@@ -1,30 +1,16 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
-import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
-import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function SkuForm({ labels, maxAccess, recordId, itemId }) {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
-
-  const invalidate = useInvalidate({
-    endpointId: DeliveryRepository.Vehicle.page
-  })
+export default function SkuForm({ labels, maxAccess, plId, itemId }) {
+  const { getRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
     initialValues: {
@@ -33,7 +19,7 @@ export default function SkuForm({ labels, maxAccess, recordId, itemId }) {
       name: '',
       weight: '',
       volume: '',
-      qtyInHand: '',
+      qtyOnHand: '',
       currentCost: '',
       defaultSalePrice: ''
     },
@@ -46,11 +32,15 @@ export default function SkuForm({ labels, maxAccess, recordId, itemId }) {
     ;(async function () {
       if (itemId) {
         const res = await getRequest({
-          extension: InventoryRepository.Item.get,
-          parameters: `_recordId=${itemId}`
+          extension: InventoryRepository.Item.quickView,
+          parameters: `_itemId=${itemId}&_plId=${plId}`
         })
 
-        formik.setValues(res.record)
+        formik.setValues({
+          ...res.record,
+          currentCost: res?.record?.hideCost ? '**' : res?.record?.currentCost,
+          defaultSalePrice: res?.record?.defaultSalePrice
+        })
       }
     })()
   }, [])
@@ -63,6 +53,7 @@ export default function SkuForm({ labels, maxAccess, recordId, itemId }) {
       editMode={false}
       isSaved={false}
       isInfo={false}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>
@@ -80,7 +71,7 @@ export default function SkuForm({ labels, maxAccess, recordId, itemId }) {
               <CustomTextField name='volume' value={formik?.values?.volume} label={labels.volume} readOnly />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField name='qtyInHand' value={formik?.values?.qtyInHand} label={labels.qtyInHand} readOnly />
+              <CustomTextField name='qtyOnHand' value={formik?.values?.qtyOnHand} label={labels.qtyOnHand} readOnly />
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
@@ -96,6 +87,7 @@ export default function SkuForm({ labels, maxAccess, recordId, itemId }) {
                 value={formik?.values?.defaultSalePrice}
                 label={labels.defaultSalePrice}
                 readOnly
+                disabled={!formik?.values?.defaultSalePrice}
               />
             </Grid>
           </Grid>

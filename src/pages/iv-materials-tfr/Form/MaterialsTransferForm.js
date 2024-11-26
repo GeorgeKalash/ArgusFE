@@ -64,6 +64,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     isVerified: false,
     wip: 1,
     carrierId: null,
+    plId: null,
     transfers: [
       {
         id: 1,
@@ -86,7 +87,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         metalId: null,
         metalRef: '',
         totalCost: 0,
-        priceType: null
+        priceType: null,
+        enabled: false
       }
     ]
   }
@@ -306,6 +308,16 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         ]
       },
       async onChange({ row: { update, newRow } }) {
+        if (!newRow?.itemId) {
+          update({
+            enabled: false
+          })
+
+          return
+        }
+
+        console.log(newRow)
+
         if (newRow?.itemId) {
           const { weight, metalId, metalRef } = await getWeightAndMetalId(newRow?.itemId)
           const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
@@ -314,10 +326,13 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
           setFilteredMU(filteredMeasurements)
 
+          console.log(newRow)
+
           update({
             weight,
             unitCost,
             totalCost,
+            enabled: true,
             msId: itemInfo?.msId,
             muRef: filteredMeasurements?.[0]?.reference,
             muId: filteredMeasurements?.[0]?.recordId,
@@ -329,23 +344,27 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     },
     {
       component: 'button',
-      name: 'enableSku',
+      name: 'enabled',
       defaultValue: false,
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png'
       },
       label: labels.sku,
       onClick: (e, row, update, newRow) => {
-        stack({
-          Component: SkuForm,
-          props: {
-            labels, 
-            maxAccess,
-            itemId: row?.itemId
-          },
-          width: 1200,
-          title: platformLabels.SalesTransactions
-        })
+        if (row?.itemId && formik.values?.plId) {
+          stack({
+            Component: SkuForm,
+            props: {
+              labels,
+              maxAccess,
+              itemId: row?.itemId,
+              plId: formik.values?.plId
+            },
+            width: 700,
+            height: 500,
+            title: labels.Transfer
+          })
+        }
       }
     },
     {
@@ -824,6 +843,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('toSiteId', newValue?.recordId)
+                      formik.setFieldValue('plId', newValue?.plId)
                     }}
                     error={formik.touched.toSiteId && Boolean(formik.errors.toSiteId)}
                   />
@@ -872,6 +892,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
               const data = value?.map(transfer => {
                 return {
                   ...transfer,
+                  enabled: false,
                   qtyInBase: 0
                 }
               })

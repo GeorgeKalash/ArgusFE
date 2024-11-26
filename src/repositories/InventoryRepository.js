@@ -8,7 +8,8 @@ export const InventoryRepository = {
   },
   Item: {
     snapshot: service + 'snapshotIT',
-    get: service + 'getIT'
+    get: service + 'getIT',
+    quickView: service + 'quickViewIT'
   },
   Group: {
     qry: service + 'qryGRP',
