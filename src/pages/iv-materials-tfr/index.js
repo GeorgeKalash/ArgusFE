@@ -161,6 +161,7 @@ const IvMaterialsTransfer = () => {
     {
       field: 'isVerified',
       headerName: _labels.isVerified,
+      type: 'checkbox',
       flex: 1
     }
   ]
