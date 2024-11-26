@@ -872,6 +872,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             value={formik?.values?.transfers || []}
             error={formik?.errors?.transfers}
             columns={columns}
+            allowDelete={!isClosed}
           />
         </Grow>
         <Fixed>
