@@ -2,14 +2,15 @@ import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@m
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
+import { DISABLED } from 'src/services/api/maxAccess'
 
 const CustomComboBox = ({
   type = 'text',
   name,
   label,
-  value: _value,
+  value,
   valueField = 'key',
   displayField = 'value',
   store = [],
@@ -42,21 +43,27 @@ const CustomComboBox = ({
 
   const [focus, setAutoFocus] = useState(autoFocus)
 
+  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
+
   const fieldAccess =
     props.maxAccess && props.maxAccess?.record?.controls?.find(item => item.controlId === name)?.accessLevel
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
   const _disabled = disabled || fieldAccess === ControlAccessLevel.Disabled
   const _required = required || fieldAccess === ControlAccessLevel.Mandatory
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
 
-  const value = neverPopulate ? '' : _value
+  useEffect(() => {
+    if (!value && store?.length > 0 && typeof defaultIndex === 'number' && defaultIndex === 0) {
+      onChange(store?.[defaultIndex])
+    }
+  }, [defaultIndex])
 
   return _hidden ? (
     <></>
   ) : (
     <Autocomplete
       name={name}
-      value={store?.[defaultIndex] || value}
+      value={value}
       size={size}
       options={store}
       key={value}

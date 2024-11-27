@@ -223,7 +223,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       flex: 2,
       props: {
         endpointId: InventoryRepository.Item.snapshot,
-        parameters: '_categoryId=0&_msId=0&_startAt=0&_size=1000',
+        parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
         displayField: 'sku',
         valueField: 'recordId',
         mapping: [
@@ -801,20 +801,20 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     !reCal && setReCal(true)
 
     const itemPriceRow = getIPR({
-      priceType: newRow?.priceType,
-      basePrice: newRow?.basePrice,
-      volume: newRow?.volume,
+      priceType: newRow?.priceType || 0,
+      basePrice: parseFloat(newRow?.basePrice) || 0,
+      volume: parseFloat(newRow?.volume),
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
-      qty: newRow?.qty,
+      qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: parseFloat(newRow?.mdAmount),
       mdType: newRow?.mdType,
       baseLaborPrice: 0,
       totalWeightPerG: 0,
       mdValue: parseFloat(newRow?.mdValue),
-      tdPct: formik?.values?.tdPct,
+      tdPct: formik?.values?.tdPct || 0,
       dirtyField: dirtyField
     })
 
@@ -968,7 +968,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     const soItems = await getSalesOrderItems(recordId)
     await fillForm(soHeader, soItems)
   }
-
+  function setAddressValues(obj) {
+    Object.entries(obj).forEach(([key, value]) => {
+      formik.setFieldValue(key, value)
+    })
+  }
   function openAddressFilterForm(clickShip, clickBill) {
     stack({
       Component: AddressFilterForm,
@@ -977,7 +981,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         labels,
         shipment: clickShip,
         bill: clickBill,
-        form: formik
+        form: formik.values,
+        handleAddressValues: setAddressValues
       },
       width: 950,
       height: 600,
