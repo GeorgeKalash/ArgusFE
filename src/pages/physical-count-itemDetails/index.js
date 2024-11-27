@@ -18,10 +18,12 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SystemChecks } from 'src/resources/SystemChecks'
+import { ContactlessOutlined } from '@mui/icons-material'
+import toast from 'react-hot-toast'
 
 const PhysicalCountItemDe = () => {
   const { stack } = useWindow()
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
   const [siteStore, setSiteStore] = useState([])
@@ -71,12 +73,45 @@ const PhysicalCountItemDe = () => {
         })
       )
     }),
-    onSubmit: values => {}
+    onSubmit: async obj => {
+      const copy = { ...obj }
+
+      const items = obj?.rows?.map((item, index) => ({
+        ...item,
+        seqNo: index + 1,
+        siteId: copy.siteId,
+        stockCountId: copy.stockCountId,
+        controllerId: copy.controllerId
+      }))
+
+      const StockCountItemDetailPack = {
+        siteId: copy.siteId,
+        controllerId: copy.controllerId,
+        stockCountId: copy.stockCountId,
+        items: items
+      }
+
+      console.log('inSave')
+      console.log(StockCountItemDetailPack)
+
+      const response = await postRequest({
+        extension: SCRepository.StockCountItemDetail.set2,
+        record: JSON.stringify(StockCountItemDetailPack)
+      })
+
+      toast.success(platformLabels.Edited)
+      setEditMode(items.length > 0)
+
+      //const newItems = { list: items }
+      handleClick(items)
+
+      //fetchGridData
+    }
   })
 
   async function fetchGridData(stockCountId, siteId, controllerId) {
     //getSysChecks()
-    
+
     getDTDsku(stockCountId)
 
     await getRequest({
@@ -96,8 +131,7 @@ const PhysicalCountItemDe = () => {
         }
 
         setEditMode(res.list.length > 0)
-
-        //handleClick(res.list)
+        handleClick(res.list)
       })
       .catch(error => {})
   }
@@ -441,9 +475,11 @@ const PhysicalCountItemDe = () => {
     setEditMode(false)
   }
 
-  /* const handleClick = async dataList => {
+  const handleClick = async dataList => {
     try {
       setFilteredItems([])
+      console.log('in handle click')
+      console.log(dataList)
 
       const filteredItemsList = dataList
         .filter(item => item.metalId && item.metalId.toString().trim() !== '')
@@ -466,19 +502,17 @@ const PhysicalCountItemDe = () => {
       condition: true,
       onClick: 'onClickMetal'
     }
-  ] */
+  ]
 
   return (
     <FormShell
       form={formik}
       isInfo={false}
       isSavedClear={false}
-
-      //actions={actions}
+      actions={actions}
       maxAccess={maxAccess}
       resourceId={ResourceIds.IVPhysicalCountItemDetails}
-
-      //filteredItems={filteredItems}
+      filteredItems={filteredItems}
       previewReport={editMode}
     >
       <VertLayout>

@@ -62,7 +62,8 @@ export const SCRepository = {
     qry: service + 'qryITD',
     set: service + 'setITD',
     get: service + 'getITD',
-    del: service + 'delITD'
+    del: service + 'delITD',
+    set2: service + 'set2ITD' //StockCountItemDetailPack
   },
   StockCountControllerTab: {
     qry: service + 'qryPHY',
