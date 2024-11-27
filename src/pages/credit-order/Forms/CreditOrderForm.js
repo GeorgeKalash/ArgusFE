@@ -398,14 +398,13 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       },
       updateOn: 'blur',
       widthDropDown: '400',
-      width: 150,
       async onChange({ row: { update, oldRow, newRow } }) {
         if (!newRow?.currencyId) {
           return
         }
 
         const exchange = await getEXMCur({
-          plantId: plantId ?? formik.values.plantId,
+          plantId: plantId || formik.values.plantId,
           toCurrency: formik?.values?.currencyId,
           fromCurrency: newRow?.currencyId,
           rateType: formik?.values?.rateType
@@ -903,30 +902,32 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 helperText={formik.touched.deliveryDate && formik.errors.deliveryDate}
               />
             </Grid>
-            <RadioGroup
-              row
-              value={formik.values.functionId}
-              defaultValue={SystemFunction.CurrencyCreditOrderPurchase}
-              onChange={async e => {
-                await setOperationType(e.target.value)
-                await getDefaultDT(e.target.value)
-                setFunctionId(e.target.value)
-                formik.setFieldValue('reference', '')
-              }}
-            >
-              <FormControlLabel
-                value={SystemFunction.CurrencyCreditOrderPurchase}
-                control={<Radio />}
-                label={labels.purchase}
-                disabled={formik?.values?.rows[0]?.currencyId}
-              />
-              <FormControlLabel
-                value={SystemFunction.CurrencyCreditOrderSale}
-                control={<Radio />}
-                label={labels.sale}
-                disabled={formik?.values?.rows[0]?.currencyId}
-              />
-            </RadioGroup>
+            <Grid item xs={6}>
+              <RadioGroup
+                row
+                value={formik.values.functionId}
+                defaultValue={SystemFunction.CurrencyCreditOrderPurchase}
+                onChange={async e => {
+                  await setOperationType(e.target.value)
+                  await getDefaultDT(e.target.value)
+                  setFunctionId(e.target.value)
+                  formik.setFieldValue('reference', '')
+                }}
+              >
+                <FormControlLabel
+                  value={SystemFunction.CurrencyCreditOrderPurchase}
+                  control={<Radio />}
+                  label={labels.purchase}
+                  disabled={formik?.values?.rows[0]?.currencyId}
+                />
+                <FormControlLabel
+                  value={SystemFunction.CurrencyCreditOrderSale}
+                  control={<Radio />}
+                  label={labels.sale}
+                  disabled={formik?.values?.rows[0]?.currencyId}
+                />
+              </RadioGroup>
+            </Grid>
           </Grid>
         </Fixed>
         <Grow>
@@ -946,8 +947,8 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
           />
         </Grow>
         <Fixed>
-          <Grid container rowGap={1} xs={12}>
-            <FormGrid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
+          <Grid container spacing={2} xs={12}>
+            <FormGrid item xs={8}>
               <CustomTextArea
                 name='notes'
                 label={labels.notes}
@@ -962,26 +963,28 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 helperText={formik.touched.notes && formik.errors.notes}
               />
             </FormGrid>
-            <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='totalCUR'
-                  label={`${labels.total} ${formik.values.currencyRef !== null ? formik.values.currencyRef : ''}`}
-                  value={getFormattedNumber(totalCUR.toFixed(2))}
-                  numberField={true}
-                  readOnly={true}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='baseAmount'
-                  maxAccess={maxAccess}
-                  label={`${labels.total} ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
-                  style={{ textAlign: 'right' }}
-                  value={getFormattedNumber(totalLoc.toFixed(2))}
-                  numberField={true}
-                  readOnly={true}
-                />
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='totalCUR'
+                    label={`${labels.total} ${formik.values.currencyRef !== null ? formik.values.currencyRef : ''}`}
+                    value={getFormattedNumber(totalCUR.toFixed(2))}
+                    numberField={true}
+                    readOnly={true}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='baseAmount'
+                    maxAccess={maxAccess}
+                    label={`${labels.total} ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
+                    style={{ textAlign: 'right' }}
+                    value={getFormattedNumber(totalLoc.toFixed(2))}
+                    numberField={true}
+                    readOnly={true}
+                  />
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
