@@ -385,24 +385,16 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       label: labels.currency,
       name: 'currencyRef',
       props: {
-        endpointId: SystemRepository.Currency.qry,
-        displayField: 'reference',
-        valueField: 'recordId',
-        mapping: [
-          { from: 'recordId', to: 'currencyId' },
-          { from: 'reference', to: 'currencyRef' },
-          { from: 'name', to: 'currencyName' }
-        ],
+        endpointId: RemittanceSettingsRepository.CorrespondentCurrency.qry,
+        parameters: `_corId=${formik.values.corId}`,
+        displayField: 'currencyRef',
+        valueField: 'currencyId',
         columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
+          { key: 'currencyRef', value: 'Reference' },
+          { key: 'currencyName', value: 'Name' }
         ],
         displayFieldWidth: 3,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          isClosed
+        disabled: !formik.values.corId || isClosed
       },
       updateOn: 'blur',
       widthDropDown: '400',
@@ -470,11 +462,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       name: 'currencyName',
       props: {
         readOnly: true,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          isClosed
+        disabled: !formik.values.corId || isClosed
       },
       width: 190
     },
@@ -484,11 +472,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       name: 'qty',
       props: {
         mandatory: true,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          isClosed
+        disabled: !formik.values.corId || isClosed
       },
       width: 130,
       async onChange({ row: { update, newRow } }) {
@@ -524,11 +508,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       props: {
         readOnly: true,
         mandatory: true,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          isClosed
+        disabled: !formik.values.corId || isClosed
       },
       width: 130
     },
@@ -539,11 +519,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       props: {
         mandatory: true,
         decimalScale: 7,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          isClosed
+        disabled: !formik.values.corId || isClosed
       },
       width: 130,
       updateOn: 'blur',
@@ -615,11 +591,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       props: {
         readOnly: true,
         mandatory: true,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          isClosed
+        disabled: !formik.values.corId || isClosed
       },
       width: 130
     }
@@ -841,7 +813,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     >
       <VertLayout>
         <Fixed>
-          <Grid container xs={12}>
+          <Grid container xs={12} spacing={2}>
             <FormGrid hideonempty item xs={4}>
               <CustomDatePicker
                 name='date'
@@ -857,7 +829,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 helperText={formik.touched.date && formik.errors.date}
               />
             </FormGrid>
-            <Grid item xs={4} sx={{ pl: 1 }}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
@@ -874,7 +846,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-            <Grid item xs={4} sx={{ pl: 1 }}>
+            <Grid item xs={4}>
               <CustomTextField
                 name='reference'
                 label={labels.reference}
@@ -888,9 +860,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
-          </Grid>
-
-          <Grid container xs={12} style={{ marginTop: '10px' }}>
             <Grid item xs={8}>
               <ResourceLookup
                 endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
@@ -919,7 +888,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 errorCheck={'corId'}
               />
             </Grid>
-            <Grid item xs={4} sx={{ pl: 1 }}>
+            <Grid item xs={4}>
               <CustomDatePicker
                 name='deliveryDate'
                 readOnly={isClosed}
@@ -934,9 +903,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 helperText={formik.touched.deliveryDate && formik.errors.deliveryDate}
               />
             </Grid>
-          </Grid>
-
-          <Grid container xs={12}>
             <RadioGroup
               row
               value={formik.values.functionId}
@@ -963,7 +929,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
             </RadioGroup>
           </Grid>
         </Fixed>
-
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('rows', value)}
@@ -980,7 +945,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
             }
           />
         </Grow>
-
         <Fixed>
           <Grid container rowGap={1} xs={12}>
             <FormGrid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
