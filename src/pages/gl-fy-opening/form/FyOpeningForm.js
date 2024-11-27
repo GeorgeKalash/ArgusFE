@@ -42,7 +42,7 @@ export default function FyOpeningForm({ _labels, access }) {
   })
 
   return (
-    <FormShell resourceId={ResourceIds.FyOpening} form={formik} maxAccess={access} editMode={true} isSavedClear={false}>
+    <FormShell resourceId={ResourceIds.FyOpening} form={formik} maxAccess={access} editMode={true} isCleared={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -57,7 +57,7 @@ export default function FyOpeningForm({ _labels, access }) {
                 required
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
+                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear || '')
                 }}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
