@@ -224,7 +224,7 @@ const AddressTab = ({
               name='unitNo'
               label={labels.unitNo}
               value={addressValidation.values.unitNo}
-              maxLength='10'
+              maxLength='4'
               setFieldValidation={setFieldValidation}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
@@ -251,12 +251,12 @@ const AddressTab = ({
             <CustomTextField
               name='postalCode'
               label={labels.postalCode}
-              readOnly={readOnly}
-              minLength={4}
-              maxLength={4}
-              setFieldValidation={setFieldValidation}
               value={addressValidation.values.postalCode}
               onChange={addressValidation.handleChange}
+              readOnly={readOnly}
+              minLength={5}
+              maxLength={5}
+              setFieldValidation={setFieldValidation}
               onClear={() => addressValidation.setFieldValue('postalCode', '')}
               error={addressValidation.touched.postalCode && Boolean(addressValidation.errors.postalCode)}
               maxAccess={maxAccess}
