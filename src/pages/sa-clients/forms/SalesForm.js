@@ -32,12 +32,13 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
     validationSchema: yup.object({
       tdPct: yup
         .number()
+        .max(99.9)
         .nullable()
         .transform((value, originalValue) => (originalValue === '' ? null : value))
         .test(function (value) {
           const { maxDiscount } = this.parent
           if (value != null && maxDiscount != null) {
-            return value < maxDiscount
+            return value <= maxDiscount
           }
 
           return true
