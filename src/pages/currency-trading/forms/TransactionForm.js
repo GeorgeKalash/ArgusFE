@@ -16,8 +16,6 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
 import * as yup from 'yup'
-import { DataSets } from 'src/resources/DataSets'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import useIdType from 'src/hooks/useIdType'
 import { useInvalidate } from 'src/hooks/resource'
 import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
@@ -35,6 +33,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
+import PaymentGrid from 'src/components/Shared/PaymentGrid'
 
 const FormContext = React.createContext(null)
 
@@ -61,10 +60,10 @@ function FormField({ type, name, Component, valueField, onFocus, language, phone
       }}
       onFocus={e => {
         if (onFocus && (name == 'idNo' || name == 'search')) {
-          onFocus(e.target.value)
+          onFocus(e)
         }
         if (onFocus && name == 'cellPhone') {
-          onFocus(e.target.value)
+          onFocus(e)
         }
       }}
       onClear={() => {
@@ -92,6 +91,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [search, setSearch] = useState(null)
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
   const { platformLabels } = useContext(ControlContext)
+  const [formikSettings, setFormik] = useState({})
 
   const resetAutoFilled = () => {
     setIDInfoAutoFilled(false)
@@ -127,19 +127,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         maxRate: ''
       }
     ],
-    amount: [
-      {
-        id: 1,
-        cashAccountId: '',
-        type: '',
-        typeName: '',
-        ccName: '',
-        amount: '',
-        ccId: '',
-        bankFees: '',
-        receiptRef: ''
-      }
-    ],
+    amount: formikSettings.initialValuePayment || [],
     date: new Date(),
     clientId: null,
     clientName: null,
@@ -277,15 +265,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
           })
         )
         .required(),
-      amount: yup
-        .array()
-        .of(
-          yup.object().shape({
-            type: yup.string().required(),
-            amount: yup.number().nullable().required()
-          })
-        )
-        .required()
+      amount: formikSettings?.paymentValidation
     }),
     onSubmit: async values => {
       const lastRow = values.operations[values.operations.length - 1]
@@ -646,7 +626,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   }, 0)
 
   const receivedTotal = formik.values.amount.reduce((acc, { amount }) => {
-    return acc + (amount || 0)
+    return acc + parseFloat(amount?.toString()?.replace(/,/g, '')) || 0
   }, 0)
 
   const balance = total - receivedTotal
@@ -853,9 +833,12 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       name='search'
                       Component={CustomTextField}
                       onBlur={e => {
-                        e.target.value &&
-                          search != e.target.value &&
-                          fetchInfoByKey({ key: e.target.value })
+                        const value = e.target.value
+                        setSearch(value)
+
+                        value &&
+                          search != value &&
+                          fetchInfoByKey({ key: value })
                             .then(info => {
                               if (!!info) {
                                 setIDInfoAutoFilled(false)
@@ -886,10 +869,11 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                               console.error('Error fetching ID info:', error)
                             })
                       }}
-                      readOnly={editMode || isClosed}
-                      onFocus={value => {
-                        setSearch(value)
+                      onClear={() => {
+                        formik.setFieldValue('search', '')
+                        setSearch('')
                       }}
+                      readOnly={editMode || isClosed}
                       required
                     />
                   </Grid>
@@ -906,15 +890,20 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           type={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : 'text'}
                           Component={CustomTextField}
                           onBlur={e => {
-                            setShowAsPasswordIDNumber(true)
-                            if (e.target.value && e.target.value != idNumberOne) {
-                              checkTypes(e.target.value)
-                              fetchClientInfo({ numberId: e.target.value })
+                            const value = e.target.value
+                            setIdNumber(value)
+                            if (value && value !== idNumberOne) {
+                              setShowAsPasswordIDNumber(true)
+                              checkTypes(value)
+                              fetchClientInfo({ numberId: value })
                             }
                           }}
-                          onFocus={value => {
+                          onFocus={e => {
                             setShowAsPasswordIDNumber(false)
-                            setIdNumber(value)
+                          }}
+                          onClear={() => {
+                            formik.setFieldValue('idNo', '')
+                            setIdNumber('')
                           }}
                           readOnly={editMode || isClosed || idInfoAutoFilled}
                           required
@@ -1371,60 +1360,15 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   <Grid item xs={9}>
                     <Grid container xs={12} spacing={2}>
                       <Grid width={'100%'}>
-                        <DataGrid
+                        <PaymentGrid
                           height={200}
                           onChange={value => formik.setFieldValue('amount', value)}
                           value={formik.values.amount}
                           error={formik.errors.amount}
+                          name={'amount'}
+                          setFormik={setFormik}
+                          amount={total}
                           disabled={isClosed}
-                          columns={[
-                            {
-                              component: 'resourcecombobox',
-                              label: labels.type,
-                              name: 'type',
-                              props: {
-                                datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
-                                displayField: 'value',
-                                valueField: 'key',
-                                mapping: [
-                                  { from: 'key', to: 'type' },
-                                  { from: 'value', to: 'typeName' }
-                                ],
-                                filter: item =>
-                                  formik.values.functionId === SystemFunction.CurrencyPurchase ? item.key === '2' : true
-                              }
-                            },
-                            {
-                              component: 'numberfield',
-                              name: 'amount',
-                              label: labels.amount
-                            },
-                            {
-                              component: 'resourcecombobox',
-                              name: 'creditCards',
-                              editable: false,
-                              label: labels.creditCard,
-                              props: {
-                                endpointId: CashBankRepository.CreditCard.qry,
-                                valueField: 'recordId',
-                                displayField: 'name',
-                                mapping: [
-                                  { from: 'recordId', to: 'ccId' },
-                                  { from: 'name', to: 'ccName' }
-                                ]
-                              }
-                            },
-                            {
-                              component: 'numberfield',
-                              label: labels.receiptRef,
-                              name: 'bankFees'
-                            },
-                            {
-                              component: 'numberfield',
-                              label: labels.receiptRef,
-                              name: 'receiptRef'
-                            }
-                          ]}
                         />
                       </Grid>
                     </Grid>
