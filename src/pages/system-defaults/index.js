@@ -181,7 +181,7 @@ const SystemDefaults = () => {
                 maxAccess={access}
                 onChange={(event, newValue) => {
                   if (newValue) {
-                    formik.setFieldValue('timeZone', newValue?.recordId)
+                    formik.setFieldValue('timeZone', newValue?.key)
                   } else {
                     formik.setFieldValue('timeZone', '')
                   }
