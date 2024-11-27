@@ -620,13 +620,13 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || !isClosed
+      disabled: !editMode || !isClosed || formik.values.isVerified
     },
     {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || !isClosed
+      disabled: !editMode || !isClosed || formik.values.isVerified
     },
     {
       key: 'Close',
