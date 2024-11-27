@@ -18,15 +18,17 @@ const CustomNumberField = ({
   decimalScale = 2,
   onClear,
   hidden = false,
+  unClearable = false,
   error,
   helperText,
   hasBorder = true,
   editMode = false,
   maxLength = 1000,
   thousandSeparator = ',',
-  min = '',
-  max = '',
+  min,
+  max,
   allowNegative = true,
+  arrow = false,
   displayCycleButton = false,
   handleCycleButtonClick,
   cycleButtonLabel = '',
@@ -121,12 +123,15 @@ const CustomNumberField = ({
       onInput={handleInput}
       InputProps={{
         inputProps: {
-          tabIndex: readOnly ? -1 : 0, // Prevent focus on the input field
+          min: min,
+          max: max,
+          type: arrow ? 'number' : 'text',
+          tabIndex: readOnly ? -1 : 0,
           onKeyPress: handleKeyPress
         },
         autoComplete: 'off',
         readOnly: _readOnly,
-        endAdornment: (!_readOnly || allowClear) && !props.disabled && (value || value === 0) && (
+        endAdornment: (!readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
           <InputAdornment position='end'>
             {displayCycleButton && (
               <Button
@@ -161,7 +166,7 @@ const CustomNumberField = ({
       sx={{
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
-            border: !hasBorder && 'none' // Hide border
+            border: !hasBorder && 'none'
           }
         }
       }}

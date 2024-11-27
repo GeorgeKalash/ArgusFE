@@ -19,7 +19,7 @@ const CustomTextField = ({
   clearable = false,
   autoComplete = 'off',
   numberField = false,
-  editMode = true,
+  editMode = false,
   maxLength = '1000',
   position,
   dir = 'ltr',

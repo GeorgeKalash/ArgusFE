@@ -21,6 +21,7 @@ import { ClientBalance } from './ClientBalance'
 import InventoryTransaction from './InventoryTransaction'
 import SalesTrxForm from './SalesTrxForm'
 import StrictUnpostConfirmation from './StrictUnpostConfirmation'
+import ClientSalesTransaction from './ClientSalesTransaction'
 
 export default function FormShell({
   form,
@@ -111,6 +112,21 @@ export default function FormShell({
                   title: platformLabels.CashTransaction
                 })
               }
+              break
+            case 'onClientSalesTransaction':
+              action.onClick = () => {
+                stack({
+                  Component: ClientSalesTransaction,
+                  props: {
+                    functionId: functionId,
+                    clientId: form?.values?.header?.clientId
+                  },
+                  width: 600,
+                  height: 450,
+                  title: platformLabels.ClientSalesTransaction
+                })
+              }
+
               break
             case 'onInventoryTransaction':
               action.onClick = () => {

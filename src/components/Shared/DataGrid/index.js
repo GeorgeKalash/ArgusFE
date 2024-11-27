@@ -530,15 +530,6 @@ export function DataGrid({
     }
   }
 
-  const onCellFocused = params => {
-    if (params.rowIndex >= 0 && params.column) {
-      params.api.startEditingCell({
-        rowIndex: params.rowIndex,
-        colKey: params.column.getId()
-      })
-    }
-  }
-
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>
       <CacheDataProvider>
@@ -558,7 +549,6 @@ export function DataGrid({
               rowData={value}
               columnDefs={columnDefs}
               suppressRowClickSelection={false}
-              suppressHeaderFocus={true}
               stopEditingWhenCellsLoseFocus={false}
               rowSelection='single'
               editType='cell'
@@ -576,7 +566,6 @@ export function DataGrid({
               tabToPreviousCell={() => true}
               onRowClicked={handleRowClick}
               onCellEditingStopped={onCellEditingStopped}
-              onCellFocused={onCellFocused}
             />
           )}
         </Box>
