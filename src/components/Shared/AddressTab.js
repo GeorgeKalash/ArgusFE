@@ -137,6 +137,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, setF
                 readOnly={readOnly}
                 required={required}
                 maxLength='20'
+                setFieldValidation={setFieldValidation}
                 onChange={addressValidation.handleChange}
                 onClear={() => addressValidation.setFieldValue('name', '')}
                 error={addressValidation.touched.name && Boolean(addressValidation.errors.name)}
@@ -151,6 +152,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, setF
                 readOnly={readOnly}
                 required={required}
                 maxLength='20'
+                setFieldValidation={setFieldValidation}
                 onChange={addressValidation.handleChange}
                 onClear={() => addressValidation.setFieldValue('street1', '')}
                 error={addressValidation.touched.street1 && Boolean(addressValidation.errors.street1)}
@@ -163,6 +165,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, setF
                 label={labels.street2}
                 value={addressValidation.values.street2}
                 maxLength='20'
+                setFieldValidation={setFieldValidation}
                 readOnly={readOnly}
                 onChange={addressValidation.handleChange}
                 onClear={() => addressValidation.setFieldValue('street2', '')}
@@ -191,6 +194,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, setF
                 label={labels.unitNo}
                 value={addressValidation.values.unitNo}
                 maxLength='4'
+                setFieldValidation={setFieldValidation}
                 readOnly={readOnly}
                 onChange={addressValidation.handleChange}
                 onClear={() => addressValidation.setFieldValue('unitNo', '')}
@@ -204,6 +208,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, setF
                 label={labels.subNo}
                 value={addressValidation.values.subNo}
                 maxLength='10'
+                setFieldValidation={setFieldValidation}
                 readOnly={readOnly}
                 onChange={addressValidation.handleChange}
                 onClear={() => addressValidation.setFieldValue('subNo', '')}
@@ -238,6 +243,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, setF
                 value={addressValidation.values.phone}
                 readOnly={readOnly}
                 maxLength='15'
+                setFieldValidation={setFieldValidation}
                 phone={true}
                 onChange={addressValidation.handleChange}
                 onClear={() => addressValidation.setFieldValue('phone', '')}
@@ -252,6 +258,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, setF
                 label={labels.phone2}
                 value={addressValidation.values.phone2}
                 maxLength='15'
+                setFieldValidation={setFieldValidation}
                 phone={true}
                 readOnly={readOnly}
                 onChange={addressValidation.handleChange}
@@ -267,6 +274,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, setF
                 label={labels.phone3}
                 value={addressValidation.values.phone3}
                 maxLength='15'
+                setFieldValidation={setFieldValidation}
                 phone={true}
                 readOnly={readOnly}
                 onChange={addressValidation.handleChange}
@@ -311,6 +319,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, setF
                 label={labels.poBox}
                 value={addressValidation.values.poBox}
                 maxLength='10'
+                setFieldValidation={setFieldValidation}
                 readOnly={readOnly}
                 onChange={addressValidation.handleChange}
                 onClear={() => addressValidation.setFieldValue('poBox', '')}
