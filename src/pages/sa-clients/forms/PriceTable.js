@@ -64,7 +64,7 @@ const PriceTab = ({ labels, maxAccess, store }) => {
   }, [])
 
   const add = () => {
-    openForm('')
+    openForm()
   }
 
   function openForm(obj) {

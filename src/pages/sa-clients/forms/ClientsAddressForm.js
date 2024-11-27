@@ -8,16 +8,10 @@ import { useInvalidate } from 'src/hooks/resource'
 
 const ClientsAddressForm = ({ getAddressGridData, clientId, recordId, window, props }) => {
   const [address, setAddress] = useState()
-  const [submited, setSubmited] = useState(false)
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  useEffect(() => {
-    getAddressGridData(clientId)
-  }, [submited])
-
   const onSubmit = async obj => {
-    setSubmited(true)
     if (obj) {
       const data = {
         clientId: clientId,
@@ -37,6 +31,7 @@ const ClientsAddressForm = ({ getAddressGridData, clientId, recordId, window, pr
         window.close()
       })
     }
+    getAddressGridData(clientId)
   }
 
   return <AddressForm {...{ ...props, address, setAddress, recordId: recordId, onSubmit }} />

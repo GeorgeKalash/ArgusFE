@@ -36,12 +36,10 @@ const AddressTab = ({ store, maxAccess, labels, editMode, ...props }) => {
     postRequest({
       extension: SaleRepository.Address.del,
       record: JSON.stringify(obj)
+    }).then(res => {
+      toast.success(platformLabels.Deleted)
+      getAddressGridData(clientId)
     })
-      .then(res => {
-        toast.success(platformLabels.Deleted)
-        getAddressGridData(clientId)
-      })
-      .catch(error => {})
   }
 
   function addAddress() {
