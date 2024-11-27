@@ -1,9 +1,55 @@
 export const getButtons = platformLabels => [
   {
+    key: 'Clear',
+    label: platformLabels.Clear,
+    condition: 'isCleared',
+    onClick: 'onClear',
+    color: '#f44336',
+    image: 'clear.png',
+    main: true
+  },
+  {
+    key: 'Info',
+    label: platformLabels.Info,
+    condition: 'isInfo && infoVisible',
+    onClick: 'onInfo',
+    color: '#4355a5',
+    disabled: '!editMode',
+    image: 'info.png',
+    main: true
+  },
+  {
+    key: 'saveClear',
+    label: platformLabels.saveClear,
+    condition: 'isSavedClear',
+    onClick: 'onSaveClear',
+    color: '#231f20',
+    image: 'saveclear.png',
+    main: true,
+    disabled: 'disabledSavedClear || isPosted || isClosed'
+  },
+  {
+    key: 'Submit',
+    label: platformLabels.Submit,
+    condition: 'isSaved',
+    onClick: 'onSave',
+    color: '#4eb558',
+    disabled: 'disabledSubmit || isPosted || isClosed',
+    image: 'save.png',
+    main: true
+  },
+  {
     key: 'Post',
     label: platformLabels.Post,
     color: '#231f20',
-    image: 'post.png',
+    image: 'lock.png',
+    main: false
+  },
+  {
+    key: 'Unpost',
+    label: platformLabels.Unpost,
+    color: '#231f20',
+    image: 'unlock.png',
     main: false
   },
   {
@@ -17,6 +63,13 @@ export const getButtons = platformLabels => [
     key: 'Cancel',
     label: platformLabels.Cancel,
     color: '#0A4164',
+    image: 'cancelWhite.png',
+    main: false
+  },
+  {
+    key: 'Terminate',
+    label: platformLabels.Terminate,
+    color: '#FF0000',
     image: 'cancelWhite.png',
     main: false
   },
@@ -114,6 +167,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Receipt Voucher',
+    label: platformLabels.ReceiptVoucher,
+    color: '#231f20',
+    image: 'invoice.png',
+    main: false
+  },
+  {
     key: 'Tree',
     label: platformLabels.Tree,
     color: '#231f20',
@@ -153,6 +213,13 @@ export const getButtons = platformLabels => [
     label: platformLabels.GL,
     color: '#231f20',
     image: 'gl.png',
+    main: false
+  },
+  {
+    key: 'SA Trx',
+    label: platformLabels.SaTrx,
+    color: '#8C0446',
+    image: 'popup-window.png',
     main: false
   },
   {
@@ -207,6 +274,7 @@ export const getButtons = platformLabels => [
     key: 'OpenRPB',
     label: platformLabels.OpenRPB,
     color: '#231F20',
+    image: 'parameters.png',
     main: false
   },
   {
@@ -219,16 +287,15 @@ export const getButtons = platformLabels => [
     key: 'GO',
     label: platformLabels.Apply,
     color: '#231F20',
+    image: 'go.png',
     main: false
   },
   {
-    key: 'Clear',
-    label: platformLabels.Clear,
-    condition: 'isCleared',
-    onClick: 'onClear',
-    color: '#f44336',
-    image: 'clear.png',
-    main: true
+    key: 'IV',
+    label: platformLabels.InventoryTransaction,
+    color: '#A76035',
+    image: 'popup-window.png',
+    main: false
   },
   {
     key: 'generate',
@@ -246,36 +313,6 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'info.png',
     main: false
-  },
-  {
-    key: 'Info',
-    label: platformLabels.Info,
-    condition: 'isInfo && infoVisible',
-    onClick: 'onInfo',
-    color: '#4355a5',
-    disabled: '!editMode',
-    image: 'info.png',
-    main: true
-  },
-  {
-    key: 'saveClear',
-    label: platformLabels.saveClear,
-    condition: 'isSavedClear',
-    onClick: 'onSaveClear',
-    color: '#231f20',
-    image: 'saveclear.png',
-    main: true,
-    disabled: 'disabledSavedClear'
-  },
-  {
-    key: 'Submit',
-    label: platformLabels.Submit,
-    condition: 'isSaved',
-    onClick: 'onSave',
-    color: '#4eb558',
-    disabled: 'disabledSubmit || isPosted || isClosed',
-    image: 'save.png',
-    main: true
   },
   {
     key: 'Import',
@@ -310,6 +347,55 @@ export const getButtons = platformLabels => [
     label: platformLabels.ClientBalance,
     color: '#231f20',
     image: 'wallet-to-bank-icon.png',
+    main: false
+  },
+  {
+    key: 'OTP',
+    label: platformLabels.OTP,
+    color: '#231f20',
+    image: 'sms.png',
+    main: false
+  },
+  {
+    key: 'Metals',
+    label: platformLabels.Metals,
+    color: '#ADD8E6',
+    image: 'metals-icon.png',
+    main: false
+  },
+  {
+    key: 'generated 2 FA',
+    label: platformLabels.Generated2FA,
+    color: '#231f20',
+    image: 'save.png',
+    main: true
+  },
+  {
+    key: 'Transfer',
+    label: platformLabels.Transfer,
+    color: '#4eb558',
+    image: 'exchange-refresh-icon.png',
+    main: false
+  },
+  {
+    key: 'ClientSalesTransaction',
+    label: platformLabels.ClientSalesTransaction,
+    color: 'blue',
+    image: 'popup-window.png',
+    main: false
+  },
+  {
+    key: 'Locked',
+    label: platformLabels.Locked,
+    color: '#231f20',
+    image: 'lock.png',
+    main: false
+  },
+  {
+    key: 'Unlocked',
+    label: platformLabels.Unlocked,
+    color: '#231f20',
+    image: 'unlock.png',
     main: false
   }
 ]

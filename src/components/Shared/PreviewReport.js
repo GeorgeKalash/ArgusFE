@@ -3,10 +3,18 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function PreviewReport({ recordId, selectedReport, functionId, resourceId, outerGrid = false }) {
+export default function PreviewReport({
+  recordId,
+  selectedReport,
+  functionId,
+  resourceId,
+  outerGrid = false,
+  scId,
+  siteId,
+  onSuccess
+}) {
   const { postRequest } = useContext(RequestsContext)
   const [pdfURL, setPdfUrl] = useState(null)
-
   useEffect(() => {
     generateReport()
   }, [selectedReport])
@@ -14,10 +22,13 @@ export default function PreviewReport({ recordId, selectedReport, functionId, re
   const generateReport = () => {
     let parameters = ''
     if (!outerGrid) {
-      parameters =
-        resourceId == ResourceIds.JournalVoucher
-          ? `?_recordId=${recordId}&_functionId=${functionId}`
-          : `?_recordId=${recordId}`
+      if (resourceId === ResourceIds.JournalVoucher) {
+        parameters = `?_recordId=${recordId}&_functionId=${functionId}`
+      } else if (resourceId === ResourceIds.IVPhysicalCountItem) {
+        parameters = `?_stockCountId=${scId}&_siteId=${siteId}`
+      } else {
+        parameters = `?_recordId=${recordId}`
+      }
     }
 
     const obj = {
@@ -34,6 +45,7 @@ export default function PreviewReport({ recordId, selectedReport, functionId, re
       record: JSON.stringify(obj)
     })
       .then(res => {
+        onSuccess()
         setPdfUrl(res.recordId)
       })
       .catch(error => {

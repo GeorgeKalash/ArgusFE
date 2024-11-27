@@ -84,7 +84,16 @@ const TimelineTitle = styled.h2`
 `
 
 const HorizontalTimeline = ({ data, label }) => (
-  <div style={{ display: 'flex', height: '180px', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+  <div
+    style={{
+      display: 'flex',
+      height: '180px',
+      flexDirection: 'column',
+      alignItems: 'center',
+      width: '100%',
+      color: '#f0f0f0'
+    }}
+  >
     <TimelineTitle>{label}</TimelineTitle>
     <TimelineContainer>
       <TimelineArrow />

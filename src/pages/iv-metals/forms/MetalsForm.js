@@ -45,7 +45,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
         .number()
         .nullable()
         .test('is-valid-reportingPurity', function (value) {
-          if (value >= 0.001 && value <= 1) return true
+          if ((!value && value !== 0) || (value >= 0.001 && value <= 1)) return true
 
           return false
         })
@@ -89,13 +89,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Metals}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isCleared={false}
-    >
+    <FormShell resourceId={ResourceIds.Metals} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -147,6 +141,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
                 label={labels.reportingPurity}
                 value={formik.values.reportingPurity}
                 maxAccess={maxAccess}
+                allowNegative={false}
                 maxLength={6}
                 decimalScale={5}
                 onChange={formik.handleChange}

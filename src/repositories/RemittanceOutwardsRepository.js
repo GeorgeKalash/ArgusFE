@@ -16,19 +16,22 @@ export const RemittanceOutwardsRepository = {
   ProductDispersalEngine: {
     qry: service + 'qryPDE'
   },
-  OutwardsTransfer: {
-    qry: service + 'qryOW',
-    qry2: service + 'qryOW2',
-    page: service + 'pageOW',
-    get: service + 'getOW',
-    get2: service + 'get2OW',
-    set: service + 'setOW',
-    set2: service + 'set2OW',
-    del: service + 'delOW',
-    close: service + 'closeOW',
-    reopen: service + 'reopenOW',
-    post: service + 'postOW',
-    snapshot: service + 'snapshotOW'
+  OutwardsCash: {
+    qry: service + 'qryOWC'
+  },
+  OutwardsOrder: {
+    qry: service + 'qryOWO',
+    qry2: service + 'qryOWO2',
+    page: service + 'pageOWO',
+    get: service + 'getOWO',
+    get2: service + 'get2OWO',
+    set: service + 'setOWO',
+    set2: service + 'set2OWO',
+    del: service + 'delOWO',
+    close: service + 'closeOWO',
+    reopen: service + 'reopenOWO',
+    post: service + 'postOWO',
+    snapshot: service + 'snapshotOWO'
   },
   InwardSettlement: {
     qry: service + 'qryIWS',
@@ -106,7 +109,9 @@ export const RemittanceOutwardsRepository = {
     qry: service + 'qryAPX',
     get: service + 'getAPX',
     set: service + 'setAPX',
-    del: service + 'delAPX'
+    del: service + 'delAPX',
+    get2: service + 'get2APX',
+    set2: service + 'set2APX'
   },
   OutwardsModification: {
     qry: service + 'qryOWM',
@@ -120,8 +125,8 @@ export const RemittanceOutwardsRepository = {
     close: service + 'closeOWM'
   },
   Postoutwards: {
-    qry: service + 'qryOW3',
-    post2: service + 'post2OW'
+    qry: service + 'qryOWT3',
+    post2: service + 'post2OWT'
   },
   OutwardsReturn: {
     page: service + 'pageOWR',
@@ -136,5 +141,34 @@ export const RemittanceOutwardsRepository = {
   CorrespondentOutwards: {
     qry: service + 'qryACE',
     set: service + 'setACE'
+  },
+  ReceiptVouchers: {
+    qry: service + 'qryRV',
+    page: service + 'pageRV',
+    get: service + 'getRV',
+    set: service + 'setRV',
+    set2: service + 'set2RV',
+    del: service + 'delRV',
+    post: service + 'postRV',
+    close: service + 'closeRV',
+    reopen: service + 'reopenRV',
+    snapshot: service + 'snapshotRV'
+  },
+  OutwardsTransfer: {
+    get: service + 'getOWT',
+    snapshot: service + 'snapshotOWT',
+    qry2: service + 'qryOWT2'
+  },
+  UnassignedCountry: { unassigned: service + 'unassignedCOU' },
+  UnassignedCurrency: { unassigned: service + 'unassignedCU' },
+  UnassignedDispersalType: { unassigned: service + 'unassignedDT' },
+  AssignedCountry: {
+    assigned: service + 'assignedCOU'
+  },
+  AssignedCurrency: {
+    assigned: service + 'assignedCU'
+  },
+  AssignedDispersalType: {
+    assigned: service + 'assignedDT'
   }
 }

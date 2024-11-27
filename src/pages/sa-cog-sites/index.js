@@ -21,14 +21,12 @@ const ConsignmentSites = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    try {
-      const response = await getRequest({
-        extension: SaleRepository.ConsignmentSites.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_clientId=0`
-      })
+    const response = await getRequest({
+      extension: SaleRepository.ConsignmentSites.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_clientId=0`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -72,14 +70,12 @@ const ConsignmentSites = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SaleRepository.ConsignmentSites.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: SaleRepository.ConsignmentSites.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(record) {

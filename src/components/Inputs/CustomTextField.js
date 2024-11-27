@@ -4,6 +4,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
 import SearchIcon from '@mui/icons-material/Search'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
+import { TrxType } from 'src/resources/AccessLevels'
 
 const CustomTextField = ({
   type = 'text', //any valid HTML5 input type
@@ -35,12 +36,11 @@ const CustomTextField = ({
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly =
-    maxAccess < 3 ||
-    accessLevel === DISABLED ||
-    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
+
+  const required = props.required || accessLevel === MANDATORY
 
   const inputRef = useRef(null)
   const [focus, setFocus] = useState(!hasBorder)
@@ -98,8 +98,6 @@ const CustomTextField = ({
       props?.onChange(e)
     }
   }
-
-  const required = props.required || accessLevel === MANDATORY
 
   return _hidden ? (
     <></>

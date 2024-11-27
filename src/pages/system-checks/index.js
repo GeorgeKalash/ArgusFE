@@ -1,5 +1,6 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
+import { Grid } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -11,10 +12,15 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 const SystemChecks = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  const [search, setSearch] = useState('')
 
   async function getAllSystems() {
     return new Promise((resolve, reject) => {
@@ -76,6 +82,18 @@ const SystemChecks = () => {
     }
   ]
 
+  const filteredData = search
+    ? data?.list?.filter(
+        item =>
+          item.checkId.toString().includes(search.toLowerCase()) ||
+          (item.checkName && item.checkName.toLowerCase().includes(search.toLowerCase()))
+      )
+    : data?.list
+
+  const handleSearchChange = event => {
+    setSearch(event.target.value)
+  }
+
   const handleSubmit = () => {
     postChecks()
   }
@@ -100,15 +118,28 @@ const SystemChecks = () => {
     })
       .then(() => {})
       .catch(e => {})
-    toast.success('Record Updated Successfully')
+    toast.success(platformLabels.Updated)
   }
 
   return (
     <VertLayout>
+      <Fixed>
+        <Grid container xs={12}>
+          <Grid item xs={3} sx={{ m: 2 }}>
+            <CustomTextField
+              name='search'
+              value={search}
+              label={_labels.search}
+              onClear={() => setSearch('')}
+              onChange={handleSearchChange}
+            />
+          </Grid>
+        </Grid>
+      </Fixed>
       <Grow>
         <Table
           columns={columns}
-          gridData={data}
+          gridData={{ list: filteredData }}
           rowId={['checkId']}
           isLoading={false}
           maxAccess={access}

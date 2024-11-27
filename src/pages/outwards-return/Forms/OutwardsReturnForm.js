@@ -25,7 +25,15 @@ import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useWindow } from 'src/windows'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-export default function OutwardsReturnForm({ labels, maxAccess: access, recordId, plantId, dtId, isOpenOutwards = false, refetch }) {
+export default function OutwardsReturnForm({
+  labels,
+  maxAccess: access,
+  recordId,
+  plantId,
+  dtId,
+  isOpenOutwards = false,
+  refetch
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -54,7 +62,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       recordId: recordId || null,
       dtId: dtId || null,
       reference: '',
-      outwardId: '',
+      owId: '',
       outwardRef: '',
       requestedBy: null,
       date: new Date(),
@@ -92,14 +100,15 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       releaseStatus: null,
       otpVerified: false,
       settlementStatus: null,
-      interfaceId: null
+      interfaceId: null,
+      attemptNo: 1
     },
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
-      outwardId: yup.number().required(),
+      owtId: yup.number().required(),
       outwardRef: yup.string().required(),
       requestedBy: yup.string().required(),
       currencyId: yup.string().required(),
@@ -108,8 +117,6 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       fcAmount: yup.string().required(),
       dispersalName: yup.string().required(),
       vatAmount: yup.string().required(),
-      tdAmount: yup.string().required(),
-      productName: yup.string().required(),
       settlementStatus: yup.number().required(),
       lcAmount: yup.string().required(),
       exRate: yup.string().required(),
@@ -149,9 +156,9 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
     stack({
       Component: OTPPhoneVerification,
       props: {
-        formValidation: formik,
+        values: formik.values,
         recordId: recId,
-        functionId: SystemFunction.OutwardsReturn,
+        functionId: SystemFunction.OutwardsReturn
       },
       width: 400,
       height: 400,
@@ -258,7 +265,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       condition: true,
       onClick: 'onApproval',
       disabled: !isClosed
-    },
+    }
   ]
 
   useEffect(() => {
@@ -284,7 +291,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       actions={actions}
       editMode={editMode}
       functionId={SystemFunction.OutwardsReturn}
-      disabledSubmit={isOpenOutwards ? false : (isPosted || isClosed)}
+      disabledSubmit={isOpenOutwards ? false : isPosted || isClosed}
     >
       <VertLayout>
         <Grow>
@@ -320,14 +327,13 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 valueField='reference'
                 displayField='reference'
                 name='outwardRef'
-                filter={item => item.status === 3}
                 secondDisplayField={false}
                 required
                 label={labels.outwards}
                 form={formik}
                 readOnly={isPosted || isClosed || isOpenOutwards}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('outwardId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('owtId', newValue ? newValue.recordId : '')
                   formik.setFieldValue('outwardRef', newValue ? newValue.reference : '')
                   formik.setFieldValue('clientId', newValue ? newValue.clientId : '')
                   formik.setFieldValue('clientName', newValue ? newValue.clientName : '')
@@ -477,7 +483,6 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 error={formik.touched.productName && Boolean(formik.errors.productName)}
                 maxAccess={maxAccess}
                 readOnly
-                required
               />
             </Grid>
             <Grid item xs={6}>
@@ -529,12 +534,14 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 valueField='key'
                 displayField='value'
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(newValue) => {
                   formik.setFieldValue('settlementStatus', newValue ? newValue?.key : '')
                 }}
-                defaultIndex={formik?.values?.interfaceId ? 0 : null}
+                defaultIndex={formik?.values?.interfaceId && 0}
                 required
-                readOnly={isOpenOutwards ? !!formik.values.interfaceId : isPosted || isClosed || !!formik.values.interfaceId}
+                readOnly={
+                  isOpenOutwards ? !!formik.values.interfaceId : isPosted || isClosed || !!formik.values.interfaceId
+                }
                 maxAccess={maxAccess}
                 error={formik.touched.settlementStatus && Boolean(formik.errors.settlementStatus)}
               />
@@ -545,7 +552,6 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 label={labels.tdAmount}
                 value={formik?.values?.tdAmount}
                 readOnly
-                required
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('tdAmount', '')}

@@ -1,10 +1,8 @@
 import React, { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
-import { useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { useWindow } from 'src/windows'
@@ -25,6 +23,7 @@ const ClientsList = () => {
     filterBy,
     clearFilter,
     labels: labels,
+    refetch,
     access
   } = useResourceQuery({
     endpointId: CTCLRepository.CtClientIndividual.snapshot,
@@ -118,7 +117,7 @@ const ClientsList = () => {
   const addClient = async () => {
     try {
       const plantId = await getPlantId()
-      if (plantId !== '') {
+      if (plantId) {
         openForm('', plantId)
       } else {
         stackError({
@@ -134,18 +133,12 @@ const ClientsList = () => {
       : null
     const parameters = `_userId=${userData && userData.userId}&_key=plantId`
 
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: parameters
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: parameters
+    })
 
-      if (res.record.value) {
-        return res.record.value
-      }
-
-      return ''
-    } catch (error) {}
+    return res?.record?.value
   }
 
   const editClient = obj => {
@@ -179,6 +172,7 @@ const ClientsList = () => {
           onEdit={editClient}
           pageSize={50}
           paginationType='client'
+          refetch={refetch}
         />
       </Grow>
     </VertLayout>

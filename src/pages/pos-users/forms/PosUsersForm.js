@@ -23,8 +23,6 @@ export default function PosUsersForm({ labels, maxAccess, recordId, record, wind
     endpointId: PointofSaleRepository.PosUsers.qry
   })
 
-
-
   const { formik } = useForm({
     initialValues: {
       recordId,
@@ -40,33 +38,27 @@ export default function PosUsersForm({ labels, maxAccess, recordId, record, wind
       posId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        await postRequest({
-          extension: PointofSaleRepository.PosUsers.set,
-          record: JSON.stringify(obj)
-        })
-        toast.success(platformLabels.Saved)
-  
-        window.close()
-  
-        invalidate()
-      } catch (error) {}
+      await postRequest({
+        extension: PointofSaleRepository.PosUsers.set,
+        record: JSON.stringify(obj)
+      })
+      toast.success(platformLabels.Saved)
+      window.close()
+      invalidate()
     }
   })
 
-  const editMode = !!formik.values.recordId && !!recordId;
+  const editMode = !!formik.values.recordId && !!recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (record && record.userId && recordId) {
-          const res = await getRequest({
-            extension: PointofSaleRepository.PosUsers.get,
-            parameters: `_userId=${record.userId}`
-          })
-          formik.setValues({ ...res.record, recordId: res.record.userId })
-        }
-      } catch (e) {}
+      if (record && record.userId && recordId) {
+        const res = await getRequest({
+          extension: PointofSaleRepository.PosUsers.get,
+          parameters: `_userId=${record.userId}`
+        })
+        formik.setValues({ ...res.record, recordId: res.record.userId })
+      }
     })()
   }, [])
 
@@ -97,7 +89,7 @@ export default function PosUsersForm({ labels, maxAccess, recordId, record, wind
 
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={PointofSaleRepository.PosUsersPOS.qry}
+                endpointId={PointofSaleRepository.PointOfSales.qry}
                 name='posId'
                 label={labels.pos}
                 valueField='recordId'

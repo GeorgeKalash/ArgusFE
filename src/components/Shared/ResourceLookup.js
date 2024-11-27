@@ -1,12 +1,12 @@
 import React, { useContext, useState, useEffect } from 'react'
 import CustomLookup from '../Inputs/CustomLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import ErrorWindow from './ErrorWindow'
 
 export const ResourceLookup = ({
   endpointId,
   parameters,
   form,
+  formObject = null,
   name,
   firstValue,
   secondValue,
@@ -14,6 +14,7 @@ export const ResourceLookup = ({
   secondValueShow,
   errorCheck,
   filter = {},
+  autoSelectFistValue = true,
   viewHelperText = true,
   minChars = 3,
   ...rest
@@ -53,19 +54,50 @@ export const ResourceLookup = ({
   }
   const check = errorCheck ? errorCheck : name
 
-  const _firstValue = firstValue || (valueShow ? form.values[valueShow] : form.values[name])
-  const _secondValue = secondValue || (secondValueShow ? form.values[secondValueShow] : form.values[name])
+  const _firstValue =
+    firstValue ||
+    (valueShow
+      ? formObject != null
+        ? formObject[valueShow]
+        : form.values[valueShow]
+      : formObject != null
+      ? formObject[name]
+      : form.values[name])
+
+  const _secondValue =
+    secondValue ||
+    (secondValueShow
+      ? formObject != null
+        ? formObject[secondValueShow]
+        : form.values[secondValueShow]
+      : formObject != null
+      ? formObject[name]
+      : form.values[name])
 
   const error = form?.touched && form.touched[check] && Boolean(form.errors[check])
   const helperText = viewHelperText && form?.touched && form.touched[check] && form.errors[check]
+
   useEffect(() => {
     setStore([])
   }, [_firstValue])
 
   const onKeyUp = e => {
-    if (e.target.value?.length > 0) {
-      setStore([])
-    } else {
+    if (e.key === 'Enter') {
+      selectFirstOption()
+    }
+  }
+
+  const onFocus = () => {
+    setStore([])
+  }
+
+  const onBlur = (e, HighlightedOption) => {
+    !HighlightedOption ? selectFirstOption() : rest.onChange('', HighlightedOption)
+  }
+
+  const selectFirstOption = () => {
+    if (autoSelectFistValue && store?.[0]) {
+      rest.onChange('', store[0])
     }
   }
 
@@ -80,6 +112,8 @@ export const ResourceLookup = ({
           secondValue: _secondValue,
           error,
           onKeyUp,
+          onFocus,
+          onBlur,
           name,
           isLoading,
           renderOption,

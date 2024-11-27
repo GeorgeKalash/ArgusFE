@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
-import { Box, IconButton, TextField, Tooltip } from '@mui/material'
+import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
@@ -33,9 +33,11 @@ const Table = ({
   globalStatus = true,
   viewCheckButtons = false,
   showCheckboxColumn = false,
+  disableSorting = false,
   rowSelection = '',
   pagination = true,
   setData,
+  checkboxFlex = '',
   handleCheckboxChange = '',
   ...props
 }) => {
@@ -64,29 +66,57 @@ const Table = ({
       if (col.type === 'date') {
         return {
           ...col,
-          valueGetter: ({ data }) => formatDateDefault(data?.[col.field])
+          valueGetter: ({ data }) => formatDateDefault(data?.[col.field]),
+          sortable: !disableSorting
         }
       }
       if (col.type === 'dateTime') {
         return {
           ...col,
-          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field])
+          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field]),
+          sortable: !disableSorting
         }
       }
       if (col.type === 'number' || col?.type?.field === 'number') {
         return {
           ...col,
-          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal)
+          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal),
+          cellStyle: { textAlign: 'right' },
+          sortable: !disableSorting
         }
       }
       if (col.type === 'timeZone') {
         return {
           ...col,
-          valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field])
+          valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field]),
+          sortable: !disableSorting
+        }
+      }
+      if (col.type === 'checkbox') {
+        return {
+          ...col,
+          width: 110,
+          cellRenderer: ({ data, node }) => {
+            const handleCheckboxChange = event => {
+              const checked = event.target.checked
+              node.setDataValue(col.field, checked)
+            }
+
+            return (
+              <Checkbox
+                checked={data?.[col.field]}
+                onChange={col.editable ? handleCheckboxChange : null}
+                style={col.editable ? {} : { pointerEvents: 'none' }}
+              />
+            )
+          }
         }
       }
 
-      return col
+      return {
+        ...col,
+        sortable: !disableSorting
+      }
     })
 
   const shouldRemoveColumn = column => {
@@ -342,10 +372,6 @@ const Table = ({
     }
   }
 
-  const getRowClass = params => {
-    return params?.rowIndex % 2 === 0 ? 'even-row' : ''
-  }
-
   const selectAll = (params, e) => {
     const gridApi = params.api
     const allNodes = []
@@ -366,9 +392,9 @@ const Table = ({
   }
 
   const onSelectionChanged = params => {
-    const gridApi = params.api
-    const selectedNodes = gridApi.getSelectedNodes()
-    const selectedData = selectedNodes.map(node => node.data)
+    const gridApi = params?.api
+    const selectedNodes = gridApi?.getSelectedNodes()
+    const selectedData = selectedNodes?.map(node => node.data)
     setData(selectedData)
   }
 
@@ -485,7 +511,12 @@ const Table = ({
             },
             '&:focus': {
               outline: 'none'
-            }
+            },
+            ...(!params.colDef?.wrapText && {
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            })
           }}
         >
           {params.value}
@@ -500,6 +531,7 @@ const Table = ({
           {
             headerName: '',
             field: 'checked',
+            flex: checkboxFlex,
             cellRenderer: checkboxCellRenderer,
             headerComponent: params =>
               rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
@@ -576,6 +608,12 @@ const Table = ({
       })
   }
 
+  const gridOptions = {
+    rowClassRules: {
+      'even-row': params => params.node.rowIndex % 2 === 0
+    }
+  }
+
   return (
     <VertLayout>
       <Grow>
@@ -593,6 +631,9 @@ const Table = ({
             },
             '.ag-cell': {
               borderRight: '1px solid #d0d0d0 !important'
+            },
+            '.ag-cell .MuiBox-root': {
+              padding: '0px !important'
             }
           }}
         >
@@ -605,9 +646,9 @@ const Table = ({
             paginationPageSize={pageSize}
             rowSelection={'single'}
             suppressAggFuncInHeader={true}
-            getRowClass={getRowClass}
             rowHeight={35}
             onFirstDataRendered={onFirstDataRendered}
+            gridOptions={gridOptions}
           />
         </Box>
       </Grow>

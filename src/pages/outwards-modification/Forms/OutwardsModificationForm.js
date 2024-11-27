@@ -161,7 +161,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     setFieldValues(data)
 
     const res = await getRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
+      extension: RemittanceOutwardsRepository.OutwardsOrder.get2,
       parameters: `_recordId=${data.outwardId}`
     })
 
@@ -233,7 +233,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     stack({
       Component: OTPPhoneVerification,
       props: {
-        formValidation: formik,
+        values: formik.values,
         recordId: recId,
         functionId: SystemFunction.OutwardsModification,
         onSuccess: () => {
@@ -326,7 +326,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
             </Grid>
             <Grid item xs={4} sx={{ pl: 1 }}>
               <ResourceLookup
-                endpointId={RemittanceOutwardsRepository.OutwardsTransfer.snapshot}
+                endpointId={RemittanceOutwardsRepository.OutwardsOrder.snapshot}
                 valueField='reference'
                 displayField='reference'
                 name='owRef'

@@ -246,45 +246,39 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
     const res = await postRequest({
       extension: CashCountRepository.CashCountTransaction.reopen,
       record: JSON.stringify(data)
+    }).then(() => {
+      if (res.recordId) {
+        toast.success(platformLabels.Reopened)
+        invalidate()
+        getData(obj?.recordId)
+      }
     })
-      .then(() => {
-        if (res.recordId) {
-          toast.success(platformLabels.Reopened)
-          invalidate()
-          getData(obj?.recordId)
-        }
-      })
-      .catch(error => {})
   }
 
   const onClose = () => {
     postRequest({
       extension: CashCountRepository.CashCountTransaction.close,
       record: JSON.stringify(formik.values)
+    }).then(res => {
+      if (res?.recordId) {
+        toast.success(platformLabels.Closed)
+        invalidate()
+        getData(res?.recordId)
+      }
     })
-      .then(res => {
-        if (res?.recordId) {
-          toast.success(platformLabels.Closed)
-          invalidate()
-          getData(res?.recordId)
-        }
-      })
-      .catch(error => {})
   }
 
   const onPost = () => {
     postRequest({
       extension: CashCountRepository.CashCountTransaction.post,
       record: JSON.stringify(formik.values)
+    }).then(res => {
+      if (res?.recordId) {
+        toast.success(platformLabels.Posted)
+        invalidate()
+        setIsPosted(true)
+      }
     })
-      .then(res => {
-        if (res?.recordId) {
-          toast.success(platformLabels.Posted)
-          invalidate()
-          setIsPosted(true)
-        }
-      })
-      .catch(error => {})
   }
   function openTransferForm() {
     stack({
@@ -364,7 +358,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
       parameters: ``
     })
     if (record) {
-      !editMode && formik.setFieldValue('startTime', getTimeInTimeZone(record?.utcDate, record?.timeZone))
+      !editMode && formik.setFieldValue('startTime', getTimeInTimeZone(record?.utcDate, 'utc'))
     }
   }
 
