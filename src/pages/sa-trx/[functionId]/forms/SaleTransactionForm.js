@@ -234,7 +234,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
             ...[
               ...obj.taxes,
               ...obj.items
-                .filter(({ taxDetails }) => taxDetails && taxDetails.length > 0)
+                .filter(({ taxDetails }) => taxDetails && taxDetails?.length > 0)
                 .map(({ taxDetails, id }) => ({
                   seqNo: id,
                   ...taxDetails[0]
@@ -617,26 +617,32 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   ]
 
   async function handleIconClick(id, updateRow) {
-    let currentMdType
-    let currentMdAmount = parseFloat(formik.values.items[id - 1].mdAmount)
-    const maxClientAmountDiscount = formik.values.items[id - 1].unitPrice * (formik.values?.header.maxDiscount / 100)
+    const index = formik.values.items.findIndex(item => item.id === id)
 
-    if (formik.values.items[id - 1].mdType == 2) {
+    if (index === -1) return
+
+    let currentMdType
+    let currentMdAmount = parseFloat(formik.values.items[index].mdAmount)
+    const maxClientAmountDiscount = formik.values.items[index].unitPrice * (formik.values?.header.maxDiscount / 100)
+
+    if (formik.values.items[index].mdType === 2) {
       if (currentMdAmount < 0 || currentMdAmount > 100) currentMdAmount = 0
-      formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 1)
-      formik.setFieldValue(`items[${id - 1}].mdType`, 1)
+
+      formik.setFieldValue(`items[${index}].mdAmountPct`, 1)
+      formik.setFieldValue(`items[${index}].mdType`, 1)
       currentMdType = 1
-      formik.setFieldValue(`items[${id - 1}].mdAmount`, parseFloat(currentMdAmount).toFixed(2))
+      formik.setFieldValue(`items[${index}].mdAmount`, parseFloat(currentMdAmount).toFixed(2))
     } else {
       if (currentMdAmount < 0 || currentMdAmount > maxClientAmountDiscount) currentMdAmount = 0
-      formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 2)
-      formik.setFieldValue(`items[${id - 1}].mdType`, 2)
+
+      formik.setFieldValue(`items[${index}].mdAmountPct`, 2)
+      formik.setFieldValue(`items[${index}].mdType`, 2)
       currentMdType = 2
-      formik.setFieldValue(`items[${id - 1}].mdAmount`, parseFloat(currentMdAmount).toFixed(2))
+      formik.setFieldValue(`items[${index}].mdAmount`, parseFloat(currentMdAmount).toFixed(2))
     }
 
     const newRow = {
-      ...formik.values.items[id - 1],
+      ...formik.values.items[index],
       mdAmount: currentMdAmount,
       mdType: currentMdType
     }
@@ -1033,7 +1039,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       dirtyField: dirtyField
     })
 
-    if (newRow.taxDetails.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
+    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
 
     const vatCalcRow = getVatCalc({
       basePrice: itemPriceRow?.basePrice,
@@ -1041,7 +1047,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       qty: parseFloat(itemPriceRow?.qty),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
-      vatAmount: parseFloat(itemPriceRow?.vatAmount),
+      vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
       tdPct: formik?.values?.header?.tdPct,
       taxDetails: formik.values.header.isVattable ? newRow.taxDetails : null
     })
@@ -1122,7 +1128,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
 
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
-      if (item.taxDetails.length > 0) item.taxDetails = [item.taxDetails[0]]
+      if (item?.taxDetails?.length > 0) item.taxDetails = [item.taxDetails[0]]
 
       const vatCalcRow = getVatCalc({
         basePrice: parseFloat(item?.basePrice),
