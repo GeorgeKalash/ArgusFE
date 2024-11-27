@@ -2,7 +2,7 @@ import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@m
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { DISABLED } from 'src/services/api/maxAccess'
 
@@ -13,7 +13,10 @@ const CustomComboBox = ({
   value,
   valueField = 'key',
   displayField = 'value',
+  onKeyUp,
+  onKeyDown,
   store = [],
+  highlightedIndex = -1,
   getOptionBy,
   onChange,
   error,
@@ -35,6 +38,7 @@ const CustomComboBox = ({
   fetchData,
   refresh = true,
   isLoading,
+  onBlur = () => {},
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -57,11 +61,30 @@ const CustomComboBox = ({
       onChange(store?.[defaultIndex])
     }
   }, [defaultIndex])
+  const autocompleteRef = useRef(null)
+  useEffect(() => {
+    function handleBlur(event) {
+      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
+        selectFirstValue.current = 'click'
+      }
+    }
+
+    document.addEventListener('mousedown', handleBlur)
+
+    return () => {
+      document.removeEventListener('mousedown', handleBlur)
+    }
+  }, [])
+
+  const valueHighlightedOption = useRef(null)
+
+  const selectFirstValue = useRef(null)
 
   return _hidden ? (
     <></>
   ) : (
     <Autocomplete
+      ref={autocompleteRef}
       name={name}
       value={value}
       size={size}
@@ -112,8 +135,14 @@ const CustomComboBox = ({
       freeSolo={_readOnly}
       disabled={_disabled}
       required={_required}
+      onFocus={e => {
+        selectFirstValue.current = ''
+      }}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
       renderOption={(props, option) => {
+        const index = store.indexOf(option)
+        const isHighlighted = index === highlightedIndex
+
         if (columnsInDropDown && columnsInDropDown.length > 0) {
           return (
             <Box>
@@ -128,7 +157,12 @@ const CustomComboBox = ({
                   })}
                 </li>
               )}
-              <li {...props}>
+              <li
+                {...props}
+                style={{
+                  backgroundColor: isHighlighted ? '#f0f0f0' : ''
+                }}
+              >
                 {columnsInDropDown.map((header, i) => {
                   return (
                     <Box key={i} sx={{ flex: 1 }}>
@@ -162,6 +196,16 @@ const CustomComboBox = ({
           onMouseLeave={() => setHover(false)}
           error={error}
           helperText={helperText}
+          onKeyDown={onKeyDown}
+          onBlur={e => {
+            onBlur(e)
+            if (selectFirstValue.current !== 'click') {
+              onBlur(e, valueHighlightedOption?.current)
+            }
+          }}
+          onKeyUp={e => {
+            onKeyUp(e)
+          }}
           InputProps={{
             ...params.InputProps,
             endAdornment: (

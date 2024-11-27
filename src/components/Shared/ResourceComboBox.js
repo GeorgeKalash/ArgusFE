@@ -1,5 +1,5 @@
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useRef } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CommonContext } from 'src/providers/CommonContext'
 import { useCacheDataContext } from 'src/providers/CacheDataContext'
@@ -25,6 +25,12 @@ export default function ResourceComboBox({
   const { updateStore, fetchWithCache } = useCacheDataContext() || {}
   const cacheAvailable = !!updateStore
   const { getAllKvsByDataset } = useContext(CommonContext)
+
+  const [apiResponse, setApiResponse] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const finalItemsListRef = useRef([]);
+
   function fetch({ datasetId, endpointId, parameters }) {
     if (endpointId) {
       return getRequest({
@@ -41,9 +47,6 @@ export default function ResourceComboBox({
       })
     }
   }
-
-  const [apiResponse, setApiResponse] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const fetchDataAsync = async () => {
@@ -71,6 +74,8 @@ export default function ResourceComboBox({
 
   let finalItemsList = data ? data : reducer(apiResponse)?.filter?.(filter)
 
+  finalItemsListRef.current = finalItemsList || []
+
   const _value =
     (typeof values[name] === 'object'
       ? values[name]
@@ -80,6 +85,60 @@ export default function ResourceComboBox({
     value ||
     ''
 
+  const onKeyUp = e => {
+    if (e.key === 'Enter' && highlightedIndex === -1) {
+      selectFirstOption()
+    }
+  }
+
+  const onKeyDown = (e) => {
+    const totalItems = finalItemsListRef.current.length;
+
+    if (totalItems === 0) return;
+
+    let newIndex = highlightedIndex;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        newIndex = (highlightedIndex + 1) % totalItems;
+        setHighlightedIndex(newIndex);
+        e.preventDefault();
+        break;
+
+      case 'ArrowUp':
+        newIndex = (highlightedIndex - 1 + totalItems) % totalItems;
+        setHighlightedIndex(newIndex);
+        e.preventDefault();
+        break;
+
+      case 'Tab':
+      case 'Enter':
+        if (highlightedIndex >= 0 && highlightedIndex < totalItems) {
+          rest.onChange('', finalItemsListRef.current[highlightedIndex]);
+          e.preventDefault();
+        } else {
+          selectFirstOption();
+        }
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const onBlur = (e) => {
+    if (highlightedIndex === -1 && finalItemsListRef.current[0]) {
+      rest.onChange('', finalItemsListRef.current[0]);
+    }
+  };
+  
+
+  const selectFirstOption = () => {
+    if (finalItemsListRef.current?.[0]) {
+      rest.onChange('', finalItemsListRef.current[0])
+    }
+  }
+
   return (
     <CustomComboBox
       {...{
@@ -88,8 +147,12 @@ export default function ResourceComboBox({
         fetchData,
         name,
         store: finalItemsList,
+        highlightedIndex,
         valueField,
         value: _value,
+        onKeyUp,
+        onKeyDown,
+        onBlur,
         isLoading
       }}
     />
