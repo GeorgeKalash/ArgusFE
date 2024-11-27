@@ -134,6 +134,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     bankId: '',
     iban: '',
     trialDays: null,
+    idScanMode: null,
 
     //clientRemittance
     remittanceRecordId: '',
@@ -730,13 +731,33 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     setNewProf(!newProf)
   }
 
-  const handleClickDigitalId = () => {
+  const handleClickDigitalId = confirmWindow => {
+    formik.setFieldValue('idScanMode', 2)
     const parameters = `_number=${formik.values.idNo}&_idType=${formik.values.idtId}`
     getRequest({
       extension: CurrencyTradingSettingsRepository.Absher.get,
       parameters
     }).then(res => {
       setImageUrl(res.record.imageContent)
+      confirmWindow.close()
+    })
+  }
+
+  const handleClickScanner = () => {
+    formik.setFieldValue('idScanMode', 1)
+  }
+
+  const digitalIdConfirmation = () => {
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: platformLabels.AbsherConfirmation,
+        okButtonAction: handleClickDigitalId,
+        fullScreen: false
+      },
+      width: 450,
+      height: 170,
+      title: platformLabels.Confirmation
     })
   }
 
@@ -1287,12 +1308,17 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                 <Grid item xs={12}>
                   <Grid container spacing={2}>
                     <Grid item xs='auto'>
-                      <Button variant='contained' color='primary'>
+                      <Button variant='contained' color='primary' onClick={handleClickScanner}>
                         {labels.scanner}
                       </Button>
                     </Grid>
                     <Grid item xs='auto'>
-                      <Button variant='contained' color='primary' onClick={handleClickDigitalId}>
+                      <Button
+                        variant='contained'
+                        color='primary'
+                        onClick={digitalIdConfirmation}
+                        disabled={!formik.values.idNo || !formik.values.idtId}
+                      >
                         {labels.digitalId}
                       </Button>
                     </Grid>
