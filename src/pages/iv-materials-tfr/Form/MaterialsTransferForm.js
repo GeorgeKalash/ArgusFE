@@ -291,6 +291,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         valueField: 'recordId',
         displayField: 'sku',
         mandatory: true,
+        readOnly: isClosed,
         displayFieldWidth: 4,
         mapping: [
           { from: 'recordId', to: 'itemId' },
@@ -316,8 +317,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           return
         }
 
-        console.log(newRow)
-
         if (newRow?.itemId) {
           const { weight, metalId, metalRef } = await getWeightAndMetalId(newRow?.itemId)
           const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
@@ -325,8 +324,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           const itemInfo = await getItem(newRow.itemId)
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
           setFilteredMU(filteredMeasurements)
-
-          console.log(newRow)
 
           update({
             weight,
@@ -347,7 +344,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       name: 'enabled',
       defaultValue: false,
       props: {
-        imgSrc: '/images/buttonsIcons/popup-black.png'
+        imgSrc: '/images/buttonsIcons/popup-black.png',
+        readOnly: isClosed,
       },
       label: labels.sku,
       onClick: (e, row, update, newRow) => {
@@ -391,6 +389,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         store: filteredMu,
         displayField: 'reference',
         valueField: 'recordId',
+        readOnly: isClosed,
         mapping: [
           { from: 'reference', to: 'muRef' },
           { from: 'qty', to: 'muQty' },
@@ -419,6 +418,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       component: 'numberfield',
       label: labels.qty,
       name: 'qty',
+      props: {
+        readOnly: isClosed
+      },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
           const totalCost = calcTotalCost(newRow)
@@ -435,6 +437,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       component: 'numberfield',
       label: labels.unitCost,
       name: 'unitCost',
+      props: {
+        readOnly: isClosed
+      },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
           const totalCost = calcTotalCost(newRow)
@@ -449,6 +454,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       component: 'numberfield',
       label: labels.totalCost,
       name: 'totalCost',
+      props: {
+        readOnly: isClosed
+      },
       async onChange({ row: { update, newRow } }) {
         if (newRow?.totalCost) {
           const unitCost = calcUnitCost(newRow, newRow.totalCost)
