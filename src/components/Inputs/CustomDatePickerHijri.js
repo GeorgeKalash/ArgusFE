@@ -25,6 +25,7 @@ export default function CustomDatePickerHijri({
   fullWidth = true,
   hidden = false,
   required = false,
+  editMode = false,
   ...props
 }) {
   const [openDatePicker, setOpenDatePicker] = useState(false)

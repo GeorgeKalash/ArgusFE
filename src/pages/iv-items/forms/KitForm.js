@@ -35,12 +35,16 @@ const KitForm = ({ store, labels, maxAccess }) => {
 
               return true
             }),
-            qty: yup.number().test(function (value) {
-              if (numRows > 1) {
-                return value > 0
-              }
+            qty: yup.number().test({
+              test: function (value) {
+                const { componentSKU } = this.parent
 
-              return true
+                if (componentSKU) {
+                  return value > 0
+                }
+
+                return true
+              }
             })
           })
         )
@@ -55,7 +59,6 @@ const KitForm = ({ store, labels, maxAccess }) => {
           muiId: '',
           componentId: '',
           componentName: '',
-          muiId: '',
           componentSKU: '',
           qty: ''
         }
@@ -67,25 +70,25 @@ const KitForm = ({ store, labels, maxAccess }) => {
   })
 
   const postKit = async obj => {
-    const items = obj?.kit.map((item, index) => ({
-      ...item,
-      kitId: recordId,
-      seqNo: index + 1
-    }))
+    const items = obj?.kit
+      .map((item, index) => ({
+        ...item,
+        kitId: recordId,
+        seqNo: index + 1
+      }))
+      .filter(item => item.componentId || item.componentName || item.componentSKU)
 
     const data = {
       kitId: recordId,
-      components: items || []
+      components: items.length > 0 ? items : []
     }
 
     await postRequest({
       extension: InventoryRepository.Kit.set,
       record: JSON.stringify(data)
+    }).then(res => {
+      toast.success(platformLabels.Edited)
     })
-      .then(res => {
-        toast.success(platformLabels.Edited)
-      })
-      .catch(error => {})
   }
 
   const columns = [

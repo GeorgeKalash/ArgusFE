@@ -43,7 +43,8 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
       extraIncome: '',
       bankId: '',
       iban: '',
-      extraIncomeId: ''
+      extraIncomeId: '',
+      educationLevel: ''
     },
     enableReinitialize: true,
     maxAccess,
@@ -60,7 +61,8 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
         extraIncomeId: obj.extraIncomeId,
         bankId: obj.bankId,
         iban: obj.iban,
-        title: obj.title
+        title: obj.title,
+        educationLevel: obj.educationLevel
       })
       window.close()
     }
@@ -77,7 +79,8 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
       extraIncome: clientFormik.values.extraIncome,
       extraIncomeId: clientFormik.values.extraIncomeId,
       bankId: clientFormik.values.bankId,
-      iban: clientFormik.values.iban
+      iban: clientFormik.values.iban,
+      educationLevel: clientFormik.values.educationLevel
     })
   }, [])
 
@@ -250,6 +253,26 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
             maxLength='10'
             onClear={() => formik.setFieldValue('iban', '')}
             error={formik.touched.iban && Boolean(formik.errors.iban)}
+            maxAccess={maxAccess}
+          />
+        </Grid>
+        <Grid item xs='12'>
+          <ResourceComboBox
+            datasetId={DataSets.EDUCATION_LEVEL}
+            name='educationLevel'
+            label={labels.educationLevel}
+            valueField='key'
+            displayField='value'
+            readOnly={editMode && !allowEdit && true}
+            values={formik.values}
+            onChange={(event, newValue) => {
+              if (newValue) {
+                formik.setFieldValue('educationLevel', newValue?.key)
+              } else {
+                formik.setFieldValue('educationLevel', null)
+              }
+            }}
+            error={formik.touched.educationLevel && Boolean(formik.errors.educationLevel)}
             maxAccess={maxAccess}
           />
         </Grid>

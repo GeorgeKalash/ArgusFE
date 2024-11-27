@@ -131,6 +131,7 @@ export const SaleRepository = {
     set: service + 'setTR',
     del: service + 'delTR',
     post: service + 'postTR',
+    unpost: service + 'unpostTRX',
     snapshot: service + 'snapshotTR'
   },
   SalesOrder: {
@@ -165,7 +166,8 @@ export const SaleRepository = {
     set: service + 'setFII'
   },
   SATrx: {
-    qry: service + 'qryTRX'
+    qry: service + 'qryTRX',
+    qry2: service + 'qryTRX2'
   },
   SalesTransaction: {
     qry: service + 'qryTR',
@@ -181,7 +183,11 @@ export const SaleRepository = {
   Contact: {
     contact: service + 'qryContact'
   },
+  FlagTR: service + 'flagTR',
   PrintedSA: {
     printed: service + 'flagORD'
+  },
+  SalesInquiries: {
+    qry: service + 'qryII'
   }
 }

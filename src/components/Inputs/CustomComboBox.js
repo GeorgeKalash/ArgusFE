@@ -2,7 +2,7 @@ import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@m
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { DISABLED, MANDATORY, FORCE_ENABLED } from 'src/services/api/maxAccess'
 
@@ -10,7 +10,7 @@ const CustomComboBox = ({
   type = 'text',
   name,
   label,
-  value: _value,
+  value,
   valueField = 'key',
   displayField = 'value',
   store = [],
@@ -41,6 +41,8 @@ const CustomComboBox = ({
 
   const [hover, setHover] = useState(false)
 
+  const [focus, setAutoFocus] = useState(autoFocus)
+
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
   const fieldAccess =
@@ -55,12 +57,18 @@ const CustomComboBox = ({
   const _required = (required || fieldAccess === ControlAccessLevel.Mandatory) && !_readOnly
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
 
-  const value = neverPopulate ? '' : _value
+  useEffect(() => {
+    if (!value && store?.length > 0 && typeof defaultIndex === 'number' && defaultIndex === 0) {
+      onChange(store?.[defaultIndex])
+    }
+  }, [defaultIndex])
 
-  return (
+  return _hidden ? (
+    <></>
+  ) : (
     <Autocomplete
       name={name}
-      value={store?.[defaultIndex] || value}
+      value={value}
       size={size}
       options={store}
       key={value}
@@ -100,7 +108,10 @@ const CustomComboBox = ({
         }
       }}
       isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
-      onChange={onChange}
+      onChange={(event, newValue) => {
+        onChange(name, newValue)
+        setAutoFocus(true)
+      }}
       fullWidth={fullWidth}
       readOnly={_readOnly}
       freeSolo={_readOnly}
@@ -151,7 +162,7 @@ const CustomComboBox = ({
           variant={variant}
           label={label}
           required={_required}
-          autoFocus={autoFocus}
+          autoFocus={focus}
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
           error={error}
@@ -169,6 +180,7 @@ const CustomComboBox = ({
                       <IconButton
                         onClick={fetchData}
                         aria-label='refresh data'
+                        tabIndex={-1}
                         sx={{
                           p: '0px !important',
                           marginRight: '-10px'

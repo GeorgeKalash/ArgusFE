@@ -214,7 +214,7 @@ export function DataGrid({
       nextCell.rowIndex = rowIndex
     }
 
-    const field = columns[nextCell.columnIndex].field
+    const field = columns[nextCell.columnIndex]?.field
 
     api.startEditingCell({
       rowIndex: nextCell.rowIndex,

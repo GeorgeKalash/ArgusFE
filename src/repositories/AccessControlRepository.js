@@ -4,6 +4,7 @@ export const AccessControlRepository = {
   maxAccess: service + 'maxAccess',
   setBMK: service + 'setBMK',
   delBMK: service + 'delBMK',
+  checkOTP: service + 'checkOTP ',
 
   NotificationGroup: {
     qry: service + 'qryNOT',
@@ -83,9 +84,13 @@ export const AccessControlRepository = {
   LockedRecords: {
     qry: service + 'qryLOK',
     del: service + 'delLOK',
-    snapshot: service + 'snapshotLOK',
+    snapshot: service + 'snapshotLOK'
   },
   UserOTPQrcode: {
     secret: service + 'secretKEY'
+  },
+  PlantSupervisors: {
+    qry: service + 'qryPLS',
+    set2: service + 'set2PLS'
   }
 }
