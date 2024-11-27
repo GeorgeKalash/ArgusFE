@@ -7,13 +7,16 @@ import { useAuth } from 'src/hooks/useAuth'
 import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
-const OTPAuthentication = ({ loggedUser, onClose, window }) => {
+const OTPAuthentication = ({ loggedUser, onClose, window, PlantSupervisors = false, values }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [error, setError] = useState('')
   const [disabled, setDisabled] = useState(0)
   const { apiUrl, languageId } = useAuth()
   const { platformLabels } = useContext(ControlContext)
+  const { postRequest } = useContext(RequestsContext)
+
   const errorModel = useError()
 
   async function showError(props) {
@@ -53,6 +56,25 @@ const OTPAuthentication = ({ loggedUser, onClose, window }) => {
           })
           if (throwError) reject(error)
         })
+    } else {
+      setError(platformLabels.AllFieldsRequired)
+    }
+  }
+
+  const checkPlantSupervisors = async value => {
+    if (value.length > 1) {
+      var data = {
+        plantId: values.plantId,
+        otp: value
+      }
+      await postRequest({
+        extension: AccessControlRepository.PlantSupervisors.verify,
+        record: JSON.stringify(data)
+      }).then(res => {
+        toast.success(platformLabels.verificationCompleted)
+        window.close()
+        onClose()
+      })
     } else {
       setError(platformLabels.AllFieldsRequired)
     }
@@ -118,7 +140,7 @@ const OTPAuthentication = ({ loggedUser, onClose, window }) => {
 
   const handleVerifyOtp = newOtp => {
     const enteredOtp = newOtp ? newOtp.join('') : otp.join('')
-    checkSMS(enteredOtp)
+    PlantSupervisors ? checkPlantSupervisors(enteredOtp) : checkSMS(enteredOtp)
   }
 
   useEffect(() => {

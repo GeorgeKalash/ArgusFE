@@ -687,13 +687,13 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     })
   }
 
-  function viewAuthOTP(loggedUser) {
+  function viewAuthOTP() {
     stack({
       Component: OTPAuthentication,
       props: {
-        formValidation: formik,
-        loggedUser,
-        onClose: () => auth.EnableLogin(loggedUser)
+        values: formik.values,
+        PlantSupervisors: true,
+        onClose: () => onPost()
       },
       expandable: false,
       width: 400,
@@ -704,7 +704,11 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   }
 
   const onPost = async () => {
-    !formik.values.otp && viewAuthOTP()
+    if (!formik.values.otp) {
+      viewAuthOTP()
+
+      return
+    }
 
     const values = formik.values
 
