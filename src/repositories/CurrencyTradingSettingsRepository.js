@@ -71,5 +71,8 @@ export const CurrencyTradingSettingsRepository = {
   },
   Yakeen: {
     get: service + 'getYakeenInformations'
+  },
+  Mobile: {
+    get: service + 'verifyMobileOwner'
   }
 }
