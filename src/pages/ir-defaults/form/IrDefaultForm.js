@@ -1,16 +1,10 @@
 import { useEffect, useState, useContext } from 'react'
 import { Grid } from '@mui/material'
-import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
 import FormShell from 'src/components/Shared/FormShell'
@@ -61,7 +55,14 @@ const IrDefaultForm = ({ _labels, access }) => {
   }
 
   return (
-    <FormShell resourceId={ResourceIds.IrDefault} form={formik} maxAccess={access} editMode={true} isSavedClear={false}>
+    <FormShell
+      resourceId={ResourceIds.IrDefault}
+      form={formik}
+      maxAccess={access}
+      editMode={true}
+      isSavedClear={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -75,7 +76,7 @@ const IrDefaultForm = ({ _labels, access }) => {
                 error={formik.touched.ir_amcShortTerm && Boolean(formik.errors.ir_amcShortTerm)}
               />
             </Grid>
-            <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <Grid item xs={12}>
               <CustomNumberField
                 onClear={() => formik.setFieldValue('ir_amcLongTerm', '')}
                 name='ir_amcLongTerm'
