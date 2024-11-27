@@ -10,12 +10,13 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
+import FormShell from 'src/components/Shared/FormShell'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { useForm } from 'src/hooks/form'
 
 const LoDefault = ({ _labels, access }) => {
-  const [errorMessage, setErrorMessage] = useState(null)
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
@@ -38,7 +39,7 @@ const LoDefault = ({ _labels, access }) => {
     setInitialValues(myObject)
   }
 
-  const formik = useFormik({
+  const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
     initialValues,
@@ -62,54 +63,55 @@ const LoDefault = ({ _labels, access }) => {
     })
   }
 
-  const handleSubmit = () => {
-    formik.handleSubmit()
-  }
-
   return (
-    <VertLayout>
-      <Grow>
-        <Grid container spacing={4} sx={{ pt: '0.5rem' }}>
-          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
-            <ResourceComboBox
-              endpointId={InventoryRepository.Site.qry}
-              name='transitSiteId'
-              label={_labels.carrierSite}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              valueField='recordId'
-              displayField='name'
-              maxAccess={access}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('transitSiteId', newValue?.recordId)
-                } else {
-                  formik.setFieldValue('transitSiteId', '')
-                }
-              }}
-              error={formik.touched.transitSiteId && Boolean(formik.errors.transitSiteId)}
-            />
+    <FormShell
+      resourceId={ResourceIds.carrierSite}
+      form={formik}
+      maxAccess={access}
+      infoVisible={false}
+      isSavedClear={false}
+      isCleared={false}
+    >
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Site.qry}
+                name='transitSiteId'
+                label={_labels.carrierSite}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                valueField='recordId'
+                displayField='name'
+                maxAccess={access}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('transitSiteId', newValue?.recordId)
+                  } else {
+                    formik.setFieldValue('transitSiteId', '')
+                  }
+                }}
+                error={formik.touched.transitSiteId && Boolean(formik.errors.transitSiteId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                onClear={() => formik.setFieldValue('lo_min_car_amount', '')}
+                name='lo_min_car_amount'
+                onChange={formik.handleChange}
+                label={_labels.mca}
+                value={formik.values.lo_min_car_amount}
+                error={formik.touched.lo_min_car_amount && Boolean(formik.errors.lo_min_car_amount)}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
-            <CustomNumberField
-              onClear={() => formik.setFieldValue('lo_min_car_amount', '')}
-              name='lo_min_car_amount'
-              onChange={formik.handleChange}
-              label={_labels.mca}
-              value={formik.values.lo_min_car_amount}
-              error={formik.touched.lo_min_car_amount && Boolean(formik.errors.lo_min_car_amount)}
-            />
-          </Grid>
-        </Grid>
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={handleSubmit} isSaved={true} />
-      </Fixed>
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </VertLayout>
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 
