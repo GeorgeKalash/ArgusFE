@@ -89,11 +89,7 @@ const LoDefault = ({ _labels, access }) => {
                 displayField='name'
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('transitSiteId', newValue?.recordId)
-                  } else {
-                    formik.setFieldValue('transitSiteId', '')
-                  }
+                  formik.setFieldValue('transitSiteId', newValue?.recordId || null)
                 }}
                 error={formik.touched.transitSiteId && Boolean(formik.errors.transitSiteId)}
               />
