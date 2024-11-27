@@ -342,10 +342,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     {
       component: 'button',
       name: 'enabled',
-      defaultValue: false,
+      defaultValue: !!formik.values?.plId,
       props: {
-        imgSrc: '/images/buttonsIcons/popup-black.png',
-        readOnly: isClosed,
+        imgSrc: '/images/buttonsIcons/popup-black.png'
       },
       label: labels.sku,
       onClick: (e, row, update, newRow) => {
@@ -699,9 +698,18 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           transfers: updatedTransfers,
           notificationGroupId: resNotification?.record?.notificationGroupId
         })
+
+        if (formik.values.toSiteId) {
+          const res2 = await getRequest({
+            extension: InventoryRepository.Site.get,
+            parameters: `_recordId=${formik.values.toSiteId}`
+          })
+
+          formik.setFieldValue('plId', res2.record.plId)
+        }
       })()
     }
-  }, [recordId, measurements])
+  }, [recordId, measurements, formik.values.toSiteId])
 
   return (
     <FormShell
