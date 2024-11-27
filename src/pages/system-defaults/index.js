@@ -39,7 +39,13 @@ const SystemDefaults = () => {
         obj.key === 'extentionsPath'
       )
     })
-    filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+    filteredList?.forEach(obj => {
+      if (obj.key === 'dateFormat' || obj.key === 'backofficeEmail') {
+        myObject[obj.key] = obj.value || null
+      } else {
+        myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
+      }
+    })
     formik.setValues(myObject)
   }
 
@@ -126,11 +132,7 @@ const SystemDefaults = () => {
                 displayField='name'
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('baseCurrencyId', newValue?.recordId)
-                  } else {
-                    formik.setFieldValue('baseCurrencyId', '')
-                  }
+                  formik.setFieldValue('baseCurrencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.baseCurrencyId && Boolean(formik.errors.baseCurrencyId)}
               />
@@ -149,11 +151,7 @@ const SystemDefaults = () => {
                 displayField='name'
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('countryId', newValue?.recordId)
-                  } else {
-                    formik.setFieldValue('countryId', '')
-                  }
+                  formik.setFieldValue('countryId', newValue?.recordId || null)
                 }}
                 error={formik.touched.countryId && Boolean(formik.errors.countryId)}
               />
@@ -180,11 +178,7 @@ const SystemDefaults = () => {
                 values={formik.values}
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('timeZone', newValue?.key)
-                  } else {
-                    formik.setFieldValue('timeZone', '')
-                  }
+                  formik.setFieldValue('timeZone', newValue?.key || null)
                 }}
                 error={formik.touched.timeZone && Boolean(formik.errors.timeZone)}
               />
@@ -199,11 +193,7 @@ const SystemDefaults = () => {
                 values={formik.values}
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('dateFormat', newValue?.key)
-                  } else {
-                    formik.setFieldValue('dateFormat', '')
-                  }
+                  formik.setFieldValue('dateFormat', newValue?.key || null)
                 }}
                 error={formik.touched.dateFormat && Boolean(formik.errors.dateFormat)}
               />
@@ -228,7 +218,7 @@ const SystemDefaults = () => {
                 values={formik.values}
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('ActivityBlankQryDaysBack', newValue?.key)
+                  formik.setFieldValue('ActivityBlankQryDaysBack', newValue?.key || '')
                 }}
                 error={formik.touched.ActivityBlankQryDaysBack && Boolean(formik.errors.ActivityBlankQryDaysBack)}
               />
