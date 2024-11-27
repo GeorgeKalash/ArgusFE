@@ -346,7 +346,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png'
       },
-      label: labels.sku,
+      label: labels.details,
       onClick: (e, row, update, newRow) => {
         if (row?.itemId && formik.values?.plId) {
           stack({
