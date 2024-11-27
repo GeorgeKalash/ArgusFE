@@ -20,7 +20,7 @@ const CustomTextField = ({
   numberField = false,
   editMode = false,
   maxLength = '1000',
-  minLength = '0',
+  minLength,
   position,
   dir = 'ltr',
   hidden = false,
@@ -31,7 +31,6 @@ const CustomTextField = ({
   ...props
 }) => {
   const name = props.name
-  const [error, setError] = useState(false)
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
@@ -57,6 +56,17 @@ const CustomTextField = ({
       inputRef.current.setSelectionRange(position, position)
     }
   }, [position])
+
+  useEffect(() => {
+    if (typeof props.setFieldValidation === 'function')
+      if (value && ((minLength && value?.length < minLength) || (maxLength && value?.length > maxLength))) {
+        props.setFieldValidation([name], 'required')
+      } else if (required && !value) {
+        props.setFieldValidation([name], ' ')
+      } else {
+        props.setFieldValidation([name], '')
+      }
+  }, [value])
 
   const handleInput = e => {
     const inputValue = e.target.value
@@ -86,16 +96,6 @@ const CustomTextField = ({
     if (language === 'english') {
       e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '')
       props?.onChange(e)
-    }
-
-    if (minLength) {
-      if (inputValue.length === 0) {
-        setError(false)
-      } else if (inputValue.length < minLength) {
-        setError(true)
-      } else {
-        setError(false)
-      }
     }
   }
 
@@ -159,7 +159,6 @@ const CustomTextField = ({
       }}
       required={required}
       {...props}
-      error={error}
     />
   )
 }

@@ -9,7 +9,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
 
-const AddressTab = ({ addressValidation, readOnly = false, required = true }) => {
+const AddressTab = ({ addressValidation, readOnly = false, required = true, setFieldValidation }) => {
   const { labels: labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.Address
   })
@@ -178,6 +178,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
                 readOnly={readOnly}
                 minLength={4}
                 maxLength={4}
+                setFieldValidation={setFieldValidation}
                 onChange={addressValidation.handleChange}
                 onClear={() => addressValidation.setFieldValue('bldgNo', '')}
                 error={addressValidation.touched.bldgNo && Boolean(addressValidation.errors.bldgNo)}
@@ -221,6 +222,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
                 readOnly={readOnly}
                 minLength={5}
                 maxLength={5}
+                setFieldValidation={setFieldValidation}
                 value={addressValidation.values.postalCode}
                 onChange={addressValidation.handleChange}
                 onClear={() => addressValidation.setFieldValue('postalCode', '')}
