@@ -15,20 +15,18 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
-import { DataSets } from 'src/resources/DataSets'
 import { getStorageData } from 'src/storage/storage'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { useWindow } from 'src/windows'
-import POSForm from './POSForm'
 import NormalDialog from 'src/components/Shared/NormalDialog'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import PaymentGrid from 'src/components/Shared/PaymentGrid'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import PreviewReport from 'src/components/Shared/PreviewReport'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId, form }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -223,7 +221,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         extension: RemittanceOutwardsRepository.OutwardsCash.qry,
         parameters: `_receiptId=${finalRecordId}`
       })
-
+      console.log(res.record)
       formik.setValues({
         header: {
           ...res.record,
@@ -290,127 +288,6 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       }
     })
   }
-
-  const columns = [
-    {
-      component: 'resourcecombobox',
-      label: labels.type,
-      name: 'type',
-      props: {
-        datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
-        displayField: 'value',
-        valueField: 'key',
-        mapping: [
-          { from: 'key', to: 'type' },
-          { from: 'value', to: 'typeName' }
-        ],
-        readOnly: isPosted
-      },
-      async onChange({ row: { update, newRow } }) {
-        const sumAmount = formik.values.cash.slice(0, -1).reduce((sum, row) => {
-          const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
-
-          return sum + curValue
-        }, 0)
-        const currentAmount = (parseFloat(formik.values.header.amount) - parseFloat(sumAmount)).toFixed(2)
-        update({ amount: currentAmount, POS: newRow.type === '1' })
-      }
-    },
-    {
-      component: 'numberfield',
-      name: 'paidAmount',
-      label: labels.paidAmount,
-      defaultValue: '',
-      async onChange({ row: { update, newRow } }) {
-        const sumAmount = formik.values.cash.slice(0, -1).reduce((sum, row) => {
-          const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
-
-          return sum + curValue
-        }, 0)
-
-        let rowAmount
-        let returnedAmount
-
-        if (formik.values.cash.length === 1) {
-          rowAmount = newRow.paidAmount > sumAmount ? newRow.paidAmount : sumAmount - newRow.paidAmount
-          returnedAmount = (parseFloat(newRow.paidAmount) - parseFloat(formik.values.header.amount)).toFixed(2)
-        } else {
-          const remainingAmount = (parseFloat(formik.values.header.amount) - parseFloat(sumAmount)).toFixed(2)
-          returnedAmount = (parseFloat(newRow.paidAmount) - parseFloat(remainingAmount)).toFixed(2)
-          rowAmount = returnedAmount > 0 ? newRow.paidAmount - returnedAmount : newRow.paidAmount
-        }
-
-        update({
-          returnedAmount: returnedAmount,
-          amount: parseFloat(rowAmount).toFixed(2)
-        })
-      }
-    },
-    {
-      component: 'numberfield',
-      name: 'returnedAmount',
-      label: labels.returnedAmount,
-      defaultValue: '',
-      props: {
-        readOnly: true
-      }
-    },
-    {
-      component: 'numberfield',
-      name: 'amount',
-      label: labels.Amount,
-      defaultValue: '',
-      props: {
-        readOnly: isPosted
-      }
-    },
-    {
-      component: 'numberfield',
-      header: labels.bankFees,
-      name: 'bankFees',
-      label: labels.bankFees,
-      props: {
-        readOnly: isPosted
-      }
-    },
-    {
-      component: 'textfield',
-      header: labels.receiptRef,
-      name: 'receiptRef',
-      label: labels.receiptRef,
-      props: {
-        readOnly: isPosted
-      }
-    },
-    {
-      component: 'resourcecombobox',
-      label: labels.posStatusName,
-      name: 'posStatusName',
-      props: {
-        readOnly: true,
-        datasetId: DataSets.RT_POSSTATUS,
-        displayField: 'value',
-        valueField: 'key',
-        mapping: [
-          { from: 'value', to: 'posStatusName' },
-          { from: 'key', to: 'posStatus' }
-        ]
-      }
-    },
-    {
-      component: 'button',
-      name: 'POS',
-      label: labels.POS,
-      onClick: (e, row, update, updateRow) => {
-        stack({
-          Component: POSForm,
-          props: {},
-          width: 700,
-          title: labels.POS
-        })
-      }
-    }
-  ]
 
   const actions = [
     {
@@ -536,18 +413,20 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
             </Grid>
           </Grid>
         </Fixed>
-        <PaymentGrid
-          onChange={value => formik.setFieldValue('cash', value)}
-          value={formik.values.cash}
-          error={formik.errors.cash}
-          labels={labels}
-          maxAccess={maxAccess}
-          allowDelete={!isPosted}
-          allowAddNewLine={!isPosted}
-          amount={formik.values.header.amount}
-          setFormik={setFormik}
-          name='cash'
-        />
+        <Grow>
+          <PaymentGrid
+            onChange={value => formik.setFieldValue('cash', value)}
+            value={formik.values.cash}
+            error={formik.errors.cash}
+            labels={labels}
+            maxAccess={maxAccess}
+            allowDelete={!isPosted}
+            allowAddNewLine={!isPosted}
+            amount={formik.values.header.amount}
+            setFormik={setFormik}
+            name='cash'
+          />
+        </Grow>
       </VertLayout>
     </FormShell>
   )

@@ -151,7 +151,7 @@ const OTPAuthentication = ({ loggedUser, onClose, window, PlantSupervisors = fal
   return (
     <div width={500} height={300} onClose={onClose}>
       <Grid className={styles.phoneVerificationContainer}>
-        <h2>{platformLabels.OTPVerification}</h2>
+        <p>{platformLabels.TwoFactorAuthentication}</p>
         <Grid className={styles.otpInputContainer}>
           {otp.map((digit, index) => (
             <input
