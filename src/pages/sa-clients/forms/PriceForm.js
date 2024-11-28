@@ -16,7 +16,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DataSets } from 'src/resources/DataSets'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function PriceForm({ labels, maxAccess, obj, window, recordId, fetchGridData }) {
+export default function PriceForm({ labels, maxAccess, obj, recordId, window, fetchGridData }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -52,7 +52,7 @@ export default function PriceForm({ labels, maxAccess, obj, window, recordId, fe
 
   useEffect(() => {
     ;(async function () {
-      if (obj.clientId) {
+      if (obj?.clientId) {
         const res = await getRequest({
           extension: SaleRepository.Price.get,
           parameters: `_clientId=${obj.clientId}&_categoryId=${obj.categoryId}&_currencyId=${obj.currencyId}&_priceType=${obj.priceType}`
@@ -88,7 +88,7 @@ export default function PriceForm({ labels, maxAccess, obj, window, recordId, fe
                 values={formik?.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('categoryId', newValue?.recordId)
+                  formik.setFieldValue('categoryId', newValue?.recordId || null)
                 }}
                 error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
               />

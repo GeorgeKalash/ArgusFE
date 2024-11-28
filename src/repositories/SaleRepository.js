@@ -168,7 +168,7 @@ export const SaleRepository = {
     qry: service + 'qryAD',
     set: service + 'setAD',
     del: service + 'delAD',
-    get: service + 'setAD'
+    get: service + 'getAD'
   },
   FilterAddress: {
     snapshot: service + 'snapshotADD'

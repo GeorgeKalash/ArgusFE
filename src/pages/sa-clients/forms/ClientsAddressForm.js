@@ -1,10 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import AddressForm from 'src/components/Shared/AddressForm'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import { useInvalidate } from 'src/hooks/resource'
 
 const ClientsAddressForm = ({ getAddressGridData, clientId, recordId, window, props }) => {
   const [address, setAddress] = useState()

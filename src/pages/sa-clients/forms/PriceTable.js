@@ -8,8 +8,6 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import PriceForm from './PriceForm'
 import { useWindow } from 'src/windows'
-import { useResourceQuery } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
 
 const PriceTab = ({ labels, maxAccess, store }) => {

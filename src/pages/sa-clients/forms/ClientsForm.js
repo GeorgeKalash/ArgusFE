@@ -75,21 +75,19 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
     await postRequest({
       extension: SaleRepository.Client.set,
       record: JSON.stringify({ ...obj, acquisitionDate: formatDateToApi(obj?.acquisitionDate) })
-    })
-      .then(res => {
-        if (!obj.recordId) {
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: res.recordId
-          }))
-          formik.setFieldValue('recordId', res.recordId)
-          toast.success(platformLabels.Added)
-          getData(res.recordId)
-        } else toast.success(platformLabels.Edited)
+    }).then(res => {
+      if (!obj.recordId) {
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: res.recordId
+        }))
+        formik.setFieldValue('recordId', res.recordId)
+        toast.success(platformLabels.Added)
+        getData(res.recordId)
+      } else toast.success(platformLabels.Edited)
 
-        invalidate()
-      })
-      .catch(error => {})
+      invalidate()
+    })
   }
 
   useEffect(() => {
@@ -119,19 +117,17 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
   }, [])
 
   const getData = async recordId => {
-    try {
-      if (recordId) {
-        const res = await getRequest({
-          extension: SaleRepository.Client.get,
-          parameters: `_recordId=${recordId}`
-        })
+    if (recordId) {
+      const res = await getRequest({
+        extension: SaleRepository.Client.get,
+        parameters: `_recordId=${recordId}`
+      })
 
-        formik.setValues({
-          ...res.record,
-          acquisitionDate: formatDateFromApi(res.record.acquisitionDate)
-        })
-      }
-    } catch (exception) {}
+      formik.setValues({
+        ...res.record,
+        acquisitionDate: formatDateFromApi(res.record.acquisitionDate)
+      })
+    }
   }
 
   const editMode = !!formik.values.recordId

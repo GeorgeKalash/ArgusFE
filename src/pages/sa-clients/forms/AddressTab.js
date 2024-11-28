@@ -43,7 +43,7 @@ const AddressTab = ({ store, maxAccess, labels, editMode, ...props }) => {
   }
 
   function addAddress() {
-    openForm('')
+    openForm()
   }
 
   function openForm(id) {
