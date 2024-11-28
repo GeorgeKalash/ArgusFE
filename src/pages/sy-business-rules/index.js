@@ -6,12 +6,12 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import CityForm from 'src/pages/cities/Forms/CityForm'
 import { useWindow } from 'src/windows'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import BusinessRulesForm from './form/BusinessRulesForm'
 
 const BusinessRules = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,7 +23,7 @@ const BusinessRules = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: SystemRepository.City.page,
+      extension: SystemRepository.BusinessRules.qry,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_countryId=0&_stateId=0`
     })
 
@@ -33,29 +33,14 @@ const BusinessRules = () => {
   const {
     query: { data },
     labels: _labels,
-    access,
-    search,
-    clear,
     refetch,
-    paginationParameters
+    paginationParameters,
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.City.page,
-    datasetId: ResourceIds.Cities,
-    search: {
-      endpointId: SystemRepository.City.snapshot,
-      searchFn: fetchWithSearch
-    }
+    endpointId: SystemRepository.BusinessRules.qry,
+    datasetId: ResourceIds.BusinessRules
   })
-
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: SystemRepository.City.snapshot,
-      parameters: `_filter=${qry}&_stateId=0&_countryId=0`
-    })
-
-    return response
-  }
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.City.page
@@ -63,28 +48,29 @@ const BusinessRules = () => {
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'resourceName',
+      headerName: _labels.resourceName,
       flex: 1
     },
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'trxTypeName',
+      headerName: _labels.trxTypeName,
       flex: 1
     },
     {
-      field: 'flName',
-      headerName: _labels.flName,
+      field: 'ruleEndPointName',
+      headerName: _labels.ruleEndPointName,
       flex: 1
     },
     {
-      field: 'countryName',
-      headerName: _labels.country,
+      field: 'ruleName',
+      headerName: _labels.ruleName,
       flex: 1
     },
     {
-      field: 'stateName',
-      headerName: _labels.state,
+      field: 'isActive',
+      headerName: _labels.isActive,
+      type: 'checkbox',
       flex: 1
     }
   ]
@@ -92,7 +78,7 @@ const BusinessRules = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: SystemRepository.City.del,
+        extension: SystemRepository.BusinessRules.del,
         record: JSON.stringify(obj)
       })
       invalidate()
@@ -101,20 +87,20 @@ const BusinessRules = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj)
   }
 
   const add = () => {
     openForm()
   }
 
-  function openForm(recordId) {
+  function openForm(obj) {
     stack({
-      Component: CityForm,
+      Component: BusinessRulesForm,
       props: {
         labels: _labels,
-        recordId: recordId,
-        maxAccess: access
+        maxAccess: access,
+        obj
       },
       width: 500,
       height: 460,
@@ -125,15 +111,7 @@ const BusinessRules = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          inputSearch={true}
-          refetch={refetch}
-        />
+        <GridToolbar onAdd={add} maxAccess={access} labels={_labels} refetch={refetch} />
       </Fixed>
       <Grow>
         <Table
