@@ -203,10 +203,17 @@ export const InventoryRepository = {
   },
   Transaction: {
     qry2: service + 'qry2TRX',
-    qry3: service + 'qry3TRX',
+    qry3: service + 'qry3TRX'
   },
   GenerateFiscalYear: {
     gen: service + 'genFIS'
+  },
+  IVMDParts: {
+    qry: service + 'qryIT'
+  },
+  ItemParts: {
+    qry: service + 'qryITP',
+    set2: service + 'set2ITP'
   },
   CurrentCost: {
     get: service + 'getCOS',
@@ -220,6 +227,7 @@ export const InventoryRepository = {
     qry: service + 'qryPRT',
     del: service + 'delPRT',
     get: service + 'getPRT',
-    set: service + 'setPRT'
+    set: service + 'setPRT',
+    snapshot: service + 'snapshotPRT'
   }
 }
