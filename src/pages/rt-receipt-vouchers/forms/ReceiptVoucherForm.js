@@ -19,14 +19,14 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { DataSets } from 'src/resources/DataSets'
 import { getStorageData } from 'src/storage/storage'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useWindow } from 'src/windows'
 import POSForm from './POSForm'
 import NormalDialog from 'src/components/Shared/NormalDialog'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
+import PaymentGrid from 'src/components/Shared/PaymentGrid'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import PreviewReport from 'src/components/Shared/PreviewReport'
 
@@ -34,9 +34,10 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const [formikSettings, setFormik] = useState({})
   const [selectedReport, setSelectedReport] = useState(null)
 
-  const { documentType, maxAccess, changeDT } = useDocumentType({
+  const { documentType, maxAccess } = useDocumentType({
     functionId: SystemFunction.RemittanceReceiptVoucher,
     access: access,
     enabled: !recordId
@@ -67,68 +68,14 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         clientId: null,
         cellPhone: null
       },
-      cash: [
-        {
-          id: 1,
-          seqNo: 0,
-          cashAccountId: cashAccountId,
-          cashAccount: '',
-          posStatus: 1,
-          posStatusName: '',
-          type: '',
-          amount: '',
-          paidAmount: 0,
-          returnedAmount: 0,
-          bankFees: '',
-          receiptRef: ''
-        }
-      ]
+      cash: formikSettings.initialValuePayment || []
     },
 
     validationSchema: yup.object({
       header: yup.object({
         owoId: yup.string().required()
       }),
-      cash: yup
-        .array()
-        .of(
-          yup.object().shape({
-            type: yup
-              .string()
-              .required('Type is required')
-              .test('unique', 'Type must be unique', function (value) {
-                const { options } = this
-                if (!this.parent.outwardId) {
-                  const arrayOfTypes = options.context.cash.map(row => row.type)
-                  if (value == 2) {
-                    const countOfType1 = arrayOfTypes.filter(item => item === '2').length
-                    if (countOfType1 > 1) {
-                      return false
-                    }
-                  }
-                }
-
-                return true
-              }),
-            paidAmount: yup.string().test('Paid Amount', 'Paid Amount is required', function (value) {
-              if (this.parent.type == '2') {
-                return !!value
-              }
-
-              return true
-            }),
-            returnedAmount: yup.string().test('Returned Amount', 'Returned Amount is required', function (value) {
-              if (this.parent.type == '2') {
-                return !!value
-              }
-
-              return true
-            }),
-            amount: yup.string().nullable().required('Amount is required')
-          })
-        )
-
-        .required('Cash array is required')
+      cash: formikSettings?.paymentValidation
     }),
     onSubmit: async obj => {
       const cash = formik.values.cash.map((cash, index) => ({
@@ -589,18 +536,18 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
             </Grid>
           </Grid>
         </Fixed>
-        <Grow>
-          <DataGrid
-            onChange={value => formik.setFieldValue('cash', value)}
-            value={formik.values.cash}
-            error={formik.errors.cash}
-            maxAccess={maxAccess}
-            allowDelete={!isPosted}
-            allowAddNewLine={!isPosted}
-            columns={columns}
-            name='cash'
-          />
-        </Grow>
+        <PaymentGrid
+          onChange={value => formik.setFieldValue('cash', value)}
+          value={formik.values.cash}
+          error={formik.errors.cash}
+          labels={labels}
+          maxAccess={maxAccess}
+          allowDelete={!isPosted}
+          allowAddNewLine={!isPosted}
+          amount={formik.values.header.amount}
+          setFormik={setFormik}
+          name='cash'
+        />
       </VertLayout>
     </FormShell>
   )
