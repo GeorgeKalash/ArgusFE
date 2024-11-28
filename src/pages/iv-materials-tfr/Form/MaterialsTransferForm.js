@@ -250,6 +250,20 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     return rec.unitCost
   }
 
+  async function getDTD(dtId) {
+    const res = await getRequest({
+      extension: InventoryRepository.DocumentTypeDefaults.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    formik.setFieldValue('plantId', res.record.plantId)
+    formik.setFieldValue('toSiteId', res.record.toSiteId)
+    formik.setFieldValue('siteId', res.record.fromSiteId)
+    formik.setFieldValue('carrierId', res.record.carrierId)
+
+    return res
+  }
+
   const { totalQty, totalCost, totalWeight } = formik?.values?.transfers?.reduce(
     (acc, row) => {
       const qtyValue = parseFloat(row?.qty) || 0
@@ -258,7 +272,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
       return {
         totalQty: acc?.totalQty + qtyValue,
-        totalCost: (Math.round((acc?.totalCost + totalCostValue) * 100) / 100).toFixed(2), 
+        totalCost: (Math.round((acc?.totalCost + totalCostValue) * 100) / 100).toFixed(2),
         totalWeight: acc?.totalWeight + weightValue
       }
     },
@@ -664,6 +678,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
   useEffect(() => {
     if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
+
+    if (documentType?.dtId) getDTD(documentType?.dtId)
   }, [documentType?.dtId])
 
   useEffect(() => {
@@ -740,7 +756,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     values={formik?.values}
                     onChange={async (event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || '')
-                      console.log(newValue)
+                      getDTD(newValue?.recordId)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}

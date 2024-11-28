@@ -238,5 +238,8 @@ export const InventoryRepository = {
     del: service + 'delPRT',
     get: service + 'getPRT',
     set: service + 'setPRT'
+  },
+  DocumentTypeDefaults: {
+    get: service + 'getDTD'
   }
 }
