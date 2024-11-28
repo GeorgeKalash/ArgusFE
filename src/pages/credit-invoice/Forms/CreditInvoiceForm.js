@@ -520,38 +520,33 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     {
       component: 'resourcecombobox',
       label: _labels.currency,
-      name: 'currencyRef',
+      name: 'currencyId',
       props: {
-        readOnly: visible,
-        endpointId: SystemRepository.Currency.qry,
-        displayField: 'reference',
-        valueField: 'recordId',
-        mapping: [
-          { from: 'recordId', to: 'currencyId' },
-          { from: 'reference', to: 'currencyRef' },
-          { from: 'name', to: 'currencyName' }
-        ],
+        endpointId: RemittanceSettingsRepository.CorrespondentCurrency.qry,
+        parameters: `_corId=${formik.values.corId}`,
+        displayField: 'currencyRef',
+        valueField: 'currencyId',
         columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
+          { key: 'currencyRef', value: 'Reference' },
+          { key: 'currencyName', value: 'Name' }
+        ],
+        mapping: [
+          { from: 'currencyId', to: 'currencyId' },
+          { from: 'currencyRef', to: 'currencyRef' },
+          { from: 'currencyName', to: 'currencyName' }
         ],
         displayFieldWidth: 3,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          visible
+        disabled: !formik.values.corId || isClosed
       },
       updateOn: 'blur',
       widthDropDown: '400',
-      width: 150,
       async onChange({ row: { update, oldRow, newRow } }) {
         if (!newRow?.currencyId) {
           return
         }
 
         const exchange = await getEXMCur({
-          plantId: plantId ?? formik.values.plantId,
+          plantId: plantId || formik.values.plantId,
           toCurrency: formik?.values?.currencyId,
           fromCurrency: newRow?.currencyId,
           rateType: formik?.values?.rateType
@@ -563,8 +558,9 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
             amount: 0,
             baseAmount: 0
           })
+
           stackError({
-            message: `${_labels.undefinedRate} ${newRow?.currencyRef}`
+            message: `Rate not defined for ${newRow?.currencyRef}.`
           })
 
           return
@@ -608,11 +604,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       readOnly: true,
       props: {
         readOnly: true,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          visible
+        disabled: !formik.values.corId || isClosed
       },
       width: 190
     },
@@ -623,11 +615,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       props: {
         readOnly: visible,
         mandatory: true,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          visible
+        disabled: !formik.values.corId || isClosed
       },
       width: 130,
       async onChange({ row: { update, newRow } }) {
@@ -663,11 +651,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       props: {
         readOnly: true,
         mandatory: true,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          visible
+        disabled: !formik.values.corId || isClosed
       },
       width: 130
     },
@@ -679,11 +663,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
         readOnly: visible,
         mandatory: true,
         decimalScale: 7,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          visible
+        disabled: !formik.values.corId || isClosed
       },
       updateOn: 'blur',
       width: 130,
@@ -755,11 +735,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       props: {
         readOnly: true,
         mandatory: true,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          visible
+        disabled: !formik.values.corId || isClosed
       },
       width: 130
     }
