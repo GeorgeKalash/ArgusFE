@@ -736,6 +736,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      valuesPath: formik.values.header,
       disabled: !editMode
     },
     {
