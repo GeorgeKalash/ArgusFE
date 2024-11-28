@@ -80,7 +80,8 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
         defaultRate: '',
         amount: '',
         baseAmount: '',
-        notes: ''
+        notes: '',
+        goc: false
       }
     ]
   })
@@ -383,7 +384,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     {
       component: 'resourcecombobox',
       label: labels.currency,
-      name: 'currencyRef',
+      name: 'currencyId',
       props: {
         endpointId: RemittanceSettingsRepository.CorrespondentCurrency.qry,
         parameters: `_corId=${formik.values.corId}`,
@@ -393,12 +394,19 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
           { key: 'currencyRef', value: 'Reference' },
           { key: 'currencyName', value: 'Name' }
         ],
+        mapping: [
+          { from: 'currencyId', to: 'currencyId' },
+          { from: 'currencyRef', to: 'currencyRef' },
+          { from: 'currencyName', to: 'currencyName' },
+          { from: 'goc', to: 'goc' }
+        ],
         displayFieldWidth: 3,
         disabled: !formik.values.corId || isClosed
       },
       updateOn: 'blur',
       widthDropDown: '400',
       async onChange({ row: { update, oldRow, newRow } }) {
+        console.log(newRow, 'newRow')
         if (!newRow?.currencyId) {
           return
         }
@@ -451,7 +459,8 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
           defaultRate: parseFloat(exchange?.rate.toString().replace(/,/g, '')).toFixed(7),
           rateCalcMethod: exchange?.rateCalcMethod,
           minRate: exchange?.minRate,
-          maxRate: exchange?.maxRate
+          maxRate: exchange?.maxRate,
+          goc: newRow?.goc
         })
       }
     },
