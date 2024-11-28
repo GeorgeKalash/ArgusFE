@@ -48,6 +48,10 @@ const PhysicalCountItemDe = () => {
       controllerId: '',
       totalQty: '',
       totalWeight: '',
+      status: 1,
+      SCStatus: null,
+      SCWIP: null,
+      EndofSiteStatus: null,
       rows: [
         {
           id: 1,
@@ -101,6 +105,7 @@ const PhysicalCountItemDe = () => {
 
       toast.success(platformLabels.Edited)
       setEditMode(items.length > 0)
+      checkPhyStatus(copy.stockCountId, copy.siteId, copy.controllerId)
 
       //const newItems = { list: items }
       handleClick(items)
@@ -119,10 +124,7 @@ const PhysicalCountItemDe = () => {
       parameters: `_stockCountId=${stockCountId}&_siteId=${siteId}&_controllerId=${controllerId}`
     })
       .then(res => {
-        if (!res.list) {
-          //print
-        } else {
-          //print
+        if (res.list) {
           const modifiedList = res.list?.map(({ ...rest }, index) => ({
             id: index + 1,
             ...rest
@@ -175,9 +177,7 @@ const PhysicalCountItemDe = () => {
       parameters: parameters
     })
       .then(res => {
-        setSiteStore(res.list)
-
-        //enable import
+        setSiteStore(res.list.filter(site => site.isChecked == true))
       })
       .catch(error => {})
   }
@@ -190,10 +190,21 @@ const PhysicalCountItemDe = () => {
     })
       .then(res => {
         setControllerStore(res.list)
-
-        //enable import
       })
       .catch(error => {})
+  }
+
+  const checkPhyStatus = async (stockCountId, siteId, controllerId) => {
+    var parameters = `_stockCountId=${stockCountId}&_siteId=${siteId}&_controllerId=${controllerId}`
+
+    const resp = await getRequest({
+      extension: SCRepository.StockCountControllerTab.get,
+      parameters: parameters
+    })
+
+    if (resp) {
+      formik.setFieldValue('status', resp.record.status)
+    }
   }
 
   async function getDTDsku(stockCountId) {
@@ -496,11 +507,73 @@ const PhysicalCountItemDe = () => {
     } catch (exception) {}
   }
 
+  const isPosted =
+    formik.values.status === 3 &&
+    formik.values.SCStatus != 3 &&
+    formik.values.SCWIP != 2 &&
+    formik.values.EndofSiteStatus != 3
+
+  const isHeader =
+    formik.values.stockCountId != null && formik.values.siteId != null && formik.values.controllerId != null
+
+  const isSaved =
+    formik.values.stockCountId != null &&
+    formik.values.siteId != null &&
+    formik.values.controllerId != null &&
+    formik.values.status != 3 &&
+    formik.values.SCStatus != 3 &&
+    formik.values.SCWIP != 2 &&
+    formik.values.EndofSiteStatus != 3
+
+  const onPost = async () => {
+    const status = formik.values.status == 1 ? 3 : 1
+    formik.setFieldValue('status', status)
+
+    const StockCountControllerTab = {
+      siteId: formik.values.siteId,
+      controllerId: formik.values.controllerId,
+      stockCountId: formik.values.stockCountId,
+      status: status
+    }
+
+    const res = await postRequest({
+      extension: SCRepository.StockCountControllerTab.post,
+      record: JSON.stringify(StockCountControllerTab)
+    })
+
+    if (status == 3) {
+      // public enum StockCountPhysicalStatus
+      /*  {
+        PENDING = 1,
+        STARTED = 2,
+        CLOSED = 3
+    } */
+      //delete row hide
+      toast.success(platformLabels.Unposted)
+    } else {
+      //delete row show
+      toast.success(platformLabels.Posted)
+    }
+  }
+
   const actions = [
     {
       key: 'Metals',
       condition: true,
       onClick: 'onClickMetal'
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onPost,
+      disabled: !isHeader
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !isHeader
     }
   ]
 
@@ -509,6 +582,7 @@ const PhysicalCountItemDe = () => {
       form={formik}
       isInfo={false}
       isSavedClear={false}
+      isSaved={isSaved}
       actions={actions}
       maxAccess={maxAccess}
       resourceId={ResourceIds.IVPhysicalCountItemDetails}
@@ -538,10 +612,14 @@ const PhysicalCountItemDe = () => {
                     setSiteStore([])
                     setFilteredItems([])
                     clearGrid()
+                    formik.setFieldValue('SCStatus', null)
+                    formik.setFieldValue('SCWIP', null)
 
                     //setDisableItemDuplicate(false)
                   } else {
                     fillSiteStore(newValue?.recordId)
+                    formik.setFieldValue('SCStatus', newValue?.status)
+                    formik.setFieldValue('SCWIP', newValue?.wip)
                   }
 
                   setDisableItemDuplicate(!!newValue?.disableItemDuplicate)
@@ -572,8 +650,10 @@ const PhysicalCountItemDe = () => {
                     setControllerStore([])
                     setFilteredItems([])
                     clearGrid()
+                    formik.setFieldValue('EndofSiteStatus', null)
                   } else {
                     fillControllerStore(formik.values.stockCountId, newValue?.siteId)
+                    formik.setFieldValue('EndofSiteStatus', newValue?.status)
                   }
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
@@ -592,6 +672,7 @@ const PhysicalCountItemDe = () => {
                 readOnly={formik.values.controllerId}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('controllerId', newValue?.controllerId)
+                  checkPhyStatus(formik.values.stockCountId, formik.values.siteId, formik.values.controllerId)
                   fetchGridData(formik.values.stockCountId, formik.values.siteId, newValue?.controllerId)
                 }}
                 error={formik.touched.controllerId && Boolean(formik.errors.controllerId)}
@@ -624,6 +705,9 @@ const PhysicalCountItemDe = () => {
             value={formik.values?.rows}
             error={formik.errors?.rows}
             columns={columns}
+            disabled={formik.values?.SCStatus !=3 && formik.values?.EndofSiteStatus !=3}
+            allowDelete={formik.values?.SCStatus !=3 && formik.values?.SCWIP != 2 && formik.values?.status != 3}
+            allowAddNewLine={formik.values?.SCStatus !=3 && formik.values?.EndofSiteStatus !=3}
           />
         </Grow>
         <Fixed>
