@@ -693,7 +693,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       props: {
         values: formik.values,
         PlantSupervisors: true,
-        onClose: () => onPost()
+        onClose: () => Post()
       },
       expandable: false,
       width: 400,
@@ -703,13 +703,15 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     })
   }
 
-  const onPost = async () => {
+  const onPost = () => {
     if (!formik.values.otp) {
       viewAuthOTP()
 
       return
-    }
+    } else Post()
+  }
 
+  const Post = async () => {
     const values = formik.values
 
     const data = {
