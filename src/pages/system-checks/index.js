@@ -91,7 +91,7 @@ const SystemChecks = () => {
     : data?.list
 
   const handleSearchChange = event => {
-    setSearch(event.target.value)
+    setSearch(event?.target?.value ?? '')
   }
 
   const handleSubmit = () => {
@@ -129,9 +129,14 @@ const SystemChecks = () => {
             <CustomTextField
               name='search'
               value={search}
-              label={_labels.search}
-              onClear={() => setSearch('')}
+              label={platformLabels.Search}
+              onClear={() => {
+                setSearch('')
+              }}
               onChange={handleSearchChange}
+              onSearch={(e) => setSearch(e)}
+              search={true}
+              height={35}
             />
           </Grid>
         </Grid>
