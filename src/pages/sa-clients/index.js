@@ -118,7 +118,7 @@ const SAClients = () => {
 
   const Delete = async obj => {
     await postRequest({
-      extension: FinancialRepository.Account.del,
+      extension: SaleRepository.Client.del,
       record: JSON.stringify(obj)
     })
     invalidate()

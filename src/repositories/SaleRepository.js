@@ -52,7 +52,8 @@ export const SaleRepository = {
     get: service + 'getCL',
     snapshot: service + 'snapshotCL',
     page: service + 'pageCL',
-    set: service + 'setCL'
+    set: service + 'setCL',
+    del: service + 'delCL'
   },
   WorkFlow: {
     graph: service + 'graph'
