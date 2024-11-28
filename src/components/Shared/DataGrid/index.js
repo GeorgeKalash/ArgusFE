@@ -117,6 +117,7 @@ export function DataGrid({
       if (params.rowIndex === value.length - 1 && !changes) {
         console.log('changes', changes)
         addNewRow(params)
+
         return
       }
       const index = value.findIndex(({ id }) => id === changes.id)
@@ -128,9 +129,11 @@ export function DataGrid({
 
       if (params.rowIndex === value.length - 1 && column.props?.jumpToNextLine) {
         console.log('add')
+
         const highestIndex = value?.length
           ? value.reduce((max, current) => (max.id > current.id ? max : current)).id + 1
           : 1
+
         const defaultValues = Object.fromEntries(
           columns?.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
         )
@@ -258,6 +261,7 @@ export function DataGrid({
           }
         } else {
           updateAndNewRow(params)
+
           return
         }
       }
