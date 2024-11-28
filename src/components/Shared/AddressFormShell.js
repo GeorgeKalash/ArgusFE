@@ -45,7 +45,7 @@ export const AddressFormShell = ({
     poBox: address?.poBox || ''
   }
 
-  const { formik } = useForm({
+  const { formik, setFieldValidation } = useForm({
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
@@ -118,7 +118,13 @@ export const AddressFormShell = ({
       isCleared={isCleared}
       {...props}
     >
-      <AddressTab addressValidation={formik} readOnly={readOnly} required={required} {...props} />
+      <AddressTab
+        addressValidation={formik}
+        setFieldValidation={setFieldValidation}
+        readOnly={readOnly}
+        required={required}
+        {...props}
+      />
     </FormShell>
   )
 }

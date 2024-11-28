@@ -1,7 +1,17 @@
 import { useFormik } from 'formik'
+import { useState } from 'react'
 import { MANDATORY } from 'src/services/api/maxAccess'
 
 export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
+  const [Validation, setValidation] = useState()
+
+  const setFieldValidation = (field, errors) => {
+    setValidation(prev => ({
+      ...prev,
+      [field]: errors
+    }))
+  }
+
   const formik = useFormik({
     ...formikProps,
     validate(values) {
@@ -9,6 +19,8 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
 
       ;(maxAccess?.record?.controls ?? []).forEach(obj => {
         const { controlId, accessLevel } = obj
+
+        console.log(controlId, accessLevel, values)
 
         if (accessLevel === MANDATORY) {
           if (!values[controlId])
@@ -19,12 +31,15 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
         }
       })
 
+      const mergedValidation = Validation
+
       return {
         ...maxAccessErrors,
+        ...mergedValidation,
         ...validate(values)
       }
     }
   })
 
-  return { formik }
+  return { formik, setFieldValidation }
 }
