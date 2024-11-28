@@ -134,6 +134,21 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     }
   }
 
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentVouchers.unpost,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res?.recordId) {
+      toast.success(platformLabels.Unposted)
+      invalidate()
+      const res2 = await getPaymentVouchers(res.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
+      formik.setValues(res2.record)
+    }
+  }
+
   useEffect(() => {
     ;(async function () {
       try {
@@ -183,10 +198,17 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
 
   const actions = [
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode || isCancelled
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: isPosted || !editMode || isCancelled
+      disabled: !editMode || isCancelled
     },
     {
       key: 'Cancel',
