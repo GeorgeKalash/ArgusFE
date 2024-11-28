@@ -56,7 +56,7 @@ const IrDefaultForm = ({ _labels, access }) => {
 
   return (
     <FormShell
-      resourceId={ResourceIds.IrDefault}
+      resourceId={ResourceIds.SystemDefaults}
       form={formik}
       maxAccess={access}
       editMode={true}
