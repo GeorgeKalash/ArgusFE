@@ -84,7 +84,8 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
         maxRate: '',
         amount: '',
         baseAmount: '',
-        notes: ''
+        notes: '',
+        goc: false
       }
     ]
   })
@@ -533,7 +534,8 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
         mapping: [
           { from: 'currencyId', to: 'currencyId' },
           { from: 'currencyRef', to: 'currencyRef' },
-          { from: 'currencyName', to: 'currencyName' }
+          { from: 'currencyName', to: 'currencyName' },
+          { from: 'goc', to: 'goc' }
         ],
         displayFieldWidth: 3,
         disabled: !formik.values.corId || isClosed
@@ -541,6 +543,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       updateOn: 'blur',
       widthDropDown: '400',
       async onChange({ row: { update, oldRow, newRow } }) {
+        console.log(newRow, 'newRow')
         if (!newRow?.currencyId) {
           return
         }
@@ -560,7 +563,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
           })
 
           stackError({
-            message: `Rate not defined for ${newRow?.currencyRef}.`
+            message: `${_labels.undefinedRate} ${newRow?.currencyRef}`
           })
 
           return
@@ -593,7 +596,8 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
           defaultRate: parseFloat(exchange?.rate.toString().replace(/,/g, '')).toFixed(7),
           rateCalcMethod: exchange?.rateCalcMethod,
           minRate: exchange?.minRate,
-          maxRate: exchange?.maxRate
+          maxRate: exchange?.maxRate,
+          goc: newRow?.goc
         })
       }
     },
