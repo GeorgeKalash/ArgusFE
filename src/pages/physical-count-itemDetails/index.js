@@ -537,7 +537,7 @@ const PhysicalCountItemDe = () => {
     }
 
     const res = await postRequest({
-      extension: SCRepository.StockCountControllerTab.post,
+      extension: SCRepository.StockCountControllerTab.set,
       record: JSON.stringify(StockCountControllerTab)
     })
 
@@ -549,10 +549,12 @@ const PhysicalCountItemDe = () => {
         CLOSED = 3
     } */
       //delete row hide
-      toast.success(platformLabels.Unposted)
+
+      toast.success(platformLabels.Posted)
     } else {
       //delete row show
-      toast.success(platformLabels.Posted)
+
+      toast.success(platformLabels.Unposted)
     }
   }
 
@@ -582,7 +584,7 @@ const PhysicalCountItemDe = () => {
       form={formik}
       isInfo={false}
       isSavedClear={false}
-      isSaved={isSaved}
+      disabledSubmit={!isSaved}
       actions={actions}
       maxAccess={maxAccess}
       resourceId={ResourceIds.IVPhysicalCountItemDetails}
@@ -672,7 +674,7 @@ const PhysicalCountItemDe = () => {
                 readOnly={formik.values.controllerId}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('controllerId', newValue?.controllerId)
-                  checkPhyStatus(formik.values.stockCountId, formik.values.siteId, formik.values.controllerId)
+                  checkPhyStatus(formik.values.stockCountId, formik.values.siteId, newValue?.controllerId)
                   fetchGridData(formik.values.stockCountId, formik.values.siteId, newValue?.controllerId)
                 }}
                 error={formik.touched.controllerId && Boolean(formik.errors.controllerId)}
@@ -705,9 +707,9 @@ const PhysicalCountItemDe = () => {
             value={formik.values?.rows}
             error={formik.errors?.rows}
             columns={columns}
-            disabled={formik.values?.SCStatus !=3 && formik.values?.EndofSiteStatus !=3}
-            allowDelete={formik.values?.SCStatus !=3 && formik.values?.SCWIP != 2 && formik.values?.status != 3}
-            allowAddNewLine={formik.values?.SCStatus !=3 && formik.values?.EndofSiteStatus !=3}
+            disabled={formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}
+            allowDelete={formik.values?.SCStatus != 3 && formik.values?.SCWIP != 2 && formik.values?.status != 3}
+            allowAddNewLine={formik.values?.SCStatus != 3 && formik.values?.EndofSiteStatus != 3}
           />
         </Grow>
         <Fixed>
