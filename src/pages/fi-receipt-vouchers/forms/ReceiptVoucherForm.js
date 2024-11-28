@@ -78,22 +78,19 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       paymentMethod: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: FinancialRepository.ReceiptVouchers.set,
-          record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date) })
-        })
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-          getData(response.recordId)
-        } else toast.success(platformLabels.Edited)
-        invalidate()
-      } catch (e) {}
+      const response = await postRequest({
+        extension: FinancialRepository.ReceiptVouchers.set,
+        record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date) })
+      })
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else toast.success(platformLabels.Edited)
+      invalidate()
     }
   })
 
-  const editMode = !!recordId || !!formik.values.recordId
+  const editMode = !!formik.values.recordId
   const isCancelled = formik.values.status === -1
   const isPosted = formik.values.status === 3
   const readOnly = formik.values.status !== 1
@@ -102,37 +99,36 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     const userData = getStorageData('userData')
 
     const _userId = userData.userId
-    try {
-      const { record: cashAccountRecord } = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${_userId}&_key=cashAccountId`
+
+    const { record: cashAccountRecord } = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${_userId}&_key=cashAccountId`
+    })
+
+    const { record: currency } = await getRequest({
+      extension: SystemRepository.Default.get,
+      parameters: `_key=currencyId`
+    })
+    const cashAccountId = cashAccountRecord?.value
+    if (cashAccountId) {
+      const { record: cashAccountResult } = await getRequest({
+        extension: CashBankRepository.CbBankAccounts.get,
+        parameters: `_recordId=${cashAccountId}`
       })
 
-      const { record: currency } = await getRequest({
-        extension: SystemRepository.Default.get,
-        parameters: `_key=currencyId`
-      })
-      const cashAccountId = cashAccountRecord?.value
-      if (cashAccountId) {
-        const { record: cashAccountResult } = await getRequest({
-          extension: CashBankRepository.CbBankAccounts.get,
-          parameters: `_recordId=${cashAccountId}`
-        })
+      formik.setFieldValue('cashAccountId', cashAccountId)
+      formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
+      formik.setFieldValue('cashAccountName', cashAccountResult.name)
+      formik.setFieldValue('currencyId', parseInt(currency.value))
+    }
 
-        formik.setFieldValue('cashAccountId', cashAccountId)
-        formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
-        formik.setFieldValue('cashAccountName', cashAccountResult.name)
-        formik.setFieldValue('currencyId', parseInt(currency.value))
-      }
-
-      const { record: plantRecord } = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${_userId}&_key=plantId`
-      })
-      if (plantRecord) {
-        formik.setFieldValue('plantId', parseInt(plantRecord.value))
-      }
-    } catch (error) {}
+    const { record: plantRecord } = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${_userId}&_key=plantId`
+    })
+    if (plantRecord) {
+      formik.setFieldValue('plantId', parseInt(plantRecord.value))
+    }
   }
 
   useEffect(() => {
@@ -142,50 +138,56 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     })()
   }, [])
 
-  async function getData(_recordId) {
-    try {
-      const finalRecordId = _recordId || recordId || formik.values.recordId
-      if (finalRecordId) {
-        const res = await getRequest({
-          extension: FinancialRepository.ReceiptVouchers.get,
-          parameters: `_recordId=${finalRecordId}`
-        })
+  async function getData() {
+    if (recordId) {
+      const res = await getRequest({
+        extension: FinancialRepository.ReceiptVouchers.get,
+        parameters: `_recordId=${recordId}`
+      })
 
-        formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
-      }
-    } catch (e) {}
+      formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
+    }
   }
 
   const onCancel = async () => {
-    try {
-      const obj = formik.values
+    const obj = formik.values
 
-      const res = await postRequest({
-        extension: FinancialRepository.ReceiptVouchers.cancel,
-        record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date) })
-      })
+    const res = await postRequest({
+      extension: FinancialRepository.ReceiptVouchers.cancel,
+      record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date) })
+    })
 
-      if (res?.recordId) {
-        getData()
-        toast.success('Record Cancelled Successfully')
-        invalidate()
-      }
-    } catch (e) {}
+    if (res?.recordId) {
+      getData()
+      toast.success(platformLabels.Cancelled)
+      invalidate()
+    }
+  }
+
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: FinancialRepository.ReceiptVouchers.unpost,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res) {
+      toast.success(platformLabels.Unposted)
+      invalidate()
+      getData()
+    }
   }
 
   const onPost = async () => {
-    try {
-      const res = await postRequest({
-        extension: FinancialRepository.ReceiptVouchers.post,
-        record: JSON.stringify(formik.values)
-      })
+    const res = await postRequest({
+      extension: FinancialRepository.ReceiptVouchers.post,
+      record: JSON.stringify(formik.values)
+    })
 
-      if (res) {
-        toast.success('Record Posted Successfully')
-        invalidate()
-        getData()
-      }
-    } catch (e) {}
+    if (res) {
+      toast.success(platformLabels.Posted)
+      invalidate()
+      getData()
+    }
   }
 
   const actions = [
@@ -221,10 +223,17 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       disabled: !editMode
     },
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode || isCancelled
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: isPosted || !editMode || isCancelled
+      disabled: !editMode || isCancelled
     },
     {
       field: 'isVerified',
