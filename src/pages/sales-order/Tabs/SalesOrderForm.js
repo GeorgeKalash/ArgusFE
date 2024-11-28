@@ -159,7 +159,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         yup.object({
           sku: yup.string().required(),
           itemName: yup.string().required(),
-          qty: yup.number().required().min(1)
+          qty: yup.number().required()
         })
       )
     }),
