@@ -205,54 +205,52 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       )
     }),
     onSubmit: async obj => {
-      try {
-        if (obj.header.serializedAddress) {
-          const addressData = {
-            clientId: obj.header.clientId,
-            address: address
-          }
-
-          const addressRes = await postRequest({
-            extension: SaleRepository.Address.set,
-            record: JSON.stringify(addressData)
-          })
-          obj.header.billAddressId = addressRes.recordId
+      if (obj.header.serializedAddress) {
+        const addressData = {
+          clientId: obj.header.clientId,
+          address: address
         }
 
-        const payload = {
-          header: {
-            ...obj.header,
-            date: formatDateToApi(obj.header.date),
-            dueDate: formatDateToApi(obj.header.dueDate)
-          },
-          items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
-            seqNo: id,
-            applyVat: isVattable,
-            ...rest
-          })),
-          taxes: [
-            ...[
-              ...obj.taxes,
-              ...obj.items
-                .filter(({ taxDetails }) => taxDetails && taxDetails?.length > 0)
-                .map(({ taxDetails, id }) => ({
-                  seqNo: id,
-                  ...taxDetails[0]
-                }))
-            ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
-          ],
-          ...(({ header, items, taxes, ...rest }) => rest)(obj)
-        }
-
-        const saTrxRes = await postRequest({
-          extension: SaleRepository.SalesTransaction.set2,
-          record: JSON.stringify(payload)
+        const addressRes = await postRequest({
+          extension: SaleRepository.Address.set,
+          record: JSON.stringify(addressData)
         })
-        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
-        await refetchForm(saTrxRes.recordId)
-        invalidate()
-      } catch (error) {}
+        obj.header.billAddressId = addressRes.recordId
+      }
+
+      const payload = {
+        header: {
+          ...obj.header,
+          date: formatDateToApi(obj.header.date),
+          dueDate: formatDateToApi(obj.header.dueDate)
+        },
+        items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
+          seqNo: id,
+          applyVat: isVattable,
+          ...rest
+        })),
+        taxes: [
+          ...[
+            ...obj.taxes,
+            ...obj.items
+              .filter(({ taxDetails }) => taxDetails && taxDetails?.length > 0)
+              .map(({ taxDetails, id }) => ({
+                seqNo: id,
+                ...taxDetails[0]
+              }))
+          ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
+        ],
+        ...(({ header, items, taxes, ...rest }) => rest)(obj)
+      }
+
+      const saTrxRes = await postRequest({
+        extension: SaleRepository.SalesTransaction.set2,
+        record: JSON.stringify(payload)
+      })
+      const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+      toast.success(actionMessage)
+      await refetchForm(saTrxRes.recordId)
+      invalidate()
     }
   })
 
@@ -400,15 +398,11 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         displayFieldWidth: 5
       },
       async onChange({ row: { update, newRow } }) {
-        try {
-          if (!newRow.itemId) return
-          const itemPhysProp = await getItemPhysProp(newRow.itemId)
-          const itemInfo = await getItem(newRow.itemId)
-          const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
-          await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
-        } catch (exception) {
-          console.log(exception)
-        }
+        if (!newRow.itemId) return
+        const itemPhysProp = await getItemPhysProp(newRow.itemId)
+        const itemInfo = await getItem(newRow.itemId)
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
+        await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
       }
     },
     {
@@ -893,46 +887,42 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       return
     }
 
-    try {
-      const res = await getRequest({
-        extension: SaleRepository.Client.get,
-        parameters: `_recordId=${clientId}`
-      })
+    const res = await getRequest({
+      extension: SaleRepository.Client.get,
+      parameters: `_recordId=${clientId}`
+    })
 
-      const record = res?.record || {}
-      const accountId = record.accountId
-      const currencyId = record.currencyId ?? formik.values.header.currencyId ?? null
-      if (!currencyId) {
-        stackError({ message: labels.NoCurrencyAvailable })
+    const record = res?.record || {}
+    const accountId = record.accountId
+    const currencyId = record.currencyId ?? formik.values.header.currencyId ?? null
+    if (!currencyId) {
+      stackError({ message: labels.NoCurrencyAvailable })
 
-        return
-      }
-      const billAdd = await getAddress(record.billAddressId)
-      const accountLimit = await getAccountLimit(currencyId, accountId)
-
-      formik.setValues({
-        ...formik.values,
-        header: {
-          ...formik.values.header,
-          clientId: clientObject?.recordId,
-          clientName: clientObject?.name,
-          clientRef: clientObject?.reference,
-          isVattable: clientObject?.isSubjectToVAT || false,
-          maxDiscount: clientObject?.maxDiscount,
-          taxId: clientObject?.taxId,
-          currencyId: currencyId,
-          spId: record.spId,
-          ptId: record.ptId ?? defaultsDataState.ptId,
-          plId: record.plId ?? defaultsDataState.plId,
-          szId: record.szId,
-          billAddressId: record.billAddressId,
-          billAddress: billAdd,
-          creditLimit: accountLimit?.limit ?? 0
-        }
-      })
-    } catch (error) {
-      console.error('Error in formik.setValues:', error)
+      return
     }
+    const billAdd = await getAddress(record.billAddressId)
+    const accountLimit = await getAccountLimit(currencyId, accountId)
+
+    formik.setValues({
+      ...formik.values,
+      header: {
+        ...formik.values.header,
+        clientId: clientObject?.recordId,
+        clientName: clientObject?.name,
+        clientRef: clientObject?.reference,
+        isVattable: clientObject?.isSubjectToVAT || false,
+        maxDiscount: clientObject?.maxDiscount,
+        taxId: clientObject?.taxId,
+        currencyId: currencyId,
+        spId: record.spId,
+        ptId: record.ptId ?? defaultsDataState.ptId,
+        plId: record.plId ?? defaultsDataState.plId,
+        szId: record.szId,
+        billAddressId: record.billAddressId,
+        billAddress: billAdd,
+        creditLimit: accountLimit?.limit ?? 0
+      }
+    })
   }
 
   async function getItemPhysProp(itemId) {
