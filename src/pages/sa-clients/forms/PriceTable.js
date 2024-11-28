@@ -9,9 +9,10 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import PriceForm from './PriceForm'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import toast from 'react-hot-toast'
 
 const PriceTab = ({ labels, maxAccess, store }) => {
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -90,7 +91,7 @@ const PriceTab = ({ labels, maxAccess, store }) => {
       extension: SaleRepository.Price.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
+    fetchGridData()
     toast.success(platformLabels.Deleted)
   }
 

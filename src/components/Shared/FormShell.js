@@ -206,7 +206,7 @@ export default function FormShell({
                     masterId: form.values?.recordId,
                     masterSource: masterSource
                   },
-                  width: 700,
+                  width: 800,
                   height: 500,
                   title: platformLabels.IntegrationAccount
                 })
