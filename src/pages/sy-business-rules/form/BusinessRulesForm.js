@@ -54,10 +54,7 @@ export default function BusinessRulesForm({ labels, obj, window, maxAccess }) {
 
       if (!recordId) {
         toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
+        formik.setFieldValue('recordId', response.recordId)
       } else toast.success(platformLabels.Edited)
 
       invalidate()

@@ -7,7 +7,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useWindow } from 'src/windows'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -34,16 +34,13 @@ const BusinessRules = () => {
     query: { data },
     labels: _labels,
     refetch,
+    invalidate,
     paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.BusinessRules.qry,
     datasetId: ResourceIds.BusinessRules
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.City.page
   })
 
   const columns = [
@@ -104,7 +101,7 @@ const BusinessRules = () => {
       },
       width: 500,
       height: 460,
-      title: _labels.cities
+      title: _labels.businessRules
     })
   }
 
