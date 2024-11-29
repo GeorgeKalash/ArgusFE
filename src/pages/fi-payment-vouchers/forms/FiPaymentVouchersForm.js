@@ -457,7 +457,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 type='text'
                 required
                 label={labels.amount}
-                maxLength={'12'}
+                maxLength={'10'}
                 decimalScale={2}
                 readOnly={isPosted || isCancelled}
                 value={formik.values.amount}
