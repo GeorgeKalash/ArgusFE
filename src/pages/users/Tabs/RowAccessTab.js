@@ -194,19 +194,6 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
         <Fixed>
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <CustomTextField
-                name='search'
-                value={search}
-                label={platformLabels.Search}
-                onClear={() => {
-                  setSearch('')
-                }}
-                onChange={handleSearchChange}
-                onSearch={e => setSearch(e)}
-                search={true}
-              />
-            </Grid>
-            <Grid item xs={6}>
               <ResourceComboBox
                 label={labels.rowAccess}
                 valueField='key'
@@ -220,6 +207,19 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
                   fetchGridData(newValue ? newValue.key : ResourceIds.Plants)
                 }}
                 error={formik.touched.classId && Boolean(formik.errors.classId)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='search'
+                value={search}
+                label={platformLabels.Search}
+                onClear={() => {
+                  setSearch('')
+                }}
+                onChange={handleSearchChange}
+                onSearch={e => setSearch(e)}
+                search={true}
               />
             </Grid>
           </Grid>
