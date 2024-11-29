@@ -149,7 +149,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   }
 
   useEffect(() => {
-    !recordId && getCashAccount()
+    if (formik.values.recordId) getCashAccount()
     ;(async function () {
       getData()
       getUserDefaultsData()
@@ -157,12 +157,11 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     })()
   }, [])
 
-  async function getData(_recordId) {
-    const finalRecordId = _recordId || recordId || formik.values.recordId
-    if (finalRecordId) {
+  async function getData() {
+    if (recordId) {
       const res = await getRequest({
         extension: FinancialRepository.ReceiptVouchers.get,
-        parameters: `_recordId=${finalRecordId}`
+        parameters: `_recordId=${recordId}`
       })
 
       formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
@@ -352,10 +351,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 secondValueShow='accountName'
                 form={formik}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('accountId', newValue?.recordId || '')
+                  formik.setFieldValue('accountId', newValue?.recordId || null)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
-                  formik.setFieldValue('spId', newValue?.spId || '')
+                  formik.setFieldValue('spId', newValue?.spId || null)
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
@@ -390,13 +389,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 required
                 values={formik.values}
                 onChange={async (event, newValue) => {
-                  formik.setValues({
-                    ...formik.values,
-                    paymentMethod: newValue?.key || '',
-                    cashAccountId: '',
-                    cashAccountRef: '',
-                    cashAccountName: ''
-                  })
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
+                  formik.setFieldValue('cashAccountRef', newValue?.reference || null)
+                  formik.setFieldValue('cashAccountName', newValue?.name || null)
+                  formik.setFieldValue('paymentMethod', newValue?.key || null)
                 }}
                 error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
                 maxAccess={maxAccess}
@@ -439,12 +435,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 form={formik}
                 required
                 onChange={(event, newValue) => {
-                  formik.setValues({
-                    ...formik.values,
-                    cashAccountId: newValue?.recordId || '',
-                    cashAccountRef: newValue?.reference || '',
-                    cashAccountName: newValue?.name || ''
-                  })
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
+                  formik.setFieldValue('cashAccountRef', newValue?.reference || null)
+                  formik.setFieldValue('cashAccountName', newValue?.name || null)
                 }}
                 errorCheck={'cashAccountId'}
                 maxAccess={maxAccess}
