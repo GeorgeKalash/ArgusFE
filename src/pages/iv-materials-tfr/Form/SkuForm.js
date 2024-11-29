@@ -86,7 +86,6 @@ export default function SkuForm({ labels, maxAccess, plId, itemId }) {
                 value={formik?.values?.defaultSalePrice}
                 label={labels.defaultSalePrice}
                 readOnly
-                disabled={!formik?.values?.defaultSalePrice}
               />
             </Grid>
           </Grid>
