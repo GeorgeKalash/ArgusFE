@@ -23,7 +23,7 @@ const ReleaseCodes = () => {
 
     return await getRequest({
       extension: DocumentReleaseRepository.ReleaseCode.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
   }
 
