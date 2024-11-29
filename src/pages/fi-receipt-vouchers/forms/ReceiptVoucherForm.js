@@ -460,6 +460,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 readOnly={readOnly}
                 value={formik.values.amount}
                 maxAccess={maxAccess}
+                maxLength={'12'}
+                decimalScale={2}
                 onChange={e =>
                   formik.setValues({
                     ...formik.values,
