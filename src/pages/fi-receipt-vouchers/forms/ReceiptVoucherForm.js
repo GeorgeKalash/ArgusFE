@@ -129,7 +129,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     userDefaultsDataState && setDefaultFields()
   }, [userDefaultsDataState])
 
-  const editMode = !!recordId || !!formik.values.recordId
+  const editMode = !!formik.values.recordId
   const isCancelled = formik.values.status === -1
   const isPosted = formik.values.status === 3
   const readOnly = formik.values.status !== 1
