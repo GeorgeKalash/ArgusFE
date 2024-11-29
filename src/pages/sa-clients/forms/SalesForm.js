@@ -11,17 +11,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import { useInvalidate } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function SalesForm({ labels, maxAccess, recordId, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  const invalidate = useInvalidate({
-    endpointId: SaleRepository.ClientGroups.page
-  })
 
   const { formik } = useForm({
     initialValues: {
@@ -54,11 +49,8 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
         extension: SaleRepository.Client.set,
         record: JSON.stringify(obj)
       })
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', response.recordId)
-      } else toast.success(platformLabels.Edited)
-      invalidate()
+
+      toast.success(platformLabels.Saved)
     }
   })
   const editMode = !!formik.values.recordId

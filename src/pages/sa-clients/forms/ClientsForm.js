@@ -85,6 +85,11 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
         toast.success(platformLabels.Added)
         getData(res.recordId)
       } else toast.success(platformLabels.Edited)
+      setStore(prevStore => ({
+        ...prevStore,
+        record: formik.values,
+        recordId: formik.values.recordId || res.recordId
+      }))
 
       invalidate()
     })
@@ -102,10 +107,6 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
         })
 
         formik.setValues({ ...res.record, acquisitionDate: formatDateFromApi(res?.record?.acquisitionDate) })
-        setStore(prevStore => ({
-          ...prevStore,
-          record: res.record
-        }))
       }
     })()
   }, [])
@@ -122,6 +123,10 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
         extension: SaleRepository.Client.get,
         parameters: `_recordId=${recordId}`
       })
+      setStore(prevStore => ({
+        ...prevStore,
+        record: res.record
+      }))
 
       formik.setValues({
         ...res.record,
