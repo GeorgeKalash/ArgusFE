@@ -2,9 +2,8 @@ import React, { useEffect } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { Button, IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import { getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { TrxType } from 'src/resources/AccessLevels'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomNumberField = ({
   variant = 'outlined',
@@ -36,18 +35,7 @@ const CustomNumberField = ({
 }) => {
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const _readOnly =
-    maxAccess < TrxType.ADD ||
-    accessLevel === DISABLED ||
-    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
-
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
-
-  const required = (props.required || accessLevel === MANDATORY) && !_readOnly
+  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/
@@ -122,7 +110,7 @@ const CustomNumberField = ({
       fullWidth
       error={error}
       helperText={helperText}
-      required={required}
+      required={_required}
       onInput={handleInput}
       InputProps={{
         inputProps: {

@@ -495,6 +495,8 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values.items}
             error={formik.errors.items}
+            name='items'
+            maxAccess={maxAccess}
             columns={[
               {
                 component: 'resourcecombobox',
