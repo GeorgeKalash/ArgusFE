@@ -230,9 +230,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   }
 
   function calcTotalCost(rec) {
-    if (rec.priceType === 1) return rec.qty * rec.unitCost
-    else if (rec.priceType === 2) return rec.qty * rec.unitCost * rec.volume
-    else if (rec.priceType === 3) return rec.qty * rec.unitCost * rec.weight
+    if (rec.priceType === 1) return (Math.round(rec.qty * rec.unitCost * 100) / 100).toFixed(2)
+    else if (rec.priceType === 2) return (Math.round(rec.qty * rec.unitCost * rec.volume * 100) / 100).toFixed(2)
+    else if (rec.priceType === 3) return (Math.round(rec.qty * rec.unitCost * rec.weight * 100) / 100).toFixed(2)
     else return 0
   }
 
@@ -690,8 +690,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   }, [])
 
   useEffect(() => {
-    if (recordId && measurements) {
-      ;(async function () {
+    ;(async function () {
+      if (recordId && measurements) {
         const res = await getData(recordId)
         const resNotification = await getNotificationData(recordId)
         const res3 = await getDataGrid(recordId)
@@ -713,17 +713,17 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           transfers: updatedTransfers,
           notificationGroupId: resNotification?.record?.notificationGroupId
         })
+      }
 
-        if (formik.values.toSiteId) {
-          const res2 = await getRequest({
-            extension: InventoryRepository.Site.get,
-            parameters: `_recordId=${formik.values.toSiteId}`
-          })
+      if (!!formik.values.toSiteId) {
+        const res2 = await getRequest({
+          extension: InventoryRepository.Site.get,
+          parameters: `_recordId=${formik.values.toSiteId}`
+        })
 
-          formik.setFieldValue('plId', res2.record.plId)
-        }
-      })()
-    }
+        formik.setFieldValue('plId', res2.record.plId)
+      }
+    })()
   }, [recordId, measurements, formik.values.toSiteId])
 
   return (
@@ -749,7 +749,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
-                    readOnly={isPosted || isClosed || editMode}
+                    readOnly={isPosted || isClosed}
                     valueField='recordId'
                     displayField='name'
                     values={formik?.values}
@@ -781,8 +781,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     name='reference'
                     label={labels.reference}
                     value={formik?.values?.reference}
-                    readOnly={isPosted || isClosed}
-                    maxAccess={maxAccess}
+                    readOnly={isPosted || isClosed || editMode}
+                    maxAccess={!editMode && maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
