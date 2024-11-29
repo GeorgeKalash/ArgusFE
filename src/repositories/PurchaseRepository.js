@@ -50,16 +50,30 @@ export const PurchaseRepository = {
     set: service + 'setAD',
     del: service + 'delAD'
   },
+  DocumentTypeDefault: {
+    qry: service + 'qryDTD',
+    get: service + 'getDTD',
+    set: service + 'setDTD',
+    del: service + 'delDTD',
+    page: service + 'pageDTD'
+  },
   PurchaseInvoiceHeader: {
     qry: service + 'qryIVC',
     get: service + 'getIVC',
+    get2: service + 'get2IVC',
+    level2_PU: service + 'level2_PU',
     set: service + 'setIVC',
     del: service + 'delIVC',
     snapshot: service + 'snapshotIVC',
-    set2: service + 'set2IVC'
+    set2: service + 'set2IVC',
+    post: service + 'postIVC',
+    unpost: service + 'unpostIVC'
   },
   PurchaseReturnHeader: {
     qry: service + 'qryIVR',
     snapshot: service + 'snapshotIVR'
+  },
+  VendorPrice: {
+    get: service + 'getPRI'
   }
 }

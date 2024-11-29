@@ -17,6 +17,7 @@ import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import Table from 'src/components/Shared/Table'
+import PurchaseTransactionForm from './PurchaseTransactionForm'
 
 const PuTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -183,18 +184,18 @@ const PuTrx = () => {
   }
 
   async function openForm(recordId) {
-    // stack({
-    //   Component: SaleTransactionForm,
-    //   props: {
-    //     labels: labels,
-    //     recordId: recordId,
-    //     access,
-    //     functionId: functionId
-    //   },
-    //   width: 1330,
-    //   height: 720,
-    //   title: getCorrectLabel(parseInt(functionId))
-    // })
+    stack({
+      Component: PurchaseTransactionForm,
+      props: {
+        labels: labels,
+        recordId: recordId,
+        access,
+        functionId: functionId
+      },
+      width: 1330,
+      height: 720,
+      title: getCorrectLabel(parseInt(functionId))
+    })
   }
 
   const add = async () => {
