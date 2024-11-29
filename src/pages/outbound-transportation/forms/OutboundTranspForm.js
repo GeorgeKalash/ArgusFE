@@ -293,13 +293,14 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
   const actions = [
     {
-      key: 'Post',
+      key: 'Locked',
       condition: isPosted,
-      onClick: () => openUnpostConfirmation(formik.values),
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
       disabled: !editMode || !isClosed
     },
     {
-      key: 'Unpost',
+      key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode || !isClosed
@@ -318,20 +319,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     }
   ]
 
-  function openUnpostConfirmation(obj) {
-    stack({
-      Component: StrictUnpostConfirmation,
-      props: {
-        action() {
-          onUnpost(obj)
-        }
-      },
-      width: 500,
-      height: 300,
-      expandable: false,
-      title: platformLabels.UnpostConfirmation
-    })
-  }
 
   const columns = [
     {
