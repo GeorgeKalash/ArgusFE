@@ -176,10 +176,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
 
   const filteredData = search
     ? {
-        list: data?.list?.filter(
-          item =>
-            (item?.name && item?.name?.toLowerCase().includes(search.toLowerCase()))
-        )
+        list: data?.list?.filter(item => item?.name && item?.name?.toLowerCase().includes(search.toLowerCase()))
       }
     : data
 
@@ -195,34 +192,36 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     >
       <VertLayout>
         <Fixed>
-          <Grid item xs={3} sx={{ mb: 3 }}>
-            <CustomTextField
-              name='search'
-              value={search}
-              label={platformLabels.Search}
-              onClear={() => {
-                setSearch('')
-              }}
-              onChange={handleSearchChange}
-              onSearch={e => setSearch(e)}
-              search={true}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <ResourceComboBox
-              label={labels.rowAccess}
-              valueField='key'
-              displayField='value'
-              name='classId'
-              datasetId={DataSets.ROW_ACCESS}
-              values={formik.values}
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('classId', newValue ? newValue.key : ResourceIds.Plants)
-                fetchGridData(newValue ? newValue.key : ResourceIds.Plants)
-              }}
-              error={formik.touched.classId && Boolean(formik.errors.classId)}
-            />
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='search'
+                value={search}
+                label={platformLabels.Search}
+                onClear={() => {
+                  setSearch('')
+                }}
+                onChange={handleSearchChange}
+                onSearch={e => setSearch(e)}
+                search={true}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                label={labels.rowAccess}
+                valueField='key'
+                displayField='value'
+                name='classId'
+                datasetId={DataSets.ROW_ACCESS}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('classId', newValue ? newValue.key : ResourceIds.Plants)
+                  fetchGridData(newValue ? newValue.key : ResourceIds.Plants)
+                }}
+                error={formik.touched.classId && Boolean(formik.errors.classId)}
+              />
+            </Grid>
           </Grid>
         </Fixed>
         <Grow>
