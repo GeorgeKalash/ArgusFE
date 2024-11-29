@@ -1,10 +1,11 @@
 import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@mui/material'
-import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
+// import { TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import React, { useEffect, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
-import { DISABLED, MANDATORY, FORCE_ENABLED } from 'src/services/api/maxAccess'
+// import { DISABLED, MANDATORY, FORCE_ENABLED, HIDDEN } from 'src/services/api/maxAccess'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomComboBox = ({
   type = 'text',
@@ -37,25 +38,18 @@ const CustomComboBox = ({
   isLoading,
   ...props
 }) => {
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+  const { _readOnly, _required, _hidden, _disabled } = checkAccess(
+    name,
+    props.maxAccess,
+    required,
+    readOnly,
+    false,
+    disabled
+  )
 
   const [hover, setHover] = useState(false)
 
   const [focus, setAutoFocus] = useState(autoFocus)
-
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const fieldAccess =
-    props.maxAccess && props.maxAccess?.record?.controls?.find(item => item.controlId === name)?.accessLevel
-
-  const _readOnly =
-    maxAccess < TrxType.ADD ||
-    accessLevel === DISABLED ||
-    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
-
-  const _disabled = disabled || fieldAccess === ControlAccessLevel.Disabled
-  const _required = (required || fieldAccess === ControlAccessLevel.Mandatory) && !_readOnly
-  const _hidden = fieldAccess === ControlAccessLevel.Hidden
 
   useEffect(() => {
     if (!value && store?.length > 0 && typeof defaultIndex === 'number' && defaultIndex === 0) {
@@ -169,7 +163,7 @@ const CustomComboBox = ({
           helperText={helperText}
           InputProps={{
             ...params.InputProps,
-            endAdornment: (
+            endAdornment: !_readOnly && (
               <React.Fragment>
                 {hover &&
                   (_disabled ? null : isLoading ? (

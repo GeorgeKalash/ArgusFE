@@ -42,7 +42,7 @@ export function useDocumentType({ functionId, access, hasDT, enabled = true }) {
     retry: false,
     staleTime: 0,
     enabled: [!!functionId, functionId == undefined] && enabled,
-    queryKey: [functionId, nraId, !!access],
+    queryKey: [functionId, nraId, !!access, enabled],
     queryFn: nraId || nraId === 'nraId' ? () => queryFn(nraId) : () => queryFn()
   })
 
