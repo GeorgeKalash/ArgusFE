@@ -169,9 +169,14 @@ const IvMaterialsTransfer = () => {
   }
 
   async function getPlantId() {
-    const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')
+    const myObject = {}
 
-    return defaultPlant?.value ? parseInt(defaultPlant.value) : null
+    const filteredList = userDefaultsData?.list?.filter(obj => {
+      return obj.key === 'plantId'
+    })
+    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+
+    return myObject.plantId
   }
 
   function openOutWardsWindow(plantId, recordId) {

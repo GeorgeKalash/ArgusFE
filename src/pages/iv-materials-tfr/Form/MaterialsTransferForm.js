@@ -256,7 +256,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       parameters: `_dtId=${dtId}`
     })
 
-    formik.setFieldValue('plantId', res.record.plantId)
     formik.setFieldValue('toSiteId', res.record.toSiteId)
     formik.setFieldValue('siteId', res.record.fromSiteId)
     formik.setFieldValue('carrierId', res.record.carrierId)
