@@ -22,14 +22,15 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { DataSets } from 'src/resources/DataSets'
-import { getStorageData } from 'src/storage/storage'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
+  const [defaultsDataState, setDefaultsDataState] = useState(null)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ReceiptVoucher,
@@ -90,26 +91,51 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     }
   })
 
-  const editMode = !!formik.values.recordId
+  async function getUserDefaultsData() {
+    const myObject = {}
+
+    const filteredList = userDefaultsData?.list?.filter(obj => {
+      return obj.key === 'plantId' || obj.key === 'userId' || obj.key === 'cashAccountId'
+    })
+    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+    setUserDefaultsDataState(myObject)
+
+    return myObject
+  }
+
+  async function getDefaultsData() {
+    const myObject = {}
+
+    const filteredList = defaultsData?.list?.filter(obj => {
+      return obj.key === 'currencyId'
+    })
+
+    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+    setDefaultsDataState(myObject)
+
+    return myObject
+  }
+
+  useEffect(() => {
+    formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
+  }, [defaultsDataState])
+
+  const setDefaultFields = () => {
+    formik.setFieldValue('plantId', userDefaultsDataState.plantId)
+    formik.setFieldValue('cashAccountId', userDefaultsDataState.cashAccountId)
+  }
+
+  useEffect(() => {
+    userDefaultsDataState && setDefaultFields()
+  }, [userDefaultsDataState])
+
+  const editMode = !!recordId || !!formik.values.recordId
   const isCancelled = formik.values.status === -1
   const isPosted = formik.values.status === 3
   const readOnly = formik.values.status !== 1
 
-  const getDefaultDT = async () => {
-    const userData = getStorageData('userData')
-
-    const _userId = userData.userId
-
-    const { record: cashAccountRecord } = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${_userId}&_key=cashAccountId`
-    })
-
-    const { record: currency } = await getRequest({
-      extension: SystemRepository.Default.get,
-      parameters: `_key=currencyId`
-    })
-    const cashAccountId = cashAccountRecord?.value
+  const getCashAccount = async () => {
+    const cashAccountId = formik.values.cashAccountId
     if (cashAccountId) {
       const { record: cashAccountResult } = await getRequest({
         extension: CashBankRepository.CbBankAccounts.get,
@@ -119,30 +145,24 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       formik.setFieldValue('cashAccountId', cashAccountId)
       formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
       formik.setFieldValue('cashAccountName', cashAccountResult.name)
-      formik.setFieldValue('currencyId', parseInt(currency.value))
-    }
-
-    const { record: plantRecord } = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${_userId}&_key=plantId`
-    })
-    if (plantRecord) {
-      formik.setFieldValue('plantId', parseInt(plantRecord.value))
     }
   }
 
   useEffect(() => {
-    !recordId && getDefaultDT()
+    !recordId && getCashAccount()
     ;(async function () {
       getData()
+      getUserDefaultsData()
+      getDefaultsData()
     })()
   }, [])
 
-  async function getData() {
-    if (recordId) {
+  async function getData(_recordId) {
+    const finalRecordId = _recordId || recordId || formik.values.recordId
+    if (finalRecordId) {
       const res = await getRequest({
         extension: FinancialRepository.ReceiptVouchers.get,
-        parameters: `_recordId=${recordId}`
+        parameters: `_recordId=${finalRecordId}`
       })
 
       formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
