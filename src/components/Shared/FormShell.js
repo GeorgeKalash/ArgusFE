@@ -159,9 +159,10 @@ export default function FormShell({
                 stack({
                   Component: GeneralLedger,
                   props: {
-                    formValues: form.values,
+                    values: form.values,
                     recordId: form.values?.recordId,
-                    functionId: functionId
+                    functionId: functionId,
+                    valuesPath: action.valuesPath
                   },
                   width: 1000,
                   height: 620,
