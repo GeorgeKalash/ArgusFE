@@ -370,9 +370,10 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
         parameters: formik?.values?.clientId && `_clientId=${formik?.values?.clientId}`,
         displayField: 'reference',
         valueField: 'recordId',
+        secondValueField: 'itemName',
         readOnly: isPosted || isCancelled,
         mapping: [
-          { from: 'recordId', to: 'clientId' },
+          { from: 'recordId', to: 'recordId' },
           { from: 'reference', to: 'reference' },
           { from: 'itemName', to: 'itemName' },
           { from: 'seqNo', to: 'mwSeqNo' },

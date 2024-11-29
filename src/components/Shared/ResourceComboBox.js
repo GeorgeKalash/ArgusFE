@@ -28,7 +28,6 @@ export default function ResourceComboBox({
 
   const [apiResponse, setApiResponse] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const finalItemsListRef = useRef([]);
 
   function fetch({ datasetId, endpointId, parameters }) {
@@ -86,51 +85,15 @@ export default function ResourceComboBox({
     ''
 
   const onKeyUp = e => {
-    if (e.key === 'Enter' && highlightedIndex === -1) {
+    if (e.key === 'Enter') {
       selectFirstOption()
     }
   }
 
-  const onKeyDown = (e) => {
-    const totalItems = finalItemsListRef.current.length;
 
-    if (totalItems === 0) return;
-
-    let newIndex = highlightedIndex;
-
-    switch (e.key) {
-      case 'ArrowDown':
-        newIndex = (highlightedIndex + 1) % totalItems;
-        setHighlightedIndex(newIndex);
-        e.preventDefault();
-        break;
-
-      case 'ArrowUp':
-        newIndex = (highlightedIndex - 1 + totalItems) % totalItems;
-        setHighlightedIndex(newIndex);
-        e.preventDefault();
-        break;
-
-      case 'Tab':
-      case 'Enter':
-        if (highlightedIndex >= 0 && highlightedIndex < totalItems) {
-          rest.onChange('', finalItemsListRef.current[highlightedIndex]);
-          e.preventDefault();
-        } else {
-          selectFirstOption();
-        }
-        break;
-
-      default:
-        break;
-    }
-  };
-
-  const onBlur = (e) => {
-    if (highlightedIndex === -1 && finalItemsListRef.current[0]) {
-      rest.onChange('', finalItemsListRef.current[0]);
-    }
-  };
+  const onBlur = (e, HighlightedOption) => {
+    !HighlightedOption ? selectFirstOption() : rest.onChange('', HighlightedOption)
+  }
   
 
   const selectFirstOption = () => {
@@ -147,11 +110,9 @@ export default function ResourceComboBox({
         fetchData,
         name,
         store: finalItemsList,
-        highlightedIndex,
         valueField,
         value: _value,
         onKeyUp,
-        onKeyDown,
         onBlur,
         isLoading
       }}

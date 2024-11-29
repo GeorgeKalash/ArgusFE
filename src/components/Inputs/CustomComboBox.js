@@ -14,9 +14,7 @@ const CustomComboBox = ({
   valueField = 'key',
   displayField = 'value',
   onKeyUp,
-  onKeyDown,
   store = [],
-  highlightedIndex = -1,
   getOptionBy,
   onChange,
   error,
@@ -62,19 +60,6 @@ const CustomComboBox = ({
     }
   }, [defaultIndex])
   const autocompleteRef = useRef(null)
-  useEffect(() => {
-    function handleBlur(event) {
-      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
-        selectFirstValue.current = 'click'
-      }
-    }
-
-    document.addEventListener('mousedown', handleBlur)
-
-    return () => {
-      document.removeEventListener('mousedown', handleBlur)
-    }
-  }, [])
 
   const valueHighlightedOption = useRef(null)
 
@@ -125,7 +110,10 @@ const CustomComboBox = ({
           )
         }
       }}
-      isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
+      isOptionEqualToValue={(option, value) => {
+        if (props?.secondValueField) return option[props.secondValueField] === value[props.secondValueField]
+        else return option[valueField] === value[valueField]
+      }}
       onChange={(event, newValue) => {
         onChange(name, newValue)
         setAutoFocus(true)
@@ -138,11 +126,11 @@ const CustomComboBox = ({
       onFocus={e => {
         selectFirstValue.current = ''
       }}
+      onHighlightChange={(event, newValue) => {
+        valueHighlightedOption.current = newValue
+      }}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
       renderOption={(props, option) => {
-        const index = store.indexOf(option)
-        const isHighlighted = index === highlightedIndex
-
         if (columnsInDropDown && columnsInDropDown.length > 0) {
           return (
             <Box>
@@ -159,9 +147,6 @@ const CustomComboBox = ({
               )}
               <li
                 {...props}
-                style={{
-                  backgroundColor: isHighlighted ? '#f0f0f0' : ''
-                }}
               >
                 {columnsInDropDown.map((header, i) => {
                   return (
@@ -196,7 +181,6 @@ const CustomComboBox = ({
           onMouseLeave={() => setHover(false)}
           error={error}
           helperText={helperText}
-          onKeyDown={onKeyDown}
           onBlur={e => {
             onBlur(e)
             if (selectFirstValue.current !== 'click') {
