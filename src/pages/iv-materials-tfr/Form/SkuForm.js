@@ -33,7 +33,7 @@ export default function SkuForm({ labels, maxAccess, plId, itemId }) {
       if (itemId) {
         const res = await getRequest({
           extension: InventoryRepository.Item.quickView,
-          parameters: `_itemId=${itemId}&_plId=${plId}`
+          parameters: `_itemId=${itemId}&_plId=${plId || 0}`
         })
 
         formik.setValues({

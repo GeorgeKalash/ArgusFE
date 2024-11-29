@@ -361,7 +361,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       },
       label: labels.details,
       onClick: (e, row, update, newRow) => {
-        if (row?.itemId && formik.values?.plId) {
+        if (row?.itemId) {
           stack({
             Component: SkuForm,
             props: {
