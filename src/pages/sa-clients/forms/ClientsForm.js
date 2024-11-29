@@ -83,8 +83,8 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
         }))
         formik.setFieldValue('recordId', res.recordId)
         toast.success(platformLabels.Added)
-        getData(res.recordId)
       } else toast.success(platformLabels.Edited)
+      getData(res.recordId)
       setStore(prevStore => ({
         ...prevStore,
         record: formik.values,
@@ -154,7 +154,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
 
   return (
     <FormShell
-      resourceId={ResourceIds.Accounts}
+      resourceId={ResourceIds.Client}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -168,6 +168,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
               <ResourceComboBox
                 endpointId={SaleRepository.ClientGroups.qry}
                 name='cgId'
+                readOnly={editMode}
                 required
                 label={labels.cGroup}
                 valueField='recordId'
@@ -183,6 +184,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
+                readOnly={editMode}
                 label={labels.reference}
                 value={formik.values.reference}
                 maxAccess={maxAccess}
