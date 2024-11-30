@@ -102,11 +102,17 @@ const CustomNumberField = ({
     if (value) formatNumber({ target: { value } })
   }, [])
 
+  const handleFocus = e => {
+    if (e.target.value === '0') {
+      e.target.value = ''
+      onChange({ ...e, target: { ...e.target, value: '' } })
+    }
+  }
+
   return _hidden ? (
     <></>
   ) : (
     <NumericFormat
-      hey={value}
       label={label}
       allowLeadingZeros
       allowNegative={allowNegative}
@@ -123,6 +129,7 @@ const CustomNumberField = ({
       onInput={handleInput}
       InputProps={{
         inputProps: {
+          onFocus: handleFocus,
           min: min,
           max: max,
           type: arrow ? 'number' : 'text',

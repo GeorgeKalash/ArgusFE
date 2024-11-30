@@ -7,11 +7,10 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ControlContext } from 'src/providers/ControlContext'
-import { Box } from '@mui/material'
 
 const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose, getData, onSuccess, window }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { defaultsData } = useContext(ControlContext)
+  const { defaultsData, platformLabels } = useContext(ControlContext)
 
   const { labels: labels } = useResourceParams({
     datasetId: ResourceIds.OTPVerify
@@ -159,7 +158,7 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
   return (
     <div width={500} height={300} onClose={onClose}>
       <Grid className={styles.phoneVerificationContainer}>
-        <h2>{labels.OTPVerification}</h2>
+        <p>{platformLabels.TwoFactorAuthentication}</p>
         <Grid className={styles.otpInputContainer}>
           {otp.map((digit, index) => (
             <input
@@ -175,6 +174,22 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
             />
           ))}
         </Grid>
+        {/* <p>{sent ? platformLabels.messageSent : ''}</p> */}
+        <a
+          onClick={() => {
+            if (timer <= 0) handleResendOtp()
+          }}
+          role='button'
+          tabIndex={0}
+          style={{
+            cursor: timer > 0 ? 'default' : 'pointer',
+            color: timer > 0 ? 'grey' : 'blue',
+            paddingTop: 10
+          }}
+          aria-disabled={timer > 0}
+        >
+          {sent ? labels.resendOTP : labels.sendOtp}
+        </a>
         <Grid className={styles.timerContainer}>
           {timer > 0 ? (
             <p>
@@ -184,16 +199,13 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
             <p className={styles.expiredTimer}>{sent && labels.OTPExpired}</p>
           )}
         </Grid>
-        <button className={styles.resendButton} onClick={handleResendOtp} disabled={timer > 0}>
-          {sent ? labels.resendOTP : labels.sendOtp}
-        </button>
-        <button
+        {/* <button
           className={styles.verifyButton}
           onClick={handleVerifyOtp}
           disabled={timer === 0 || disabled < 5 ? true : false}
         >
           {labels.verifyOTP}
-        </button>
+        </button> */}
       </Grid>
     </div>
   )
