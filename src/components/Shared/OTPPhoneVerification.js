@@ -7,10 +7,11 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ControlContext } from 'src/providers/ControlContext'
+import { Box } from '@mui/material'
 
 const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose, getData, onSuccess, window }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { defaultsData, platformLabels } = useContext(ControlContext)
+  const { defaultsData } = useContext(ControlContext)
 
   const { labels: labels } = useResourceParams({
     datasetId: ResourceIds.OTPVerify
@@ -91,11 +92,6 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
       if (index < otp.length - 1 && value !== '') {
         document.getElementById(`otp-input-${index + 1}`).focus()
         document.getElementById(`otp-input-${index + 1}`).select()
-      } else if (index === otp.length - 1) {
-        const isOtpComplete = newOtp.every(digit => digit !== '')
-        if (isOtpComplete) {
-          handleVerifyOtp(newOtp)
-        }
       }
     } else if (e.nativeEvent.inputType === 'deleteContentBackward') {
       newOtp[index] = ''
@@ -150,15 +146,15 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
     otpSMS()
   }
 
-  const handleVerifyOtp = newOtp => {
-    const enteredOtp = newOtp ? newOtp.join('') : otp.join('')
+  const handleVerifyOtp = () => {
+    const enteredOtp = otp.join('')
     checkSMS(enteredOtp)
   }
 
   return (
     <div width={500} height={300} onClose={onClose}>
       <Grid className={styles.phoneVerificationContainer}>
-        <p>{platformLabels.TwoFactorAuthentication}</p>
+        <h2>{labels.OTPVerification}</h2>
         <Grid className={styles.otpInputContainer}>
           {otp.map((digit, index) => (
             <input
@@ -174,22 +170,6 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
             />
           ))}
         </Grid>
-        {/* <p>{sent ? platformLabels.messageSent : ''}</p> */}
-        <a
-          onClick={() => {
-            if (timer <= 0) handleResendOtp()
-          }}
-          role='button'
-          tabIndex={0}
-          style={{
-            cursor: timer > 0 ? 'default' : 'pointer',
-            color: timer > 0 ? 'grey' : 'blue',
-            paddingTop: 10
-          }}
-          aria-disabled={timer > 0}
-        >
-          {sent ? labels.resendOTP : labels.sendOtp}
-        </a>
         <Grid className={styles.timerContainer}>
           {timer > 0 ? (
             <p>
@@ -199,13 +179,16 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
             <p className={styles.expiredTimer}>{sent && labels.OTPExpired}</p>
           )}
         </Grid>
-        {/* <button
+        <button className={styles.resendButton} onClick={handleResendOtp} disabled={timer > 0}>
+          {sent ? labels.resendOTP : labels.sendOtp}
+        </button>
+        <button
           className={styles.verifyButton}
           onClick={handleVerifyOtp}
           disabled={timer === 0 || disabled < 5 ? true : false}
         >
           {labels.verifyOTP}
-        </button> */}
+        </button>
       </Grid>
     </div>
   )
