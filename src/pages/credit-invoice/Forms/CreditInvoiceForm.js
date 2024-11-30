@@ -537,8 +537,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
           { from: 'currencyName', to: 'currencyName' },
           { from: 'goc', to: 'goc' }
         ],
-        displayFieldWidth: 3,
-        disabled: !formik.values.corId || isClosed
+        displayFieldWidth: 3
       },
       updateOn: 'blur',
       widthDropDown: '400',
@@ -607,8 +606,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       name: 'currencyName',
       readOnly: true,
       props: {
-        readOnly: true,
-        disabled: !formik.values.corId || isClosed
+        readOnly: true
       },
       width: 190
     },
@@ -619,7 +617,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       props: {
         readOnly: visible,
         mandatory: true,
-        disabled: !formik.values.corId || isClosed
+        disabled: !formik.values.corId
       },
       width: 130,
       async onChange({ row: { update, newRow } }) {
@@ -655,7 +653,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       props: {
         readOnly: true,
         mandatory: true,
-        disabled: !formik.values.corId || isClosed
+        disabled: !formik.values.corId
       },
       width: 130
     },
@@ -666,8 +664,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       props: {
         readOnly: visible,
         mandatory: true,
-        decimalScale: 7,
-        disabled: !formik.values.corId || isClosed
+        decimalScale: 7
       },
       updateOn: 'blur',
       width: 130,
@@ -738,8 +735,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       name: 'amount',
       props: {
         readOnly: true,
-        mandatory: true,
-        disabled: !formik.values.corId || isClosed
+        mandatory: true
       },
       width: 130
     }
@@ -903,6 +899,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('rows', value)}
+            disabled={!formik.values.corId || isCancelled || isPosted}
             value={formik.values.rows}
             error={formik.errors.rows}
             allowAddNewLine={!visible}
