@@ -25,13 +25,13 @@ import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 import { VertLayout } from './Layouts/VertLayout'
 
-const GeneralLedger = ({ functionId, formValues }) => {
+const GeneralLedger = ({ functionId, values, valuesPath }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [formik, setformik] = useState(null)
   const [baseGridData, setBaseGridData] = useState({ credit: 0, debit: 0, balance: 0 })
   const [exRateValue, setExRateValue] = useState(null)
   const [currencyGridData, setCurrencyGridData] = useState([])
-
+  const formValues = valuesPath ? valuesPath : values
   async function fetchGridData() {
     return await getRequest({
       extension: GeneralLedgerRepository.GeneralLedger.qry,
