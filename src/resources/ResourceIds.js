@@ -306,5 +306,6 @@ export const ResourceIds = {
   ClientSalesTransaction: 51345,
   POSDefaults: 54103,
   GlSync: 30501,
-  POSPayment: 36601
+  POSPayment: 36601,
+  FyOpening: 30503
 }
