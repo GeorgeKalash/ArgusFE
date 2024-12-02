@@ -5,7 +5,6 @@ export const AccessControlRepository = {
   setBMK: service + 'setBMK',
   delBMK: service + 'delBMK',
   checkOTP: service + 'checkOTP ',
-
   NotificationGroup: {
     qry: service + 'qryNOT',
     page: service + 'pageNOT',
@@ -95,5 +94,10 @@ export const AccessControlRepository = {
   },
   UserOTPQrcode: {
     secret: service + 'secretKEY'
+  },
+  PlantSupervisors: {
+    qry: service + 'qryPLS',
+    set2: service + 'set2PLS',
+    verify: service + 'verifyPLS'
   }
 }
