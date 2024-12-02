@@ -172,10 +172,6 @@ const SystemParamsForm = ({ _labels, access }) => {
                     { name: 'GLDOEGainAccountref', value: accountRef },
                     { name: 'GLDOEGainAccountname', value: name }
                   ])
-
-                  // formik.setFieldValue('GLDOEGainAccountId', newValue ? newValue.recordId : '')
-                  // formik.setFieldValue('GLDOEGainAccountref', newValue ? newValue.accountRef : '')
-                  // formik.setFieldValue('GLDOEGainAccountname', newValue ? newValue.name : '')
                 }}
                 error={formik.touched.GLDOEGainAccountId && Boolean(formik.errors.GLDOEGainAccountId)}
               />
