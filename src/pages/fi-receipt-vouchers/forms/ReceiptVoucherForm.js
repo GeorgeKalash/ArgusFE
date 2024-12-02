@@ -48,7 +48,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     validateOnChange: true,
     initialValues: {
       reference: '',
-      accountId: '',
+      accountId: null,
       date: new Date(),
       currencyId: null,
       dtId: documentType?.dtId,
