@@ -37,6 +37,7 @@ const Table = ({
   rowSelection = '',
   pagination = true,
   setData,
+  checkboxFlex = '',
   handleCheckboxChange = '',
   ...props
 }) => {
@@ -80,6 +81,7 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal),
+          cellStyle: { textAlign: 'right' },
           sortable: !disableSorting
         }
       }
@@ -529,6 +531,7 @@ const Table = ({
           {
             headerName: '',
             field: 'checked',
+            flex: checkboxFlex,
             cellRenderer: checkboxCellRenderer,
             headerComponent: params =>
               rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,

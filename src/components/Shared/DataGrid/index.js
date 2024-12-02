@@ -1,53 +1,422 @@
-import {
-  GridDeleteIcon,
-  DataGrid as MUIDataGrid,
-  gridExpandedSortedRowIdsSelector,
-  useGridApiRef
-} from '@mui/x-data-grid'
-import components from './components'
+import React, { useEffect, useRef, useState } from 'react'
+import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton } from '@mui/material'
-import { useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { useError } from 'src/error'
-import DeleteDialog from '../DeleteDialog'
+import components from './components'
+import { CacheDataProvider } from 'src/providers/CacheDataContext'
+import 'ag-grid-community/styles/ag-grid.css'
+import 'ag-grid-community/styles/ag-theme-alpine.css'
+import { GridDeleteIcon } from '@mui/x-data-grid'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
-import { ControlContext } from 'src/providers/ControlContext'
-import { CacheDataProvider } from 'src/providers/CacheDataContext'
+import DeleteDialog from '../DeleteDialog'
 
 export function DataGrid({
-  idName = 'id',
-  name,
-  maxAccess,
+  name, // maxAccess
   columns,
   value,
   error,
-  bg,
+  maxAccess,
   height,
   onChange,
+  disabled = false,
   allowDelete = true,
   allowAddNewLine = true,
   onSelectionChange,
-  rowSelectionModel,
-  disabled = false
+  bg
 }) {
-  async function processDependenciesForColumn(newRow, oldRow, editCell) {
-    const column = columns.find(({ name }) => name === editCell.field)
+  const gridApiRef = useRef(null)
 
-    let updatedRow = { ...newRow }
+  const { stack } = useWindow()
 
-    if (column.onChange)
-      await column.onChange({
-        row: {
-          newRow,
-          oldRow,
-          update(updates) {
-            updatedRow = { ...updatedRow, ...updates }
-          }
+  const [ready, setReady] = useState(false)
+
+  const skip = allowDelete ? 1 : 0
+
+  const process = (params, oldRow, setData) => {
+    const column = columns.find(({ name }) => name === params.colDef.field)
+
+    const updateRowCommit = changes => {
+      setData(changes, params)
+      commit({ changes: { ...params.node.data, changes } })
+    }
+
+    if (column.onChange) {
+      column.onChange({ row: { oldRow: oldRow, newRow: params.node.data, update: updateRowCommit } })
+    }
+  }
+
+  function deleteRow(params) {
+    const newRows = value.filter(({ id }) => id !== params.data.id)
+    gridApiRef.current.applyTransaction({ remove: [params.data] })
+    if (newRows?.length < 1) setReady(true)
+
+    onChange(newRows)
+  }
+
+  function openDelete(params) {
+    stack({
+      Component: DeleteDialog,
+      props: {
+        open: [true, {}],
+        fullScreen: false,
+        onConfirm: () => deleteRow(params)
+      },
+      width: 450,
+      height: 170,
+      canExpand: false,
+      title: 'Delete'
+    })
+  }
+
+  useEffect(() => {
+    if (!value?.length && allowAddNewLine && ready) {
+      addNewRow()
+      setReady(false)
+    }
+  }, [ready, value])
+
+  const addNewRow = params => {
+    const highestIndex = params?.node?.data?.id + 1 || 1
+
+    const defaultValues = Object.fromEntries(
+      columns.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
+    )
+
+    const newRow = {
+      id: highestIndex,
+      ...defaultValues
+    }
+
+    const res = gridApiRef.current?.applyTransaction({ add: [newRow] })
+    if (res?.add?.length > 0) {
+      const newRowNode = res.add[0]
+      commit(newRowNode.data)
+
+      setTimeout(() => {
+        const rowNode = gridApiRef.current.getRowNode(newRowNode.data.id)
+
+        if (rowNode) {
+          const rowIndex = rowNode.rowIndex
+          gridApiRef.current.startEditingCell({
+            rowIndex: rowIndex,
+            colKey: columns[0].name
+          })
         }
+      }, 0)
+    }
+  }
+
+  const findCell = params => {
+    const allColumns = params.api.getColumnDefs()
+
+    if (gridApiRef.current) {
+      return {
+        rowIndex: params.rowIndex,
+        columnIndex: allColumns?.findIndex(col => col.colId === params.column.getColId())
+      }
+    }
+  }
+
+  const onCellKeyDown = params => {
+    const { event, api, node } = params
+
+    const allColumns = api.getColumnDefs()
+    const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
+
+    if (event.key === 'Enter') {
+      const nextColumnId = allColumns[currentColumnIndex].colId
+      api.startEditingCell({
+        rowIndex: node.rowIndex,
+        colKey: nextColumnId
       })
 
-    return updatedRow
+      return
+    }
+
+    if (event.key !== 'Tab') {
+      return
+    }
+
+    const nextCell = findCell(params)
+
+    if (currentColumnIndex === allColumns.length - 1 - skip && node.rowIndex === api.getDisplayedRowCount() - 1) {
+      if (allowAddNewLine && !error) {
+        event.stopPropagation()
+        addNewRow(params)
+      }
+    }
+
+    const columns = gridApiRef.current.getColumnDefs()
+    if (!event.shiftKey) {
+      if (nextCell.columnIndex < columns.length - skip - 1) {
+        nextCell.columnIndex += 1
+      } else if (
+        nextCell.columnIndex === columns.length - 1 - skip &&
+        node.rowIndex !== api.getDisplayedRowCount() - 1
+      ) {
+        nextCell.rowIndex += 1
+        nextCell.columnIndex = 0
+      }
+    } else if (nextCell.columnIndex > 0) {
+      nextCell.columnIndex -= 1
+    } else {
+      nextCell.rowIndex -= 1
+      nextCell.columnIndex = columns.length - 1 - skip
+    }
+
+    const field = columns[nextCell.columnIndex].field
+
+    api.startEditingCell({
+      rowIndex: nextCell.rowIndex,
+      colKey: field
+    })
+
+    const row = params.data
+    if (onSelectionChange) onSelectionChange(row)
   }
+
+  const CustomCellRenderer = params => {
+    const { column } = params
+
+    const Component =
+      typeof column.colDef.component === 'string'
+        ? components[column.colDef.component].view
+        : column.colDef.component.view
+
+    async function update({ field, value }) {
+      const oldRow = params.data
+
+      const changes = {
+        [field]: value || undefined
+      }
+
+      setData(changes, params)
+
+      commit(changes)
+
+      process(params, oldRow, setData)
+    }
+
+    const updateRow = ({ changes }) => {
+      const oldRow = params.data
+
+      setData(changes, params)
+
+      commit(changes)
+
+      process(params, oldRow, setData)
+    }
+
+    return (
+      <Box
+        sx={{
+          width: '100%',
+          height: '100%',
+          padding: '0 1000px',
+          display: 'flex',
+          justifyContent:
+            (column.colDef.component === 'checkbox' ||
+              column.colDef.component === 'button' ||
+              column.colDef.component === 'icon') &&
+            'center'
+        }}
+      >
+        <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
+      </Box>
+    )
+  }
+
+  const CustomCellEditor = params => {
+    const { column, data, maxAccess } = params
+    const [currentValue, setCurrentValue] = useState(params?.node?.data) // Capture current data state
+
+    const Component =
+      typeof column?.colDef?.component === 'string'
+        ? components[column?.colDef?.component]?.edit
+        : column?.component?.edit
+
+    const maxAccessName = `${name}.${column.colId}`
+
+    const props = {
+      ...column.colDef.props,
+      name: maxAccessName,
+      maxAccess
+    }
+
+    async function update({ field, value }) {
+      const oldRow = params.data
+
+      const changes = {
+        [field]: value || undefined
+      }
+
+      setCurrentValue(changes)
+
+      setData(changes, params)
+
+      if (column.colDef.updateOn !== 'blur') {
+        commit(changes)
+        process(params, oldRow, setData)
+      }
+    }
+
+    const updateRow = ({ changes }) => {
+      const oldRow = params.data
+
+      setCurrentValue(changes || '')
+
+      setData(changes, params)
+
+      if (column.colDef.updateOn !== 'blur') {
+        commit(changes)
+
+        process(params, oldRow, setData)
+      }
+    }
+
+    const comp = column.colDef.component
+
+    return (
+      <Box
+        sx={{
+          width: '100%',
+          height: '100%',
+          padding: '0 0px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: (comp === 'checkbox' || comp === 'button' || comp === 'icon') && 'center'
+        }}
+      >
+        <Component
+          id={params.node.data.id}
+          {...params}
+          value={currentValue}
+          column={{
+            ...column.colDef,
+            props: column.propsReducer ? column?.propsReducer({ data, props }) : props
+          }}
+          updateRow={updateRow}
+          update={update}
+        />
+      </Box>
+    )
+  }
+
+  const getCellStyle = params => {
+    const hasError = error && error[params.node.rowIndex]?.[params.colDef.field]
+
+    return {
+      border: hasError ? '1px solid #ff0000' : '1px solid transparent'
+    }
+  }
+
+  const ActionCellRenderer = params => {
+    return (
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}
+        onClick={() => openDelete(params)}
+      >
+        <IconButton>
+          <GridDeleteIcon />
+        </IconButton>
+      </Box>
+    )
+  }
+
+  const columnDefs = [
+    ...columns.map(column => ({
+      ...column,
+      field: column.name,
+      headerName: column.label || column.name,
+      editable: !disabled,
+      flex: column.flex || 1,
+      sortable: false,
+      cellRenderer: CustomCellRenderer,
+      cellEditor: CustomCellEditor,
+      cellEditorParams: { maxAccess },
+      cellStyle: getCellStyle,
+      suppressKeyboardEvent: params => {
+        const { event } = params
+
+        return event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter' ? true : false
+      }
+    })),
+    allowDelete
+      ? {
+          field: 'actions',
+          headerName: '',
+          width: 50,
+          editable: false,
+          sortable: false,
+          cellRenderer: ActionCellRenderer
+        }
+      : null
+  ]
+    .filter(Boolean)
+    .filter(({ name: field }) => accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN)
+
+  const commit = data => {
+    const allRowNodes = []
+    gridApiRef.current.forEachNode(node => allRowNodes.push(node.data))
+    const updatedGridData = allRowNodes.map(row => (row.id === data?.id ? data : row))
+
+    onChange(updatedGridData)
+  }
+
+  const onCellClicked = params => {
+    const { colDef, rowIndex, api } = params
+
+    api.startEditingCell({
+      rowIndex: rowIndex,
+      colKey: colDef.field
+    })
+  }
+
+  const gridContainerRef = useRef(null)
+
+  useEffect(() => {
+    function handleBlur(event) {
+      if (gridContainerRef.current && !gridContainerRef.current.contains(event.target)) {
+        gridApiRef.current?.stopEditing()
+      }
+    }
+
+    const gridContainer = gridContainerRef.current
+
+    if (gridContainer) {
+      document.addEventListener('click', handleBlur)
+    }
+
+    return () => {
+      if (gridContainer) {
+        document.removeEventListener('click', handleBlur)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    function handleBlur(event) {
+      if (
+        gridContainerRef.current &&
+        !event.target.value &&
+        event.target.classList.contains('ag-center-cols-viewport')
+      ) {
+        gridApiRef.current?.stopEditing()
+      }
+    }
+
+    const gridContainer = gridContainerRef.current
+
+    if (gridContainer) {
+      gridContainer.addEventListener('mousedown', handleBlur)
+    }
+
+    return () => {
+      if (gridContainer) {
+        gridContainer.removeEventListener('mousedown', handleBlur)
+      }
+    }
+  }, [])
 
   function handleRowChange(row) {
     const newRows = [...value]
@@ -58,221 +427,14 @@ export function DataGrid({
     return row
   }
 
-  const apiRef = useGridApiRef()
-
-  const [isUpdatingField, setIsUpdating] = useState(false)
-  const { platformLabels } = useContext(ControlContext)
-
-  const [nextEdit, setNextEdit] = useState(null)
-
-  const skip = allowDelete ? 1 : 0
-
-  useEffect(() => {
-    if (!isUpdatingField && nextEdit) {
-      const { id, field } = nextEdit
-      if (!disabled) {
-        if (id) {
-          if (apiRef.current.getCellMode(id, field) === 'view') apiRef?.current.startCellEditMode({ id, field })
-          apiRef.current.setCellFocus(id, field)
-        }
-      }
-      setNextEdit(null)
-    }
-  }, [isUpdatingField, nextEdit])
-
-  function findCell({ id, field }) {
-    return {
-      rowIndex: apiRef.current.getRowIndexRelativeToVisibleRows(id),
-      columnIndex: apiRef.current.getColumnIndex(field)
-    }
-  }
-
-  const handleCellKeyDown = (params, event) => {
-    if (event.key === 'Enter') {
-      event.stopPropagation()
-
-      return
-    }
-
-    if (event.key !== 'Tab') {
-      return
-    }
-
-    const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
-    const columns = apiRef.current.getVisibleColumns()
-
-    const nextCell = findCell(params)
-
-    const currentCell = { ...nextCell }
-
-    if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
-      if (error || !allowAddNewLine) {
-        event.stopPropagation()
-
-        return
-      }
-    }
-    if (apiRef.current.getCellMode(rowIds[currentCell.rowIndex], columns[currentCell.columnIndex].field) === 'edit')
-      apiRef.current.stopCellEditMode({
-        id: rowIds[nextCell.rowIndex],
-        field: columns[nextCell.columnIndex].field
-      })
-
-    if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
-      addRow()
-    }
-
-    if (nextCell.columnIndex === columns.length - 1 && nextCell.rowIndex === rowIds.length - 1 && !event.shiftKey) {
-      return
-    }
-
-    if (nextCell.columnIndex === 0 && nextCell.rowIndex === 0 && event.shiftKey) {
-      return
-    }
-
-    event.preventDefault()
-    event.defaultMuiPrevented = true
-
-    process.nextTick(() => {
-      const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
-      const columns = apiRef.current.getVisibleColumns()
-
-      if (!event.shiftKey) {
-        if (nextCell.columnIndex < columns.length - 1 - skip) {
-          nextCell.columnIndex += 1
-        } else {
-          nextCell.rowIndex += 1
-          nextCell.columnIndex = 0
-        }
-      } else if (nextCell.columnIndex > 0) {
-        nextCell.columnIndex -= 1
-      } else {
-        nextCell.rowIndex -= 1
-        nextCell.columnIndex = columns.length - 1
-      }
-
-      const field = columns[nextCell.columnIndex].field
-      const id = rowIds[nextCell.rowIndex]
-
-      setNextEdit({
-        id,
-        field
-      })
-      const row = apiRef.current.getRow(id)
-      if (onSelectionChange) onSelectionChange(row)
-    })
-  }
-
-  function addRow() {
-    const highestIndex = value?.length
-      ? value.reduce((max, current) => (max[idName] > current[idName] ? max : current))[idName] + 1
-      : 1
-
-    const defaultValues = Object.fromEntries(
-      columns.filter(({ name }) => name !== idName).map(({ name, defaultValue }) => [name, defaultValue])
-    )
-
-    onChange([
-      ...value,
-      {
-        [idName]: highestIndex,
-        ...defaultValues
-      }
-    ])
-  }
-
-  useEffect(() => {
-    if (!value?.length && allowAddNewLine) {
-      addRow()
-    }
-  }, [value])
-
-  function deleteRow(deleteId) {
-    const newRows = value.filter(({ id }) => id !== deleteId)
-    onChange(newRows)
-  }
-
-  const actionsColumn = {
-    field: !allowDelete && 'actions',
-    editable: false,
-    flex: 0,
-    width: '20',
-    renderCell({ id: idName }) {
-      return (
-        <IconButton disabled={disabled} tabIndex='-1' icon='pi pi-trash' onClick={() => openDelete(idName)}>
-          <GridDeleteIcon />
-        </IconButton>
-      )
-    }
-  }
-
-  function openDelete(id) {
-    stack({
-      Component: DeleteDialog,
-      props: {
-        open: [true, {}],
-        fullScreen: false,
-        onConfirm: () => deleteRow(id)
-      },
-      width: 450,
-      height: 170,
-      canExpand: false,
-      title: platformLabels.Delete
-    })
-  }
-
-  const currentEditCell = useRef(null)
-
-  const { stack: stackError } = useError()
-  const { stack } = useWindow()
-  const stagedChanges = useRef(null)
-
-  function stageRowUpdate({ changes }) {
-    apiRef.current.setEditCellValue({
-      id: currentEditCell.current.id,
-      field: currentEditCell.current.field,
-      value: changes[currentEditCell.current.field]
-    })
-
-    stagedChanges.current = changes
-  }
-
-  async function commitRowUpdate() {
-    const changes = stagedChanges.current
-
-    if (!changes) return apiRef.current.getRow(currentEditCell.current.id)
-
-    const row = apiRef.current.getRow(currentEditCell.current.id)
-
-    const updatedRow = await processDependenciesForColumn(
-      {
-        ...row,
-        ...changes
-      },
-      row,
-      {
-        id: currentEditCell.current.id,
-        field: currentEditCell.current.field
-      }
-    )
-
-    apiRef.current.updateRows([updatedRow])
-
-    handleRowChange(updatedRow)
-
-    stagedChanges.current = null
-
-    return updatedRow
-  }
-
   async function updateState({ newRow }) {
-    apiRef.current.updateRows([newRow])
+    gridApiRef.current.updateRows([newRow])
 
     handleRowChange(newRow)
   }
 
   const handleRowClick = params => {
-    const selectedRow = apiRef.current.getRow(params.id)
+    const selectedRow = params?.data
     if (onSelectionChange) {
       async function update({ newRow }) {
         updateState({
@@ -283,217 +445,66 @@ export function DataGrid({
     }
   }
 
-  async function updateRowState({ id, changes }) {
-    const row = apiRef.current.getRow(id)
-    const newRow = { ...row, ...changes }
-    apiRef.current.updateRows([newRow])
-    handleRowChange(newRow)
+  const setData = (changes, params) => {
+    const id = params.node?.id
+
+    const rowNode = params.api.getRowNode(id)
+    if (rowNode) {
+      const currentData = rowNode.data
+
+      const newData = { ...currentData, ...changes }
+
+      rowNode.updateData(newData)
+    }
+  }
+
+  const onCellEditingStopped = params => {
+    const { data, colDef } = params
+
+    if (colDef.updateOn === 'blur') {
+      process(params, data, setData)
+    }
   }
 
   return (
-    <Box sx={{ height: height ? height : 'auto', flex: '1 !important' }}>
-      {/* Container with scroll */}
+    <Box sx={{ height: height || 'auto', flex: 1 }}>
       <CacheDataProvider>
-        <MUIDataGrid
-          hideFooter
-          autoHeight={false}
-          columnResizable={false}
-          disableColumnFilter
-          disableColumnMenu
-          disableColumnSelector
-          disableSelectionOnClick
-          disableMultipleSelection
-          getRowId={row => row[idName]}
-          rowSelectionModel={[rowSelectionModel]}
-          onCellClick={params => {
-            const cellMode = apiRef.current.getCellMode(params.id, params.field)
-            if (cellMode === 'view' && params.isEditable) {
-              apiRef.current.startCellEditMode({ id: params.id, field: params.field })
-              apiRef.current.setCellFocus(params.id, params.field)
-            }
-          }}
-          onStateChange={state => {
-            if (Object.entries(state.editRows)[0]) {
-              const [id, obj] = Object.entries(state.editRows)[0]
-              currentEditCell.current = { id, field: Object.keys(obj)[0] }
-            }
-          }}
-          processRowUpdate={async () => {
-            setIsUpdating(true)
-
-            const row = await commitRowUpdate()
-
-            setIsUpdating(false)
-
-            return row
-          }}
-          onProcessRowUpdateError={e => {
-            console.error(
-              `[Datagrid - ERROR]: Error updating row with id ${currentEditCell.current.id} and field ${currentEditCell.current.field}.`
-            )
-            console.error('[Datagrid - ERROR]: Please handle all errors inside onChange of your respective field.')
-            console.error('[Datagrid - ERROR]:', e)
-
-            stackError({ message: 'Error occured while updating row.' })
-          }}
-          onCellKeyDown={handleCellKeyDown}
-          columnVisibilityModel={{
-            ...Object.fromEntries(
-              columns
-                .filter(({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) === HIDDEN)
-                .map(({ name }) => [name, false])
-            ),
-            actions: allowDelete
-          }}
-          rows={value}
-          apiRef={apiRef}
-          editMode='cell'
+        <Box
+          className='ag-theme-alpine'
+          style={{ height: '100%', width: '100%' }}
           sx={{
-            display: 'flex !important',
-            flex: '1 !important',
-            '& .MuiDataGrid-cell': {
-              padding: '0 !important'
-            },
-            '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: bg
-            },
-            '& .MuiDataGrid-columnHeaderTitle': {
-              fontWeight: '900'
-            },
-            '& .MuiDataGrid-virtualScroller': {
-              zIndex: 0
+            '.ag-header': {
+              background: bg
             }
           }}
-          onRowClick={handleRowClick} // Handle row click event
-          columns={[
-            ...columns.map(column => ({
-              field: column.name,
-              headerName: column.label || column.name,
-              editable: !disabled,
-              flex: column.flex || 1,
-              sortable: false,
-              renderCell(params) {
-                const Component =
-                  typeof column.component === 'string' ? components[column.component].view : column.component.view
-
-                const cell = findCell(params)
-
-                async function updateRow({ changes }) {
-                  updateRowState({ id: params.row.id, changes })
-                }
-
-                async function update({ newRow }) {
-                  updateState({
-                    newRow
-                  })
-                }
-
-                function handleCheckboxChange(event) {
-                  const changes = { [params.field]: event.target.checked }
-                  updateRow({ changes })
-                  const column = columns.find(col => col.name === params.field)
-                  if (column?.onChange) {
-                    column.onChange({
-                      row: {
-                        update: changes => updateRow({ changes }),
-                        newRow: { ...params.row, ...changes }
-                      }
-                    })
-                  }
-                }
-
-                return (
-                  <Box
-                    sx={{
-                      width: '100%',
-                      height: '100%',
-                      padding: '0 20px',
-                      backgroundColor: bg,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent:
-                        (column.component === 'checkbox' ||
-                          column.component === 'button' ||
-                          column.component === 'icon') &&
-                        'center',
-                      border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`,
-                      whiteSpace: 'normal',
-                      wordWrap: 'break-word'
-                    }}
-                  >
-                    {column.component === 'checkbox' ? (
-                      <input type='checkbox' checked={!!params.value} onChange={handleCheckboxChange} />
-                    ) : (
-                      <Component {...params} update={update} updateRow={updateRow} column={column} />
-                    )}
-                  </Box>
-                )
-              },
-              renderEditCell(params) {
-                const columnId = column.name // Adjust according to your column definition
-
-                const Component =
-                  typeof column.component === 'string' ? components[column.component].edit : column.component.edit
-
-                const maxAccessName = `${name}.${column.name}`
-
-                const props = {
-                  ...column.props,
-                  name: maxAccessName,
-                  maxAccess
-                }
-
-                async function update({ field, value }) {
-                  stageRowUpdate({
-                    changes: {
-                      [field]: value
-                    }
-                  })
-
-                  if (column.updateOn !== 'blur') await commitRowUpdate()
-                }
-
-                async function updateRow({ changes }) {
-                  stageRowUpdate({
-                    changes
-                  })
-
-                  if (column.updateOn !== 'blur') await commitRowUpdate()
-                }
-                const row = apiRef.current.getRow(params.id)
-
-                return (
-                  <Box
-                    sx={{
-                      width: '100%',
-                      height: '100%',
-                      padding: '0 0px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent:
-                        (column.component === 'checkbox' ||
-                          column.component === 'button' ||
-                          column.component === 'icon') &&
-                        'center'
-                    }}
-                  >
-                    <Component
-                      {...params}
-                      column={{
-                        ...column,
-                        props: column.propsReducer ? column?.propsReducer({ row, props }) : props
-                      }}
-                      update={update}
-                      updateRow={updateRow}
-                      isLoading={isUpdatingField}
-                    />
-                  </Box>
-                )
-              }
-            })),
-            actionsColumn
-          ]}
-        />
+          ref={gridContainerRef}
+        >
+          {value && (
+            <AgGridReact
+              gridApiRef={gridApiRef}
+              rowData={value}
+              columnDefs={columnDefs}
+              suppressRowClickSelection={false}
+              stopEditingWhenCellsLoseFocus={false}
+              rowSelection='single'
+              editType='cell'
+              singleClickEdit={false}
+              onGridReady={params => {
+                gridApiRef.current = params.api
+                onChange(value)
+                setReady(true)
+              }}
+              onCellKeyDown={onCellKeyDown}
+              onCellClicked={onCellClicked}
+              rowHeight={45}
+              getRowId={params => params?.data?.id}
+              tabToNextCell={() => true}
+              tabToPreviousCell={() => true}
+              onRowClicked={handleRowClick}
+              onCellEditingStopped={onCellEditingStopped}
+            />
+          )}
+        </Box>
       </CacheDataProvider>
     </Box>
   )

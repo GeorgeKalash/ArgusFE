@@ -146,7 +146,7 @@ const CustomComboBox = ({
           helperText={helperText}
           InputProps={{
             ...params.InputProps,
-            endAdornment: (
+            endAdornment: !_disabled && (
               <React.Fragment>
                 {isLoading ? (
                   <CircularProgress color='inherit' size={18} />
