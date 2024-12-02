@@ -19,11 +19,11 @@ const DeliveryOrders = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: DeliveryRepository.DeliveriesOrders.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=recordId desc`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=recordId desc`
     })
 
     return { ...response, _startAt: _startAt }
@@ -35,9 +35,7 @@ const DeliveryOrders = () => {
         extension: DeliveryRepository.DeliveriesOrders.snapshot,
         parameters: `_filter=${filters.qry}`
       })
-    } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0 })
-    }
+    } else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
