@@ -5,12 +5,8 @@ import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
-
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
-
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { DateTimePicker } from '@mui/x-date-pickers'
-import { TrxType } from 'src/resources/AccessLevels'
 
 const CustomDateTimePicker = ({
   name,

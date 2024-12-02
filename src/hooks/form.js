@@ -52,6 +52,7 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
 
       ;(maxAccess?.record?.controls ?? []).forEach(obj => {
         const { controlId, accessLevel } = obj
+
         if (accessLevel === MANDATORY)
           if (controlId?.indexOf('.') < 0) {
             if (!values[controlId])
@@ -61,6 +62,7 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
               }
           } else {
             const { gridName, fieldName } = explode(controlId)
+
             ;(values?.[gridName] || []).forEach((row, index) => {
               if (!maxAccessErrors[gridName]) {
                 maxAccessErrors[gridName] = []

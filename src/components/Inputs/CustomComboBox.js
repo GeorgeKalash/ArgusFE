@@ -1,10 +1,8 @@
 import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@mui/material'
-// import { TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import React, { useEffect, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
-// import { DISABLED, MANDATORY, FORCE_ENABLED, HIDDEN } from 'src/services/api/maxAccess'
 import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomComboBox = ({
