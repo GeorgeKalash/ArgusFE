@@ -305,5 +305,9 @@ export const ResourceIds = {
   PlantSupervisors: 23108,
   ClientSalesTransaction: 51345,
   POSDefaults: 54103,
-  GlSync: 30501
+  GlSync: 30501,
+  FyOpening: 30503,
+  POSPayment: 36601,
+  FyOpening: 30503,
+  BusinessRules: 20114
 }

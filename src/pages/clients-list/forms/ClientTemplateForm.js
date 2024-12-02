@@ -34,10 +34,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import MoreDetails from './MoreDetails'
 import { useForm } from 'src/hooks/form'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
 
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { systemChecks, defaultsData } = useContext(ControlContext)
+
   const [showAsPassword, setShowAsPassword] = useState(!!recordId)
   const [showAsPasswordPhone, setShowAsPasswordPhone] = useState(!!recordId)
   const [showAsPasswordPhoneRepeat, setShowAsPasswordPhoneRepeat] = useState(!!recordId)
@@ -48,9 +51,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const [newProf, setNewProf] = useState(false)
   const [idTypes, setIdTypes] = useState({})
   const [nationalities, setNationalities] = useState({})
+  const [isValidatePhoneClicked, setIsValidatePhoneClicked] = useState(false)
+  const [imageUrl, setImageUrl] = useState(null)
 
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
+
+  const trialDays = defaultsData?.list?.find(({ key }) => key === 'ct-client-trial-days')?.value
 
   const initialValues = {
     //clientIDView
@@ -126,6 +133,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     oldReference: '',
     bankId: '',
     iban: '',
+    trialDays: null,
+    idScanMode: null,
 
     //clientRemittance
     remittanceRecordId: '',
@@ -188,8 +197,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       formik.setFieldValue('idtName', idType.name)
     }
   }
-
-  const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
 
   async function getCountry() {
     var parameters = `_filter=&_key=countryId`
@@ -348,6 +355,25 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       })
   }
 
+  const handleConfirmFetchMobileOwner = async () => {
+    setIsValidatePhoneClicked(true)
+    formik.setFieldTouched('cellPhone', false)
+    formik.setFieldTouched('cellPhoneRepeat', false)
+    formik.setFieldTouched('idNo', false)
+    formik.setFieldValue('trialDays', trialDays)
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        fullScreen: false,
+        okButtonAction: handleFetchMobileOwner,
+        DialogText: platformLabels.PhoneVerificationConfirmation
+      },
+      width: 450,
+      height: 170,
+      title: platformLabels.Confirmation
+    })
+  }
+
   const otpForm = () => {
     stack({
       Component: OTPPhoneVerification,
@@ -413,7 +439,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       street1: yup.string().required()
     }),
     onSubmit: async values => {
-      await postRtDefault(values)
+      shouldValidateOnSubmit ? handleConfirmFetchMobileOwner() : await postRtDefault(values)
     }
   })
 
@@ -705,6 +731,36 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     setNewProf(!newProf)
   }
 
+  const handleClickDigitalId = confirmWindow => {
+    formik.setFieldValue('idScanMode', 2)
+    const parameters = `_number=${formik.values.idNo}&_idType=${formik.values.idtId}`
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.Absher.get,
+      parameters
+    }).then(res => {
+      setImageUrl(res.record.imageContent)
+      confirmWindow.close()
+    })
+  }
+
+  const handleClickScanner = () => {
+    formik.setFieldValue('idScanMode', 1)
+  }
+
+  const digitalIdConfirmation = () => {
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: platformLabels.AbsherConfirmation,
+        okButtonAction: handleClickDigitalId,
+        fullScreen: false
+      },
+      width: 450,
+      height: 170,
+      title: platformLabels.Confirmation
+    })
+  }
+
   useEffect(() => {
     if (formik.values.nationalityId) {
       const languageId = nationalities?.list?.filter(item => item.recordId === formik.values.nationalityId)?.[0]
@@ -713,6 +769,32 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       languageId && formik.setFieldValue('smsLanguage', languageId)
     }
   }, [formik?.values?.nationalityId])
+
+  const handleFetchMobileOwner = async window => {
+    const parameters = `_idNo=${formik.values.idNo}&_mobileNumber=${formik.values.cellPhone}`
+
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.Mobile.get,
+      parameters: parameters
+    }).then(res => {
+      window.close()
+      if (res.record.isOwner) {
+        formik.setFieldValue('trialDays', null)
+        toast.success(platformLabels.PhoneVerification)
+      } else {
+        formik.setFieldValue('trialDays', trialDays)
+        toast.error(platformLabels.notOwner)
+      }
+    })
+  }
+
+  const isCellPhoneTouched = Boolean(formik.touched.cellPhone && formik.touched.cellPhoneRepeat)
+  const isIdNoTouched = Boolean(formik.touched.idNo)
+
+  const shouldValidateOnSubmit =
+    (isCellPhoneTouched || isIdNoTouched) &&
+    !isValidatePhoneClicked &&
+    !systemChecks?.some(item => item.checkId === 3504)
 
   return (
     <FormShell
@@ -806,6 +888,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           value={formik.values?.idNo}
                           required
                           onChange={e => {
+                            setIsValidatePhoneClicked(false)
+                            formik.setFieldTouched('idNo', true)
                             formik.handleChange(e)
                           }}
                           onCopy={handleCopy}
@@ -1226,29 +1310,38 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                 <Grid item xs={12}>
                   <Grid container spacing={2}>
                     <Grid item xs='auto'>
-                      <Button variant='contained' color='primary'>
-                        {labels.preview}
-                      </Button>
-                    </Grid>
-                    <Grid item xs='auto'>
-                      <Button variant='contained' color='primary'>
+                      <Button variant='contained' color='primary' onClick={handleClickScanner}>
                         {labels.scanner}
                       </Button>
                     </Grid>
                     <Grid item xs='auto'>
-                      <Button variant='contained' color='primary'>
+                      <Button
+                        variant='contained'
+                        color='primary'
+                        onClick={digitalIdConfirmation}
+                        disabled={!formik.values.idNo || !formik.values.idtId}
+                      >
                         {labels.digitalId}
                       </Button>
                     </Grid>
                   </Grid>
                 </Grid>
+                {imageUrl && (
+                  <Grid item xs={12}>
+                    <img
+                      src={`data:image/png;base64,${imageUrl}`}
+                      alt='Id image'
+                      style={{ objectFit: 'cover', width: '100%', height: '95%' }}
+                    />
+                  </Grid>
+                )}
               </Grid>
             </Grid>
             <Grid item xs={6}>
               <Grid container xs={12} spacing={2}>
                 <Grid item xs={12}>
                   <FieldSet title={labels.customerInformation}>
-                    <Grid item xs={6}>
+                    <Grid item xs={5}>
                       <CustomTextField
                         name='cellPhone'
                         type={showAsPasswordPhone && formik.values?.cellPhone ? 'password' : 'text'}
@@ -1258,6 +1351,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         required
                         phone={true}
                         onChange={e => {
+                          formik.setFieldTouched('cellPhone', true)
+                          setIsValidatePhoneClicked(false)
                           formik.handleChange(e)
                           formik.values?.cellPhoneRepeat === e.target.value &&
                             formik.setFieldValue('whatsAppNo', e.target.value)
@@ -1278,7 +1373,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={5}>
                       <CustomTextField
                         name='cellPhoneRepeat'
                         type={showAsPasswordPhoneRepeat && formik.values?.cellPhoneRepeat ? 'password' : 'text'}
@@ -1290,6 +1385,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         autoComplete='off'
                         phone={true}
                         onChange={e => {
+                          formik.setFieldTouched('cellPhoneRepeat', true)
+                          setIsValidatePhoneClicked(false)
                           formik.handleChange(e)
                           formik.values?.cellPhone === e.target.value &&
                             formik.setFieldValue('whatsAppNo', e.target.value)
@@ -1307,6 +1404,20 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         helperText={formik.touched.cellPhoneRepeat && formik.errors.cellPhoneRepeat}
                         maxAccess={maxAccess}
                       />
+                    </Grid>
+                    <Grid item xs={2}>
+                      <Button
+                        variant='contained'
+                        color='primary'
+                        onClick={handleConfirmFetchMobileOwner}
+                        disabled={
+                          !formik.values.idNo ||
+                          !formik.values.cellPhone ||
+                          systemChecks?.some(item => item.checkId === 3504)
+                        }
+                      >
+                        {labels.fetch}
+                      </Button>
                     </Grid>
                     <Grid item xs={4}>
                       <ResourceComboBox
