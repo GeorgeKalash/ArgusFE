@@ -39,7 +39,12 @@ const ConfirmationDialog = ({
           justifyContent: 'flex-end'
         }}
       >
-        <Button onClick={() => okButtonAction(window)} color='primary'>
+        <Button
+          onClick={() => {
+            okButtonAction(window)
+          }}
+          color='primary'
+        >
           {platformLabels.OK}
         </Button>
       </Box>
