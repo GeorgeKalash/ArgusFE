@@ -131,9 +131,11 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       plantId: yup.number().required(),
       vehicleId: yup.string().required(),
       driverId: yup.string().required(),
+      siteId: yup.string().required(),
       orders: yup.array().of(
         yup.object({
-          mwRef: yup.string().required()
+          mwRef: yup.string().required(),
+          siteRef: yup.string().required(),
         })
       )
     }),
@@ -559,11 +561,12 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
                     label={labels.site}
+                    required
                     values={formik.values}
                     displayField='name'
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId)
+                      formik.setFieldValue('siteId', newValue?.recordId || '')
                     }}
                     error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                   />
