@@ -135,7 +135,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       orders: yup.array().of(
         yup.object({
           mwRef: yup.string().required(),
-          siteRef: yup.string().required(),
+          siteName: yup.string().required(),
         })
       )
     }),
@@ -423,7 +423,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     {
       component: 'resourcecombobox',
       label: labels.site,
-      name: 'siteRef',
+      name: 'siteName',
       props: {
         endpointId: InventoryRepository.Site.qry,
         displayField: 'name',
@@ -565,6 +565,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     values={formik.values}
                     displayField='name'
                     maxAccess={maxAccess}
+                    readOnly={isPosted}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('siteId', newValue?.recordId || '')
                     }}
@@ -688,7 +689,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     value={formik.values.address}
                     rows={3.5}
                     maxLength='100'
-                    readOnly={isCancelled}
+                    readOnly={isCancelled || isPosted}
                     maxAccess={maxAccess}
                     viewDropDown={formik.values.clientId}
                     onChange={e => formik.setFieldValue('address', e.target.value)}
