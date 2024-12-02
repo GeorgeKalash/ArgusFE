@@ -305,6 +305,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         extraIncomeId: obj.clientMaster?.extraIncomeId,
         bankId: obj.clientMaster?.bankId,
         iban: obj.clientMaster?.iban,
+        trialDays: obj.clientMaster?.trialDays,
+        idScanMode: obj.clientMaster?.idScanMode,
 
         //clientRemittance
         recordId: recordId,
@@ -339,6 +341,21 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       })
 
       setEditMode(true)
+
+      if (
+        obj.clientRemittance?.clientId &&
+        obj.clientIDView?.idNo &&
+        obj.clientIDView?.idtId &&
+        obj.clientMaster?.idScanMode
+      ) {
+        const parameters = `_number=${obj.clientIDView?.idNo}&_clientId=${obj.clientRemittance?.clientId}&_idType=${obj.clientIDView?.idtId}&_idScanMode=${obj.clientMaster?.idScanMode}`
+        getRequest({
+          extension: CurrencyTradingSettingsRepository.PreviewImageID.get,
+          parameters: parameters
+        }).then(res => {
+          setImageUrl(res.record.imageContent ?? null)
+        })
+      }
     })
   }
 
@@ -472,7 +489,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       categoryName: obj.categoryName,
       extraIncomeId: obj.extraIncomeId,
       bankId: obj.bankId,
-      iban: obj.iban
+      iban: obj.iban,
+      trialDays: obj.trialDays,
+      idScanMode: obj.idScanMode
     }
 
     //CCTD
@@ -776,16 +795,21 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     getRequest({
       extension: CurrencyTradingSettingsRepository.Mobile.get,
       parameters: parameters
-    }).then(res => {
-      window.close()
-      if (res.record.isOwner) {
-        formik.setFieldValue('trialDays', null)
-        toast.success(platformLabels.PhoneVerification)
-      } else {
-        formik.setFieldValue('trialDays', trialDays)
-        toast.error(platformLabels.notOwner)
-      }
     })
+      .then(res => {
+        window.close()
+        formik.setFieldValue('govCellVerified', true)
+        if (res.record.isOwner) {
+          formik.setFieldValue('trialDays', null)
+          toast.success(platformLabels.PhoneVerification)
+        } else {
+          formik.setFieldValue('trialDays', trialDays)
+          toast.error(platformLabels.notOwner)
+        }
+      })
+      .catch(() => {
+        formik.setFieldValue('govCellVerified', false)
+      })
   }
 
   const isCellPhoneTouched = Boolean(formik.touched.cellPhone && formik.touched.cellPhoneRepeat)
@@ -794,6 +818,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const shouldValidateOnSubmit =
     (isCellPhoneTouched || isIdNoTouched) &&
     !isValidatePhoneClicked &&
+    !formik.values.govCellVerified &&
     !systemChecks?.some(item => item.checkId === 3504)
 
   return (
