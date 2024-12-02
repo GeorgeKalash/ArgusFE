@@ -370,7 +370,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
         parameters: formik?.values?.clientId && `_clientId=${formik?.values?.clientId}`,
         displayField: 'reference',
         valueField: 'itemName',
-        readOnly: isPosted || isCancelled,
+        readOnly: isPosted || isCancelled || editMode,
         mapping: [
           { from: 'recordId', to: 'recordId' },
           { from: 'reference', to: 'reference' },
@@ -558,7 +558,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
-                    readOnly={editMode}
                     label={labels.site}
                     values={formik.values}
                     displayField='name'
@@ -597,7 +596,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     label={labels.client}
                     form={formik}
                     required
-                    readOnly={isCancelled}
+                    readOnly={isCancelled || editMode}
                     displayFieldWidth={2}
                     valueShow='clientRef'
                     secondValueShow='clientName'
