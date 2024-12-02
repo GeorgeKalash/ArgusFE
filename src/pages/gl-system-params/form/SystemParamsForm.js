@@ -1,5 +1,5 @@
 import { useEffect, useContext } from 'react'
-import { Grid } from '@mui/material'
+import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -14,14 +14,21 @@ import { useForm } from 'src/hooks/form'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import * as yup from 'yup'
 
 const SystemParamsForm = ({ _labels, access }) => {
-  const { postRequest } = useContext(RequestsContext)
+  const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
+    validationSchema: yup.object({
+      GLDOEGainAccountId: yup.string().required(),
+      GLDOELossAccountId: yup.string().required(),
+      GLFYCLossAccountId: yup.string().required(),
+      GLFYCGainAccountId: yup.string().required()
+    }),
     initialValues: {
       GLDOEGainAccountId: null,
       GLDOEGainAccountname: '',
@@ -43,7 +50,11 @@ const SystemParamsForm = ({ _labels, access }) => {
       GLFYCGainAccountref: '',
       GLFYCLossAccountId: '',
       GLFYCLossAccountref: '',
-      GLFYCLossAccountname: ''
+      GLFYCLossAccountname: '',
+      GLFYCSeg0Start: '',
+      GLFYCSeg0End: '',
+      GLFYCDTId: '',
+      GLFYCDOECheck: false
     },
     onSubmit: values => {
       postSystemParams(values)
@@ -54,7 +65,7 @@ const SystemParamsForm = ({ _labels, access }) => {
     getDataResult()
   }, [])
 
-  const getDataResult = () => {
+  const getDataResult = async () => {
     const myObject = {}
 
     const filteredList = defaultsData?.list?.filter(obj => {
@@ -65,49 +76,53 @@ const SystemParamsForm = ({ _labels, access }) => {
         obj.key === 'GLRoundingAccountCr' ||
         obj.key === 'GLDOESeg0Start' ||
         obj.key === 'GLDOESeg0End' ||
-        obj.key === 'GLDOEGainAccountname' ||
-        obj.key === 'GLDOEGainAccountref' ||
-        obj.key === 'GLDOELossAccountname' ||
-        obj.key === 'GLDOELossAccountref' ||
-        obj.key === 'GLRoundingAccountDbref' ||
-        obj.key === 'GLRoundingAccountDbname' ||
         obj.key === 'GLDOEDTId' ||
-        obj.key === 'GLRoundingAccountCrref' ||
-        obj.key === 'GLRoundingAccountCrname' ||
         obj.key === 'GLFYCGainAccountId' ||
-        obj.key === 'GLFYCGainAccountname' ||
-        obj.key === 'GLFYCGainAccountref' ||
         obj.key === 'GLFYCLossAccountId' ||
-        obj.key === 'GLFYCLossAccountref' ||
-        obj.key === 'GLFYCLossAccountname'
+        obj.key === 'GLFYCSeg0Start' ||
+        obj.key === 'GLFYCSeg0End' ||
+        obj.key === 'GLFYCDTId' ||
+        obj.key === 'GLFYCDOECheck'
       )
     })
+
     filteredList?.forEach(obj => {
-      if (
+      if (obj.key === 'GLFYCDOECheck') {
+        myObject[obj.key] = obj.value === 'true' || obj.value === true
+      } else if (
         obj.key === 'GLDOESeg0End' ||
         obj.key === 'GLDOESeg0Start' ||
-        obj.key === 'GLDOEGainAccountname' ||
-        obj.key === 'GLDOEGainAccountref' ||
-        obj.key === 'GLDOELossAccountref' ||
-        obj.key === 'GLDOELossAccountname' ||
-        obj.key === 'GLRoundingAccountDbref' ||
-        obj.key === 'GLRoundingAccountDbname' ||
-        obj.key === 'GLRoundingAccountCrref' ||
-        obj.key === 'GLRoundingAccountCrname' ||
-        obj.key === 'GLFYCGainAccountname' ||
-        obj.key === 'GLFYCGainAccountref' ||
-        obj.key === 'GLFYCLossAccountref' ||
-        obj.key === 'GLFYCLossAccountname'
+        obj.key === 'GLFYCSeg0Start' ||
+        obj.key === 'GLFYCSeg0End'
       ) {
         myObject[obj.key] = obj.value || null
       } else {
         myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
       }
     })
-    formik.setValues(myObject)
-  }
 
-  console.log(formik.values, 'aaaaaaaaaaa')
+    formik.setValues(myObject)
+
+    const accountMappings = [
+      { key: 'GLDOEGainAccountId', refField: 'GLDOEGainAccountref', nameField: 'GLDOEGainAccountname' },
+      { key: 'GLDOELossAccountId', refField: 'GLDOELossAccountref', nameField: 'GLDOELossAccountname' },
+      { key: 'GLRoundingAccountDb', refField: 'GLRoundingAccountDbref', nameField: 'GLRoundingAccountDbname' },
+      { key: 'GLRoundingAccountCr', refField: 'GLRoundingAccountCrref', nameField: 'GLRoundingAccountCrname' },
+      { key: 'GLFYCGainAccountId', refField: 'GLFYCGainAccountref', nameField: 'GLFYCGainAccountname' },
+      { key: 'GLFYCLossAccountId', refField: 'GLFYCLossAccountref', nameField: 'GLFYCLossAccountname' }
+    ]
+
+    await Promise.all(
+      accountMappings.map(async ({ key, refField, nameField }) => {
+        const response = await getRequest({
+          extension: GeneralLedgerRepository.ChartOfAccounts.get,
+          parameters: `_recordId=${myObject[key]}`
+        })
+        formik.setFieldValue(refField, response.record.accountRef)
+        formik.setFieldValue(nameField, response.record.name)
+      })
+    )
+  }
 
   const postSystemParams = obj => {
     var data = []
@@ -142,7 +157,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueField='accountRef'
                 displayField='name'
                 name='GLDOEGainAccountId'
-                label={'1'}
+                label={_labels.glDoeGain}
                 form={formik}
                 required
                 displayFieldWidth={2}
@@ -163,7 +178,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueField='accountRef'
                 displayField='name'
                 name='GLDOELossAccountId'
-                label={'2'}
+                label={_labels.glDoeLoss}
                 form={formik}
                 required
                 displayFieldWidth={2}
@@ -184,9 +199,8 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueField='accountRef'
                 displayField='name'
                 name='GLRoundingAccountDb'
-                label={'3'}
+                label={_labels.glRounding}
                 form={formik}
-                required
                 displayFieldWidth={2}
                 valueShow='GLRoundingAccountDbref'
                 secondValueShow='GLRoundingAccountDbname'
@@ -205,9 +219,8 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueField='accountRef'
                 displayField='name'
                 name='GLRoundingAccountCr'
-                label={'3'}
+                label={_labels.glRoundingC}
                 form={formik}
-                required
                 displayFieldWidth={2}
                 valueShow='GLRoundingAccountCrref'
                 secondValueShow='GLRoundingAccountCrname'
@@ -225,7 +238,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 onClear={() => formik.setFieldValue('GLDOESeg0Start', '')}
                 name='GLDOESeg0Start'
                 onChange={formik.handleChange}
-                label={'5'}
+                label={_labels.glDoeSegStart}
                 value={formik.values.GLDOESeg0Start}
                 error={formik.touched.GLDOESeg0Start && Boolean(formik.errors.GLDOESeg0Start)}
               />
@@ -235,7 +248,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 onClear={() => formik.setFieldValue('GLDOESeg0End', '')}
                 name='GLDOESeg0End'
                 onChange={formik.handleChange}
-                label={'6'}
+                label={_labels.glDoeSegEnd}
                 value={formik.values.GLDOESeg0End}
                 error={formik.touched.GLDOESeg0End && Boolean(formik.errors.GLDOESeg0End)}
               />
@@ -245,13 +258,12 @@ const SystemParamsForm = ({ _labels, access }) => {
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
                 name='GLDOEDTId'
-                label={'7'}
+                label={_labels.glDoeDt}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('GLDOEDTId', newValue?.recordId)
-                  changeDT(newValue)
                 }}
                 error={formik.touched.GLDOEDTId && Boolean(formik.errors.GLDOEDTId)}
                 maxAccess={access}
@@ -263,7 +275,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueField='accountRef'
                 displayField='name'
                 name='GLFYCGainAccountId'
-                label={'8'}
+                label={_labels.glFycGain}
                 form={formik}
                 required
                 displayFieldWidth={2}
@@ -275,7 +287,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                   formik.setFieldValue('GLFYCGainAccountref', newValue ? newValue.accountRef : '')
                   formik.setFieldValue('GLFYCGainAccountname', newValue ? newValue.name : '')
                 }}
-                error={formik.touched.GLRoundingAccountCr && Boolean(formik.errors.GLRoundingAccountCr)}
+                error={formik.touched.GLFYCGainAccountId && Boolean(formik.errors.GLFYCGainAccountId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -284,7 +296,7 @@ const SystemParamsForm = ({ _labels, access }) => {
                 valueField='accountRef'
                 displayField='name'
                 name='GLFYCLossAccountId'
-                label={'9'}
+                label={_labels.glFycLoss}
                 form={formik}
                 required
                 displayFieldWidth={2}
@@ -296,7 +308,56 @@ const SystemParamsForm = ({ _labels, access }) => {
                   formik.setFieldValue('GLFYCLossAccountref', newValue ? newValue.accountRef : '')
                   formik.setFieldValue('GLFYCLossAccountname', newValue ? newValue.name : '')
                 }}
-                error={formik.touched.GLRoundingAccountCr && Boolean(formik.errors.GLRoundingAccountCr)}
+                error={formik.touched.GLFYCLossAccountId && Boolean(formik.errors.GLFYCLossAccountId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                onClear={() => formik.setFieldValue('GLFYCSeg0Start', '')}
+                name='GLFYCSeg0Start'
+                onChange={formik.handleChange}
+                label={_labels.glFycStart}
+                value={formik.values.GLFYCSeg0Start}
+                error={formik.touched.GLFYCSeg0Start && Boolean(formik.errors.GLFYCSeg0Start)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                onClear={() => formik.setFieldValue('GLFYCSeg0End', '')}
+                name='GLFYCSeg0End'
+                onChange={formik.handleChange}
+                label={_labels.glFycEnd}
+                value={formik.values.GLFYCSeg0End}
+                error={formik.touched.GLFYCSeg0End && Boolean(formik.errors.GLFYCSeg0End)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
+                name='GLFYCDTId'
+                label={_labels.glFycDt}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('GLFYCDTId', newValue?.recordId)
+                }}
+                error={formik.touched.GLFYCDTId && Boolean(formik.errors.GLFYCDTId)}
+                maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='GLFYCDOECheck'
+                    maxAccess={access}
+                    checked={formik.values?.GLFYCDOECheck}
+                    onChange={formik.handleChange}
+                  />
+                }
+                label={_labels.check}
               />
             </Grid>
           </Grid>
