@@ -68,33 +68,28 @@ const SystemParamsForm = ({ _labels, access }) => {
   const getDataResult = async () => {
     const myObject = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
-      return (
-        obj.key === 'GLDOEGainAccountId' ||
-        obj.key === 'GLDOELossAccountId' ||
-        obj.key === 'GLRoundingAccountDb' ||
-        obj.key === 'GLRoundingAccountCr' ||
-        obj.key === 'GLDOESeg0Start' ||
-        obj.key === 'GLDOESeg0End' ||
-        obj.key === 'GLDOEDTId' ||
-        obj.key === 'GLFYCGainAccountId' ||
-        obj.key === 'GLFYCLossAccountId' ||
-        obj.key === 'GLFYCSeg0Start' ||
-        obj.key === 'GLFYCSeg0End' ||
-        obj.key === 'GLFYCDTId' ||
-        obj.key === 'GLFYCDOECheck'
-      )
-    })
+    const VALID_OBJ_KEY = [
+      'GLDOEGainAccountId',
+      'GLDOELossAccountId',
+      'GLRoundingAccountDb',
+      'GLRoundingAccountCr',
+      'GLDOESeg0Start',
+      'GLDOESeg0End',
+      'GLDOEDTId',
+      'GLFYCGainAccountId',
+      'GLFYCLossAccountId',
+      'GLFYCSeg0Start',
+      'GLFYCSeg0End',
+      'GLFYCDTId',
+      'GLFYCDOECheck'
+    ]
+
+    const filteredList = defaultsData?.list?.filter(obj => VALID_OBJ_KEY.includes(obj.key))
 
     filteredList?.forEach(obj => {
       if (obj.key === 'GLFYCDOECheck') {
         myObject[obj.key] = obj.value === 'true' || obj.value === true
-      } else if (
-        obj.key === 'GLDOESeg0End' ||
-        obj.key === 'GLDOESeg0Start' ||
-        obj.key === 'GLFYCSeg0Start' ||
-        obj.key === 'GLFYCSeg0End'
-      ) {
+      } else if (['GLDOESeg0End', 'GLDOESeg0Start', 'GLFYCSeg0Start', 'GLFYCSeg0End'].includes(obj.key)) {
         myObject[obj.key] = obj.value || null
       } else {
         myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
@@ -139,6 +134,12 @@ const SystemParamsForm = ({ _labels, access }) => {
     })
   }
 
+  const handleChange = fieldArray => {
+    fieldArray.forEach(({ name, value }) => {
+      formik.setFieldValue(name, value)
+    })
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.SystemParams}
@@ -165,9 +166,16 @@ const SystemParamsForm = ({ _labels, access }) => {
                 secondValueShow='GLDOEGainAccountname'
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('GLDOEGainAccountId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('GLDOEGainAccountref', newValue ? newValue.accountRef : '')
-                  formik.setFieldValue('GLDOEGainAccountname', newValue ? newValue.name : '')
+                  const { recordId = '', accountRef = '', name = '' } = newValue || {}
+                  handleChange([
+                    { name: 'GLDOEGainAccountId', value: recordId },
+                    { name: 'GLDOEGainAccountref', value: accountRef },
+                    { name: 'GLDOEGainAccountname', value: name }
+                  ])
+
+                  // formik.setFieldValue('GLDOEGainAccountId', newValue ? newValue.recordId : '')
+                  // formik.setFieldValue('GLDOEGainAccountref', newValue ? newValue.accountRef : '')
+                  // formik.setFieldValue('GLDOEGainAccountname', newValue ? newValue.name : '')
                 }}
                 error={formik.touched.GLDOEGainAccountId && Boolean(formik.errors.GLDOEGainAccountId)}
               />
@@ -186,9 +194,12 @@ const SystemParamsForm = ({ _labels, access }) => {
                 secondValueShow='GLDOELossAccountname'
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('GLDOELossAccountId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('GLDOELossAccountref', newValue ? newValue.accountRef : '')
-                  formik.setFieldValue('GLDOELossAccountname', newValue ? newValue.name : '')
+                  const { recordId = '', accountRef = '', name = '' } = newValue || {}
+                  handleChange([
+                    { name: 'GLDOELossAccountId', value: recordId },
+                    { name: 'GLDOELossAccountref', value: accountRef },
+                    { name: 'GLDOELossAccountname', value: name }
+                  ])
                 }}
                 error={formik.touched.GLDOELossAccountId && Boolean(formik.errors.GLDOELossAccountId)}
               />
@@ -206,9 +217,12 @@ const SystemParamsForm = ({ _labels, access }) => {
                 secondValueShow='GLRoundingAccountDbname'
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('GLRoundingAccountDb', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('GLRoundingAccountDbref', newValue ? newValue.accountRef : '')
-                  formik.setFieldValue('GLRoundingAccountDbname', newValue ? newValue.name : '')
+                  const { recordId = '', accountRef = '', name = '' } = newValue || {}
+                  handleChange([
+                    { name: 'GLRoundingAccountDb', value: recordId },
+                    { name: 'GLRoundingAccountDbref', value: accountRef },
+                    { name: 'GLRoundingAccountDbname', value: name }
+                  ])
                 }}
                 error={formik.touched.GLRoundingAccountDb && Boolean(formik.errors.GLRoundingAccountDb)}
               />
@@ -226,9 +240,12 @@ const SystemParamsForm = ({ _labels, access }) => {
                 secondValueShow='GLRoundingAccountCrname'
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('GLRoundingAccountCr', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('GLRoundingAccountCrref', newValue ? newValue.accountRef : '')
-                  formik.setFieldValue('GLRoundingAccountCrname', newValue ? newValue.name : '')
+                  const { recordId = '', accountRef = '', name = '' } = newValue || {}
+                  handleChange([
+                    { name: 'GLRoundingAccountCr', value: recordId },
+                    { name: 'GLRoundingAccountCrref', value: accountRef },
+                    { name: 'GLRoundingAccountCrname', value: name }
+                  ])
                 }}
                 error={formik.touched.GLRoundingAccountCr && Boolean(formik.errors.GLRoundingAccountCr)}
               />
@@ -283,9 +300,12 @@ const SystemParamsForm = ({ _labels, access }) => {
                 secondValueShow='GLFYCGainAccountname'
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('GLFYCGainAccountId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('GLFYCGainAccountref', newValue ? newValue.accountRef : '')
-                  formik.setFieldValue('GLFYCGainAccountname', newValue ? newValue.name : '')
+                  const { recordId = '', accountRef = '', name = '' } = newValue || {}
+                  handleChange([
+                    { name: 'GLFYCGainAccountId', value: recordId },
+                    { name: 'GLFYCGainAccountref', value: accountRef },
+                    { name: 'GLFYCGainAccountname', value: name }
+                  ])
                 }}
                 error={formik.touched.GLFYCGainAccountId && Boolean(formik.errors.GLFYCGainAccountId)}
               />
@@ -304,9 +324,12 @@ const SystemParamsForm = ({ _labels, access }) => {
                 secondValueShow='GLFYCLossAccountname'
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('GLFYCLossAccountId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('GLFYCLossAccountref', newValue ? newValue.accountRef : '')
-                  formik.setFieldValue('GLFYCLossAccountname', newValue ? newValue.name : '')
+                  const { recordId = '', accountRef = '', name = '' } = newValue || {}
+                  handleChange([
+                    { name: 'GLFYCLossAccountId', value: recordId },
+                    { name: 'GLFYCLossAccountref', value: accountRef },
+                    { name: 'GLFYCLossAccountname', value: name }
+                  ])
                 }}
                 error={formik.touched.GLFYCLossAccountId && Boolean(formik.errors.GLFYCLossAccountId)}
               />
