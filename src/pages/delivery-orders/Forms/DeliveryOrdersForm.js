@@ -430,8 +430,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
         mapping: [
           { from: 'recordId', to: 'siteId' },
           { from: 'name', to: 'siteName' }
-        ],
-        columnsInDropDown: [{ key: 'name', value: 'Name' }]
+        ]
       }
     }
   ]
@@ -657,7 +656,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     name='szId'
                     label={labels.saleZone}
                     readOnly={isPosted}
-                    columnsInDropDown={[{ key: 'name', value: 'Name' }]}
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
