@@ -62,6 +62,35 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     endpointId: DeliveryRepository.DeliveriesOrders.qry
   })
 
+  const ordersInitialValues = [
+    {
+      id: 1,
+      doId: null,
+      doSeqNo: null,
+      seqNo: 1,
+      soSeqNo: null,
+      soRef: null,
+      itemId: null,
+      soId: null,
+      soDate: null,
+      sku: null,
+      itemName: null,
+      qty: null,
+      pendingQty: null,
+      placeHolder: null,
+      soRef: null,
+      siteId: null,
+      siteName: '',
+      isEditMode: false,
+      deliveredNowQty: null,
+      deliveredQty: null,
+      mwFunctionId: null,
+      mwId: null,
+      mwRef: '',
+      mwSeqNo: null
+    }
+  ]
+
   const { formik } = useForm({
     initialValues: {
       recordId: null,
@@ -95,34 +124,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       qty: null,
       siteId: null,
       address: '',
-      orders: [
-        {
-          id: 1,
-          doId: null,
-          doSeqNo: null,
-          seqNo: 1,
-          soSeqNo: null,
-          soRef: null,
-          itemId: null,
-          soId: null,
-          soDate: null,
-          sku: null,
-          itemName: null,
-          qty: null,
-          pendingQty: null,
-          placeHolder: null,
-          soRef: null,
-          siteId: null,
-          siteName: '',
-          isEditMode: false,
-          deliveredNowQty: null,
-          deliveredQty: null,
-          mwFunctionId: null,
-          mwId: null,
-          mwRef: '',
-          mwSeqNo: null
-        }
-      ]
+      orders: ordersInitialValues
     },
     maxAccess,
     enableReinitialize: false,
@@ -374,7 +376,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
         valueField: 'itemName',
         readOnly: isPosted || isCancelled || editMode,
         mapping: [
-          { from: 'recordId', to: 'recordId' },
           { from: 'reference', to: 'reference' },
           { from: 'itemName', to: 'itemName' },
           { from: 'seqNo', to: 'mwSeqNo' },
@@ -473,6 +474,10 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       title: labels.AddressFilter
     })
   }
+
+  useEffect(() => {
+    formik.setFieldValue('orders', ordersInitialValues)
+  }, [formik?.values?.clientId])
 
   return (
     <FormShell
