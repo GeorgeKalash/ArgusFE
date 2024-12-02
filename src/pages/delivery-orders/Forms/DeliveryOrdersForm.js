@@ -460,6 +460,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
   }
 
   function openAddressFilterForm(deliveryOrder) {
+    console.log(formik.values.addressId)
     stack({
       Component: AddressFilterForm,
       props: {
@@ -467,7 +468,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
         labels,
         deliveryOrder,
         form: formik.values,
-        handleAddressValues: setAddressValues
+        handleAddressValues: setAddressValues,
+        selectedAddressId: formik.values.addressId
       },
       width: 950,
       height: 600,

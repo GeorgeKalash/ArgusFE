@@ -21,6 +21,7 @@ export default function AddressFilterForm({
   deliveryOrder = false,
   form,
   handleAddressValues,
+  selectedAddressId,
   window
 }) {
   const [data, setData] = useState([])
@@ -126,7 +127,7 @@ export default function AddressFilterForm({
           })
           const formattedAddress = res2.record.formattedAddress.replace(/[\r\n]+/g, ',').replace(/,$/, '')
 
-          return { addressId: item.addressId, address: formattedAddress }
+          return { addressId: item.addressId, address: formattedAddress, checked: item.addressId === selectedAddressId }
         })
       )
       setData({ list: formattedAddressList })
