@@ -135,17 +135,23 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     enableReinitialize: false,
     validateOnChange: true,
     validateOnBlur: true,
+    validate: values => {
+      const errors = {}
+      const total = checkAmountValidation(values.operations)
+      if (total && !values.id_type) errors['id_type'] = ' '
+      if (total && !values.idNo) errors['idNo'] = ' '
+      if (total && !values.birthDate) errors['birthDate'] = ' '
+      if (total && !values.firstName) errors['firstName'] = ' '
+      if (total && !values.lastName) errors['lastName'] = ' '
+      if (total && !values.expiryDate) errors['expiryDate'] = ' '
+      if (total && !values.nationalityId) errors['nationalityId'] = ' '
+      if (total && !values.cellPhone) errors['cellPhone'] = ' '
+      if (total && !values.professionId) errors['professionId'] = ' '
+
+      return errors
+    },
     validationSchema: yup.object({
       date: yup.string().required(),
-      id_type: yup.number().required(),
-      idNo: yup.number().required(),
-      birthDate: yup.string().required(),
-      firstName: yup.string().required(),
-      lastName: yup.string().required(),
-      expiryDate: yup.string().required(),
-      nationalityId: yup.string().required(),
-      cellPhone: yup.string().required(),
-      professionId: yup.string().required(),
       nationalityType: yup.number().required(),
       operations: yup
         .array()
@@ -389,6 +395,17 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     }
   })
 
+  const checkAmountValidation = array => {
+    const total = array.reduce((sumLc, row) => {
+      const curValue = parseFloat(row.lcAmount?.toString()?.replace(/,/g, '')) || 0
+
+      return sumLc + curValue
+    }, 0)
+    console.log(total >= 5000)
+
+    return total >= 5000 ? true : false
+  }
+
   const emptyRows = formik.values.operations.filter(
     row =>
       row.id !== 1 &&
@@ -442,8 +459,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
   const isReleased = formik.values.status === 4
-
-  console.log(isPosted, 'isPosted')
 
   async function setOperationType(type) {
     if (type) {
@@ -840,11 +855,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       values={formik.values}
                       readOnly
                       onChange={(event, newValue) => {
-                        if (newValue) {
-                          formik.setFieldValue('status', newValue?.key)
-                        } else {
-                          formik.setFieldValue('status', '')
-                        }
+                        formik && formik.setFieldValue('status', newValue?.key)
                       }}
                       maxAccess={maxAccess}
                       error={formik.touched.status && Boolean(formik.errors.status)}
@@ -905,11 +916,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       values={formik.values}
                       required
                       onChange={(event, newValue) => {
-                        if (newValue) {
-                          formik.setFieldValue('nationalityType', newValue?.key)
-                        } else {
-                          formik.setFieldValue('nationalityType', '')
-                        }
+                        formik && formik.setFieldValue('nationalityType', newValue?.key)
                       }}
                       maxAccess={maxAccess}
                       error={formik.touched.nationalityType && Boolean(formik.errors.nationalityType)}
@@ -936,7 +943,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           type={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : 'text'}
                           value={formik.values.idNo}
                           readOnly={editMode || isClosed || idInfoAutoFilled}
-                          required
+                          required={total >= 5000}
                           maxLength='20'
                           onBlur={e => {
                             const value = e.target.value
@@ -964,7 +971,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           name='birthDate'
                           label={labels.birthDate}
                           value={formik.values?.birthDate}
-                          required={true}
+                          required={total >= 5000}
                           onChange={formik.setFieldValue}
                           onClear={() => formik.setFieldValue('birthDate', '')}
                           error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
@@ -992,15 +999,11 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           valueField='recordId'
                           displayField='name'
                           onChange={(event, newValue) => {
-                            if (newValue) {
-                              formik.setFieldValue('id_type', newValue?.key)
-                            } else {
-                              formik.setFieldValue('id_type', '')
-                            }
+                            formik && formik.setFieldValue('id_type', newValue?.key)
                           }}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                           values={formik.values}
-                          required
+                          required={total >= 5000}
                           maxAccess={maxAccess}
                           error={formik.touched.id_type && Boolean(formik.errors.id_type)}
                         />
@@ -1047,7 +1050,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           name='expiryDate'
                           label={labels.expiryDate}
                           value={formik.values?.expiryDate}
-                          required={true}
+                          required={total >= 5000}
                           onChange={formik.setFieldValue}
                           onClear={() => formik.setFieldValue('expiryDate', '')}
                           error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
@@ -1065,7 +1068,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           label={labels.firstName}
                           value={formik.values.firstName}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          required
+                          required={total >= 5000}
                           maxLength='20'
                           onChange={formik.handleChange}
                           forceUpperCase={true}
@@ -1109,7 +1112,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           label={labels.lastName}
                           value={formik.values.lastName}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          required
+                          required={total >= 5000}
                           maxLength='20'
                           onChange={formik.handleChange}
                           forceUpperCase={true}
@@ -1196,7 +1199,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                             setShowAsPasswordPhone(false)
                           }}
                           maxLength='20'
-                          required
+                          required={total >= 5000}
                           onClear={() => formik.setFieldValue('cellPhone', '')}
                           error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
                           maxAccess={maxAccess}
@@ -1210,22 +1213,18 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           label={labels.nationalityId}
                           valueField='recordId'
                           displayField={['reference', 'name', 'flName']}
+                          values={formik.values}
                           columnsInDropDown={[
                             { key: 'reference', value: 'Reference' },
                             { key: 'name', value: 'Name' },
                             { key: 'flName', value: 'Foreign Language Name' }
                           ]}
+                          required={total >= 5000}
                           onChange={(event, newValue) => {
-                            if (newValue) {
-                              formik.setFieldValue('nationalityId', newValue?.key)
-                            } else {
-                              formik.setFieldValue('nationalityId', '')
-                            }
+                            formik && formik.setFieldValue('nationalityId', newValue?.recordId)
                           }}
-                          readOnly={editMode || isClosed || idInfoAutoFilled}
-                          values={formik.values}
-                          required
                           maxAccess={maxAccess}
+                          readOnly={editMode || isClosed || idInfoAutoFilled}
                           error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
                         />
                       </Grid>
@@ -1236,20 +1235,16 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           label={labels.professionId}
                           valueField='recordId'
                           displayField={['reference', 'name']}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          values={formik.values}
+                          required={total >= 5000}
                           columnsInDropDown={[
                             { key: 'reference', value: 'Reference' },
                             { key: 'name', value: 'Name' }
                           ]}
                           onChange={(event, newValue) => {
-                            if (newValue) {
-                              formik.setFieldValue('professionId', newValue?.key)
-                            } else {
-                              formik.setFieldValue('professionId', '')
-                            }
+                            formik && formik.setFieldValue('professionId', newValue?.key)
                           }}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          values={formik.values}
-                          required
                           maxAccess={maxAccess}
                           error={formik.touched.professionId && Boolean(formik.errors.professionId)}
                         />
@@ -1294,11 +1289,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                             { key: 'name', value: 'Name' }
                           ]}
                           onChange={(event, newValue) => {
-                            if (newValue) {
-                              formik.setFieldValue('purpose_of_exchange', newValue?.key)
-                            } else {
-                              formik.setFieldValue('purpose_of_exchange', '')
-                            }
+                            formik && formik.setFieldValue('purpose_of_exchange', newValue?.key)
                           }}
                           readOnly={editMode || isClosed}
                           values={formik.values}

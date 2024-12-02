@@ -67,8 +67,8 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       )
       .required('Cash array is required')
 
-    rest.setFormik({ ...initialValuePayment, paymentValidation })
-  }, [rest.name])
+    !value && rest.setFormik({ ...initialValuePayment, paymentValidation })
+  }, [rest.name, value])
 
   const calculate = values => {
     const totalPaidAmount = values.reduce((sum, current) => sum + parseFloat(current.paidAmount || 0), 0)
