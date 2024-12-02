@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from 'src/lib/maxAccess'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomLookup = ({
   type = 'text',

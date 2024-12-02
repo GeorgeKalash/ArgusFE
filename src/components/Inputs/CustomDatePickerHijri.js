@@ -77,6 +77,7 @@ export default function CustomDatePickerHijri({
         slotProps={{
           textField: {
             required: _required,
+            required: _required,
             readOnly: _readOnly,
             size: size,
             fullWidth: fullWidth,
