@@ -110,10 +110,7 @@ const CustomComboBox = ({
           )
         }
       }}
-      isOptionEqualToValue={(option, value) => {
-        if (props?.secondValueField) return option[props.secondValueField] === value[props.secondValueField]
-        else return option[valueField] === value[valueField]
-      }}
+      isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
       onChange={(event, newValue) => {
         onChange(name, newValue)
         setAutoFocus(true)

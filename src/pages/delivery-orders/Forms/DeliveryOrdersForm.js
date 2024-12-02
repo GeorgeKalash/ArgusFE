@@ -369,8 +369,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
         endpointId: formik?.values?.clientId && DeliveryRepository.MW.qry,
         parameters: formik?.values?.clientId && `_clientId=${formik?.values?.clientId}`,
         displayField: 'reference',
-        valueField: 'recordId',
-        secondValueField: 'itemName',
+        valueField: 'itemName',
         readOnly: isPosted || isCancelled,
         mapping: [
           { from: 'recordId', to: 'recordId' },
