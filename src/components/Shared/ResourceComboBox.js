@@ -68,6 +68,10 @@ export default function ResourceComboBox({
       setApiResponse(!!datasetId ? { list: data } : data)
       if (typeof setData == 'function') setData(!!datasetId ? { list: data } : data)
       setIsLoading(false)
+
+      if (!values[name]) {
+        selectFirstOption();
+      }
     }
   }
 
@@ -92,7 +96,11 @@ export default function ResourceComboBox({
 
 
   const onBlur = (e, HighlightedOption) => {
-    !HighlightedOption ? selectFirstOption() : rest.onChange('', HighlightedOption)
+    if (HighlightedOption) {
+      rest.onChange('', HighlightedOption);
+    } else if (!values[name] && finalItemsListRef.current?.[0]) {
+      selectFirstOption();
+    }
   }
   
 

@@ -142,9 +142,7 @@ const CustomComboBox = ({
                   })}
                 </li>
               )}
-              <li
-                {...props}
-              >
+              <li {...props}>
                 {columnsInDropDown.map((header, i) => {
                   return (
                     <Box key={i} sx={{ flex: 1 }}>
@@ -179,8 +177,8 @@ const CustomComboBox = ({
           error={error}
           helperText={helperText}
           onBlur={e => {
-            onBlur(e)
-            if (selectFirstValue.current !== 'click') {
+            const listbox = document.querySelector('[role="listbox"]')
+            if (selectFirstValue.current !== 'click' && listbox && listbox.offsetHeight > 0) {
               onBlur(e, valueHighlightedOption?.current)
             }
           }}
