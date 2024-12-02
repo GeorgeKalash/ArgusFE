@@ -47,6 +47,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
+      recordId,
       reference: '',
       accountId: null,
       date: new Date(),
@@ -351,10 +352,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 secondValueShow='accountName'
                 form={formik}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('accountId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('accountRef', newValue?.reference || null)
-                  formik.setFieldValue('accountName', newValue?.name || null)
-                  formik.setFieldValue('spId', newValue?.spId || null)
+                  formik.setFieldValue('accountId', newValue ? newValue.recordId : null)
+                  formik.setFieldValue('accountRef', newValue?.reference || '')
+                  formik.setFieldValue('accountName', newValue?.name || '')
+                  formik.setFieldValue('spId', newValue?.spId || '')
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
