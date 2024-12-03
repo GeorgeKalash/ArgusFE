@@ -24,7 +24,7 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId,
+      recordId,
       name: '',
       reference: '',
       description: ''

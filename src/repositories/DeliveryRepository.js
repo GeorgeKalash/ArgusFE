@@ -40,11 +40,9 @@ export const DeliveryRepository = {
     flag: service + 'flagTRP'
   },
   ExpenseTypes: {
-    qry: service + 'qryET',
     get: service + 'getET',
     set: service + 'setET',
     del: service + 'delET',
-    page: service + 'pageET',
-    snapshot: service + 'snapshotET'
+    page: service + 'pageET'
   }
 }
