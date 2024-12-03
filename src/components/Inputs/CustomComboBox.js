@@ -65,6 +65,20 @@ const CustomComboBox = ({
 
   const selectFirstValue = useRef(null)
 
+  useEffect(() => {
+    function handleBlur(event) {
+      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
+        selectFirstValue.current = 'click'
+      }
+    }
+
+    document.addEventListener('mousedown', handleBlur)
+
+    return () => {
+      document.removeEventListener('mousedown', handleBlur)
+    }
+  }, [])
+
   return _hidden ? (
     <></>
   ) : (
