@@ -484,7 +484,11 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
   }
 
   useEffect(() => {
-    if (!formik.values.clientId) formik.setFieldValue('orders', ordersInitialValues)
+    if (!formik.values.clientId) {
+      formik.setFieldValue('orders', ordersInitialValues)
+      formik.setFieldValue('addressId', null)
+      formik.setFieldValue('address', '')
+    }
   }, [formik?.values?.clientId])
 
   return (
