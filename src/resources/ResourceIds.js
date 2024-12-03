@@ -286,6 +286,7 @@ export const ResourceIds = {
   InventoryOpeningCosts: 41203,
   OpenMultiCurrencyCashTransfer: 33315,
   LockedRecords: 23302,
+  UserDefined: 41114,
   AvailabilitiesBySite: 41226,
   ProductionSheet: 42327,
   ProdSheetDocumentTypeDefault: 42120,
@@ -301,7 +302,14 @@ export const ResourceIds = {
   SalesInquiries: 51300,
   MigrateBarcodeData: 41508,
   PhysicalCountSerialSummary: 44206,
+  IVMDParts: 41223,
+  PlantSupervisors: 23108,
   ClientSalesTransaction: 51345,
   POSDefaults: 54103,
-  GlSync: 30501
+  GlSync: 30501,
+  FyOpening: 30503,
+  SystemParams: 30109,
+  POSPayment: 36601,
+  FyOpening: 30503,
+  BusinessRules: 20114
 }
