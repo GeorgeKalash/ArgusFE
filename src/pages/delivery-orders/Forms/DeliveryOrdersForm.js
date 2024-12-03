@@ -399,8 +399,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
 
       },
       propsReducer({ row, props }) {
-        console.log(row, props)
-
         return { ...props, readOnly: !!row.mwId }
       }
     },
@@ -425,7 +423,17 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       label: labels.qty,
       name: 'qty',
       props: {
-        readOnly: isPosted || isCancelled
+        readOnly: isPosted || isCancelled,
+        allowNegative: false
+      },
+      async onChange({ row: { update, oldRow, newRow } }) {
+        if (newRow.qty) {
+          if (newRow.qty > oldRow.qty) {
+            update({
+              qty: oldRow.qty
+            })
+          }
+        }
       }
     },
     {
