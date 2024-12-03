@@ -269,6 +269,7 @@ const PhysicalCountItemDe = () => {
       async onChange({ row: { update, newRow } }) {
         let itemId
         itemId = newRow?.itemId
+
         // if (!disSkuLookup) {
         //   itemId = newRow?.itemId
         //   if (disableItemDuplicate) {
@@ -283,6 +284,7 @@ const PhysicalCountItemDe = () => {
         //     return
         //   }
         // }
+
         if (itemId) {
           const res = await getRequest({
             extension: InventoryRepository.Physical.get,
@@ -299,9 +301,7 @@ const PhysicalCountItemDe = () => {
       },
       async onCellPress(e, { row: { addRow, oldValue, update } }) {
         if (disSkuLookup) {
-          console.log(e.target.value, oldValue.sku, 'oldValue')
           var txtRes
-          // // const oldValue = formik.values.rows[id - 1]?.sku
           if (e.target.value !== oldValue.sku) {
             txtRes = await getRequest({
               extension: InventoryRepository.Items.get2,
