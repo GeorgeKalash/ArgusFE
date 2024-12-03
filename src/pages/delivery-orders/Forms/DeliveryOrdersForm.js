@@ -475,7 +475,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
         deliveryOrder,
         form: formik.values,
         handleAddressValues: setAddressValues,
-        selectedAddressId: formik.values.addressId
+        checkedAddressId: formik.values.addressId
       },
       width: 950,
       height: 600,
