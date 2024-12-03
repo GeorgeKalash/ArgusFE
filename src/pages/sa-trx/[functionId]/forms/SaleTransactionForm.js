@@ -121,7 +121,9 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       commitItems: false,
       postMetalToFinancials: false,
       metalPrice: 0,
-      KGmetalPrice: 0
+      KGmetalPrice: 0,
+      balance: 0,
+      accountId: 0
     },
     items: [
       {
@@ -808,6 +810,9 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       items: modifiedList,
       taxes: [...saTrxTaxes]
     })
+
+    const res = await getClientInfo(saTrxHeader.clientId)
+    getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
   }
 
   async function getSalesTransactionPack(transactionId) {
@@ -887,10 +892,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       return
     }
 
-    const res = await getRequest({
-      extension: SaleRepository.Client.get,
-      parameters: `_recordId=${clientId}`
-    })
+    const res = await getClientInfo(clientId)
 
     const record = res?.record || {}
     const accountId = record.accountId
@@ -920,9 +922,27 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         szId: record.szId,
         billAddressId: record.billAddressId,
         billAddress: billAdd,
-        creditLimit: accountLimit?.limit ?? 0
+        creditLimit: accountLimit?.limit ?? 0,
+        accountId: record?.accountId
       }
     })
+
+    await getClientBalance(record?.accountId, formik.values.header.currencyId)
+  }
+
+  async function getClientInfo(clientId) {
+    return await getRequest({
+      extension: SaleRepository.Client.get,
+      parameters: `_recordId=${clientId}`
+    })
+  }
+
+  async function getClientBalance(accountId, currencyId) {
+    const res = await getRequest({
+      extension: FinancialRepository.AccountCreditBalance.get,
+      parameters: `_accountId=${accountId}&_currencyId=${currencyId}`
+    })
+    formik.setFieldValue('header.balance', res?.record?.balance || 0)
   }
 
   async function getItemPhysProp(itemId) {
@@ -1705,6 +1725,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('header.currencyId', newValue?.recordId || null)
+                    getClientBalance(formik.values.header?.accountId, newValue?.recordId)
                   }}
                   error={formik.touched?.header?.currencyId && Boolean(formik.errors?.header?.currencyId)}
                 />
@@ -1803,6 +1824,15 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     maxAccess={maxAccess}
                     label={labels.totWeight}
                     value={totalWeight}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item>
+                  <CustomNumberField
+                    name='balance'
+                    maxAccess={maxAccess}
+                    label={labels.balance}
+                    value={formik.values.header.balance}
                     readOnly
                   />
                 </Grid>
