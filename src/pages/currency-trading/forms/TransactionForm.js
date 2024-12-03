@@ -242,11 +242,11 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       if (isLastRowMandatoryOnly) {
         operations = values.operations?.filter((item, index) => index !== values.operations.length - 1)
       }
-
       if (
         ((!values?.idNoConfirm && values?.clientId) ||
           (!values?.clientId && !values.cellPhoneConfirm && !values?.idNoConfirm)) &&
-        !editMode
+        !editMode &&
+        values?.idNo !== null
       ) {
         stack({
           Component: ConfirmationOnSubmit,
@@ -349,30 +349,32 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             }))
         }
 
-        const hasKYC = await fetchInfoByKey({ key: values.idNo })
+        if (values.idNo) {
+          const hasKYC = await fetchInfoByKey({ key: values.idNo })
 
-        let totalBaseAmount = ''
-        if (total > baseAmount.value && !recordId) {
-          if (!hasKYC?.clientRemittance) {
-            stackError({
-              message: `You need to create full KYC file for this client.`
-            })
-
-            return
-          }
-        } else {
-          if (hasKYC?.clientId) {
-            const getbase = await getRequest({
-              extension: CTTRXrepository.CurrencyTrading.get3,
-              parameters: `_clientId=${hasKYC.clientId}`
-            })
-            totalBaseAmount = parseInt(getbase.record.baseAmount) + parseInt(total)
-            if (totalBaseAmount > baseAmount.value && !hasKYC.clientRemittance && !recordId) {
+          let totalBaseAmount = ''
+          if (total > baseAmount.value && !recordId) {
+            if (!hasKYC?.clientRemittance) {
               stackError({
                 message: `You need to create full KYC file for this client.`
               })
 
               return
+            }
+          } else {
+            if (hasKYC?.clientId) {
+              const getbase = await getRequest({
+                extension: CTTRXrepository.CurrencyTrading.get3,
+                parameters: `_clientId=${hasKYC.clientId}`
+              })
+              totalBaseAmount = parseInt(getbase.record.baseAmount) + parseInt(total)
+              if (totalBaseAmount > baseAmount.value && !hasKYC.clientRemittance && !recordId) {
+                stackError({
+                  message: `You need to create full KYC file for this client.`
+                })
+
+                return
+              }
             }
           }
         }
