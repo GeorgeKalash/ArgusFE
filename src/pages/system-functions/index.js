@@ -144,12 +144,15 @@ const SystemFunction = () => {
           <CustomTextField
             name='search'
             value={formik.values.search}
-            label={labels.search}
+            label={platformLabels.Search}
             onClear={() => {
               formik.setFieldValue('search', '')
             }}
-            sx={{ width: '30%' }}
+            sx={{ width: '20%' }}
             onChange={handleSearchChange}
+            onSearch={(e) => formik.setFieldValue('search', e)}
+            search={true}
+            height={35}
           />
         </Fixed>
         <Grow>
