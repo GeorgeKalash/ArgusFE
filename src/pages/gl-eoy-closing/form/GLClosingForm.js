@@ -47,6 +47,7 @@ export default function GlEoyClosingForm({ _labels, access }) {
       form={formik}
       maxAccess={access}
       editMode={true}
+      isCleared={false}
       isSavedClear={false}
     >
       <VertLayout>
