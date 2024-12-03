@@ -131,8 +131,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.number().required(),
-      vehicleId: yup.string().required(),
-      driverId: yup.string().required(),
       siteId: yup.string().required(),
       orders: yup.array().of(
         yup.object({
@@ -610,7 +608,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                       formik.setFieldValue('driverId', newValue ? newValue?.recordId : '')
                     }}
                     error={formik.touched.driverId && Boolean(formik.errors.driverId)}
-                    required
                   />
                 </Grid>
               </Grid>
@@ -657,7 +654,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                       formik.setFieldValue('vehicleId', newValue ? newValue?.recordId : '')
                     }}
                     error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
-                    required
                   />
                 </Grid>
               </Grid>
