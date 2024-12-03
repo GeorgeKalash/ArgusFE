@@ -67,8 +67,6 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
   })
 
   const post = async obj => {
-    const lastObject = obj[obj.length - 1]
-
     const data = {
       productId: pId,
       productSchedules: obj.map(({ id, seqNo, productId, plantId, saved, ...rest }, index) => ({
@@ -84,15 +82,6 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
     })
       .then(res => {
         if (res) toast.success(platformLabels.Edited)
-        setStore(prevStore => ({
-          ...prevStore,
-          plantId: lastObject.plantId,
-          currencyId: lastObject.currencyId,
-          countryId: lastObject.countryId,
-          dispersalId: lastObject.dispersalId,
-          _seqNo: lastObject.seqNo
-        }))
-        setRowSelectionModel(lastObject.id)
         getProductSchedules(pId)
       })
       .catch(error => {})
@@ -263,6 +252,15 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
               ...rest
             }))
           })
+        const lastObject = res.list[res.list.length - 1]
+        setStore(prevStore => ({
+          ...prevStore,
+          plantId: lastObject.plantId,
+          currencyId: lastObject.currencyId,
+          countryId: lastObject.countryId,
+          dispersalId: lastObject.dispersalId,
+          _seqNo: lastObject.seqNo
+        }))
       })
       .catch(error => {})
   }

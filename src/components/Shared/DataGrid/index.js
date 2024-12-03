@@ -22,6 +22,7 @@ export function DataGrid({
   allowDelete = true,
   allowAddNewLine = true,
   onSelectionChange,
+  rowSelectionModel,
   bg
 }) {
   const gridApiRef = useRef(null)
@@ -88,6 +89,15 @@ export function DataGrid({
       setReady(false)
     }
   }, [ready, value])
+
+  useEffect(() => {
+    if (gridApiRef.current && rowSelectionModel) {
+      const rowNode = gridApiRef.current.getRowNode(rowSelectionModel)
+      if (rowNode) {
+        rowNode.setSelected(true)
+      }
+    }
+  }, [rowSelectionModel])
 
   const addNewRow = params => {
     const highestIndex = params?.node?.data?.id + 1 || 1
@@ -505,6 +515,7 @@ export function DataGrid({
           newRow
         })
       }
+
       onSelectionChange(selectedRow, update)
     }
   }
