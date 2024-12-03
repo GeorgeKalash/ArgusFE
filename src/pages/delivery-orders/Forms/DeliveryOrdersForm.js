@@ -374,7 +374,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
         parameters: formik?.values?.clientId && `_clientId=${formik?.values?.clientId}`,
         displayField: 'reference',
         valueField: 'itemName',
-        readOnly: isPosted || isCancelled || editMode,
+        readOnly: isPosted || isCancelled,
         mapping: [
           { from: 'reference', to: 'reference' },
           { from: 'itemName', to: 'itemName' },
@@ -386,7 +386,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           { from: 'recordId', to: 'mwId' },
           { from: 'dropDownQty', to: 'deliveredNowQty' },
           { from: 'dropDownQty', to: 'pendingQty' },
-          { from: 'sku', to: 'sku' }
+          { from: 'sku', to: 'sku' },
+          { from: 'doId', to: 'doId' }
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
@@ -394,7 +395,13 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           { key: 'sku', value: 'SKU' },
           { key: 'qty', value: 'Qty' }
         ],
-        displayFieldWidth: 3
+        displayFieldWidth: 3,
+
+      },
+      propsReducer({ row, props }) {
+        console.log(row, props)
+
+        return { ...props, readOnly: !!row.mwId }
       }
     },
     {

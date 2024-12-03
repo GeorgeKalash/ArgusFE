@@ -126,6 +126,8 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
         readOnly: false
       },
       propsReducer({ row, props }) {
+        console.log(row, props)
+        
         return { ...props, readOnly: (row.statusName === 'Processed') || isPosted || isClosed }
       }
     }

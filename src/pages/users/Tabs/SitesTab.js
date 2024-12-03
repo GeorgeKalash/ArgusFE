@@ -165,6 +165,8 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
         ]
       },
       propsReducer({ row, props }) {
+        console.log(row, props)
+
         return { ...props, readOnly: !row.isChecked }
       }
     }

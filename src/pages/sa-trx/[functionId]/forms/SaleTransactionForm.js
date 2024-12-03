@@ -970,7 +970,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     return res?.record
   }
 
-  const handleCycleButtonClick = () => {
+  const handleButtonClick = () => {
     setReCal(true)
     let currentTdAmount
     let currentPctAmount
@@ -1828,7 +1828,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
                     readOnly={isPosted}
-                    handleCycleButtonClick={handleCycleButtonClick}
+                    handleButtonClick={handleButtonClick}
                     onChange={e => {
                       let discount = Number(e.target.value.replace(/,/g, ''))
                       if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
