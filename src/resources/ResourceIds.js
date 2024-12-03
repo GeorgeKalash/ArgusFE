@@ -308,5 +308,6 @@ export const ResourceIds = {
   GlSync: 30501,
   FyOpening: 30503,
   POSPayment: 36601,
-  FyOpening: 30503
+  FyOpening: 30503,
+  ExpenseTypes: 52102
 }
