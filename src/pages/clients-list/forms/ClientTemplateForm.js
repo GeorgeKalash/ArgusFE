@@ -190,11 +190,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     if (!value) {
       formik.setFieldValue('idtId', '')
       formik.setFieldValue('idtName', '')
+      formik.setFieldValue('isResident', false)
     }
     const idType = await getValue(value)
     if (idType) {
       formik.setFieldValue('idtId', idType.recordId)
       formik.setFieldValue('idtName', idType.name)
+      formik.setFieldValue('isResident', idType.isResident)
     }
   }
 
@@ -954,6 +956,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
                             formik.setFieldValue('idtId', newValue?.recordId || '')
                             formik.setFieldValue('idtName', newValue?.name || '')
+                            formik.setFieldValue('isResident', newValue?.isResident || false)
                           }}
                           error={formik.touched.idtId && Boolean(formik.errors.idtId)}
                           maxAccess={maxAccess}
