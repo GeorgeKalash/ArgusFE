@@ -307,5 +307,8 @@ export const ResourceIds = {
   POSDefaults: 54103,
   GlSync: 30501,
   FyOpening: 30503,
+  SystemParams: 30109,
+  POSPayment: 36601,
+  BusinessRules: 20114,
   IVPhysicalCountItemDetails: 44205
 }
