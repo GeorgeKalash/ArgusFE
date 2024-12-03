@@ -16,6 +16,7 @@ export const FixedAssetsRepository = {
     del: service + 'delGRP'
   },
   Location: {
+    page: service + 'pageLOC',
     qry: service + 'qryLOC',
     get: service + 'getLOC',
     set: service + 'setLOC',

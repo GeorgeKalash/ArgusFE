@@ -1,11 +1,6 @@
-import { Box } from '@mui/material'
 import { useFormik } from 'formik'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-
-// ** Custom Imports
-import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { useWindow } from 'src/windows'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect } from 'react'
@@ -13,16 +8,13 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 
 const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editMode }) => {
-  const { recordId, counties } = store
-  const { stack } = useWindow()
+  const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { height } = useWindowDimensions()
   const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
@@ -74,12 +66,10 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
     await postRequest({
       extension: RemittanceSettingsRepository.CorrespondentCurrency.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      toast.success(platformLabels.Edited)
+      if (res) getData()
     })
-      .then(res => {
-        toast.success(platformLabels.Edited)
-        if (res) getData()
-      })
-      .catch(error => {})
   }
 
   const columns = [
@@ -164,38 +154,36 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
       getRequest({
         extension: RemittanceSettingsRepository.CorrespondentCurrency.qry,
         parameters: parameters
+      }).then(res => {
+        if (res?.list?.length > 0) {
+          formik.setValues({
+            currencies: res.list.map(({ ...rest }, index) => ({
+              id: index,
+              saved: true,
+              ...rest
+            }))
+          })
+        } else {
+          formik.setValues({
+            currencies: [
+              {
+                id: 1,
+                corId: recordId,
+                currencyId: '',
+                currencyRef: '',
+                currencyName: '',
+                outward: false,
+                inward: false,
+                bankDeposit: false,
+                deal: false,
+                goc: false,
+                isInactive: false,
+                saved: false
+              }
+            ]
+          })
+        }
       })
-        .then(res => {
-          if (res?.list?.length > 0) {
-            formik.setValues({
-              currencies: res.list.map(({ ...rest }, index) => ({
-                id: index,
-                saved: true,
-                ...rest
-              }))
-            })
-          } else {
-            formik.setValues({
-              currencies: [
-                {
-                  id: 1,
-                  corId: recordId,
-                  currencyId: '',
-                  currencyRef: '',
-                  currencyName: '',
-                  outward: false,
-                  inward: false,
-                  bankDeposit: false,
-                  deal: false,
-                  goc: false,
-                  isInactive: false,
-                  saved: false
-                }
-              ]
-            })
-          }
-        })
-        .catch(error => {})
   }
   useEffect(() => {
     getData()
