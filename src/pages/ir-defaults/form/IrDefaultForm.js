@@ -62,6 +62,7 @@ const IrDefaultForm = ({ _labels, access }) => {
       editMode={true}
       isSavedClear={false}
       isCleared={false}
+      infoVisible={false}
     >
       <VertLayout>
         <Grow>
