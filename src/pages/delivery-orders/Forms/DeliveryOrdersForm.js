@@ -521,7 +521,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.docType}
-                    readOnly={editMode}
+                    readOnly={editMode || isCancelled}
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
@@ -572,7 +572,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     name='reference'
                     label={labels.reference}
                     value={formik.values.reference}
-                    readOnly={editMode}
+                    readOnly={editMode || isCancelled}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
@@ -588,7 +588,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     values={formik.values}
                     displayField='name'
                     maxAccess={maxAccess}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isCancelled}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('siteId', newValue?.recordId || '')
                     }}
@@ -679,7 +679,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
                     name='szId'
                     label={labels.saleZone}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isCancelled}
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
