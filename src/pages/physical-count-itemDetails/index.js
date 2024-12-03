@@ -4,10 +4,9 @@ import { useContext, useEffect, useState, useRef } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { Button, Grid, Hidden } from '@mui/material'
+import { Button, Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useResourceQuery } from 'src/hooks/resource'
-import { useWindow } from 'src/windows'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SCRepository } from 'src/repositories/SCRepository'
 import FormShell from 'src/components/Shared/FormShell'
@@ -18,14 +17,11 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SystemChecks } from 'src/resources/SystemChecks'
-import { ContactlessOutlined } from '@mui/icons-material'
 import toast from 'react-hot-toast'
 
 const PhysicalCountItemDe = () => {
-  const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [data, setData] = useState([])
   const [siteStore, setSiteStore] = useState([])
   const [controllerStore, setControllerStore] = useState([])
   const [filteredItems, setFilteredItems] = useState([])
@@ -34,8 +30,6 @@ const PhysicalCountItemDe = () => {
   const [jumpToNextLine, setJumpToNextLine] = useState(false)
   const [showDefaultQty, setShowDefaultQty] = useState(false)
   const [disableItemDuplicate, setDisableItemDuplicate] = useState(false)
-
-  //const [defaultQty, setDefaultQty] = useState(1)
 
   const { labels: _labels, maxAccess } = useResourceQuery({
     datasetId: ResourceIds.IVPhysicalCountItemDetails
@@ -107,16 +101,11 @@ const PhysicalCountItemDe = () => {
       setEditMode(items.length > 0)
       checkPhyStatus(copy.stockCountId, copy.siteId, copy.controllerId)
 
-      //const newItems = { list: items }
       handleClick(items)
-
-      //fetchGridData
     }
   })
 
   async function fetchGridData(stockCountId, siteId, controllerId) {
-    //getSysChecks()
-
     getDTDsku(stockCountId)
 
     await getRequest({
@@ -248,22 +237,9 @@ const PhysicalCountItemDe = () => {
     })
 
     if (DQres?.record?.value) setShowDefaultQty(DQres?.record?.value)
-
-    //checkDefQty()
   }
 
   const defaultQty = !jumpToNextLine && !showDefaultQty ? 0 : 1
-
-  /* const checkDefQty = async () => {
-    console.log('check', jumpToNextLine, showDefaultQty)
-    if (!jumpToNextLine) {
-      if (!showDefaultQty) {
-        setDefaultQty(0)
-      }
-    }
-  } */
-
-  const previousValuesRef = useRef(formik.values.rows)
 
   const columns = [
     {
@@ -291,43 +267,23 @@ const PhysicalCountItemDe = () => {
         jumpToNextLine: jumpToNextLine
       },
       async onChange({ row: { update, newRow } }) {
-        update({
-          countedQty: 1
-        })
-
         let itemId
-        if (!disSkuLookup) {
-          itemId = newRow?.itemId
-          if (disableItemDuplicate) {
-            if (formik.values.rows.find(item => item.itemId == itemId)) {
-              update({
-                itemId: null,
-                itemName: '',
-                sku: null,
-                priceType: null
-              }) // not clearing
-              /* const duplicateIndex = formik.values.rows.findIndex(item => item.itemId === itemId)
-              if (duplicateIndex !== -1) {
-                const updatedRows = formik.values.rows.filter((_, index) => index !== duplicateIndex)
-                formik.setFieldValue('rows', updatedRows)
-              } */
-              /* const newRows = formik.values.rows.filter(({ id }) => id !== newRow.id)
-              formik.setFieldValue('rows', newRows) */
-            }
-
-            /* console.log(formik.values.rows[1])
-              console.log(`${formik.values.rows[1]}`)
-              formik.setFieldValue(`${formik.values.rows[1]}`, {
-                itemId: null,
-                itemName: '',
-                sku: '',
-                priceType: null
-              }) */
-            return
-          }
-        }
+        itemId = newRow?.itemId
+        // if (!disSkuLookup) {
+        //   itemId = newRow?.itemId
+        //   if (disableItemDuplicate) {
+        //     if (formik.values.rows.find(item => item.itemId == itemId)) {
+        //       update({
+        //         itemId: null,
+        //         itemName: '',
+        //         sku: null,
+        //         priceType: null
+        //       })
+        //     }
+        //     return
+        //   }
+        // }
         if (itemId) {
-          // Fill Item Phy Properties
           const res = await getRequest({
             extension: InventoryRepository.Physical.get,
             parameters: `_itemId=${itemId}`
@@ -342,16 +298,16 @@ const PhysicalCountItemDe = () => {
         }
       },
       async onCellPress(e, { row: { addRow, oldValue, update } }) {
-        if (!disSkuLookup) {
-          console.log(e.target.value, oldValue.sku)
-
+        if (disSkuLookup) {
+          console.log(e.target.value, oldValue.sku, 'oldValue')
+          var txtRes
           // // const oldValue = formik.values.rows[id - 1]?.sku
-          // if (e.target.value !== oldValue.sku) {
-
-          const txtRes = await getRequest({
-            extension: InventoryRepository.Items.get2,
-            parameters: `_sku=${e.target.value}`
-          })
+          if (e.target.value !== oldValue.sku) {
+            txtRes = await getRequest({
+              extension: InventoryRepository.Items.get2,
+              parameters: `_sku=${e.target.value}`
+            })
+          }
           if (txtRes?.record) {
             const itemId = txtRes?.record?.recordId ? txtRes?.record?.recordId : ''
             addRow({
@@ -360,8 +316,8 @@ const PhysicalCountItemDe = () => {
                 id: oldValue.id,
                 sku: e.target.value,
                 itemId: itemId,
-                itemName: txtRes?.record?.name ? txtRes?.record?.name : '',
-                priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : 0
+                itemName: txtRes?.record?.name ? txtRes?.record?.name : oldValue.itemName,
+                priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : oldValue.priceType
               }
             })
           } else {
@@ -371,69 +327,9 @@ const PhysicalCountItemDe = () => {
             })
           }
         }
-
-        // } else {
-        //   addRow({ changes: null })
-        // }
       }
     },
 
-    /* {
-      component: 'resourcelookup',
-      label: _labels.sku,
-      name: 'sku',
-      props: {
-        endpointId: InventoryRepository.Item.snapshot,
-
-        //parameters: '_type=',
-        displayField: 'sku',
-        valueField: 'recordId',
-        columnsInDropDown: [
-          { key: 'sku', value: 'sku' },
-          { key: 'name', value: 'Name' },
-          { key: 'flName', value: 'FL Name' }
-        ],
-        mapping: [
-          { from: 'recordId', to: 'itemId' },
-          { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' },
-          { from: 'priceType', to: 'priceType' }
-        ],
-        displayFieldWidth: 1
-      } */
-
-    //fill item weight
-    /*  async onChange({ row: { update, oldRow, newRow } }) {
-        if (newRow.accountId) {
-          update({
-            currencyRef: formValues.currencyRef,
-            currencyId: formValues.currencyId,
-            exRate: exRateValue
-          })
-
-          if (formValues.currencyId) {
-            const result = await getCurrencyApi(formValues.currencyId)
-
-            const result2 = result?.record
-            const exRate = result2?.exRate
-            const rateCalcMethod = result2?.rateCalcMethod
-
-            const updatedRateRow = getRate({
-              amount: newRow?.amount,
-              exRate: exRate,
-              baseAmount: newRow?.baseAmount,
-              rateCalcMethod: rateCalcMethod,
-              dirtyField: DIRTYFIELD_RATE
-            })
-            update({
-              exRate: updatedRateRow.exRate,
-              amount: updatedRateRow.amount,
-              baseAmount: updatedRateRow.baseAmount
-            })
-          }
-        }
-      } */
-    //},
     {
       component: 'textfield',
       name: 'itemName',
@@ -448,35 +344,12 @@ const PhysicalCountItemDe = () => {
     {
       component: 'numberfield',
       label: _labels.weight,
-      name: 'weight', //calculate footer
+      name: 'weight',
       defaultValue: 0,
       props: {
         readOnly: true
       }
     }
-
-    /* {
-      component: 'numberfield',
-      name: 'metalId',
-      props :{
-        hidden: true
-      }
-    },
-    {
-      component: 'numberfield',
-      name: 'metalPurity',
-      props :{
-        hidden: true
-      }
-    },
-    {
-      component: 'textfield',
-      name: 'isMetal',
-      Hidden: true,
-      props :{
-        Hidden: true
-      }
-    }, */
   ]
 
   const clearGrid = () => {
@@ -542,18 +415,8 @@ const PhysicalCountItemDe = () => {
     })
 
     if (status == 3) {
-      // public enum StockCountPhysicalStatus
-      /*  {
-        PENDING = 1,
-        STARTED = 2,
-        CLOSED = 3
-    } */
-      //delete row hide
-
       toast.success(platformLabels.Posted)
     } else {
-      //delete row show
-
       toast.success(platformLabels.Unposted)
     }
   }
@@ -704,7 +567,7 @@ const PhysicalCountItemDe = () => {
             onChange={value => {
               formik.setFieldValue('rows', value)
             }}
-            value={formik.values?.rows}
+            value={formik.values.controllerId ? formik.values?.rows : []}
             error={formik.errors?.rows}
             columns={columns}
             disabled={formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}

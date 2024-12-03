@@ -255,7 +255,12 @@ export function DataGrid({
     const col = allColumns.find(({ name }) => name === params.colDef.field)
     if (col.onCellPress)
       if (event.key == 'Tab') {
-        if (column.colDef.component === 'resourcelookup' && col.props.jumpToNextLine) {
+        if (
+          column.colDef.component === 'resourcelookup' &&
+          col.props.jumpToNextLine &&
+          !error &&
+          node.rowIndex === api.getDisplayedRowCount() - 1
+        ) {
           if (col.props.jumpToNextLine) {
             addNewRow(params)
           }
