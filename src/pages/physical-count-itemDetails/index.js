@@ -118,7 +118,7 @@ const PhysicalCountItemDe = () => {
             id: index + 1,
             ...rest
           }))
-          formik.setFieldValue('rows', modifiedList)
+          modifiedList.length > 0 && formik.setFieldValue('rows', modifiedList)
         }
 
         setEditMode(res.list.length > 0)
