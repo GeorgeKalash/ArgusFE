@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Window from 'src/components/Shared/Window'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { v4 as uuidv4 } from 'uuid'
 
 const WindowContext = React.createContext(null)
@@ -8,16 +10,54 @@ const ClearContext = React.createContext(null)
 
 export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
+  const { postRequest } = useContext(RequestsContext)
   const [rerenderFlag, setRerenderFlag] = useState(false)
   const closedWindow = useRef(null)
+  const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
+
+  useEffect(() => {
+    const currentValue = { ...stack[stack.length - 1] }
+    if (currentValue.lockProps) {
+      const body = {
+        resourceId: currentValue.lockProps.resourceId,
+        recordId: currentValue.lockProps.recordId,
+        reference: currentValue.lockProps.reference,
+        userId: userId,
+        clockStamp: new Date()
+      }
+      postRequest({
+        extension: AccessControlRepository.lockRecord,
+        record: JSON.stringify(body)
+      })
+    }
+  }, [stack])
+
+  function unlockRecord() {
+    const currentValue = { ...stack[stack.length - 1] }
+    if (currentValue.lockProps) {
+      const body = {
+        resourceId: currentValue.lockProps.resourceId,
+        recordId: currentValue.lockProps.recordId,
+        reference: currentValue.lockProps.reference,
+        userId: userId,
+        clockStamp: new Date()
+      }
+      postRequest({
+        extension: AccessControlRepository.unlockRecord,
+        record: JSON.stringify(body)
+      })
+    }
+  }
 
   function closeWindow() {
+    unlockRecord()
     setStack(stack => {
       return stack.slice(0, stack.length - 1)
     })
   }
 
   function closeWindowById(givenId) {
+    unlockRecord()
     const currentValue = { ...stack[stack.length - 1] }
     closedWindow.current = currentValue
     setStack(stack.filter(({ id }) => givenId != id))

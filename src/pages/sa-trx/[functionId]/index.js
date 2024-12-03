@@ -161,7 +161,7 @@ const SaTrx = () => {
   })
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.reference)
   }
 
   const getCorrectLabel = functionId => {
@@ -178,7 +178,21 @@ const SaTrx = () => {
     }
   }
 
-  async function openForm(recordId) {
+  const getResourceId = functionId => {
+    if (functionId === SystemFunction.SalesInvoice) {
+      return ResourceIds.SalesInvoice
+    } else if (functionId === SystemFunction.SalesReturn) {
+      return ResourceIds.SaleReturn
+    } else if (functionId === SystemFunction.ConsignmentIn) {
+      return ResourceIds.ClientGOCIn
+    } else if (functionId === SystemFunction.ConsignmentOut) {
+      return ResourceIds.ClientGOCOut
+    } else {
+      return null
+    }
+  }
+
+  async function openForm(recordId, reference) {
     stack({
       Component: SaleTransactionForm,
       props: {
@@ -187,6 +201,13 @@ const SaTrx = () => {
         access,
         functionId: functionId
       },
+      lockProps: recordId
+        ? {
+            recordId: recordId,
+            reference: reference,
+            resourceId: getResourceId(parseInt(functionId))
+          }
+        : null,
       width: 1330,
       height: 720,
       title: getCorrectLabel(parseInt(functionId))
