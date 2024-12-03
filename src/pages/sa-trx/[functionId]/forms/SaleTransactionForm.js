@@ -179,7 +179,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -1227,6 +1227,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         labels,
         bill: true,
         form: formik.values.header,
+        checkedAddressId: formik.values?.header?.billAddressId,
         handleAddressValues: setAddressValues
       },
       width: 950,

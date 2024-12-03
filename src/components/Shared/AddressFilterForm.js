@@ -20,6 +20,7 @@ export default function AddressFilterForm({
   bill = false,
   form,
   handleAddressValues,
+  checkedAddressId,
   window
 }) {
   const [data, setData] = useState([])
@@ -122,6 +123,11 @@ export default function AddressFilterForm({
         })
       )
       setData({ list: formattedAddressList })
+
+      if (checkedAddressId) {
+        const matchingAddress = formattedAddressList.find(address => address.addressId === checkedAddressId)
+        matchingAddress.checked = true
+      }
     }
   }
 

@@ -981,6 +981,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         labels,
         shipment: clickShip,
         bill: clickBill,
+        checkedAddressId: clickShip ? formik.values?.shipToAddressId : formik.values?.billToAddressId,
         form: formik.values,
         handleAddressValues: setAddressValues
       },
