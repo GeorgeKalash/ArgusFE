@@ -16,8 +16,6 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
 import * as yup from 'yup'
-import { DataSets } from 'src/resources/DataSets'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import useIdType from 'src/hooks/useIdType'
 import { useInvalidate } from 'src/hooks/resource'
 import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
@@ -35,49 +33,9 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
-
-const FormContext = React.createContext(null)
-
-function FormField({ type, name, Component, valueField, onFocus, language, phone, ...rest }) {
-  const { formik, labels } = useContext(FormContext)
-
-  return (
-    <Component
-      {...{
-        ...rest,
-        type,
-        name,
-        label: labels[name],
-        values: formik.values,
-        value: formik.values[name],
-        error: formik.touched[name] && formik.errors[name],
-        errors: formik.errors,
-        valueField: valueField,
-        language: language,
-        phone: phone
-      }}
-      onChange={(e, v) => {
-        formik.setFieldValue(name, v ? v[valueField] ?? v : e.target.value)
-      }}
-      onFocus={e => {
-        if (onFocus && (name == 'idNo' || name == 'search')) {
-          onFocus(e.target.value)
-        }
-        if (onFocus && name == 'cellPhone') {
-          onFocus(e.target.value)
-        }
-      }}
-      onClear={() => {
-        formik.setFieldValue(name, '')
-      }}
-      form={formik}
-    />
-  )
-}
-
-function FormProvider({ formik, maxAccess, labels, children }) {
-  return <FormContext.Provider value={{ formik, maxAccess, labels }}>{children}</FormContext.Provider>
-}
+import PaymentGrid from 'src/components/Shared/PaymentGrid'
+import { DataSets } from 'src/resources/DataSets'
+import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
 
 export default function TransactionForm({ recordId, labels, access, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -92,6 +50,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [search, setSearch] = useState(null)
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
   const { platformLabels } = useContext(ControlContext)
+  const [formikSettings, setFormik] = useState({})
 
   const resetAutoFilled = () => {
     setIDInfoAutoFilled(false)
@@ -119,6 +78,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       {
         id: 1,
         currencyId: '',
+        oldNote: false,
         fcAmount: '',
         defaultRate: '',
         exRate: '',
@@ -127,19 +87,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         maxRate: ''
       }
     ],
-    amount: [
-      {
-        id: 1,
-        cashAccountId: '',
-        type: '',
-        typeName: '',
-        ccName: '',
-        amount: '',
-        ccId: '',
-        bankFees: '',
-        receiptRef: ''
-      }
-    ],
+    amount: formikSettings.initialValuePayment || [],
     date: new Date(),
     clientId: null,
     clientName: null,
@@ -162,6 +110,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     remarks: null,
     purpose_of_exchange: null,
     nationalityId: null,
+    nationalityType: null,
     cellPhone: null,
     status: '1',
     type: -1,
@@ -197,6 +146,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       nationalityId: yup.string().required(),
       cellPhone: yup.string().required(),
       professionId: yup.string().required(),
+      nationalityType: yup.number().required(),
       operations: yup
         .array()
         .of(
@@ -277,15 +227,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
           })
         )
         .required(),
-      amount: yup
-        .array()
-        .of(
-          yup.object().shape({
-            type: yup.string().required(),
-            amount: yup.number().nullable().required()
-          })
-        )
-        .required()
+      amount: formikSettings?.paymentValidation
     }),
     onSubmit: async values => {
       const lastRow = values.operations[values.operations.length - 1]
@@ -334,6 +276,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             recordId: values?.recordId || null,
             dtId,
             reference: values.reference,
+            nationalityId: values.nationalityId,
+            nationalityType: values.nationalityType,
             status: values.status,
             date: formatDateToApi(values.date),
             functionId: values.functionId,
@@ -356,6 +300,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             flName: null,
             keyword: null,
             nationalityId: values.nationalityId,
+            nationalityType: values.nationalityType,
             status: 1,
             addressId: null,
             cellPhone: values.cellPhone,
@@ -467,6 +412,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     const data = {
       recordId: result.headerView?.recordId,
       reference: result.headerView?.reference,
+      nationalityId: result.headerView?.nationalityId,
+      nationalityType: result.headerView?.nationalityType,
       status: result.headerView?.status,
       functionId: result.headerView?.functionId,
       plantId: result.headerView?.plantId,
@@ -485,14 +432,18 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     })
     if (result2.recordId) {
       if (recordId) toast.success(platformLabels.Closed)
-      invalidate()
       formik.setFieldValue('recordId', result2.recordId)
-      await getData(result2.recordId)
+      const receivedClient = await getData(result2.recordId)
+      isReleased && viewOTP(result2.recordId, receivedClient)
     }
+    invalidate()
   }
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
-  const isPosted = formik.values.status === 4
+  const isPosted = formik.values.status === 3
+  const isReleased = formik.values.status === 4
+
+  console.log(isPosted, 'isPosted')
 
   async function setOperationType(type) {
     if (type) {
@@ -535,6 +486,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     if (record) {
       formik.setFieldValue('recordId', record.headerView.recordId)
       formik.setFieldValue('reference', record.headerView.reference)
+      formik.setFieldValue('nationalityId', record.headerView.nationalityId)
+      formik.setFieldValue('nationalityType', record.headerView.nationalityType)
       formik.setFieldValue(
         'operations',
         record.items.map(({ seqNo, ...rest }) => ({
@@ -616,6 +569,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       recordId: values?.recordId || null,
       date: formatDateToApi(values.date),
       reference: values.reference,
+      nationalityId: values.nationalityId,
+      nationalityType: values.nationalityType,
       status: values.status,
       functionId: values.functionId,
       plantId: plantId ? plantId : values.plantId,
@@ -634,9 +589,9 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     })
     if (res.recordId) {
       toast.success(platformLabels.Reopened)
-      invalidate()
       await getData(res.recordId)
     }
+    invalidate()
   }
 
   const total = formik.values.operations.reduce((sumLc, row) => {
@@ -646,7 +601,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   }, 0)
 
   const receivedTotal = formik.values.amount.reduce((acc, { amount }) => {
-    return acc + (amount || 0)
+    return acc + parseFloat(amount?.toString()?.replace(/,/g, '')) || 0
   }, 0)
 
   const balance = total - receivedTotal
@@ -692,6 +647,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       formik.setFieldValue('expiryDate', formatDateFromApi(clientInfo.client.expiryDate))
       formik.setFieldValue('professionId', clientInfo.client.professionId)
       formik.setFieldValue('nationalityId', clientInfo.client.nationalityId)
+      formik.setFieldValue('nationalityType', clientInfo.client.nationalityType)
       formik.setFieldValue('cellPhone', clientInfo.client.cellPhone)
 
       setInfoAutoFilled(true)
@@ -699,21 +655,71 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   }
 
   async function fetchInfoByKey({ key }) {
-    const response = await getRequest({
+    await getRequest({
       extension: RTCLRepository.CtClientIndividual.get3,
       parameters: `_key=${key}`
-    })
+    }).then(res => {
+      setIDInfoAutoFilled(false)
 
-    return response.record
+      formik.setFieldValue('idNo', res.record.clientIDView.idNo)
+      formik.setFieldValue('firstName', res.record.clientIndividual.firstName)
+      formik.setFieldValue('clientId', res.record.clientId)
+      formik.setFieldValue('middleName', res.record.clientIndividual.middleName)
+      formik.setFieldValue('lastName', res.record.clientIndividual.lastName)
+      formik.setFieldValue('familyName', res.record.clientIndividual.familyName)
+      formik.setFieldValue('fl_firstName', res.record.clientIndividual.fl_firstName)
+      formik.setFieldValue('fl_lastName', res.record.clientIndividual.fl_lastName)
+      formik.setFieldValue('fl_middleName', res.record.clientIndividual.fl_middleName)
+      formik.setFieldValue('fl_familyName', res.record.clientIndividual.fl_familyName)
+      formik.setFieldValue('birthDate', formatDateFromApi(res.record.clientIndividual.birthDate))
+      formik.setFieldValue('resident', res.record.clientIndividual.isResident)
+      formik.setFieldValue('professionId', res.record.clientMaster.professionId)
+      formik.setFieldValue('sponsorName', res.record.clientIndividual.sponsorName)
+      formik.setFieldValue('id_type', res.record.clientIDView.idtId)
+      formik.setFieldValue('nationalityId', res.record.clientMaster.nationalityId)
+      formik.setFieldValue('nationalityType', res.record.clientMaster.nationalityType)
+      formik.setFieldValue('cellPhone', res.record.clientMaster.cellPhone)
+      formik.setFieldValue('expiryDate', formatDateFromApi(res.record.clientIDView.idExpiryDate))
+
+      setIDInfoAutoFilled(true)
+
+      return res.record
+    })
   }
 
-  const onPost = async () => {
+  function viewAuthOTP() {
+    stack({
+      Component: OTPAuthentication,
+      props: {
+        values: formik.values,
+        PlantSupervisors: true,
+        onClose: () => Post()
+      },
+      expandable: false,
+      width: 400,
+      height: 400,
+      spacing: false,
+      title: platformLabels.OTPVerification
+    })
+  }
+
+  const onPost = () => {
+    if (!formik.values.otp) {
+      viewAuthOTP()
+
+      return
+    } else Post()
+  }
+
+  const Post = async () => {
     const values = formik.values
 
     const data = {
       recordId: values?.recordId || null,
       date: formatDateToApi(values.date),
       reference: values.reference,
+      nationalityId: values.nationalityId,
+      nationalityType: values.nationalityType,
       status: values.status,
       functionId: values.functionId,
       plantId: plantId ? plantId : values.plantId,
@@ -743,7 +749,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !isPosted
+      disabled: isPosted
     },
     {
       key: 'Close',
@@ -757,6 +763,12 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       condition: isClosed,
       onClick: onReopen,
       disabled: !isClosed
+    },
+    {
+      key: 'OTP',
+      condition: true,
+      onClick: viewOTP,
+      disabled: isPosted && !isReleased
     },
     {
       key: 'Approval',
@@ -783,17 +795,28 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       isClosed={isClosed}
       disabledSubmit={balance > 0 && true}
       previewReport={editMode}
+      isParentWindow={false}
     >
       <VertLayout>
         <Grow>
-          <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
-            <Grid container sx={{ zIndex: 0 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
               <FieldSet title='Transaction'>
                 <Grid container spacing={2}>
-                  <Grid item xs={4}>
-                    <FormField name='reference' maxAccess={maxAccess} Component={CustomTextField} readOnly={editMode} />
+                  <Grid item xs={3}>
+                    <CustomTextField
+                      name='reference'
+                      label={labels.reference}
+                      value={formik.values.reference}
+                      readOnly={editMode}
+                      maxLength='20'
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('reference', '')}
+                      error={formik.touched.reference && Boolean(formik.errors.reference)}
+                      maxAccess={maxAccess}
+                    />
                   </Grid>
-                  <FormGrid hideonempty item xs={4}>
+                  <FormGrid hideonempty item xs={3}>
                     <CustomDatePicker
                       name='date'
                       label={labels.date}
@@ -807,17 +830,48 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       maxAccess={maxAccess}
                     />
                   </FormGrid>
-                  <Grid item xs={4}>
-                    <FormField
+                  <Grid item xs={3}>
+                    <ResourceComboBox
+                      datasetId={DataSets.DOCUMENT_STATUS}
                       name='status'
-                      Component={ResourceComboBox}
-                      displayField='value'
+                      label={labels.status}
                       valueField='key'
-                      datasetId={7}
+                      displayField='value'
+                      values={formik.values}
                       readOnly
+                      onChange={(event, newValue) => {
+                        if (newValue) {
+                          formik.setFieldValue('status', newValue?.key)
+                        } else {
+                          formik.setFieldValue('status', '')
+                        }
+                      }}
+                      maxAccess={maxAccess}
+                      error={formik.touched.status && Boolean(formik.errors.status)}
                     />
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid item xs={3}>
+                    <CustomTextField
+                      name='search'
+                      label={labels.search}
+                      value={formik.values.search}
+                      readOnly={editMode || isClosed}
+                      maxLength='20'
+                      required
+                      onChange={e => {
+                        const value = e.target.value
+                        setSearch(value)
+                        value && search != value && fetchInfoByKey({ key: value })
+                      }}
+                      onFocus={value => {
+                        setSearch(value)
+                      }}
+                      onClear={() => formik.setFieldValue('search', '')}
+                      error={formik.touched.search && Boolean(formik.errors.search)}
+                      maxAccess={maxAccess}
+                    />
+                  </Grid>
+                  <Grid item xs={3}>
                     <RadioGroup
                       row
                       value={formik.values.functionId}
@@ -841,83 +895,68 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       />
                     </RadioGroup>
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid item xs={3}>
+                    <ResourceComboBox
+                      datasetId={DataSets.NATIONALITY}
+                      name='nationalityType'
+                      label={labels.nationalityType}
+                      valueField='key'
+                      displayField='value'
+                      values={formik.values}
+                      required
+                      onChange={(event, newValue) => {
+                        if (newValue) {
+                          formik.setFieldValue('nationalityType', newValue?.key)
+                        } else {
+                          formik.setFieldValue('nationalityType', '')
+                        }
+                      }}
+                      maxAccess={maxAccess}
+                      error={formik.touched.nationalityType && Boolean(formik.errors.nationalityType)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
                     <RadioGroup row value={formik.values.clientType} onChange={formik.onChange}>
                       <FormControlLabel value={'1'} control={<Radio />} label={labels.individual} />
                       <FormControlLabel value={'2'} control={<Radio />} label={labels.corporate} disabled />
                     </RadioGroup>
                   </Grid>
-
-                  <Grid item xs={4}>
-                    <FormField
-                      name='search'
-                      Component={CustomTextField}
-                      onBlur={e => {
-                        e.target.value &&
-                          search != e.target.value &&
-                          fetchInfoByKey({ key: e.target.value })
-                            .then(info => {
-                              if (!!info) {
-                                setIDInfoAutoFilled(false)
-
-                                formik.setFieldValue('idNo', info.clientIDView.idNo)
-                                formik.setFieldValue('firstName', info.clientIndividual.firstName)
-                                formik.setFieldValue('clientId', info.clientId)
-                                formik.setFieldValue('middleName', info.clientIndividual.middleName)
-                                formik.setFieldValue('lastName', info.clientIndividual.lastName)
-                                formik.setFieldValue('familyName', info.clientIndividual.familyName)
-                                formik.setFieldValue('fl_firstName', info.clientIndividual.fl_firstName)
-                                formik.setFieldValue('fl_lastName', info.clientIndividual.fl_lastName)
-                                formik.setFieldValue('fl_middleName', info.clientIndividual.fl_middleName)
-                                formik.setFieldValue('fl_familyName', info.clientIndividual.fl_familyName)
-                                formik.setFieldValue('birthDate', formatDateFromApi(info.clientIndividual.birthDate))
-                                formik.setFieldValue('resident', info.clientIndividual.isResident)
-                                formik.setFieldValue('professionId', info.clientMaster.professionId)
-                                formik.setFieldValue('sponsorName', info.clientIndividual.sponsorName)
-                                formik.setFieldValue('id_type', info.clientIDView.idtId)
-                                formik.setFieldValue('nationalityId', info.clientMaster.nationalityId)
-                                formik.setFieldValue('cellPhone', info.clientMaster.cellPhone)
-                                formik.setFieldValue('expiryDate', formatDateFromApi(info.clientIDView.idExpiryDate))
-
-                                setIDInfoAutoFilled(true)
-                              }
-                            })
-                            .catch(error => {
-                              console.error('Error fetching ID info:', error)
-                            })
-                      }}
-                      readOnly={editMode || isClosed}
-                      onFocus={value => {
-                        setSearch(value)
-                      }}
-                      required
-                    />
-                  </Grid>
                 </Grid>
               </FieldSet>
-
+            </Grid>
+            <Grid item xs={12}>
               <FieldSet title='Individual'>
-                <Grid container>
+                <Grid container spacing={2}>
                   <Grid item xs={4}>
-                    <Grid container spacing={2} xs={12} sx={{ px: 2 }}>
+                    <Grid container spacing={2}>
                       <Grid item xs={12}>
-                        <FormField
+                        <CustomTextField
                           name='idNo'
+                          label={labels.idNo}
                           type={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : 'text'}
-                          Component={CustomTextField}
-                          onBlur={e => {
-                            setShowAsPasswordIDNumber(true)
-                            if (e.target.value && e.target.value != idNumberOne) {
-                              checkTypes(e.target.value)
-                              fetchClientInfo({ numberId: e.target.value })
-                            }
-                          }}
-                          onFocus={value => {
-                            setShowAsPasswordIDNumber(false)
-                            setIdNumber(value)
-                          }}
+                          value={formik.values.idNo}
                           readOnly={editMode || isClosed || idInfoAutoFilled}
                           required
+                          maxLength='20'
+                          onBlur={e => {
+                            const value = e.target.value
+                            setIdNumber(value)
+                            if (value && value !== idNumberOne) {
+                              setShowAsPasswordIDNumber(true)
+                              checkTypes(value)
+                              fetchClientInfo({ numberId: value })
+                            }
+                          }}
+                          onFocus={e => {
+                            setShowAsPasswordIDNumber(false)
+                          }}
+                          onClear={() => {
+                            formik.setFieldValue('idNo', '')
+                            setIdNumber('')
+                          }}
+                          onChange={formik.handleChange}
+                          error={formik.touched.idNo && Boolean(formik.errors.idNo)}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
                       <Grid item xs={6}>
@@ -946,20 +985,38 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         />
                       </Grid>
                       <Grid item xs={6}>
-                        <FormField
+                        <ResourceComboBox
                           name='id_type'
-                          Component={ResourceComboBox}
-                          setData={setIdTypeStore}
                           endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
+                          label={labels.id_type}
                           valueField='recordId'
                           displayField='name'
+                          onChange={(event, newValue) => {
+                            if (newValue) {
+                              formik.setFieldValue('id_type', newValue?.key)
+                            } else {
+                              formik.setFieldValue('id_type', '')
+                            }
+                          }}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          values={formik.values}
                           required
+                          maxAccess={maxAccess}
+                          error={formik.touched.id_type && Boolean(formik.errors.id_type)}
                         />
                       </Grid>
                       <Grid item xs={6}>
                         <Button
                           variant='contained'
+                          sx={{
+                            '&:hover': {
+                              opacity: 0.8
+                            },
+                            width: 'auto',
+                            height: '33px',
+                            objectFit: 'contain',
+                            minWidth: 'auto'
+                          }}
                           onClick={() =>
                             stack({
                               Component: Confirmation,
@@ -1000,100 +1057,157 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       </Grid>
                     </Grid>
                   </Grid>
-
-                  <Grid container rowGap={2} xs={8} sx={{ pl: 4, alignContent: 'start' }}>
-                    <Grid xs={12} container spacing={2} sx={{ direction: dir }}>
+                  <Grid item xs={8}>
+                    <Grid container spacing={2}>
                       <Grid item xs={3}>
-                        <FormField
+                        <CustomTextField
                           name='firstName'
-                          Component={CustomTextField}
+                          label={labels.firstName}
+                          value={formik.values.firstName}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                           required
-                          language='english'
+                          maxLength='20'
+                          onChange={formik.handleChange}
+                          forceUpperCase={true}
+                          onClear={() => formik.setFieldValue('firstName', '')}
+                          error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
                       <Grid item xs={3}>
-                        <FormField
+                        <CustomTextField
                           name='middleName'
-                          language='english'
-                          Component={CustomTextField}
+                          label={labels.middleName}
+                          value={formik.values.middleName}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          maxLength='20'
+                          onChange={formik.handleChange}
+                          forceUpperCase={true}
+                          onClear={() => formik.setFieldValue('middleName', '')}
+                          error={formik.touched.middleName && Boolean(formik.errors.middleName)}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='lastName'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          required
-                          language='english'
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='familyName'
-                          language='english'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                        />
-                      </Grid>
-                    </Grid>
-                    <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse', direction: dir }}>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='fl_firstName'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          language='arabic'
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='fl_middleName'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          language='arabic'
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='fl_lastName'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='fl_familyName'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          language='arabic'
-                        />
-                      </Grid>
-                    </Grid>
 
-                    <Grid container spacing={2} xs={12}>
-                      <Grid item xs={4}>
-                        <FormField
-                          type={showAsPasswordPhone && formik.values['cellPhone'] ? 'password' : 'text'}
-                          name='cellPhone'
-                          Component={CustomTextField}
-                          phone={true}
+                      <Grid item xs={3}>
+                        <CustomTextField
+                          name='familyName'
+                          label={labels.familyName}
+                          value={formik.values.familyName}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          maxLength='20'
+                          onChange={formik.handleChange}
+                          forceUpperCase={true}
+                          onClear={() => formik.setFieldValue('familyName', '')}
+                          error={formik.touched.familyName && Boolean(formik.errors.familyName)}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <CustomTextField
+                          name='lastName'
+                          label={labels.lastName}
+                          value={formik.values.lastName}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                           required
-                          readOnly={editMode || isClosed || idInfoAutoFilled}
+                          maxLength='20'
+                          onChange={formik.handleChange}
+                          forceUpperCase={true}
+                          onClear={() => formik.setFieldValue('lastName', '')}
+                          error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Grid container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
+                          <Grid item xs={3}>
+                            <CustomTextField
+                              name='fl_firstName'
+                              label={labels.fl_firstName}
+                              value={formik.values.fl_firstName}
+                              readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                              dir='rtl'
+                              language='arabic'
+                              onChange={formik.handleChange}
+                              forceUpperCase={true}
+                              onClear={() => formik.setFieldValue('fl_firstName', '')}
+                              error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
+                              maxAccess={maxAccess}
+                            />
+                          </Grid>
+                          <Grid item xs={3}>
+                            <CustomTextField
+                              name='fl_middleName'
+                              label={labels.fl_middleName}
+                              value={formik.values.fl_middleName}
+                              readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                              dir='rtl'
+                              language='arabic'
+                              onChange={formik.handleChange}
+                              forceUpperCase={true}
+                              onClear={() => formik.setFieldValue('fl_middleName', '')}
+                              error={formik.touched.fl_middleName && Boolean(formik.errors.fl_middleName)}
+                              maxAccess={maxAccess}
+                            />
+                          </Grid>
+                          <Grid item xs={3}>
+                            <CustomTextField
+                              name='fl_familyName'
+                              label={labels.fl_familyName}
+                              value={formik.values.fl_familyName}
+                              readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                              dir='rtl'
+                              language='arabic'
+                              onChange={formik.handleChange}
+                              forceUpperCase={true}
+                              onClear={() => formik.setFieldValue('fl_familyName', '')}
+                              error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
+                              maxAccess={maxAccess}
+                            />
+                          </Grid>
+                          <Grid item xs={3}>
+                            <CustomTextField
+                              name='fl_lastName'
+                              label={labels.fl_lastName}
+                              value={formik.values.fl_lastName}
+                              readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                              dir='rtl'
+                              language='arabic'
+                              onChange={formik.handleChange}
+                              forceUpperCase={true}
+                              onClear={() => formik.setFieldValue('fl_lastName', '')}
+                              error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
+                              maxAccess={maxAccess}
+                            />
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <CustomTextField
+                          name='cellPhone'
+                          phone={true}
+                          label={labels.cellPhone}
+                          value={formik.values?.cellPhone}
+                          onChange={formik.handleChange}
                           onBlur={e => {
                             setShowAsPasswordPhone(true)
                           }}
                           onFocus={value => {
                             setShowAsPasswordPhone(false)
                           }}
+                          maxLength='20'
+                          required
+                          onClear={() => formik.setFieldValue('cellPhone', '')}
+                          error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
+                          maxAccess={maxAccess}
+                          readOnly={editMode || isClosed || idInfoAutoFilled}
                         />
                       </Grid>
                       <Grid item xs={4}>
-                        <FormField
+                        <ResourceComboBox
                           name='nationalityId'
-                          Component={ResourceComboBox}
                           endpointId={SystemRepository.Country.qry}
+                          label={labels.nationalityId}
                           valueField='recordId'
                           displayField={['reference', 'name', 'flName']}
                           columnsInDropDown={[
@@ -1101,41 +1215,97 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                             { key: 'name', value: 'Name' },
                             { key: 'flName', value: 'Foreign Language Name' }
                           ]}
+                          onChange={(event, newValue) => {
+                            if (newValue) {
+                              formik.setFieldValue('nationalityId', newValue?.key)
+                            } else {
+                              formik.setFieldValue('nationalityId', '')
+                            }
+                          }}
                           readOnly={editMode || isClosed || idInfoAutoFilled}
+                          values={formik.values}
                           required
+                          maxAccess={maxAccess}
+                          error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
                         />
                       </Grid>
                       <Grid item xs={4}>
-                        <FormField
+                        <ResourceComboBox
                           name='professionId'
-                          Component={ResourceComboBox}
                           endpointId={RemittanceSettingsRepository.Profession.qry}
-                          required
+                          label={labels.professionId}
                           valueField='recordId'
                           displayField={['reference', 'name']}
                           columnsInDropDown={[
                             { key: 'reference', value: 'Reference' },
                             { key: 'name', value: 'Name' }
                           ]}
+                          onChange={(event, newValue) => {
+                            if (newValue) {
+                              formik.setFieldValue('professionId', newValue?.key)
+                            } else {
+                              formik.setFieldValue('professionId', '')
+                            }
+                          }}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          values={formik.values}
+                          required
+                          maxAccess={maxAccess}
+                          error={formik.touched.professionId && Boolean(formik.errors.professionId)}
                         />
                       </Grid>
-
+                      <Grid item xs={6}>
+                        <CustomTextField
+                          name='sponsorName'
+                          label={labels.sponsorName}
+                          value={formik.values.sponsorName}
+                          readOnly={editMode || isClosed}
+                          maxLength='20'
+                          onChange={formik.handleChange}
+                          forceUpperCase={true}
+                          onClear={() => formik.setFieldValue('sponsorName', '')}
+                          error={formik.touched.sponsorName && Boolean(formik.errors.sponsorName)}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <CustomTextField
+                          name='remarks'
+                          label={labels.remarks}
+                          value={formik.values.remarks}
+                          readOnly={editMode || isClosed}
+                          maxLength='20'
+                          onChange={formik.handleChange}
+                          forceUpperCase={true}
+                          onClear={() => formik.setFieldValue('remarks', '')}
+                          error={formik.touched.remarks && Boolean(formik.errors.remarks)}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
                       <Grid item xs={4}>
-                        <FormField
+                        <ResourceComboBox
                           name='purpose_of_exchange'
-                          Component={ResourceComboBox}
                           endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
+                          label={labels.purpose_of_exchange}
                           valueField='recordId'
                           displayField={['reference', 'name']}
                           columnsInDropDown={[
                             { key: 'reference', value: 'Reference' },
                             { key: 'name', value: 'Name' }
                           ]}
+                          onChange={(event, newValue) => {
+                            if (newValue) {
+                              formik.setFieldValue('purpose_of_exchange', newValue?.key)
+                            } else {
+                              formik.setFieldValue('purpose_of_exchange', '')
+                            }
+                          }}
                           readOnly={editMode || isClosed}
+                          values={formik.values}
+                          maxAccess={maxAccess}
+                          error={formik.touched.purpose_of_exchange && Boolean(formik.errors.purpose_of_exchange)}
                         />
                       </Grid>
-
                       <Grid item xs={2}>
                         <FormControlLabel
                           name='resident'
@@ -1156,300 +1326,239 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           disabled={true}
                         />
                       </Grid>
-                      <Grid item xs={6}>
-                        <FormField name='sponsorName' Component={CustomTextField} readOnly={editMode || isClosed} />
-                      </Grid>
-
-                      <Grid item xs={6}>
-                        <FormField name='remarks' Component={CustomTextField} readOnly={editMode || isClosed} />
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </FieldSet>
-              <FieldSet title='Operations'>
-                <Grid width={'100%'}>
-                  <DataGrid
-                    onChange={value => formik.setFieldValue('operations', value)}
-                    value={formik.values.operations}
-                    error={emptyRows.length < 1 ? formik.errors.operations : true}
-                    height={200}
-                    disabled={isClosed}
-                    maxAccess={maxAccess}
-                    name='operations'
-                    bg={
-                      formik.values.functionId &&
-                      (parseInt(formik.values.functionId) === SystemFunction.CurrencySale
-                        ? '#C7F6C7'
-                        : 'rgb(245, 194, 193)')
-                    }
-                    columns={[
-                      {
-                        component: 'resourcecombobox',
-                        label: labels.currency,
-                        name: 'currencyId',
-                        props: {
-                          endpointId: SystemRepository.Currency.qry,
-                          displayField: ['reference', 'name'],
-                          valueField: 'recordId',
-                          mapping: [
-                            { from: 'recordId', to: 'currencyId' },
-                            { from: 'name', to: 'currencyName' },
-                            { from: 'reference', to: 'currencyRef' }
-                          ],
-                          columnsInDropDown: [
-                            { key: 'reference', value: 'Reference' },
-                            { key: 'name', value: 'Name' }
-                          ]
-                        },
-                        async onChange({ row: { update, oldRow, newRow } }) {
-                          if (!newRow?.currencyId) {
-                            update({
-                              currencyId: '',
-                              currencyName: '',
-                              currencyRef: '',
-                              exRate: '',
-                              defaultRate: '',
-                              rateCalcMethod: '',
-                              minRate: '',
-                              maxRate: ''
-                            })
-
-                            return
-                          }
-                          const exchange = await fetchRate({ currencyId: newRow?.currencyId })
-                          if (!exchange?.rate) {
-                            update({
-                              exRate: '',
-                              defaultRate: '',
-                              rateCalcMethod: '',
-                              minRate: '',
-                              maxRate: ''
-                            })
-                            stackError({
-                              message: `Rate not defined for ${newRow.currencyName}.`
-                            })
-
-                            return
-                          }
-                          if (exchange && newRow.fcAmount) {
-                            const exRate = exchange.rate
-                            const rateCalcMethod = exchange.rateCalcMethod
-
-                            const lcAmount =
-                              rateCalcMethod === 1
-                                ? newRow.fcAmount * exRate
-                                : rateCalcMethod === 2
-                                ? newRow.fcAmount / exRate
-                                : 0
-
-                            !isNaN(lcAmount) && update({ lcAmount: lcAmount })
-                          }
-
-                          update({
-                            currencyId: newRow.currencyId,
-                            exRate: exchange?.rate,
-                            defaultRate: exchange?.rate,
-                            rateCalcMethod: exchange?.rateCalcMethod,
-                            minRate: exchange?.minRate,
-                            maxRate: exchange?.maxRate
-                          })
-                        },
-
-                        flex: 1.5
-                      },
-                      {
-                        component: 'numberfield',
-                        label: labels.fcAmount,
-                        name: 'fcAmount',
-                        async onChange({ row: { update, newRow } }) {
-                          const fcAmount = newRow.fcAmount
-                          const rateCalcMethod = newRow.rateCalcMethod
-                          const exRate = newRow.exRate
-
-                          const lcAmount =
-                            rateCalcMethod === 1 ? fcAmount * exRate : rateCalcMethod === 2 ? fcAmount / exRate : 0
-
-                          !isNaN(lcAmount) &&
-                            update({
-                              lcAmount: lcAmount?.toFixed(2)
-                            })
-                        },
-                        defaultValue: ''
-                      },
-                      {
-                        component: 'numberfield',
-                        label: labels.defaultRate,
-                        name: 'defaultRate',
-                        props: { readOnly: true }
-                      },
-                      {
-                        component: 'numberfield',
-                        name: 'exRate',
-                        label: labels.Rate,
-                        props: {
-                          readOnly: false
-                        },
-                        updateOn: 'blur',
-                        async onChange({ row: { update, newRow } }) {
-                          const fcAmount = newRow.fcAmount
-                          const lcAmount = newRow.lcAmount
-                          const rateCalcMethod = newRow.rateCalcMethod
-                          const exRate = newRow.exRate
-                          if (exRate)
-                            if (exRate >= newRow.minRate && exRate <= newRow.maxRate) {
-                              if (fcAmount) {
-                                const lcAmount =
-                                  rateCalcMethod === 1
-                                    ? fcAmount * exRate
-                                    : rateCalcMethod === 2
-                                    ? fcAmount / exRate
-                                    : 0
-                                !isNaN(lcAmount) &&
-                                  update({
-                                    lcAmount: lcAmount.toFixed(2)
-                                  })
-                              } else if (lcAmount) {
-                                const fcAmount =
-                                  rateCalcMethod === 2
-                                    ? lcAmount * exRate
-                                    : rateCalcMethod === 1
-                                    ? lcAmount / exRate
-                                    : 0
-                                !isNaN(fcAmount) &&
-                                  update({
-                                    fcAmount: fcAmount.toFixed(2)
-                                  })
-                              } else {
-                                update({
-                                  exRate: newRow?.exRate
-                                })
-                              }
-                            } else {
-                              stackError({
-                                message: `Rate not in the [${newRow.minRate}-${newRow.maxRate}]range.`
-                              })
-                              update({
-                                exRate: ''
-                              })
-
-                              return
-                            }
-                        },
-
-                        defaultValue: ''
-                      },
-                      {
-                        component: 'numberfield',
-                        name: 'lcAmount',
-                        label: labels.lcAmount,
-                        props: {
-                          readOnly: false
-                        },
-                        async onChange({ row: { update, newRow } }) {
-                          const lcAmount = newRow.lcAmount
-                          const rateCalcMethod = newRow.rateCalcMethod
-                          const exRate = newRow.exRate
-
-                          const fcAmount =
-                            rateCalcMethod === 2 ? lcAmount * exRate : rateCalcMethod === 1 ? lcAmount / exRate : 0
-
-                          if (fcAmount && newRow.exRate)
-                            update({
-                              fcAmount: fcAmount.toFixed(2)
-                            })
-                        },
-
-                        defaultValue: ''
-                      }
-                    ]}
-                  />
-                </Grid>
-              </FieldSet>
-              <FieldSet title='Amount'>
-                <Grid container xs={12}>
-                  <Grid item xs={9}>
-                    <Grid container xs={12} spacing={2}>
-                      <Grid width={'100%'}>
-                        <DataGrid
-                          height={200}
-                          onChange={value => formik.setFieldValue('amount', value)}
-                          value={formik.values.amount}
-                          error={formik.errors.amount}
-                          disabled={isClosed}
-                          columns={[
-                            {
-                              component: 'resourcecombobox',
-                              label: labels.type,
-                              name: 'type',
-                              props: {
-                                datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
-                                displayField: 'value',
-                                valueField: 'key',
-                                mapping: [
-                                  { from: 'key', to: 'type' },
-                                  { from: 'value', to: 'typeName' }
-                                ],
-                                filter: item =>
-                                  formik.values.functionId === SystemFunction.CurrencyPurchase ? item.key === '2' : true
-                              }
-                            },
-                            {
-                              component: 'numberfield',
-                              name: 'amount',
-                              label: labels.amount
-                            },
-                            {
-                              component: 'resourcecombobox',
-                              name: 'creditCards',
-                              editable: false,
-                              label: labels.creditCard,
-                              props: {
-                                endpointId: CashBankRepository.CreditCard.qry,
-                                valueField: 'recordId',
-                                displayField: 'name',
-                                mapping: [
-                                  { from: 'recordId', to: 'ccId' },
-                                  { from: 'name', to: 'ccName' }
-                                ]
-                              }
-                            },
-                            {
-                              component: 'numberfield',
-                              label: labels.receiptRef,
-                              name: 'bankFees'
-                            },
-                            {
-                              component: 'numberfield',
-                              label: labels.receiptRef,
-                              name: 'receiptRef'
-                            }
-                          ]}
-                        />
-                      </Grid>
-                    </Grid>
-                  </Grid>
-
-                  <Grid container xs={3} spacing={2} sx={{ p: 4 }}>
-                    <Grid item xs={12}>
-                      <CustomNumberField label={labels.netAmount} value={total} readOnly />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <CustomNumberField label={labels.amountReceived} value={receivedTotal} readOnly />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <CustomNumberField
-                        format={value => (value === 0 ? '0.00' : value)}
-                        label={labels.balanceToPay}
-                        value={balance}
-                        readOnly
-                      />
                     </Grid>
                   </Grid>
                 </Grid>
               </FieldSet>
             </Grid>
-          </FormProvider>
+            <Grid item xs={12}>
+              <FieldSet title='Operations'>
+                <DataGrid
+                  onChange={value => formik.setFieldValue('operations', value)}
+                  value={formik.values.operations}
+                  error={emptyRows.length < 1 ? formik.errors.operations : true}
+                  height={200}
+                  disabled={isClosed}
+                  maxAccess={maxAccess}
+                  name='operations'
+                  bg={
+                    formik.values.functionId &&
+                    (parseInt(formik.values.functionId) === SystemFunction.CurrencySale
+                      ? '#C7F6C7'
+                      : 'rgb(245, 194, 193)')
+                  }
+                  columns={[
+                    {
+                      component: 'resourcecombobox',
+                      label: labels.currency,
+                      name: 'currencyId',
+                      props: {
+                        endpointId: SystemRepository.Currency.qry,
+                        displayField: ['reference', 'name'],
+                        valueField: 'recordId',
+                        mapping: [
+                          { from: 'recordId', to: 'currencyId' },
+                          { from: 'name', to: 'currencyName' },
+                          { from: 'reference', to: 'currencyRef' }
+                        ],
+                        columnsInDropDown: [
+                          { key: 'reference', value: 'Reference' },
+                          { key: 'name', value: 'Name' }
+                        ]
+                      },
+                      async onChange({ row: { update, oldRow, newRow } }) {
+                        if (!newRow?.currencyId) {
+                          update({
+                            currencyId: '',
+                            currencyName: '',
+                            currencyRef: '',
+                            exRate: '',
+                            defaultRate: '',
+                            rateCalcMethod: '',
+                            minRate: '',
+                            maxRate: ''
+                          })
+
+                          return
+                        }
+                        const exchange = await fetchRate({ currencyId: newRow?.currencyId })
+                        if (!exchange?.rate) {
+                          update({
+                            exRate: '',
+                            defaultRate: '',
+                            rateCalcMethod: '',
+                            minRate: '',
+                            maxRate: ''
+                          })
+                          stackError({
+                            message: `Rate not defined for ${newRow.currencyName}.`
+                          })
+
+                          return
+                        }
+                        if (exchange && newRow.fcAmount) {
+                          const exRate = exchange.rate
+                          const rateCalcMethod = exchange.rateCalcMethod
+
+                          const lcAmount =
+                            rateCalcMethod === 1
+                              ? newRow.fcAmount * exRate
+                              : rateCalcMethod === 2
+                              ? newRow.fcAmount / exRate
+                              : 0
+
+                          !isNaN(lcAmount) && update({ lcAmount: lcAmount })
+                        }
+
+                        update({
+                          currencyId: newRow.currencyId,
+                          exRate: exchange?.rate,
+                          defaultRate: exchange?.rate,
+                          rateCalcMethod: exchange?.rateCalcMethod,
+                          minRate: exchange?.minRate,
+                          maxRate: exchange?.maxRate
+                        })
+                      },
+
+                      flex: 1.5
+                    },
+                    {
+                      component: 'numberfield',
+                      label: labels.fcAmount,
+                      name: 'fcAmount',
+                      async onChange({ row: { update, newRow } }) {
+                        const fcAmount = newRow.fcAmount
+                        const rateCalcMethod = newRow.rateCalcMethod
+                        const exRate = newRow.exRate
+
+                        const lcAmount =
+                          rateCalcMethod === 1 ? fcAmount * exRate : rateCalcMethod === 2 ? fcAmount / exRate : 0
+
+                        !isNaN(lcAmount) &&
+                          update({
+                            lcAmount: lcAmount?.toFixed(2)
+                          })
+                      },
+                      defaultValue: ''
+                    },
+                    {
+                      component: 'numberfield',
+                      label: labels.defaultRate,
+                      name: 'defaultRate',
+                      props: { readOnly: true }
+                    },
+                    {
+                      component: 'numberfield',
+                      name: 'exRate',
+                      label: labels.Rate,
+                      props: {
+                        readOnly: false
+                      },
+                      updateOn: 'blur',
+                      async onChange({ row: { update, newRow } }) {
+                        const fcAmount = newRow.fcAmount
+                        const lcAmount = newRow.lcAmount
+                        const rateCalcMethod = newRow.rateCalcMethod
+                        const exRate = newRow.exRate
+                        if (exRate)
+                          if (exRate >= newRow.minRate && exRate <= newRow.maxRate) {
+                            if (fcAmount) {
+                              const lcAmount =
+                                rateCalcMethod === 1 ? fcAmount * exRate : rateCalcMethod === 2 ? fcAmount / exRate : 0
+                              !isNaN(lcAmount) &&
+                                update({
+                                  lcAmount: lcAmount.toFixed(2)
+                                })
+                            } else if (lcAmount) {
+                              const fcAmount =
+                                rateCalcMethod === 2 ? lcAmount * exRate : rateCalcMethod === 1 ? lcAmount / exRate : 0
+                              !isNaN(fcAmount) &&
+                                update({
+                                  fcAmount: fcAmount.toFixed(2)
+                                })
+                            } else {
+                              update({
+                                exRate: newRow?.exRate
+                              })
+                            }
+                          } else {
+                            stackError({
+                              message: `Rate not in the [${newRow.minRate}-${newRow.maxRate}]range.`
+                            })
+                            update({
+                              exRate: ''
+                            })
+
+                            return
+                          }
+                      },
+
+                      defaultValue: ''
+                    },
+                    {
+                      component: 'numberfield',
+                      name: 'lcAmount',
+                      label: labels.lcAmount,
+                      props: {
+                        readOnly: false
+                      },
+                      async onChange({ row: { update, newRow } }) {
+                        const lcAmount = newRow.lcAmount
+                        const rateCalcMethod = newRow.rateCalcMethod
+                        const exRate = newRow.exRate
+
+                        const fcAmount =
+                          rateCalcMethod === 2 ? lcAmount * exRate : rateCalcMethod === 1 ? lcAmount / exRate : 0
+
+                        if (fcAmount && newRow.exRate)
+                          update({
+                            fcAmount: fcAmount.toFixed(2)
+                          })
+                      },
+
+                      defaultValue: ''
+                    }
+                  ]}
+                />
+              </FieldSet>
+            </Grid>
+            <Grid item xs={12}>
+              <FieldSet title='Amount'>
+                <Grid container spacing={2}>
+                  <Grid item xs={9}>
+                    <PaymentGrid
+                      height={200}
+                      onChange={value => formik.setFieldValue('amount', value)}
+                      value={formik.values.amount}
+                      error={formik.errors.amount}
+                      name={'amount'}
+                      setFormik={setFormik}
+                      amount={total}
+                      disabled={isClosed}
+                    />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12}>
+                        <CustomNumberField label={labels.netAmount} value={total} readOnly />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <CustomNumberField label={labels.amountReceived} value={receivedTotal} readOnly />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <CustomNumberField
+                          format={value => (value === 0 ? '0.00' : value)}
+                          label={labels.balanceToPay}
+                          value={balance}
+                          readOnly
+                        />
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </FieldSet>
+            </Grid>
+          </Grid>
         </Grow>
       </VertLayout>
     </FormShell>
