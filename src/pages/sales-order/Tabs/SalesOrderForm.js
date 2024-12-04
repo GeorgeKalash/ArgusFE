@@ -159,7 +159,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         yup.object({
           sku: yup.string().required(),
           itemName: yup.string().required(),
-          qty: yup.number().required().min(1)
+          qty: yup.number().required()
         })
       )
     }),
@@ -802,12 +802,12 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType || 0,
-      basePrice: newRow?.basePrice || 0,
-      volume: newRow?.volume,
+      basePrice: parseFloat(newRow?.basePrice) || 0,
+      volume: parseFloat(newRow?.volume),
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
-      qty: newRow?.qty,
+      qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: parseFloat(newRow?.mdAmount),
       mdType: newRow?.mdType,
@@ -1575,7 +1575,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                         formik.setFieldValue('tdAmount', tdAmount)
                       }
 
-                      recalcGridVat(formik.values.tdType, tdPct, tdAmount, Number(e.target.value))
+                      recalcGridVat(formik.values.tdType, tdPct, tdAmount, discountAmount)
                     }}
                     onClear={() => {
                       formik.setFieldValue('tdAmount', 0)

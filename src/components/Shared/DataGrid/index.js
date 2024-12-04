@@ -35,13 +35,27 @@ export function DataGrid({
   const process = (params, oldRow, setData) => {
     const column = columns.find(({ name }) => name === params.colDef.field)
 
-    const updateRowCommit = changes => {
+    const updateCommit = changes => {
       setData(changes, params)
       commit({ changes: { ...params.node.data, changes } })
     }
 
+    const updateRowCommit = changes => {
+      const rowToUpdate = value?.find(item => item?.id === changes?.id)
+
+      const updatedRow = { ...rowToUpdate, ...changes.changes }
+
+      gridApiRef.current.applyTransaction({
+        update: [updatedRow]
+      })
+
+      commit({ changes: updatedRow })
+    }
+
     if (column.onChange) {
-      column.onChange({ row: { oldRow: oldRow, newRow: params.node.data, update: updateRowCommit } })
+      column.onChange({
+        row: { oldRow: oldRow, newRow: params.node.data, update: updateCommit, updateRow: updateRowCommit }
+      })
     }
   }
 
@@ -50,7 +64,7 @@ export function DataGrid({
     gridApiRef.current.applyTransaction({ remove: [params.data] })
     if (newRows?.length < 1) setReady(true)
 
-    onChange(newRows)
+    onChange(newRows, 'delete')
   }
 
   function openDelete(params) {
@@ -343,7 +357,7 @@ export function DataGrid({
           value={currentValue}
           column={{
             ...column.colDef,
-            props: column.propsReducer ? column?.propsReducer({ data, props }) : props
+            props: column?.colDef?.propsReducer ? column?.colDef?.propsReducer({ row: data, props }) : props
           }}
           updateRow={updateRow}
           update={update}
@@ -516,15 +530,6 @@ export function DataGrid({
     }
   }
 
-  const onCellFocused = params => {
-    if (params.rowIndex >= 0 && params.column) {
-      params.api.startEditingCell({
-        rowIndex: params.rowIndex,
-        colKey: params.column.getId()
-      })
-    }
-  }
-
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>
       <CacheDataProvider>
@@ -544,7 +549,6 @@ export function DataGrid({
               rowData={value}
               columnDefs={columnDefs}
               suppressRowClickSelection={false}
-              suppressHeaderFocus={true}
               stopEditingWhenCellsLoseFocus={false}
               rowSelection='single'
               editType='cell'
@@ -562,7 +566,6 @@ export function DataGrid({
               tabToPreviousCell={() => true}
               onRowClicked={handleRowClick}
               onCellEditingStopped={onCellEditingStopped}
-              onCellFocused={onCellFocused}
             />
           )}
         </Box>
