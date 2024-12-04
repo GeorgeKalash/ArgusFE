@@ -64,7 +64,7 @@ export default function GlEoyClosingForm({ _labels, access }) {
                 required
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
+                  formik && formik.setFieldValue('fiscalYear', newValue?.fiscalYear || '')
                 }}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
