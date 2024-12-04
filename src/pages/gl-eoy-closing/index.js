@@ -1,6 +1,6 @@
 import { ImmediateWindow } from 'src/windows'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import GlEoyClosingForm from './form/GLClosingForm'
+import GlEoyClosingForm from './form/GlEoyClosingForm'
 
 const GlEoyClosing = () => {
   return (
