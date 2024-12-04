@@ -302,12 +302,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       parameters: `_recordId=${formik.values.clientId}&_doId=${formik.values.recordId}`
     })
 
-    if (formik?.values?.totalQty === 0) {
-      stackError({
-        message: 'You cannot do generate with zero items'
-      })
-    }
-
     if (resClient?.record?.ptId === null) {
       stackError({
         message: platformLabels.paymentTermError
