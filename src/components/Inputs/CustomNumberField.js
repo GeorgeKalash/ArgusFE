@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { Button, IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
@@ -37,6 +37,8 @@ const CustomNumberField = ({
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+
+  const inputRef = useRef(null)
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
@@ -109,6 +111,17 @@ const CustomNumberField = ({
     }
   }
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.select() // Select the text when the editor is initialized
+    }
+  }, [])
+
+  const handleClick = e => {
+    // Prevent focus on click
+    e.preventDefault()
+  }
+
   return _hidden ? (
     <></>
   ) : (
@@ -128,6 +141,8 @@ const CustomNumberField = ({
       required={required}
       onInput={handleInput}
       InputProps={{
+        inputRef,
+        autoFocus: false,
         inputProps: {
           onFocus: handleFocus,
           min: min,
