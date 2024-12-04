@@ -273,11 +273,11 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         birthDate: obj.clientIndividual?.birthDate && formatDateFromApi(obj.clientIndividual.birthDate),
         firstName: obj.clientIndividual?.firstName,
         lastName: obj.clientIndividual?.lastName,
-        middleName: obj.clientIndividual?.middleName,
+        middleName: obj.clientIndividual?.middleName + ' ' + obj.clientIndividual?.familyName,
         familyName: obj.clientIndividual?.familyName,
         fl_firstName: obj.clientIndividual?.fl_firstName,
         fl_lastName: obj.clientIndividual?.fl_lastName,
-        fl_middleName: obj.clientIndividual?.fl_middleName,
+        fl_middleName: obj.clientIndividual?.fl_middleName + ' ' + obj.clientIndividual?.fl_familyName,
         fl_familyName: obj.clientIndividual?.fl_familyName,
         isResident: obj.clientIndividual?.isResident,
         incomeSourceId: obj.clientIndividual?.incomeSourceId,
@@ -514,12 +514,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       clientId: obj.clientId || 0,
       firstName: obj.firstName,
       lastName: obj.lastName,
-      middleName: obj.middleName,
-      familyName: obj.familyName,
+      middleName: obj.familyName ? obj.middleName + '' + obj.familyName : obj.middleName,
+      familyName: null,
       fl_firstName: obj.fl_firstName,
       fl_lastName: obj.fl_lastName,
-      fl_middleName: obj.fl_middleName,
-      fl_familyName: obj.fl_familyName,
+      fl_middleName: obj.fl_familyName ? obj.fl_middleName + ' ' + obj.fl_familyName : obj.fl_middleName,
+      fl_familyName: null,
       birthDate: formatDateToApi(obj.birthDate),
       isResident: obj.isResident,
       sponsorName: obj.sponsorName,
@@ -1104,7 +1104,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       </Grid>
                       <Grid item xs={12}>
                         <Grid container spacing={2}>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='firstName'
                               label={labels.first}
@@ -1122,7 +1122,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='middleName'
                               label={labels.middle}
@@ -1136,7 +1136,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='lastName'
                               label={labels.last}
@@ -1154,7 +1154,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          {/* <Grid item xs={3}>
                             <CustomTextField
                               name='familyName'
                               label={labels.family}
@@ -1167,12 +1167,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               error={formik.touched.familyName && Boolean(formik.errors.familyName)}
                               maxAccess={maxAccess}
                             />
-                          </Grid>
+                          </Grid> */}
                         </Grid>
                       </Grid>
                       <Grid item xs={12}>
                         <Grid container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
                               label={labels.fl_first}
@@ -1188,7 +1188,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_middleName'
                               label={labels.fl_middle}
@@ -1202,7 +1202,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_lastName'
                               label={labels.fl_last}
@@ -1217,7 +1217,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          {/* <Grid item xs={3}>
                             <CustomTextField
                               name='fl_familyName'
                               label={labels.fl_family}
@@ -1230,7 +1230,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
                               maxAccess={maxAccess}
                             />
-                          </Grid>
+                          </Grid> */}
                         </Grid>
                       </Grid>
                       <Grid item xs={4}>
