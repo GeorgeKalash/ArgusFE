@@ -1,5 +1,5 @@
 import { useFormik } from 'formik'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -19,6 +19,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
   const [filters, setFilters] = useState(currencies)
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const { platformLabels } = useContext(ControlContext)
+  const ref = useRef()
 
   const formik = useFormik({
     enableReinitialize: false,
@@ -109,7 +110,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
       },
 
       async onChange({ row: { update, oldRow, newRow } }) {
-        setFilters(currencies.filter(item => item.countryId === newRow.countryId))
+        ref.current = currencies.filter(item => item.countryId === newRow.countryId)
       }
     },
     {
@@ -128,7 +129,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         endpointId: SystemRepository.Plant.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 2,
+        displayFieldWidth: 3,
         mapping: [
           { from: 'recordId', to: 'plantId' },
           { from: 'name', to: 'plantName' },
@@ -166,6 +167,9 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
           { key: 'currencyRef', value: 'Reference' },
           { key: 'currencyName', value: 'Name' }
         ]
+      },
+      propsReducer({ props }) {
+        return { ...props, store: ref.current }
       }
     },
     {
@@ -292,6 +296,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
                   _seqNo: row.seqNo
                 }))
                 setRowSelectionModel(row.id)
+                ref.current = currencies.filter(item => item.countryId === row.countryId)
               }
             }}
           />

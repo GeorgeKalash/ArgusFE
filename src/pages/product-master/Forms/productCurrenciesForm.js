@@ -110,7 +110,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         endpointId: SystemRepository.Currency.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 2,
+        displayFieldWidth: 3,
         mapping: [
           { from: 'recordId', to: 'currencyId' },
           { from: 'reference', to: 'currencyRef' },
@@ -140,7 +140,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         datasetId: DataSets.RT_Dispersal_Type,
         valueField: 'key',
         displayField: 'value',
-        displayFieldWidth: 2,
+        displayFieldWidth: 1,
         refresh: false,
         mapping: [
           { from: 'key', to: 'dispersalType' },
