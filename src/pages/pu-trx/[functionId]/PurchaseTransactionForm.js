@@ -580,7 +580,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         const filteredMeasurements = measurements.filter(x => x.msId === item?.msId)
         setFilteredMU(filteredMeasurements)
 
-        const taxDetailsResponse = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
+        const taxDetailsResponse = []
+
+        //const taxDetailsResponse = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
 
         const updatedSaTrxTaxes =
           saTrxTaxes?.map(tax => {
