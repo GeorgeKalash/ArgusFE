@@ -12,16 +12,17 @@ export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
   const { postRequest } = useContext(RequestsContext)
   const [rerenderFlag, setRerenderFlag] = useState(false)
+  const [lockProps, setLockProps] = useState(null)
   const closedWindow = useRef(null)
   const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
+  const currentValue = { ...stack[stack.length - 1] }
 
   useEffect(() => {
-    const currentValue = { ...stack[stack.length - 1] }
-    if (currentValue.lockProps) {
+    if (lockProps) {
       const body = {
-        resourceId: currentValue.lockProps.resourceId,
-        recordId: currentValue.lockProps.recordId,
-        reference: currentValue.lockProps.reference,
+        resourceId: lockProps.resourceId,
+        recordId: lockProps.recordId,
+        reference: lockProps.reference,
         userId: userId,
         clockStamp: new Date()
       }
@@ -30,15 +31,14 @@ export function WindowProvider({ children }) {
         record: JSON.stringify(body)
       })
     }
-  }, [stack])
+  }, [lockProps])
 
   function unlockRecord() {
-    const currentValue = { ...stack[stack.length - 1] }
-    if (currentValue.lockProps) {
+    if (lockProps) {
       const body = {
-        resourceId: currentValue.lockProps.resourceId,
-        recordId: currentValue.lockProps.recordId,
-        reference: currentValue.lockProps.reference,
+        resourceId: lockProps.resourceId,
+        recordId: lockProps.recordId,
+        reference: lockProps.reference,
         userId: userId,
         clockStamp: new Date()
       }
@@ -46,6 +46,7 @@ export function WindowProvider({ children }) {
         extension: AccessControlRepository.unlockRecord,
         record: JSON.stringify(body)
       })
+      setLockProps(null)
     }
   }
 
@@ -58,7 +59,6 @@ export function WindowProvider({ children }) {
 
   function closeWindowById(givenId) {
     unlockRecord()
-    const currentValue = { ...stack[stack.length - 1] }
     closedWindow.current = currentValue
     setStack(stack.filter(({ id }) => givenId != id))
   }
@@ -78,7 +78,7 @@ export function WindowProvider({ children }) {
   }
 
   return (
-    <WindowContext.Provider value={{ stack: addToStack }}>
+    <WindowContext.Provider value={{ stack: addToStack, setLockProps }}>
       {children}
       {stack.map(
         ({
@@ -100,7 +100,6 @@ export function WindowProvider({ children }) {
             value={{
               open: () => openWindow(id),
               clear() {
-                const currentValue = { ...stack[stack.length - 1] }
                 if (Object.keys(currentValue).length) {
                   closeWindow()
                   currentValue.props.recordId = null

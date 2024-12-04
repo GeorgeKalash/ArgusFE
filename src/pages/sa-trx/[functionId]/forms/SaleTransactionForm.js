@@ -56,7 +56,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 
-export default function SaleTransactionForm({ labels, access, recordId, functionId, window }) {
+export default function SaleTransactionForm({ labels, access, recordId, functionId, window, setLockProps }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -813,6 +813,12 @@ export default function SaleTransactionForm({ labels, access, recordId, function
 
     const res = await getClientInfo(saTrxHeader.clientId)
     getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
+    !formik.values.recordId &&
+      setLockProps({
+        recordId: saTrxHeader.recordId,
+        reference: saTrxHeader.reference,
+        resourceId: getResourceId(parseInt(functionId))
+      })
   }
 
   async function getSalesTransactionPack(transactionId) {

@@ -20,7 +20,7 @@ import toast from 'react-hot-toast'
 const SaTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
-  const { stack } = useWindow()
+  const { stack, setLockProps } = useWindow()
   const { stack: stackError } = useError()
   const router = useRouter()
   const { functionId } = router.query
@@ -179,35 +179,37 @@ const SaTrx = () => {
   }
 
   const getResourceId = functionId => {
-    if (functionId === SystemFunction.SalesInvoice) {
-      return ResourceIds.SalesInvoice
-    } else if (functionId === SystemFunction.SalesReturn) {
-      return ResourceIds.SaleReturn
-    } else if (functionId === SystemFunction.ConsignmentIn) {
-      return ResourceIds.ClientGOCIn
-    } else if (functionId === SystemFunction.ConsignmentOut) {
-      return ResourceIds.ClientGOCOut
-    } else {
-      return null
+    switch (functionId) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.SalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.SaleReturn
+      case SystemFunction.ConsignmentIn:
+        return ResourceIds.ClientGOCIn
+      case SystemFunction.ConsignmentOut:
+        return ResourceIds.ClientGOCOut
+      default:
+        return null
     }
   }
 
   async function openForm(recordId, reference) {
+    if (recordId && reference) {
+      setLockProps({
+        recordId: recordId,
+        reference: reference,
+        resourceId: getResourceId(parseInt(functionId))
+      })
+    }
     stack({
       Component: SaleTransactionForm,
       props: {
         labels: labels,
         recordId: recordId,
         access,
-        functionId: functionId
+        functionId: functionId,
+        setLockProps
       },
-      lockProps: recordId
-        ? {
-            recordId: recordId,
-            reference: reference,
-            resourceId: getResourceId(parseInt(functionId))
-          }
-        : null,
       width: 1330,
       height: 720,
       title: getCorrectLabel(parseInt(functionId))
