@@ -100,7 +100,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     sourceOfIncome: '',
     countryId: '',
     purposeOfTransfer: '',
-    commission: ''
+    commission: 0
   }
 
   const { maxAccess } = useDocumentType({
@@ -413,7 +413,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                     />
                   </Grid>
                 </Grid>
-                <Grid container spacing={2} marginTop={.5}>
+                <Grid container spacing={2} marginTop={0.5}>
                   <Grid item xs={6}>
                     <CustomNumberField
                       name='amount'
@@ -424,8 +424,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       readOnly={editMode}
                       onChange={e => {
                         formik.setFieldValue('amount', e.target.value)
-
-                        //formik.values.commission && calculateAmounts(formik.values.commission)
                       }}
                       onClear={() => formik.setFieldValue('amount', '')}
                       error={formik.touched.amount && Boolean(formik.errors.amount)}
@@ -1026,13 +1024,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   value={formik.values.commission}
                   maxAccess={maxAccess}
                   readOnly
-                  onChange={e => {
-                    formik.setFieldValue('commission', e.target.value)
-
-                    // formik.values.amount && calculateAmounts(e.target.value)
-                  }}
-                  onClear={() => formik.setFieldValue('commission', '')}
-                  error={formik.touched.commission && Boolean(formik.errors.commission)}
                   maxLength={12}
                   decimalScale={2}
                 />
