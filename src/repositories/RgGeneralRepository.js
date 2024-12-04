@@ -6,8 +6,5 @@ export const RGGeneralRepository = {
   },
   FyOpening: {
     GLFYO: service + 'GLFYO'
-  },
-  EoyClosing: {
-    GLEOY: service + 'GLEOY'
   }
 }
