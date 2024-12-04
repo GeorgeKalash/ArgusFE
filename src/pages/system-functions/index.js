@@ -70,11 +70,12 @@ const SystemFunction = () => {
 
   const columns = [
     {
-      component: 'numberfield',
+      component: 'textfield',
       label: labels.functionId,
       name: 'functionId',
       props: {
-        readOnly: true
+        readOnly: true,
+        type: 'number'
       }
     },
     {
@@ -126,10 +127,11 @@ const SystemFunction = () => {
   ]
 
   const filteredData = formik.values.search
-  ? formik.values.rows.filter(
-      item => item.functionId.toString().includes(formik.values.search.toLowerCase()) ||
-              item.sfName?.toLowerCase().includes(formik.values.search.toLowerCase())
-    )
+    ? formik.values.rows.filter(
+        item =>
+          item.functionId.toString().includes(formik.values.search.toLowerCase()) ||
+          item.sfName?.toLowerCase().includes(formik.values.search.toLowerCase())
+      )
     : formik.values.rows
 
   const handleSearchChange = event => {
@@ -150,7 +152,7 @@ const SystemFunction = () => {
             }}
             sx={{ width: '20%' }}
             onChange={handleSearchChange}
-            onSearch={(e) => formik.setFieldValue('search', e)}
+            onSearch={e => formik.setFieldValue('search', e)}
             search={true}
             height={35}
           />
