@@ -11,7 +11,7 @@ import { useForm } from 'src/hooks/form'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RGGeneralRepository } from 'src/repositories/RgGeneralRepository'
+import { RGGeneralRepository } from 'src/repositories/RGGeneralRepository'
 
 export default function GlEoyClosingForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
