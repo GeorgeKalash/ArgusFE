@@ -37,11 +37,11 @@ const PhysicalCountItemDe = () => {
 
   const { formik } = useForm({
     initialValues: {
-      stockCountId: '',
-      siteId: '',
-      controllerId: '',
-      totalQty: '',
-      totalWeight: '',
+      stockCountId: null,
+      siteId: null,
+      controllerId: null,
+      totalQty: null,
+      totalWeight: null,
       status: 1,
       SCStatus: null,
       SCWIP: null,
@@ -52,8 +52,9 @@ const PhysicalCountItemDe = () => {
           sku: '',
           itemId: null,
           itemName: '',
-          countedQty: 1,
-          weight: 0
+          countedQty: 0,
+          weight: 0,
+          metalPurity: 0
         }
       ]
     },
@@ -114,9 +115,12 @@ const PhysicalCountItemDe = () => {
     })
       .then(res => {
         if (res.list) {
-          const modifiedList = res.list?.map(({ ...rest }, index) => ({
+          const modifiedList = res.list?.map((item, index) => ({
+            ...item,
             id: index + 1,
-            ...rest
+            metalPurity: item?.metalPurity ? item?.metalPurity : 0,
+            weight: item?.weight ? item?.weight : 0,
+            countedQty: item?.countedQty ? item?.countedQty : 0
           }))
           modifiedList.length > 0 && formik.setFieldValue('rows', modifiedList)
         }
@@ -145,12 +149,14 @@ const PhysicalCountItemDe = () => {
   }, [formik.values.rows])
 
   const setTotals = gridList => {
+    formik.setFieldValue('totalQty', 0)
+    formik.setFieldValue('totalWeight', 0)
     let sumQty = 0
     let sumWeight = 0
 
     gridList.map(item => {
-      sumQty += item.countedQty || 0
-      sumWeight += item.weight || 0
+      sumQty += Number(item.countedQty) || 0
+      sumWeight += Number(item.weight) || 0
     })
 
     formik.setFieldValue('totalQty', sumQty)
@@ -343,6 +349,15 @@ const PhysicalCountItemDe = () => {
     },
     {
       component: 'numberfield',
+      label: _labels.metalPurity,
+      name: 'metalPurity',
+      defaultValue: 0,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
       label: _labels.weight,
       name: 'weight',
       defaultValue: 0,
@@ -380,14 +395,15 @@ const PhysicalCountItemDe = () => {
     } catch (exception) {}
   }
 
-  const isPosted =
-    formik.values.status === 3 &&
+  const isPosted = formik.values.status === 3
+
+  const isHeader =
+    formik.values.stockCountId != null &&
+    formik.values.siteId != null &&
+    formik.values.controllerId != null &&
     formik.values.SCStatus != 3 &&
     formik.values.SCWIP != 2 &&
     formik.values.EndofSiteStatus != 3
-
-  const isHeader =
-    formik.values.stockCountId != null && formik.values.siteId != null && formik.values.controllerId != null
 
   const isSaved =
     formik.values.stockCountId != null &&
