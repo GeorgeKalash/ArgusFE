@@ -164,7 +164,9 @@ export default function OutwardsReturnForm({
 
   async function getRaCurrencyId() {
     const raCurrencyId = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
-    formik.setFieldValue('raCurrencyId', raCurrencyId)
+    if (raCurrencyId) {
+      await formik.setFieldValue('raCurrencyId', raCurrencyId)
+    }
 
     return raCurrencyId
   }
@@ -288,36 +290,46 @@ export default function OutwardsReturnForm({
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res = await getOutwardsTransfer(recordId)
+        const raCurrencyId = await getRaCurrencyId()
+        const res = await getOutwardsReturn(recordId)
+        const outwardTransfer = await getOutwardsTransfer(res?.record?.owt_Id)
 
-        console.log(res)
+        if (raCurrencyId) {
+          const data = await getData(
+            res.record.plantId,
+            res.record?.currencyId,
+            outwardTransfer?.record?.rateTypeId,
+            raCurrencyId
+          )
 
-        const data = await getData(
-          res.record.plantId,
-          res.record?.currencyId,
-          res.record?.rateTypeId,
-          res.record?.raCurrencyId
-        )
+          const rate = parseFloat(data?.rate)
+          if (isNaN(rate)) {
+            return
+          }
 
-        console.log(res.record.plantId,
-          res.record?.currencyId,
-          res.record?.rateTypeId,
-          res.record?.raCurrencyId)
+          const fcAmount = parseFloat(outwardTransfer?.record?.fcAmount || 0)
+          const owtLcAmount = parseFloat(outwardTransfer?.record?.lcAmount || 0)
+          const adRateCalcMethod = parseInt(outwardTransfer?.record?.rateCalcMethod, 10)
 
-        formik.setValues({
-          ...res.record,
-          owt_lcAmount: res.record.lcAmount,
-          date: formatDateFromApi(res.record.date)
-        })
+          const derivedLcAmount = calculateLcAmount(fcAmount, rate, adRateCalcMethod)
+
+          formik.setValues({
+            ...res.record,
+            amount: outwardTransfer?.record?.amount,
+            owt_lcAmount: outwardTransfer?.record?.lcAmount,
+            derivedLcAmount: derivedLcAmount,
+            date: formatDateFromApi(res.record.date)
+          })
+        }
       }
     })()
   }, [])
 
-  async function getData(plantId, currencyId, rateTypeId) {
-    if (plantId && currencyId && rateTypeId) {
+  async function getData(plantId, currencyId, rateTypeId, raCurrencyId) {
+    if (plantId && currencyId && rateTypeId && raCurrencyId) {
       const res = await getRequest({
         extension: CurrencyTradingSettingsRepository.ExchangeMap.get,
-        parameters: `_plantId=${plantId}&_currencyId=${currencyId}&_rateTypeId=${rateTypeId}&_raCurrencyId=${formik.values.raCurrencyId}`
+        parameters: `_plantId=${plantId}&_currencyId=${currencyId}&_rateTypeId=${rateTypeId}&_raCurrencyId=${raCurrencyId}`
       })
 
       return res.record
@@ -325,8 +337,12 @@ export default function OutwardsReturnForm({
   }
 
   useEffect(() => {
-    getRaCurrencyId()
-  }, [])
+    ;(async function () {
+      if (recordId || editMode) {
+        await getRaCurrencyId()
+      }
+    })()
+  }, [recordId, editMode])
 
   const getExRateChangeStatus = (beforeAmount, afterAmount) => {
     if (beforeAmount === afterAmount) formik.setFieldValue('exRateChangeStatus', '1')
@@ -428,12 +444,7 @@ export default function OutwardsReturnForm({
                                 parameters: `_recordId=${newValue?.corId}`
                               })
                             : Promise.resolve({ record: {} }),
-                          getData(
-                            formik.values?.plantId,
-                            newValue?.currencyId,
-                            newValue?.rateTypeId,
-                            formik?.values?.raCurrencyId
-                          )
+                          getData(formik.values?.plantId, newValue?.currencyId, newValue?.rateTypeId)
                         ])
 
                         formik.setFieldValue('interfaceId', res?.record?.interfaceId)
