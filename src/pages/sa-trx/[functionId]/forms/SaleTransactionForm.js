@@ -1096,7 +1096,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
 
   const subTotal = getSubtotal(parsedItemsArray)
 
-  const miscValue = formik.values.miscAmount == 0 ? 0 : parseFloat(formik.values.header.miscAmount)
+  const miscValue = formik.values.miscAmount == 0 ? 0 : parseFloat(formik.values.header.miscAmount) || 0
 
   const _footerSummary = getFooterTotals(parsedItemsArray, {
     totalQty: 0,
