@@ -18,7 +18,7 @@ class PosPaymentService {
 
   async cancelPayment() {
     try {
-      await axios.post(`${this.baseUrl}/api/pos/cancelTransaction`)
+      await axios.get(`${this.baseUrl}/api/Ingenico/sendCancel`)
       console.log('Transaction cancelled')
     } catch (error) {
       console.error('Error cancelling transaction:', error)
@@ -89,7 +89,6 @@ class PosPaymentService {
   async stopConnection() {
     if (this.connection) {
       try {
-        await this.connection.invoke('Stop_Connection')
         this.connection.stop()
         console.log('Connection closed')
       } catch (err) {
