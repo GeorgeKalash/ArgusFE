@@ -482,13 +482,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     })
   }
 
-  useEffect(() => {
-    if (!formik.values.clientId) {
-      formik.setFieldValue('orders', ordersInitialValues)
-      formik.setFieldValue('addressId', null)
-      formik.setFieldValue('address', '')
-    }
-  }, [formik?.values?.clientId])
 
   return (
     <FormShell
@@ -630,6 +623,11 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                       formik.setFieldValue('clientId', newValue?.recordId)
                       formik.setFieldValue('clientName', newValue?.name)
                       formik.setFieldValue('clientRef', newValue?.reference)
+                      if (!newValue.recordId) {
+                        formik.setFieldValue('orders', ordersInitialValues)
+                        formik.setFieldValue('addressId', null)
+                        formik.setFieldValue('address', '')
+                      }
                     }}
                     errorCheck={'clientId'}
                   />
