@@ -100,7 +100,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     sourceOfIncome: '',
     countryId: '',
     purposeOfTransfer: '',
-    commission: ''
+    commission: 0
   }
 
   const { maxAccess } = useDocumentType({
@@ -116,8 +116,9 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     validateOnChange: true,
     validate: values => {
       const errors = {}
-      if (values.dispersalMode == 1) {
+      if (values.dispersalMode == 2) {
         if (!values.receiver_bank) errors.receiver_bank = 'Receiver bank is required'
+        if (!values.receiver_bankBranch) errors.receiver_bankBranch = 'Receiver bank branch is required'
       }
 
       return errors
@@ -144,6 +145,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
         copy.sender_idExpiryDate = copy.sender_idExpiryDate ? formatDateToApi(copy?.sender_idExpiryDate) : null
         copy.receiver_idIssueDate = copy.receiver_idIssueDate ? formatDateToApi(copy?.receiver_idIssueDate) : null
         copy.receiver_idExpiryDate = copy.receiver_idExpiryDate ? formatDateToApi(copy?.receiver_idExpiryDate) : null
+        copy.commission = 0
 
         const res = await postRequest({
           extension: RemittanceOutwardsRepository.InwardsTransfer.set,
@@ -413,7 +415,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                     />
                   </Grid>
                 </Grid>
-                <Grid container spacing={2} marginTop={.5}>
+                <Grid container spacing={2} marginTop={0.5}>
                   <Grid item xs={6}>
                     <CustomNumberField
                       name='amount'
@@ -443,6 +445,27 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       readOnly={editMode}
                       onChange={e => formik.setFieldValue('trackingNo', e.target.value)}
                       error={formik.touched.trackingNo && Boolean(formik.errors.trackingNo)}
+                      onClear={() => formik.setFieldValue('trackingNo', '')}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <ResourceComboBox
+                      values={formik.values}
+                      endpointId={SystemRepository.Country.qry}
+                      name='sender_countryId'
+                      label={labels.sender_countryId}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('sender_countryId', newValue ? newValue.recordId : '')
+                      }}
+                      error={formik.touched.sender_countryId && Boolean(formik.errors.sender_countryId)}
+                      maxAccess={maxAccess}
+                      readOnly={editMode}
                     />
                   </Grid>
                 </Grid>
@@ -556,26 +579,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
               <Grid item xs={4}>
                 <ResourceComboBox
                   values={formik.values}
-                  endpointId={SystemRepository.Country.qry}
-                  name='sender_countryId'
-                  label={labels.sender_countryId}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('sender_countryId', newValue ? newValue.recordId : '')
-                  }}
-                  error={formik.touched.sender_countryId && Boolean(formik.errors.sender_countryId)}
-                  maxAccess={maxAccess}
-                  readOnly={editMode}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <ResourceComboBox
-                  values={formik.values}
                   endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
                   name='sender_idtId'
                   label={labels.sender_idtId}
@@ -646,6 +649,23 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
           </FieldSet>
           <FieldSet title={labels.receiverDetails}>
             <Grid container spacing={2}>
+              <Grid item xs={3}>
+                <ResourceComboBox
+                  values={formik.values}
+                  datasetId={DataSets.Category}
+                  name='receiver_category'
+                  label={labels.receiver_type}
+                  valueField='key'
+                  displayField='value'
+                  required
+                  maxAccess={maxAccess}
+                  readOnly={editMode}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('receiver_category', newValue?.key)
+                  }}
+                  error={formik.touched.receiver_category && Boolean(formik.errors.receiver_category)}
+                />
+              </Grid>
               <Grid item xs={3}>
                 <CustomTextField
                   name='receiver_firstName'
@@ -763,24 +783,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
               <Grid item xs={3}>
                 <ResourceComboBox
                   values={formik.values}
-                  datasetId={DataSets.Category}
-                  name='receiver_category'
-                  label={labels.receiver_type}
-                  valueField='key'
-                  displayField='value'
-                  required
-                  maxAccess={maxAccess}
-                  readOnly={editMode}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('receiver_category', newValue?.key)
-                  }}
-                  error={formik.touched.receiver_category && Boolean(formik.errors.receiver_category)}
-                />
-              </Grid>
-              <Grid item xs={3}>
-                <ResourceComboBox
-                  values={formik.values}
-                  datasetId={DataSets.CA_CASH_ACCOUNT_TYPE}
+                  datasetId={DataSets.RT_Dispersal_Type}
                   name='dispersalMode'
                   label={labels.dispersalMode}
                   valueField='key'
@@ -790,7 +793,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   required
                   onChange={(event, newValue) => {
                     formik.setFieldValue('dispersalMode', newValue?.key)
-                    if (newValue?.key == 2 || !newValue?.key) {
+                    if (newValue?.key != 2 || !newValue?.key) {
                       formik.setFieldValue('receiver_bank', null)
                       formik.setFieldValue('receiver_bankBranch', null)
                     }
@@ -811,7 +814,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                     { key: 'name', value: 'Name' }
                   ]}
                   maxAccess={maxAccess}
-                  required={formik.values.dispersalMode == 1}
+                  required={formik.values.dispersalMode == 2}
                   values={formik.values}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('receiver_bank', newValue ? newValue.recordId : '')
@@ -820,7 +823,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                     }
                   }}
                   error={formik.touched.receiver_bank && Boolean(formik.errors.receiver_bank)}
-                  readOnly={(editMode || formik.values.countryId) && formik.values.dispersalMode != 1}
+                  readOnly={(editMode || formik.values.countryId) && formik.values.dispersalMode != 2}
                 />
               </Grid>
               <Grid item xs={3}>
@@ -833,11 +836,12 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   displayField='name'
                   maxAccess={maxAccess}
                   values={formik.values}
+                  required={formik.values.dispersalMode == 2}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('receiver_bankBranch', newValue ? newValue.recordId : '')
                   }}
                   error={formik.touched.receiver_bankBranch && Boolean(formik.errors.receiver_bankBranch)}
-                  readOnly={(editMode || formik.values.countryId) && formik.values.dispersalMode != 1}
+                  readOnly={(editMode || formik.values.countryId) && formik.values.dispersalMode != 2}
                 />
               </Grid>
               <Grid item xs={3}>
