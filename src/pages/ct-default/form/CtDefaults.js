@@ -59,10 +59,10 @@ const CtDefaults = ({ _labels, access }) => {
       ct_credit_eval_ratetype_id: null,
       ct_minOtp_CIVAmount: null,
       'ct-client-trial-days': null,
-      ct_min_client_CIVAmount: '',
-      ct_default_civ_client: '',
-      ct_default_civ_clientRef: '',
-      ct_default_civ_clientName: ''
+      ct_min_client_CIVAmount: null,
+      ct_default_civ_client: null,
+      ct_default_civ_clientRef: null,
+      ct_default_civ_clientName: null
     },
     onSubmit: async values => {
       await postRtDefault(values)
@@ -204,7 +204,7 @@ const CtDefaults = ({ _labels, access }) => {
                     valueField='recordId'
                     displayField='name'
                     onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('ct_cash_purchase_ratetype_id', newValue?.recordId || null)
+                      formik.setFieldValue('ct_cash_purchase_ratetype_id', newValue?.recordId || null)
                     }}
                     error={
                       formik.touched.ct_cash_purchase_ratetype_id && Boolean(formik.errors.ct_cash_purchase_ratetype_id)
@@ -220,7 +220,7 @@ const CtDefaults = ({ _labels, access }) => {
                     valueField='recordId'
                     displayField='name'
                     onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('ct_credit_sales_ratetype_id', newValue?.recordId || null)
+                      formik.setFieldValue('ct_credit_sales_ratetype_id', newValue?.recordId || null)
                     }}
                     error={
                       formik.touched.ct_credit_sales_ratetype_id && Boolean(formik.errors.ct_credit_sales_ratetype_id)
@@ -236,7 +236,7 @@ const CtDefaults = ({ _labels, access }) => {
                     valueField='recordId'
                     displayField='name'
                     onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('ct_credit_purchase_ratetype_id', newValue?.recordId || null)
+                      formik.setFieldValue('ct_credit_purchase_ratetype_id', newValue?.recordId || null)
                     }}
                     error={
                       formik.touched.ct_credit_purchase_ratetype_id &&
@@ -253,7 +253,7 @@ const CtDefaults = ({ _labels, access }) => {
                     valueField='recordId'
                     displayField='name'
                     onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('ct_credit_eval_ratetype_id', newValue?.recordId || null)
+                      formik.setFieldValue('ct_credit_eval_ratetype_id', newValue?.recordId || null)
                     }}
                     error={
                       formik.touched.ct_credit_eval_ratetype_id && Boolean(formik.errors.ct_credit_eval_ratetype_id)
