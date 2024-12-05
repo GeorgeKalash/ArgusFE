@@ -24,6 +24,8 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useWindow } from 'src/windows'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import FieldSet from 'src/components/Shared/FieldSet'
 
 export default function OutwardsReturnForm({
   labels,
@@ -35,7 +37,7 @@ export default function OutwardsReturnForm({
   refetch
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
 
   const { maxAccess } = useDocumentType({
@@ -62,8 +64,13 @@ export default function OutwardsReturnForm({
       recordId: recordId || null,
       dtId: dtId || null,
       reference: '',
-      owId: '',
-      outwardRef: '',
+      owt_Id: null,
+      owt_reference: '',
+      owt_rateCalcMethod: null,
+      owt_exRate: null,
+      ad_exRate: null,
+      ad_rateCalcMethod: null,
+      exRateChangeStatus: null,
       requestedBy: null,
       date: new Date(),
       currencyId: null,
@@ -79,7 +86,7 @@ export default function OutwardsReturnForm({
       currencyRef: null,
       corName: null,
       corRef: null,
-      plantId: plantId,
+      plantId: parseInt(plantId),
       cashAccountName: null,
       cashAccountRef: null,
       fcAmount: '',
@@ -108,8 +115,8 @@ export default function OutwardsReturnForm({
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
-      owtId: yup.number().required(),
-      outwardRef: yup.string().required(),
+      owt_Id: yup.number().required(),
+      owt_reference: yup.string().required(),
       requestedBy: yup.string().required(),
       currencyId: yup.string().required(),
       clientId: yup.number().required(),
@@ -151,6 +158,20 @@ export default function OutwardsReturnForm({
       } catch (error) {}
     }
   })
+
+  async function getRaCurrencyId() {
+    const raCurrencyId = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
+    console.log(raCurrencyId)
+    formik.setFieldValue('raCurrencyId', raCurrencyId)
+
+    return raCurrencyId
+  }
+
+  const calculateLcAmount = (fcAmount, adExRate, adRateCalcMethod) => {
+    const derivedLcAmount = adRateCalcMethod === 1 ? fcAmount * adExRate : fcAmount / adExRate
+
+    return derivedLcAmount
+  }
 
   function viewOTP(recId) {
     stack({
@@ -283,6 +304,30 @@ export default function OutwardsReturnForm({
     })()
   }, [])
 
+  async function getData(plantId, currencyId, rateTypeId) {
+    if (plantId && currencyId && rateTypeId) {
+      const res = await getRequest({
+        extension: CurrencyTradingSettingsRepository.ExchangeMap.get,
+        parameters: `_plantId=${plantId}&_currencyId=${currencyId}&_rateTypeId=${rateTypeId}&_raCurrencyId=${formik.values.raCurrencyId}`
+      })
+
+      return res.record
+    }
+  }
+
+  useEffect(() => {
+    getRaCurrencyId()
+  }, [])
+
+  console.log(formik.values.raCurrencyId)
+
+  const getExRateChangeStatus = (beforeAmount, afterAmount) => {
+    console.log(beforeAmount, afterAmount)
+    if (beforeAmount === afterAmount) formik.setFieldValue('exRateChangeStatus', '1')
+    if (beforeAmount < afterAmount) formik.setFieldValue('exRateChangeStatus', '2')
+    if (beforeAmount > afterAmount) formik.setFieldValue('exRateChangeStatus', '3')
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.OutwardsReturn}
@@ -295,295 +340,389 @@ export default function OutwardsReturnForm({
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='reference'
-                label={labels.reference}
-                value={formik?.values?.reference}
-                maxAccess={!editMode && maxAccess}
-                maxLength='30'
-                readOnly={editMode || isPosted || isClosed}
-                onChange={formik.handleChange}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomDatePicker
-                name='date'
-                label={labels.date}
-                value={formik.values?.date}
-                required
-                readOnly={isPosted || isClosed || isOpenOutwards}
-                onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('date', '')}
-                error={formik.touched.date && Boolean(formik.errors.date)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <ResourceLookup
-                endpointId={RemittanceOutwardsRepository.OutwardsTransfer.snapshot}
-                valueField='reference'
-                displayField='reference'
-                name='outwardRef'
-                secondDisplayField={false}
-                required
-                label={labels.outwards}
-                form={formik}
-                readOnly={isPosted || isClosed || isOpenOutwards}
-                onChange={async (event, newValue) => {
-                  formik.setFieldValue('owtId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('outwardRef', newValue ? newValue.reference : '')
-                  formik.setFieldValue('clientId', newValue ? newValue.clientId : '')
-                  formik.setFieldValue('clientName', newValue ? newValue.clientName : '')
-                  formik.setFieldValue('clientRef', newValue ? newValue.clientRef : '')
-                  formik.setFieldValue('currencyId', newValue ? newValue.currencyId : '')
-                  formik.setFieldValue('currencyName', newValue ? newValue.currencyName : '')
-                  formik.setFieldValue('currencyRef', newValue ? newValue.currencyRef : '')
-                  formik.setFieldValue('fcAmount', newValue ? newValue.fcAmount : '')
-                  formik.setFieldValue('corId', newValue ? newValue.corId : '')
-                  formik.setFieldValue('corName', newValue ? newValue.corName : '')
-                  formik.setFieldValue('corRef', newValue ? newValue.corRef : '')
-                  formik.setFieldValue('corReplyStatus', newValue ? newValue.corReplyStatus : '')
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.cashAccountId : '')
-                  formik.setFieldValue('cashAccountName', newValue ? newValue.cashAccountName : '')
-                  formik.setFieldValue('cashAccountRef', newValue ? newValue.cashAccountRef : '')
-                  formik.setFieldValue('dispersalType', newValue ? newValue.dispersalType : '')
-                  formik.setFieldValue('dispersalName', newValue ? newValue.dispersalName : '')
-                  formik.setFieldValue('corRateCalcMethod', newValue ? newValue.corRateCalcMethod : '')
-                  formik.setFieldValue('corExRate', newValue ? newValue.corExRate : '')
-                  formik.setFieldValue('commission', newValue ? newValue.commission : '')
-                  formik.setFieldValue('vatAmount', newValue ? newValue.vatAmount : '')
-                  formik.setFieldValue('tdAmount', newValue ? newValue.tdAmount : '')
-                  formik.setFieldValue('amount', newValue ? newValue.amount : '')
-                  formik.setFieldValue('exRate', newValue ? newValue.exRate : '')
-                  formik.setFieldValue('rateCalcMethod', newValue ? newValue.rateCalcMethod : '')
-                  formik.setFieldValue('lcAmount', newValue ? newValue.lcAmount : '')
-                  formik.setFieldValue('releaseStatus', newValue ? newValue.releaseStatus : '')
-                  formik.setFieldValue('corCurrencyId', newValue ? newValue.corCurrencyId : '')
-                  formik.setFieldValue('productId', newValue ? newValue.productId : '')
-                  formik.setFieldValue('productName', newValue ? newValue.productName : '')
-                  if (newValue?.corId) {
-                    const res = await getRequest({
-                      extension: RemittanceSettingsRepository.Correspondent.get,
-                      parameters: `_recordId=${newValue?.corId}`
-                    })
-                    formik.setFieldValue('interfaceId', res?.record?.interfaceId)
-                  }
-                }}
-                error={formik.touched.outwardRef && Boolean(formik.errors.outwardRef)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <ResourceComboBox
-                datasetId={DataSets.REQUESTED_BY}
-                name='requestedBy'
-                label={labels.requestedBy}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                required
-                readOnly={isPosted || isClosed || isOpenOutwards}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('requestedBy', newValue?.key)
-                }}
-                error={formik.touched.requestedBy && Boolean(formik.errors.requestedBy)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Currency.qry}
-                name='currencyId'
-                label={labels.currency}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                values={formik.values}
-                readOnly
-                required
-                maxAccess={maxAccess}
-                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='fcAmount'
-                label={labels.fcAmount}
-                value={formik?.values?.fcAmount}
-                required
-                readOnly
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('fcAmount', '')}
-                error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='dispersalName'
-                label={labels.dispersalName}
-                value={formik?.values?.dispersalName}
-                onChange={formik.handleChange}
-                error={formik.touched.dispersalName && Boolean(formik.errors.dispersalName)}
-                maxAccess={maxAccess}
-                readOnly
-                required
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='lcAmount'
-                label={labels.lcAmount}
-                value={formik?.values?.lcAmount}
-                required
-                readOnly
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('lcAmount', '')}
-                error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <ResourceLookup
-                readOnly
-                valueField='reference'
-                displayField='name'
-                name='clientId'
-                label={labels.client}
-                form={formik}
-                required
-                displayFieldWidth={2}
-                valueShow='clientRef'
-                secondValueShow='clientName'
-                maxAccess={maxAccess}
-                error={formik.touched.clientId && Boolean(formik.errors.clientId)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='exRate'
-                label={labels.exRate}
-                value={formik?.values?.exRate}
-                required
-                readOnly
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('exRate', '')}
-                error={formik.touched.exRate && Boolean(formik.errors.exRate)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='productName'
-                label={labels.product}
-                value={formik?.values?.productName}
-                onChange={formik.handleChange}
-                error={formik.touched.productName && Boolean(formik.errors.productName)}
-                maxAccess={maxAccess}
-                readOnly
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='commission'
-                label={labels.commission}
-                value={formik?.values?.commission}
-                required
-                readOnly
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('commission', '')}
-                error={formik.touched.commission && Boolean(formik.errors.commission)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <ResourceLookup
-                valueField='reference'
-                displayField='name'
-                name='corId'
-                label={labels.correspondent}
-                form={formik}
-                required
-                valueShow='corRef'
-                secondValueShow='corName'
-                readOnly
-                maxAccess={maxAccess}
-                error={formik.touched.corId && Boolean(formik.errors.corId)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='vatAmount'
-                label={labels.vatAmount}
-                value={formik?.values?.vatAmount}
-                readOnly
-                required
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('vatAmount', '')}
-                error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <ResourceComboBox
-                datasetId={DataSets.SETTLEMENT_STATUS}
-                name='settlementStatus'
-                label={labels.settlementStatus}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                onChange={(newValue) => {
-                  formik.setFieldValue('settlementStatus', newValue ? newValue?.key : '')
-                }}
-                defaultIndex={formik?.values?.interfaceId && 0}
-                required
-                readOnly={
-                  isOpenOutwards ? !!formik.values.interfaceId : isPosted || isClosed || !!formik.values.interfaceId
-                }
-                maxAccess={maxAccess}
-                error={formik.touched.settlementStatus && Boolean(formik.errors.settlementStatus)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='tdAmount'
-                label={labels.tdAmount}
-                value={formik?.values?.tdAmount}
-                readOnly
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('tdAmount', '')}
-                error={formik.touched.tdAmount && Boolean(formik.errors.tdAmount)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='otpVerified'
-                    checked={formik.values?.otpVerified}
-                    disabled={true}
-                    onChange={formik.handleChange}
-                    maxAccess={access}
-                  />
-                }
-                label={labels.otpVerified}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='amount'
-                label={labels.amount}
-                value={formik?.values?.amount}
-                required
-                readOnly
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('amount', '')}
-                error={formik.touched.amount && Boolean(formik.errors.amount)}
-              />
+          <Grid container spacing={2} sx={{ pt: 5, display: 'flex' }}>
+            <Grid container item xs={12} spacing={2} sx={{ display: 'flex', flexDirection: 'row' }}>
+              <Grid item xs={6}>
+                <FieldSet title='Outwards Transfer'>
+                  <Grid item xs={6}>
+                    <CustomTextField
+                      name='reference'
+                      label={labels.reference}
+                      value={formik?.values?.reference}
+                      maxAccess={!editMode && maxAccess}
+                      maxLength='30'
+                      readOnly={editMode || isPosted || isClosed}
+                      onChange={formik.handleChange}
+                      error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomDatePicker
+                      name='date'
+                      label={labels.date}
+                      value={formik.values?.date}
+                      required
+                      readOnly={isPosted || isClosed || isOpenOutwards}
+                      onChange={formik.setFieldValue}
+                      onClear={() => formik.setFieldValue('date', '')}
+                      error={formik.touched.date && Boolean(formik.errors.date)}
+                      maxAccess={maxAccess}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <ResourceLookup
+                      endpointId={RemittanceOutwardsRepository.OutwardsTransfer.snapshot}
+                      valueField='reference'
+                      displayField='reference'
+                      name='owt_reference'
+                      secondDisplayField={false}
+                      required
+                      label={labels.outwards}
+                      form={formik}
+                      readOnly={isPosted || isClosed || isOpenOutwards}
+                      onChange={async (event, newValue) => {
+                        formik.setFieldValue('owt_Id', newValue ? newValue.recordId : '')
+                        formik.setFieldValue('owt_reference', newValue ? newValue.reference : '')
+                        formik.setFieldValue('owt_exRate', newValue ? newValue.exRate : '')
+                        formik.setFieldValue('owt_rateCalcMethod', newValue ? newValue.rateCalcMethod : '')
+                        formik.setFieldValue('owt_lcAmount', newValue ? newValue.lcAmount : '')
+                        formik.setFieldValue('clientId', newValue ? newValue.clientId : '')
+                        formik.setFieldValue('clientName', newValue ? newValue.clientName : '')
+                        formik.setFieldValue('clientRef', newValue ? newValue.clientRef : '')
+                        formik.setFieldValue('currencyId', newValue ? newValue.currencyId : '')
+                        formik.setFieldValue('currencyName', newValue ? newValue.currencyName : '')
+                        formik.setFieldValue('currencyRef', newValue ? newValue.currencyRef : '')
+                        formik.setFieldValue('fcAmount', newValue ? newValue.fcAmount : '')
+                        formik.setFieldValue('corId', newValue ? newValue.corId : '')
+                        formik.setFieldValue('corName', newValue ? newValue.corName : '')
+                        formik.setFieldValue('corRef', newValue ? newValue.corRef : '')
+                        formik.setFieldValue('corReplyStatus', newValue ? newValue.corReplyStatus : '')
+                        formik.setFieldValue('cashAccountId', newValue ? newValue.cashAccountId : '')
+                        formik.setFieldValue('cashAccountName', newValue ? newValue.cashAccountName : '')
+                        formik.setFieldValue('cashAccountRef', newValue ? newValue.cashAccountRef : '')
+                        formik.setFieldValue('dispersalType', newValue ? newValue.dispersalType : '')
+                        formik.setFieldValue('dispersalName', newValue ? newValue.dispersalName : '')
+                        formik.setFieldValue('corRateCalcMethod', newValue ? newValue.corRateCalcMethod : '')
+                        formik.setFieldValue('corExRate', newValue ? newValue.corExRate : '')
+                        formik.setFieldValue('commission', newValue ? newValue.commission : '')
+                        formik.setFieldValue('vatAmount', newValue ? newValue.vatAmount : '')
+                        formik.setFieldValue('tdAmount', newValue ? newValue.tdAmount : '')
+                        formik.setFieldValue('amount', newValue ? newValue.amount : '')
+                        formik.setFieldValue('releaseStatus', newValue ? newValue.releaseStatus : '')
+                        formik.setFieldValue('corCurrencyId', newValue ? newValue.corCurrencyId : '')
+                        formik.setFieldValue('productId', newValue ? newValue.productId : '')
+                        formik.setFieldValue('rateTypeId', newValue ? newValue.rateTypeId : '')
+                        if (newValue?.corId) {
+                          const res = await getRequest({
+                            extension: RemittanceSettingsRepository.Correspondent.get,
+                            parameters: `_recordId=${newValue?.corId}`
+                          })
+                          formik.setFieldValue('interfaceId', res?.record?.interfaceId)
+                        }
+
+                        const adRateCalcMethod = parseInt(formik?.values?.ad_rateCalcMethod, 10)
+                        const fcAmount = parseFloat(newValue?.fcAmount) || 0
+                        const owtLcAmount = parseFloat(newValue?.lcAmount)
+
+                        const data = await getData(
+                          formik.values?.plantId,
+                          newValue?.currencyId,
+                          newValue?.rateTypeId,
+                          formik?.values?.raCurrencyId
+                        )
+                        console.log(data, 'data...')
+
+                        console.log(fcAmount, data?.rate, adRateCalcMethod, owtLcAmount)
+                        const derivedLcAmount = calculateLcAmount(fcAmount, data?.rate, adRateCalcMethod)
+
+                        console.log(derivedLcAmount, 'derivedLcAmount')
+                        const smallestLcAmount = Math.min(owtLcAmount, derivedLcAmount)
+
+                        formik.setFieldValue('lcAmount', smallestLcAmount)
+                        formik.setFieldValue('derivedLcAmount', derivedLcAmount)
+                        formik.setFieldValue('exRate', Math.min(parseFloat(newValue?.exRate), data?.rate))
+                        formik.setFieldValue(
+                          'rateCalcMethod',
+                          Math.min(parseInt(newValue?.rateCalcMethod, 10), adRateCalcMethod)
+                        )
+
+                        formik.setFieldValue('ad_exRate', data?.rate)
+                        formik.setFieldValue('ad_rateCalcMethod', data?.rateCalcMethod)
+                        getExRateChangeStatus(owtLcAmount, derivedLcAmount)
+                      }}
+                      error={formik.touched.owt_reference && Boolean(formik.errors.owt_reference)}
+                      maxAccess={maxAccess}
+                    />
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <ResourceComboBox
+                      endpointId={SystemRepository.Currency.qry}
+                      name='currencyId'
+                      label={labels.currency}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      maxAccess={maxAccess}
+                      values={formik.values}
+                      error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                      readOnly={editMode}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomNumberField
+                      name='fcAmount'
+                      label={labels.fcAmount}
+                      value={formik?.values?.fcAmount}
+                      required
+                      readOnly
+                      maxAccess={maxAccess}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('fcAmount', '')}
+                      error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomNumberField
+                      name='owt_lcAmount'
+                      label={labels.lcAmount}
+                      value={formik?.values?.owt_lcAmount}
+                      required
+                      readOnly
+                      maxAccess={maxAccess}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('owt_lcAmount', '')}
+                      error={formik.touched.owt_lcAmount && Boolean(formik.errors.owt_lcAmount)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomTextField
+                      name='dispersalName'
+                      label={labels.dispersalName}
+                      value={formik?.values?.dispersalName}
+                      onChange={formik.handleChange}
+                      error={formik.touched.dispersalName && Boolean(formik.errors.dispersalName)}
+                      maxAccess={maxAccess}
+                      readOnly
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <ResourceLookup
+                      readOnly
+                      valueField='reference'
+                      displayField='name'
+                      name='clientId'
+                      label={labels.client}
+                      form={formik}
+                      required
+                      displayFieldWidth={2}
+                      valueShow='clientRef'
+                      secondValueShow='clientName'
+                      maxAccess={maxAccess}
+                      error={formik.touched.clientId && Boolean(formik.errors.clientId)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomNumberField
+                      name='exRate'
+                      label={labels.exRate}
+                      value={formik?.values?.exRate}
+                      required
+                      readOnly
+                      maxAccess={maxAccess}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('exRate', '')}
+                      error={formik.touched.exRate && Boolean(formik.errors.exRate)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomTextField
+                      name='productName'
+                      label={labels.product}
+                      value={formik?.values?.productName}
+                      onChange={formik.handleChange}
+                      error={formik.touched.productName && Boolean(formik.errors.productName)}
+                      maxAccess={maxAccess}
+                      readOnly
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomNumberField
+                      name='commission'
+                      label={labels.commission}
+                      value={formik?.values?.commission}
+                      required
+                      readOnly
+                      maxAccess={maxAccess}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('commission', '')}
+                      error={formik.touched.commission && Boolean(formik.errors.commission)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomNumberField
+                      name='vatAmount'
+                      label={labels.vatAmount}
+                      value={formik?.values?.vatAmount}
+                      readOnly
+                      required
+                      maxAccess={maxAccess}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('vatAmount', '')}
+                      error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceLookup
+                      valueField='reference'
+                      displayField='name'
+                      name='corId'
+                      label={labels.correspondent}
+                      form={formik}
+                      required
+                      valueShow='corRef'
+                      secondValueShow='corName'
+                      readOnly
+                      maxAccess={maxAccess}
+                      error={formik.touched.corId && Boolean(formik.errors.corId)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomNumberField
+                      name='tdAmount'
+                      label={labels.tdAmount}
+                      value={formik?.values?.tdAmount}
+                      readOnly
+                      maxAccess={maxAccess}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('tdAmount', '')}
+                      error={formik.touched.tdAmount && Boolean(formik.errors.tdAmount)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name='otpVerified'
+                          checked={formik.values?.otpVerified}
+                          disabled={true}
+                          onChange={formik.handleChange}
+                          maxAccess={access}
+                        />
+                      }
+                      label={labels.otpVerified}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomNumberField
+                      name='amount'
+                      label={labels.amount}
+                      value={formik?.values?.amount}
+                      required
+                      readOnly
+                      maxAccess={maxAccess}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('amount', '')}
+                      error={formik.touched.amount && Boolean(formik.errors.amount)}
+                    />
+                  </Grid>
+                </FieldSet>
+              </Grid>
+              <Grid item xs={6}>
+                <FieldSet title='Calculated'>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      datasetId={DataSets.REQUESTED_BY}
+                      name='requestedBy'
+                      label={labels.requestedBy}
+                      valueField='key'
+                      displayField='value'
+                      values={formik.values}
+                      required
+                      readOnly={isPosted || isClosed || isOpenOutwards}
+                      maxAccess={maxAccess}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('requestedBy', newValue?.key)
+                      }}
+                      error={formik.touched.requestedBy && Boolean(formik.errors.requestedBy)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      datasetId={DataSets.SETTLEMENT_STATUS}
+                      name='settlementStatus'
+                      label={labels.settlementStatus}
+                      valueField='key'
+                      displayField='value'
+                      values={formik.values}
+                      onChange={newValue => {
+                        formik.setFieldValue('settlementStatus', newValue ? newValue?.key : '')
+                      }}
+                      defaultIndex={formik?.values?.interfaceId && 0}
+                      required
+                      readOnly={
+                        isOpenOutwards
+                          ? !!formik.values.interfaceId
+                          : isPosted || isClosed || !!formik.values.interfaceId
+                      }
+                      maxAccess={maxAccess}
+                      error={formik.touched.settlementStatus && Boolean(formik.errors.settlementStatus)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='ad_exRate'
+                      label={labels.exRate}
+                      value={formik?.values?.ad_exRate}
+                      required
+                      readOnly
+                      maxAccess={maxAccess}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('ad_exRate', '')}
+                      error={formik.touched.ad_exRate && Boolean(formik.errors.ad_exRate)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='derivedLcAmount'
+                      label={labels.amount}
+                      value={formik?.values?.derivedLcAmount}
+                      required
+                      readOnly
+                    />
+                  </Grid>
+                </FieldSet>
+                <FieldSet title='Amount'>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='lcAmount'
+                      label={labels.lcAmount}
+                      value={formik?.values?.lcAmount}
+                      required
+                      readOnly
+                      maxAccess={maxAccess}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('lcAmount', '')}
+                      error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      datasetId={DataSets.EXCHANGE_RATE_CHANGE_STATUS}
+                      name='exRateChangeStatus'
+                      label={labels.exRateChangeStatus}
+                      valueField='key'
+                      displayField='value'
+                      values={formik.values}
+                      required
+                      maxAccess={maxAccess}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('exRateChangeStatus', newValue?.key)
+                      }}
+                    />
+                  </Grid>
+                </FieldSet>
+              </Grid>
             </Grid>
           </Grid>
         </Grow>
