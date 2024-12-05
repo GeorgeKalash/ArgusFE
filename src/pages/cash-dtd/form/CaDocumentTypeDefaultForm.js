@@ -29,12 +29,29 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
     initialValues: {
       dtId: '',
       plantId: '',
-      recordId: recordId || null
+      recordId: recordId || null,
+      cashAccountId: '',
+      fromCashAccountId: '',
+      toCashAccountId: '',
+      fromCashAccountRef: '',
+      fromCashAccountName: '',
+      toCashAccountName: '',
+      toCashAccountRef: ''
     },
     maxAccess,
     enableReinitialize: false,
     validationSchema: yup.object({
-      dtId: yup.string().required()
+      dtId: yup.string().required(),
+      fromCashAccountId: yup.string().nullable(),
+      toCashAccountId: yup
+        .string()
+        .nullable()
+        .test(function (value) {
+          const { fromCashAccountId } = this.parent
+          if (!value || !fromCashAccountId) return true
+
+          return value !== fromCashAccountId
+        })
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -134,6 +151,52 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
                   formik.setFieldValue('cashAccountName', newValue?.name || '')
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={CashBankRepository.CashAccount.snapshot}
+                parameters={{
+                  _type: 0
+                }}
+                valueField='reference'
+                displayField='name'
+                name='fromCashAccountId'
+                displayFieldWidth={2}
+                label={labels.fromCa}
+                form={formik}
+                valueShow='fromCashAccountRef'
+                secondValueShow='fromCashAccountName'
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('fromCashAccountId', newValue ? newValue.recordId : null)
+                  formik.setFieldValue('fromCashAccountRef', newValue ? newValue.reference : null)
+                  formik.setFieldValue('fromCashAccountName', newValue ? newValue.name : null)
+                }}
+                error={formik.touched.fromCashAccountId && Boolean(formik.errors.fromCashAccountId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={CashBankRepository.CashAccount.snapshot}
+                parameters={{
+                  _type: 0
+                }}
+                valueField='reference'
+                displayField='name'
+                name='toCashAccountId'
+                displayFieldWidth={2}
+                label={labels.toCa}
+                form={formik}
+                valueShow='toCashAccountRef'
+                secondValueShow='toashAccountName'
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('toCashAccountId', newValue ? newValue.recordId : null)
+                  formik.setFieldValue('toCashAccountRef', newValue ? newValue.reference : null)
+                  formik.setFieldValue('toashAccountName', newValue ? newValue.name : null)
+                }}
+                error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
                 maxAccess={maxAccess}
               />
             </Grid>
