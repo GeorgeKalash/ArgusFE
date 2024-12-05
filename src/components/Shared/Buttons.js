@@ -385,6 +385,19 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'generateIV',
+    label: platformLabels.GenerateInvoice,
+    color: 'black',
+    image: 'generate.png',
+    main: false
+  },
+  {
+    key: 'Generate Invoice',
+    label: platformLabels.GenerateInvoice,
+    color: '#231f20',
+    main: false
+  },
+  {
     key: 'ClientSalesTransaction',
     label: platformLabels.ClientSalesTransaction,
     color: 'blue',
