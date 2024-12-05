@@ -245,7 +245,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
   useEffect(() => {
     pId && getProductSchedules(pId)
   }, [pId])
-  console.log('store', store)
+
   const getProductSchedules = pId => {
     const defaultParams = `_productId=${pId}`
     var parameters = defaultParams
