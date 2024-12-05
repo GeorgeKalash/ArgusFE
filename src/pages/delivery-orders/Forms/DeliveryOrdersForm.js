@@ -217,7 +217,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
   async function fillForm(doHeader, doItems) {
     const address = await getAddress(doHeader?.record?.addressId)
 
-    let ordersList = []
+    let ordersList = ordersInitialValues
 
     if (doItems.list != []) {
       ordersList = await Promise.all(
