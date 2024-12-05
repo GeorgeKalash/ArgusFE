@@ -161,7 +161,6 @@ export default function OutwardsReturnForm({
 
   async function getRaCurrencyId() {
     const raCurrencyId = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
-    console.log(raCurrencyId)
     formik.setFieldValue('raCurrencyId', raCurrencyId)
 
     return raCurrencyId
@@ -319,14 +318,13 @@ export default function OutwardsReturnForm({
     getRaCurrencyId()
   }, [])
 
-  console.log(formik.values.raCurrencyId)
-
   const getExRateChangeStatus = (beforeAmount, afterAmount) => {
-    console.log(beforeAmount, afterAmount)
     if (beforeAmount === afterAmount) formik.setFieldValue('exRateChangeStatus', '1')
     if (beforeAmount < afterAmount) formik.setFieldValue('exRateChangeStatus', '2')
     if (beforeAmount > afterAmount) formik.setFieldValue('exRateChangeStatus', '3')
   }
+
+  let lcAmountCalculated = formik.values.lcAmount
 
   return (
     <FormShell
@@ -411,43 +409,48 @@ export default function OutwardsReturnForm({
                         formik.setFieldValue('releaseStatus', newValue ? newValue.releaseStatus : '')
                         formik.setFieldValue('corCurrencyId', newValue ? newValue.corCurrencyId : '')
                         formik.setFieldValue('productId', newValue ? newValue.productId : '')
+                        formik.setFieldValue('productName', newValue ? newValue.productName : '')
                         formik.setFieldValue('rateTypeId', newValue ? newValue.rateTypeId : '')
-                        if (newValue?.corId) {
-                          const res = await getRequest({
-                            extension: RemittanceSettingsRepository.Correspondent.get,
-                            parameters: `_recordId=${newValue?.corId}`
-                          })
-                          formik.setFieldValue('interfaceId', res?.record?.interfaceId)
-                        }
+                        formik.setFieldValue('owt_Id', newValue?.recordId || '')
 
-                        const adRateCalcMethod = parseInt(formik?.values?.ad_rateCalcMethod, 10)
-                        const fcAmount = parseFloat(newValue?.fcAmount) || 0
-                        const owtLcAmount = parseFloat(newValue?.lcAmount)
+                        const [res, data] = await Promise.all([
+                          newValue?.corId
+                            ? getRequest({
+                                extension: RemittanceSettingsRepository.Correspondent.get,
+                                parameters: `_recordId=${newValue?.corId}`
+                              })
+                            : Promise.resolve({ record: {} }),
+                          getData(
+                            formik.values?.plantId,
+                            newValue?.currencyId,
+                            newValue?.rateTypeId,
+                            formik?.values?.raCurrencyId
+                          )
+                        ])
 
-                        const data = await getData(
-                          formik.values?.plantId,
-                          newValue?.currencyId,
-                          newValue?.rateTypeId,
-                          formik?.values?.raCurrencyId
-                        )
-                        console.log(data, 'data...')
-
-                        console.log(fcAmount, data?.rate, adRateCalcMethod, owtLcAmount)
+                        formik.setFieldValue('interfaceId', res?.record?.interfaceId)
+                        const fcAmount = parseFloat(newValue?.fcAmount || 0)
+                        const owtLcAmount = parseFloat(newValue?.lcAmount || 0)
+                        const adRateCalcMethod = parseInt(newValue?.rateCalcMethod, 10)
                         const derivedLcAmount = calculateLcAmount(fcAmount, data?.rate, adRateCalcMethod)
 
-                        console.log(derivedLcAmount, 'derivedLcAmount')
                         const smallestLcAmount = Math.min(owtLcAmount, derivedLcAmount)
+
+                        if (!formik.values.originalLcAmount) {
+                          formik.setFieldValue('originalLcAmount', smallestLcAmount)
+                        }
 
                         formik.setFieldValue('lcAmount', smallestLcAmount)
                         formik.setFieldValue('derivedLcAmount', derivedLcAmount)
-                        formik.setFieldValue('exRate', Math.min(parseFloat(newValue?.exRate), data?.rate))
+                        formik.setFieldValue('exRate', Math.min(parseFloat(newValue?.exRate || 0), data?.rate || 0))
                         formik.setFieldValue(
                           'rateCalcMethod',
-                          Math.min(parseInt(newValue?.rateCalcMethod, 10), adRateCalcMethod)
+                          Math.min(parseInt(newValue?.rateCalcMethod, 10) || 0, adRateCalcMethod)
                         )
 
                         formik.setFieldValue('ad_exRate', data?.rate)
                         formik.setFieldValue('ad_rateCalcMethod', data?.rateCalcMethod)
+
                         getExRateChangeStatus(owtLcAmount, derivedLcAmount)
                       }}
                       error={formik.touched.owt_reference && Boolean(formik.errors.owt_reference)}
@@ -554,8 +557,6 @@ export default function OutwardsReturnForm({
                       required
                       readOnly
                       maxAccess={maxAccess}
-                      onChange={formik.handleChange}
-                      onClear={() => formik.setFieldValue('commission', '')}
                       error={formik.touched.commission && Boolean(formik.errors.commission)}
                     />
                   </Grid>
@@ -642,7 +643,21 @@ export default function OutwardsReturnForm({
                       readOnly={isPosted || isClosed || isOpenOutwards}
                       maxAccess={maxAccess}
                       onChange={(event, newValue) => {
+                        const originalLcAmount = formik.values.originalLcAmount
+
                         formik.setFieldValue('requestedBy', newValue?.key)
+
+                        if (newValue?.key === '1' || newValue?.key === '2') {
+                          const amount =
+                            originalLcAmount +
+                            (formik?.values?.commission || 0) +
+                            (formik?.values?.vatAmount || 0) -
+                            (formik?.values?.tdAmount || 0)
+
+                          formik.setFieldValue('lcAmount', amount)
+                        } else if (newValue?.key === '3') {
+                          formik.setFieldValue('lcAmount', originalLcAmount)
+                        }
                       }}
                       error={formik.touched.requestedBy && Boolean(formik.errors.requestedBy)}
                     />
@@ -655,8 +670,8 @@ export default function OutwardsReturnForm({
                       valueField='key'
                       displayField='value'
                       values={formik.values}
-                      onChange={newValue => {
-                        formik.setFieldValue('settlementStatus', newValue ? newValue?.key : '')
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('settlementStatus', newValue?.key)
                       }}
                       defaultIndex={formik?.values?.interfaceId && 0}
                       required
