@@ -28,7 +28,7 @@ export default function ResourceComboBox({
 
   const [apiResponse, setApiResponse] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
-  const finalItemsListRef = useRef([]);
+  const finalItemsListRef = useRef([])
 
   function fetch({ datasetId, endpointId, parameters }) {
     if (endpointId) {
@@ -70,7 +70,7 @@ export default function ResourceComboBox({
       setIsLoading(false)
 
       if (!values[name]) {
-        selectFirstOption();
+        selectFirstOption()
       }
     }
   }
@@ -94,15 +94,13 @@ export default function ResourceComboBox({
     }
   }
 
-
   const onBlur = (e, HighlightedOption) => {
     if (HighlightedOption) {
-      rest.onChange('', HighlightedOption);
+      rest.onChange('', HighlightedOption)
     } else if (!values[name] && finalItemsListRef.current?.[0]) {
-      selectFirstOption();
+      selectFirstOption()
     }
   }
-  
 
   const selectFirstOption = () => {
     if (finalItemsListRef.current?.[0]) {
