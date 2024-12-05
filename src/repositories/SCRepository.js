@@ -21,15 +21,12 @@ export const SCRepository = {
     del: service + 'delSIT',
     reopen: service + 'reopenSIT',
     end: service + 'endSIT'
-    end: service + 'endSIT'
   },
   Controller: {
-    qry: service + 'qryCRL'
     qry: service + 'qryCRL'
   },
   PHY: {
     qry: service + 'qryPHY',
-    set2: service + 'set2PHY'
     set2: service + 'set2PHY'
   },
   StockCount: {

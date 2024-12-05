@@ -455,6 +455,17 @@ const PhysicalCountItemDe = () => {
       condition: !isPosted,
       onClick: onPost,
       disabled: !isHeader
+    },
+    {
+      key: 'ClearGrid',
+      condition: true,
+      onClick: 'onClearGridConfirmation',
+      onSuccess: clearGrid
+    },
+    {
+      key: 'ClearHG',
+      condition: true,
+      onClick: 'onClearAllConfirmation'
     }
   ]
 
@@ -462,6 +473,7 @@ const PhysicalCountItemDe = () => {
     <FormShell
       form={formik}
       isInfo={false}
+      isCleared={false}
       isSavedClear={false}
       disabledSubmit={!isSaved}
       actions={actions}
@@ -560,7 +572,7 @@ const PhysicalCountItemDe = () => {
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={2}>
+            {/* <Grid item xs={2}>
               <Button
                 onClick={clearGrid}
                 sx={{
@@ -575,7 +587,7 @@ const PhysicalCountItemDe = () => {
               >
                 <img src='/images/buttonsIcons/clear.png' alt={platformLabels.Clear} />
               </Button>
-            </Grid>
+            </Grid> */}
           </Grid>
         </Fixed>
         <Grow>
