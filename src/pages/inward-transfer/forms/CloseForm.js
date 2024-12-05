@@ -140,6 +140,20 @@ export default function CloseForm({ form, labels, access, window, recordId, wind
                   decimalScale={2}
                 />
               </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='trackingNo'
+                  label={labels.trackingNo}
+                  value={formik?.values?.trackingNo}
+                  maxLength='30'
+                  required={form.values.trackingNo}
+                  onChange={e => formik.setFieldValue('trackingNo', e.target.value)}
+                  onClear={() => formik.setFieldValue('trackingNo', '')}
+                  error={
+                    (formik.touched.trackingNo && Boolean(formik.errors.trackingNo)) || getFieldError('trackingNo')
+                  }
+                />
+              </Grid>
             </Grid>
           </FieldSet>
           <FieldSet title={labels.receiverDetails} sx={{ flex: 0 }}>
@@ -172,20 +186,6 @@ export default function CloseForm({ form, labels, access, window, recordId, wind
                   }
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('receiver_lastName', '')}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='trackingNo'
-                  label={labels.trackingNo}
-                  value={formik?.values?.trackingNo}
-                  maxLength='30'
-                  required={form.values.trackingNo}
-                  onChange={e => formik.setFieldValue('trackingNo', e.target.value)}
-                  onClear={() => formik.setFieldValue('trackingNo', '')}
-                  error={
-                    (formik.touched.trackingNo && Boolean(formik.errors.trackingNo)) || getFieldError('trackingNo')
-                  }
                 />
               </Grid>
             </Grid>
