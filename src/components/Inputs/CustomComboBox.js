@@ -13,7 +13,6 @@ const CustomComboBox = ({
   value,
   valueField = 'key',
   displayField = 'value',
-  onKeyUp,
   store = [],
   getOptionBy,
   onChange,
@@ -195,9 +194,6 @@ const CustomComboBox = ({
             if (selectFirstValue.current !== 'click' && listbox && listbox.offsetHeight > 0) {
               onBlur(e, valueHighlightedOption?.current)
             }
-          }}
-          onKeyUp={e => {
-            onKeyUp(e)
           }}
           InputProps={{
             ...params.InputProps,

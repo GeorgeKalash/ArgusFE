@@ -88,12 +88,6 @@ export default function ResourceComboBox({
     value ||
     ''
 
-  const onKeyUp = e => {
-    if (e.key === 'Enter') {
-      selectFirstOption()
-    }
-  }
-
 
   const onBlur = (e, HighlightedOption) => {
     if (HighlightedOption) {
@@ -120,7 +114,6 @@ export default function ResourceComboBox({
         store: finalItemsList,
         valueField,
         value: _value,
-        onKeyUp,
         onBlur,
         isLoading
       }}
