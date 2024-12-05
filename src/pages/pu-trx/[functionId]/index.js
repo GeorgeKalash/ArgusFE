@@ -70,7 +70,7 @@ const PuTrx = () => {
       field: 'dueDate',
       headerName: labels.dueDate,
       flex: 1,
-      type: 'dueDate'
+      type: 'date'
     },
     {
       field: 'vendorName',
@@ -102,7 +102,7 @@ const PuTrx = () => {
     },
     {
       field: 'qty',
-      headerName: labels.qty,
+      headerName: labels.totQty,
       flex: 1,
       type: 'number'
     },
