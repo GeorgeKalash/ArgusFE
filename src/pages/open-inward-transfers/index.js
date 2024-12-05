@@ -10,10 +10,12 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useContext } from 'react'
 import CloseForm from '../inward-transfer/forms/CloseForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const InwardTransfer = () => {
   const { stack } = useWindow()
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -83,8 +85,7 @@ const InwardTransfer = () => {
       props: {
         form: obj,
         labels,
-        access,
-        recordId: obj.recordId
+        access
       },
       width: 600,
       title: platformLabels.ApproveFields

@@ -27,11 +27,10 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import * as yup from 'yup'
 import { ControlContext } from 'src/providers/ControlContext'
-import CloseForm from './CloseForm'
 import AuditForm from './AuditForm'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
-export default function InwardTransferForm({ labels, recordId, access, plantId, window, userId, dtId }) {
+export default function InwardTransferForm({ labels, recordId, access, plantId, userId, dtId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -166,20 +165,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
 
-  function openCloseWindow() {
-    stack({
-      Component: CloseForm,
-      props: {
-        form: formik,
-        labels,
-        access,
-        recordId: formik.values.recordId,
-        window2: window
-      },
-      width: 600,
-      title: platformLabels.ApproveFields
-    })
-  }
   async function getInwards(recordId) {
     try {
       return await getRequest({
@@ -235,12 +220,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
 
   const actions = [
     {
-      key: 'Close',
-      condition: true,
-      onClick: openCloseWindow,
-      disabled: isClosed || !editMode
-    },
-    {
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
@@ -256,7 +235,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !editMode || isPosted
+      disabled: isPosted || !formik.values.status == 4
     },
     {
       key: 'Audit',
