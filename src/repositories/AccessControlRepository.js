@@ -85,6 +85,7 @@ export const AccessControlRepository = {
   LockedRecords: {
     qry: service + 'qryLOK',
     del: service + 'delLOK',
+    get: service + 'getLOK',
     snapshot: service + 'snapshotLOK'
   },
   UserOTPQrcode: {

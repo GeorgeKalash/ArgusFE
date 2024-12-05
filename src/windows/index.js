@@ -10,28 +10,41 @@ const ClearContext = React.createContext(null)
 
 export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
-  const { postRequest } = useContext(RequestsContext)
+  const { postRequest, getRequest } = useContext(RequestsContext)
   const [rerenderFlag, setRerenderFlag] = useState(false)
   const [lockProps, setLockProps] = useState(null)
   const closedWindow = useRef(null)
   const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
   const currentValue = { ...stack[stack.length - 1] }
 
-  useEffect(() => {
-    if (lockProps) {
+  function lockRecord(obj) {
+    getRequest({
+      extension: AccessControlRepository.LockedRecords.get,
+      parameters: `_resourceId=${obj.resourceId}&_recordId=${obj.recordId}`
+    }).then(res => {
+      if (res.record && res.record.userId != obj.userId) {
+        obj.isAlreadyLocked ? obj.isAlreadyLocked(res.record.userName) : null
+
+        return
+      }
+
       const body = {
-        resourceId: lockProps.resourceId,
-        recordId: lockProps.recordId,
-        reference: lockProps.reference,
+        resourceId: obj.resourceId,
+        recordId: obj.recordId,
+        reference: obj.reference,
         userId: userId,
         clockStamp: new Date()
       }
+
       postRequest({
         extension: AccessControlRepository.lockRecord,
         record: JSON.stringify(body)
+      }).then(res => {
+        setLockProps(obj)
+        obj.onSuccess ? obj.onSuccess() : null
       })
-    }
-  }, [lockProps])
+    })
+  }
 
   function unlockRecord() {
     if (lockProps) {
@@ -78,7 +91,7 @@ export function WindowProvider({ children }) {
   }
 
   return (
-    <WindowContext.Provider value={{ stack: addToStack, setLockProps }}>
+    <WindowContext.Provider value={{ stack: addToStack, lockRecord }}>
       {children}
       {stack.map(
         ({
