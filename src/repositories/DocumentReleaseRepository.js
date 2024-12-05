@@ -13,7 +13,8 @@ export const DocumentReleaseRepository = {
     qry: service + 'qryCOD',
     get: service + 'getCOD',
     set: service + 'setCOD',
-    del: service + 'delCOD'
+    del: service + 'delCOD',
+    snapshot: service + 'snapshotCOD'
   },
   DRGroup: {
     page: service + 'pageGRP',
