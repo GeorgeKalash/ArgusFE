@@ -446,7 +446,6 @@ export function DataGrid({
     })
 
     if (colDef.field !== 'actions' && params?.data.id !== rowSelectionModel) {
-      console.log('actions')
       const selectedRow = params?.data
       if (onSelectionChange) {
         async function update({ newRow }) {
