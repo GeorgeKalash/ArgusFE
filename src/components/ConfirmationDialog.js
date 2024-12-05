@@ -17,7 +17,8 @@ const ConfirmationDialog = ({
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '140px'
+        height: '140px',
+        zIndex: 2
       }}
     >
       <Box
