@@ -21,7 +21,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useError } from 'src/error'
 
-export default function GenerateInvoiceForm({ labels, maxAccess: access, recordId, formikDeliveryOrders }) {
+export default function GenerateInvoiceForm({ labels, maxAccess: access, recordId, form }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack: stackError } = useError()
@@ -55,21 +55,21 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
 
   const { formik } = useForm({
     initialValues: {
-      reference: formikDeliveryOrders?.values?.reference,
-      plantId: formikDeliveryOrders?.values?.plantId,
-      clientId: formikDeliveryOrders?.values?.clientId,
+      reference: form?.values?.reference,
+      plantId: form?.values?.plantId,
+      clientId: form?.values?.clientId,
       applyVAT: false,
-      spId: formikDeliveryOrders?.values?.spId,
-      clientRef: formikDeliveryOrders?.values?.clientRef,
-      clientName: formikDeliveryOrders?.values?.clientName,
+      spId: form?.values?.spId,
+      clientRef: form?.values?.clientRef,
+      clientName: form?.values?.clientName,
       date: new Date(),
       dtId: documentType?.dtId,
       currency: null,
       dtName: '',
       ptId: null,
-      plantName: formikDeliveryOrders?.values?.plantName,
+      plantName: form?.values?.plantName,
       description: '',
-      deliveryOrderId: formikDeliveryOrders?.values?.recordId
+      deliveryOrderId: form?.values?.recordId
     },
     maxAccess,
     enableReinitialize: false,

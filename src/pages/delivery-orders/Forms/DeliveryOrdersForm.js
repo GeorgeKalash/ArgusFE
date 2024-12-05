@@ -309,7 +309,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       stack({
         Component: GenerateInvoiceForm,
         props: {
-          formikDeliveryOrders: formik,
+          form: formik,
           labels,
           maxAccess,
           recordId
