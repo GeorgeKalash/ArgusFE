@@ -37,7 +37,8 @@ export default function CloseForm({ form, labels, access, window, recordId, wind
       corName: '',
       amount: null,
       receiver_firstName: '',
-      receiver_lastName: ''
+      receiver_lastName: '',
+      trackingNo: ''
     },
     access,
     enableReinitialize: true,
@@ -46,7 +47,14 @@ export default function CloseForm({ form, labels, access, window, recordId, wind
       corId: yup.string().required(),
       amount: yup.number().required(),
       receiver_firstName: yup.string().required(),
-      receiver_lastName: yup.string().required()
+      receiver_lastName: yup.string().required(),
+      trackingNo: yup.string().test('is-trackingNo-required', 'Tracking number is required', function (value) {
+        if (form.values.trackingNo) {
+          return !!value
+        }
+
+        return true
+      })
     }),
     onSubmit: () => {
       setMismatchedFields([])
@@ -130,6 +138,20 @@ export default function CloseForm({ form, labels, access, window, recordId, wind
                   error={(formik.touched.amount && Boolean(formik.errors.amount)) || getFieldError('amount')}
                   maxLength={15}
                   decimalScale={2}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='trackingNo'
+                  label={labels.trackingNo}
+                  value={formik?.values?.trackingNo}
+                  maxLength='30'
+                  required={form.values.trackingNo}
+                  onChange={e => formik.setFieldValue('trackingNo', e.target.value)}
+                  onClear={() => formik.setFieldValue('trackingNo', '')}
+                  error={
+                    (formik.touched.trackingNo && Boolean(formik.errors.trackingNo)) || getFieldError('trackingNo')
+                  }
                 />
               </Grid>
             </Grid>
