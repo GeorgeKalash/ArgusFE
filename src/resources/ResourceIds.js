@@ -311,5 +311,8 @@ export const ResourceIds = {
   FyOpening: 30503,
   SystemParams: 30109,
   POSPayment: 36601,
+  FyOpening: 30503,
+  BusinessRules: 20114,
+  GlEoyClosing: 30502,
   BusinessRules: 20114
 }
