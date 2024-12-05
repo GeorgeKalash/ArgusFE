@@ -51,12 +51,17 @@ export default function OutwardsReturnForm({
   })
 
   async function getOutwardsReturn(recordId) {
-    try {
-      return await getRequest({
-        extension: RemittanceOutwardsRepository.OutwardsReturn.get,
-        parameters: `_recordId=${recordId}`
-      })
-    } catch (error) {}
+    return await getRequest({
+      extension: RemittanceOutwardsRepository.OutwardsReturn.get,
+      parameters: `_recordId=${recordId}`
+    })
+  }
+
+  async function getOutwardsTransfer(recordId) {
+    return await getRequest({
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.get,
+      parameters: `_recordId=${recordId}`
+    })
   }
 
   const { formik } = useForm({
@@ -131,31 +136,29 @@ export default function OutwardsReturnForm({
       amount: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const copy = { ...obj }
-        copy.date = formatDateToApi(copy.date)
+      const copy = { ...obj }
+      copy.date = formatDateToApi(copy.date)
 
-        const response = await postRequest({
-          extension: RemittanceOutwardsRepository.OutwardsReturn.set,
-          record: JSON.stringify(copy)
+      const response = await postRequest({
+        extension: RemittanceOutwardsRepository.OutwardsReturn.set,
+        record: JSON.stringify(copy)
+      })
+
+      if (response.recordId) {
+        toast.success(platformLabels.Added)
+        const res2 = await getOutwardsReturn(response.recordId)
+
+        formik.setValues({
+          ...res2.record,
+          date: formatDateFromApi(res2.record.date)
         })
+        !recordId && viewOTP(response.recordId)
+        if (isOpenOutwards) {
+          refetch()
+        }
+      } else toast.success(platformLabels.Edited)
 
-        if (response.recordId) {
-          toast.success(platformLabels.Added)
-          const res2 = await getOutwardsReturn(response.recordId)
-
-          formik.setValues({
-            ...res2.record,
-            date: formatDateFromApi(res2.record.date)
-          })
-          !recordId && viewOTP(response.recordId)
-          if (isOpenOutwards) {
-            refetch()
-          }
-        } else toast.success(platformLabels.Edited)
-
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
 
@@ -191,74 +194,68 @@ export default function OutwardsReturnForm({
   const isClosed = formik.values.wip === 2
 
   const onClose = async recId => {
-    try {
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsReturn.close,
-        record: JSON.stringify({
-          recordId: formik.values.recordId ?? recId
-        })
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsReturn.close,
+      record: JSON.stringify({
+        recordId: formik.values.recordId ?? recId
       })
+    })
 
-      if (res.recordId) {
-        toast.success(platformLabels.Closed)
-        invalidate()
-        const res2 = await getOutwardsReturn(res.recordId)
+    if (res.recordId) {
+      toast.success(platformLabels.Closed)
+      invalidate()
+      const res2 = await getOutwardsReturn(res.recordId)
 
-        formik.setValues({
-          ...res2.record,
-          date: formatDateFromApi(res2.record.date)
-        })
-      }
-    } catch (error) {}
+      formik.setValues({
+        ...res2.record,
+        date: formatDateFromApi(res2.record.date)
+      })
+    }
   }
 
   const onReopen = async () => {
-    try {
-      const copy = { ...formik.values }
-      copy.date = formatDateToApi(copy.date)
+    const copy = { ...formik.values }
+    copy.date = formatDateToApi(copy.date)
 
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsReturn.reopen,
-        record: JSON.stringify(copy)
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsReturn.reopen,
+      record: JSON.stringify(copy)
+    })
+
+    if (res.recordId) {
+      toast.success(platformLabels.Reopened)
+      invalidate()
+
+      const res2 = await getOutwardsReturn(res.recordId)
+
+      formik.setValues({
+        ...res2.record,
+        date: formatDateFromApi(res2.record.date)
       })
-
-      if (res.recordId) {
-        toast.success(platformLabels.Reopened)
-        invalidate()
-
-        const res2 = await getOutwardsReturn(res.recordId)
-
-        formik.setValues({
-          ...res2.record,
-          date: formatDateFromApi(res2.record.date)
-        })
-      }
-    } catch (error) {}
+    }
   }
   const isPosted = formik.values.status === 3
 
   const onPost = async () => {
-    try {
-      const copy = { ...formik.values }
-      copy.date = formatDateToApi(copy.date)
+    const copy = { ...formik.values }
+    copy.date = formatDateToApi(copy.date)
 
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsReturn.post,
-        record: JSON.stringify(copy)
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsReturn.post,
+      record: JSON.stringify(copy)
+    })
+
+    if (res.recordId) {
+      toast.success(platformLabels.Posted)
+      invalidate()
+
+      const res2 = await getOutwardsReturn(res.recordId)
+
+      formik.setValues({
+        ...res2.record,
+        date: formatDateFromApi(res2.record.date)
       })
-
-      if (res.recordId) {
-        toast.success(platformLabels.Posted)
-        invalidate()
-
-        const res2 = await getOutwardsReturn(res.recordId)
-
-        formik.setValues({
-          ...res2.record,
-          date: formatDateFromApi(res2.record.date)
-        })
-      }
-    } catch (error) {}
+    }
   }
 
   const actions = [
@@ -290,16 +287,29 @@ export default function OutwardsReturnForm({
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getOutwardsReturn(recordId)
+      if (recordId) {
+        const res = await getOutwardsTransfer(recordId)
 
-          formik.setValues({
-            ...res.record,
-            date: formatDateFromApi(res.record.date)
-          })
-        }
-      } catch (exception) {}
+        console.log(res)
+
+        const data = await getData(
+          res.record.plantId,
+          res.record?.currencyId,
+          res.record?.rateTypeId,
+          res.record?.raCurrencyId
+        )
+
+        console.log(res.record.plantId,
+          res.record?.currencyId,
+          res.record?.rateTypeId,
+          res.record?.raCurrencyId)
+
+        formik.setValues({
+          ...res.record,
+          owt_lcAmount: res.record.lcAmount,
+          date: formatDateFromApi(res.record.date)
+        })
+      }
     })()
   }, [])
 
@@ -323,8 +333,6 @@ export default function OutwardsReturnForm({
     if (beforeAmount < afterAmount) formik.setFieldValue('exRateChangeStatus', '2')
     if (beforeAmount > afterAmount) formik.setFieldValue('exRateChangeStatus', '3')
   }
-
-  let lcAmountCalculated = formik.values.lcAmount
 
   return (
     <FormShell
