@@ -134,7 +134,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       orders: yup.array().of(
         yup.object({
           mwRef: yup.string().required(),
-          siteName: yup.string().required(),
+          siteName: yup.string().required()
         })
       )
     }),
@@ -149,7 +149,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
         doId: recordId || 0,
         doSeqNo: index + 1,
         id: index + 1,
-        reference: order.mwRef 
+        reference: order.mwRef
       }))
 
       const data = {
@@ -386,8 +386,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           { key: 'sku', value: 'SKU' },
           { key: 'qty', value: 'Qty' }
         ],
-        displayFieldWidth: 3,
-
+        displayFieldWidth: 3
       },
       propsReducer({ row, props }) {
         return { ...props, readOnly: !!row.mwId }
@@ -482,7 +481,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     })
   }
 
-
   return (
     <FormShell
       resourceId={ResourceIds.DeliveriesOrders}
@@ -551,8 +549,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     maxAccess={maxAccess}
                   />
                 </Grid>
-              </Grid>
-              <Grid container spacing={2} mt={0.3}>
                 <Grid item xs={4}>
                   <CustomTextField
                     name='reference'
@@ -596,8 +592,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     error={formik.touched.driverId && Boolean(formik.errors.driverId)}
                   />
                 </Grid>
-              </Grid>
-              <Grid container spacing={2} mt={0.3}>
                 <Grid item xs={8}>
                   <ResourceLookup
                     endpointId={SaleRepository.Client.snapshot}
@@ -647,8 +641,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
                   />
                 </Grid>
-              </Grid>
-              <Grid container spacing={2} mt={0.3}>
                 <Grid item xs={8}>
                   <FormControlLabel
                     control={
