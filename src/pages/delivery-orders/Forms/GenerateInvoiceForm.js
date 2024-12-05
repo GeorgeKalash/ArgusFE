@@ -105,7 +105,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
         formik.setFieldValue('currencyName', currency.record.name)
       }
     })()
-  }, [formik?.values?.currencyId])
+  }, [])
 
   useEffect(() => {
     if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
