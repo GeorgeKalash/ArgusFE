@@ -14,6 +14,8 @@ import FormShell from 'src/components/Shared/FormShell'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
+import ClearFilteringPhy from 'src/components/Shared/ClearFilteringPhy'
+import { useWindow } from 'src/windows'
 
 const PhysicalCountItem = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -22,6 +24,7 @@ const PhysicalCountItem = () => {
   const [siteStore, setSiteStore] = useState([])
   const [filteredItems, setFilteredItems] = useState([])
   const [editMode, setEditMode] = useState(false)
+  const { stack } = useWindow()
 
   const {
     labels: _labels,
@@ -129,14 +132,27 @@ const PhysicalCountItem = () => {
   }, [formik.values.stockCountId, formik.values.siteId])
 
   const clearGrid = () => {
-    formik.resetForm({
-      values: formik.initialValues
-    })
+    openClear()
+  }
 
-    setData({ list: [] })
-    setSiteStore([])
-    setFilteredItems([])
-    setEditMode(false)
+  function openClear() {
+    stack({
+      Component: ClearFilteringPhy,
+      props: {
+        open: [true, {}],
+        fullScreen: false,
+        onConfirm: () => {
+          formik.resetForm()
+          setData({ list: [] })
+          setSiteStore([])
+          setFilteredItems([])
+          setEditMode(false)
+        }
+      },
+      width: 450,
+      height: 170,
+      title: platformLabels.Clear
+    })
   }
 
   const handleClick = async dataList => {
