@@ -163,7 +163,6 @@ const BatchImports = () => {
       field: name,
       headerName: name,
       type: dataType === 2 || dataType === 3 ? 'number' : undefined,
-      // flex: 1,
       ...rest
     })) || []
 
