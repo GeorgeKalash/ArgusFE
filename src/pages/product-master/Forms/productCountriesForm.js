@@ -193,6 +193,7 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
       maxAccess={maxAccess}
       infoVisible={false}
       editMode={editMode}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>

@@ -276,6 +276,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
       maxAccess={maxAccess}
       infoVisible={false}
       editMode={editMode}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>

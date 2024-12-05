@@ -444,6 +444,20 @@ export function DataGrid({
       rowIndex: rowIndex,
       colKey: colDef.field
     })
+
+    if (colDef.field !== 'actions' && params?.data.id !== rowSelectionModel) {
+      console.log('actions')
+      const selectedRow = params?.data
+      if (onSelectionChange) {
+        async function update({ newRow }) {
+          updateState({
+            newRow
+          })
+        }
+
+        onSelectionChange(selectedRow, update)
+      }
+    }
   }
 
   const gridContainerRef = useRef(null)
@@ -507,19 +521,6 @@ export function DataGrid({
     handleRowChange(newRow)
   }
 
-  const handleRowClick = params => {
-    const selectedRow = params?.data
-    if (onSelectionChange) {
-      async function update({ newRow }) {
-        updateState({
-          newRow
-        })
-      }
-
-      onSelectionChange(selectedRow, update)
-    }
-  }
-
   const setData = (changes, params) => {
     const id = params.node?.id
 
@@ -575,7 +576,6 @@ export function DataGrid({
               getRowId={params => params?.data?.id}
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}
-              onRowClicked={handleRowClick}
               onCellEditingStopped={onCellEditingStopped}
             />
           )}

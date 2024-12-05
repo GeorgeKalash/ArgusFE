@@ -192,6 +192,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
       maxAccess={maxAccess}
       infoVisible={false}
       editMode={editMode}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>
