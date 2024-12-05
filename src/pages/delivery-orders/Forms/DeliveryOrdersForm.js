@@ -23,7 +23,6 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
 import { useWindow } from 'src/windows'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
@@ -706,7 +705,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     maxLength='100'
                     readOnly={isCancelled || isPosted}
                     maxAccess={maxAccess}
-                    viewDropDown={formik.values.clientId}
+                    viewDropDown={formik.values.clientId && !isCancelled && !isPosted}
                     onChange={e => formik.setFieldValue('address', e.target.value)}
                     onClear={() => formik.setFieldValue('address', '')}
                     onDropDown={() => openAddressFilterForm(true)}
