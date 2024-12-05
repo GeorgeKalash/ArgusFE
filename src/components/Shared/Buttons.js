@@ -371,6 +371,13 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
+    key: 'PR',
+    label: platformLabels.PR,
+    color: '#231f20',
+    image: 'preview.png',
+    main: false
+  },
+  {
     key: 'Transfer',
     label: platformLabels.Transfer,
     color: '#4eb558',
