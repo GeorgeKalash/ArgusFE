@@ -394,7 +394,7 @@ export function DataGrid({
       headerName: column.label || column.name,
       editable: !disabled,
       flex: column.flex || 1,
-      sortable: false,
+      sortable: column?.sortable || false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
       cellEditorParams: { maxAccess },
@@ -440,7 +440,9 @@ export function DataGrid({
 
   useEffect(() => {
     function handleBlur(event) {
-      if (gridContainerRef.current && !gridContainerRef.current.contains(event.target)) {
+      const isClickInsideAutocomplete = event.target.closest('.MuiAutocomplete-option')
+
+      if (gridContainerRef.current && !isClickInsideAutocomplete && !gridContainerRef.current.contains(event.target)) {
         gridApiRef.current?.stopEditing()
       }
     }
