@@ -89,6 +89,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     corId: '',
     corRef: '',
     corName: '',
+    rateTypeId: '',
     commission: null,
     defaultCommission: null,
     lcAmount: null,
@@ -289,6 +290,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     formik.setFieldValue('corId', selectedRowData?.corId)
     formik.setFieldValue('corRef', selectedRowData?.corRef)
     formik.setFieldValue('corName', selectedRowData?.corName)
+    formik.setFieldValue('rateTypeId', selectedRowData?.rateTypeId)
     calculateValueDate(selectedRowData?.valueDays)
     if (clearAmounts) {
       formik.setFieldValue('lcAmount', '')
@@ -601,6 +603,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       if (!data.fcAmount && !data.lcAmount) {
         return
       }
+      
       if (plantId && data.countryId && data.currencyId && data.dispersalType) {
         formik.setFieldValue('products', [])
         var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${data.dispersalType}&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}`
