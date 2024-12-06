@@ -70,6 +70,7 @@ export const SystemFunction = {
   RetailPurchase: Module.PointOfSale * 100 + 2,
   ChartOfAccounts: Module.GeneralLedger * 100 + 2,
   Assets: Module.FixedAssets * 100 + 0,
+  AssetsDepreciation: Module.FixedAssets * 100 + 2,
   Employee: Module.HR * 100 + 0,
   MasterData: Module.BusinessPartner * 100 + 0,
   MeltingReq: Module.Foundry * 100 + 2,
@@ -105,7 +106,7 @@ export const SystemFunction = {
   ClientRelation: Module.Remittance * 100 + 1,
   RemittanceReceiptVoucher: Module.Remittance * 100 + 7,
   OutwardsTransfer: Module.Remittance * 100 + 8,
-  ProductionSheet: Module.Manufacturing * 100 + 12,
+  ProductionSheet: Module.Manufacturing * 100 + 12
 }
 
 export const getSystemFunctionModule = functionId => {
