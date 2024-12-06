@@ -436,6 +436,7 @@ export default function OutwardsReturnForm({
                         formik.setFieldValue('productName', newValue ? newValue.productName : '')
                         formik.setFieldValue('rateTypeId', newValue ? newValue.rateTypeId : '')
                         formik.setFieldValue('owt_Id', newValue?.recordId || '')
+                        const raCurrencyId = await getRaCurrencyId()
 
                         const [res, data] = await Promise.all([
                           newValue?.corId
@@ -444,7 +445,7 @@ export default function OutwardsReturnForm({
                                 parameters: `_recordId=${newValue?.corId}`
                               })
                             : Promise.resolve({ record: {} }),
-                          getData(formik.values?.plantId, newValue?.currencyId, newValue?.rateTypeId)
+                          getData(formik.values?.plantId, newValue?.currencyId, newValue?.rateTypeId, raCurrencyId)
                         ])
 
                         formik.setFieldValue('interfaceId', res?.record?.interfaceId)
