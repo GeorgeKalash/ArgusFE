@@ -149,7 +149,7 @@ const PhysicalCountItem = () => {
           setEditMode(false)
         }
       },
-      width: 450,
+      width: 520,
       height: 170,
       title: platformLabels.Clear
     })
