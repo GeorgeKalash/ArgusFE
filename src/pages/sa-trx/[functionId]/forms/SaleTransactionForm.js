@@ -76,7 +76,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     enabled: !recordId
   })
 
-  const [initialValues, setInitialData] = useState({
+  const initialValues = {
     recordId: recordId || null,
     header: {
       dgId: functionId,
@@ -170,7 +170,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     serials: [],
     lots: [],
     taxes: []
-  })
+  }
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.SalesTransaction.qry
