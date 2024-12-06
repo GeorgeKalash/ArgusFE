@@ -288,7 +288,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             date: formatDateToApi(values.date),
             functionId: values.functionId,
             plantId: plantId ? plantId : values.plantId,
-            clientId,
+            clientId: total < 5000 && !clientId ? -1 : clientId,
             cashAccountId: cashAccountRecord.value,
             poeId: values.purpose_of_exchange,
             wip: values.wip,
@@ -317,7 +317,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             professionId: values.professionId
           },
           clientIndividual: {
-            clientId,
+            clientId: total < 5000 && !clientId ? -1 : clientId,
             firstName: values.firstName,
             lastName: values.lastName,
             middleName: values.middleName,
@@ -332,7 +332,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
           },
           clientID: {
             idNo: values.idNo,
-            clientId,
+            clientId: total < 5000 && !clientId ? -1 : clientId,
             idtId: values.id_type,
             idExpiryDate: formatDateToApi(values.expiryDate),
             idIssueDate: null,
@@ -403,7 +403,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
       return sumLc + curValue
     }, 0)
-    console.log(total >= 5000)
 
     return total >= 5000 ? true : false
   }
