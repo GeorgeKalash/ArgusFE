@@ -42,8 +42,6 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
           })
           .catch(error => {})
       }
-    } else {
-      toast.success(platformLabels.Edited)
     }
   }
   function setAddress(res) {
