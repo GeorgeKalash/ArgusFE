@@ -805,7 +805,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         billAddress: billAdd,
         currentDiscount:
           saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
-        KGmetalPrice: saTrxHeader?.metalPrice * 1000
+        KGmetalPrice: saTrxHeader?.metalPrice * 1000,
+        subtotal: saTrxHeader?.subtotal.toFixed(2)
       },
       items: modifiedList,
       taxes: [...saTrxTaxes]
@@ -1114,7 +1115,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   const amount = reCal ? _footerSummary?.net : formik.values?.header.amount || 0
   const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.header.volume || 0
   const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.header.weight || 0
-  const subtotal = reCal ? subTotal : formik.values?.header.subtotal || 0
+  const subtotal = reCal ? subTotal.toFixed(2) : formik.values?.header.subtotal || 0
   const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.header.vatAmount || 0
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
