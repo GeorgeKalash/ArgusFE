@@ -16,6 +16,7 @@ import { formatDate, formatDateDefault } from 'src/lib/date-helper'
 import { ThreadProgress } from 'src/components/Shared/ThreadProgress'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
+
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
 const transform = array => {
