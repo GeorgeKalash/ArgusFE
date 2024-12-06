@@ -35,7 +35,6 @@ import {
   DIRTYFIELD_UNIT_PRICE,
   DIRTYFIELD_MDAMOUNT,
   DIRTYFIELD_MDTYPE,
-  DIRTYFIELD_UPO,
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_PCT
 } from 'src/utils/ItemPriceCalculator'
@@ -77,6 +76,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     recordId: recordId || null,
     header: {
       dgId: functionId,
+      functionId: functionId,
       recordId: null,
       dtId: documentType?.dtId,
       reference: '',
@@ -148,7 +148,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         overheadId: '',
         vatAmount: 0,
         mdAmount: 0,
-        upo: 0,
         extendedPrice: 0,
         priceType: 0,
         applyVat: false,
@@ -159,7 +158,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     ],
     serials: [],
     lots: [],
-    taxes: []
+    taxCodes: []
   })
 
   const invalidate = useInvalidate({
@@ -198,44 +197,49 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       )
     }),
     onSubmit: async obj => {
-      const payload = {
-        header: {
-          ...obj.header,
-          date: formatDateToApi(obj.header.date),
-          dueDate: formatDateToApi(obj.header.dueDate)
-        },
-        items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
-          seqNo: id,
-          applyVat: isVattable,
-          ...rest
-        })),
-        taxes: [
-          ...[
-            ...obj.taxCodes,
-            ...obj.items
-              .filter(({ taxDetails }) => taxDetails && taxDetails?.length > 0)
-              .map(({ taxDetails, id }) => ({
-                seqNo: id,
-                ...taxDetails[0]
-              }))
-          ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
-        ],
-        ...(({ header, items, taxes, ...rest }) => rest)(obj)
-      }
+      try {
+        const payload = {
+          header: {
+            ...obj.header,
+            date: formatDateToApi(obj.header.date),
+            dueDate: formatDateToApi(obj.header.dueDate)
+          },
+          items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
+            seqNo: id,
+            applyVat: isVattable,
+            ...rest
+          })),
+          taxCodes: [
+            ...[
+              ...obj.taxCodes,
+              ...obj.items
+                .filter(({ taxDetails }) => taxDetails && taxDetails?.length > 0)
+                .map(({ taxDetails, id }) => ({
+                  seqNo: id,
+                  ...taxDetails[0]
+                }))
+            ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
+          ],
+          ...(({ header, items, taxCodes, ...rest }) => rest)(obj)
+        }
 
-      const puTrxRes = await postRequest({
-        extension: PurchaseRepository.PurchaseInvoiceHeader.set2,
-        record: JSON.stringify(payload)
-      })
-      const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
-      await refetchForm(puTrxRes.recordId)
-      invalidate()
+        const puTrxRes = await postRequest({
+          extension: PurchaseRepository.PurchaseInvoiceHeader.set2,
+          record: JSON.stringify(payload)
+        })
+        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+        toast.success(actionMessage)
+        await refetchForm(puTrxRes.recordId)
+        invalidate()
+      } catch (error) {
+        console.log(error)
+      }
     }
   })
 
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
+  console.log(formik.values)
 
   const columns = [
     {
@@ -264,7 +268,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         if (!newRow.itemId) return
         const phycialProperty = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        const vendorPrice = await getVendorPrice(newRow)
+        const vendorPrice = await getVendorPrice(newRow, formik.values.header)
         fillItemObject(update, phycialProperty, itemInfo, vendorPrice)
       }
     },
@@ -568,26 +572,26 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   ]
 
-  async function fillForm(saTrxPack) {
-    const saTrxHeader = saTrxPack?.header
-    const saTrxItems = saTrxPack?.items
-    const saTrxTaxes = saTrxPack?.taxCodes
+  async function fillForm(puTrxPack) {
+    const puTrxHeader = puTrxPack?.header
+    const puTrxItems = puTrxPack?.items
+    const puTrxTaxes = puTrxPack?.taxCodes
 
-    saTrxHeader?.tdType === 1 || saTrxHeader?.tdType == null
+    puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
 
     const modifiedList = await Promise.all(
-      saTrxItems?.map(async (item, index) => {
+      puTrxItems?.map(async (item, index) => {
         const filteredMeasurements = measurements.filter(x => x.msId === item?.msId)
         setFilteredMU(filteredMeasurements)
 
         const taxDetailsResponse = []
 
-        //const taxDetailsResponse = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
+        //const taxDetailsResponse = puTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
 
-        const updatedSaTrxTaxes =
-          saTrxTaxes?.map(tax => {
+        const updatedpuTrxTaxes =
+          puTrxTaxes?.map(tax => {
             const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
 
             return {
@@ -601,28 +605,26 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           id: index + 1,
           basePrice: parseFloat(item.basePrice).toFixed(5),
           unitPrice: parseFloat(item.unitPrice).toFixed(3),
-
-          //upo: parseFloat(item.upo).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-          saTrx: true,
-          taxDetails: updatedSaTrxTaxes
+          puTrx: true,
+          taxDetails: updatedpuTrxTaxes
         }
       })
     )
     formik.setValues({
       ...formik.values,
-      recordId: saTrxHeader.recordId || null,
+      recordId: puTrxHeader.recordId || null,
       header: {
         ...formik.values.header,
-        ...saTrxHeader,
-        amount: parseFloat(saTrxHeader?.amount).toFixed(2),
+        ...puTrxHeader,
+        amount: parseFloat(puTrxHeader?.amount).toFixed(2),
         currentDiscount:
-          saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
-        KGmetalPrice: saTrxHeader?.metalPrice * 1000
+          puTrxHeader?.tdType == 1 || puTrxHeader?.tdType == null ? puTrxHeader?.tdAmount : puTrxHeader?.tdPct,
+        KGmetalPrice: puTrxHeader?.metalPrice * 1000
       },
       items: modifiedList,
-      taxes: [...saTrxTaxes]
+      taxCodes: [...puTrxTaxes]
     })
   }
 
@@ -674,6 +676,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }
 
   async function fillVendorData(object) {
+    console.log(formik.values.header)
+    console.log(object?.tradeDiscount ? DIRTYFIELD_TDPCT : formik.values.header.tdType)
     formik.setValues({
       ...formik.values,
       header: {
@@ -683,7 +687,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         vendorRef: object?.reference,
         isVattable: object?.isTaxable || false,
         tdAmount: object?.tradeDiscount,
-        tdPct: object?.tradeDiscount ?? DIRTYFIELD_TDPCT,
+        tdPct: object?.tradeDiscount,
+        tdType: object?.tradeDiscount ? DIRTYFIELD_TDPCT : formik.values.header.tdType,
         taxId: object?.taxId,
         paymentMethod: object?.paymentMethod
       }
@@ -716,10 +721,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
     return res?.list
   }
-  async function getVendorPrice(object) {
+  async function getVendorPrice(object, form) {
+    console.log(form)
+
     const res = await getRequest({
       extension: PurchaseRepository.VendorPrice.get,
-      parameters: `_itemId=${object.itemId}&_vendorId=${object.vendorId}&_currencyId=${object.currencyId}&_functionId=${functionId}`
+      parameters: `_itemId=${object.itemId}&_vendorId=${form.vendorId}&_currencyId=${form.currencyId}&_functionId=${functionId}`
     })
 
     return res?.record
@@ -748,7 +755,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
 
         const details = taxDetailsResponse.map(item => ({
-          invoiceId: formik.values.recordId,
+          invoiceId: formik.values.recordId || 0,
           taxSeqNo: item.seqNo,
           taxId: itemInfo.taxId,
           taxCodeId: item.taxCodeId,
@@ -762,7 +769,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       const taxDetailsResponse = await getTaxDetails(formik.values.header.taxId)
 
       const details = taxDetailsResponse.map(item => ({
-        invoiceId: formik.values.recordId,
+        invoiceId: formik.values.recordId || 0,
         taxSeqNo: item.seqNo,
         taxId: formik.values.header.taxId,
         taxCodeId: item.taxCodeId,
@@ -777,30 +784,24 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     setFilteredMU(filteredMeasurements)
 
     update({
-      sku: ItemConvertPrice?.sku,
-      barcode: ItemConvertPrice?.barcode,
-      itemName: ItemConvertPrice?.itemName,
-      itemId: ItemConvertPrice?.itemId,
+      sku: itemInfo?.sku,
+      itemName: itemInfo?.name,
+      itemId: itemInfo?.recordId,
       isMetal: isMetal,
       metalId: metalId,
       metalPurity: metalPurity,
       volume: parseFloat(itemPhysProp?.volume) || 0,
       weight: weight,
-      basePrice:
-        isMetal === false
-          ? parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5)
-          : metalPurity > 0
-          ? basePriceValue
-          : 0,
+      basePrice: basePriceValue,
       baseLaborPrice: baseLaborPrice,
       TotPricePerG: TotPricePerG,
       unitPrice: unitPrice,
-      upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
-      priceType: ItemConvertPrice?.priceType || 1,
+      priceType: itemInfo?.priceType || 1,
       qty: 0,
       msId: itemInfo?.msId,
       muRef: filteredMeasurements?.[0]?.reference,
       muId: filteredMeasurements?.[0]?.recordId,
+      muQty: filteredMeasurements?.[0]?.qty,
       mdAmount: formik.values.header.maxDiscount ? parseFloat(formik.values.header.maxDiscount).toFixed(2) : 0,
       mdValue: 0,
       mdType: MDTYPE_PCT,
@@ -873,8 +874,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       volume: parseFloat(newRow?.volume),
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
-
-      //upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
+      upo: 0,
       qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: parseFloat(newRow?.mdAmount) || 0,
@@ -896,19 +896,20 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
       tdPct: formik?.values?.header?.tdPct,
-      taxDetails: formik.values.header.isVattable ? newRow.taxDetails : null
+      taxDetails: formik.values.header.isVattable === true ? newRow.taxDetails : null
     })
+
+    const qtyInBase = itemPriceRow?.qty * newRow?.muQty
 
     let commonData = {
       id: newRow?.id,
       qty: parseFloat(itemPriceRow?.qty).toFixed(2),
+      baseQty: parseFloat(qtyInBase).toFixed(2),
       volume: parseFloat(itemPriceRow?.volume).toFixed(2),
       weight: parseFloat(itemPriceRow?.weight).toFixed(2),
       basePrice: parseFloat(itemPriceRow?.basePrice).toFixed(5),
       unitPrice: parseFloat(itemPriceRow?.unitPrice).toFixed(3),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice).toFixed(2),
-
-      //upo: parseFloat(itemPriceRow?.upo).toFixed(2),
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
       mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),
@@ -924,8 +925,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       ...item,
       basePrice: parseFloat(item.basePrice) || 0,
       unitPrice: parseFloat(item.unitPrice) || 0,
-
-      //upo: parseFloat(item.upo) || 0,
       vatAmount: parseFloat(item.vatAmount) || 0,
       weight: parseFloat(item.weight) || 0,
       volume: parseFloat(item.volume) || 0,
@@ -940,8 +939,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     totalQty: 0,
     totalWeight: 0,
     totalVolume: 0,
-
-    //totalUpo: 0,
     sumVat: 0,
     sumExtended: parseFloat(subTotal),
     tdAmount: parseFloat(formik.values.header.tdAmount),
@@ -1504,10 +1501,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 </Grid>
                 <Grid item>
                   <CustomNumberField
-                    name='discount'
+                    name='tdAmount'
                     maxAccess={maxAccess}
                     label={labels.discount}
-                    value={formik.values.header.currentDiscount}
+                    value={formik.values.header.tdAmount}
                     displayCycleButton={true}
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
