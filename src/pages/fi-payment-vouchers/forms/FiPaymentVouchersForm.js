@@ -111,12 +111,10 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
   const editMode = !!formik.values.recordId
 
   async function getPaymentVouchers(recordId) {
-    try {
-      return await getRequest({
-        extension: FinancialRepository.PaymentVouchers.get,
-        parameters: `_recordId=${recordId}`
-      })
-    } catch (error) {}
+    return await getRequest({
+      extension: FinancialRepository.PaymentVouchers.get,
+      parameters: `_recordId=${recordId}`
+    })
   }
 
   const onPost = async () => {
@@ -134,21 +132,34 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     }
   }
 
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentVouchers.unpost,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res?.recordId) {
+      toast.success(platformLabels.Unposted)
+      invalidate()
+      const res2 = await getPaymentVouchers(res.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
+      formik.setValues(res2.record)
+    }
+  }
+
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: FinancialRepository.PaymentVouchers.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.PaymentVouchers.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues({
-            ...res.record,
-            date: formatDateFromApi(res.record.date)
-          })
-        }
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          date: formatDateFromApi(res.record.date)
+        })
+      }
     })()
   }, [])
 
@@ -165,28 +176,33 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
   }
 
   const onCancel = async () => {
-    try {
-      const res = await postRequest({
-        extension: FinancialRepository.PaymentVouchers.cancel,
-        record: JSON.stringify(formik.values)
-      })
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentVouchers.cancel,
+      record: JSON.stringify(formik.values)
+    })
 
-      if (res?.recordId) {
-        toast.success('Record Cancelled Successfully')
-        invalidate()
-        const res2 = await getPaymentVouchers(res.recordId)
-        res2.record.date = formatDateFromApi(res2.record.date)
-        formik.setValues(res2.record)
-      }
-    } catch (e) {}
+    if (res?.recordId) {
+      toast.success('Record Cancelled Successfully')
+      invalidate()
+      const res2 = await getPaymentVouchers(res.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
+      formik.setValues(res2.record)
+    }
   }
 
   const actions = [
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode || isCancelled
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: isPosted || !editMode || isCancelled
+      disabled: !editMode || isCancelled
     },
     {
       key: 'Cancel',
@@ -280,6 +296,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 value={formik.values.reference}
                 readOnly={isPosted || isCancelled}
                 maxAccess={maxAccess}
+                maxLength='15'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -402,6 +419,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
+                required
                 readOnly={isPosted || isCancelled}
                 values={formik.values}
                 onChange={(event, newValue) => {
@@ -435,6 +453,8 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 type='text'
                 required
                 label={labels.amount}
+                maxLength={'10'}
+                decimalScale={2}
                 readOnly={isPosted || isCancelled}
                 value={formik.values.amount}
                 maxAccess={maxAccess}
