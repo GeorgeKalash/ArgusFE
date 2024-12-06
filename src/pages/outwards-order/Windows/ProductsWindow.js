@@ -8,8 +8,6 @@ import { useEffect, useState } from 'react'
 const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, editMode, window }) => {
   const [gridData, setGridData] = useState([])
 
-
-
   const columns = [
     {
       field: 'productName',
