@@ -436,7 +436,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 form={formik}
                 required
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : null)
                   formik.setFieldValue('cashAccountRef', newValue ? newValue.reference : '')
                   formik.setFieldValue('cashAccountName', newValue ? newValue.name : '')
                 }}
