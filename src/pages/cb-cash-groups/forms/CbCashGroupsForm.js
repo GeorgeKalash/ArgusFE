@@ -72,6 +72,7 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      masterSource: MasterSource.CashAccountGroup,
       disabled: !editMode
     }
   ]
@@ -80,7 +81,6 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
     <FormShell
       resourceId={ResourceIds.CbCashGroups}
       actions={actions}
-      masterSource={MasterSource.CashAccountGroup}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}

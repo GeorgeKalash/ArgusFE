@@ -75,6 +75,7 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      masterSource: MasterSource.TaxCode,
       disabled: !editMode
     }
   ]
@@ -86,7 +87,6 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      masterSource={MasterSource.TaxCode}
     >
       <VertLayout>
         <Grow>
