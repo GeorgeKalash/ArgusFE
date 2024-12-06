@@ -87,14 +87,12 @@ const LockedRecords = () => {
   ]
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: AccessControlRepository.LockedRecords.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
+    await postRequest({
+      extension: AccessControlRepository.LockedRecords.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const onApply = ({ search, rpbParams }) => {

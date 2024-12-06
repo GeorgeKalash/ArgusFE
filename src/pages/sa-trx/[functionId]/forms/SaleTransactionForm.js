@@ -55,8 +55,9 @@ import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
+import NormalDialog from 'src/components/Shared/NormalDialog'
 
-export default function SaleTransactionForm({ labels, access, recordId, functionId, window }) {
+export default function SaleTransactionForm({ labels, access, recordId, functionId, window, lockRecord }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -672,28 +673,32 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   const onUnpost = async () => {
-    const res = await postRequest({
+    await postRequest({
       extension: SaleRepository.SaleTransaction.unpost,
       record: JSON.stringify(formik.values.header)
-    })
-
-    await refetchForm(res.recordId)
-    toast.success(platformLabels.Posted)
-    invalidate()
-  }
-
-  function openUnpostConfirmation(obj) {
-    stack({
-      Component: StrictUnpostConfirmation,
-      props: {
-        action() {
-          onUnpost(obj)
+    }).then(res => {
+      toast.success(platformLabels.Posted)
+      invalidate()
+      lockRecord({
+        recordId: res.recordId,
+        reference: formik.values.header.reference,
+        resourceId: getResourceId(parseInt(functionId)),
+        onSuccess: () => {
+          refetchForm(res.recordId)
+        },
+        isAlreadyLocked: name => {
+          window.close()
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              width: 600,
+              height: 200,
+              title: platformLabels.Dialog
+            }
+          })
         }
-      },
-      width: 500,
-      height: 300,
-      expandable: false,
-      title: platformLabels.UnpostConfirmation
+      })
     })
   }
 
@@ -736,13 +741,14 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       disabled: !editMode
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: isPosted,
-      onClick: () => openUnpostConfirmation(formik.values),
-      disabled: !isPosted
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
     },
     {
-      key: 'Unpost',
+      key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode
@@ -813,6 +819,12 @@ export default function SaleTransactionForm({ labels, access, recordId, function
 
     const res = await getClientInfo(saTrxHeader.clientId)
     getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
+    !formik.values.recordId &&
+      lockRecord({
+        recordId: saTrxHeader.recordId,
+        reference: saTrxHeader.reference,
+        resourceId: getResourceId(parseInt(functionId))
+      })
   }
 
   async function getSalesTransactionPack(transactionId) {
