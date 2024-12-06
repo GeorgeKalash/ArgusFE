@@ -22,6 +22,8 @@ import InventoryTransaction from './InventoryTransaction'
 import SalesTrxForm from './SalesTrxForm'
 import StrictUnpostConfirmation from './StrictUnpostConfirmation'
 import ClientSalesTransaction from './ClientSalesTransaction'
+import ClearFilteringPhy from './ClearFilteringPhy'
+import ClearGridPhyConfirmation from './ClearGridPhyConfirmation'
 
 export default function FormShell({
   form,
@@ -50,7 +52,9 @@ export default function FormShell({
   setIDInfoAutoFilled,
   visibleClear,
   actions,
-  filteredItems = []
+  filteredItems = [],
+  isClearedGrid = false,
+  isClearedAll = false
 }) {
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
@@ -357,6 +361,38 @@ export default function FormShell({
                 })
               }
               break
+            case 'onClearGridConfirmation':
+              action.onClick = () => {
+                stack({
+                  Component: ClearGridPhyConfirmation,
+                  props: {
+                    open: [true, {}],
+                    fullScreen: false,
+                    onConfirm: action.onSuccess
+                  },
+                  width: 450,
+                  height: 170,
+                  expandable: false,
+                  title: platformLabels.Clear
+                })
+              }
+              break
+            case 'onClearAllConfirmation':
+              action.onClick = () => {
+                stack({
+                  Component: ClearFilteringPhy,
+                  props: {
+                    open: [true, {}],
+                    fullScreen: false,
+                    onConfirm: () => handleReset()
+                  },
+                  width: 450,
+                  height: 170,
+                  expandable: false,
+                  title: platformLabels.Clear
+                })
+              }
+              break
             default:
               action.onClick = () => console.log(`Action with key ${action.key} has a string onClick handler.`)
               break
@@ -479,6 +515,8 @@ export default function FormShell({
           previewReport={previewReport}
           visibleClear={visibleClear}
           functionId={functionId}
+          isClearedAll={isClearedAll}
+          isClearedGrid={isClearedGrid}
         />
       )}
     </>

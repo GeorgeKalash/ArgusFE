@@ -60,5 +60,18 @@ export const SCRepository = {
   },
   StockCountSerialSum: {
     qry: service + 'qrySRS'
+  },
+  StockCountItemDetail: {
+    qry: service + 'qryITD',
+    set: service + 'setITD',
+    get: service + 'getITD',
+    del: service + 'delITD',
+    set2: service + 'set2ITD' //StockCountItemDetailPack
+  },
+  StockCountControllerTab: {
+    qry: service + 'qryPHY',
+    set: service + 'setPHY',
+    get: service + 'getPHY',
+    del: service + 'delPHY'
   }
 }

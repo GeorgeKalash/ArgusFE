@@ -19,6 +19,7 @@ export const SystemChecks = {
   ENABLE_IVMU_TRX: Module.Inventory * 100 + 3,
   ALLOW_PUIVC_MULTI_SITE: Module.Inventory * 100 + 4,
   ALLOW_SATRX_MULTI_SITE: Module.Inventory * 100 + 5,
+  DEFAULT_QTY_PIECES: Module.Inventory * 100 + 9,
 
   // GL Checks
   ALLOW_GL_TRX_RATE_DISCREPENCY: Module.GeneralLedger * 100 + 1,
