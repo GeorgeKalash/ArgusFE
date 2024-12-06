@@ -37,7 +37,8 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
       clientFileExpiryType: null,
       clientFileLifeTime: null,
       type: null,
-      isDiplomat: false
+      isDiplomat: false,
+      isResident: false
     },
     validate: values => {
       const errors = {}
@@ -62,12 +63,10 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
 
   const postIdTypes = async obj => {
     const recordId = obj?.recordId || ''
-    const date = obj?.validFrom && formatDateToApi(obj?.validFrom)
-    const data = { ...obj, validFrom: date }
 
     await postRequest({
       extension: CurrencyTradingSettingsRepository.IdTypes.set,
-      record: JSON.stringify(data)
+      record: JSON.stringify(obj)
     }).then(res => {
       if (!recordId) {
         setEditMode(true)
@@ -100,12 +99,12 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
       extension: CurrencyTradingSettingsRepository.IdTypes.get,
       parameters: parameters
     }).then(res => {
-      res.record.validFrom = formatDateFromApi(res.record.validFrom)
-      formik.setValues(res.record)
+      const result = res.record
+      formik.setValues({ ...result, isResident: result.isResident || false })
       setStore(prevStore => ({
         ...prevStore,
-        recordId: res.record.recordId,
-        name: res.record.name
+        recordId: result.recordId,
+        name: result.name
       }))
       setEditMode(true)
     })
@@ -239,6 +238,19 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
               />
             }
             label={labels.isDiplomat}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name='isResident'
+                checked={formik.values?.isResident}
+                onChange={formik.handleChange}
+                maxAccess={maxAccess}
+              />
+            }
+            label={labels.isResident}
           />
         </Grid>
       </Grid>

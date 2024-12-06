@@ -77,5 +77,8 @@ export const CurrencyTradingSettingsRepository = {
   },
   Absher: {
     get: service + 'getAbsherDCI'
+  },
+  PreviewImageID: {
+    get: service + 'previewImageID'
   }
 }
