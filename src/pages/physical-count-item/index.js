@@ -131,9 +131,9 @@ const PhysicalCountItem = () => {
     })()
   }, [formik.values.stockCountId, formik.values.siteId])
 
-  const clearGrid = () => {
-    openClear()
-  }
+  // const clearGrid = () => {
+  //   openClear()
+  // }
 
   function openClear() {
     stack({
@@ -215,7 +215,6 @@ const PhysicalCountItem = () => {
                   if (!newValue) {
                     setSiteStore([])
                     setFilteredItems([])
-                    clearGrid()
                   } else {
                     fillSiteStore(newValue?.recordId)
                   }
@@ -246,7 +245,7 @@ const PhysicalCountItem = () => {
             </Grid>
             <Grid item xs={2}>
               <Button
-                onClick={clearGrid}
+                onClick={openClear}
                 sx={{
                   backgroundColor: '#f44336',
                   '&:hover': {
