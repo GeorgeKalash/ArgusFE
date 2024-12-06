@@ -37,24 +37,20 @@ const PhysicalCountSerial = () => {
 
   const { formik } = useForm({
     initialValues: {
-      stockCountId: '',
-      siteId: '',
-      totalCountedPcs: '',
-      totalWeight: '',
-      totalSystemPcs: '',
-      totalVariancePcs: '',
-      totalVarianceWeight: '',
+      stockCountId: null,
+      siteId: null,
+      totalCountedPcs: null,
+      totalWeight: null,
+      totalSystemPcs: null,
+      totalVariancePcs: null,
+      totalVarianceWeight: null,
       date: '',
       reference: '',
       search: ''
     },
     maxAccess,
     enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      stockCountId: yup.string().required(),
-      siteId: yup.string().required()
-    })
+    validateOnChange: true
   })
 
   const handleSearchChange = event => {
