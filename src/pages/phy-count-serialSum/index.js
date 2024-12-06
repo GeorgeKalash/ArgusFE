@@ -184,7 +184,7 @@ const PhysicalCountSerial = () => {
           setEditMode(false)
         }
       },
-      width: 520,
+      width: 570,
       height: 170,
       title: platformLabels.Clear
     })
