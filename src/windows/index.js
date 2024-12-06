@@ -91,6 +91,9 @@ export function WindowProvider({ children }) {
             >
               <Component
                 {...props}
+                {...(props?.maxAccess
+                  ? { maxAccess: { ...props?.maxAccess, editMode: !!props.recordId } }
+                  : { access: { ...props.access, editMode: !!props.recordId } })}
                 window={{
                   close: () => closeWindowById(id)
                 }}

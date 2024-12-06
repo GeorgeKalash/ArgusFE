@@ -118,7 +118,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
               }}
               valueField='name'
               displayField='name'
-              name='city'
+              name='cityId'
               required={required}
               label={labels.city}
               readOnly={(readOnly || !addressValidation.values.countryId) && true}
@@ -134,7 +134,6 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
                   cityDistrict: ''
                 })
               }}
-              errorCheck={'cityId'}
               maxAccess={maxAccess}
             />
           </FormGrid>
