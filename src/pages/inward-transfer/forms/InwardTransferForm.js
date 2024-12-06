@@ -235,7 +235,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: isPosted || !formik.values.status == 4
+      disabled: formik.values.status == 1 || isPosted
     },
     {
       key: 'Audit',
