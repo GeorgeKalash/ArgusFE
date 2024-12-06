@@ -194,8 +194,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
 
-  console.log(formik)
-
   const getCashAccountId = async () => {
     const res = await getRequest({
       extension: SystemRepository.UserDefaults.get,
@@ -279,8 +277,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     formik.setFieldValue('products', productData?.list)
     const selectedRowData = productData?.list?.find(row => row.checked)
     handleSelectedProduct(selectedRowData)
-
-    console.log(selectedRowData, 'selectedRowData')
   }
 
   function handleSelectedProduct(selectedRowData, clearAmounts) {
@@ -306,7 +302,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }
 
   const fillOutwardsData = async data => {
-    console.log(data, 'data')
     formik.setValues(prevValues => ({
       ...prevValues,
       ...data,
@@ -598,7 +593,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   async function refetchForm(recordId) {
     const res = await getOutwards(recordId)
     await fillOutwardsData(res.record)
-    console.log()
     await chooseClient(res.record.clientId, res.record.category)
 
     return res
@@ -610,7 +604,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         return
       }
       
-      console.log(data.fcAmount)
       if (plantId && data.countryId && data.currencyId && data.dispersalType) {
         formik.setFieldValue('products', [])
         var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${data.dispersalType}&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}`
@@ -619,8 +612,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
           parameters: parameters
         })
-
-        console.log(res)
 
         if (res.list.length > 0) {
           formik.setFieldValue('products', res.list)
@@ -676,7 +667,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           }
 
           !editMode && handleSelectedProduct(updatedProduct)
-          console.log(updatedProduct, '!editMod')
           formik.setFieldValue('products', [updatedProduct])
           formik.setFieldValue('products[0].checked', true)
         } else {
@@ -694,14 +684,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           )
 
           formik.setFieldValue('products', updatedData)
-          console.log(updatedData, 'products')
           const matchedIndex = updatedData.findIndex(product => product.productId === data.productId)
           if (matchedIndex) {
             formik.setFieldValue(`products[${matchedIndex}].checked`, true)
           }
         }
       } else {
-        console.log(data, 'data')
         displayProduct(data, data.productId)
       }
     } catch (error) {
@@ -711,7 +699,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
   async function displayProduct(data, productId) {
     if (data.length === 1) {
-      console.log(data, '!editMod')
       formik.setFieldValue('products[0].checked', true)
       !editMode && handleSelectedProduct(data[0])
     } else {
