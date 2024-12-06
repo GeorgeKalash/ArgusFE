@@ -27,6 +27,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
 
   async function getData() {
     try {
+
       const result = await getRequest({
         extension: SystemRepository.Attachment.get,
         parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${uniqueRecord}`

@@ -1,16 +1,25 @@
-import { Icon } from '@iconify/react'
-import edit from './edit'
+import { Checkbox } from '@mui/material'
+
+function CheckBoxComponent({ value, column: { field, props }, updateRow, isEditMode }) {
+  const handleCheckboxChange = event => {
+    const changes = { [field]: event.target.checked }
+
+    updateRow({ changes })
+  }
+
+  return (
+    <Checkbox
+      variant='rounded'
+      name={field}
+      autoFocus={isEditMode}
+      checked={value?.[field]}
+      disabled={(!value?.saved && field === 'select') || props?.disabled}
+      onClick={handleCheckboxChange}
+    />
+  )
+}
 
 export default {
-  view({ value, field, row, column: { props } }) {
-    return value ? (
-      <Icon icon='mdi:checkbox-marked' style={{ fontSize: 24 }} />
-    ) : (
-      <Icon
-        icon='mdi:checkbox-blank-outline'
-        style={{ fontSize: 24, opacity: ((!row.saved && field === 'select') || props?.disabled) && 0.2 }}
-      />
-    )
-  },
-  edit
+  view: props => <CheckBoxComponent {...props} value={props.data} isEditMode={false} />,
+  edit: props => <CheckBoxComponent {...props} isEditMode={true} />
 }

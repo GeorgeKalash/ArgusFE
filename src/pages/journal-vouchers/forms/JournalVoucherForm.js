@@ -1,6 +1,5 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -55,23 +54,22 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
         date: formatDateToApi(obj.date),
         recordId: recordId
       }
-      try {
-        const response = await postRequest({
-          extension: GeneralLedgerRepository.JournalVoucher.set,
-          record: JSON.stringify(data)
+
+      const response = await postRequest({
+        extension: GeneralLedgerRepository.JournalVoucher.set,
+        record: JSON.stringify(data)
+      })
+
+      if (!recordId) {
+        toast.success(platformLabels.Added)
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
+        getData(response.recordId)
+      } else toast.success(platformLabels.Edited)
 
-        if (!recordId) {
-          toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
-          getData(response.recordId)
-        } else toast.success(platformLabels.Edited)
-
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
 
@@ -85,36 +83,33 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
   }, [])
 
   const getData = async recordId => {
-    try {
-      if (recordId) {
-        const res = await getRequest({
-          extension: GeneralLedgerRepository.JournalVoucher.get,
-          parameters: `_recordId=${recordId}`
-        })
+    if (recordId) {
+      const res = await getRequest({
+        extension: GeneralLedgerRepository.JournalVoucher.get,
+        parameters: `_recordId=${recordId}`
+      })
 
-        formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res.record.date)
-        })
-      }
-    } catch (exception) {}
+      formik.setValues({
+        ...res.record,
+        date: formatDateFromApi(res.record.date)
+      })
+    }
   }
 
   const onPost = async () => {
     const { ...rest } = formik.values
     const copy = { ...rest }
     copy.date = formatDateToApi(copy.date)
-    try {
-      const res = await postRequest({
-        extension: GeneralLedgerRepository.JournalVoucher.post,
-        record: JSON.stringify(copy)
-      })
 
-      getData(formik.values.recordId)
-      toast.success(platformLabels.Added)
+    const res = await postRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.post,
+      record: JSON.stringify(copy)
+    })
 
-      invalidate()
-    } catch (e) {}
+    getData(formik.values.recordId)
+    toast.success(platformLabels.Added)
+
+    invalidate()
   }
 
   const actions = [

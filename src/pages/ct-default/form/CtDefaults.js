@@ -29,7 +29,8 @@ const CtDefaults = ({ _labels, access }) => {
     'ct_credit_purchase_ratetype_id',
     'ct_credit_eval_ratetype_id',
     'ct_minOtp_CIVAmount',
-    'otp-expiry-time'
+    'otp-expiry-time',
+    'ct-client-trial-days'
   ]
   useEffect(() => {
     getDataResult()
@@ -39,7 +40,8 @@ const CtDefaults = ({ _labels, access }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      'otp-expiry-time': yup.number().min(30).max(120)
+      'otp-expiry-time': yup.number().min(30).max(120).nullable(true),
+      'ct-client-trial-days': yup.number().min(0).max(180).nullable(true)
     }),
     initialValues: {
       'ct-nra-individual': null,
@@ -50,7 +52,8 @@ const CtDefaults = ({ _labels, access }) => {
       ct_credit_sales_ratetype_id: null,
       ct_credit_purchase_ratetype_id: null,
       ct_credit_eval_ratetype_id: null,
-      ct_minOtp_CIVAmount: null
+      ct_minOtp_CIVAmount: null,
+      'ct-client-trial-days': null
     },
     onSubmit: async values => {
       await postRtDefault(values)
@@ -247,8 +250,20 @@ const CtDefaults = ({ _labels, access }) => {
               decimalScale={0}
               maxAccess={access}
               onChange={e => formik.setFieldValue('otp-expiry-time', e.target.value)}
-              onClear={() => formik.setFieldValue('otp-expiry-time', null)}
+              onClear={() => formik.setFieldValue('otp-expiry-time', '')}
               error={formik.touched['otp-expiry-time'] && Boolean(formik.errors['otp-expiry-time'])}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomNumberField
+              name='ct-client-trial-days'
+              label={_labels.phone}
+              value={formik.values['ct-client-trial-days']}
+              maxAccess={access}
+              onChange={e => formik.setFieldValue('ct-client-trial-days', e.target.value)}
+              onClear={() => formik.setFieldValue('ct-client-trial-days', '')}
+              error={formik.touched['ct-client-trial-days'] && Boolean(formik.errors['ct-client-trial-days'])}
+              allowNegative={false}
             />
           </Grid>
         </Grid>
