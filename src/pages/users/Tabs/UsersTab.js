@@ -49,6 +49,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       spId: '',
       password: '',
       confirmPassword: '',
+      platform: '',
       dashboardId: null,
       umcpnl: false,
       is2FAEnabled: false
@@ -306,6 +307,21 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     formik.setFieldValue('languageId', newValue ? newValue.key : '')
                   }}
                   error={formik.touched.languageId && Boolean(formik.errors.languageId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  name='platform'
+                  label={labels.platform}
+                  datasetId={DataSets.PLATFORM}
+                  values={formik.values}
+                  valueField='key'
+                  displayField='value'
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('platform', newValue ? newValue?.key : '')
+                  }}
+                  error={formik.touched.platform && Boolean(formik.errors.platform)}
                 />
               </Grid>
             </Grid>

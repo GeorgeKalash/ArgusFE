@@ -233,7 +233,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     stack({
       Component: OTPPhoneVerification,
       props: {
-        formValidation: formik,
+        values: formik.values,
         recordId: recId,
         functionId: SystemFunction.OutwardsModification,
         onSuccess: () => {

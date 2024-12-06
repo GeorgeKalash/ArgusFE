@@ -13,13 +13,12 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import SalesOrderForm from './Tabs/SalesOrderForm'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const SalesOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -133,12 +132,9 @@ const SalesOrder = () => {
   }
 
   async function getDefaultSalesCurrency() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=currencyId`
-    })
+    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
 
-    return res?.record?.value
+    return defaultCurrency?.value ? parseInt(defaultCurrency.value) : null
   }
 
   const { proxyAction } = useDocumentTypeProxy({

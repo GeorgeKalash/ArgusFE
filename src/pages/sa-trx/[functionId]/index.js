@@ -14,12 +14,12 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { useWindow } from 'src/windows'
 import SaleTransactionForm from './forms/SaleTransactionForm'
 import { useResourceQuery } from 'src/hooks/resource'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import Table from 'src/components/Shared/Table'
+import toast from 'react-hot-toast'
 
 const SaTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const router = useRouter()
@@ -36,7 +36,7 @@ const SaTrx = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesTransaction.snapshot,
+    endpointId: SaleRepository.SalesTransaction.qry,
     datasetId: ResourceIds.SalesInvoice,
     filter: {
       filterFn: fetchWithFilter,
@@ -142,16 +142,9 @@ const SaTrx = () => {
   }
 
   async function getDefaultSalesCurrency() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=currencyId`
-      })
+    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
 
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
+    return defaultCurrency?.value ? parseInt(defaultCurrency.value) : null
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -185,29 +178,14 @@ const SaTrx = () => {
     }
   }
 
-  async function getDefaultSalesTD() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=salesTD`
-      })
-
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
-  }
-
   async function openForm(recordId) {
-    const defaultSalesTD = await getDefaultSalesTD()
     stack({
       Component: SaleTransactionForm,
       props: {
         labels: labels,
         recordId: recordId,
         access,
-        functionId: functionId,
-        defaultSalesTD
+        functionId: functionId
       },
       width: 1330,
       height: 720,
@@ -220,14 +198,12 @@ const SaTrx = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SaleRepository.SalesTransaction.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: SaleRepository.SalesTransaction.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const onApply = ({ search, rpbParams }) => {

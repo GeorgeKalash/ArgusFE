@@ -19,18 +19,27 @@ const ReleaseCodes = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    try {
-      const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50 } = options
 
-      return await getRequest({
-        extension: DocumentReleaseRepository.ReleaseCode.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-      })
-    } catch (error) {}
+    return await getRequest({
+      extension: DocumentReleaseRepository.ReleaseCode.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    })
+  }
+
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: DocumentReleaseRepository.ReleaseCode.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
   }
 
   const {
     query: { data },
+    search,
+    clear,
     labels: _labels,
     invalidate,
     refetch,
@@ -39,7 +48,10 @@ const ReleaseCodes = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: DocumentReleaseRepository.ReleaseCode.page,
-    datasetId: ResourceIds.ReleaseCodes
+    datasetId: ResourceIds.ReleaseCodes,
+    search: {
+      searchFn: fetchWithSearch
+    }
   })
 
   const columns = [
@@ -91,7 +103,7 @@ const ReleaseCodes = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table

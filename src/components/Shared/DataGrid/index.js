@@ -6,7 +6,7 @@ import { CacheDataProvider } from 'src/providers/CacheDataContext'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { GridDeleteIcon } from '@mui/x-data-grid'
-import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { DISABLED, HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 
@@ -35,13 +35,27 @@ export function DataGrid({
   const process = (params, oldRow, setData) => {
     const column = columns.find(({ name }) => name === params.colDef.field)
 
-    const updateRowCommit = changes => {
+    const updateCommit = changes => {
       setData(changes, params)
       commit({ changes: { ...params.node.data, changes } })
     }
 
+    const updateRowCommit = changes => {
+      const rowToUpdate = value?.find(item => item?.id === changes?.id)
+
+      const updatedRow = { ...rowToUpdate, ...changes.changes }
+
+      gridApiRef.current.applyTransaction({
+        update: [updatedRow]
+      })
+
+      commit({ changes: updatedRow })
+    }
+
     if (column.onChange) {
-      column.onChange({ row: { oldRow: oldRow, newRow: params.node.data, update: updateRowCommit } })
+      column.onChange({
+        row: { oldRow: oldRow, newRow: params.node.data, update: updateCommit, updateRow: updateRowCommit }
+      })
     }
   }
 
@@ -50,7 +64,7 @@ export function DataGrid({
     gridApiRef.current.applyTransaction({ remove: [params.data] })
     if (newRows?.length < 1) setReady(true)
 
-    onChange(newRows)
+    onChange(newRows, 'delete')
   }
 
   function openDelete(params) {
@@ -117,6 +131,46 @@ export function DataGrid({
     }
   }
 
+  const allColumns = columns.filter(
+    ({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== HIDDEN
+  )
+
+  const findNextEditableColumn = (columnIndex, rowIndex, direction) => {
+    const limit = direction > 0 ? allColumns.length : -1
+    const step = direction > 0 ? 1 : -1
+    for (let i = columnIndex + step; i !== limit; i += step) {
+      if (
+        !allColumns?.[i]?.props?.readOnly &&
+        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED
+      ) {
+        return { columnIndex: i, rowIndex }
+      }
+    }
+
+    for (let i = direction > 0 ? 0 : allColumns.length - 1; i !== limit; i += step) {
+      if (
+        !allColumns?.[i]?.props?.readOnly &&
+        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED
+      ) {
+        return {
+          columnIndex: i,
+          rowIndex: rowIndex + direction
+        }
+      }
+    }
+  }
+
+  const nextColumn = columnIndex => {
+    let count = 0
+    for (let i = columnIndex + 1; i < allColumns.length; i++) {
+      if (!allColumns?.[i]?.props?.readOnly) {
+        count++
+      }
+    }
+
+    return count
+  }
+
   const onCellKeyDown = params => {
     const { event, api, node } = params
 
@@ -140,6 +194,19 @@ export function DataGrid({
     const nextCell = findCell(params)
 
     if (currentColumnIndex === allColumns.length - 1 - skip && node.rowIndex === api.getDisplayedRowCount() - 1) {
+      if ((error || !allowAddNewLine) && !event.shiftKey) {
+        event.stopPropagation()
+
+        return
+      }
+    }
+
+    const countColumn = nextColumn(nextCell.columnIndex)
+
+    if (
+      (currentColumnIndex === allColumns.length - 1 - skip || !countColumn) &&
+      node.rowIndex === api.getDisplayedRowCount() - 1
+    ) {
       if (allowAddNewLine && !error) {
         event.stopPropagation()
         addNewRow(params)
@@ -148,23 +215,20 @@ export function DataGrid({
 
     const columns = gridApiRef.current.getColumnDefs()
     if (!event.shiftKey) {
-      if (nextCell.columnIndex < columns.length - skip - 1) {
-        nextCell.columnIndex += 1
-      } else if (
-        nextCell.columnIndex === columns.length - 1 - skip &&
-        node.rowIndex !== api.getDisplayedRowCount() - 1
-      ) {
-        nextCell.rowIndex += 1
-        nextCell.columnIndex = 0
-      }
-    } else if (nextCell.columnIndex > 0) {
-      nextCell.columnIndex -= 1
+      const skipReadOnlyTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, 1)
+      const { columnIndex, rowIndex } = skipReadOnlyTab(nextCell.columnIndex, nextCell.rowIndex)
+
+      nextCell.columnIndex = columnIndex
+      nextCell.rowIndex = rowIndex
     } else {
-      nextCell.rowIndex -= 1
-      nextCell.columnIndex = columns.length - 1 - skip
+      const skipReadOnlyShiftTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, -1)
+      const { columnIndex, rowIndex } = skipReadOnlyShiftTab(nextCell.columnIndex, nextCell.rowIndex)
+
+      nextCell.columnIndex = columnIndex
+      nextCell.rowIndex = rowIndex
     }
 
-    const field = columns[nextCell.columnIndex].field
+    const field = columns[nextCell.columnIndex]?.field
 
     api.startEditingCell({
       rowIndex: nextCell.rowIndex,
@@ -212,7 +276,7 @@ export function DataGrid({
         sx={{
           width: '100%',
           height: '100%',
-          padding: '0 1000px',
+          padding: '0 0px',
           display: 'flex',
           justifyContent:
             (column.colDef.component === 'checkbox' ||
@@ -293,7 +357,7 @@ export function DataGrid({
           value={currentValue}
           column={{
             ...column.colDef,
-            props: column?.colDef?.propsReducer ? column.colDef.propsReducer({ row: data, props }) : props
+            props: column?.colDef?.propsReducer ? column?.colDef?.propsReducer({ row: data, props }) : props
           }}
           updateRow={updateRow}
           update={update}

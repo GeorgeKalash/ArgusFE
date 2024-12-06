@@ -9,28 +9,14 @@ import { ControlContext } from 'src/providers/ControlContext'
 const WindowToolbar = ({
   onSave,
   onSaveClear,
-  transactionClicked,
-  onPost,
   onClear,
   onInfo,
-  onGenerate,
-
-  onApply,
   isSaved,
   isSavedClear,
   isInfo,
   isCleared,
   isGenerated,
   recordId,
-  onApproval,
-  onInventoryTransaction,
-  onClickGIA,
-  onClickGL,
-  onClickAC,
-  onClickIT,
-  onClickSATRX,
-  onClickAging,
-  onClickMetal,
   onGenerateReport,
   disabledSubmit,
   disabledSavedClear,
@@ -39,9 +25,6 @@ const WindowToolbar = ({
   infoVisible = true,
   onRecordRemarks,
   isClosed = false,
-  onClientRelation = false,
-  onAddClientRelation = false,
-  onClientBalance = false,
   isPosted = false,
   resourceId,
   setSelectedReport,
@@ -135,25 +118,8 @@ const WindowToolbar = ({
     editMode,
     onSave,
     onSaveClear,
-    onPost,
-    transactionClicked,
     onClear,
-    onInfo,
-    onGenerate,
-    onApply,
-    onClickIT,
-    onClickSATRX,
-    onClickAging,
-    onClickMetal,
-    onApproval,
-    onInventoryTransaction,
-    onClientRelation,
-    onAddClientRelation,
-    onClientBalance,
-
-    onClickGL: () => onClickGL(recordId),
-    onClickAC: () => onClickAC(recordId),
-    onClickGIA: () => onClickGIA(recordId)
+    onInfo
   }
 
   const buttons = getButtons(platformLabels)
@@ -258,14 +224,18 @@ const WindowToolbar = ({
                           opacity: 0.8
                         },
                         border: button.border,
-                        width: '50px !important',
+                        width: button?.image ? '50px !important' : 'auto',
                         height: '35px',
                         objectFit: 'contain',
-                        minWidth: '30px !important'
+                        minWidth: button?.image ? '30px !important' : 'auto'
                       }}
                       disabled={isDisabled}
                     >
-                      <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                      {button?.image ? (
+                        <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                      ) : (
+                        button?.label
+                      )}
                     </Button>
                     {tooltip && <div className='toast'>{tooltip}</div>}
                   </div>
