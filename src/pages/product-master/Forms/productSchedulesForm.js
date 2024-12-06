@@ -1,5 +1,5 @@
 import { useFormik } from 'formik'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -16,9 +16,9 @@ import { ControlContext } from 'src/providers/ControlContext'
 const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: pId, countries, currencies } = store
-  const [filters, setFilters] = useState(currencies)
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const { platformLabels } = useContext(ControlContext)
+  const ref = useRef()
 
   const formik = useFormik({
     enableReinitialize: false,
@@ -67,12 +67,10 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
   })
 
   const post = async obj => {
-    const lastObject = obj[obj.length - 1]
-
     const data = {
       productId: pId,
       productSchedules: obj.map(({ id, seqNo, productId, plantId, saved, ...rest }, index) => ({
-        seqNo: index + 1,
+        seqNo: seqNo,
         plantId: plantId || null,
         productId: pId,
         ...rest
@@ -84,19 +82,14 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
     })
       .then(res => {
         if (res) toast.success(platformLabels.Edited)
-        setStore(prevStore => ({
-          ...prevStore,
-          plantId: lastObject.plantId,
-          currencyId: lastObject.currencyId,
-          countryId: lastObject.countryId,
-          dispersalId: lastObject.dispersalId,
-          _seqNo: lastObject.seqNo
-        }))
-        setRowSelectionModel(lastObject.id)
         getProductSchedules(pId)
       })
       .catch(error => {})
   }
+
+  const maxSeqNo = Math.max(
+    ...formik.values.schedules.map(schedule => schedule.seqNo).filter(seqNo => seqNo !== null && seqNo !== undefined)
+  )
 
   const columns = [
     {
@@ -120,7 +113,10 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
       },
 
       async onChange({ row: { update, oldRow, newRow } }) {
-        setFilters(currencies.filter(item => item.countryId === newRow.countryId))
+        ref.current = currencies.filter(item => item?.countryId === newRow?.countryId)
+        const _seqNo = newRow?.seqNo || maxSeqNo + 1
+        setRowSelectionModel(_seqNo)
+        !newRow.seqNo && update({ seqNo: _seqNo })
       }
     },
     {
@@ -139,7 +135,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         endpointId: SystemRepository.Plant.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 2,
+        displayFieldWidth: 3,
         mapping: [
           { from: 'recordId', to: 'plantId' },
           { from: 'name', to: 'plantName' },
@@ -164,7 +160,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
       label: labels.currency,
       name: 'currencyId',
       props: {
-        store: filters,
+        store: ref?.current,
         valueField: 'currencyId',
         displayField: 'currencyRef',
         displayFieldWidth: 4,
@@ -177,6 +173,9 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
           { key: 'currencyRef', value: 'Reference' },
           { key: 'currencyName', value: 'Name' }
         ]
+      },
+      propsReducer({ props }) {
+        return { ...props, store: ref.current }
       }
     },
     {
@@ -263,6 +262,17 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
               ...rest
             }))
           })
+
+        const item = res.list.find(item => item?.seqNo === rowSelectionModel)
+        item &&
+          setStore(prevStore => ({
+            ...prevStore,
+            plantId: item.plantId,
+            currencyId: item.currencyId,
+            countryId: item.countryId,
+            dispersalId: item.dispersalId,
+            _seqNo: item.seqNo
+          }))
       })
       .catch(error => {})
   }
@@ -274,6 +284,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
       maxAccess={maxAccess}
       infoVisible={false}
       editMode={editMode}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>
@@ -282,7 +293,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
             value={formik.values.schedules}
             error={formik.errors.schedules}
             columns={columns}
-            rowSelectionModel={rowSelectionModel}
+            rowSelectionModel={formik.values.schedules?.find(item => item?.seqNo === rowSelectionModel)?.id}
             onSelectionChange={row => {
               if (row) {
                 setStore(prevStore => ({
@@ -293,7 +304,8 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
                   dispersalId: row.dispersalId,
                   _seqNo: row.seqNo
                 }))
-                setRowSelectionModel(row.id)
+                setRowSelectionModel(row.seqNo)
+                ref.current = currencies.filter(item => item.countryId === row.countryId)
               }
             }}
           />

@@ -186,7 +186,13 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
 
   return (
     store.currencyId && (
-      <FormShell form={formik} resourceId={ResourceIds.ProductMaster} maxAccess={maxAccess} editMode={editMode}>
+      <FormShell
+        form={formik}
+        resourceId={ResourceIds.ProductMaster}
+        maxAccess={maxAccess}
+        editMode={editMode}
+        isCleared={false}
+      >
         <VertLayout>
           <Fixed>
             <Grid container xs={12} spacing={3}>

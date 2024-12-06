@@ -276,14 +276,15 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   label={labels.activateCounterMessage}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox name='isInactive' checked={formik.values?.isInactive} onChange={formik.handleChange} />
-                  }
-                  label={labels.isInactive}
-                />
-              </Grid>
+            </Grid>
+            <Grid item xs={6}></Grid>
+            <Grid item xs={6} sx={{ px: 2 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox name='isInactive' checked={formik.values?.isInactive} onChange={formik.handleChange} />
+                }
+                label={labels.isInactive}
+              />
             </Grid>
           </Grid>
         </Grow>
