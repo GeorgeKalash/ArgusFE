@@ -131,10 +131,6 @@ const PhysicalCountItem = () => {
     })()
   }, [formik.values.stockCountId, formik.values.siteId])
 
-  // const clearGrid = () => {
-  //   openClear()
-  // }
-
   function openClear() {
     stack({
       Component: ClearFilteringPhy,
