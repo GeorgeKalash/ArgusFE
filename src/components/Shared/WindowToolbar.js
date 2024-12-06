@@ -228,14 +228,18 @@ const WindowToolbar = ({
                           opacity: 0.8
                         },
                         border: button.border,
-                        width: '50px !important',
+                        width: button?.image ? '50px !important' : 'auto',
                         height: '35px',
                         objectFit: 'contain',
-                        minWidth: '30px !important'
+                        minWidth: button?.image ? '30px !important' : 'auto'
                       }}
                       disabled={isDisabled}
                     >
-                      <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                      {button?.image ? (
+                        <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                      ) : (
+                        button?.label
+                      )}
                     </Button>
                     {tooltip && <div className='toast'>{tooltip}</div>}
                   </div>

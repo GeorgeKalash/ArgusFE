@@ -131,10 +131,6 @@ const PhysicalCountItem = () => {
     })()
   }, [formik.values.stockCountId, formik.values.siteId])
 
-  const clearGrid = () => {
-    openClear()
-  }
-
   function openClear() {
     stack({
       Component: ClearFilteringPhy,
@@ -149,7 +145,7 @@ const PhysicalCountItem = () => {
           setEditMode(false)
         }
       },
-      width: 450,
+      width: 570,
       height: 170,
       title: platformLabels.Clear
     })
@@ -215,7 +211,6 @@ const PhysicalCountItem = () => {
                   if (!newValue) {
                     setSiteStore([])
                     setFilteredItems([])
-                    clearGrid()
                   } else {
                     fillSiteStore(newValue?.recordId)
                   }
@@ -246,7 +241,7 @@ const PhysicalCountItem = () => {
             </Grid>
             <Grid item xs={2}>
               <Button
-                onClick={clearGrid}
+                onClick={openClear}
                 sx={{
                   backgroundColor: '#f44336',
                   '&:hover': {

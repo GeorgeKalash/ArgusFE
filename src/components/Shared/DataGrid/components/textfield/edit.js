@@ -59,19 +59,8 @@ export default function TextFieldEdit({ id, column: { props, field, ...column },
       onChange={handleChange}
       onKeyPress={handleKeyPress}
       inputMode={props.type === 'numeric' ? 'decimal' : 'text'}
+      onClear={() => update({ id, field, value: '' })}
       {...props}
-      InputProps={{
-        endAdornment: (
-          <InputAdornment position='end'>
-            <IconButton onClick={() => update({ id, field, value: '' })}>
-              <ClearIcon />
-            </IconButton>
-            {props?.ShowDiscountIcons && (
-              <IconButton onClick={handleIconClick}>{isPercentIcon ? <PercentIcon /> : <PinIcon />}</IconButton>
-            )}
-          </InputAdornment>
-        )
-      }}
       sx={{
         flexGrow: 1,
         border: 'none',

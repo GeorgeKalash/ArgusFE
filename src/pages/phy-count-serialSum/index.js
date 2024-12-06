@@ -18,7 +18,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import { useWindow } from 'src/windows'
-import ClearDialog from 'src/components/Shared/ClearDialog'
 import ClearFilteringPhy from 'src/components/Shared/ClearFilteringPhy'
 
 const PhysicalCountSerial = () => {
@@ -38,24 +37,20 @@ const PhysicalCountSerial = () => {
 
   const { formik } = useForm({
     initialValues: {
-      stockCountId: '',
-      siteId: '',
-      totalCountedPcs: '',
-      totalWeight: '',
-      totalSystemPcs: '',
-      totalVariancePcs: '',
-      totalVarianceWeight: '',
+      stockCountId: null,
+      siteId: null,
+      totalCountedPcs: null,
+      totalWeight: null,
+      totalSystemPcs: null,
+      totalVariancePcs: null,
+      totalVarianceWeight: null,
       date: '',
       reference: '',
       search: ''
     },
     maxAccess,
     enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      stockCountId: yup.string().required(),
-      siteId: yup.string().required()
-    })
+    validateOnChange: true
   })
 
   const handleSearchChange = event => {
@@ -175,10 +170,6 @@ const PhysicalCountSerial = () => {
     })()
   }, [formik.values.siteId])
 
-  const clearGrid = () => {
-    openClear()
-  }
-
   function openClear() {
     stack({
       Component: ClearFilteringPhy,
@@ -193,7 +184,7 @@ const PhysicalCountSerial = () => {
           setEditMode(false)
         }
       },
-      width: 450,
+      width: 570,
       height: 170,
       title: platformLabels.Clear
     })
@@ -267,7 +258,7 @@ const PhysicalCountSerial = () => {
                     setFilteredItems([])
                     formik.setFieldValue('date', '')
                     formik.setFieldValue('reference', '')
-                    clearGrid()
+                    openClear()
                   } else {
                     fillSiteStore(newValue?.recordId)
                   }
@@ -293,62 +284,58 @@ const PhysicalCountSerial = () => {
                 error={false}
               />
             </Grid>
-            <Grid container item xs={12} spacing={2}>
-              <Grid item xs={2}>
-                <ResourceComboBox
-                  name='siteId'
-                  store={siteStore}
-                  label={_labels.site}
-                  valueField='siteId'
-                  displayField={['siteRef', 'siteName']}
-                  columnsInDropDown={[
-                    { key: 'siteRef', value: 'Reference' },
-                    { key: 'siteName', value: 'Name' }
-                  ]}
-                  values={formik.values}
-                  required
-                  readOnly={formik.values.siteId}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('siteId', newValue?.siteId)
-                  }}
-                  error={formik.touched.siteId && Boolean(formik.errors.siteId)}
-                  maxAccess={maxAccess}
-                />
-              </Grid>
+            <Grid item xs={6}></Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                name='siteId'
+                store={siteStore}
+                label={_labels.site}
+                valueField='siteId'
+                displayField={['siteRef', 'siteName']}
+                columnsInDropDown={[
+                  { key: 'siteRef', value: 'Reference' },
+                  { key: 'siteName', value: 'Name' }
+                ]}
+                values={formik.values}
+                required
+                readOnly={formik.values.siteId}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('siteId', newValue?.siteId)
+                }}
+                error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                maxAccess={maxAccess}
+              />
             </Grid>
-            <Grid container item xs={12} spacing={2}>
-              <Grid item xs={2}>
-                <CustomTextField
-                  name='search'
-                  value={formik.values.search}
-                  label={_labels.search}
-                  onClear={() => {
-                    formik.setFieldValue('search', '')
-                  }}
-                  onChange={handleSearchChange}
-                  readOnly={data?.list?.length === 0 || data?.length === 0}
-                />
-              </Grid>
-              <Grid item xs={2}>
-                <Button
-                  onClick={clearGrid}
-                  sx={{
+            <Grid item xs={10}></Grid>
+            <Grid item xs={2}>
+              <CustomTextField
+                name='search'
+                value={formik.values.search}
+                label={_labels.search}
+                onClear={() => {
+                  formik.setFieldValue('search', '')
+                }}
+                onChange={handleSearchChange}
+                readOnly={data?.list?.length === 0 || data?.length === 0}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <Button
+                onClick={openClear}
+                sx={{
+                  backgroundColor: '#f44336',
+                  '&:hover': {
                     backgroundColor: '#f44336',
-                    '&:hover': {
-                      backgroundColor: '#f44336',
-                      opacity: 0.8
-                    },
-                    ml: 2
-                  }}
-                  variant='contained'
-                >
-                  <img src='/images/buttonsIcons/clear.png' alt={platformLabels.Clear} />
-                </Button>
-              </Grid>
+                    opacity: 0.8
+                  }
+                }}
+                variant='contained'
+              >
+                <img src='/images/buttonsIcons/clear.png' alt={platformLabels.Clear} />
+              </Button>
             </Grid>
           </Grid>
         </Fixed>
-
         <Grow>
           <Table
             columns={columns}
@@ -364,51 +351,55 @@ const PhysicalCountSerial = () => {
         </Grow>
         <Fixed>
           <Grid container spacing={2} sx={{ pt: 3 }}>
-            <Grid item xs={3.9}></Grid>
-            <Grid item xs={1.35}>
-              <CustomNumberField
-                name='totalCountedPcs'
-                label={_labels.totalCountedPcs}
-                value={formik.values.totalCountedPcs}
-                readOnly={true}
-                hidden={!(formik.values.stockCountId && formik.values.siteId)}
-              />
-            </Grid>
-            <Grid item xs={1.3}>
-              <CustomNumberField
-                name='totalSystemPcs'
-                label={_labels.totalSys}
-                value={formik.values.totalSystemPcs}
-                readOnly={true}
-                hidden={!(formik.values.stockCountId && formik.values.siteId)}
-              />
-            </Grid>
-            <Grid item xs={1.3}>
-              <CustomNumberField
-                name='totalVariancePcs'
-                label={_labels.tPv}
-                value={formik.values.totalVariancePcs}
-                readOnly={true}
-                hidden={!(formik.values.stockCountId && formik.values.siteId)}
-              />
-            </Grid>
-            <Grid item xs={1.3}>
-              <CustomNumberField
-                name='totalWeight'
-                label={_labels.totalWeight}
-                value={formik.values.totalWeight}
-                readOnly={true}
-                hidden={!(formik.values.stockCountId && formik.values.siteId)}
-              />
-            </Grid>
-            <Grid item xs={1.4}>
-              <CustomNumberField
-                name='totalVarianceWeight'
-                label={_labels.tVw}
-                value={formik.values.totalVarianceWeight}
-                readOnly={true}
-                hidden={!(formik.values.stockCountId && formik.values.siteId)}
-              />
+            <Grid item xs={4}></Grid>
+            <Grid item xs={8}>
+              <Grid container spacing={2}>
+                <Grid item xs={2}>
+                  <CustomNumberField
+                    name='totalCountedPcs'
+                    label={_labels.totalCountedPcs}
+                    value={formik.values.totalCountedPcs}
+                    readOnly={true}
+                    hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <CustomNumberField
+                    name='totalSystemPcs'
+                    label={_labels.totalSys}
+                    value={formik.values.totalSystemPcs}
+                    readOnly={true}
+                    hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <CustomNumberField
+                    name='totalVariancePcs'
+                    label={_labels.tPv}
+                    value={formik.values.totalVariancePcs}
+                    readOnly={true}
+                    hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <CustomNumberField
+                    name='totalWeight'
+                    label={_labels.totalWeight}
+                    value={formik.values.totalWeight}
+                    readOnly={true}
+                    hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <CustomNumberField
+                    name='totalVarianceWeight'
+                    label={_labels.tVw}
+                    value={formik.values.totalVarianceWeight}
+                    readOnly={true}
+                    hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </Fixed>
