@@ -749,10 +749,8 @@ export default function OutwardsReturnForm({
                       displayField='value'
                       values={formik.values}
                       required
+                      readOnly
                       maxAccess={maxAccess}
-                      onChange={(event, newValue) => {
-                        formik.setFieldValue('exRateChangeStatus', newValue?.key)
-                      }}
                     />
                   </Grid>
                 </FieldSet>
