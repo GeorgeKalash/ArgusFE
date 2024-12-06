@@ -9,8 +9,8 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useContext } from 'react'
-import CloseForm from '../inward-transfer/forms/CloseForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import CloseForm from './forms/CloseForm'
 
 const InwardTransfer = () => {
   const { stack } = useWindow()
@@ -60,17 +60,8 @@ const InwardTransfer = () => {
     {
       field: 'amount',
       headerName: labels.amount,
-      flex: 1
-    },
-    {
-      field: 'rsName',
-      headerName: labels.releaseStatus,
-      flex: 1
-    },
-    {
-      field: 'statusName',
-      headerName: labels.status,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'wipName',
