@@ -53,6 +53,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       date: new Date(),
       currencyId: null,
       dtId: documentType?.dtId,
+      sptId: null,
       dgId: '',
       amount: '',
       baseAmount: '',
@@ -61,7 +62,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       printStatus: '',
       status: 1,
       paymentMethod: '1',
-      cashAccountId: '',
+      cashAccountId: null,
       plantId: null,
       exRate: 1.0,
       rateCalcMethod: 1,
@@ -69,8 +70,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       collectorId: null,
       isVerified: true,
       template: 1,
-      sourceReference: '',
-      spId: ''
+      sourceReference: ''
     },
     validationSchema: yup.object({
       accountId: yup.string().required(),
@@ -356,6 +356,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                   formik.setFieldValue('spId', newValue?.spId || '')
+                  formik.setFieldValue('sptId', newValue?.sptId || '')
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
@@ -368,14 +369,13 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   name='sptId'
                   readOnly={!formik.values.accountId}
                   label={labels.salePerson}
-                  valueField='sptId'
+                  valueField='recordId'
                   displayField={'name'}
                   values={formik.values}
-                  onChange={async (event, newValue) => {
-                    formik.setFieldValue('sptId', newValue?.sptId || '')
-                    formik.setFieldValue('sptName', newValue?.name || '')
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('sptId', newValue?.recordId)
                   }}
-                  error={formik.touched.spId && Boolean(formik.errors.spId)}
+                  error={formik.touched.sptId && Boolean(formik.errors.sptId)}
                   maxAccess={maxAccess}
                 />
               </Grid>
