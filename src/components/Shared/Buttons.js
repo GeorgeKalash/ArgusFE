@@ -371,10 +371,30 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
+    key: 'PR',
+    label: platformLabels.PR,
+    color: '#231f20',
+    image: 'preview.png',
+    main: false
+  },
+  {
     key: 'Transfer',
     label: platformLabels.Transfer,
     color: '#4eb558',
     image: 'exchange-refresh-icon.png',
+    main: false
+  },
+  {
+    key: 'generateIV',
+    label: platformLabels.GenerateInvoice,
+    color: 'black',
+    image: 'generate.png',
+    main: false
+  },
+  {
+    key: 'Generate Invoice',
+    label: platformLabels.GenerateInvoice,
+    color: '#231f20',
     main: false
   },
   {

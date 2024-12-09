@@ -74,5 +74,11 @@ export const CurrencyTradingSettingsRepository = {
   },
   Mobile: {
     get: service + 'verifyMobileOwner'
+  },
+  Absher: {
+    get: service + 'getAbsherDCI'
+  },
+  PreviewImageID: {
+    get: service + 'previewImageID'
   }
 }
