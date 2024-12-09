@@ -27,6 +27,8 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
       spfId: '',
       ltId: '',
       classId: '',
+      designName: '',
+      designRef: '',
       designId: '',
       standardCost: '',
       standardId: '',
@@ -52,24 +54,22 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.ItemProduction.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.ItemProduction.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          if (res?.record) {
-            const newValues = Object.keys(formik.initialValues).reduce((acc, key) => {
-              acc[key] = res.record[key] !== null ? res.record[key] : formik.initialValues[key]
+        if (res?.record) {
+          const newValues = Object.keys(formik.initialValues).reduce((acc, key) => {
+            acc[key] = res.record[key] !== null ? res.record[key] : formik.initialValues[key]
 
-              return acc
-            }, {})
+            return acc
+          }, {})
 
-            formik.setValues(newValues)
-          }
+          formik.setValues(newValues)
         }
-      } catch (exception) {}
+      }
     })()
   }, [recordId])
 
@@ -176,7 +176,6 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 value={formik.values.standardCost}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('standardCost', '')}
-                required
                 error={formik.touched.grossWgt && Boolean(formik.errors.grossWgt)}
               />
             </Grid>
@@ -207,8 +206,9 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 displayField='name'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('ltId', newValue?.recordId || '')
+                  formik.setFieldValue('ltId', newValue ? newValue.recordId : '')
                 }}
+                error={formik.touched.ltId && Boolean(formik.errors.ltId)}
                 maxAccess={maxAccess}
               />
             </Grid>

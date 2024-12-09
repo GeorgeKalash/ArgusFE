@@ -27,22 +27,20 @@ const PropertiesForm = ({ store, maxAccess }) => {
   useEffect(() => {
     if (recordId) {
       const fetchDimension = async () => {
-        try {
-          const response = await getRequest({
-            extension: SystemRepository.Defaults.qry,
-            parameters: `_filter=`
-          })
+        const response = await getRequest({
+          extension: SystemRepository.Defaults.qry,
+          parameters: `_filter=`
+        })
 
-          const filteredDimensions = response?.list?.filter(
-            item => item.key.includes('ivtDimension') && item.value.length > 0
-          )
-          setDimensions(filteredDimensions)
+        const filteredDimensions = response?.list?.filter(
+          item => item.key.includes('ivtDimension') && item.value.length > 0
+        )
+        setDimensions(filteredDimensions)
 
-          const filteredDimensions2 = response?.list?.filter(
-            item => item.key.includes('ivtUDT') && item.key !== 'ivtUDTCount' && item.value.length > 0
-          )
-          setDimensionsUDT(filteredDimensions2)
-        } catch (error) {}
+        const filteredDimensions2 = response?.list?.filter(
+          item => item.key.includes('ivtUDT') && item.key !== 'ivtUDTCount' && item.value.length > 0
+        )
+        setDimensionsUDT(filteredDimensions2)
       }
 
       fetchDimension()
@@ -52,49 +50,47 @@ const PropertiesForm = ({ store, maxAccess }) => {
   useEffect(() => {
     const fetchDimensionsData = async () => {
       if (recordId && dimensions.length > 0) {
-        try {
-          const dimensionRequests = dimensions.map(dimension => {
-            const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
+        const dimensionRequests = dimensions.map(dimension => {
+          const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
 
-            return getRequest({
-              extension: InventoryRepository.DimensionId.get,
-              parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
-            })
+          return getRequest({
+            extension: InventoryRepository.DimensionId.get,
+            parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
           })
+        })
 
-          const dimensionResponses = await Promise.all(dimensionRequests)
+        const dimensionResponses = await Promise.all(dimensionRequests)
 
-          const newDimensionValues = dimensionResponses.reduce((acc, res, index) => {
-            const dimensionKey = dimensions[index].key
-            acc[dimensionKey] = res.record?.id || ''
+        const newDimensionValues = dimensionResponses.reduce((acc, res, index) => {
+          const dimensionKey = dimensions[index].key
+          acc[dimensionKey] = res.record?.id || ''
 
-            return acc
-          }, {})
+          return acc
+        }, {})
 
-          const udtRequests = dimensionsUDT.map(dimension => {
-            const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
+        const udtRequests = dimensionsUDT.map(dimension => {
+          const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
 
-            return getRequest({
-              extension: InventoryRepository.DimensionUDT.get,
-              parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
-            })
+          return getRequest({
+            extension: InventoryRepository.DimensionUDT.get,
+            parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
           })
+        })
 
-          const udtResponses = await Promise.all(udtRequests)
+        const udtResponses = await Promise.all(udtRequests)
 
-          const newUDTValues = udtResponses.reduce((acc, res, index) => {
-            const udtKey = dimensionsUDT[index]?.key
-            acc[udtKey] = res.record?.value || ''
+        const newUDTValues = udtResponses.reduce((acc, res, index) => {
+          const udtKey = dimensionsUDT[index]?.key
+          acc[udtKey] = res.record?.value || ''
 
-            return acc
-          }, {})
+          return acc
+        }, {})
 
-          formik.setValues(prevValues => ({
-            ...prevValues,
-            ...newDimensionValues,
-            ...newUDTValues
-          }))
-        } catch (error) {}
+        formik.setValues(prevValues => ({
+          ...prevValues,
+          ...newDimensionValues,
+          ...newUDTValues
+        }))
       }
     }
 
@@ -133,28 +129,26 @@ const PropertiesForm = ({ store, maxAccess }) => {
         item => item.value !== '' && item.value !== undefined && item.value !== null
       )
 
-      try {
-        if (filteredData.length > 0) {
-          await postRequest({
-            extension: InventoryRepository.DimensionId.set,
-            record: JSON.stringify({
-              itemId: recordId,
-              data: filteredData
-            })
+      if (filteredData.length > 0) {
+        await postRequest({
+          extension: InventoryRepository.DimensionId.set,
+          record: JSON.stringify({
+            itemId: recordId,
+            data: filteredData
           })
-        }
+        })
+      }
 
-        if (filteredUdtData.length > 0) {
-          await postRequest({
-            extension: InventoryRepository.DimensionUDT.set,
-            record: JSON.stringify({
-              itemId: recordId,
-              data: filteredUdtData
-            })
+      if (filteredUdtData.length > 0) {
+        await postRequest({
+          extension: InventoryRepository.DimensionUDT.set,
+          record: JSON.stringify({
+            itemId: recordId,
+            data: filteredUdtData
           })
-        }
-        toast.success(platformLabels.Edited)
-      } catch (error) {}
+        })
+      }
+      toast.success(platformLabels.Edited)
     }
   })
 

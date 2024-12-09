@@ -4,7 +4,7 @@ export default function DateEdit({ column: { props }, id, field, value, update }
   return (
     <CustomDatePicker
       autoFocus
-      value={value}
+      value={value?.[field]}
       required={true}
       hasBorder={false}
       onChange={(name, newValue) => {

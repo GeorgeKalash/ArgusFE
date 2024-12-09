@@ -63,21 +63,21 @@ const OutwardsOrder = () => {
   }
 
   const getPlantId = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userData && userData.userId}&_key=plantId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userData && userData.userId}&_key=plantId`
+    })
 
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
+    return res?.record?.value
   }
 
   async function openForm(recordId) {
     const plantId = await getPlantId()
-    if (plantId) {
+    if (!plantId && !recordId) {
+      stackError({
+        message: _labels.PlantDefaultError
+      })
+    } else {
       const dtId = await getDefaultDT()
       stack({
         Component: OutwardsForm,
@@ -93,10 +93,6 @@ const OutwardsOrder = () => {
         width: 1100,
         height: 600,
         title: _labels.OutwardsOrder
-      })
-    } else {
-      stackError({
-        message: _labels.PlantDefaultError
       })
     }
   }
@@ -156,18 +152,21 @@ const OutwardsOrder = () => {
       field: 'wipName',
       headerName: _labels.WIP,
       flex: 1
+    },
+    {
+      field: 'wfStatusName',
+      headerName: _labels.wfStatus,
+      flex: 1
     }
   ]
 
   const delOutwards = async obj => {
-    try {
-      await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsOrder.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsOrder.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const { proxyAction } = useDocumentTypeProxy({

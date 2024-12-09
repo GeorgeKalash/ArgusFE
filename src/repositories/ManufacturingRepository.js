@@ -67,7 +67,9 @@ export const ManufacturingRepository = {
     preview: service + 'previewPQ',
     preview2: service + 'previewPQ2',
     update: service + 'updatePQ',
-    del: service + 'delPQ'
+    snapshot: service + 'snapshotPQ',
+    del: service + 'delPQ',
+    cancel: service + 'cancelPQ'
   },
   MaterialsAdjustment: {
     generate: service + 'generateADJ'
@@ -123,7 +125,8 @@ export const ManufacturingRepository = {
     get2: service + 'get2PST',
     del: service + 'delPST',
     post: service + 'postPST',
-    snapshot: service + 'snapshotPST'
+    unpost: service + 'unpostPST',
+    snapshot: service + 'snapshotPST',
   },
   ProductionSheetItem: {
     qry: service + 'qryPSI',

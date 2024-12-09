@@ -78,16 +78,14 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
   useEffect(() => {
     const fetchData = async () => {
       if (record && record.currencyId && record.vendorId) {
-        try {
-          const res = await getRequest({
-            extension: PurchaseRepository.PriceList.get,
-            parameters: `_itemId=${itemId}&_vendorId=${formik.values.vendorId}&_currencyId=${formik.values.currencyId}`
-          })
+        const res = await getRequest({
+          extension: PurchaseRepository.PriceList.get,
+          parameters: `_itemId=${itemId}&_vendorId=${formik.values.vendorId}&_currencyId=${formik.values.currencyId}`
+        })
 
-          if (res.record) {
-            formik.setValues(res.record)
-          }
-        } catch (error) {}
+        if (res.record) {
+          formik.setValues(res.record)
+        }
       }
     }
 

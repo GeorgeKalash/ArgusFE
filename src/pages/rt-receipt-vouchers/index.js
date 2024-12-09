@@ -31,7 +31,7 @@ export default function RtReceiptVouchers() {
       parameters: `_userId=${userData && userData.userId}&_key=cashAccountId`
     })
 
-    if (res.record.value) {
+    if (res.record?.value) {
       return res.record.value
     }
 

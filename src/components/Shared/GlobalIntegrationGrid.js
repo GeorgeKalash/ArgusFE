@@ -81,6 +81,7 @@ const GlobalIntegrationGrid = ({ masterSource, masterId }) => {
         endpointId: GeneralLedgerRepository.ChartOfAccounts.snapshot,
         valueField: 'recordId',
         displayField: 'accountRef',
+        displayFieldWidth: 2,
         mapping: [
           { from: 'name', to: 'accountName' },
           { from: 'accountRef', to: 'accountRef' },

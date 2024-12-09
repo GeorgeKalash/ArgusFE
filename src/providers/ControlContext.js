@@ -16,7 +16,9 @@ const ControlProvider = ({ children }) => {
   const { user, apiUrl, languageId } = useContext(AuthContext)
   const userData = window.sessionStorage.getItem('userData')
   const [defaultsData, setDefaultsData] = useState([])
+  const [userDefaultsData, setUserDefaultsData] = useState([])
   const [apiPlatformLabels, setApiPlatformLabels] = useState(null)
+  const [systemChecks, setSystemChecks] = useState([])
   const [loading, setLoading] = useState(false)
   const errorModel = useError()
 
@@ -25,7 +27,11 @@ const ControlProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    if (userData != null) getDefaults(setDefaultsData)
+    if (userData != null) {
+      getDefaults(setDefaultsData)
+      getUserDefaults(setUserDefaultsData)
+      getSystemChecks(setSystemChecks)
+    }
   }, [userData, user?.userId])
 
   const getDefaults = callback => {
@@ -35,6 +41,16 @@ const ControlProvider = ({ children }) => {
       parameters: parameters
     }).then(res => {
       callback(res)
+    })
+  }
+
+  const getSystemChecks = callback => {
+    const parameters = '_scope=1'
+    getRequest({
+      extension: SystemRepository.SystemChecks.qry,
+      parameters
+    }).then(res => {
+      callback(res.list)
     })
   }
 
@@ -50,6 +66,16 @@ const ControlProvider = ({ children }) => {
       return acc
     }, [])
     setDefaultsData({ list: updatedDefaultsData })
+  }
+
+  const getUserDefaults = callback => {
+    var parameters = '_userId=' + user?.userId
+    getRequest({
+      extension: SystemRepository.UserDefaults.qry,
+      parameters: parameters
+    }).then(res => {
+      callback(res)
+    })
   }
 
   useEffect(() => {
@@ -120,7 +146,10 @@ const ControlProvider = ({ children }) => {
     platformLabels,
     defaultsData,
     setDefaultsData,
-    updateDefaults
+    updateDefaults,
+    userDefaultsData,
+    setUserDefaultsData,
+    systemChecks
   }
 
   return <ControlContext.Provider value={values}>{children}</ControlContext.Provider>

@@ -225,6 +225,11 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       condition: true,
       onClick: onPost,
       disabled: isPosted || !editMode || isCancelled
+    },
+    {
+      field: 'isVerified',
+      headerName: labels.isVerified,
+      type: 'checkbox'
     }
   ]
 
