@@ -6,7 +6,7 @@ const NormalDialog = ({ DialogText, bottomSection }) => {
   return (
     <VertLayout>
       <Grow>
-        <Box sx={{ p: 12, height: '100px' }} textAlign='center'>
+        <Box sx={{ p: 12 }} textAlign='center'>
           {DialogText}
         </Box>
       </Grow>
