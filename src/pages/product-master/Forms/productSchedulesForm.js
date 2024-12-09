@@ -289,7 +289,19 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
       <VertLayout>
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('schedules', value)}
+            onChange={(value, action, row) => {
+              formik.setFieldValue('schedules', value)
+              if (action === 'delete' && row?.seqNo === store?._seqNo) {
+                setStore(prevStore => ({
+                  ...prevStore,
+                  plantId: '',
+                  currencyId: '',
+                  countryId: '',
+                  dispersalId: '',
+                  _seqNo: null
+                }))
+              }
+            }}
             value={formik.values.schedules}
             error={formik.errors.schedules}
             columns={columns}

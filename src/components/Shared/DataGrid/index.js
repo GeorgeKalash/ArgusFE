@@ -65,7 +65,7 @@ export function DataGrid({
     gridApiRef.current.applyTransaction({ remove: [params.data] })
     if (newRows?.length < 1) setReady(true)
 
-    onChange(newRows, 'delete')
+    onChange(newRows, 'delete', params.data)
   }
 
   function openDelete(params) {
