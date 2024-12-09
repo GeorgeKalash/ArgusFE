@@ -3,55 +3,44 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useResourceQuery } from 'src/hooks/resource'
+import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { useWindow } from 'src/windows'
+import { useResourceQuery } from 'src/hooks/resource'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { useWindow } from 'src/windows'
-import ReleaseCodeForm from './forms/ReleaseCodeForm'
+import ExpenseTypesForms from './forms/ExpenseTypesForms'
 
-const ReleaseCodes = () => {
+const ExpenseTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
-      extension: DocumentReleaseRepository.ReleaseCode.page,
+    const response = await getRequest({
+      extension: DeliveryRepository.ExpenseTypes.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
-  }
 
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: DocumentReleaseRepository.ReleaseCode.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
-    search,
-    clear,
     labels: _labels,
     invalidate,
-    refetch,
+    access,
     paginationParameters,
-    access
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.ReleaseCode.page,
-    datasetId: ResourceIds.ReleaseCodes,
-    search: {
-      searchFn: fetchWithSearch
-    }
+    endpointId: DeliveryRepository.ExpenseTypes.page,
+    datasetId: ResourceIds.ExpenseTypes
   })
 
   const columns = [
@@ -64,8 +53,27 @@ const ReleaseCodes = () => {
       field: 'name',
       headerName: _labels.name,
       flex: 1
+    },
+    ,
+    {
+      field: 'description',
+      headerName: _labels.description,
+      flex: 1
     }
   ]
+
+  const del = async obj => {
+    await postRequest({
+      extension: DeliveryRepository.ExpenseTypes.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+  }
+
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
 
   const add = () => {
     openForm()
@@ -73,55 +81,39 @@ const ReleaseCodes = () => {
 
   function openForm(recordId) {
     stack({
-      Component: ReleaseCodeForm,
+      Component: ExpenseTypesForms,
       props: {
         labels: _labels,
-        recordId: recordId,
+        recordId,
         maxAccess: access
       },
-      width: 500,
-      height: 300,
-      title: _labels.releaseCode
+      width: 600,
+      height: 400,
+      title: _labels.expenseType
     })
-  }
-
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
-  const del = async obj => {
-    try {
-      await postRequest({
-        extension: DocumentReleaseRepository.ReleaseCode.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true} />
+        <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
           gridData={data}
           rowId={['recordId']}
+          refetch={refetch}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
-          pageSize={50}
-          refetch={refetch}
-          paginationType='api'
-          paginationParameters={paginationParameters}
           maxAccess={access}
+          pageSize={50}
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default ReleaseCodes
+export default ExpenseTypes

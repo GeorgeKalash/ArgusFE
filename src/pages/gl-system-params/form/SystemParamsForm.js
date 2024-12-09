@@ -109,12 +109,18 @@ const SystemParamsForm = ({ _labels, access }) => {
 
     await Promise.all(
       accountMappings.map(async ({ key, refField, nameField }) => {
-        const response = await getRequest({
-          extension: GeneralLedgerRepository.ChartOfAccounts.get,
-          parameters: `_recordId=${myObject[key]}`
-        })
-        formik.setFieldValue(refField, response.record.accountRef)
-        formik.setFieldValue(nameField, response.record.name)
+        const keyValue = myObject[key]
+        if (keyValue) {
+          const response = await getRequest({
+            extension: GeneralLedgerRepository.ChartOfAccounts.get,
+            parameters: `_recordId=${keyValue}`
+          })
+          formik.setFieldValue(refField, response.record.accountRef)
+          formik.setFieldValue(nameField, response.record.name)
+        } else {
+          formik.setFieldValue(refField, null)
+          formik.setFieldValue(nameField, null)
+        }
       })
     )
   }

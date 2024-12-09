@@ -79,12 +79,10 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
     await postRequest({
       extension: RemittanceSettingsRepository.ProductSchedules.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      if (res) toast.success(platformLabels.Edited)
+      getProductSchedules(pId)
     })
-      .then(res => {
-        if (res) toast.success(platformLabels.Edited)
-        getProductSchedules(pId)
-      })
-      .catch(error => {})
   }
 
   const maxSeqNo = Math.max(
@@ -252,29 +250,27 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
     getRequest({
       extension: RemittanceSettingsRepository.ProductSchedules.qry,
       parameters: parameters
-    })
-      .then(res => {
-        if (res.list.length > 0)
-          formik.setValues({
-            schedules: res.list.map(({ ...rest }, index) => ({
-              id: index + 1,
-              saved: true,
-              ...rest
-            }))
-          })
-
-        const item = res.list.find(item => item?.seqNo === rowSelectionModel)
-        item &&
-          setStore(prevStore => ({
-            ...prevStore,
-            plantId: item.plantId,
-            currencyId: item.currencyId,
-            countryId: item.countryId,
-            dispersalId: item.dispersalId,
-            _seqNo: item.seqNo
+    }).then(res => {
+      if (res.list.length > 0)
+        formik.setValues({
+          schedules: res.list.map(({ ...rest }, index) => ({
+            id: index + 1,
+            saved: true,
+            ...rest
           }))
-      })
-      .catch(error => {})
+        })
+
+      const item = res.list.find(item => item?.seqNo === rowSelectionModel)
+      item &&
+        setStore(prevStore => ({
+          ...prevStore,
+          plantId: item.plantId,
+          currencyId: item.currencyId,
+          countryId: item.countryId,
+          dispersalId: item.dispersalId,
+          _seqNo: item.seqNo
+        }))
+    })
   }
 
   return (
