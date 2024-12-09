@@ -23,7 +23,7 @@ const InwardTransfer = () => {
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const userId = getStorageData('userData').userId
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -64,18 +64,9 @@ const InwardTransfer = () => {
   }
 
   const getPlantId = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userId}&_key=plantId`
-      })
+    const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')
 
-      return res?.record?.value
-    } catch (error) {
-      stackError(error)
-
-      return ''
-    }
+    return defaultPlant?.value ? parseInt(defaultPlant.value) : null
   }
 
   const getDefaultDT = async () => {
