@@ -365,14 +365,15 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               <Grid item xs={6}>
                 <ResourceComboBox
                   endpointId={SaleRepository.SalesPerson.qry}
-                  name='spId'
+                  name='sptId'
                   readOnly={!formik.values.accountId}
                   label={labels.salePerson}
                   valueField='sptId'
                   displayField={'name'}
                   values={formik.values}
                   onChange={async (event, newValue) => {
-                    formik.setFieldValue('spId', newValue?.spId || '')
+                    formik.setFieldValue('sptId', newValue?.sptId || '')
+                    formik.setFieldValue('sptName', newValue?.name || '')
                   }}
                   error={formik.touched.spId && Boolean(formik.errors.spId)}
                   maxAccess={maxAccess}
