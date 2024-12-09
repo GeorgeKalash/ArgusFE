@@ -123,7 +123,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
   const setDefaultFields = () => {
     formik.setFieldValue('plantId', userDefaultsDataState.plantId)
-    formik.setFieldValue('cashAccountId', userDefaultsDataState.cashAccountId)
+    formik.setFieldValue('cashAccountId', userDefaultsDataState?.cashAccountId || null)
   }
 
   useEffect(() => {
