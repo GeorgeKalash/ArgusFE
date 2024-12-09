@@ -18,8 +18,10 @@ export default function AddressFilterForm({
   labels,
   shipment = false,
   bill = false,
+  deliveryOrder = false,
   form,
   handleAddressValues,
+  checkedAddressId,
   window
 }) {
   const [data, setData] = useState([])
@@ -32,13 +34,13 @@ export default function AddressFilterForm({
     onSubmit: async obj => {
       const checkedADD = data?.list?.find(obj => obj.checked)
       if (!checkedADD.addressId) {
-        handleAddressValues({ shipAddress: '', BillAddress: '' })
+        handleAddressValues({ shipAddress: '', BillAddress: '', address: '' })
         window.close()
 
         return
       }
 
-      if (shipment || bill) {
+      if (shipment || bill || deliveryOrder) {
         const address = await getAddress(checkedADD.addressId)
         if (shipment)
           handleAddressValues({
@@ -53,6 +55,13 @@ export default function AddressFilterForm({
             billAddressId: checkedADD.addressId,
             billToAddressId: checkedADD.addressId
           })
+
+        if (deliveryOrder) {
+          handleAddressValues({
+            address: address,
+            addressId: checkedADD.addressId
+          })
+        }
       }
 
       window.close()
@@ -122,6 +131,11 @@ export default function AddressFilterForm({
         })
       )
       setData({ list: formattedAddressList })
+
+      if (checkedAddressId) {
+        const matchingAddress = formattedAddressList.find(address => address.addressId === checkedAddressId)
+        matchingAddress.checked = true
+      }
     }
   }
 
