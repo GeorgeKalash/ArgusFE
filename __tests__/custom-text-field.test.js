@@ -1,0 +1,84 @@
+import React from 'react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import '@testing-library/jest-dom'
+import CustomTextField from 'src/components/Inputs/CustomTextField.js'
+import CustomComboBox from 'src/components/Inputs/CustomCombobox.js'
+
+describe('First test', () => {
+  it('should render custom text field', () => {
+    render(
+      <CustomTextField
+        label='Test Field'
+        value=''
+        onChange={() => {}}
+        type='text'
+        variant='outlined'
+        size='small'
+        fullWidth
+        required={false}
+        disabled={false}
+        error={false}
+      />
+    )
+  })
+
+  it('combobox should update value on select', async () => {
+    const mockStore = [
+      { key: 'option1', value: 'Option 1' },
+      { key: 'option2', value: 'Option 2' }
+    ]
+
+    const handleChange = jest.fn()
+
+    render(
+      <CustomComboBox
+        name='testComboBox'
+        label='Test label'
+        value={mockStore[0]}
+        onChange={handleChange}
+        type='text'
+        variant='outlined'
+        size='small'
+        fullWidth
+        required={false}
+        disabled={false}
+        error={false}
+        store={mockStore}
+      />
+    )
+
+    const inputElement = screen.getByRole('combobox')
+
+    fireEvent.mouseDown(inputElement)
+
+    const options = await screen.findAllByRole('option')
+
+    expect(options).toHaveLength(2)
+    expect(options[0]).toHaveTextContent('Option 1')
+
+    fireEvent.click(options[1])
+
+    expect(handleChange).toHaveBeenCalledWith('testComboBox', mockStore[1])
+  })
+
+  it('properly handles disabled state', async () => {
+    const mockStore = [
+      { key: 'option1', value: 'Option 1' },
+      { key: 'option2', value: 'Option 2' }
+    ]
+
+    render(
+      <CustomComboBox
+        name='testComboBox'
+        label='Test label'
+        value={mockStore[0]}
+        onChange={() => {}}
+        store={mockStore}
+        disabled={true}
+      />
+    )
+
+    const inputElement = screen.getByRole('combobox')
+    expect(inputElement).toBeDisabled()
+  })
+})
