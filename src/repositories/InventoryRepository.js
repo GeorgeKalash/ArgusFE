@@ -159,7 +159,8 @@ export const InventoryRepository = {
     close: service + 'closeTFR',
     reopen: service + 'reopenTFR',
     post: service + 'postTFR',
-    unpost: service + 'unpostTFR'
+    unpost: service + 'unpostTFR',
+    print: service + 'setTFR_PS'
   },
   MaterialsTransferItems: {
     qry: service + 'qryTFI',
