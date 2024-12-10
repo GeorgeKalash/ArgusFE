@@ -423,9 +423,8 @@ const PhysicalCountItemDe = () => {
         onConfirm: clearGrid,
         dialogText: platformLabels.DeleteGridConf
       },
-      width: 450,
+      width: 570,
       height: 170,
-      expandable: false,
       title: platformLabels.Clear
     })
   }
@@ -443,9 +442,8 @@ const PhysicalCountItemDe = () => {
         },
         dialogText: platformLabels.ClearFormGrid
       },
-      width: 450,
+      width: 570,
       height: 170,
-      expandable: false,
       title: platformLabels.Clear
     })
   }

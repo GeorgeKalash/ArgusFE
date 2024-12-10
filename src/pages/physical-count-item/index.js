@@ -83,7 +83,7 @@ const PhysicalCountItem = () => {
       extension: SCRepository.Sites.qry,
       parameters: parameters
     }).then(res => {
-      setSiteStore(res.list)
+      setSiteStore(res.list.filter(site => site.isChecked == true))
     })
   }
 

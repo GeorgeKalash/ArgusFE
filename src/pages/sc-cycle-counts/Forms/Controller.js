@@ -55,42 +55,40 @@ const Controller = ({ store, maxAccess, labels }) => {
   })
 
   const fetchGridData = async (recordId, siteId) => {
-    try {
-      const response = await getRequest({
-        extension: SCRepository.Controller.qry,
-        parameters: `_siteId=${siteId}`
-      })
+    const response = await getRequest({
+      extension: SCRepository.Controller.qry,
+      parameters: `_siteId=${siteId}`
+    })
 
-      const checkedResponse = await getRequest({
-        extension: SCRepository.StockCountControllerTab.qry,
-        parameters: `_siteId=${siteId}&_stockCountId=${recordId}`
-      })
+    const checkedResponse = await getRequest({
+      extension: SCRepository.StockCountControllerTab.qry,
+      parameters: `_siteId=${siteId}&_stockCountId=${recordId}`
+    })
 
-      response.list.map((item, index) => {
-        const checkedItem = checkedResponse.list.find(checked => checked.controllerId === item.recordId)
+    response.list.map((item, index) => {
+      const checkedItem = checkedResponse.list.find(checked => checked.controllerId === item.recordId)
 
-        if (checkedItem) {
-          item.isChecked = true
-          item.statusName = checkedItem.statusName
-          item.status = checkedItem.status
-        }
+      if (checkedItem) {
+        item.isChecked = true
+        item.statusName = checkedItem.statusName
+        item.status = checkedItem.status
+      }
 
-        return {
-          ...item,
-          id: index + 1
-        }
-      })
-
-      response.list = response?.list?.map((item, index) => ({
+      return {
         ...item,
-        id: index,
-        isChecked: item?.isChecked === undefined ? false : item?.isChecked
-      }))
+        id: index + 1
+      }
+    })
 
-      formik.setFieldValue('stockCountId', recordId)
-      formik.setValues({ rows: response.list })
-      formik.setFieldValue('siteId', siteId)
-    } catch (error) {}
+    response.list = response?.list?.map((item, index) => ({
+      ...item,
+      id: index,
+      isChecked: item?.isChecked === undefined ? false : item?.isChecked
+    }))
+
+    formik.setFieldValue('stockCountId', recordId)
+    formik.setValues({ rows: response.list })
+    formik.setFieldValue('siteId', siteId)
   }
 
   const columns = [
