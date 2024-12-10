@@ -103,7 +103,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     }
 
     if (documentType?.dtId) {
-      console.log(documentType?.dtId)
       await getDTD(documentType?.dtId)
 
       return
@@ -687,16 +686,15 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   }
 
   useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-
-    if (documentType?.dtId) getDTD(documentType?.dtId)
-  }, [])
-
-  useEffect(() => {
     ;(async function () {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       getDefaultFromSiteId()
+      
+    if (documentType?.dtId) {
+      formik.setFieldValue('dtId', documentType.dtId)
+      getDTD(documentType?.dtId)
+    }
     })()
   }, [])
 
@@ -957,7 +955,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             }}
             name='items'
             maxAccess={maxAccess}
-            value={formik?.values?.transfers || []}
+            value={formik?.values?.transfers}
             error={formik?.errors?.transfers}
             columns={columns}
             allowDelete={!isClosed}
