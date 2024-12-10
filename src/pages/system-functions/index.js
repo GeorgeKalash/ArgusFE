@@ -54,9 +54,9 @@ const SystemFunction = () => {
         }
       ]
     },
-    onSubmit: async values => {
+    onSubmit: async () => {
       const resultObject = {
-        systemFunctionMappings: values.rows
+        systemFunctionMappings: formik.values.rows
       }
 
       await postRequest({
@@ -70,11 +70,12 @@ const SystemFunction = () => {
 
   const columns = [
     {
-      component: 'numberfield',
+      component: 'textfield',
       label: labels.functionId,
       name: 'functionId',
       props: {
-        readOnly: true
+        readOnly: true,
+        type: 'number'
       }
     },
     {
@@ -126,15 +127,26 @@ const SystemFunction = () => {
   ]
 
   const filteredData = formik.values.search
-  ? formik.values.rows.filter(
-      item => item.functionId.toString().includes(formik.values.search.toLowerCase()) ||
-              item.sfName?.toLowerCase().includes(formik.values.search.toLowerCase())
-    )
+    ? formik.values.rows.filter(
+        item =>
+          item.functionId.toString().includes(formik.values.search.toLowerCase()) ||
+          item.sfName?.toLowerCase().includes(formik.values.search.toLowerCase())
+      )
     : formik.values.rows
 
   const handleSearchChange = event => {
     const { value } = event.target
     formik.setFieldValue('search', value)
+  }
+
+  function handleRowsChange(newValues) {
+    const updatedRows = formik.values.rows.map(row => {
+      const newValue = newValues.find(newRow => newRow.id === row.id)
+
+      return newValue ? newValue : row
+    })
+
+    formik.setFieldValue('rows', updatedRows)
   }
 
   return (
@@ -144,19 +156,20 @@ const SystemFunction = () => {
           <CustomTextField
             name='search'
             value={formik.values.search}
-            label={labels.search}
+            label={platformLabels.Search}
             onClear={() => {
               formik.setFieldValue('search', '')
             }}
-            sx={{ width: '30%' }}
+            sx={{ width: '20%' }}
             onChange={handleSearchChange}
+            onSearch={e => formik.setFieldValue('search', e)}
+            search={true}
+            height={35}
           />
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => {
-              formik.setFieldValue('rows', value)
-            }}
+            onChange={value => handleRowsChange(value)}
             value={filteredData}
             error={formik.errors?.rows}
             columns={columns}

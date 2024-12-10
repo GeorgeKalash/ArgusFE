@@ -22,10 +22,13 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
+import { useWindow } from 'src/windows'
 
 export default function ProductionSheetForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionSheet.qry
@@ -147,28 +150,62 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
 
     const res2 = await getData(res?.recordId)
 
-        const res3 = await getDataGrid()
+    const res3 = await getDataGrid()
 
-        formik.setValues({
-          ...res2.record,
-          items: res3.list.map(item => ({
-            ...item,
-            id: item.seqNo,
-            orderedQty: item.orderedQty ?? 0
-          })),
-          date: !!res2?.record?.date ? formatDateFromApi(res2?.record?.date) : null
-        })
+    formik.setValues({
+      ...res2.record,
+      items: res3.list.map(item => ({
+        ...item,
+        id: item.seqNo,
+        orderedQty: item.orderedQty ?? 0
+      })),
+      date: !!res2?.record?.date ? formatDateFromApi(res2?.record?.date) : null
+    })
   }
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
 
+  const onUnpost = async () => {
+    const copy = { ...formik.values }
+    delete copy.items
+
+    const res = await postRequest({
+      extension: ManufacturingRepository.ProductionSheet.unpost,
+      record: JSON.stringify(copy)
+    })
+
+    toast.success(platformLabels.Unposted)
+    invalidate()
+
+    const res2 = await getData(res?.recordId)
+
+    const res3 = await getDataGrid()
+
+    formik.setValues({
+      ...res2.record,
+      items: res3.list.map(item => ({
+        ...item,
+        id: item.seqNo,
+        orderedQty: item.orderedQty ?? 0
+      })),
+      date: !!res2?.record?.date ? formatDateFromApi(res2?.record?.date) : null
+    })
+  }
+
   const actions = [
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || isPosted
+      disabled: !editMode
     },
     {
       key: 'IV',
@@ -177,6 +214,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       disabled: !editMode || !isPosted
     }
   ]
+
 
   const columns = [
     {
@@ -204,14 +242,15 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      flex: 3,
       props: {
         readOnly: true
-      }
+      },
     },
     {
       component: 'numberfield',
       label: labels.qty,
-      name: 'qty'
+      name: 'qty',
     },
     {
       component: 'numberfield',
@@ -219,15 +258,15 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       name: 'orderedQty',
       props: {
         readOnly: true
-      }
+      },
     },
     {
       component: 'textfield',
       label: labels.notes,
-      name: 'notes'
+      name: 'notes',
     }
-  ]
-
+  ];
+  
   async function getData(recordId) {
     return await getRequest({
       extension: ManufacturingRepository.ProductionSheet.get,
@@ -358,7 +397,15 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
             </Grid>
           </Grid>
           <DataGrid
-            onChange={value => formik.setFieldValue('items', value)}
+            onChange={value => {
+              const data = value?.map((item) => {
+                return {
+                  ...item,
+                  orderedQty: 0
+                }
+              })
+              formik.setFieldValue('items', data)
+            }}
             maxAccess={maxAccess}
             name='items'
             disabled={isPosted}

@@ -6,6 +6,8 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import Table from 'src/components/Shared/Table'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 import cancelIcon from '../../../public/images/TableIcons/cancel.png'
 import Image from 'next/image'
 import { Box, IconButton } from '@mui/material'
@@ -43,13 +45,27 @@ const GateKeeper = () => {
     query: { data },
     labels: _labels,
     refetch,
+    search,
+    clear,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview2,
-    datasetId: ResourceIds.GateKeeper
+    datasetId:  ResourceIds.GateKeeper,
+    search: {
+      searchFn: fetchWithSearch
+    },
   })
+
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
 
   const columns = [
     {
@@ -93,10 +109,7 @@ const GateKeeper = () => {
 
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-            <IconButton
-              size='small'
-              onClick={() => openCancel(data)}
-            >
+            <IconButton size='small' onClick={() => openCancel(data)}>
               <Image src={cancelIcon} width={18} height={18} alt={_labels.cancel} />
             </IconButton>
           </Box>
@@ -105,7 +118,7 @@ const GateKeeper = () => {
     }
   ]
 
-  const del = async (data) => {
+  const del = async data => {
     await postRequest({
       extension: ManufacturingRepository.LeanProductionPlanning.cancel,
       record: JSON.stringify(data)
@@ -133,6 +146,9 @@ const GateKeeper = () => {
 
   return (
     <VertLayout>
+      <Fixed>
+        <GridToolbar onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true}/>
+      </Fixed>
       <Grow>
         <Table
           columns={columns}

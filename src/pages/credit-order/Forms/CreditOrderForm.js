@@ -80,7 +80,8 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
         defaultRate: '',
         amount: '',
         baseAmount: '',
-        notes: ''
+        notes: '',
+        goc: false
       }
     ]
   })
@@ -397,23 +398,17 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 3,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          isClosed
+        displayFieldWidth: 3
       },
       updateOn: 'blur',
       widthDropDown: '400',
-      width: 150,
       async onChange({ row: { update, oldRow, newRow } }) {
         if (!newRow?.currencyId) {
           return
         }
 
         const exchange = await getEXMCur({
-          plantId: plantId ?? formik.values.plantId,
+          plantId: plantId || formik.values.plantId,
           toCurrency: formik?.values?.currencyId,
           fromCurrency: newRow?.currencyId,
           rateType: formik?.values?.rateType
@@ -452,7 +447,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
               : 0
           update({ baseAmount: getFormattedNumber(curToBase.toFixed(2)) })
         }
-
+        const gocPresent = await getCorCurrencyInfo(newRow?.currencyId)
         update({
           currencyId: exchange?.currencyId,
           currencyName: exchange?.currencyName,
@@ -460,7 +455,8 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
           defaultRate: parseFloat(exchange?.rate.toString().replace(/,/g, '')).toFixed(7),
           rateCalcMethod: exchange?.rateCalcMethod,
           minRate: exchange?.minRate,
-          maxRate: exchange?.maxRate
+          maxRate: exchange?.maxRate,
+          goc: gocPresent?.goc || false
         })
       }
     },
@@ -469,12 +465,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       label: labels.name,
       name: 'currencyName',
       props: {
-        readOnly: true,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          isClosed
+        readOnly: true
       },
       width: 190
     },
@@ -483,12 +474,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       label: labels.quantity,
       name: 'qty',
       props: {
-        mandatory: true,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          isClosed
+        mandatory: true
       },
       width: 130,
       async onChange({ row: { update, newRow } }) {
@@ -523,12 +509,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       name: 'defaultRate',
       props: {
         readOnly: true,
-        mandatory: true,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          isClosed
+        mandatory: true
       },
       width: 130
     },
@@ -538,12 +519,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       name: 'exRate',
       props: {
         mandatory: true,
-        decimalScale: 7,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          isClosed
+        decimalScale: 7
       },
       width: 130,
       updateOn: 'blur',
@@ -614,16 +590,20 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       name: 'amount',
       props: {
         readOnly: true,
-        mandatory: true,
-        disabled:
-          formik?.values?.corId === '' ||
-          formik?.values?.corId === null ||
-          formik?.values?.corId === undefined ||
-          isClosed
+        mandatory: true
       },
       width: 130
     }
   ]
+
+  async function getCorCurrencyInfo(currencyId) {
+    const res = await getRequest({
+      extension: RemittanceSettingsRepository.CorrespondentCurrency.get,
+      parameters: `_corId=${formik.values.corId}&_currencyId=${currencyId}`
+    })
+
+    return res?.record
+  }
 
   const fillItemsGrid = async orderId => {
     const res = await getRequest({
@@ -841,7 +821,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     >
       <VertLayout>
         <Fixed>
-          <Grid container xs={12}>
+          <Grid container xs={12} spacing={2}>
             <FormGrid hideonempty item xs={4}>
               <CustomDatePicker
                 name='date'
@@ -857,7 +837,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 helperText={formik.touched.date && formik.errors.date}
               />
             </FormGrid>
-            <Grid item xs={4} sx={{ pl: 1 }}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
@@ -874,7 +854,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-            <Grid item xs={4} sx={{ pl: 1 }}>
+            <Grid item xs={4}>
               <CustomTextField
                 name='reference'
                 label={labels.reference}
@@ -888,9 +868,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
-          </Grid>
-
-          <Grid container xs={12} style={{ marginTop: '10px' }}>
             <Grid item xs={8}>
               <ResourceLookup
                 endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
@@ -919,7 +896,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 errorCheck={'corId'}
               />
             </Grid>
-            <Grid item xs={4} sx={{ pl: 1 }}>
+            <Grid item xs={4}>
               <CustomDatePicker
                 name='deliveryDate'
                 readOnly={isClosed}
@@ -934,39 +911,38 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 helperText={formik.touched.deliveryDate && formik.errors.deliveryDate}
               />
             </Grid>
-          </Grid>
-
-          <Grid container xs={12}>
-            <RadioGroup
-              row
-              value={formik.values.functionId}
-              defaultValue={SystemFunction.CurrencyCreditOrderPurchase}
-              onChange={async e => {
-                await setOperationType(e.target.value)
-                await getDefaultDT(e.target.value)
-                setFunctionId(e.target.value)
-                formik.setFieldValue('reference', '')
-              }}
-            >
-              <FormControlLabel
-                value={SystemFunction.CurrencyCreditOrderPurchase}
-                control={<Radio />}
-                label={labels.purchase}
-                disabled={formik?.values?.rows[0]?.currencyId}
-              />
-              <FormControlLabel
-                value={SystemFunction.CurrencyCreditOrderSale}
-                control={<Radio />}
-                label={labels.sale}
-                disabled={formik?.values?.rows[0]?.currencyId}
-              />
-            </RadioGroup>
+            <Grid item xs={6}>
+              <RadioGroup
+                row
+                value={formik.values.functionId}
+                defaultValue={SystemFunction.CurrencyCreditOrderPurchase}
+                onChange={async e => {
+                  await setOperationType(e.target.value)
+                  await getDefaultDT(e.target.value)
+                  setFunctionId(e.target.value)
+                  formik.setFieldValue('reference', '')
+                }}
+              >
+                <FormControlLabel
+                  value={SystemFunction.CurrencyCreditOrderPurchase}
+                  control={<Radio />}
+                  label={labels.purchase}
+                  disabled={formik?.values?.rows[0]?.currencyId}
+                />
+                <FormControlLabel
+                  value={SystemFunction.CurrencyCreditOrderSale}
+                  control={<Radio />}
+                  label={labels.sale}
+                  disabled={formik?.values?.rows[0]?.currencyId}
+                />
+              </RadioGroup>
+            </Grid>
           </Grid>
         </Fixed>
-
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('rows', value)}
+            disabled={!formik.values.corId || isClosed}
             value={formik.values.rows}
             error={formik.errors.rows}
             columns={columns}
@@ -980,10 +956,9 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
             }
           />
         </Grow>
-
         <Fixed>
-          <Grid container rowGap={1} xs={12}>
-            <FormGrid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
+          <Grid container spacing={2} xs={12}>
+            <FormGrid item xs={8}>
               <CustomTextArea
                 name='notes'
                 label={labels.notes}
@@ -998,26 +973,28 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 helperText={formik.touched.notes && formik.errors.notes}
               />
             </FormGrid>
-            <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='totalCUR'
-                  label={`${labels.total} ${formik.values.currencyRef !== null ? formik.values.currencyRef : ''}`}
-                  value={getFormattedNumber(totalCUR.toFixed(2))}
-                  numberField={true}
-                  readOnly={true}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='baseAmount'
-                  maxAccess={maxAccess}
-                  label={`${labels.total} ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
-                  style={{ textAlign: 'right' }}
-                  value={getFormattedNumber(totalLoc.toFixed(2))}
-                  numberField={true}
-                  readOnly={true}
-                />
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='totalCUR'
+                    label={`${labels.total} ${formik.values.currencyRef !== null ? formik.values.currencyRef : ''}`}
+                    value={getFormattedNumber(totalCUR.toFixed(2))}
+                    numberField={true}
+                    readOnly={true}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='baseAmount'
+                    maxAccess={maxAccess}
+                    label={`${labels.total} ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
+                    style={{ textAlign: 'right' }}
+                    value={getFormattedNumber(totalLoc.toFixed(2))}
+                    numberField={true}
+                    readOnly={true}
+                  />
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
