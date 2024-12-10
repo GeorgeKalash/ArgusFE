@@ -22,7 +22,6 @@ import InventoryTransaction from './InventoryTransaction'
 import SalesTrxForm from './SalesTrxForm'
 import StrictUnpostConfirmation from './StrictUnpostConfirmation'
 import ClientSalesTransaction from './ClientSalesTransaction'
-import ClearGridConfirmation from './ClearGridConfirmation'
 
 export default function FormShell({
   form,
@@ -355,40 +354,6 @@ export default function FormShell({
                   height: 550,
                   title: platformLabels.Metals,
                   expandable: false
-                })
-              }
-              break
-            case 'onClearGridConfirmation':
-              action.onClick = () => {
-                stack({
-                  Component: ClearGridConfirmation,
-                  props: {
-                    open: { flag: true },
-                    fullScreen: false,
-                    onConfirm: action.onSuccess,
-                    dialogText: platformLabels.DeleteGridConf
-                  },
-                  width: 450,
-                  height: 170,
-                  expandable: false,
-                  title: platformLabels.Clear
-                })
-              }
-              break
-            case 'onClearAllConfirmation':
-              action.onClick = () => {
-                stack({
-                  Component: ClearGridConfirmation,
-                  props: {
-                    open: { flag: true },
-                    fullScreen: false,
-                    onConfirm: () => handleReset(),
-                    dialogText: platformLabels.ClearFormGrid
-                  },
-                  width: 450,
-                  height: 170,
-                  expandable: false,
-                  title: platformLabels.Clear
                 })
               }
               break

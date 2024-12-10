@@ -27,15 +27,15 @@ const Controller = ({ store, maxAccess, labels }) => {
     onSubmit: async () => {
       try {
         const itemsList = formik.values.rows
-        .map((item, index) => ({
-          ...item,
-          id: index + 1,
-          status: item.status || 1,
-          controllerId: item.recordId,
-          siteId: formik.values.siteId,
-          stockCountId: recordId,
-        }))
-        .filter(item => item.isChecked); 
+          .map((item, index) => ({
+            ...item,
+            id: index + 1,
+            status: item.status || 1,
+            controllerId: item.recordId,
+            siteId: formik.values.siteId,
+            stockCountId: recordId
+          }))
+          .filter(item => item.isChecked)
 
         const data = {
           stockCountId: recordId,
@@ -44,7 +44,7 @@ const Controller = ({ store, maxAccess, labels }) => {
         }
 
         await postRequest({
-          extension: SCRepository.PHY.set2,
+          extension: SCRepository.StockCountControllerTab.set2,
           record: JSON.stringify(data)
         })
         toast.success(platformLabels.Updated)
@@ -62,7 +62,7 @@ const Controller = ({ store, maxAccess, labels }) => {
       })
 
       const checkedResponse = await getRequest({
-        extension: SCRepository.PHY.qry,
+        extension: SCRepository.StockCountControllerTab.qry,
         parameters: `_siteId=${siteId}&_stockCountId=${recordId}`
       })
 
@@ -98,10 +98,10 @@ const Controller = ({ store, maxAccess, labels }) => {
       component: 'checkbox',
       label: ' ',
       name: 'isChecked',
-      flex: .2,
+      flex: 0.2,
       props: {
         disabled: isPosted || isClosed
-      },
+      }
     },
     {
       component: 'textfield',

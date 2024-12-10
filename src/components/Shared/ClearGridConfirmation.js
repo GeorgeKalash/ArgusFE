@@ -1,6 +1,4 @@
-import { ControlContext } from 'src/providers/ControlContext'
 import ConfirmationDialog from '../ConfirmationDialog'
-import { useContext } from 'react'
 
 const ClearGridConfirmation = ({ window, onConfirm, fullScreen, open, dialogText }) => {
   return (
@@ -15,6 +13,7 @@ const ClearGridConfirmation = ({ window, onConfirm, fullScreen, open, dialogText
       }}
       fullScreen={fullScreen}
       cancelButtonAction={() => window.close()}
+      height='140px'
     />
   )
 }

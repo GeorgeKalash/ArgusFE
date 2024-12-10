@@ -25,8 +25,7 @@ export const SCRepository = {
   Controller: {
     qry: service + 'qryCRL'
   },
-  PHY: {
-    //StockCountControllerTab
+  StockCountControllerTab: {
     qry: service + 'qryPHY',
     set2: service + 'set2PHY',
     set: service + 'setPHY',

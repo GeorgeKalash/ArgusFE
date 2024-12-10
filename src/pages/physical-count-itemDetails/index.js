@@ -19,8 +19,11 @@ import { SystemChecks } from 'src/resources/SystemChecks'
 import toast from 'react-hot-toast'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
+import ClearGridConfirmation from 'src/components/Shared/ClearGridConfirmation'
+import { useWindow } from 'src/windows'
 
 const PhysicalCountItemDe = () => {
+  const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [siteStore, setSiteStore] = useState([])
@@ -171,7 +174,7 @@ const PhysicalCountItemDe = () => {
 
   const fillControllerStore = (stockCountId, siteId) => {
     getRequest({
-      extension: SCRepository.PHY.qry,
+      extension: SCRepository.StockCountControllerTab.qry,
       parameters: `_stockCountId=${stockCountId}&_siteId=${siteId}`
     }).then(res => {
       setControllerStore(res.list)
@@ -180,13 +183,11 @@ const PhysicalCountItemDe = () => {
 
   const checkPhyStatus = async controllerId => {
     const resp = await getRequest({
-      extension: SCRepository.PHY.get,
+      extension: SCRepository.StockCountControllerTab.get,
       parameters: `_stockCountId=${formik.values.stockCountId}&_siteId=${formik.values.siteId}&_controllerId=${controllerId}`
     })
 
-    if (resp) {
-      formik.setFieldValue('status', resp.record.status)
-    }
+    formik.setFieldValue('status', resp?.record?.status)
   }
 
   async function getDTDsku(stockCountId) {
@@ -198,14 +199,14 @@ const PhysicalCountItemDe = () => {
       parameters: `_recordId=${stockCountId}`
     })
 
-    res?.record?.dtId ? (dtId = res?.record?.dtId) : null
+    dtId = res?.record?.dtId
 
     if (dtId) {
       const DTDres = await getRequest({
         extension: SCRepository.DocumentTypeDefaults.get,
         parameters: `_dtId=${dtId}`
       })
-      DTDres?.record?.disableSKULookup ? (disableSKULookup = DTDres?.record?.disableSKULookup) : false
+      disableSKULookup = DTDres?.record?.disableSKULookup || false
     }
 
     setDisSkuLookup(disableSKULookup)
@@ -378,16 +379,12 @@ const PhysicalCountItemDe = () => {
     (formik?.values?.rows[0]?.sku == undefined || formik?.values?.rows[0]?.sku == '')
 
   const isHeader =
-    formik.values.stockCountId != null &&
-    formik.values.siteId != null &&
     formik.values.controllerId != null &&
     formik.values.SCStatus != 3 &&
     formik.values.SCWIP != 2 &&
     formik.values.EndofSiteStatus != 3
 
   const isSaved =
-    formik.values.stockCountId != null &&
-    formik.values.siteId != null &&
     formik.values.controllerId != null &&
     formik.values.status != 3 &&
     formik.values.SCStatus != 3 &&
@@ -406,7 +403,7 @@ const PhysicalCountItemDe = () => {
     }
 
     await postRequest({
-      extension: SCRepository.PHY.set,
+      extension: SCRepository.StockCountControllerTab.set,
       record: JSON.stringify(StockCountControllerTab)
     })
 
@@ -417,11 +414,48 @@ const PhysicalCountItemDe = () => {
     }
   }
 
+  const onClearGridConfirmation = async () => {
+    stack({
+      Component: ClearGridConfirmation,
+      props: {
+        open: { flag: true },
+        fullScreen: false,
+        onConfirm: clearGrid,
+        dialogText: platformLabels.DeleteGridConf
+      },
+      width: 450,
+      height: 170,
+      expandable: false,
+      title: platformLabels.Clear
+    })
+  }
+
+  const onClearAllConfirmation = async () => {
+    stack({
+      Component: ClearGridConfirmation,
+      props: {
+        open: { flag: true },
+        fullScreen: false,
+        onConfirm: () => {
+          formik.resetForm()
+          setFilteredItems([])
+          setEditMode(false)
+        },
+        dialogText: platformLabels.ClearFormGrid
+      },
+      width: 450,
+      height: 170,
+      expandable: false,
+      title: platformLabels.Clear
+    })
+  }
+
   const actions = [
     {
       key: 'Metals',
       condition: true,
-      onClick: 'onClickMetal'
+      onClick: 'onClickMetal',
+      disabled: formik.values.controllerId == null
     },
     {
       key: 'Locked',
@@ -439,15 +473,15 @@ const PhysicalCountItemDe = () => {
     {
       key: 'ClearGrid',
       condition: true,
-      onClick: 'onClearGridConfirmation',
+      onClick: onClearGridConfirmation,
       onSuccess: clearGrid,
       disabled: emptyGrid
     },
     {
       key: 'ClearHG',
       condition: true,
-      onClick: 'onClearAllConfirmation',
-      disabled: formik.values.stockCountId == null && formik.values.siteId == null && formik.values.controllerId == null
+      onClick: onClearAllConfirmation,
+      disabled: formik.values.controllerId == null
     }
   ]
 
@@ -528,7 +562,7 @@ const PhysicalCountItemDe = () => {
                 readOnly={formik.values.controllerId}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('siteId', newValue?.siteId)
-                  formik.setFieldValue('controllerId', '')
+                  formik.setFieldValue('controllerId', null)
 
                   if (!newValue) {
                     setControllerStore([])
@@ -588,9 +622,8 @@ const PhysicalCountItemDe = () => {
                 label={_labels.totalQty}
                 value={getFormattedNumber(totalQty.toFixed(2))}
                 readOnly={true}
-                hidden={!(formik.values.stockCountId && formik.values.siteId && formik.values.controllerId)}
+                hidden={!formik.values.controllerId}
                 maxAccess={access}
-                style={{ textAlign: 'right' }}
                 numberField={true}
               />
             </Grid>
@@ -600,9 +633,8 @@ const PhysicalCountItemDe = () => {
                 label={_labels.totalWeight}
                 value={getFormattedNumber(totalWeight.toFixed(2))}
                 readOnly={true}
-                hidden={!(formik.values.stockCountId && formik.values.siteId && formik.values.controllerId)}
+                hidden={!formik.values.controllerId}
                 maxAccess={access}
-                style={{ textAlign: 'right' }}
                 numberField={true}
               />
             </Grid>
