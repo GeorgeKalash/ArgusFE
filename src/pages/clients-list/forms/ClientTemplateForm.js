@@ -1,4 +1,4 @@
-import { Grid, FormControlLabel, Checkbox, Button } from '@mui/material'
+import { Grid, FormControlLabel, Checkbox, Button, CircularProgress } from '@mui/material'
 import { useEffect, useState, useContext } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import * as yup from 'yup'
@@ -38,7 +38,7 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequestFullEndPoint, getRequest, postRequest } = useContext(RequestsContext)
   const { systemChecks, defaultsData } = useContext(ControlContext)
 
   const [showAsPassword, setShowAsPassword] = useState(!!recordId)
@@ -53,6 +53,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const [nationalities, setNationalities] = useState({})
   const [isValidatePhoneClicked, setIsValidatePhoneClicked] = useState(false)
   const [imageUrl, setImageUrl] = useState(null)
+  const [loading, setLoading] = useState(null)
 
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
@@ -218,13 +219,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
   }, [])
 
-  async function getClient(recordId) {
+  function getClient(recordId) {
     const defaultParams = `_clientId=${recordId}`
     var parameters = defaultParams
-    await getRequest({
+    getRequest({
       extension: RTCLRepository.CtClientIndividual.get2,
       parameters: parameters
-    }).then(res => {
+    }).then(async res => {
       const obj = res?.record
 
       obj?.workAddressView && setAddress(obj?.workAddressView)
@@ -350,13 +351,16 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         obj.clientIDView?.idtId &&
         obj.clientMaster?.idScanMode
       ) {
+        setLoading(true)
         const parameters = `_number=${obj.clientIDView?.idNo}&_clientId=${obj.clientRemittance?.clientId}&_idType=${obj.clientIDView?.idtId}&_idScanMode=${obj.clientMaster?.idScanMode}`
-        getRequest({
+
+        const res = await getRequest({
           extension: CurrencyTradingSettingsRepository.PreviewImageID.get,
           parameters: parameters
-        }).then(res => {
-          setImageUrl(res.record.imageContent ?? null)
         })
+
+        setLoading(false)
+        setImageUrl(res.record.imageContent ?? null)
       }
     })
   }
@@ -620,6 +624,11 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         record: JSON.stringify(updateData)
       }).then(res => {
         if (res) {
+          postRequest({
+            extension: CurrencyTradingSettingsRepository.ScannerImage.set,
+            record: JSON.stringify({ base64Image: imageUrl, clientId: obj.clientId, numberID: obj.idNo })
+          })
+
           toast.success(platformLabels.Edited)
           otpForm()
           getClient(obj.recordId)
@@ -652,8 +661,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
   useEffect(() => {
     if (formik.values.idtId) {
-      const res = idTypes.list.filter(item => item.recordId === formik.values.idtId)?.[0]
-      if (res['type'] && (res['type'] === 1 || res['type'] === 2)) {
+      const res = idTypes.list?.filter(item => item.recordId === formik.values.idtId)?.[0]
+      if (res && res['type'] && (res['type'] === 1 || res['type'] === 2)) {
         getCountry()
       }
     }
@@ -764,16 +773,21 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     })
   }
 
-  const handleClickScanner = () => {
+  const handleClickScanner = confirmWindow => {
     formik.setFieldValue('idScanMode', 1)
+
+    getRequestFullEndPoint({ endPoint: process.env.NEXT_PUBLIC_SCANNER_URL }).then(response => {
+      setImageUrl(response?.imageContent)
+      confirmWindow.close()
+    })
   }
 
-  const digitalIdConfirmation = () => {
+  const digitalIdConfirmation = mode => {
     stack({
       Component: ConfirmationDialog,
       props: {
-        DialogText: platformLabels.AbsherConfirmation,
-        okButtonAction: handleClickDigitalId,
+        DialogText: mode === 2 ? platformLabels.AbsherConfirmation : platformLabels.scannerConfirmation,
+        okButtonAction: mode === 2 ? handleClickDigitalId : handleClickScanner,
         fullScreen: false
       },
       width: 450,
@@ -1336,7 +1350,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                 <Grid item xs={12}>
                   <Grid container spacing={2}>
                     <Grid item xs='auto'>
-                      <Button variant='contained' color='primary' onClick={handleClickScanner}>
+                      <Button
+                        variant='contained'
+                        color='primary'
+                        onClick={() => digitalIdConfirmation(1)}
+                        disabled={loading}
+                      >
                         {labels.scanner}
                       </Button>
                     </Grid>
@@ -1344,21 +1363,27 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       <Button
                         variant='contained'
                         color='primary'
-                        onClick={digitalIdConfirmation}
-                        disabled={!formik.values.idNo || !formik.values.idtId}
+                        onClick={() => digitalIdConfirmation(2)}
+                        disabled={!formik.values.idNo || !formik.values.idtId || loading}
                       >
                         {labels.digitalId}
                       </Button>
                     </Grid>
                   </Grid>
                 </Grid>
+
                 {imageUrl && (
                   <Grid item xs={12}>
                     <img
                       src={`data:image/png;base64,${imageUrl}`}
                       alt='Id image'
-                      style={{ objectFit: 'cover', width: '100%', height: '95%' }}
+                      style={{ width: '100%', height: '95%' }}
                     />
+                  </Grid>
+                )}
+                {loading && (
+                  <Grid item xs={12} textAlign={'center'} paddingTop={5}>
+                    <CircularProgress />
                   </Grid>
                 )}
               </Grid>

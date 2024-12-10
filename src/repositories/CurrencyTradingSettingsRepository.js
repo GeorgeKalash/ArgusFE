@@ -80,5 +80,8 @@ export const CurrencyTradingSettingsRepository = {
   },
   PreviewImageID: {
     get: service + 'previewImageID'
+  },
+  ScannerImage: {
+    set: service + 'saveScannerImage'
   }
 }
