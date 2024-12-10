@@ -317,5 +317,6 @@ export const ResourceIds = {
   ExpenseTypes: 52102,
   BusinessRules: 20114,
   GlEoyClosing: 30502,
-  BusinessRules: 20114
+  BusinessRules: 20114,
+  IVPhysicalCountItemDetails: 44205
 }

@@ -14,7 +14,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-import ClearFilteringPhy from 'src/components/Shared/ClearFilteringPhy'
+import ClearGridConfirmation from 'src/components/Shared/ClearGridConfirmation'
 import { useWindow } from 'src/windows'
 
 const PhysicalCountItem = () => {
@@ -133,10 +133,11 @@ const PhysicalCountItem = () => {
 
   function openClear() {
     stack({
-      Component: ClearFilteringPhy,
+      Component: ClearGridConfirmation,
       props: {
-        open: [true, {}],
+        open: { flag: true },
         fullScreen: false,
+        dialogText: platformLabels.ClearFormGrid,
         onConfirm: () => {
           formik.resetForm()
           setData({ list: [] })
