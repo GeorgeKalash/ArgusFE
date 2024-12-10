@@ -135,7 +135,7 @@ export default function FormShell({
                     recordId: form.values.recordId,
                     functionId: functionId
                   },
-                  width: 1000,
+                  width: 700,
                   title: platformLabels.InventoryTransaction
                 })
               }
