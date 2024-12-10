@@ -315,5 +315,6 @@ export const ResourceIds = {
   FyOpening: 30503,
   BusinessRules: 20114,
   GlEoyClosing: 30502,
-  BusinessRules: 20114
+  BusinessRules: 20114,
+  OutwardReturnSettlement: 36326
 }
