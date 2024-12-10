@@ -10,6 +10,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
 
 const IrDefaultForm = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -33,6 +34,17 @@ const IrDefaultForm = ({ _labels, access }) => {
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
+    validationSchema: yup.object().shape({
+      ir_amcShortTerm: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { ir_amcLongTerm } = this.parent
+
+          return value == null || ir_amcLongTerm == null || value <= ir_amcLongTerm
+        }),
+      ir_amcLongTerm: yup.number().nullable()
+    }),
     initialValues: { ir_amcShortTerm: null, ir_amcLongTerm: null, recordId: 'N/A' },
     onSubmit: values => {
       postDefault(values)
