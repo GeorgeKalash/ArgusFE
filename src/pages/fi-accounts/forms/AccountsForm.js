@@ -99,6 +99,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      masterSource: MasterSource.Account,
       disabled: !editMode
     }
   ]
@@ -110,7 +111,6 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      masterSource={MasterSource.Account}
     >
       <VertLayout>
         <Grow>
