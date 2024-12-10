@@ -113,7 +113,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     maxAccess,
     initialValues,
     enableReinitialize: false,
-    validateOnChange: true,
+    validateOnChange: false,
     validate: values => {
       const errors = {}
       if (values.dispersalMode == 2) {
