@@ -54,7 +54,7 @@ const AuthProvider = ({ children }) => {
   const fetchData = async () => {
     const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
-    const accountName = matchHostname ? matchHostname[1] : 'anthonys'
+    const accountName = matchHostname ? matchHostname[1] : 'cil-deploy'
 
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
@@ -107,9 +107,8 @@ const AuthProvider = ({ children }) => {
       })
 
       const defaultSet = {
-        dateFormat: defaultSettings.data.record.value ? defaultSettings.data.record.value : 'dd/MM/yyyy'
+        dateFormat: defaultSettings.data.record?.value ? defaultSettings.data.record?.value : 'dd/MM/yyyy'
       }
-
       window.localStorage.setItem('default', JSON.stringify(defaultSet))
 
       const loggedUser = {

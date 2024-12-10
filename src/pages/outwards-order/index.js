@@ -63,16 +63,12 @@ const OutwardsOrder = () => {
   }
 
   const getPlantId = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userData && userData.userId}&_key=plantId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userData && userData.userId}&_key=plantId`
+    })
 
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
+    return res?.record?.value
   }
 
   async function openForm(recordId) {

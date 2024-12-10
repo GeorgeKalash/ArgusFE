@@ -1,6 +1,12 @@
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function NumberfieldEdit({ id, column: { props, field }, value, update }) {
+export default function NumberfieldEdit({ id, column: { props, field }, value, update, updateRow }) {
+  const isPercentIcon = props?.gridData ? props?.gridData[id - 1]?.mdType === 1 : false
+
+  const handleIconClick = () => {
+    props?.iconsClicked(id, updateRow)
+  }
+
   return (
     <CustomNumberField
       value={value?.[field]}
@@ -23,6 +29,8 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, u
           value: ''
         })
       }
+      handleButtonClick={handleIconClick}
+      isPercentIcon={isPercentIcon}
       {...props}
     />
   )

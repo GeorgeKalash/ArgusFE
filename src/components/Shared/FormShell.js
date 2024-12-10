@@ -21,6 +21,7 @@ import { ClientBalance } from './ClientBalance'
 import InventoryTransaction from './InventoryTransaction'
 import SalesTrxForm from './SalesTrxForm'
 import StrictUnpostConfirmation from './StrictUnpostConfirmation'
+import ClientSalesTransaction from './ClientSalesTransaction'
 
 export default function FormShell({
   form,
@@ -111,6 +112,21 @@ export default function FormShell({
                 })
               }
               break
+            case 'onClientSalesTransaction':
+              action.onClick = () => {
+                stack({
+                  Component: ClientSalesTransaction,
+                  props: {
+                    functionId: functionId,
+                    clientId: form?.values?.header?.clientId
+                  },
+                  width: 600,
+                  height: 450,
+                  title: platformLabels.ClientSalesTransaction
+                })
+              }
+
+              break
             case 'onInventoryTransaction':
               action.onClick = () => {
                 stack({
@@ -142,9 +158,10 @@ export default function FormShell({
                 stack({
                   Component: GeneralLedger,
                   props: {
-                    formValues: form.values,
+                    values: form.values,
                     recordId: form.values?.recordId,
-                    functionId: functionId
+                    functionId: functionId,
+                    valuesPath: action.valuesPath
                   },
                   width: 1000,
                   height: 620,
@@ -189,7 +206,7 @@ export default function FormShell({
                     masterId: form.values?.recordId,
                     masterSource: action?.masterSource
                   },
-                  width: 700,
+                  width: 800,
                   height: 500,
                   title: platformLabels.IntegrationAccount
                 })

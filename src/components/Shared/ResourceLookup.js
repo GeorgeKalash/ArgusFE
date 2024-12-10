@@ -52,7 +52,6 @@ export const ResourceLookup = ({
         })
     }
   }
-  const check = errorCheck ? errorCheck : name
 
   const _firstValue =
     firstValue ||
@@ -74,26 +73,36 @@ export const ResourceLookup = ({
       ? formObject[name]
       : form.values[name])
 
-  const error = form?.touched && form.touched[check] && Boolean(form.errors[check])
-  const helperText = viewHelperText && form?.touched && form.touched[check] && form.errors[check]
+  const getErrorState = () => {
+    if (!form || !errorCheck) return false
+    const fieldPath = errorCheck.split('.')
+    if (fieldPath.length > 1) {
+      const [parent, child] = fieldPath
+
+      return form.touched?.[parent]?.[child] && Boolean(form.errors?.[parent]?.[child])
+    }
+
+    return form.touched?.[errorCheck] && Boolean(form.errors?.[errorCheck])
+  }
+
+  const error = getErrorState()
 
   useEffect(() => {
     setStore([])
   }, [_firstValue])
 
   const onKeyUp = e => {
-    if (e.target.value?.length > 0 && e.key != 'ArrowDown' && e.key != 'ArrowUp') {
-      setStore([])
-    } else {
-    }
-
     if (e.key === 'Enter') {
       selectFirstOption()
     }
   }
 
-  const onBlur = () => {
-    selectFirstOption()
+  const onFocus = () => {
+    setStore([])
+  }
+
+  const onBlur = (e, HighlightedOption) => {
+    !HighlightedOption ? selectFirstOption() : rest.onChange('', HighlightedOption)
   }
 
   const selectFirstOption = () => {
@@ -113,6 +122,7 @@ export const ResourceLookup = ({
           secondValue: _secondValue,
           error,
           onKeyUp,
+          onFocus,
           onBlur,
           name,
           isLoading,

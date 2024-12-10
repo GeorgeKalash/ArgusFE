@@ -159,7 +159,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         yup.object({
           sku: yup.string().required(),
           itemName: yup.string().required(),
-          qty: yup.number().required().min(1)
+          qty: yup.number().required()
         })
       )
     }),
@@ -422,7 +422,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       name: 'tax'
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.markdown,
       name: 'mdAmount',
       updateOn: 'blur',
@@ -764,7 +764,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     return res?.record
   }
 
-  const handleCycleButtonClick = () => {
+  const handleButtonClick = () => {
     setReCal(true)
     let currentTdAmount
     let currentPctAmount
@@ -802,12 +802,12 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType || 0,
-      basePrice: newRow?.basePrice || 0,
-      volume: newRow?.volume,
+      basePrice: parseFloat(newRow?.basePrice) || 0,
+      volume: parseFloat(newRow?.volume),
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
-      qty: newRow?.qty,
+      qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: parseFloat(newRow?.mdAmount),
       mdType: newRow?.mdType,
@@ -1544,9 +1544,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     value={formik.values.currentDiscount}
                     displayCycleButton={true}
                     readOnly={isClosed}
+                    isPercentIcon={cycleButtonState.text === '%' ? true : false}
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
-                    handleCycleButtonClick={handleCycleButtonClick}
+                    handleButtonClick={handleButtonClick}
+                    ShowDiscountIcons={true}
                     onChange={e => {
                       let discount = Number(e.target.value)
                       if (formik.values.tdType == 1) {
@@ -1575,7 +1577,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                         formik.setFieldValue('tdAmount', tdAmount)
                       }
 
-                      recalcGridVat(formik.values.tdType, tdPct, tdAmount, Number(e.target.value))
+                      recalcGridVat(formik.values.tdType, tdPct, tdAmount, discountAmount)
                     }}
                     onClear={() => {
                       formik.setFieldValue('tdAmount', 0)

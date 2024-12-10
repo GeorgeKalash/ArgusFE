@@ -50,7 +50,10 @@ export const SaleRepository = {
   },
   Client: {
     get: service + 'getCL',
-    snapshot: service + 'snapshotCL'
+    snapshot: service + 'snapshotCL',
+    page: service + 'pageCL',
+    set: service + 'setCL',
+    del: service + 'delCL'
   },
   WorkFlow: {
     graph: service + 'graph'
@@ -120,6 +123,13 @@ export const SaleRepository = {
     del: service + 'delCCS',
     page: service + 'pageCCS'
   },
+  Price: {
+    qry: service + 'qryCC',
+    get: service + 'getCC',
+    set: service + 'setCC',
+    del: service + 'delCC',
+    page: service + 'pageCC'
+  },
   SaleZoneLevel: {
     qry: service + 'qryZOL',
     set2: service + 'set2ZOL',
@@ -156,7 +166,9 @@ export const SaleRepository = {
   },
   Address: {
     qry: service + 'qryAD',
-    set: service + 'setAD'
+    set: service + 'setAD',
+    del: service + 'delAD',
+    get: service + 'getAD'
   },
   FilterAddress: {
     snapshot: service + 'snapshotADD'
@@ -166,7 +178,8 @@ export const SaleRepository = {
     set: service + 'setFII'
   },
   SATrx: {
-    qry: service + 'qryTRX'
+    qry: service + 'qryTRX',
+    qry2: service + 'qryTRX2'
   },
   SalesTransaction: {
     qry: service + 'qryTR',

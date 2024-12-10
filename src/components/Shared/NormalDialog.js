@@ -1,16 +1,17 @@
-import { Box, Grid } from '@mui/material'
+import { Box } from '@mui/material'
+import { VertLayout } from './Layouts/VertLayout'
+import { Grow } from './Layouts/Grow'
 
-const NormalDialog = ({ DialogText }) => {
-  console.log(DialogText, 'DialogText')
-
+const NormalDialog = ({ DialogText, bottomSection }) => {
   return (
-    <Grid container justifyContent='center' alignItems='center'>
-      <Grid item>
-        <Box textAlign='center' p={12}>
+    <VertLayout>
+      <Grow>
+        <Box sx={{ p: 12 }} textAlign='center'>
           {DialogText}
         </Box>
-      </Grid>
-    </Grid>
+      </Grow>
+      {bottomSection}
+    </VertLayout>
   )
 }
 
