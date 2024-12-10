@@ -83,6 +83,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      masterSource: MasterSource.AccountGroup,
       disabled: !editMode
     }
   ]
@@ -94,7 +95,6 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      masterSource={MasterSource.AccountGroup}
     >
       <VertLayout>
         <Grow>
