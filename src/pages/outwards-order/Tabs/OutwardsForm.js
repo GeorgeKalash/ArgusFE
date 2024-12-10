@@ -743,7 +743,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       <VertLayout>
         <Grow>
           <Grid container xs={12} spacing={2}>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2}>
               <CustomTextField
                 name='reference'
                 label={labels.Reference}
@@ -755,7 +755,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </FormGrid>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2}>
               <CustomDatePicker
                 name='date'
                 required
@@ -770,7 +770,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                 helperText={formik.touched.date && formik.errors.date}
               />
             </FormGrid>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2}>
               <ResourceComboBox
                 datasetId={DataSets.DOCUMENT_STATUS}
                 name='status'
@@ -781,7 +781,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                 values={formik.values}
               />
             </FormGrid>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2}>
               <CustomDatePicker
                 name='valueDate'
                 label={labels.valueDate}
@@ -795,7 +795,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                 helperText={formik.touched.valueDate && formik.errors.valueDate}
               />
             </FormGrid>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2}>
               <ResourceComboBox
                 datasetId={DataSets.WF_STATUS}
                 name='wfStatus'
@@ -806,10 +806,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                 values={formik.values}
               />
             </FormGrid>
-            <Grid item xs={9}></Grid>
+            <Grid item xs={2}></Grid>
             <Grid item xs={4.5}>
               <FieldSet title='Transaction Details'>
-                <Grid container spacing={2}>
+                <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={RemittanceOutwardsRepository.Country.qry}
@@ -950,7 +950,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   </Grid>
                   <Grid item xs={12}>
                     <Button
-                      sx={{ backgroundColor: '#908c8c', color: '#000000' }}
+                      sx={{
+                        backgroundColor: '#908c8c',
+                        color: '#000000',
+                        height: '33px',
+                        objectFit: 'contain'
+                      }}
                       disabled={
                         !(plantId && formik.values.countryId && formik.values.currencyId && formik.values.dispersalType)
                       }
@@ -1057,7 +1062,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <FieldSet title='Client Details'>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={3}>
                       <Grid item xs={12}>
                         <ResourceLookup
                           endpointId={CTCLRepository.ClientCorporate.snapshot}
@@ -1336,7 +1341,9 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       '&:disabled': {
                         backgroundColor: '#eaeaea',
                         color: '#000000'
-                      }
+                      },
+                      height: '33px',
+                      objectFit: 'contain'
                     }}
                     disabled={!formik.values.beneficiaryId}
                     onClick={() => openBankWindow()}

@@ -53,6 +53,7 @@ const CustomDatePicker = ({
   const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
+  const [isFocused, setIsFocused] = useState(false)
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)
@@ -93,14 +94,27 @@ const CustomDatePicker = ({
         size={size}
         value={value}
         label={label}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         minDate={!!min ? min : disabledRangeDate.date}
         maxDate={!!max ? max : newDate}
         fullWidth={fullWidth}
         sx={{
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
-              border: !hasBorder && 'none' // Hide border
-            }
+              border: !hasBorder && 'none',
+              borderColor: '#959d9e',
+              borderRadius: '6px'
+            },
+            height: `33px !important`
+          },
+          '& .MuiInputLabel-root': {
+            fontSize: '0.90rem',
+            top: isFocused || value ? '0px' : '-3px'
+          },
+          '& .MuiInputBase-input': {
+            fontSize: '0.90rem',
+            color: 'black'
           }
         }}
         autoFocus={autoFocus}
@@ -127,12 +141,12 @@ const CustomDatePicker = ({
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {value && (
-                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
-                      <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -3 }}>
+                      <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
                     </IconButton>
                   )}
                   <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
-                    <EventIcon />
+                    <EventIcon sx={{ border: '0px', fontSize: 17 }} />
                   </IconButton>
                 </InputAdornment>
               )

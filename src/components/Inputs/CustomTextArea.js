@@ -1,7 +1,6 @@
-// ** MUI Imports
 import { TextField, InputAdornment, IconButton, Box } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import Image from 'next/image'
 import DropDownArrow from '/public/images/buttonsIcons/bottom-arrow.png'
@@ -42,6 +41,7 @@ const CustomTextArea = ({
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
   const inputRef = useRef(null)
+  const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
     // Save the cursor position before the value changes
@@ -58,7 +58,7 @@ const CustomTextArea = ({
     <Box sx={{ width: '100%' }}>
       <TextField
         multiline
-        rows={rows} // You can adjust the number of rows as needed
+        rows={rows}
         inputRef={inputRef}
         name={name}
         type={type}
@@ -67,15 +67,33 @@ const CustomTextArea = ({
         size={size}
         fullWidth={fullWidth}
         autoFocus={autoFocus}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         inputProps={{
-          tabIndex: _readOnly ? -1 : 0, // Add tabIndex here
+          tabIndex: _readOnly ? -1 : 0,
           readOnly: _readOnly,
           maxLength: maxLength,
           inputMode: 'numeric',
-          pattern: numberField && '[0-9]*', // Allow only numeric input
+          pattern: numberField && '[0-9]*',
           style: {
             textAlign: numberField && 'right',
             paddingRight: paddingRight
+          }
+        }}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              borderColor: '#959d9e',
+              borderRadius: '6px'
+            }
+          },
+          '& .MuiInputLabel-root': {
+            fontSize: '0.90rem',
+            top: isFocused || value ? '0px' : '-3px'
+          },
+          '& .MuiInputBase-input': {
+            fontSize: '0.90rem',
+            color: 'black'
           }
         }}
         autoComplete={autoComplete}
@@ -85,7 +103,7 @@ const CustomTextArea = ({
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 {!readOnly && value && (
                   <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                    <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                    <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
                   </IconButton>
                 )}
                 {viewAdd && (

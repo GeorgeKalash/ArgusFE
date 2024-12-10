@@ -42,6 +42,7 @@ const CustomDateTimePicker = ({
   } ${formatTime}`
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
@@ -114,11 +115,24 @@ const CustomDateTimePicker = ({
         sx={{
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
-              border: !hasBorder && 'none'
-            }
+              border: !hasBorder && 'none',
+              borderColor: '#959d9e',
+              borderRadius: '6px'
+            },
+            height: `33px !important`
+          },
+          '& .MuiInputLabel-root': {
+            fontSize: '0.90rem',
+            top: isFocused || value ? '0px' : '-3px'
+          },
+          '& .MuiInputBase-input': {
+            fontSize: '0.90rem',
+            color: 'black'
           }
         }}
         autoFocus={autoFocus}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         format={dateFormat}
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
@@ -140,8 +154,8 @@ const CustomDateTimePicker = ({
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {value && (
-                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
-                      <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -3 }}>
+                      <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
                     </IconButton>
                   )}
                   <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>

@@ -36,6 +36,7 @@ import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 import PaymentGrid from 'src/components/Shared/PaymentGrid'
 import { DataSets } from 'src/resources/DataSets'
 import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
+import CustomRadioButtonGroup from 'src/components/Inputs/CustomRadioButtonGroup'
 
 export default function TransactionForm({ recordId, labels, access, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -443,8 +444,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const isPosted = formik.values.status === 3
   const isReleased = formik.values.status === 4
 
-  console.log(isPosted, 'isPosted')
-
   async function setOperationType(type) {
     if (type) {
       const res = await getRequest({
@@ -757,7 +756,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       onClick: onClose,
       disabled: isClosed || !editMode
     },
-
     {
       key: 'Reopen',
       condition: isClosed,
@@ -872,28 +870,26 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                     />
                   </Grid>
                   <Grid item xs={3}>
-                    <RadioGroup
-                      row
+                    <CustomRadioButtonGroup
+                      options={[
+                        {
+                          label: labels.purchase,
+                          value: SystemFunction.CurrencyPurchase
+                        },
+                        {
+                          label: labels.sale,
+                          value: SystemFunction.CurrencySale
+                        }
+                      ]}
                       value={formik.values.functionId}
                       onChange={e => {
-                        setOperationType(parseInt(e.target.value))
-                        setFId(e.target.value)
+                        const newValue = e.target.value
+                        setOperationType(parseInt(newValue))
+                        setFId(newValue)
                         formik.setFieldValue('reference', '')
                       }}
-                    >
-                      <FormControlLabel
-                        value={SystemFunction.CurrencyPurchase}
-                        control={<Radio />}
-                        label={labels.purchase}
-                        disabled={formik?.values?.operations[0]?.currencyId != '' ? true : false}
-                      />
-                      <FormControlLabel
-                        value={SystemFunction.CurrencySale}
-                        control={<Radio />}
-                        label={labels.sale}
-                        disabled={formik?.values?.operations[0]?.currencyId != '' ? true : false}
-                      />
-                    </RadioGroup>
+                      disabledCondition={() => formik?.values?.operations[0]?.currencyId !== ''}
+                    />
                   </Grid>
                   <Grid item xs={3}>
                     <ResourceComboBox
@@ -916,10 +912,15 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                     />
                   </Grid>
                   <Grid item xs={6}>
-                    <RadioGroup row value={formik.values.clientType} onChange={formik.onChange}>
-                      <FormControlLabel value={'1'} control={<Radio />} label={labels.individual} />
-                      <FormControlLabel value={'2'} control={<Radio />} label={labels.corporate} disabled />
-                    </RadioGroup>
+                    <CustomRadioButtonGroup
+                      options={[
+                        { label: labels.individual, value: '1' },
+                        { label: labels.corporate, value: '2', disabled: true }
+                      ]}
+                      value={formik.values.clientType}
+                      onChange={e => formik.setFieldValue('clientType', e.target.value)}
+                      disabledCondition={() => formik?.values?.operations[0]?.currencyId !== ''}
+                    />
                   </Grid>
                 </Grid>
               </FieldSet>
@@ -1308,6 +1309,14 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       </Grid>
                       <Grid item xs={2}>
                         <FormControlLabel
+                          sx={{
+                            '.MuiFormControlLabel-label': {
+                              fontSize: '0.9rem'
+                            },
+                            '.MuiSvgIcon-root': {
+                              fontSize: '1.2rem'
+                            }
+                          }}
                           name='resident'
                           checked={formik.values.resident}
                           onChange={formik.handleChange}
@@ -1318,6 +1327,14 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       </Grid>
                       <Grid item xs={2}>
                         <FormControlLabel
+                          sx={{
+                            '.MuiFormControlLabel-label': {
+                              fontSize: '0.9rem'
+                            },
+                            '.MuiSvgIcon-root': {
+                              fontSize: '1.2rem'
+                            }
+                          }}
                           name='otp'
                           checked={formik.values.otp}
                           onChange={formik.handleChange}
@@ -1337,7 +1354,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   onChange={value => formik.setFieldValue('operations', value)}
                   value={formik.values.operations}
                   error={emptyRows.length < 1 ? formik.errors.operations : true}
-                  height={200}
+                  height={175}
                   disabled={isClosed}
                   maxAccess={maxAccess}
                   name='operations'
@@ -1527,7 +1544,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                 <Grid container spacing={2}>
                   <Grid item xs={9}>
                     <PaymentGrid
-                      height={200}
+                      height={175}
                       onChange={value => formik.setFieldValue('amount', value)}
                       value={formik.values.amount}
                       error={formik.errors.amount}

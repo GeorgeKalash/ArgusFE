@@ -1,7 +1,5 @@
-import { Box } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
 import useResourceParams from 'src/hooks/useResourceParams'
@@ -27,19 +25,15 @@ export default function CurrencyTrading() {
     return getRequest({
       extension: SystemRepository.UserDefaults.get,
       parameters: parameters
-    })
-      .then(res => res.record.value)
-      .catch(error => {})
+    }).then(res => res.record.value)
   }
   async function openForm() {
-    try {
-      const plantId = await getPlantId()
-      if (!plantId) {
-        stackError({ message: 'The user does not have a default plant' })
-      } else {
-        setPlantId(plantId)
-      }
-    } catch (error) {}
+    const plantId = await getPlantId()
+    if (!plantId) {
+      stackError({ message: 'The user does not have a default plant' })
+    } else {
+      setPlantId(plantId)
+    }
   }
 
   useEffect(() => {
