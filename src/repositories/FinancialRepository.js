@@ -120,7 +120,8 @@ export const FinancialRepository = {
     page: service + 'pageRV',
     snapshot: service + 'snapshotRV',
     cancel: service + 'cancelRV',
-    post: service + 'postRV'
+    post: service + 'postRV',
+    unpost: service + 'unpostRV'
   },
   Contact: {
     qry: service + 'qryContact'
@@ -148,7 +149,8 @@ export const FinancialRepository = {
     del: service + 'delPV',
     post: service + 'postPV',
     cancel: service + 'cancelPV',
-    snapshot: service + 'snapshotPV'
+    snapshot: service + 'snapshotPV',
+    unpost: service + 'unpostPV',
   },
   AgingProfile: {
     qry: service + 'qryAGP',
