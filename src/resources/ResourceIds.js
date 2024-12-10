@@ -251,6 +251,8 @@ export const ResourceIds = {
   AgingButton: 31419,
   LotCategories: 41108,
   ClientBalance: 36131,
+  MaterialsTransfer: 41208,
+  InventoryTransaction: 41209,
   SalesDefaults: 51114,
   DivisionFilter: 70101,
   BranchFilter: 70102,
@@ -290,7 +292,6 @@ export const ResourceIds = {
   AvailabilitiesBySite: 41226,
   ProductionSheet: 42327,
   ProdSheetDocumentTypeDefault: 42120,
-  InventoryTransaction: 41209,
   GenerateFiscalYear: 41503,
   UserSecretOTPQrCode: 23201,
   CurrentCosts: 41207,
@@ -313,10 +314,9 @@ export const ResourceIds = {
   FyOpening: 30503,
   SystemParams: 30109,
   POSPayment: 36601,
-  FyOpening: 30503,
   ExpenseTypes: 52102,
-  BusinessRules: 20114,
   GlEoyClosing: 30502,
   BusinessRules: 20114,
+  CaDtd: 33103,
   IVPhysicalCountItemDetails: 44205
 }

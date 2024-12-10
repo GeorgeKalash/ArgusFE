@@ -8,7 +8,8 @@ export const InventoryRepository = {
   },
   Item: {
     snapshot: service + 'snapshotIT',
-    get: service + 'getIT'
+    get: service + 'getIT',
+    quickView: service + 'quickViewIT'
   },
   Group: {
     qry: service + 'qryGRP',
@@ -150,6 +151,24 @@ export const InventoryRepository = {
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
   },
+  MaterialsTransfer: {
+    page: service + 'pageTFR',
+    snapshot: service + 'snapshotTFR',
+    get: service + 'getTFR',
+    set2: service + 'set2TFR',
+    del: service + 'delTFR',
+    close: service + 'closeTFR',
+    reopen: service + 'reopenTFR',
+    post: service + 'postTFR',
+    unpost: service + 'unpostTFR',
+    print: service + 'setTFR_PS'
+  },
+  MaterialsTransferItems: {
+    qry: service + 'qryTFI',
+  },
+  Cost: {
+    get: service + 'getCOS',
+  },
   ItemPhysProp: {
     get: service + 'getPP'
   },
@@ -229,5 +248,8 @@ export const InventoryRepository = {
     get: service + 'getPRT',
     set: service + 'setPRT',
     snapshot: service + 'snapshotPRT'
+  },
+  DocumentTypeDefaults: {
+    get: service + 'getDTD'
   }
 }
