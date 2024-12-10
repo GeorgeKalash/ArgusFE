@@ -113,7 +113,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     maxAccess,
     initialValues,
     enableReinitialize: false,
-    validateOnChange: true,
+    validateOnChange: false,
     validate: values => {
       const errors = {}
       if (values.dispersalMode == 2) {
@@ -162,6 +162,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       }
     }
   })
+
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
@@ -335,6 +336,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   maxLength='15'
                   readOnly={editMode}
                   onChange={e => formik.setFieldValue('reference', e.target.value)}
+                  onClear={() => formik.setFieldValue('reference', '')}
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
                 />
               </Grid>
