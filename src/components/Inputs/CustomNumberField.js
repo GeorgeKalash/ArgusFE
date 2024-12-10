@@ -115,14 +115,9 @@ const CustomNumberField = ({
 
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.select() // Select the text when the editor is initialized
+      inputRef.current.select()
     }
   }, [])
-
-  const handleClick = e => {
-    // Prevent focus on click
-    e.preventDefault()
-  }
 
   return _hidden ? (
     <></>
