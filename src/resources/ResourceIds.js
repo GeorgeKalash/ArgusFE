@@ -301,6 +301,8 @@ export const ResourceIds = {
   IVparts: 41222,
   SalesInquiries: 51300,
   MigrateBarcodeData: 41508,
+  PhysicalCountSerialSummary: 44206,
+  DeliveriesOrders: 52301,
   Depreciation: 43402,
   IVMDParts: 41223,
   PlantSupervisors: 23108,
@@ -311,5 +313,9 @@ export const ResourceIds = {
   FyOpening: 30503,
   SystemParams: 30109,
   POSPayment: 36601,
+  FyOpening: 30503,
+  ExpenseTypes: 52102,
+  BusinessRules: 20114,
+  GlEoyClosing: 30502,
   BusinessRules: 20114
 }
