@@ -409,7 +409,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     })
   }
 
-  const { formik } = useForm({
+  const { formik, setFieldValidation } = useForm({
     maxAccess,
     initialValues,
     enableReinitialize: true,
@@ -1585,6 +1585,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       labels={labels}
                       defaultReadOnly={{ countryId: true }}
                       addressValidation={formik}
+                      setFieldValidation={setFieldValidation}
                       readOnly={editMode && !allowEdit && true}
                       access={maxAccess}
                     />
