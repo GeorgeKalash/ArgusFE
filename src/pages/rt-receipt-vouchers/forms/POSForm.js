@@ -47,7 +47,7 @@ export default function POSForm({ labels, formik }) {
           <CustomTextField
             name='corCurrencyRef'
             readOnly
-            label={labels.corCurrency}
+            label={labels?.corCurrency}
             value={owiFields?.corCurrencyRef}
           />
         </Grid>
@@ -55,7 +55,7 @@ export default function POSForm({ labels, formik }) {
           <CustomNumberField
             name='corExRate'
             readOnly
-            label={labels.corCurrencyRate}
+            label={labels?.corCurrencyRate}
             value={owiFields?.corExRate}
             decimalScale={5}
           />
@@ -64,7 +64,7 @@ export default function POSForm({ labels, formik }) {
           <CustomTextField
             name='corEvalExRate'
             readOnly
-            label={labels.corCurrencyEval}
+            label={labels?.corCurrencyEval}
             InputProps={{
               startAdornment: (
                 <Box component='span'>
