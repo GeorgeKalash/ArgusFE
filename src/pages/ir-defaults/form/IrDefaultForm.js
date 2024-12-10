@@ -74,7 +74,6 @@ const IrDefaultForm = ({ _labels, access }) => {
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MaterialTransfer}`}
                 name='ir_tfr_DocTypeId'
-                required
                 label={_labels.docType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
