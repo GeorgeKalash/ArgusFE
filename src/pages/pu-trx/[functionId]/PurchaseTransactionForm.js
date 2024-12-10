@@ -676,8 +676,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }
 
   async function fillVendorData(object) {
-    console.log(formik.values.header)
-    console.log(object?.tradeDiscount ? DIRTYFIELD_TDPCT : formik.values.header.tdType)
+    const currenctTdType = object?.tradeDiscount ? DIRTYFIELD_TDPCT : formik.values.header.tdType
+    if (currenctTdType == DIRTYFIELD_TDPCT) setCycleButtonState({ text: '%', value: 2 })
     formik.setValues({
       ...formik.values,
       header: {
@@ -688,7 +688,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         isVattable: object?.isTaxable || false,
         tdAmount: object?.tradeDiscount,
         tdPct: object?.tradeDiscount,
-        tdType: object?.tradeDiscount ? DIRTYFIELD_TDPCT : formik.values.header.tdType,
+        currentDiscount: object?.tradeDiscount,
+        tdType: currenctTdType,
         taxId: object?.taxId,
         paymentMethod: object?.paymentMethod
       }
@@ -965,7 +966,14 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       hiddenTdAmount: parseFloat(tdAmount),
       typeChange: typeChange
     })
-    formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
+    formik.setFieldValue(
+      'header.tdAmount',
+      formik.values?.header?.currentDiscount
+        ? formik.values?.header?.currentDiscount
+        : _discountObj?.hiddenTdAmount
+        ? _discountObj?.hiddenTdAmount?.toFixed(2)
+        : 0
+    )
     formik.setFieldValue('header.tdType', _discountObj?.tdType)
     formik.setFieldValue('header.currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('header.tdPct', _discountObj?.hiddenTdPct)
@@ -984,7 +992,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
         tdPct: parseFloat(tdPct),
-        taxDetails: item.taxDetails
+        taxDetails: formik.values.header.isVattable === true ? item.taxDetails : null
       })
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
     })
