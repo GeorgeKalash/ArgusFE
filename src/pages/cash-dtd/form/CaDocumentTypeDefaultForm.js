@@ -15,6 +15,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
@@ -22,7 +23,7 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: CashBankRepository.DocumentTypeDefault.qry
+    endpointId: CashBankRepository.DocumentTypeDefault.page
   })
 
   const { formik } = useForm({
@@ -80,8 +81,7 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
 
         formik.setValues({
           ...res.record,
-          recordId: recordId,
-          disableSKULookup: Boolean(res.record.disableSKULookup)
+          recordId: recordId
         })
       }
     })()
@@ -95,7 +95,7 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_startAt=0&_pageSize=1000&_dgId=${3303}`}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.CashTransfer}`}
                 name='dtId'
                 required
                 label={labels.documentType}
@@ -138,28 +138,6 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
                 parameters={{
                   _type: 0
                 }}
-                name='cashAccountId'
-                label={labels.cA}
-                valueField='reference'
-                displayField='name'
-                valueShow='cashAccountRef'
-                secondValueShow='cashAccountName'
-                form={formik}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue?.recordId || '')
-                  formik.setFieldValue('cashAccountRef', newValue?.reference || '')
-                  formik.setFieldValue('cashAccountName', newValue?.name || '')
-                }}
-                error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
                 valueField='reference'
                 displayField='name'
                 name='fromCashAccountId'
@@ -190,11 +168,11 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
                 label={labels.toCa}
                 form={formik}
                 valueShow='toCashAccountRef'
-                secondValueShow='toashAccountName'
+                secondValueShow='toCashAccountName'
                 onChange={(event, newValue) => {
                   formik.setFieldValue('toCashAccountId', newValue ? newValue.recordId : null)
                   formik.setFieldValue('toCashAccountRef', newValue ? newValue.reference : null)
-                  formik.setFieldValue('toashAccountName', newValue ? newValue.name : null)
+                  formik.setFieldValue('toCashAccountName', newValue ? newValue.name : null)
                 }}
                 error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
                 maxAccess={maxAccess}

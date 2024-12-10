@@ -12,6 +12,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CaDocumentTypeDefaultForm from './form/CaDocumentTypeDefaultForm'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const CaDocumentTypeDefault = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,8 +24,8 @@ const CaDocumentTypeDefault = () => {
 
     try {
       const response = await getRequest({
-        extension: CashBankRepository.DocumentTypeDefault.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=3303`
+        extension: CashBankRepository.DocumentTypeDefault.page,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=${SystemFunction.CashTransfer}`
       })
 
       return { ...response, _startAt: _startAt }
@@ -35,11 +36,12 @@ const CaDocumentTypeDefault = () => {
     query: { data },
     labels: _labels,
     invalidate,
+    paginationParameters,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CashBankRepository.DocumentTypeDefault.qry,
+    endpointId: CashBankRepository.DocumentTypeDefault.page,
     datasetId: ResourceIds.CaDtd
   })
 
@@ -55,8 +57,13 @@ const CaDocumentTypeDefault = () => {
       flex: 1
     },
     {
-      field: 'cashAccountName',
-      headerName: _labels.cA,
+      field: 'fromCashAccountName',
+      headerName: _labels.fromCa,
+      flex: 1
+    },
+    {
+      field: 'toCashAccountName',
+      headerName: _labels.toCa,
       flex: 1
     }
   ]
@@ -83,7 +90,7 @@ const CaDocumentTypeDefault = () => {
         maxAccess: access
       },
       width: 600,
-      height: 500,
+      height: 400,
       title: _labels.dtDefault
     })
   }
@@ -107,7 +114,8 @@ const CaDocumentTypeDefault = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>

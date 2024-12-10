@@ -98,7 +98,7 @@ export const CashBankRepository = {
     set: service + 'postTFM2'
   },
   DocumentTypeDefault: {
-    qry: service + 'qryDTD',
+    page: service + 'pageDTD',
     get: service + 'getDTD',
     set: service + 'setDTD',
     del: service + 'delDTD'
