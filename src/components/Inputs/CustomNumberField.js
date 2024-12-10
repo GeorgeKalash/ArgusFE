@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import PercentIcon from '@mui/icons-material/Percent'
 import PinIcon from '@mui/icons-material/Pin'
 import { NumericFormat } from 'react-number-format'
@@ -39,6 +39,8 @@ const CustomNumberField = ({
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+
+  const inputRef = useRef(null)
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
@@ -111,6 +113,17 @@ const CustomNumberField = ({
     }
   }
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.select() // Select the text when the editor is initialized
+    }
+  }, [])
+
+  const handleClick = e => {
+    // Prevent focus on click
+    e.preventDefault()
+  }
+
   return _hidden ? (
     <></>
   ) : (
@@ -130,6 +143,8 @@ const CustomNumberField = ({
       required={required}
       onInput={handleInput}
       InputProps={{
+        inputRef,
+        autoFocus: false,
         inputProps: {
           onFocus: handleFocus,
           min: min,
@@ -142,9 +157,11 @@ const CustomNumberField = ({
         readOnly: _readOnly,
         endAdornment: (!readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
           <InputAdornment position='end'>
-            {
-              props.ShowDiscountIcons && <IconButton onClick={handleButtonClick}>{props.isPercentIcon ? <PercentIcon /> : <PinIcon sx={{ minWidth: '40px', height: '70px' }}/>}</IconButton>
-            }
+            {props.ShowDiscountIcons && (
+              <IconButton onClick={handleButtonClick}>
+                {props.isPercentIcon ? <PercentIcon /> : <PinIcon sx={{ minWidth: '40px', height: '70px' }} />}
+              </IconButton>
+            )}
             {displayButtons && (
               <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
                 <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
