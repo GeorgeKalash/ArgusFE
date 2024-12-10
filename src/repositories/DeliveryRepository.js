@@ -39,6 +39,12 @@ export const DeliveryRepository = {
   TRP: {
     flag: service + 'flagTRP'
   },
+  ExpenseTypes: {
+    get: service + 'getET',
+    set: service + 'setET',
+    del: service + 'delET',
+    page: service + 'pageET'
+  },
   DeliveriesOrders: {
     qry: service + 'qryORD',
     get: service + 'getORD',
@@ -53,10 +59,9 @@ export const DeliveryRepository = {
   },
   OrderItem: {
     qry: service + 'qryORI',
-    get: service + 'getORI',
+    get: service + 'getORI'
   },
   MW: {
     qry: service + 'qryMW2'
   }
-
 }

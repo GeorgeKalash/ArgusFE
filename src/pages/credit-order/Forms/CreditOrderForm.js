@@ -384,29 +384,25 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     {
       component: 'resourcecombobox',
       label: labels.currency,
-      name: 'currencyId',
+      name: 'currencyRef',
       props: {
-        endpointId: RemittanceSettingsRepository.CorrespondentCurrency.qry,
-        parameters: `_corId=${formik.values.corId}`,
-        displayField: 'currencyRef',
-        valueField: 'currencyId',
-        columnsInDropDown: [
-          { key: 'currencyRef', value: 'Reference' },
-          { key: 'currencyName', value: 'Name' }
-        ],
+        endpointId: SystemRepository.Currency.qry,
+        displayField: 'reference',
+        valueField: 'recordId',
         mapping: [
-          { from: 'currencyId', to: 'currencyId' },
-          { from: 'currencyRef', to: 'currencyRef' },
-          { from: 'currencyName', to: 'currencyName' },
-          { from: 'goc', to: 'goc' }
+          { from: 'recordId', to: 'currencyId' },
+          { from: 'reference', to: 'currencyRef' },
+          { from: 'name', to: 'currencyName' }
         ],
-        displayFieldWidth: 3,
-        disabled: !formik.values.corId || isClosed
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 3
       },
       updateOn: 'blur',
       widthDropDown: '400',
       async onChange({ row: { update, oldRow, newRow } }) {
-        console.log(newRow, 'newRow')
         if (!newRow?.currencyId) {
           return
         }
@@ -451,7 +447,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
               : 0
           update({ baseAmount: getFormattedNumber(curToBase.toFixed(2)) })
         }
-
+        const gocPresent = await getCorCurrencyInfo(newRow?.currencyId)
         update({
           currencyId: exchange?.currencyId,
           currencyName: exchange?.currencyName,
@@ -460,7 +456,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
           rateCalcMethod: exchange?.rateCalcMethod,
           minRate: exchange?.minRate,
           maxRate: exchange?.maxRate,
-          goc: newRow?.goc
+          goc: gocPresent?.goc || false
         })
       }
     },
@@ -469,8 +465,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       label: labels.name,
       name: 'currencyName',
       props: {
-        readOnly: true,
-        disabled: !formik.values.corId || isClosed
+        readOnly: true
       },
       width: 190
     },
@@ -479,8 +474,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       label: labels.quantity,
       name: 'qty',
       props: {
-        mandatory: true,
-        disabled: !formik.values.corId || isClosed
+        mandatory: true
       },
       width: 130,
       async onChange({ row: { update, newRow } }) {
@@ -515,8 +509,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       name: 'defaultRate',
       props: {
         readOnly: true,
-        mandatory: true,
-        disabled: !formik.values.corId || isClosed
+        mandatory: true
       },
       width: 130
     },
@@ -526,8 +519,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       name: 'exRate',
       props: {
         mandatory: true,
-        decimalScale: 7,
-        disabled: !formik.values.corId || isClosed
+        decimalScale: 7
       },
       width: 130,
       updateOn: 'blur',
@@ -598,12 +590,20 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       name: 'amount',
       props: {
         readOnly: true,
-        mandatory: true,
-        disabled: !formik.values.corId || isClosed
+        mandatory: true
       },
       width: 130
     }
   ]
+
+  async function getCorCurrencyInfo(currencyId) {
+    const res = await getRequest({
+      extension: RemittanceSettingsRepository.CorrespondentCurrency.get,
+      parameters: `_corId=${formik.values.corId}&_currencyId=${currencyId}`
+    })
+
+    return res?.record
+  }
 
   const fillItemsGrid = async orderId => {
     const res = await getRequest({
@@ -942,6 +942,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('rows', value)}
+            disabled={!formik.values.corId || isClosed}
             value={formik.values.rows}
             error={formik.errors.rows}
             columns={columns}
