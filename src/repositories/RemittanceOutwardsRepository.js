@@ -52,7 +52,8 @@ export const RemittanceOutwardsRepository = {
     snapshot2: service + 'snapshotIW2',
     close: service + 'closeIW',
     reopen: service + 'reopenIW',
-    post: service + 'postIW'
+    post: service + 'postIW',
+    open: service + 'openIW'
   },
   InwardGLInformation: {
     get: service + 'getIWI'
