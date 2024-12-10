@@ -54,9 +54,9 @@ const SystemFunction = () => {
         }
       ]
     },
-    onSubmit: async values => {
+    onSubmit: async () => {
       const resultObject = {
-        systemFunctionMappings: values.rows
+        systemFunctionMappings: formik.values.rows
       }
 
       await postRequest({
@@ -139,6 +139,16 @@ const SystemFunction = () => {
     formik.setFieldValue('search', value)
   }
 
+  function handleRowsChange(newValues) {
+    const updatedRows = formik.values.rows.map(row => {
+      const newValue = newValues.find(newRow => newRow.id === row.id)
+
+      return newValue ? newValue : row
+    })
+
+    formik.setFieldValue('rows', updatedRows)
+  }
+
   return (
     <FormShell form={formik} infoVisible={false} visibleClear={false} isCleared={false} isSavedClear={false}>
       <VertLayout>
@@ -159,9 +169,7 @@ const SystemFunction = () => {
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => {
-              formik.setFieldValue('rows', value)
-            }}
+            onChange={value => handleRowsChange(value)}
             value={filteredData}
             error={formik.errors?.rows}
             columns={columns}
