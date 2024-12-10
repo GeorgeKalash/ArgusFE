@@ -6,10 +6,16 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
   const [Validation, setValidation] = useState()
 
   const setFieldValidation = (field, errors) => {
-    setValidation(prev => ({
-      ...prev,
-      [field]: errors
-    }))
+    setValidation(prev => {
+      const updatedValidation = { ...prev }
+      if (errors === '') {
+        delete updatedValidation[field]
+      } else {
+        updatedValidation[field] = errors
+      }
+
+      return updatedValidation
+    })
   }
 
   const formik = useFormik({

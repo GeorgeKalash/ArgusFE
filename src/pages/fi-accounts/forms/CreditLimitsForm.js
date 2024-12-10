@@ -56,10 +56,10 @@ const CreditLimitsForm = ({ setStore, labels, editMode, height, store, expanded,
       props: { readOnly: true }
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.CreditLimits,
       name: 'limit',
-      props: { type: 'number' }
+      props: { maxLength: 12, decimalScale: 2 }
     }
   ]
 
