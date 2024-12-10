@@ -140,7 +140,7 @@ const CtDefaults = ({ _labels, access }) => {
       <VertLayout>
         <Grow>
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={6}>
               <Grid container spacing={4}>
                 <Grid item xs={12}>
                   <ResourceLookup
@@ -288,7 +288,7 @@ const CtDefaults = ({ _labels, access }) => {
               </Grid>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={6}>
               <Grid container spacing={4}>
                 <Grid item xs={12}>
                   <CustomNumberField
@@ -315,7 +315,7 @@ const CtDefaults = ({ _labels, access }) => {
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={CTCLRepository.CtClientIndividual.snapshot}
-                    parameters={{ _category: 1, _size: 30 }}
+                    parameters={{ _category: 1 }}
                     name='ct_default_civ_client'
                     label={_labels.client}
                     valueField='reference'
