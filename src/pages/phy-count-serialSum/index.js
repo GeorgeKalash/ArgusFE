@@ -18,7 +18,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import { useWindow } from 'src/windows'
-import ClearFilteringPhy from 'src/components/Shared/ClearFilteringPhy'
+import ClearGridConfirmation from 'src/components/Shared/ClearGridConfirmation'
 
 const PhysicalCountSerial = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -172,10 +172,11 @@ const PhysicalCountSerial = () => {
 
   function openClear() {
     stack({
-      Component: ClearFilteringPhy,
+      Component: ClearGridConfirmation,
       props: {
-        open: [true, {}],
+        open: { flag: true },
         fullScreen: false,
+        dialogText: platformLabels.ClearFormGrid,
         onConfirm: () => {
           formik.resetForm()
           setData({ list: [] })

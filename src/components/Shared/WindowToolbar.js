@@ -30,9 +30,7 @@ const WindowToolbar = ({
   setSelectedReport,
   selectedReport,
   previewReport,
-  actions = [],
-  isClearedGrid = false,
-  isClearedAll = false
+  actions = []
 }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -121,9 +119,7 @@ const WindowToolbar = ({
     onSave,
     onSaveClear,
     onClear,
-    onInfo,
-    isClearedGrid,
-    isClearedAll
+    onInfo
   }
 
   const buttons = getButtons(platformLabels)

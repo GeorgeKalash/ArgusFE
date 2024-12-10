@@ -11,7 +11,6 @@ export const getButtons = platformLabels => [
   {
     key: 'ClearGrid',
     label: platformLabels.clearGrid,
-    condition: 'isClearedGrid',
     color: '#f44336',
     image: 'clear.png',
     main: false
@@ -19,7 +18,6 @@ export const getButtons = platformLabels => [
   {
     key: 'ClearHG', //HeaderGrid
     label: platformLabels.clearAll,
-    condition: 'isClearedAll',
     color: '#4682B4',
     image: 'clear.png',
     main: false

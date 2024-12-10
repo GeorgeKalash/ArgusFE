@@ -2,16 +2,14 @@ import { ControlContext } from 'src/providers/ControlContext'
 import ConfirmationDialog from '../ConfirmationDialog'
 import { useContext } from 'react'
 
-const ClearFilteringPhy = ({ window, onConfirm, fullScreen, open }) => {
-  const { platformLabels } = useContext(ControlContext)
-
+const ClearGridConfirmation = ({ window, onConfirm, fullScreen, open, dialogText }) => {
   return (
     <ConfirmationDialog
-      open={open[0] ? open[0] : false}
-      DialogText={platformLabels.ClearFormGrid}
+      open={open?.flag ? open?.flag : false}
+      DialogText={dialogText}
       okButtonAction={() => {
         if (typeof onConfirm === 'function') {
-          onConfirm(open[1])
+          onConfirm()
         }
         window.close()
       }}
@@ -21,4 +19,4 @@ const ClearFilteringPhy = ({ window, onConfirm, fullScreen, open }) => {
   )
 }
 
-export default ClearFilteringPhy
+export default ClearGridConfirmation

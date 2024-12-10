@@ -22,8 +22,7 @@ import InventoryTransaction from './InventoryTransaction'
 import SalesTrxForm from './SalesTrxForm'
 import StrictUnpostConfirmation from './StrictUnpostConfirmation'
 import ClientSalesTransaction from './ClientSalesTransaction'
-import ClearFilteringPhy from './ClearFilteringPhy'
-import ClearGridPhyConfirmation from './ClearGridPhyConfirmation'
+import ClearGridConfirmation from './ClearGridConfirmation'
 
 export default function FormShell({
   form,
@@ -52,9 +51,7 @@ export default function FormShell({
   setIDInfoAutoFilled,
   visibleClear,
   actions,
-  filteredItems = [],
-  isClearedGrid = false,
-  isClearedAll = false
+  filteredItems = []
 }) {
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
@@ -364,11 +361,12 @@ export default function FormShell({
             case 'onClearGridConfirmation':
               action.onClick = () => {
                 stack({
-                  Component: ClearGridPhyConfirmation,
+                  Component: ClearGridConfirmation,
                   props: {
-                    open: [true, {}],
+                    open: { flag: true },
                     fullScreen: false,
-                    onConfirm: action.onSuccess
+                    onConfirm: action.onSuccess,
+                    dialogText: platformLabels.DeleteGridConf
                   },
                   width: 450,
                   height: 170,
@@ -380,11 +378,12 @@ export default function FormShell({
             case 'onClearAllConfirmation':
               action.onClick = () => {
                 stack({
-                  Component: ClearFilteringPhy,
+                  Component: ClearGridConfirmation,
                   props: {
-                    open: [true, {}],
+                    open: { flag: true },
                     fullScreen: false,
-                    onConfirm: () => handleReset()
+                    onConfirm: () => handleReset(),
+                    dialogText: platformLabels.ClearFormGrid
                   },
                   width: 450,
                   height: 170,
@@ -515,8 +514,6 @@ export default function FormShell({
           previewReport={previewReport}
           visibleClear={visibleClear}
           functionId={functionId}
-          isClearedAll={isClearedAll}
-          isClearedGrid={isClearedGrid}
         />
       )}
     </>

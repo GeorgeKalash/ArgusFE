@@ -1,16 +1,15 @@
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useContext, useEffect, useState, useRef } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SCRepository } from 'src/repositories/SCRepository'
 import FormShell from 'src/components/Shared/FormShell'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -18,6 +17,8 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import toast from 'react-hot-toast'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const PhysicalCountItemDe = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -26,12 +27,12 @@ const PhysicalCountItemDe = () => {
   const [controllerStore, setControllerStore] = useState([])
   const [filteredItems, setFilteredItems] = useState([])
   const [editMode, setEditMode] = useState(false)
-  const [disSkuLookup, setDisSkuLookup] = useState(false)
-  const [jumpToNextLine, setJumpToNextLine] = useState(false)
-  const [showDefaultQty, setShowDefaultQty] = useState(false)
-  const [disableItemDuplicate, setDisableItemDuplicate] = useState(false)
+  const [disSkuLookup, setDisSkuLookup] = useState(false) //better to put them in formik not states if possible
+  const [jumpToNextLine, setJumpToNextLine] = useState(false) //better to put them in formik not states if possible
+  const [showDefaultQty, setShowDefaultQty] = useState(false) //better to put them in formik not states if possible
+  const [disableItemDuplicate, setDisableItemDuplicate] = useState(false) //better to put them in formik not states if possible
 
-  const { labels: _labels, maxAccess } = useResourceQuery({
+  const { labels: _labels, access } = useResourceQuery({
     datasetId: ResourceIds.IVPhysicalCountItemDetails
   })
 
@@ -40,8 +41,6 @@ const PhysicalCountItemDe = () => {
       stockCountId: null,
       siteId: null,
       controllerId: null,
-      totalQty: null,
-      totalWeight: null,
       status: 1,
       SCStatus: null,
       SCWIP: null,
@@ -58,7 +57,7 @@ const PhysicalCountItemDe = () => {
         }
       ]
     },
-    maxAccess,
+    access,
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -67,68 +66,83 @@ const PhysicalCountItemDe = () => {
       controllerId: yup.string().required(),
       rows: yup.array().of(
         yup.object().shape({
-          sku: yup.string().required(),
-          itemName: yup.string().required()
+          sku: yup.string().test({
+            name: 'sku-first-row-check',
+            test(value, context) {
+              const { parent } = context
+              if (parent?.id == 1 && value) return true
+              if (parent?.id == 1 && !value) return true
+              if (parent?.id > 1 && !value) return false
+
+              return value
+            }
+          }),
+          itemName: yup.string().test({
+            name: 'itemName-first-row-check',
+            test(value, context) {
+              const { parent } = context
+              if (parent?.id == 1 && value) return true
+              if (parent?.id == 1 && !value) return true
+              if (parent?.id > 1 && !value) return false
+
+              return value
+            }
+          })
         })
       )
     }),
     onSubmit: async obj => {
-      const copy = { ...obj }
-
       const items = obj?.rows?.map((item, index) => ({
         ...item,
         seqNo: index + 1,
-        siteId: copy.siteId,
-        stockCountId: copy.stockCountId,
-        controllerId: copy.controllerId
+        siteId: obj.siteId,
+        stockCountId: obj.stockCountId,
+        controllerId: obj.controllerId
       }))
 
       const StockCountItemDetailPack = {
-        siteId: copy.siteId,
-        controllerId: copy.controllerId,
-        stockCountId: copy.stockCountId,
-        items: items
+        siteId: obj.siteId,
+        controllerId: obj.controllerId,
+        stockCountId: obj.stockCountId,
+        items: items.length > 0 && items[0].sku ? items : []
       }
 
-      console.log('inSave')
-      console.log(StockCountItemDetailPack)
-
-      const response = await postRequest({
+      await postRequest({
         extension: SCRepository.StockCountItemDetail.set2,
         record: JSON.stringify(StockCountItemDetailPack)
       })
 
       toast.success(platformLabels.Edited)
       setEditMode(items.length > 0)
-      checkPhyStatus(copy.stockCountId, copy.siteId, copy.controllerId)
+      checkPhyStatus(obj.controllerId)
 
       handleClick(items)
     }
   })
 
-  async function fetchGridData(stockCountId, siteId, controllerId) {
+  async function fetchGridData(controllerId) {
+    const stockCountId = formik.values.stockCountId
+
     getDTDsku(stockCountId)
 
     await getRequest({
       extension: SCRepository.StockCountItemDetail.qry,
-      parameters: `_stockCountId=${stockCountId}&_siteId=${siteId}&_controllerId=${controllerId}`
-    })
-      .then(res => {
-        if (res.list) {
-          const modifiedList = res.list?.map((item, index) => ({
-            ...item,
-            id: index + 1,
-            metalPurity: item?.metalPurity ? item?.metalPurity : 0,
-            weight: item?.weight ? item?.weight : 0,
-            countedQty: item?.countedQty ? item?.countedQty : 0
-          }))
-          modifiedList.length > 0 && formik.setFieldValue('rows', modifiedList)
-        }
+      parameters: `_stockCountId=${stockCountId}&_siteId=${formik.values.siteId}&_controllerId=${controllerId}`
+    }).then(res => {
+      if (res.list) {
+        const modifiedList = res.list?.map((item, index) => ({
+          ...item,
+          id: index + 1,
+          metalPurity: item?.metalPurity || 0,
+          weight: item?.weight || 0,
+          countedQty: item?.countedQty || 0
+        }))
+        modifiedList.length > 0 && formik.setFieldValue('rows', modifiedList)
+      }
 
-        setEditMode(res.list.length > 0)
-        handleClick(res.list)
-      })
-      .catch(error => {})
+      setEditMode(res.list.length > 0)
+      handleClick(res.list)
+    })
   }
 
   useEffect(() => {
@@ -144,57 +158,30 @@ const PhysicalCountItemDe = () => {
     }
   }, [formik.values.stockCountId])
 
-  useEffect(() => {
-    setTotals(formik.values.rows)
-  }, [formik.values.rows])
-
-  const setTotals = gridList => {
-    formik.setFieldValue('totalQty', 0)
-    formik.setFieldValue('totalWeight', 0)
-    let sumQty = 0
-    let sumWeight = 0
-
-    gridList.map(item => {
-      sumQty += Number(item.countedQty) || 0
-      sumWeight += Number(item.weight) || 0
-    })
-
-    formik.setFieldValue('totalQty', sumQty)
-    formik.setFieldValue('totalWeight', sumWeight)
-  }
-
   const fillSiteStore = stockCountId => {
     setSiteStore([])
     setControllerStore([])
-    var parameters = `_stockCountId=${stockCountId}`
     getRequest({
       extension: SCRepository.Sites.qry,
-      parameters: parameters
+      parameters: `_stockCountId=${stockCountId}`
+    }).then(res => {
+      setSiteStore(res.list.filter(site => site.isChecked == true))
     })
-      .then(res => {
-        setSiteStore(res.list.filter(site => site.isChecked == true))
-      })
-      .catch(error => {})
   }
 
   const fillControllerStore = (stockCountId, siteId) => {
-    var parameters = `_stockCountId=${stockCountId}&_siteId=${siteId}`
     getRequest({
-      extension: SCRepository.StockCountControllerTab.qry,
-      parameters: parameters
+      extension: SCRepository.PHY.qry,
+      parameters: `_stockCountId=${stockCountId}&_siteId=${siteId}`
+    }).then(res => {
+      setControllerStore(res.list)
     })
-      .then(res => {
-        setControllerStore(res.list)
-      })
-      .catch(error => {})
   }
 
-  const checkPhyStatus = async (stockCountId, siteId, controllerId) => {
-    var parameters = `_stockCountId=${stockCountId}&_siteId=${siteId}&_controllerId=${controllerId}`
-
+  const checkPhyStatus = async controllerId => {
     const resp = await getRequest({
-      extension: SCRepository.StockCountControllerTab.get,
-      parameters: parameters
+      extension: SCRepository.PHY.get,
+      parameters: `_stockCountId=${formik.values.stockCountId}&_siteId=${formik.values.siteId}&_controllerId=${controllerId}`
     })
 
     if (resp) {
@@ -211,22 +198,16 @@ const PhysicalCountItemDe = () => {
       parameters: `_recordId=${stockCountId}`
     })
 
-    console.log(dtId)
-    console.log(res)
-    console.log('resss', res?.record?.dtId)
     res?.record?.dtId ? (dtId = res?.record?.dtId) : null
-    console.log(dtId)
 
     if (dtId) {
       const DTDres = await getRequest({
         extension: SCRepository.DocumentTypeDefaults.get,
         parameters: `_dtId=${dtId}`
       })
-      console.log(DTDres)
       DTDres?.record?.disableSKULookup ? (disableSKULookup = DTDres?.record?.disableSKULookup) : false
     }
 
-    console.log(disableSKULookup)
     setDisSkuLookup(disableSKULookup)
   }
   async function getSysChecks() {
@@ -268,7 +249,7 @@ const PhysicalCountItemDe = () => {
             { key: 'name', value: 'Name' },
             { key: 'flName', value: 'FL Name' }
           ],
-          displayFieldWidth: 1
+          displayFieldWidth: 2
         }),
         jumpToNextLine: jumpToNextLine
       },
@@ -296,12 +277,11 @@ const PhysicalCountItemDe = () => {
             extension: InventoryRepository.Physical.get,
             parameters: `_itemId=${itemId}`
           })
-          console.log(res)
           update({
-            weight: res?.record?.weight ? res?.record?.weight : 0,
-            metalPurity: res?.record?.metalPurity ? res?.record?.metalPurity : 0,
-            metalId: res?.record?.metalId ? res?.record?.metalId : null,
-            isMetal: res?.record?.isMetal ? res?.record?.isMetal : null
+            weight: res?.record?.weight || 0,
+            metalPurity: res?.record?.metalPurity || 0,
+            metalId: res?.record?.metalId,
+            isMetal: res?.record?.isMetal
           })
         }
       },
@@ -375,27 +355,27 @@ const PhysicalCountItemDe = () => {
   }
 
   const handleClick = async dataList => {
-    try {
-      setFilteredItems([])
-      console.log('in handle click')
-      console.log(dataList)
+    setFilteredItems([])
 
-      const filteredItemsList = dataList
-        .filter(item => item.metalId && item.metalId.toString().trim() !== '')
-        .map(item => ({
-          qty: item.countedQty,
-          metalRef: null,
-          metalId: item.metalId,
-          metalPurity: item.metalPurity,
-          weight: item.weight,
-          priceType: item.priceType
-        }))
-      setFilteredItems(filteredItemsList)
-      setEditMode(dataList.length > 0)
-    } catch (exception) {}
+    const filteredItemsList = dataList
+      .filter(item => item.metalId && item.metalId.toString().trim() !== '')
+      .map(item => ({
+        qty: item.countedQty,
+        metalRef: null,
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+    setFilteredItems(filteredItemsList)
+    setEditMode(dataList.length > 0)
   }
 
   const isPosted = formik.values.status === 3
+
+  const emptyGrid =
+    formik?.values?.rows?.length < 2 &&
+    (formik?.values?.rows[0]?.sku == undefined || formik?.values?.rows[0]?.sku == '')
 
   const isHeader =
     formik.values.stockCountId != null &&
@@ -425,8 +405,8 @@ const PhysicalCountItemDe = () => {
       status: status
     }
 
-    const res = await postRequest({
-      extension: SCRepository.StockCountControllerTab.set,
+    await postRequest({
+      extension: SCRepository.PHY.set,
       record: JSON.stringify(StockCountControllerTab)
     })
 
@@ -460,14 +440,28 @@ const PhysicalCountItemDe = () => {
       key: 'ClearGrid',
       condition: true,
       onClick: 'onClearGridConfirmation',
-      onSuccess: clearGrid
+      onSuccess: clearGrid,
+      disabled: emptyGrid
     },
     {
       key: 'ClearHG',
       condition: true,
-      onClick: 'onClearAllConfirmation'
+      onClick: 'onClearAllConfirmation',
+      disabled: formik.values.stockCountId == null && formik.values.siteId == null && formik.values.controllerId == null
     }
   ]
+
+  const totalQty = formik.values.rows.reduce((qtySum, row) => {
+    const qtyValue = parseFloat(row.countedQty?.toString().replace(/,/g, '')) || 0
+
+    return qtySum + qtyValue
+  }, 0)
+
+  const totalWeight = formik.values.rows.reduce((weightSum, row) => {
+    const weightValue = parseFloat(row.weight?.toString().replace(/,/g, '')) || 0
+
+    return weightSum + weightValue
+  }, 0)
 
   return (
     <FormShell
@@ -477,7 +471,7 @@ const PhysicalCountItemDe = () => {
       isSavedClear={false}
       disabledSubmit={!isSaved}
       actions={actions}
-      maxAccess={maxAccess}
+      maxAccess={access}
       resourceId={ResourceIds.IVPhysicalCountItemDetails}
       filteredItems={filteredItems}
       previewReport={editMode}
@@ -485,7 +479,7 @@ const PhysicalCountItemDe = () => {
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={2}>
+            <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SCRepository.StockCount.qry}
                 parameters={`_startAt=0&_pageSize=1000&_params=`}
@@ -496,7 +490,7 @@ const PhysicalCountItemDe = () => {
                 values={formik.values}
                 required
                 readOnly={formik.values.controllerId}
-                maxAccess={maxAccess}
+                maxAccess={access}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('stockCountId', newValue?.recordId)
                   formik.setFieldValue('siteId', '')
@@ -507,8 +501,6 @@ const PhysicalCountItemDe = () => {
                     clearGrid()
                     formik.setFieldValue('SCStatus', null)
                     formik.setFieldValue('SCWIP', null)
-
-                    //setDisableItemDuplicate(false)
                   } else {
                     fillSiteStore(newValue?.recordId)
                     formik.setFieldValue('SCStatus', newValue?.status)
@@ -516,12 +508,11 @@ const PhysicalCountItemDe = () => {
                   }
 
                   setDisableItemDuplicate(!!newValue?.disableItemDuplicate)
-                  console.log('bool', !!newValue?.disableItemDuplicate)
                 }}
                 error={formik.touched.stockCountId && Boolean(formik.errors.stockCountId)}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={3}>
               <ResourceComboBox
                 name='siteId'
                 store={siteStore}
@@ -550,10 +541,10 @@ const PhysicalCountItemDe = () => {
                   }
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
-                maxAccess={maxAccess}
+                maxAccess={access}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={3}>
               <ResourceComboBox
                 name='controllerId'
                 store={controllerStore}
@@ -565,29 +556,13 @@ const PhysicalCountItemDe = () => {
                 readOnly={formik.values.controllerId}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('controllerId', newValue?.controllerId)
-                  checkPhyStatus(formik.values.stockCountId, formik.values.siteId, newValue?.controllerId)
-                  fetchGridData(formik.values.stockCountId, formik.values.siteId, newValue?.controllerId)
+                  checkPhyStatus(newValue?.controllerId)
+                  fetchGridData(newValue?.controllerId)
                 }}
                 error={formik.touched.controllerId && Boolean(formik.errors.controllerId)}
-                maxAccess={maxAccess}
+                maxAccess={access}
               />
             </Grid>
-            {/* <Grid item xs={2}>
-              <Button
-                onClick={clearGrid}
-                sx={{
-                  backgroundColor: '#f44336',
-                  '&:hover': {
-                    backgroundColor: '#f44336',
-                    opacity: 0.8
-                  },
-                  ml: 2
-                }}
-                variant='contained'
-              >
-                <img src='/images/buttonsIcons/clear.png' alt={platformLabels.Clear} />
-              </Button>
-            </Grid> */}
           </Grid>
         </Fixed>
         <Grow>
@@ -601,26 +576,34 @@ const PhysicalCountItemDe = () => {
             disabled={formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}
             allowDelete={formik.values?.SCStatus != 3 && formik.values?.SCWIP != 2 && formik.values?.status != 3}
             allowAddNewLine={formik.values?.SCStatus != 3 && formik.values?.EndofSiteStatus != 3}
+            maxAccess={access}
+            name='rows'
           />
         </Grow>
         <Fixed>
           <Grid container justifyContent='flex-end' spacing={2} sx={{ pt: 5 }}>
             <Grid item xs={2}>
-              <CustomNumberField
+              <CustomTextField
                 name='totalQty'
                 label={_labels.totalQty}
-                value={formik.values.totalQty}
+                value={getFormattedNumber(totalQty.toFixed(2))}
                 readOnly={true}
                 hidden={!(formik.values.stockCountId && formik.values.siteId && formik.values.controllerId)}
+                maxAccess={access}
+                style={{ textAlign: 'right' }}
+                numberField={true}
               />
             </Grid>
             <Grid item xs={2}>
-              <CustomNumberField
+              <CustomTextField
                 name='totalWeight'
                 label={_labels.totalWeight}
-                value={formik.values.totalWeight}
+                value={getFormattedNumber(totalWeight.toFixed(2))}
                 readOnly={true}
                 hidden={!(formik.values.stockCountId && formik.values.siteId && formik.values.controllerId)}
+                maxAccess={access}
+                style={{ textAlign: 'right' }}
+                numberField={true}
               />
             </Grid>
           </Grid>
