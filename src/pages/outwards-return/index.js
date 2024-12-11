@@ -75,7 +75,7 @@ const OutwardsReturn = () => {
       type: 'date'
     },
     {
-      field: 'outwardRef',
+      field: 'owt_reference',
       headerName: _labels.outwardRef,
       flex: 1
     },

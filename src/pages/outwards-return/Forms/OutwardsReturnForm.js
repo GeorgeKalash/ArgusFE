@@ -111,7 +111,7 @@ export default function OutwardsReturnForm({
       lcAmount: '',
       releaseStatus: null,
       otpVerified: false,
-      settlementStatus: null,
+      settlementStatus: 1,
       interfaceId: null,
       attemptNo: 1
     },
@@ -156,6 +156,7 @@ export default function OutwardsReturnForm({
         if (isOpenOutwards) {
           refetch()
         }
+        fillForm(response.recordId)
       } else toast.success(platformLabels.Edited)
 
       invalidate()
@@ -206,12 +207,7 @@ export default function OutwardsReturnForm({
     if (res.recordId) {
       toast.success(platformLabels.Closed)
       invalidate()
-      const res2 = await getOutwardsReturn(res.recordId)
-
-      formik.setValues({
-        ...res2.record,
-        date: formatDateFromApi(res2.record.date)
-      })
+      fillForm(res.recordId)
     }
   }
 
@@ -228,12 +224,7 @@ export default function OutwardsReturnForm({
       toast.success(platformLabels.Reopened)
       invalidate()
 
-      const res2 = await getOutwardsReturn(res.recordId)
-
-      formik.setValues({
-        ...res2.record,
-        date: formatDateFromApi(res2.record.date)
-      })
+      fillForm(res.recordId)
     }
   }
   const isPosted = formik.values.status === 3
@@ -251,12 +242,7 @@ export default function OutwardsReturnForm({
       toast.success(platformLabels.Posted)
       invalidate()
 
-      const res2 = await getOutwardsReturn(res.recordId)
-
-      formik.setValues({
-        ...res2.record,
-        date: formatDateFromApi(res2.record.date)
-      })
+      fillForm(res.recordId)
     }
   }
 
@@ -287,40 +273,44 @@ export default function OutwardsReturnForm({
     }
   ]
 
+  const fillForm = async recordId => {
+    const raCurrencyId = await getRaCurrencyId()
+    const res = await getOutwardsReturn(recordId)
+    const outwardTransfer = await getOutwardsTransfer(res?.record?.owt_Id)
+
+    if (raCurrencyId) {
+      const data = await getData(
+        res.record.plantId,
+        res.record?.currencyId,
+        outwardTransfer?.record?.rateTypeId,
+        raCurrencyId
+      )
+
+      const rate = parseFloat(data?.rate)
+      if (isNaN(rate)) {
+        return
+      }
+
+      const fcAmount = parseFloat(outwardTransfer?.record?.fcAmount || 0)
+      const owtLcAmount = parseFloat(outwardTransfer?.record?.lcAmount || 0)
+      const adRateCalcMethod = parseInt(outwardTransfer?.record?.rateCalcMethod, 10)
+
+      const derivedLcAmount = calculateLcAmount(fcAmount, rate, adRateCalcMethod)
+
+      formik.setValues({
+        ...res.record,
+        amount: outwardTransfer?.record?.amount,
+        owt_lcAmount: outwardTransfer?.record?.lcAmount,
+        derivedLcAmount: derivedLcAmount,
+        date: formatDateFromApi(res.record.date)
+      })
+    }
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const raCurrencyId = await getRaCurrencyId()
-        const res = await getOutwardsReturn(recordId)
-        const outwardTransfer = await getOutwardsTransfer(res?.record?.owt_Id)
-
-        if (raCurrencyId) {
-          const data = await getData(
-            res.record.plantId,
-            res.record?.currencyId,
-            outwardTransfer?.record?.rateTypeId,
-            raCurrencyId
-          )
-
-          const rate = parseFloat(data?.rate)
-          if (isNaN(rate)) {
-            return
-          }
-
-          const fcAmount = parseFloat(outwardTransfer?.record?.fcAmount || 0)
-          const owtLcAmount = parseFloat(outwardTransfer?.record?.lcAmount || 0)
-          const adRateCalcMethod = parseInt(outwardTransfer?.record?.rateCalcMethod, 10)
-
-          const derivedLcAmount = calculateLcAmount(fcAmount, rate, adRateCalcMethod)
-
-          formik.setValues({
-            ...res.record,
-            amount: outwardTransfer?.record?.amount,
-            owt_lcAmount: outwardTransfer?.record?.lcAmount,
-            derivedLcAmount: derivedLcAmount,
-            date: formatDateFromApi(res.record.date)
-          })
-        }
+        fillForm(recordId)
       }
     })()
   }, [])
@@ -402,6 +392,15 @@ export default function OutwardsReturnForm({
                       label={labels.outwards}
                       form={formik}
                       readOnly={isPosted || isClosed || isOpenOutwards}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Ref.' },
+                        { key: 'amount', value: 'Amount' },
+                        { key: 'commission', value: 'Commission' },
+                        { key: 'corName', value: 'Correspondent' },
+                        { key: 'clientName', value: 'Client Name' },
+                        { key: 'currencyRef', value: 'Currency Ref.' }
+                      ]}
+                      displayFieldWidth={4}
                       onChange={async (event, newValue) => {
                         formik.setFieldValue('owt_Id', newValue ? newValue.recordId : '')
                         formik.setFieldValue('owt_reference', newValue ? newValue.reference : '')
@@ -460,7 +459,6 @@ export default function OutwardsReturnForm({
                           formik.setFieldValue('originalLcAmount', smallestLcAmount)
                         }
 
-                        formik.setFieldValue('lcAmount', smallestLcAmount)
                         formik.setFieldValue('derivedLcAmount', derivedLcAmount)
                         formik.setFieldValue('exRate', Math.min(parseFloat(newValue?.exRate || 0), data?.rate || 0))
                         formik.setFieldValue(
@@ -547,15 +545,12 @@ export default function OutwardsReturnForm({
                   </Grid>
                   <Grid item xs={6}>
                     <CustomNumberField
-                      name='exRate'
+                      name='owt_exRate'
                       label={labels.exRate}
-                      value={formik?.values?.exRate}
+                      value={formik?.values?.owt_exRate}
                       required
                       readOnly
                       maxAccess={maxAccess}
-                      onChange={formik.handleChange}
-                      onClear={() => formik.setFieldValue('exRate', '')}
-                      error={formik.touched.exRate && Boolean(formik.errors.exRate)}
                     />
                   </Grid>
                   <Grid item xs={6}>
@@ -695,11 +690,11 @@ export default function OutwardsReturnForm({
                       }}
                       defaultIndex={formik?.values?.interfaceId && 0}
                       required
-                      readOnly={
-                        isOpenOutwards
-                          ? !!formik.values.interfaceId
-                          : isPosted || isClosed || !!formik.values.interfaceId
-                      }
+                      readOnly= {(
+                        !recordId || 
+                        (isOpenOutwards && !!formik.values.interfaceId) || 
+                        (!isOpenOutwards && (isPosted || isClosed || !!formik.values.interfaceId))
+                      )}                      
                       maxAccess={maxAccess}
                       error={formik.touched.settlementStatus && Boolean(formik.errors.settlementStatus)}
                     />
