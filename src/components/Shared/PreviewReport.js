@@ -24,7 +24,10 @@ export default function PreviewReport({
     if (!outerGrid) {
       if (resourceId === ResourceIds.JournalVoucher) {
         parameters = `?_recordId=${recordId}&_functionId=${functionId}`
-      } else if (resourceId === ResourceIds.IVPhysicalCountItem) {
+      } else if (
+        resourceId === ResourceIds.IVPhysicalCountItem ||
+        resourceId === ResourceIds.PhysicalCountSerialSummary
+      ) {
         parameters = `?_stockCountId=${scId}&_siteId=${siteId}`
       } else {
         parameters = `?_recordId=${recordId}`

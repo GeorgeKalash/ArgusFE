@@ -1,5 +1,5 @@
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useRef } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CommonContext } from 'src/providers/CommonContext'
 import { useCacheDataContext } from 'src/providers/CacheDataContext'
@@ -25,6 +25,11 @@ export default function ResourceComboBox({
   const { updateStore, fetchWithCache } = useCacheDataContext() || {}
   const cacheAvailable = !!updateStore
   const { getAllKvsByDataset } = useContext(CommonContext)
+
+  const [apiResponse, setApiResponse] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const finalItemsListRef = useRef([])
+
   function fetch({ datasetId, endpointId, parameters }) {
     if (endpointId) {
       return getRequest({
@@ -41,9 +46,6 @@ export default function ResourceComboBox({
       })
     }
   }
-
-  const [apiResponse, setApiResponse] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const fetchDataAsync = async () => {
@@ -66,10 +68,16 @@ export default function ResourceComboBox({
       setApiResponse(!!datasetId ? { list: data } : data)
       if (typeof setData == 'function') setData(!!datasetId ? { list: data } : data)
       setIsLoading(false)
+
+      if (!values[name]) {
+        selectFirstOption()
+      }
     }
   }
 
   let finalItemsList = data ? data : reducer(apiResponse)?.filter?.(filter)
+
+  finalItemsListRef.current = finalItemsList || []
 
   const _value =
     (typeof values[name] === 'object'
@@ -79,6 +87,21 @@ export default function ResourceComboBox({
       : finalItemsList?.find(item => item[valueField] === (values[name] || values))) ||
     value ||
     ''
+
+
+  const onBlur = (e, HighlightedOption) => {
+    if (HighlightedOption) {
+      rest.onChange('', HighlightedOption)
+    } else if (!values[name] && finalItemsListRef.current?.[0]) {
+      selectFirstOption()
+    }
+  }
+
+  const selectFirstOption = () => {
+    if (finalItemsListRef.current?.[0]) {
+      rest.onChange('', finalItemsListRef.current[0])
+    }
+  }
 
   return (
     <CustomComboBox
@@ -90,6 +113,7 @@ export default function ResourceComboBox({
         store: finalItemsList,
         valueField,
         value: _value,
+        onBlur,
         isLoading
       }}
     />

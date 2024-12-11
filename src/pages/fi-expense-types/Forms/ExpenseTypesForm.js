@@ -69,6 +69,7 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalid
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      masterSource: MasterSource.ExpenseType,
       disabled: !editMode
     }
   ]
@@ -81,7 +82,6 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalid
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      masterSource={MasterSource.ExpenseType}
     >
       <VertLayout>
         <Grow>
