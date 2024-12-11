@@ -20,14 +20,17 @@ export const SCRepository = {
     get: service + 'getSIT',
     del: service + 'delSIT',
     reopen: service + 'reopenSIT',
-    end: service + 'endSIT',
+    end: service + 'endSIT'
   },
   Controller: {
-    qry: service + 'qryCRL',
+    qry: service + 'qryCRL'
   },
-  PHY: {
+  StockCountControllerTab: {
     qry: service + 'qryPHY',
     set2: service + 'set2PHY',
+    set: service + 'setPHY',
+    get: service + 'getPHY',
+    del: service + 'delPHY'
   },
   StockCount: {
     page: service + 'pageHDR',
@@ -57,5 +60,15 @@ export const SCRepository = {
     set: service + 'setITM',
     get: service + 'getITM',
     del: service + 'delITM'
+  },
+  StockCountSerialSum: {
+    qry: service + 'qrySRS'
+  },
+  StockCountItemDetail: {
+    qry: service + 'qryITD',
+    set: service + 'setITD',
+    get: service + 'getITD',
+    del: service + 'delITD',
+    set2: service + 'set2ITD'
   }
 }
