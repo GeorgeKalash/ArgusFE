@@ -168,6 +168,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       delete copy.items
       copy.date = formatDateToApi(copy.date)
       copy.dueDate = formatDateToApi(copy.dueDate)
+      copy.miscAmount = copy.miscAmount || 0
 
       if (!obj.rateCalcMethod) delete copy.rateCalcMethod
 
@@ -422,7 +423,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       name: 'tax'
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.markdown,
       name: 'mdAmount',
       updateOn: 'blur',
@@ -764,7 +765,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     return res?.record
   }
 
-  const handleCycleButtonClick = () => {
+  const handleButtonClick = () => {
     setReCal(true)
     let currentTdAmount
     let currentPctAmount
@@ -1544,9 +1545,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     value={formik.values.currentDiscount}
                     displayCycleButton={true}
                     readOnly={isClosed}
+                    isPercentIcon={cycleButtonState.text === '%' ? true : false}
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
-                    handleCycleButtonClick={handleCycleButtonClick}
+                    handleButtonClick={handleButtonClick}
+                    ShowDiscountIcons={true}
                     onChange={e => {
                       let discount = Number(e.target.value)
                       if (formik.values.tdType == 1) {
@@ -1589,7 +1592,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     name='miscAmount'
                     maxAccess={maxAccess}
                     label={labels.misc}
-                    value={formik.values.miscAmount}
+                    value={formik.values.miscAmount || 0}
                     decimalScale={2}
                     readOnly={isClosed}
                     onChange={e => formik.setFieldValue('miscAmount', e.target.value)}
