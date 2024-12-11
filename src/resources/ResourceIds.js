@@ -317,6 +317,7 @@ export const ResourceIds = {
   ExpenseTypes: 52102,
   GlEoyClosing: 30502,
   BusinessRules: 20114,
+  OpenInwardTransfers: 36327,
   CaDtd: 33103,
   IVPhysicalCountItemDetails: 44205
 }
