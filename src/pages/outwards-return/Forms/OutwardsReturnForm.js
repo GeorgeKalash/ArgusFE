@@ -336,8 +336,8 @@ export default function OutwardsReturnForm({
 
   const getExRateChangeStatus = (beforeAmount, afterAmount) => {
     if (beforeAmount === afterAmount) formik.setFieldValue('exRateChangeStatus', '1')
-    if (beforeAmount < afterAmount) formik.setFieldValue('exRateChangeStatus', '2')
-    if (beforeAmount > afterAmount) formik.setFieldValue('exRateChangeStatus', '3')
+    if (beforeAmount < afterAmount) formik.setFieldValue('exRateChangeStatus', '3')
+    if (beforeAmount > afterAmount) formik.setFieldValue('exRateChangeStatus', '2')
   }
 
   return (
@@ -468,8 +468,6 @@ export default function OutwardsReturnForm({
 
                         formik.setFieldValue('ad_exRate', data?.rate)
                         formik.setFieldValue('ad_rateCalcMethod', data?.rateCalcMethod)
-
-                        getExRateChangeStatus(owtLcAmount, derivedLcAmount)
                       }}
                       error={formik.touched.owt_reference && Boolean(formik.errors.owt_reference)}
                       maxAccess={maxAccess}
@@ -670,8 +668,10 @@ export default function OutwardsReturnForm({
                             (formik?.values?.tdAmount || 0)
 
                           formik.setFieldValue('lcAmount', amount)
+                          getExRateChangeStatus(formik?.values?.amount, amount)
                         } else if (newValue?.key === '3') {
                           formik.setFieldValue('lcAmount', originalLcAmount)
+                          getExRateChangeStatus(formik?.values?.amount, originalLcAmount)
                         }
                       }}
                       error={formik.touched.requestedBy && Boolean(formik.errors.requestedBy)}
@@ -690,11 +690,11 @@ export default function OutwardsReturnForm({
                       }}
                       defaultIndex={formik?.values?.interfaceId && 0}
                       required
-                      readOnly= {(
-                        !recordId || 
-                        (isOpenOutwards && !!formik.values.interfaceId) || 
+                      readOnly={
+                        !recordId ||
+                        (isOpenOutwards && !!formik.values.interfaceId) ||
                         (!isOpenOutwards && (isPosted || isClosed || !!formik.values.interfaceId))
-                      )}                      
+                      }
                       maxAccess={maxAccess}
                       error={formik.touched.settlementStatus && Boolean(formik.errors.settlementStatus)}
                     />
