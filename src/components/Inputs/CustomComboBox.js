@@ -1,7 +1,7 @@
 import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@mui/material'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
 
@@ -34,6 +34,7 @@ const CustomComboBox = ({
   fetchData,
   refresh = true,
   isLoading,
+  onBlur = () => {},
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
@@ -54,11 +55,31 @@ const CustomComboBox = ({
       onChange(store?.[defaultIndex])
     }
   }, [defaultIndex])
+  const autocompleteRef = useRef(null)
+
+  const valueHighlightedOption = useRef(null)
+
+  const selectFirstValue = useRef(null)
+
+  useEffect(() => {
+    function handleBlur(event) {
+      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
+        selectFirstValue.current = 'click'
+      }
+    }
+
+    document.addEventListener('mousedown', handleBlur)
+
+    return () => {
+      document.removeEventListener('mousedown', handleBlur)
+    }
+  }, [])
 
   return _hidden ? (
     <></>
   ) : (
     <Autocomplete
+      ref={autocompleteRef}
       name={name}
       value={value}
       size={size}
@@ -109,6 +130,12 @@ const CustomComboBox = ({
       freeSolo={_readOnly}
       disabled={_disabled}
       required={_required}
+      onFocus={e => {
+        selectFirstValue.current = ''
+      }}
+      onHighlightChange={(event, newValue) => {
+        valueHighlightedOption.current = newValue
+      }}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
       renderOption={(props, option) => {
         if (columnsInDropDown && columnsInDropDown.length > 0) {
@@ -159,6 +186,12 @@ const CustomComboBox = ({
           onMouseLeave={() => setHover(false)}
           error={error}
           helperText={helperText}
+          onBlur={e => {
+            const listbox = document.querySelector('[role="listbox"]')
+            if (selectFirstValue.current !== 'click' && listbox && listbox.offsetHeight > 0) {
+              onBlur(e, valueHighlightedOption?.current)
+            }
+          }}
           InputProps={{
             ...params.InputProps,
             endAdornment: !_readOnly && (

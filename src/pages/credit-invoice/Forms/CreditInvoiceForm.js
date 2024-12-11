@@ -521,28 +521,25 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     {
       component: 'resourcecombobox',
       label: _labels.currency,
-      name: 'currencyId',
+      name: 'currencyRef',
       props: {
-        endpointId: RemittanceSettingsRepository.CorrespondentCurrency.qry,
-        parameters: `_corId=${formik.values.corId}`,
-        displayField: 'currencyRef',
-        valueField: 'currencyId',
-        columnsInDropDown: [
-          { key: 'currencyRef', value: 'Reference' },
-          { key: 'currencyName', value: 'Name' }
-        ],
+        endpointId: SystemRepository.Currency.qry,
+        displayField: 'reference',
+        valueField: 'recordId',
         mapping: [
-          { from: 'currencyId', to: 'currencyId' },
-          { from: 'currencyRef', to: 'currencyRef' },
-          { from: 'currencyName', to: 'currencyName' },
-          { from: 'goc', to: 'goc' }
+          { from: 'recordId', to: 'currencyId' },
+          { from: 'reference', to: 'currencyRef' },
+          { from: 'name', to: 'currencyName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
       },
       updateOn: 'blur',
       widthDropDown: '400',
       async onChange({ row: { update, oldRow, newRow } }) {
-        console.log(newRow, 'newRow')
         if (!newRow?.currencyId) {
           return
         }
@@ -588,6 +585,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
           update({ baseAmount: getFormattedNumber(curToBase.toFixed(2)) })
         }
 
+        const gocPresent = await getCorCurrencyInfo(newRow?.currencyId)
         update({
           currencyId: exchange?.currencyId,
           currencyName: exchange?.currencyName,
@@ -596,7 +594,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
           rateCalcMethod: exchange?.rateCalcMethod,
           minRate: exchange?.minRate,
           maxRate: exchange?.maxRate,
-          goc: newRow?.goc
+          goc: gocPresent?.goc || false
         })
       }
     },
@@ -740,6 +738,14 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       width: 130
     }
   ]
+  async function getCorCurrencyInfo(currencyId) {
+    const res = await getRequest({
+      extension: RemittanceSettingsRepository.CorrespondentCurrency.get,
+      parameters: `_corId=${formik.values.corId}&_currencyId=${currencyId}`
+    })
+
+    return res?.record
+  }
 
   useEffect(() => {
     ;(async function () {

@@ -1,4 +1,6 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
+import PercentIcon from '@mui/icons-material/Percent'
+import PinIcon from '@mui/icons-material/Pin'
 import { NumericFormat } from 'react-number-format'
 import { Button, IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
@@ -29,7 +31,7 @@ const CustomNumberField = ({
   allowNegative = true,
   arrow = false,
   displayCycleButton = false,
-  handleCycleButtonClick,
+  handleButtonClick,
   cycleButtonLabel = '',
   ...props
 }) => {
@@ -100,6 +102,12 @@ const CustomNumberField = ({
     }
   }
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.select()
+    }
+  }, [])
+
   return _hidden ? (
     <></>
   ) : (
@@ -119,6 +127,8 @@ const CustomNumberField = ({
       required={_required}
       onInput={handleInput}
       InputProps={{
+        inputRef,
+        autoFocus: false,
         inputProps: {
           onFocus: handleFocus,
           min: min,
@@ -131,25 +141,11 @@ const CustomNumberField = ({
         readOnly: _readOnly,
         endAdornment: (!readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
           <InputAdornment position='end'>
-            {displayCycleButton && (
-              <Button
-                tabIndex={-1}
-                onClick={handleCycleButtonClick}
-                aria-label='cycle button'
-                sx={{
-                  backgroundColor: '#708090',
-                  color: 'white',
-                  padding: '7px 8px',
-                  minWidth: '40px',
-                  '&:hover': {
-                    backgroundColor: '#607D8B'
-                  }
-                }}
-              >
-                {cycleButtonLabel}
-              </Button>
+            {props.ShowDiscountIcons && (
+              <IconButton onClick={handleButtonClick}>
+                {props.isPercentIcon ? <PercentIcon /> : <PinIcon sx={{ minWidth: '40px', height: '70px' }} />}
+              </IconButton>
             )}
-
             {displayButtons && (
               <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
                 <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
