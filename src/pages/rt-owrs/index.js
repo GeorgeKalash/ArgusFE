@@ -148,7 +148,7 @@ export default function RtOutwardReturnSettlement() {
       flex: 1
     },
     {
-      field: 'owoRef',
+      field: 'owrRef',
       headerName: labels.outwardOrder,
       flex: 1
     },
