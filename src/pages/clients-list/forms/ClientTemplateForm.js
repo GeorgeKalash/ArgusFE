@@ -1354,7 +1354,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         variant='contained'
                         color='primary'
                         onClick={() => digitalIdConfirmation(1)}
-                        disabled={loading}
+                        disabled={loading || !allowEdit}
                       >
                         {labels.scanner}
                       </Button>
@@ -1364,7 +1364,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         variant='contained'
                         color='primary'
                         onClick={() => digitalIdConfirmation(2)}
-                        disabled={!formik.values.idNo || !formik.values.idtId || loading}
+                        disabled={!formik.values.idNo || !formik.values.idtId || loading || !allowEdit}
                       >
                         {labels.digitalId}
                       </Button>
@@ -1464,7 +1464,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         disabled={
                           !formik.values.idNo ||
                           !formik.values.cellPhone ||
-                          systemChecks?.some(item => item.checkId === 3504)
+                          systemChecks?.some(item => item.checkId === 3504) ||
+                          !allowEdit
                         }
                       >
                         {labels.fetch}
