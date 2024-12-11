@@ -110,10 +110,9 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         ]
       },
 
-      async onChange({ row: { update, oldRow, newRow } }) {
+      async onChange({ row: { update, newRow } }) {
         ref.current = currencies.filter(item => item?.countryId === newRow?.countryId)
         const _seqNo = newRow?.seqNo || maxSeqNo + 1
-        setRowSelectionModel(_seqNo)
         !newRow.seqNo && update({ seqNo: _seqNo })
       }
     },
@@ -268,7 +267,8 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
           currencyId: item.currencyId,
           countryId: item.countryId,
           dispersalId: item.dispersalId,
-          _seqNo: item.seqNo
+          _seqNo: item.seqNo,
+          rowSelectionSaved: true
         }))
     })
   }
@@ -294,7 +294,8 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
                   currencyId: '',
                   countryId: '',
                   dispersalId: '',
-                  _seqNo: null
+                  _seqNo: null,
+                  rowSelectionSaved: false
                 }))
               }
             }}
@@ -310,7 +311,8 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
                   currencyId: row.currencyId,
                   countryId: row.countryId,
                   dispersalId: row.dispersalId,
-                  _seqNo: row.seqNo
+                  _seqNo: row.seqNo,
+                  rowSelectionSaved: row?.saved || false
                 }))
                 setRowSelectionModel(row.seqNo)
                 ref.current = currencies.filter(item => item.countryId === row.countryId)

@@ -17,8 +17,8 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useState } from 'react'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
-const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
-  const { recordId: pId, countries, _seqNo } = store
+const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
+  const { recordId: pId, countries, _seqNo, rowSelectionSaved } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [commissionColumns, setCommissionColumns] = useState([])
@@ -70,6 +70,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
 
   const formik = useFormik({
     initialValues: {
+      seqNo: '',
       productLegs: [
         {
           id: 1,
@@ -126,73 +127,85 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
     setCommission(result)
 
     setCommissionColumns([...columns, ...result])
+
+    return 1
   }
 
   useEffect(() => {
-    getColumns()
-  }, [pId])
+    const fetchData = async () => {
+      if (commissionColumns?.length < 1) {
+        await getColumns()
+      }
+      if (_seqNo && active && rowSelectionSaved) {
+        getScheduleRange(_seqNo)
+      }
+    }
 
-  useEffect(() => {
-    _seqNo && getScheduleRange(_seqNo)
-  }, [_seqNo])
+    fetchData()
+  }, [_seqNo, active, rowSelectionSaved])
 
   const getScheduleRange = async () => {
-    const defaultParams = `_productId=${pId}&_seqNo=${_seqNo}`
-    const parameters = defaultParams
+    if (_seqNo !== formik.values.seqNo) {
+      formik.setFieldValue('seqNo', _seqNo)
+      const defaultParams = `_productId=${pId}&_seqNo=${_seqNo}`
+      const parameters = defaultParams
 
-    try {
-      const allCommissionFees = await getRequest({
-        extension: RemittanceSettingsRepository.ProductScheduleFees.qry, //qryPSF
-        parameters: `_productId=${pId}&_seqNo=${_seqNo}&_rangeSeqNo=${0}`
-      })
+      try {
+        const allCommissionFees = await getRequest({
+          extension: RemittanceSettingsRepository.ProductScheduleFees.qry, //qryPSF
+          parameters: `_productId=${pId}&_seqNo=${_seqNo}&_rangeSeqNo=${0}`
+        })
 
-      const res = await getRequest({
-        extension: RemittanceSettingsRepository.ProductScheduleRanges.qry,
-        parameters: parameters
-      })
+        const res = await getRequest({
+          extension: RemittanceSettingsRepository.ProductScheduleRanges.qry,
+          parameters: parameters
+        })
 
-      const productLegsPromises = res?.list?.map(async (item, index) => {
-        const commissionFees = await allCommissionFees?.list?.filter(value => value.rangeSeqNo === item.rangeSeqNo)
+        const productLegsPromises = res?.list?.map(async (item, index) => {
+          const commissionFees = await allCommissionFees?.list?.filter(value => value.rangeSeqNo === item.rangeSeqNo)
 
-        try {
-          const commissionFeesMap = commissionFees.reduce((acc, fee) => {
-            acc[fee?.commissionId] = fee?.commission
+          try {
+            const commissionFeesMap = commissionFees.reduce((acc, fee) => {
+              acc[fee?.commissionId] = fee?.commission
 
-            return acc
-          }, {})
+              return acc
+            }, {})
 
-          const rows = commission.map(commissionType => {
+            const rows = commission.map(commissionType => {
+              return {
+                [commissionType?.name]: commissionFeesMap[commissionType?.name] || ''
+              }
+            })
+
             return {
-              [commissionType?.name]: commissionFeesMap[commissionType?.name] || ''
+              id: index + 1,
+              saved: true,
+              ...item,
+              ...Object.assign({}, ...rows)
             }
-          })
-
-          return {
-            id: index + 1,
-            saved: true,
-            ...item,
-            ...Object.assign({}, ...rows)
+          } catch (error) {
+            return
           }
-        } catch (error) {
-          return
-        }
-      })
+        })
 
-      const productLegs = await Promise.all(productLegsPromises)
+        const productLegs = await Promise.all(productLegsPromises)
 
-      formik.setFieldValue('productLegs', productLegs)
-    } catch (error) {}
+        formik.setFieldValue('productLegs', productLegs)
+      } catch (error) {}
+    }
   }
 
   return (
-    store.currencyId && (
-      <FormShell
-        form={formik}
-        resourceId={ResourceIds.ProductMaster}
-        maxAccess={maxAccess}
-        editMode={editMode}
-        isCleared={false}
-      >
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.ProductMaster}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isCleared={false}
+      isSaved={!!rowSelectionSaved}
+      infoVisible={!!rowSelectionSaved}
+    >
+      {rowSelectionSaved && active && (
         <VertLayout>
           <Fixed>
             <Grid container xs={12} spacing={3}>
@@ -259,17 +272,19 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
               </Grid>
             </Grid>
           </Fixed>
-          <Grow key={_seqNo}>
-            <DataGrid
-              onChange={value => formik.setFieldValue('productLegs', value)}
-              value={formik.values.productLegs}
-              error={formik.errors.productLegs}
-              columns={commissionColumns}
-            />
-          </Grow>
+          {active && rowSelectionSaved && commissionColumns.length > 0 && (
+            <Grow key={active}>
+              <DataGrid
+                onChange={value => formik.setFieldValue('productLegs', value)}
+                value={formik.values.productLegs}
+                error={formik.errors.productLegs}
+                columns={commissionColumns}
+              />
+            </Grow>
+          )}
         </VertLayout>
-      </FormShell>
-    )
+      )}
+    </FormShell>
   )
 }
 
