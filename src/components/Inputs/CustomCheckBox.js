@@ -1,5 +1,5 @@
 import { FormControlLabel, Checkbox } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
 const CustomCheckBox = ({
@@ -19,6 +19,8 @@ const CustomCheckBox = ({
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
+  const _disabled = accessLevel === DISABLED || disabled
+
   const handleChange = event => {
     if (onChange) {
       onChange(event)
@@ -32,7 +34,7 @@ const CustomCheckBox = ({
           name={name}
           checked={value}
           onChange={handleChange}
-          disabled={readOnly || disabled}
+          disabled={readOnly || _disabled}
           inputProps={{ 'aria-label': label }}
           sx={{ '& .MuiSvgIcon-root': { fontSize: 17 } }}
         />

@@ -208,7 +208,6 @@ const CustomComboBox = ({
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
           error={error}
           helperText={helperText}
           onBlur={e => {
