@@ -2,7 +2,7 @@ import React from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import CustomTextField from 'src/components/Inputs/CustomTextField.js'
-import CustomComboBox from 'src/components/Inputs/CustomCombobox.js'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox.js'
 
 describe('First test', () => {
   it('should render custom text field', () => {
@@ -20,6 +20,7 @@ describe('First test', () => {
         error={false}
       />
     )
+    expect(screen.getByLabelText('Test Field')).toBeInTheDocument()
   })
 
   it('combobox should update value on select', async () => {

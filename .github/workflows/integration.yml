@@ -2,7 +2,6 @@ name: Integration Tests
 
 on:
   push:
-    # all branches
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
@@ -30,16 +29,16 @@ jobs:
       - name: Run Jest tests
         run: npm test
 
-      #   - name: Run Cypress tests
-      #     uses: cypress-io/github-action@v6
-      #     with:
-      #       build: npm run build
-      #       start: npm start
-      #       wait-on: 'http://localhost:3001'
-      #       browser: chrome
+      # - name: Run Cypress tests
+      #   uses: cypress-io/github-action@v6
+      #   with:
+      #     build: npm run build
+      #     start: npm start
+      #     wait-on: 'http://localhost:3001'
+      #     browser: chrome
 
-    #   - name: Upload test coverage
-    #     uses: actions/upload-artifact@v3
-    #     with:
-    #       name: coverage
-    #       path: coverage/
+      # - name: Upload test coverage
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: coverage
+      #     path: coverage/
