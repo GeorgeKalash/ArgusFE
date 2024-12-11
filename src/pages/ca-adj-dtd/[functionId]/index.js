@@ -45,7 +45,7 @@ const CaDocTypeDefaults = () => {
     refetch
   } = useResourceQuery({
     endpointId: CashBankRepository.DocumentTypeDefault.page,
-    datasetId: ResourceIds.FIDocTypeDefaults,
+    datasetId: ResourceIds.AdjDocumentTypeDefault,
 
     filter: {
       filterFn: fetchGridData,

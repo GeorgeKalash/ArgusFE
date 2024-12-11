@@ -54,16 +54,14 @@ export default function AdjDocTypeDefaultsForm({ labels, maxAccess, recordId, fu
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: CashBankRepository.DocumentTypeDefault.get,
-            parameters: `_dtId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: CashBankRepository.DocumentTypeDefault.get,
+          parameters: `_dtId=${recordId}`
+        })
 
-          formik.setValues({ ...res.record, recordId: recordId })
-        }
-      } catch (exception) {}
+        formik.setValues({ ...res.record, recordId: recordId })
+      }
     })()
   }, [])
 
@@ -108,8 +106,7 @@ export default function AdjDocTypeDefaultsForm({ labels, maxAccess, recordId, fu
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  const plantId = newValue?.recordId || ''
-                  formik.setFieldValue('plantId', plantId)
+                  formik.setFieldValue('plantId', newValue?.recordId || '')
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
