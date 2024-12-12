@@ -157,7 +157,7 @@ const RetailTrx = () => {
         labels: labels,
         recordId,
         access,
-        posId: posObj?.current?.posId,
+        posInfo: posObj?.current,
         functionId
       },
       width: 1330,
@@ -208,7 +208,6 @@ const RetailTrx = () => {
       await fetchPOSInfo()
     })()
   }, [])
-  console.log('check pos ', posObj)
 
   return (
     <VertLayout>

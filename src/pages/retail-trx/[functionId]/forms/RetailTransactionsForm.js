@@ -45,7 +45,7 @@ import NormalDialog from 'src/components/Shared/NormalDialog'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 
-export default function RetailTransactionsForm({ labels, posId, access, recordId, functionId, window }) {
+export default function RetailTransactionsForm({ labels, posUser, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -67,7 +67,7 @@ export default function RetailTransactionsForm({ labels, posId, access, recordId
       recordId: recordId || null,
       dtId: documentType?.dtId,
       functionId: functionId,
-      posId: parseInt(posId),
+      posId: parseInt(posUser?.posId),
       currencyId: null,
       plantId: null,
       siteId: null,
@@ -994,52 +994,6 @@ export default function RetailTransactionsForm({ labels, posId, access, recordId
     await fillForm(saTrxpack)
   }
 
-  useEffect(() => {}, [address])
-
-  useEffect(() => {
-    formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
-    formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
-    formik.setFieldValue('header.volume', parseFloat(totalVolume).toFixed(2))
-    formik.setFieldValue('header.amount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('header.baseAmount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
-    formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
-  }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
-
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('header.dtId', documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
-  useEffect(() => {
-    if (reCal) {
-      let currentTdAmount = (parseFloat(formik.values.header.tdPct) * parseFloat(subtotal)) / 100
-      recalcGridVat(
-        formik.values.header.tdType,
-        formik.values.header.tdPct,
-        currentTdAmount,
-        formik.values.header.currentDiscount
-      )
-    }
-  }, [subtotal])
-
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const transactionPack = await getSalesTransactionPack(recordId)
-        await fillForm(transactionPack)
-      } else {
-        await getDefaultsData()
-        await getUserDefaultsData()
-      }
-    })()
-  }, [])
-
-  useEffect(() => {
-    defaultsDataState && setDefaultFields()
-  }, [defaultsDataState])
-
   async function getDefaultsData() {
     const myObject = {}
 
@@ -1124,6 +1078,95 @@ export default function RetailTransactionsForm({ labels, posId, access, recordId
       title: labels.address
     })
   }
+  async function getPosInfo() {
+    if (!posUser?.posId) return
+
+    return await getRequest({
+      extension: PointofSaleRepository.PointOfSales.get,
+      parameters: `_recordId=${posUser?.posId}`
+    })
+  }
+
+  async function setDefaults(posInfo) {
+    let isVat = false
+    let tax = false
+    switch (functionId) {
+      case SystemFunction.RetailInvoice:
+        isVat = posUser?.applyTaxIVC
+        tax = pos?.applyTaxIVC ? posUser?.taxId : null
+        break
+      case SystemFunction.RetailReturn:
+        isVat = posUser?.applyTaxRET
+        tax = pos?.applyTaxRET ? posUser?.taxId : null
+        break
+      case SystemFunction.RetailPurchase:
+        isVat = posUser?.applyTaxPUR
+        tax = pos?.applyTaxPUR ? posUser?.taxId : null
+        break
+      default:
+        break
+    }
+    formik.setFieldValue('header.isVatable', isVat)
+    formik.setFieldValue('header.taxId', tax)
+    formik.setFieldValue('header.currencyId', posInfo?.currencyId)
+    formik.setFieldValue('header.currencyRef', posInfo?.currencyRef)
+    formik.setFieldValue('header.plantId', posInfo?.plantId)
+    formik.setFieldValue('header.plantName', posInfo?.plantName)
+    formik.setFieldValue('header.siteId', posInfo?.siteId)
+    formik.setFieldValue('header.siteName', posInfo?.siteName)
+    formik.setFieldValue('header.posRef', posInfo?.reference)
+    formik.setFieldValue('header.plId', posInfo?.plId)
+    formik.setFieldValue('header.dtId', posInfo?.dtId)
+    formik.setFieldValue('header.spId', posUser?.spId)
+  }
+
+  useEffect(() => {}, [address])
+
+  useEffect(() => {
+    formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
+    formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
+    formik.setFieldValue('header.volume', parseFloat(totalVolume).toFixed(2))
+    formik.setFieldValue('header.amount', parseFloat(amount).toFixed(2))
+    formik.setFieldValue('header.baseAmount', parseFloat(amount).toFixed(2))
+    formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
+    formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
+  }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
+
+  useEffect(() => {
+    if (documentType?.dtId) {
+      formik.setFieldValue('header.dtId', documentType.dtId)
+    }
+  }, [documentType?.dtId])
+
+  useEffect(() => {
+    if (reCal) {
+      let currentTdAmount = (parseFloat(formik.values.header.tdPct) * parseFloat(subtotal)) / 100
+      recalcGridVat(
+        formik.values.header.tdType,
+        formik.values.header.tdPct,
+        currentTdAmount,
+        formik.values.header.currentDiscount
+      )
+    }
+  }, [subtotal])
+
+  useEffect(() => {
+    ;(async function () {
+      if (recordId) {
+        const transactionPack = await getSalesTransactionPack(recordId)
+        await fillForm(transactionPack)
+      } else {
+        await getDefaultsData()
+        await getUserDefaultsData()
+        const res = await getPosInfo()
+        await setDefaults(res?.record)
+      }
+    })()
+  }, [])
+
+  useEffect(() => {
+    defaultsDataState && setDefaultFields()
+  }, [defaultsDataState])
 
   return (
     <FormShell
