@@ -709,8 +709,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     formik.setFieldValue('billToAddressId', res?.record?.billAddressId)
     const shipAdd = await getAddress(res?.record?.shipAddressId)
     const billAdd = await getAddress(res?.record?.billAddressId)
-    formik.setFieldValue('shipAddress', shipAdd)
-    formik.setFieldValue('billAddress', billAdd)
+  
+    formik.setFieldValue('shipAddress', shipAdd || '')
+    formik.setFieldValue('billAddress', billAdd || '')
   }
 
   async function getItemPhysProp(itemId) {
