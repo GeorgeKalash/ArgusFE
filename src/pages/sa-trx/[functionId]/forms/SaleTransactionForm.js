@@ -682,21 +682,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     invalidate()
   }
 
-  function openUnpostConfirmation(obj) {
-    stack({
-      Component: StrictUnpostConfirmation,
-      props: {
-        action() {
-          onUnpost(obj)
-        }
-      },
-      width: 500,
-      height: 300,
-      expandable: false,
-      title: platformLabels.UnpostConfirmation
-    })
-  }
-
   const actions = [
     {
       key: 'RecordRemarks',
@@ -736,13 +721,14 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       disabled: !editMode
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: isPosted,
-      onClick: () => openUnpostConfirmation(formik.values),
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
       disabled: !isPosted
     },
     {
-      key: 'Unpost',
+      key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode
@@ -1543,7 +1529,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                 xs={12}
                 direction='row'
                 spacing={2}
-                sx={{ overflowX: 'auto', flexWrap: 'nowrap', pl: '8px' }}
+                sx={{ overflowX: 'auto', flexWrap: 'nowrap', pl: '8px', pt: '3px' }}
               >
                 <Grid item xs={4}>
                   <CustomTextField
@@ -1807,7 +1793,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
               spacing={2}
               sx={{ overflow: 'hidden', flexWrap: 'nowrap', pt: '5px' }}
             >
-              <Grid container item xs={6} direction='column' spacing={1} sx={{ px: 2, mt: 1 }}>
+              <Grid container item xs={6} direction='column' spacing={2} sx={{ px: 2, mt: 1 }}>
                 <Grid item>
                   <CustomNumberField name='qty' maxAccess={maxAccess} label={labels.totQty} value={totalQty} readOnly />
                 </Grid>
@@ -1840,7 +1826,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                 </Grid>
               </Grid>
 
-              <Grid container item xs={6} direction='column' spacing={1} sx={{ px: 2, mt: 1 }}>
+              <Grid container item xs={6} direction='column' spacing={2} sx={{ px: 2, mt: 1 }}>
                 <Grid item>
                   <CustomNumberField
                     name='subTotal'
