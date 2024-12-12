@@ -387,7 +387,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           if (!newRow.itemId) return
           const itemPhysProp = await getItemPhysProp(newRow.itemId)
           const itemInfo = await getItem(newRow.itemId)
-          const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
+          const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+          const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, filteredMeasurements?.[0]?.recordId)
           const weight = parseFloat(itemPhysProp?.weight || 0).toFixed(2)
           const metalPurity = itemPhysProp?.metalPurity ?? 0
           const isMetal = itemPhysProp?.isMetal ?? false
@@ -438,7 +439,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
             rowTaxDetails = details
           }
 
-          const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
           if (parseFloat(unitPrice) < parseFloat(minPrice)) {
             ShowMinPriceValueErrorMessage(minPrice, unitPrice)
           }
@@ -530,6 +530,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
+          const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, newRow?.muId)
           const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
           const qtyInBase = newRow?.qty * filteredItems?.muQty
 
@@ -1041,10 +1042,10 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     return res?.list
   }
 
-  async function getItemConvertPrice(itemId) {
+  async function getItemConvertPrice(itemId, muId) {
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
-      parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}`
+      parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}&_muId=${muId}`
     })
 
     return res?.record
