@@ -318,5 +318,6 @@ export const ResourceIds = {
   GlEoyClosing: 30502,
   BusinessRules: 20114,
   CaDtd: 33103,
-  IVPhysicalCountItemDetails: 44205
+  IVPhysicalCountItemDetails: 44205,
+  RawMaterialCategory: 42123
 }
