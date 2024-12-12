@@ -14,15 +14,16 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
-export default function SegmentForm({ labels, obj, maxAccess }) {
-  const [editMode, setEditMode] = useState(false)
+export default function SegmentForm({ labels, obj, maxAccess, formikSegmentId, fetchGridData }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.City.page
+    endpointId: GeneralLedgerRepository.Segments.qry
   })
+
+  console.log(formikSegmentId, 'ssss')
 
   const { formik } = useForm({
     initialValues: {
@@ -39,25 +40,27 @@ export default function SegmentForm({ labels, obj, maxAccess }) {
       reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      const segmentId = obj.segmentId
+      if (!obj.segmentId) {
+        obj.segmentId = formikSegmentId
+      }
 
-      const response = await postRequest({
-        extension: SystemRepository.City.set,
+      await postRequest({
+        extension: GeneralLedgerRepository.Segments.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      if (!obj.segmentId) {
         toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          segmentId: obj.segmentId
-        })
-      } else toast.success(platformLabels.Edited)
-      setEditMode(true)
+        formik.setValues(obj)
+      } else {
+        toast.success(platformLabels.Edited)
+      }
 
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.segmentId
 
   useEffect(() => {
     ;(async function () {
@@ -73,10 +76,30 @@ export default function SegmentForm({ labels, obj, maxAccess }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.Segments} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.Segments}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isCleared={false}
+      infoVisible={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && formik.errors.reference}
+              />
+            </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'
@@ -87,18 +110,6 @@ export default function SegmentForm({ labels, obj, maxAccess }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && formik.errors.name}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='reference'
-                label={labels.reference}
-                value={formik.values.reference}
-                required
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && formik.errors.reference}
               />
             </Grid>
           </Grid>

@@ -16,11 +16,13 @@ import { Grid } from '@mui/material'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import SegmentForm from './form/SegmentForm'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 const Segments = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
+  const [store, setStore] = useState([])
 
   const { stack } = useWindow()
 
@@ -66,13 +68,13 @@ const Segments = () => {
 
   const columns = [
     {
-      field: 'name',
-      headerName: _labels.segment,
+      field: 'reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'name',
+      headerName: _labels.segment,
       flex: 1
     }
   ]
@@ -102,11 +104,13 @@ const Segments = () => {
       props: {
         labels: _labels,
         obj,
-        maxAccess: access
+        maxAccess: access,
+        formikSegmentId: formik.values.segmentId,
+        fetchGridData
       },
       width: 500,
       height: 460,
-      title: _labels.cities
+      title: _labels.segments
     })
   }
 
@@ -117,9 +121,27 @@ const Segments = () => {
         parameters: '_filter=GLACSeg'
       })
 
-      console.log(res, 'segggggggggg')
+      if (res && res.list) {
+        const filteredList = res.list
+          .filter(item => item.key.startsWith('GLACSegName') && item.value !== null)
+          .map(item => {
+            const segKey = item.key.replace('Name', '')
+            const matchingSeg = res.list.find(seg => seg.key === segKey && seg.value !== null)
+            if (matchingSeg) {
+              return {
+                key: item.value,
+                value: matchingSeg.value
+              }
+            }
+
+            return null
+          })
+          .filter(Boolean)
+
+        setStore(filteredList)
+      }
     })()
-  }, [formik.values])
+  }, [])
 
   return (
     <VertLayout>
@@ -130,21 +152,22 @@ const Segments = () => {
           labels={_labels}
           middleSection={
             <Grid item sx={{ display: 'flex', mr: 2 }}>
-              <ResourceComboBox
+              <CustomComboBox
                 endpointId={SystemRepository.Defaults.qry}
                 parameters={`_filter=GLACSeg`}
                 sx={{ width: 450 }}
                 name='segmentName'
                 label={_labels.segment}
                 valueField='key'
-                displayField='value'
-                values={formik.values}
+                displayField='key'
+                store={store}
+                value={formik.values.segmentName}
+                required
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('segmentName', newValue ? newValue.key : 0)
-                  formik.setFieldValue('segmentId', newValue ? newValue.value : 0)
+                  formik.setFieldValue('segmentName', newValue?.key)
+                  formik.setFieldValue('segmentId', newValue?.value)
                 }}
-                maxAccess={access}
-                filter={item => item.value !== ''}
+                error={!formik.values.segmentName}
               />
             </Grid>
           }
