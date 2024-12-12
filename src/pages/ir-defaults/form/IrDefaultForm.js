@@ -10,6 +10,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
@@ -32,9 +33,20 @@ const IrDefaultForm = ({ _labels, access }) => {
     formik.setFieldValue('recordId', 'N/A')
   }
 
-  const { formik } = useForm({
+  const { formik, setFieldValidation } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
+    // validationSchema: yup.object().shape({
+    //   ir_amcShortTerm: yup
+    //     .number()
+    //     .nullable()
+    //     .test(function (value) {
+    //       const { ir_amcLongTerm } = this.parent
+
+    //       return value == null || ir_amcLongTerm == null || value <= ir_amcLongTerm
+    //     }),
+    //   ir_amcLongTerm: yup.number().nullable()
+    // }),
     initialValues: { ir_amcShortTerm: null, ir_amcLongTerm: null, ir_tfr_DocTypeId: null, recordId: 'N/A' },
     onSubmit: values => {
       postDefault(values)
@@ -95,6 +107,8 @@ const IrDefaultForm = ({ _labels, access }) => {
                 name='ir_amcShortTerm'
                 onChange={formik.handleChange}
                 label={_labels.shortTerm}
+                setFieldValidation={setFieldValidation}
+                maxValue={formik.values.ir_amcLongTerm}
                 value={formik.values.ir_amcShortTerm}
                 error={formik.touched.ir_amcShortTerm && Boolean(formik.errors.ir_amcShortTerm)}
               />
@@ -105,6 +119,8 @@ const IrDefaultForm = ({ _labels, access }) => {
                 name='ir_amcLongTerm'
                 onChange={formik.handleChange}
                 label={_labels.longTerm}
+                setFieldValidation={setFieldValidation}
+                minValue={formik.values.ir_amcShortTerm}
                 value={formik.values.ir_amcLongTerm}
                 error={formik.touched.ir_amcLongTerm && Boolean(formik.errors.ir_amcLongTerm)}
               />
