@@ -1,5 +1,5 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid, FormControlLabel, Checkbox, Button } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
@@ -44,6 +44,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import NormalDialog from 'src/components/Shared/NormalDialog'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
+import { SystemChecks } from 'src/resources/SystemChecks'
 
 export default function RetailTransactionsForm({ labels, posUser, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -51,8 +52,6 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const [address, setAddress] = useState({})
-  const [defaultsDataState, setDefaultsDataState] = useState(null)
-  const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess } = useDocumentType({
@@ -63,8 +62,12 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
 
   const initialValues = {
     recordId: recordId || null,
+    singleCashPos: false,
+    defaultMCbaseCU: null,
     header: {
       recordId: recordId || null,
+      date: new Date(),
+      reference: null,
       dtId: documentType?.dtId,
       functionId: functionId,
       posId: parseInt(posUser?.posId),
@@ -499,6 +502,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       label: labels.cashbox,
       name: 'cashAccountRef',
       props: {
+        endpointId: PointofSaleRepository.CashAccount.qry,
+        parameters: `_posId= parseInt(posUser?.posId) `,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -731,8 +736,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       taxes: [...saTrxTaxes]
     })
 
-    const res = await getClientInfo(saTrxHeader.clientId)
-    getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
+    // const res = await getClientInfo(saTrxHeader.clientId)
+    // getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
     !formik.values.recordId &&
       lockRecord({
         recordId: saTrxHeader.recordId,
@@ -994,48 +999,32 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     await fillForm(saTrxpack)
   }
 
-  async function getDefaultsData() {
-    const myObject = {}
+  async function setMetalPriceOperations() {
+    const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
+    const defaultRateType = defaultsData?.list?.find(({ key }) => key === 'mc_defaultRTSA')
+    formik.setFieldValue('baseMetalCuId', parseInt(defaultMCbaseCU?.value))
+    if (!defaultRateType.value) {
+      stackError({
+        message: labels.RTSANoteDefined
+      })
 
-    const filteredList = defaultsData?.list?.filter(obj => {
-      return (
-        obj.key === 'baseMetalCuId' ||
-        obj.key === 'mc_defaultRTSA' ||
-        obj.key === 'plId' ||
-        obj.key === 'ptId' ||
-        obj.key === 'allowSalesNoLinesTrx' ||
-        obj.key === 'salesTD' ||
-        obj.key === 'sdpClientName' ||
-        obj.key === 'sdpItemName' ||
-        obj.key === 'currencyId'
-      )
-    })
-    filteredList.forEach(obj => {
-      myObject[obj.key] =
-        obj.value === 'True' || obj.value === 'False' ? obj.value : obj.value ? parseInt(obj.value) : null
-    })
-    setDefaultsDataState(myObject)
-
-    return myObject
+      return
+    }
+    const kgMetalPriceValue = await fillMetalPrice(defaultMCbaseCU?.value)
+    formik.setFieldValue('header.KGmetalPrice', kgMetalPriceValue || 0)
+    formik.setFieldValue('header.metalPrice', kgMetalPriceValue ? kgMetalPriceValue / 1000 : 0)
   }
+  async function fillMetalPrice(baseMetalCuId) {
+    if (!baseMetalCuId) return
 
-  async function getUserDefaultsData() {
-    const myObject = {}
-
-    const filteredList = userDefaultsData?.list?.filter(obj => {
-      return obj.key === 'plantId' || obj.key === 'siteId'
+    const res = await getRequest({
+      extension: MultiCurrencyRepository.Currency.get,
+      parameters: `_currencyId=${baseMetalCuId}&_date=${formatDateForGetApI(formik.values.header.date)}&_rateDivision=${
+        RateDivision.SALES
+      }`
     })
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setUserDefaultsDataState(myObject)
 
-    return myObject
-  }
-
-  const setDefaultFields = () => {
-    formik.setFieldValue('header.currencyId', defaultsDataState.currencyId)
-    formik.setFieldValue('header.plantId', userDefaultsDataState.plantId)
-    formik.setFieldValue('header.spId', userDefaultsDataState.spId)
-    formik.setFieldValue('header.siteId', userDefaultsDataState.siteId)
+    return res.record.exRate * 1000
   }
 
   const getResourceId = functionId => {
@@ -1078,12 +1067,20 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       title: labels.address
     })
   }
+
   async function getPosInfo() {
     if (!posUser?.posId) return
 
     return await getRequest({
       extension: PointofSaleRepository.PointOfSales.get,
-      parameters: `_recordId=${posUser?.posId}`
+      parameters: `_recordId=${parseInt(posUser?.posId)}`
+    })
+  }
+
+  async function checkSingleCashPos() {
+    return await getRequest({
+      extension: SystemRepository.SystemChecks.get,
+      parameters: `_checkId=${SystemChecks.SINGLE_CASH_POS}&_scopeId=1&_masterId=0`
     })
   }
 
@@ -1106,6 +1103,9 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       default:
         break
     }
+    const hasSingleCashPos = checkSingleCashPos?.record?.value
+    const countryId = defaultsData?.list?.find(({ key }) => key === 'country')
+    formik.setFieldValue('singleCashPos', hasSingleCashPos)
     formik.setFieldValue('header.isVatable', isVat)
     formik.setFieldValue('header.taxId', tax)
     formik.setFieldValue('header.currencyId', posInfo?.currencyId)
@@ -1118,6 +1118,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     formik.setFieldValue('header.plId', posInfo?.plId)
     formik.setFieldValue('header.dtId', posInfo?.dtId)
     formik.setFieldValue('header.spId', posUser?.spId)
+    formik.setFieldValue('header.countryId', countryId?.value)
   }
 
   useEffect(() => {}, [address])
@@ -1156,17 +1157,12 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
         const transactionPack = await getSalesTransactionPack(recordId)
         await fillForm(transactionPack)
       } else {
-        await getDefaultsData()
-        await getUserDefaultsData()
+        await setMetalPriceOperations()
         const res = await getPosInfo()
         await setDefaults(res?.record)
       }
     })()
   }, [])
-
-  useEffect(() => {
-    defaultsDataState && setDefaultFields()
-  }, [defaultsDataState])
 
   return (
     <FormShell
@@ -1193,9 +1189,9 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                         ? response?.record?.documentTypes
                         : response?.record?.documentTypes?.filter(item => item.activeStatus == 1)
                     }}
-                    parameters={`_posId=${posId}&_functionId=${functionId}`}
+                    parameters={`_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`}
                     name='dtId'
-                    readOnly={editMode}
+                    readOnly={formik?.values?.items?.some(item => item.sku)}
                     label={labels.documentType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -1243,7 +1239,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     reducer={response => {
                       return response?.record?.salesPeople?.filter(item => item.inActive === false)
                     }}
-                    parameters={`_posId=${posId}&_functionId=${functionId}`}
+                    parameters={`_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`}
                     name='spId'
                     readOnly={isPosted}
                     label={labels.salesPerson}
@@ -1270,6 +1266,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     value={formik.values.header.KGmetalPrice}
                     onChange={formik.handleChange}
                     readOnly={editMode}
+                    hidden={!formik.values.baseMetalCuId}
                     onClear={() => formik.setFieldValue('header.KGmetalPrice', '')}
                     error={formik.touched.KGmetalPrice && Boolean(formik.errors.KGmetalPrice)}
                   />
@@ -1318,7 +1315,9 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={SystemRepository.City.snapshot}
-                    parameters={{}}
+                    parameters={{
+                      _countryId: formik.values.header.countryId
+                    }}
                     valueField='name'
                     displayField='name'
                     name='cityId'
@@ -1431,7 +1430,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                         name='header.isVatable'
                         checked={formik.values?.header?.isVatable}
                         onChange={formik.handleChange}
-                        disabled
+                        disabled={formik?.values?.items?.some(item => item.sku)}
                       />
                     }
                     label={labels.vat}
