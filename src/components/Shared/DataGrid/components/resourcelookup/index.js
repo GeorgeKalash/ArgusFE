@@ -2,15 +2,15 @@ import edit from './edit'
 
 export default {
   view: props => {
-    let changes = props?.column?.props.mapping
-      ? props?.column?.props.mapping
+    let changes = props?.colDef?.props?.mapping
+      ? props?.colDef?.props?.mapping
           ?.map(({ from, to }) => ({
-            [from]: props.row && props.row.hasOwnProperty(to) ? props.row[to] : ''
+            [from]: props.data && props.data.hasOwnProperty(to) ? props.data[to] : ''
           }))
           .reduce((acc, obj) => ({ ...acc, ...obj }), {})
       : props?.value
 
-    return changes?.[props.column.props.displayField]
+    return changes?.[props?.colDef?.props?.displayField]
   },
   edit
 }

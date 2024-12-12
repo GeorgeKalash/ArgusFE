@@ -217,20 +217,18 @@ const CTExchangeRates = () => {
   })
 
   const postExchangeMaps = async (obj, currencyId, raCurrencyId, rateTypeId) => {
-    try {
-      const data = {
-        currencyId: currencyId,
-        rateTypeId: rateTypeId,
-        raCurrencyId: raCurrencyId,
-        exchangeMaps: obj.rows
-      }
+    const data = {
+      currencyId: currencyId,
+      rateTypeId: rateTypeId,
+      raCurrencyId: raCurrencyId,
+      exchangeMaps: obj.rows
+    }
 
-      await postRequest({
-        extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
-        record: JSON.stringify(data)
-      })
-      toast.success(platformLabels.Saved)
-    } catch (error) {}
+    await postRequest({
+      extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
+      record: JSON.stringify(data)
+    })
+    toast.success(platformLabels.Saved)
   }
 
   useEffect(() => {
@@ -266,46 +264,44 @@ const CTExchangeRates = () => {
   }
 
   const getExchangeRates = async (cuId, rateTypeId, raCurrencyId, formik) => {
-    try {
-      formik.setFieldValue('rows', [])
-      if (cuId && raCurrencyId && rateTypeId) {
-        const parameters = `_currencyId=${cuId}&_rateTypeId=${rateTypeId}&_raCurrencyId=${raCurrencyId}`
+    formik.setFieldValue('rows', [])
+    if (cuId && raCurrencyId && rateTypeId) {
+      const parameters = `_currencyId=${cuId}&_rateTypeId=${rateTypeId}&_raCurrencyId=${raCurrencyId}`
 
-        const values = await getRequest({
-          extension: CurrencyTradingSettingsRepository.ExchangeMap.qry,
-          parameters: parameters
-        })
+      const values = await getRequest({
+        extension: CurrencyTradingSettingsRepository.ExchangeMap.qry,
+        parameters: parameters
+      })
 
-        const valuesMap = values.list.reduce((acc, fee) => {
-          acc[fee.plantId] = fee
+      const valuesMap = values.list.reduce((acc, fee) => {
+        acc[fee.plantId] = fee
 
-          return acc
-        }, {})
+        return acc
+      }, {})
 
-        const rows = plantStore.map((plant, index) => {
-          const value = valuesMap[plant.recordId] || 0
+      const rows = plantStore.map((plant, index) => {
+        const value = valuesMap[plant.recordId] || 0
 
-          return {
-            id: index,
-            currencyId: cuId,
-            raCurrencyId: raCurrencyId,
-            rateTypeId: rateTypeId,
-            plantId: plant.recordId,
-            plantName: plant.name,
-            rateCalcMethod: value.rateCalcMethod,
-            rateCalcMethodName: value.rateCalcMethodName,
-            rate: value.rate,
-            minRate: value.minRate,
-            maxRate: value.maxRate
-          }
-        })
+        return {
+          id: index,
+          currencyId: cuId,
+          raCurrencyId: raCurrencyId,
+          rateTypeId: rateTypeId,
+          plantId: plant.recordId,
+          plantName: plant.name,
+          rateCalcMethod: value.rateCalcMethod,
+          rateCalcMethodName: value.rateCalcMethodName,
+          rate: value.rate,
+          minRate: value.minRate,
+          maxRate: value.maxRate
+        }
+      })
 
-        formik.setValues({
-          ...formik.values,
-          rows: rows
-        })
-      }
-    } catch (error) {}
+      formik.setValues({
+        ...formik.values,
+        rows: rows
+      })
+    }
   }
 
   const getDefaultBaseCurrencyId = () => {
@@ -313,11 +309,9 @@ const CTExchangeRates = () => {
     getRequest({
       extension: SystemRepository.Defaults.get,
       parameters: parameters
+    }).then(res => {
+      formik.setFieldValue('raCurrencyId', parseInt(res?.record?.value))
     })
-      .then(res => {
-        formik.setFieldValue('raCurrencyId', parseInt(res?.record?.value))
-      })
-      .catch(error => {})
   }
 
   const handleSubmit = () => {
@@ -355,14 +349,12 @@ const CTExchangeRates = () => {
     await postRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      if (res) {
+        getExchangeRates(formik.values.currencyId, RateTypeId, formik.values.raCurrencyId, form)
+        toast.success(platformLabels.Saved)
+      }
     })
-      .then(res => {
-        if (res) {
-          getExchangeRates(formik.values.currencyId, RateTypeId, formik.values.raCurrencyId, form)
-          toast.success(platformLabels.Saved)
-        }
-      })
-      .catch(error => {})
   }
 
   function openClear(form, RateTypeId) {

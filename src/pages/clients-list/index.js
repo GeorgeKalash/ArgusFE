@@ -117,7 +117,7 @@ const ClientsList = () => {
   const addClient = async () => {
     try {
       const plantId = await getPlantId()
-      if (plantId !== '') {
+      if (plantId) {
         openForm('', plantId)
       } else {
         stackError({
@@ -133,18 +133,12 @@ const ClientsList = () => {
       : null
     const parameters = `_userId=${userData && userData.userId}&_key=plantId`
 
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: parameters
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: parameters
+    })
 
-      if (res.record.value) {
-        return res.record.value
-      }
-
-      return ''
-    } catch (error) {}
+    return res?.record?.value
   }
 
   const editClient = obj => {

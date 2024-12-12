@@ -2,10 +2,10 @@ import { Icon } from '@iconify/react'
 import edit from './edit'
 
 export default {
-  view({ row, column, field }) {
+  view({ data, colDef: { field } }) {
     return (
       <>
-        {row?.[field] ? (
+        {data?.[field] ? (
           <Icon icon='mdi:check' style={{ fontSize: '28px', color: '#4eb558' }} />
         ) : (
           <Icon icon='mdi:close' style={{ fontSize: '28px', color: '#f44336' }} />

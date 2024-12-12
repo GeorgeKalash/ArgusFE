@@ -24,16 +24,33 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTimePicker from 'src/components/Inputs/CustomTimePicker'
 import dayjs from 'dayjs'
+import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
+import { useWindow } from 'src/windows'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DeliveryTrip,
     access,
     enabled: !recordId
   })
+
+  async function getDefaultData() {
+    const userKeys = ['plantId']
+
+    const plantIdDefault = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
+      if (userKeys.includes(key)) {
+        acc[key] = value ? parseInt(value) : null
+      }
+      
+      return acc
+    }, {})
+
+    formik.setFieldValue('plantId', parseInt(plantIdDefault?.plantId))
+  }
 
   const invalidate = useInvalidate({
     endpointId: DeliveryRepository.Trip.page
@@ -229,6 +246,18 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     await refetchForm(formik.values.recordId)
   }
 
+  const onUnpost = async () => {
+    await postRequest({
+      extension: DeliveryRepository.Trip.unpost,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(platformLabels.Unposted)
+    invalidate()
+
+    await refetchForm(formik.values.recordId)
+  }
+
   const onClose = async () => {
     const res = await postRequest({
       extension: DeliveryRepository.Trip.close,
@@ -255,6 +284,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
   useEffect(() => {
     ;(async function () {
+      getDefaultData()
       if (recordId) {
         await refetchForm(recordId)
       }
@@ -263,10 +293,17 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
   const actions = [
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode || !isClosed
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: isPosted || !editMode || !isClosed
+      disabled: !editMode || !isClosed
     },
     {
       key: 'Close',
@@ -281,6 +318,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       disabled: !isClosed || isPosted
     }
   ]
+
 
   const columns = [
     {
@@ -346,6 +384,21 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     }
   ]
 
+  async function previewBtnClicked() {
+    const data = { printStatus: 2, recordId: formik.values.recordId }
+
+    await postRequest({
+      extension: DeliveryRepository.TRP.flag,
+      record: JSON.stringify(data)
+    })
+
+    invalidate()
+  }
+
+  useEffect(() => {
+    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
+  }, [documentType?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.Trip}
@@ -353,6 +406,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
+      previewBtnClicked={previewBtnClicked}
       functionId={SystemFunction.DeliveryTrip}
       disabledSubmit={isPosted || isClosed}
       previewReport={editMode}

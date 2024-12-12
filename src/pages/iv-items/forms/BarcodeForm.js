@@ -37,16 +37,6 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
       flex: 1
     },
     {
-      field: 'scaleDescription',
-      headerName: labels.scaleDescription,
-      flex: 1
-    },
-    {
-      field: 'posDescription',
-      headerName: labels.posDescription,
-      flex: 1
-    },
-    {
       field: 'isInactive',
       headerName: labels.isInactive,
       flex: 1,
@@ -93,12 +83,13 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
       Component: BarcodesForm,
       props: {
         labels: _labels,
-        recordId: obj?.barcode,
+        recordId: obj?.recordId,
+        barcode: obj?.barcode,
         access: maxAccess,
         store,
         msId: store?._msId
       },
-      width: 600,
+      width: 750,
       height: 500,
       title: _labels.Barcodes
     })
@@ -142,6 +133,7 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
           rowId={'barcode'}
           onEdit={edit}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           pagination={false}

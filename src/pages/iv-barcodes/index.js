@@ -102,6 +102,16 @@ const IvBarcodes = () => {
       field: 'defaultQty',
       headerName: _labels.defaultQty,
       flex: 1
+    },
+    {
+      field: 'scaleDescription',
+      headerName: _labels.scaleDescription,
+      flex: 1
+    },
+    {
+      field: 'posDescription',
+      headerName: _labels.posDescription,
+      flex: 1
     }
   ]
 
@@ -114,11 +124,12 @@ const IvBarcodes = () => {
       Component: BarcodesForm,
       props: {
         labels: _labels,
-        recordId: obj?.barcode,
+        recordId: obj?.recordId,
+        barcode: obj?.barcode,
         msId: obj?.msId,
         maxAccess: access
       },
-      width: 600,
+      width: 750,
       height: 500,
       title: _labels.Barcodes
     })

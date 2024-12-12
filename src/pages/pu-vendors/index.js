@@ -100,7 +100,7 @@ const PuVendors = () => {
         maxAccess: access
       },
       width: 700,
-      height: 750,
+      height: 550,
       title: _labels?.vendor
     })
   }

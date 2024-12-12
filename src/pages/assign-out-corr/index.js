@@ -28,7 +28,7 @@ const OutwardsCorrespondent = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchWithFilter,
-    endpointId: RemittanceOutwardsRepository.OutwardsOrder.qry2,
+    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.qry2,
     datasetId: ResourceIds.CorrespondentOutwards
   })
 
@@ -63,11 +63,13 @@ const OutwardsCorrespondent = () => {
     },
     {
       field: 'fcAmount',
-      headerName: labels.fcAmount
+      headerName: labels.fcAmount,
+      type: 'number'
     },
     {
       field: 'amount',
-      headerName: labels.amount
+      headerName: labels.amount,
+      type: 'number'
     }
   ]
 
@@ -110,7 +112,7 @@ const OutwardsCorrespondent = () => {
       formatDate(formik.values.toDate) === '1-1-1970' ? '1-1-2050' : formatDate(formik.values.toDate)
 
     const res = await getRequest({
-      extension: RemittanceOutwardsRepository.OutwardsOrder.qry2,
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.qry2,
       parameters: `_countryId=${formik.values.countryId || 0}&_currencyId=${formik.values.currencyId || 0}&_corId=${
         formik.values.corId || 0
       }&_dispersalType=${formik.values.dispersalType || 0}&_fromAmount=${formik.values.fromAmount || 0}&_toAmount=${
@@ -140,8 +142,7 @@ const OutwardsCorrespondent = () => {
     {
       key: 'Correspondent',
       condition: true,
-      onClick: openCorrespondent,
-      disabled: !formik.values.countryId
+      onClick: openCorrespondent
     }
   ]
 
