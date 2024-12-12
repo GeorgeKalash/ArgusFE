@@ -54,6 +54,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const [isValidatePhoneClicked, setIsValidatePhoneClicked] = useState(false)
   const [imageUrl, setImageUrl] = useState(null)
   const [loading, setLoading] = useState(null)
+  const [idScanner, setIdScanner] = useState(null)
 
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
@@ -197,7 +198,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     if (idType) {
       formik.setFieldValue('idtId', idType.recordId)
       formik.setFieldValue('idtName', idType.name)
-      formik.setFieldValue('isResident', idType.isResident)
+      formik.setFieldValue('isResident', idType.isResident || false)
     }
   }
 
@@ -215,17 +216,17 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
   useEffect(() => {
     if (recordId) {
-      getClient(recordId)
+      getClient(recordId, true)
     }
   }, [])
 
-  function getClient(recordId) {
+  function getClient(recordId, requestImage = false) {
     const defaultParams = `_clientId=${recordId}`
     var parameters = defaultParams
     getRequest({
       extension: RTCLRepository.CtClientIndividual.get2,
       parameters: parameters
-    }).then(async res => {
+    }).then(res => {
       const obj = res?.record
 
       obj?.workAddressView && setAddress(obj?.workAddressView)
@@ -343,24 +344,30 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         cltRemReference: obj.clientRemittance?.reference
       })
 
+      setIdScanner(obj.clientMaster?.idScanMode)
       setEditMode(true)
 
       if (
+        requestImage === true &&
         obj.clientRemittance?.clientId &&
         obj.clientIDView?.idNo &&
         obj.clientIDView?.idtId &&
-        obj.clientMaster?.idScanMode
+        obj.clientMaster?.idScanMode &&
+        (obj.clientMaster?.idScanMode == 1 || obj.clientMaster?.idScanMode == 2)
       ) {
         setLoading(true)
         const parameters = `_number=${obj.clientIDView?.idNo}&_clientId=${obj.clientRemittance?.clientId}&_idType=${obj.clientIDView?.idtId}&_idScanMode=${obj.clientMaster?.idScanMode}`
-
-        const res = await getRequest({
+        getRequest({
           extension: CurrencyTradingSettingsRepository.PreviewImageID.get,
           parameters: parameters
         })
-
-        setLoading(false)
-        setImageUrl(res.record.imageContent ?? null)
+          .then(res => {
+            setImageUrl(res?.record?.imageContent ?? null)
+            setLoading(false)
+          })
+          .catch(() => {
+            setLoading(false)
+          })
       }
     })
   }
@@ -469,6 +476,14 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const isClosed = !(editMode && formik.values.status === -1 && !formik.values.otpVerified && formik.values.wip !== 2)
 
   const wip = formik.values.wip === 2
+
+  async function saveImage(obj) {
+    if (imageUrl)
+      return await postRequest({
+        extension: CurrencyTradingSettingsRepository.ScannerImage.set,
+        record: JSON.stringify({ base64Image: imageUrl, clientId: obj.clientId, numberID: obj.numberID })
+      })
+  }
 
   const postRtDefault = async obj => {
     const date = new Date()
@@ -624,10 +639,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         record: JSON.stringify(updateData)
       }).then(res => {
         if (res) {
-          postRequest({
-            extension: CurrencyTradingSettingsRepository.ScannerImage.set,
-            record: JSON.stringify({ base64Image: imageUrl, clientId: obj.clientId, numberID: obj.idNo })
-          })
+          if (imageUrl && obj?.idScanMode == 1 && idScanner !== obj?.idScanMode)
+            saveImage({ clientId: obj.clientId, numberID: obj.idNo })
 
           toast.success(platformLabels.Edited)
           otpForm()
@@ -650,6 +663,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         record: JSON.stringify(data)
       }).then(res => {
         if (res) {
+          if (imageUrl && obj?.idScanMode == 1) saveImage({ clientId: res.recordId, numberID: obj.idNo })
+
           toast.success(platformLabels.Submit)
           setOtpShow(true)
           getClient(res.recordId)
@@ -762,21 +777,20 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   }
 
   const handleClickDigitalId = confirmWindow => {
-    formik.setFieldValue('idScanMode', 2)
     const parameters = `_number=${formik.values.idNo}&_idType=${formik.values.idtId}`
     getRequest({
       extension: CurrencyTradingSettingsRepository.Absher.get,
       parameters
     }).then(res => {
+      formik.setFieldValue('idScanMode', 2)
       setImageUrl(res.record.imageContent)
       confirmWindow.close()
     })
   }
 
   const handleClickScanner = confirmWindow => {
-    formik.setFieldValue('idScanMode', 1)
-
     getRequestFullEndPoint({ endPoint: process.env.NEXT_PUBLIC_SCANNER_URL }).then(response => {
+      formik.setFieldValue('idScanMode', 1)
       setImageUrl(response?.imageContent)
       confirmWindow.close()
     })
@@ -997,7 +1011,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                             !formik?.values?.idtId ||
                             !formik?.values?.birthDate ||
                             !formik.values.idNo ||
-                            (editMode && new Date(formik.values?.expiryDate) >= new Date())
+                            (editMode && new Date(formik.values?.expiryDate) >= new Date()) ||
+                            (editMode && !allowEdit)
                               ? true
                               : false
                           }
@@ -1354,7 +1369,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         variant='contained'
                         color='primary'
                         onClick={() => digitalIdConfirmation(1)}
-                        disabled={loading || !allowEdit}
+                        disabled={loading || (editMode && !allowEdit)}
                       >
                         {labels.scanner}
                       </Button>
@@ -1364,7 +1379,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         variant='contained'
                         color='primary'
                         onClick={() => digitalIdConfirmation(2)}
-                        disabled={!formik.values.idNo || !formik.values.idtId || loading || !allowEdit}
+                        disabled={!formik.values.idNo || !formik.values.idtId || loading || (editMode && !allowEdit)}
                       >
                         {labels.digitalId}
                       </Button>
@@ -1381,7 +1396,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     />
                   </Grid>
                 )}
-                {loading && (
+                {loading && !imageUrl && (
                   <Grid item xs={12} textAlign={'center'} paddingTop={5}>
                     <CircularProgress />
                   </Grid>
@@ -1465,7 +1480,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           !formik.values.idNo ||
                           !formik.values.cellPhone ||
                           systemChecks?.some(item => item.checkId === 3504) ||
-                          !allowEdit
+                          (editMode && !allowEdit)
                         }
                       >
                         {labels.fetch}
