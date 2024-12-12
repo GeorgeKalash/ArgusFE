@@ -150,6 +150,7 @@ export default function OutwardsReturnForm({
 
         formik.setValues({
           ...res2.record,
+          cellPhone: res2.record.cellPhone,
           date: formatDateFromApi(res2.record.date)
         })
         !recordId && viewOTP(response.recordId)
