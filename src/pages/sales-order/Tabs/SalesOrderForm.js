@@ -387,6 +387,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       label: labels.baseprice,
       name: 'basePrice',
       updateOn: 'blur',
+      props: {
+        decimalScale: 5
+      },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
       }
