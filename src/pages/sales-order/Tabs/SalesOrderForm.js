@@ -168,6 +168,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       delete copy.items
       copy.date = formatDateToApi(copy.date)
       copy.dueDate = formatDateToApi(copy.dueDate)
+      copy.miscAmount = copy.miscAmount || 0
 
       if (!obj.rateCalcMethod) delete copy.rateCalcMethod
 
@@ -758,7 +759,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
-      parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${formik.values.currencyId}&_plId=${formik.values.plId}`
+      parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${formik.values.currencyId}&_plId=${formik.values.plId}&_muId=0`
     })
 
     return res?.record
@@ -1584,7 +1585,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     name='miscAmount'
                     maxAccess={maxAccess}
                     label={labels.misc}
-                    value={formik.values.miscAmount}
+                    value={formik.values.miscAmount || 0}
                     decimalScale={2}
                     readOnly={isClosed}
                     onChange={e => formik.setFieldValue('miscAmount', e.target.value)}
