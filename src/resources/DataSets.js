@@ -183,5 +183,5 @@ export const DataSets = {
   PLATFORM: 185,
   NATIONALITY: 3622,
   OUTER_GRID_DAYS: 187,
-  Activity: 190
+  MF_ACTIVITY: 190
 }

@@ -28,7 +28,7 @@ export default function WorkCentersForm({ labels, workCenterId, maxAccess }) {
     initialValues: {
       recordId: null,
       workCenterId: null,
-      activity: ''
+      activity: null
     },
     maxAccess,
     enableReinitialize: true,
@@ -97,14 +97,14 @@ export default function WorkCentersForm({ labels, workCenterId, maxAccess }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('workCenterId', newValue?.recordId || '')
+                  formik.setFieldValue('workCenterId', newValue?.recordId || null)
                 }}
                 error={formik.touched.workCenterId && formik.errors.workCenterId}
               />
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                datasetId={DataSets.Activity}
+                datasetId={DataSets.MF_ACTIVITY}
                 name='activity'
                 label={labels.activity}
                 required
@@ -113,7 +113,7 @@ export default function WorkCentersForm({ labels, workCenterId, maxAccess }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('activity', newValue?.key || '')
+                  formik.setFieldValue('activity', newValue?.key || null)
                 }}
                 error={formik.touched.activity && Boolean(formik.errors.activity)}
               />
