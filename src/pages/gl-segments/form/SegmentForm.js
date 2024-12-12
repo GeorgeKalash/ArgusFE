@@ -15,7 +15,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
 export default function SegmentForm({ labels, obj, maxAccess }) {
-  console.log(obj, 'objjjjjjjjjj')
   const [editMode, setEditMode] = useState(false)
   const { platformLabels } = useContext(ControlContext)
 
@@ -40,7 +39,7 @@ export default function SegmentForm({ labels, obj, maxAccess }) {
       reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
+      const segmentId = obj.segmentId
 
       const response = await postRequest({
         extension: SystemRepository.City.set,
@@ -51,7 +50,7 @@ export default function SegmentForm({ labels, obj, maxAccess }) {
         toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
-          recordId: response.recordId
+          segmentId: obj.segmentId
         })
       } else toast.success(platformLabels.Edited)
       setEditMode(true)

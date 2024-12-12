@@ -25,14 +25,18 @@ const Segments = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    if (formik.values.segmentId) {
+      const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-      extension: GeneralLedgerRepository.Segments.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_segmentId=${formik.values.segmentId || 0}`
-    })
+      const response = await getRequest({
+        extension: GeneralLedgerRepository.Segments.qry,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_segmentId=${formik.values.segmentId}`
+      })
 
-    setData(response || [])
+      setData(response)
+    } else {
+      setData([])
+    }
   }
 
   const {
@@ -106,6 +110,17 @@ const Segments = () => {
     })
   }
 
+  useEffect(() => {
+    ;(async function () {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.qry,
+        parameters: '_filter=GLACSeg'
+      })
+
+      console.log(res, 'segggggggggg')
+    })()
+  }, [formik.values])
+
   return (
     <VertLayout>
       <Fixed>
@@ -117,7 +132,7 @@ const Segments = () => {
             <Grid item sx={{ display: 'flex', mr: 2 }}>
               <ResourceComboBox
                 endpointId={SystemRepository.Defaults.qry}
-                parameters={`_filter=GLACSegName`}
+                parameters={`_filter=GLACSeg`}
                 sx={{ width: 450 }}
                 name='segmentName'
                 label={_labels.segment}
