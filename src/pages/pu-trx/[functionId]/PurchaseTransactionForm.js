@@ -422,7 +422,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)
-        checkMdAmountPct(newRow, update)
       }
     },
     {
@@ -472,7 +471,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
 
     getItemPriceRow(updateRow, newRow, DIRTYFIELD_MDTYPE, true)
-    checkMdAmountPct(newRow, updateRow)
   }
 
   async function onWorkFlowClick() {
@@ -1152,17 +1150,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   }
 
-  async function previewBtnClicked() {
-    const data = { printStatus: 2, recordId: formik.values.header.recordId }
-
-    await postRequest({
-      extension: PurchaseRepository.FlagTR,
-      record: JSON.stringify(data)
-    })
-
-    invalidate()
-  }
-
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
@@ -1170,7 +1157,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       functionId={functionId}
       maxAccess={maxAccess}
       previewReport={editMode}
-      previewBtnClicked={previewBtnClicked}
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
