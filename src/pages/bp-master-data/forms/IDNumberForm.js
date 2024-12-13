@@ -111,6 +111,7 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
             value={formik.values.rows}
             error={formik.errors.rows}
             columns={columns}
+            name='rows'
             allowDelete={false}
             allowAddNewLine={false}
           />
