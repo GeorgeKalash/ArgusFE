@@ -91,7 +91,7 @@ const CustomNumberField = ({
     }
   }
 
-  const displayButtons = (!readOnly || allowClear) && !props.disabled && (value || value === 0)
+  const displayButtons = (!_readOnly || allowClear) && !props.disabled && (value || value === 0)
 
   useEffect(() => {
     if (value) formatNumber({ target: { value } })
@@ -141,7 +141,7 @@ const CustomNumberField = ({
         },
         autoComplete: 'off',
         readOnly: _readOnly,
-        endAdornment: (!readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
+        endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
           <InputAdornment position='end'>
             {props.ShowDiscountIcons && (
               <IconButton onClick={handleButtonClick}>
