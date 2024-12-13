@@ -1121,7 +1121,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     sumExtended: parseFloat(subTotal),
     tdAmount: parseFloat(formik.values.header.tdAmount),
     net: 0,
-    miscAmount: miscValue
+    miscAmount: miscValue || 0
   })
 
   const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.header?.qty || 0
