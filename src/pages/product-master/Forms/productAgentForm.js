@@ -115,6 +115,7 @@ const ProductAgentForm = ({
       maxAccess={maxAccess}
       infoVisible={false}
       editMode={editMode}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>
@@ -129,17 +130,15 @@ const ProductAgentForm = ({
               { key: 'name', value: 'Name' }
             ]}
             values={_dispersalId}
-            required
             onChange={(event, newValue) => {
               setDispersalId({ dispersalId: newValue?.recordId })
               onDispersalSelection(newValue?.recordId)
             }}
             error={Boolean(formik.errors.dispersalId)}
-            helperText={formik.errors.dispersalId}
           />
           <DataGrid
             onChange={value => formik.setFieldValue('agents', value)}
-            value={formik.values.agents}
+            value={_dispersalId.dispersalId ? formik.values.agents : []}
             error={formik.errors.agents}
             columns={columns}
           />

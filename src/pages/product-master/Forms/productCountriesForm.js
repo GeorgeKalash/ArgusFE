@@ -87,6 +87,7 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
         endpointId: SystemRepository.Country.qry,
         valueField: 'recordId',
         displayField: 'reference',
+        displayFieldWidth: 2,
         mapping: [
           { from: 'name', to: 'countryName' },
           { from: 'reference', to: 'countryRef' },
@@ -192,6 +193,7 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
       maxAccess={maxAccess}
       infoVisible={false}
       editMode={editMode}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>

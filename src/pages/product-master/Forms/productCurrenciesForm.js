@@ -1,4 +1,3 @@
-import { Box } from '@mui/material'
 import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -68,14 +67,10 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
     await postRequest({
       extension: RemittanceSettingsRepository.ProductMonetaries.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      if (res) toast.success(platformLabels.Edited)
+      getMonetaries(pId)
     })
-      .then(res => {
-        if (res) toast.success(platformLabels.Edited)
-        getMonetaries(pId)
-      })
-      .catch(error => {
-        // setErrorMessage(error)
-      })
   }
 
   const columns = [
@@ -115,6 +110,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         endpointId: SystemRepository.Currency.qry,
         valueField: 'recordId',
         displayField: 'reference',
+        displayFieldWidth: 3,
         mapping: [
           { from: 'recordId', to: 'currencyId' },
           { from: 'reference', to: 'currencyRef' },
@@ -124,8 +120,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' },
           { key: 'flName', value: 'FlName' }
-        ],
-        displayFieldWidth: 1
+        ]
       }
     },
     {
@@ -145,7 +140,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         datasetId: DataSets.RT_Dispersal_Type,
         valueField: 'key',
         displayField: 'value',
-        displayFieldWidth: 2,
+        displayFieldWidth: 1,
         refresh: false,
         mapping: [
           { from: 'key', to: 'dispersalType' },
@@ -197,6 +192,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
       maxAccess={maxAccess}
       infoVisible={false}
       editMode={editMode}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>
