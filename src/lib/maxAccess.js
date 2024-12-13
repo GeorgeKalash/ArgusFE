@@ -7,7 +7,9 @@ const checkAccess = (name, maxAccess, required, readOnly, hidden, disabled) => {
   const { accessLevel } = (maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
   const _readOnly = maxAccess?.editMode
-    ? generalMaxAccess < TrxType.EDIT
+    ? generalMaxAccess < TrxType.EDIT ||
+      accessLevel === DISABLED ||
+      (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
     : generalMaxAccess < TrxType.ADD ||
       accessLevel === DISABLED ||
       (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
