@@ -109,8 +109,8 @@ const Segments = () => {
         fetchGridData
       },
       width: 500,
-      height: 460,
-      title: _labels.segments
+      height: 260,
+      title: _labels.segment
     })
   }
 
@@ -139,6 +139,11 @@ const Segments = () => {
           .filter(Boolean)
 
         setStore(filteredList)
+
+        if (filteredList.length > 0) {
+          formik.setFieldValue('segmentName', filteredList[0].key)
+          formik.setFieldValue('segmentId', filteredList[0].value)
+        }
       }
     })()
   }, [])
