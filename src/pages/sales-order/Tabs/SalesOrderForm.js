@@ -159,7 +159,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         yup.object({
           sku: yup.string().required(),
           itemName: yup.string().required(),
-          qty: yup.number().required().min(1)
+          qty: yup.number().required()
         })
       )
     }),
@@ -168,6 +168,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       delete copy.items
       copy.date = formatDateToApi(copy.date)
       copy.dueDate = formatDateToApi(copy.dueDate)
+      copy.miscAmount = copy.miscAmount || 0
 
       if (!obj.rateCalcMethod) delete copy.rateCalcMethod
 
@@ -386,6 +387,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       label: labels.baseprice,
       name: 'basePrice',
       updateOn: 'blur',
+      props: {
+        decimalScale: 5
+      },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
       }
@@ -422,7 +426,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       name: 'tax'
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.markdown,
       name: 'mdAmount',
       updateOn: 'blur',
@@ -758,13 +762,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
-      parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${formik.values.currencyId}&_plId=${formik.values.plId}`
+      parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${formik.values.currencyId}&_plId=${formik.values.plId}&_muId=0`
     })
 
     return res?.record
   }
 
-  const handleCycleButtonClick = () => {
+  const handleButtonClick = () => {
     setReCal(true)
     let currentTdAmount
     let currentPctAmount
@@ -803,11 +807,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType || 0,
       basePrice: parseFloat(newRow?.basePrice) || 0,
-      volume: newRow?.volume,
+      volume: parseFloat(newRow?.volume),
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
-      qty: newRow?.qty,
+      qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: parseFloat(newRow?.mdAmount),
       mdType: newRow?.mdType,
@@ -1544,9 +1548,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     value={formik.values.currentDiscount}
                     displayCycleButton={true}
                     readOnly={isClosed}
+                    isPercentIcon={cycleButtonState.text === '%' ? true : false}
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
-                    handleCycleButtonClick={handleCycleButtonClick}
+                    handleButtonClick={handleButtonClick}
+                    ShowDiscountIcons={true}
                     onChange={e => {
                       let discount = Number(e.target.value)
                       if (formik.values.tdType == 1) {
@@ -1575,7 +1581,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                         formik.setFieldValue('tdAmount', tdAmount)
                       }
 
-                      recalcGridVat(formik.values.tdType, tdPct, tdAmount, Number(e.target.value))
+                      recalcGridVat(formik.values.tdType, tdPct, tdAmount, discountAmount)
                     }}
                     onClear={() => {
                       formik.setFieldValue('tdAmount', 0)
@@ -1589,7 +1595,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     name='miscAmount'
                     maxAccess={maxAccess}
                     label={labels.misc}
-                    value={formik.values.miscAmount}
+                    value={formik.values.miscAmount || 0}
                     decimalScale={2}
                     readOnly={isClosed}
                     onChange={e => formik.setFieldValue('miscAmount', e.target.value)}

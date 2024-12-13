@@ -5,7 +5,8 @@ export const AccessControlRepository = {
   setBMK: service + 'setBMK',
   delBMK: service + 'delBMK',
   checkOTP: service + 'checkOTP ',
-
+  unlockRecord: service + 'unlockRecord ',
+  lockRecord: service + 'lockRecord',
   NotificationGroup: {
     qry: service + 'qryNOT',
     page: service + 'pageNOT',
@@ -81,12 +82,25 @@ export const AccessControlRepository = {
     set: service + 'setROW',
     del: service + 'delROW'
   },
+  Notification: {
+    qry: service + 'qryNTX',
+    set: service + 'setNTX',
+    get: service + 'getNTX',
+    del: service + 'delNTX',
+    post: service + 'postNTX',
+  },
   LockedRecords: {
     qry: service + 'qryLOK',
     del: service + 'delLOK',
+    get: service + 'getLOK',
     snapshot: service + 'snapshotLOK'
   },
   UserOTPQrcode: {
     secret: service + 'secretKEY'
+  },
+  PlantSupervisors: {
+    qry: service + 'qryPLS',
+    set2: service + 'set2PLS',
+    verify: service + 'verifyPLS'
   }
 }

@@ -38,5 +38,30 @@ export const DeliveryRepository = {
   },
   TRP: {
     flag: service + 'flagTRP'
+  },
+  ExpenseTypes: {
+    get: service + 'getET',
+    set: service + 'setET',
+    del: service + 'delET',
+    page: service + 'pageET'
+  },
+  DeliveriesOrders: {
+    qry: service + 'qryORD',
+    get: service + 'getORD',
+    snapshot: service + 'snapshotORD',
+    unpost: service + 'unpostORD',
+    post: service + 'postORD',
+    del: service + 'delORD',
+    cancel: service + 'cancelORD',
+    flag: service + 'flagORD',
+    set2: service + 'set2ORD',
+    generate: service + 'generateIVC2'
+  },
+  OrderItem: {
+    qry: service + 'qryORI',
+    get: service + 'getORI'
+  },
+  MW: {
+    qry: service + 'qryMW2'
   }
 }

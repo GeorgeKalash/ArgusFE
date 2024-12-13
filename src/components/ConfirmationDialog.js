@@ -2,7 +2,15 @@ import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, B
 import { ControlContext } from 'src/providers/ControlContext'
 import { useContext } from 'react'
 
-const ConfirmationDialog = ({ openCondition, closeCondition, DialogText, okButtonAction, fullScreen = true }) => {
+const ConfirmationDialog = ({
+  openCondition,
+  closeCondition,
+  DialogText,
+  okButtonAction,
+  fullScreen = true,
+  window,
+  height = '120px'
+}) => {
   const { platformLabels } = useContext(ControlContext)
 
   return !fullScreen ? (
@@ -10,7 +18,7 @@ const ConfirmationDialog = ({ openCondition, closeCondition, DialogText, okButto
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '120px',
+        height: height,
         zIndex: 2
       }}
     >
@@ -32,7 +40,12 @@ const ConfirmationDialog = ({ openCondition, closeCondition, DialogText, okButto
           justifyContent: 'flex-end'
         }}
       >
-        <Button onClick={okButtonAction} color='primary'>
+        <Button
+          onClick={() => {
+            okButtonAction(window)
+          }}
+          color='primary'
+        >
           {platformLabels.OK}
         </Button>
       </Box>

@@ -1,4 +1,6 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
+import PercentIcon from '@mui/icons-material/Percent'
+import PinIcon from '@mui/icons-material/Pin'
 import { NumericFormat } from 'react-number-format'
 import { Button, IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
@@ -18,23 +20,27 @@ const CustomNumberField = ({
   decimalScale = 2,
   onClear,
   hidden = false,
+  unClearable = false,
   error,
   helperText,
   hasBorder = true,
   editMode = false,
   maxLength = 1000,
   thousandSeparator = ',',
-  min = '',
-  max = '',
+  min,
+  max,
   allowNegative = true,
+  arrow = false,
   displayCycleButton = false,
-  handleCycleButtonClick,
+  handleButtonClick,
   cycleButtonLabel = '',
   ...props
 }) => {
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+
+  const inputRef = useRef(null)
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
@@ -100,11 +106,23 @@ const CustomNumberField = ({
     if (value) formatNumber({ target: { value } })
   }, [])
 
+  const handleFocus = e => {
+    if (e.target.value === '0') {
+      e.target.value = ''
+      onChange({ ...e, target: { ...e.target, value: '' } })
+    }
+  }
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.select()
+    }
+  }, [])
+
   return _hidden ? (
     <></>
   ) : (
     <NumericFormat
-      hey={value}
       label={label}
       allowLeadingZeros
       allowNegative={allowNegative}
@@ -120,33 +138,25 @@ const CustomNumberField = ({
       required={required}
       onInput={handleInput}
       InputProps={{
+        inputRef,
+        autoFocus: false,
         inputProps: {
-          tabIndex: readOnly ? -1 : 0, // Prevent focus on the input field
+          onFocus: handleFocus,
+          min: min,
+          max: max,
+          type: arrow ? 'number' : 'text',
+          tabIndex: readOnly ? -1 : 0,
           onKeyPress: handleKeyPress
         },
         autoComplete: 'off',
         readOnly: _readOnly,
-        endAdornment: (!_readOnly || allowClear) && !props.disabled && (value || value === 0) && (
+        endAdornment: (!readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
           <InputAdornment position='end'>
-            {displayCycleButton && (
-              <Button
-                tabIndex={-1}
-                onClick={handleCycleButtonClick}
-                aria-label='cycle button'
-                sx={{
-                  backgroundColor: '#708090',
-                  color: 'white',
-                  padding: '7px 8px',
-                  minWidth: '40px',
-                  '&:hover': {
-                    backgroundColor: '#607D8B'
-                  }
-                }}
-              >
-                {cycleButtonLabel}
-              </Button>
+            {props.ShowDiscountIcons && (
+              <IconButton onClick={handleButtonClick}>
+                {props.isPercentIcon ? <PercentIcon /> : <PinIcon sx={{ minWidth: '40px', height: '70px' }} />}
+              </IconButton>
             )}
-
             {displayButtons && (
               <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
                 <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
@@ -161,7 +171,7 @@ const CustomNumberField = ({
       sx={{
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
-            border: !hasBorder && 'none' // Hide border
+            border: !hasBorder && 'none'
           }
         }
       }}
