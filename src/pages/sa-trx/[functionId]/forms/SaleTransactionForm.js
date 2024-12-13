@@ -1592,6 +1592,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     valueField='recordId'
                     displayField='name'
                     values={formik.values.header}
+                    maxAccess={maxAccess}
                     displayFieldWidth={1.5}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.szId', newValue ? newValue.recordId : null)
@@ -1699,6 +1700,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                   control={
                     <Checkbox
                       name='header.isVattable'
+                      maxAccess={maxAccess}
                       checked={formik.values?.header?.isVattable}
                       disabled={formik?.values?.items && formik?.values?.items[0]?.itemId}
                       onChange={formik.handleChange}
@@ -1769,6 +1771,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     name='KGmetalPrice'
                     label={labels.metalPrice}
                     value={formik.values.header.KGmetalPrice}
+                    maxAccess={maxAccess}
                     readOnly
                   />
                 )}

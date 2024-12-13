@@ -422,6 +422,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
                 value={formik.values.date}
                 onChange={formik.setFieldValue}
                 readOnly={true}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -495,7 +496,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values.items}
             error={formik.errors.items}
-            name='items'
+            name='currency'
             maxAccess={maxAccess}
             columns={[
               {
