@@ -249,7 +249,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   valueField='recordId'
                   displayField={['reference', 'name']}
                   values={formik.values}
-                  maxAccess={maxAccess}
+                  maxAccess={!editMode && maxAccess}
                   onChange={(event, newValue) => {
                     formik && formik.setFieldValue('dtId', newValue?.recordId || null)
                   }}
@@ -261,7 +261,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   name='reference'
                   label={labels[12]}
                   value={formik?.values?.reference}
-                  maxAccess={maxAccess}
+                  maxAccess={!editMode && maxAccess}
                   maxLength='30'
                   readOnly={isPosted}
                   onChange={formik.handleChange}
@@ -345,6 +345,8 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
             onChange={value => formik.setFieldValue('rows', value)}
             value={formik.values.rows}
             error={formik.errors.rows}
+            name='rows'
+            maxAccess={maxAccess}
             columns={columns}
             allowAddNewLine={!isPosted}
             allowDelete={!isPosted}
