@@ -96,5 +96,11 @@ export const CashBankRepository = {
   OpenMultiCurrencyCashTransfer: {
     open: service + 'openTFM',
     set: service + 'postTFM2'
+  },
+  DocumentTypeDefault: {
+    page: service + 'pageDTD',
+    get: service + 'getDTD',
+    set: service + 'setDTD',
+    del: service + 'delDTD'
   }
 }

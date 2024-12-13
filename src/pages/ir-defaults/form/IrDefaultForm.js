@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -10,6 +10,9 @@ import { ControlContext } from 'src/providers/ControlContext'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import * as yup from 'yup'
 
 const IrDefaultForm = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -23,7 +26,7 @@ const IrDefaultForm = ({ _labels, access }) => {
     const myObject = {}
 
     const filteredList = defaultsData?.list?.filter(obj => {
-      return obj.key === 'ir_amcShortTerm' || obj.key === 'ir_amcLongTerm'
+      return obj.key === 'ir_amcShortTerm' || obj.key === 'ir_amcLongTerm' || obj.key === 'ir_tfr_DocTypeId'
     })
     filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
     formik.setValues(myObject)
@@ -33,7 +36,18 @@ const IrDefaultForm = ({ _labels, access }) => {
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
-    initialValues: { ir_amcShortTerm: null, ir_amcLongTerm: null, recordId: 'N/A' },
+    initialValues: { ir_amcShortTerm: null, ir_amcLongTerm: null, ir_tfr_DocTypeId: null, recordId: 'N/A' },
+    validationSchema: yup.object().shape({
+      ir_amcShortTerm: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { ir_amcLongTerm } = this.parent
+
+          return value == null || ir_amcLongTerm == null || value <= ir_amcLongTerm
+        }),
+      ir_amcLongTerm: yup.number().nullable()
+    }),
     onSubmit: values => {
       postDefault(values)
     }
@@ -67,6 +81,26 @@ const IrDefaultForm = ({ _labels, access }) => {
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MaterialTransfer}`}
+                name='ir_tfr_DocTypeId'
+                label={_labels.docType}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={'name'}
+                values={formik.values}
+                maxAccess={access}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('ir_tfr_DocTypeId', newValue?.recordId || null)
+                }}
+                error={formik.touched.ir_tfr_DocTypeId && Boolean(formik.errors.ir_tfr_DocTypeId)}
+              />
+            </Grid>
             <Grid item xs={12}>
               <CustomNumberField
                 onClear={() => formik.setFieldValue('ir_amcShortTerm', '')}

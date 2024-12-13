@@ -178,6 +178,7 @@ export const SystemRepository = {
   },
   SystemChecks: {
     qry: service + 'qryCHK',
+    get: service + 'getCHK',
     set: service + 'set2CHK'
   },
   PosUsers: {

@@ -27,15 +27,15 @@ const Controller = ({ store, maxAccess, labels }) => {
     onSubmit: async () => {
       try {
         const itemsList = formik.values.rows
-        .map((item, index) => ({
-          ...item,
-          id: index + 1,
-          status: item.status || 1,
-          controllerId: item.recordId,
-          siteId: formik.values.siteId,
-          stockCountId: recordId,
-        }))
-        .filter(item => item.isChecked); 
+          .map((item, index) => ({
+            ...item,
+            id: index + 1,
+            status: item.status || 1,
+            controllerId: item.recordId,
+            siteId: formik.values.siteId,
+            stockCountId: recordId
+          }))
+          .filter(item => item.isChecked)
 
         const data = {
           stockCountId: recordId,
@@ -44,7 +44,7 @@ const Controller = ({ store, maxAccess, labels }) => {
         }
 
         await postRequest({
-          extension: SCRepository.PHY.set2,
+          extension: SCRepository.StockCountControllerTab.set2,
           record: JSON.stringify(data)
         })
         toast.success(platformLabels.Updated)
@@ -55,42 +55,40 @@ const Controller = ({ store, maxAccess, labels }) => {
   })
 
   const fetchGridData = async (recordId, siteId) => {
-    try {
-      const response = await getRequest({
-        extension: SCRepository.Controller.qry,
-        parameters: `_siteId=${siteId}`
-      })
+    const response = await getRequest({
+      extension: SCRepository.Controller.qry,
+      parameters: `_siteId=${siteId}`
+    })
 
-      const checkedResponse = await getRequest({
-        extension: SCRepository.PHY.qry,
-        parameters: `_siteId=${siteId}&_stockCountId=${recordId}`
-      })
+    const checkedResponse = await getRequest({
+      extension: SCRepository.StockCountControllerTab.qry,
+      parameters: `_siteId=${siteId}&_stockCountId=${recordId}`
+    })
 
-      response.list.map((item, index) => {
-        const checkedItem = checkedResponse.list.find(checked => checked.controllerId === item.recordId)
+    response.list.map((item, index) => {
+      const checkedItem = checkedResponse.list.find(checked => checked.controllerId === item.recordId)
 
-        if (checkedItem) {
-          item.isChecked = true
-          item.statusName = checkedItem.statusName
-          item.status = checkedItem.status
-        }
+      if (checkedItem) {
+        item.isChecked = true
+        item.statusName = checkedItem.statusName
+        item.status = checkedItem.status
+      }
 
-        return {
-          ...item,
-          id: index + 1
-        }
-      })
-
-      response.list = response?.list?.map((item, index) => ({
+      return {
         ...item,
-        id: index,
-        isChecked: item?.isChecked === undefined ? false : item?.isChecked
-      }))
+        id: index + 1
+      }
+    })
 
-      formik.setFieldValue('stockCountId', recordId)
-      formik.setValues({ rows: response.list })
-      formik.setFieldValue('siteId', siteId)
-    } catch (error) {}
+    response.list = response?.list?.map((item, index) => ({
+      ...item,
+      id: index,
+      isChecked: item?.isChecked === undefined ? false : item?.isChecked
+    }))
+
+    formik.setFieldValue('stockCountId', recordId)
+    formik.setValues({ rows: response.list })
+    formik.setFieldValue('siteId', siteId)
   }
 
   const columns = [
@@ -98,10 +96,10 @@ const Controller = ({ store, maxAccess, labels }) => {
       component: 'checkbox',
       label: ' ',
       name: 'isChecked',
-      flex: .2,
+      flex: 0.2,
       props: {
         disabled: isPosted || isClosed
-      },
+      }
     },
     {
       component: 'textfield',
