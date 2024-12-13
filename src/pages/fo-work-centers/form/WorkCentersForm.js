@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -55,8 +55,6 @@ export default function WorkCentersForm({ labels, workCenterId, maxAccess }) {
     }
   })
 
-  const editMode = !!formik.values.recordId
-
   useEffect(() => {
     ;(async function () {
       if (workCenterId) {
@@ -65,7 +63,7 @@ export default function WorkCentersForm({ labels, workCenterId, maxAccess }) {
           parameters: `_workCenterId=${workCenterId}`
         })
 
-        formik.setValues({ ...res.record, recordId: res.record.workCenterId })
+        formik.setValues(res.record)
       }
     })()
   }, [])
