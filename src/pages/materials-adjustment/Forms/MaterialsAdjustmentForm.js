@@ -61,6 +61,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
     validateOnChange: true,
     validationSchema: yup.object({
       siteId: yup.string().required(),
+      date: yup.date().required(),
       rows: yup
         .array()
         .of(
@@ -276,6 +277,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   readOnly={isPosted}
                   value={formik?.values?.date}
                   onChange={formik.setFieldValue}
+                  required
                   maxAccess={maxAccess}
                   onClear={() => formik.setFieldValue('date', null)}
                   error={formik.touched.date && Boolean(formik.errors.date)}
