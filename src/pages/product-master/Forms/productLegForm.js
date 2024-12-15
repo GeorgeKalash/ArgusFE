@@ -70,7 +70,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
 
   const formik = useFormik({
     initialValues: {
-      productLegs: [
+      productScheduleRanges: [
         {
           id: 1,
           seqNo: '',
@@ -81,9 +81,10 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
       ]
     },
     enableReinitialize: false,
+    maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      productLegs: yup
+      productScheduleRanges: yup
         .array()
         .of(
           yup.object().shape({
@@ -94,7 +95,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
         .required()
     }),
     onSubmit: values => {
-      post(values.productLegs)
+      post(values.productScheduleRanges)
     }
   })
 
@@ -178,9 +179,9 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
         }
       })
 
-      const productLegs = await Promise.all(productLegsPromises)
+      const productScheduleRanges = await Promise.all(productLegsPromises)
 
-      formik.setFieldValue('productLegs', productLegs)
+      formik.setFieldValue('productScheduleRanges', productScheduleRanges)
     } catch (error) {}
   }
 
@@ -255,10 +256,12 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
           </Fixed>
           <Grow key={_seqNo}>
             <DataGrid
-              onChange={value => formik.setFieldValue('productLegs', value)}
-              value={formik.values.productLegs}
-              error={formik.errors.productLegs}
+              onChange={value => formik.setFieldValue('productScheduleRanges', value)}
+              value={formik.values.productScheduleRanges}
+              error={formik.errors.productScheduleRanges}
               columns={commissionColumns}
+              name={'productScheduleRanges'}
+              maxAccess={maxAccess}
             />
           </Grow>
         </VertLayout>
