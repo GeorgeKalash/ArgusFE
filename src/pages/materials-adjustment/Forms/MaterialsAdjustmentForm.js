@@ -61,6 +61,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
     validateOnChange: true,
     validationSchema: yup.object({
       siteId: yup.string().required(),
+      date: yup.date().required(),
       rows: yup
         .array()
         .of(
@@ -249,7 +250,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   valueField='recordId'
                   displayField={['reference', 'name']}
                   values={formik.values}
-                  maxAccess={maxAccess}
+                  maxAccess={!editMode && maxAccess}
                   onChange={(event, newValue) => {
                     formik && formik.setFieldValue('dtId', newValue?.recordId || null)
                   }}
@@ -261,7 +262,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   name='reference'
                   label={labels[12]}
                   value={formik?.values?.reference}
-                  maxAccess={maxAccess}
+                  maxAccess={!editMode && maxAccess}
                   maxLength='30'
                   readOnly={isPosted}
                   onChange={formik.handleChange}
@@ -276,6 +277,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   readOnly={isPosted}
                   value={formik?.values?.date}
                   onChange={formik.setFieldValue}
+                  required
                   maxAccess={maxAccess}
                   onClear={() => formik.setFieldValue('date', null)}
                   error={formik.touched.date && Boolean(formik.errors.date)}
@@ -345,6 +347,8 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
             onChange={value => formik.setFieldValue('rows', value)}
             value={formik.values.rows}
             error={formik.errors.rows}
+            name='rows'
+            maxAccess={maxAccess}
             columns={columns}
             allowAddNewLine={!isPosted}
             allowDelete={!isPosted}
