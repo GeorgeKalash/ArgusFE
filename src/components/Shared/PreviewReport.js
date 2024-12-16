@@ -11,6 +11,7 @@ export default function PreviewReport({
   outerGrid = false,
   scId,
   siteId,
+  controllerId,
   onSuccess
 }) {
   const { postRequest } = useContext(RequestsContext)
@@ -29,6 +30,8 @@ export default function PreviewReport({
         resourceId === ResourceIds.PhysicalCountSerialSummary
       ) {
         parameters = `?_stockCountId=${scId}&_siteId=${siteId}`
+      } else if (resourceId === ResourceIds.IVPhysicalCountItemDetails) {
+        parameters = `?_stockCountId=${scId}&_siteId=${siteId}&_controllerId=${controllerId}`
       } else {
         parameters = `?_recordId=${recordId}`
       }

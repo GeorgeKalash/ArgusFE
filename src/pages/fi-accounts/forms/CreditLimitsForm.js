@@ -59,7 +59,7 @@ const CreditLimitsForm = ({ setStore, labels, editMode, height, store, expanded,
       component: 'numberfield',
       label: labels.CreditLimits,
       name: 'limit',
-      props: { decimalScale: 2, maxLength: 10 }
+      props: { maxLength: 12, decimalScale: 2 }
     }
   ]
 
