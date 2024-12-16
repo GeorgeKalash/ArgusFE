@@ -929,6 +929,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       formik.setFieldValue('birthDate', value)
                     }}
                     onClear={() => formik.setFieldValue('birthDate', '')}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1058,6 +1059,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           readOnly={editMode && !allowEdit && true}
                           disabledDate={!editMode && '>'}
                           onClear={() => formik.setFieldValue('issueDate', '')}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
                       <Grid item xs={4}>
