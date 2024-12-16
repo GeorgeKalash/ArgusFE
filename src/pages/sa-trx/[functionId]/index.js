@@ -26,6 +26,21 @@ const SaTrx = () => {
   const router = useRouter()
   const { functionId } = router.query
 
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.SalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.SaleReturn
+      case SystemFunction.ConsignmentIn:
+        return ResourceIds.ClientGOCIn
+      case SystemFunction.ConsignmentOut:
+        return ResourceIds.ClientGOCOut
+      default:
+        return null
+    }
+  }
+
   const {
     query: { data },
     filterBy,
@@ -39,6 +54,7 @@ const SaTrx = () => {
     queryFn: fetchGridData,
     endpointId: SaleRepository.SalesTransaction.qry,
     datasetId: ResourceIds.SalesInvoice,
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
       filterFn: fetchWithFilter,
       default: { functionId }
@@ -176,21 +192,6 @@ const SaTrx = () => {
       return labels.consignmentOut
     } else {
       return null
-    }
-  }
-
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.SalesInvoice:
-        return ResourceIds.SalesInvoice
-      case SystemFunction.SalesReturn:
-        return ResourceIds.SaleReturn
-      case SystemFunction.ConsignmentIn:
-        return ResourceIds.ClientGOCIn
-      case SystemFunction.ConsignmentOut:
-        return ResourceIds.ClientGOCOut
-      default:
-        return null
     }
   }
 
