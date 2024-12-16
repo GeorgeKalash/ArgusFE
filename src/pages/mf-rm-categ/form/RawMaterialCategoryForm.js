@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -22,7 +22,7 @@ export default function RawMaterialCategoryForm({ labels, maxAccess, recordId })
   })
 
   const { formik } = useForm({
-    initialValues: { recordId: null, reference: '', name: '' },
+    initialValues: { recordId: null, reference: '', name: '', isMetal: false },
     enableReinitialize: true,
     maxAccess,
     validateOnChange: true,
@@ -76,6 +76,7 @@ export default function RawMaterialCategoryForm({ labels, maxAccess, recordId })
                 label={labels.reference}
                 value={formik.values.reference}
                 required
+                maxLength='10'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
@@ -92,6 +93,21 @@ export default function RawMaterialCategoryForm({ labels, maxAccess, recordId })
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='isMetal'
+                    maxAccess={maxAccess}
+                    checked={formik.values?.isMetal}
+                    onChange={e => {
+                      formik.setFieldValue('isMetal', e.target.checked)
+                    }}
+                  />
+                }
+                label={labels.isMetal}
               />
             </Grid>
           </Grid>
