@@ -7,7 +7,6 @@ export const ResourceIds = {
   DocumentTypeMaps: 20201,
   GeographicRegions: 20133,
   GLSettings: 30110,
-  WorkCenters: 42101,
   Cities: 20125,
   PlantGroups: 20123,
   Labor: 42103,
@@ -317,5 +316,10 @@ export const ResourceIds = {
   ExpenseTypes: 52102,
   GlEoyClosing: 30502,
   BusinessRules: 20114,
-  CaDtd: 33103
+  OutwardReturnSettlement: 36326,
+  OpenInwardTransfers: 36327,
+  CaDtd: 33103,
+  IVPhysicalCountItemDetails: 44205,
+  RawMaterialCategory: 42123,
+  FoWorkCenters: 47101
 }

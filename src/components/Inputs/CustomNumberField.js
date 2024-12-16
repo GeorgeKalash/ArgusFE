@@ -2,11 +2,10 @@ import React, { useEffect, useRef } from 'react'
 import PercentIcon from '@mui/icons-material/Percent'
 import PinIcon from '@mui/icons-material/Pin'
 import { NumericFormat } from 'react-number-format'
-import { Button, IconButton, InputAdornment, TextField } from '@mui/material'
+import { IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import { getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { TrxType } from 'src/resources/AccessLevels'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomNumberField = ({
   variant = 'outlined',
@@ -40,21 +39,12 @@ const CustomNumberField = ({
 }) => {
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
 
   const inputRef = useRef(null)
-
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
-
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
-
-  const required = props.required || accessLevel === MANDATORY
-
   useEffect(() => {
     if (typeof props.setFieldValidation === 'function') {
-      if (required && !value) {
+      if (props.required && !value) {
         props.setFieldValidation([name], ' ')
       } else if (value) {
         const numericValue = parseFloat(value)
@@ -67,7 +57,7 @@ const CustomNumberField = ({
         props.setFieldValidation([name], '')
       }
     }
-  }, [value, minValue, maxValue, required])
+  }, [value, minValue, maxValue, props.required])
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/
@@ -119,7 +109,7 @@ const CustomNumberField = ({
     }
   }
 
-  const displayButtons = (!readOnly || allowClear) && !props.disabled && (value || value === 0)
+  const displayButtons = (!_readOnly || allowClear) && !props.disabled && (value || value === 0)
 
   useEffect(() => {
     if (value) formatNumber({ target: { value } })
@@ -154,7 +144,7 @@ const CustomNumberField = ({
       fullWidth
       error={error}
       helperText={helperText}
-      required={required}
+      required={_required}
       onInput={handleInput}
       InputProps={{
         inputRef,
@@ -169,7 +159,7 @@ const CustomNumberField = ({
         },
         autoComplete: 'off',
         readOnly: _readOnly,
-        endAdornment: (!readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
+        endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
           <InputAdornment position='end'>
             {props.ShowDiscountIcons && (
               <IconButton onClick={handleButtonClick}>

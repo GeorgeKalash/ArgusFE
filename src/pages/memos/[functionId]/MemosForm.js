@@ -479,6 +479,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                   { key: 'keywords', value: 'Keywords' },
                   { key: 'groupName', value: 'Account Group' }
                 ]}
+                maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue ? newValue.recordId : '')
                   formik.setFieldValue('accountRef', newValue ? newValue.reference : '')

@@ -8,7 +8,8 @@ const ConfirmationDialog = ({
   DialogText,
   okButtonAction,
   fullScreen = true,
-  window
+  window,
+  height = '120px'
 }) => {
   const { platformLabels } = useContext(ControlContext)
 
@@ -17,7 +18,7 @@ const ConfirmationDialog = ({
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '120px',
+        height: height,
         zIndex: 2
       }}
     >

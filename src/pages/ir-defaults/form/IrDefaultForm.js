@@ -10,7 +10,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
-import * as yup from 'yup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
@@ -36,17 +35,6 @@ const IrDefaultForm = ({ _labels, access }) => {
   const { formik, setFieldValidation } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
-    // validationSchema: yup.object().shape({
-    //   ir_amcShortTerm: yup
-    //     .number()
-    //     .nullable()
-    //     .test(function (value) {
-    //       const { ir_amcLongTerm } = this.parent
-
-    //       return value == null || ir_amcLongTerm == null || value <= ir_amcLongTerm
-    //     }),
-    //   ir_amcLongTerm: yup.number().nullable()
-    // }),
     initialValues: { ir_amcShortTerm: null, ir_amcLongTerm: null, ir_tfr_DocTypeId: null, recordId: 'N/A' },
     onSubmit: values => {
       postDefault(values)
