@@ -57,7 +57,15 @@ import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirma
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import NormalDialog from 'src/components/Shared/NormalDialog'
 
-export default function SaleTransactionForm({ labels, access, recordId, functionId, window, lockRecord }) {
+export default function SaleTransactionForm({
+  labels,
+  access,
+  recordId,
+  functionId,
+  window,
+  lockRecord,
+  getResourceId
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -1408,21 +1416,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     formik.setFieldValue('header.siteId', userDefaultsDataState.siteId)
   }
 
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.SalesInvoice:
-        return ResourceIds.SalesInvoice
-      case SystemFunction.SalesReturn:
-        return ResourceIds.SaleReturn
-      case SystemFunction.ConsignmentIn:
-        return ResourceIds.ClientGOCIn
-      case SystemFunction.ConsignmentOut:
-        return ResourceIds.ClientGOCOut
-      default:
-        return null
-    }
-  }
-
   async function previewBtnClicked() {
     const data = { printStatus: 2, recordId: formik.values.header.recordId }
 
@@ -1592,6 +1585,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     valueField='recordId'
                     displayField='name'
                     values={formik.values.header}
+                    maxAccess={maxAccess}
                     displayFieldWidth={1.5}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.szId', newValue ? newValue.recordId : null)
@@ -1698,7 +1692,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                 <FormControlLabel
                   control={
                     <Checkbox
-                      name='header.isVattable'
+                      name='isVattable'
+                      maxAccess={maxAccess}
                       checked={formik.values?.header?.isVattable}
                       disabled={formik?.values?.items && formik?.values?.items[0]?.itemId}
                       onChange={formik.handleChange}
@@ -1769,6 +1764,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     name='KGmetalPrice'
                     label={labels.metalPrice}
                     value={formik.values.header.KGmetalPrice}
+                    maxAccess={maxAccess}
                     readOnly
                   />
                 )}

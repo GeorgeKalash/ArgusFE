@@ -1,5 +1,6 @@
 import { useContext } from 'react'
 import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -22,35 +23,39 @@ const Controller = ({ store, maxAccess, labels }) => {
     validateOnChange: true,
     initialValues: {
       stockCountId: '',
+      siteId: null,
       rows: []
     },
+    validationSchema: yup.object({
+      siteId: yup.number().required()
+    }),
     onSubmit: async () => {
-      try {
-        const itemsList = formik.values.rows
-          .map((item, index) => ({
-            ...item,
-            id: index + 1,
-            status: item.status || 1,
-            controllerId: item.recordId,
-            siteId: formik.values.siteId,
-            stockCountId: recordId
-          }))
-          .filter(item => item.isChecked)
-
-        const data = {
-          stockCountId: recordId,
+      const itemsList = formik.values.rows
+        .map((item, index) => ({
+          ...item,
+          id: index + 1,
+          status: item.status || 1,
+          controllerId: item.recordId,
           siteId: formik.values.siteId,
-          items: itemsList
-        }
+          stockCountId: recordId
+        }))
+        .filter(item => item.isChecked)
 
-        await postRequest({
-          extension: SCRepository.StockCountControllerTab.set2,
-          record: JSON.stringify(data)
-        })
-        toast.success(platformLabels.Updated)
+      const data = {
+        stockCountId: recordId,
+        siteId: formik.values.siteId,
+        items: itemsList
+      }
+
+      await postRequest({
+        extension: SCRepository.StockCountControllerTab.set2,
+        record: JSON.stringify(data)
+      })
+      toast.success(platformLabels.Updated)
+      if (formik.values.siteId) {
         const res2 = await fetchGridData(recordId, formik.values.siteId)
         formik.setValues({ rows: res2.list })
-      } catch (error) {}
+      }
     }
   })
 
@@ -143,11 +148,12 @@ const Controller = ({ store, maxAccess, labels }) => {
               label={labels.sites}
               filter={item => item.isChecked}
               valueField='siteId'
+              required
               displayField='siteName'
               values={formik.values}
               onChange={async (event, newValue) => {
                 if (newValue?.siteId) {
-                  formik.setFieldValue('siteId', newValue ? newValue?.siteId : '')
+                  formik.setFieldValue('siteId', newValue ? newValue?.siteId : null)
                   await fetchGridData(recordId, newValue?.siteId)
                 }
               }}
