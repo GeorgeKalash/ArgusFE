@@ -69,7 +69,7 @@ const Financial = () => {
   } = useResourceQuery({
     endpointId: FinancialRepository.FiMemo.page,
     datasetId: ResourceIds.CreditNote,
-    accessDatasetId: getResourceId(parseInt(functionId)),
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
       filterFn: fetchWithSearch,
       default: { functionId }

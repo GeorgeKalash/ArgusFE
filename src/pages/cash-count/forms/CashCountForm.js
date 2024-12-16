@@ -422,6 +422,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
                 value={formik.values.date}
                 onChange={formik.setFieldValue}
                 readOnly={true}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -452,6 +453,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
                 label={labels.startTime}
                 value={formik.values.startTime}
                 readOnly={true}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -469,7 +471,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField name='endTime' label={labels.endTime} value={formik.values.endTime} readOnly={true} />
+              <CustomTextField name='endTime' label={labels.endTime} value={formik.values.endTime} readOnly={true} maxAccess={maxAccess}/>
             </Grid>
             <Grid item xs={12}>
               <FormControlLabel
@@ -478,6 +480,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
                     name='forceNoteCount'
                     checked={formik.values?.forceNoteCount}
                     onChange={formik.handleChange}
+                    maxAccess={maxAccess}
                     disabled={
                       formik.values.items &&
                       (formik.values?.items[0]?.currencyId || formik.values?.items[0]?.currencyId)
@@ -495,7 +498,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values.items}
             error={formik.errors.items}
-            name='items'
+            name='currency'
             maxAccess={maxAccess}
             columns={[
               {

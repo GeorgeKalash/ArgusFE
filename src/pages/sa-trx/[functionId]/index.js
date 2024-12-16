@@ -54,7 +54,7 @@ const SaTrx = () => {
     queryFn: fetchGridData,
     endpointId: SaleRepository.SalesTransaction.qry,
     datasetId: ResourceIds.SalesInvoice,
-    accessDatasetId: getResourceId(parseInt(functionId)),
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
       filterFn: fetchWithFilter,
       default: { functionId }
@@ -203,7 +203,8 @@ const SaTrx = () => {
         recordId: recordId,
         access,
         functionId: functionId,
-        lockRecord
+        lockRecord,
+        getResourceId
       },
       width: 1330,
       height: 720,
