@@ -80,10 +80,6 @@ export default function ResourceComboBox({
       }
       if (typeof setData == 'function') setData(!!datasetId ? { list: data } : data)
       setIsLoading(false)
-
-      if (!values[name]) {
-        selectFirstOption()
-      }
     }
   }
   let finalItemsList = data ? data : reducer(apiResponse)?.filter?.(filter)
