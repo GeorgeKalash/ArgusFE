@@ -157,7 +157,7 @@ const RetailTrx = () => {
         labels: labels,
         recordId,
         access,
-        posInfo: posObj?.current,
+        posUser: posObj?.current,
         functionId
       },
       width: 1330,

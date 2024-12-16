@@ -46,7 +46,7 @@ import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { SystemChecks } from 'src/resources/SystemChecks'
 
-export default function RetailTransactionsForm({ labels, posUser, access, recordId, functionId, window }) {
+export default function RetailTransactionsForm({ labels, posUser, access, recordId, functionId, country, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -90,11 +90,13 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       name: null,
       street1: null,
       street2: null,
-      countryId: null,
+      countryId: parseInt(country),
       cityId: null,
       phone: null,
       city: null,
-      defPriceType: null
+      defPriceType: null,
+      posFlags: false,
+      priceType: null
     },
     items: [
       {
@@ -233,102 +235,53 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
-  async function barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, setItemInfo) {
-    const weight = parseFloat(itemPhysProp?.weight || 0).toFixed(2)
-    const metalPurity = itemPhysProp?.metalPurity ?? 0
-    const isMetal = itemPhysProp?.isMetal ?? false
-    const metalId = itemPhysProp?.metalId ?? null
-
-    const postMetalToFinancials = formik?.values?.header?.postMetalToFinancials ?? false
-    const KGmetalPrice = formik?.values?.header?.KGmetalPrice ?? 0
-    const basePrice = (KGmetalPrice * metalPurity) / 1000
-    const basePriceValue = postMetalToFinancials === false ? basePrice : 0
-    const TotPricePerG = basePriceValue
-
-    const unitPrice =
-      ItemConvertPrice?.priceType === 3
-        ? weight * TotPricePerG
-        : parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3)
-
-    const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3)
-    let rowTax = null
-    let rowTaxDetails = null
-
-    if (!formik.values.header.taxId) {
-      if (itemInfo.taxId) {
-        const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
-
-        const details = taxDetailsResponse.map(item => ({
-          invoiceId: formik.values.recordId,
-          taxSeqNo: item.seqNo,
-          taxId: itemInfo.taxId,
-          taxCodeId: item.taxCodeId,
-          taxBase: item.taxBase,
-          amount: item.amount
-        }))
-        rowTax = itemInfo.taxId
-        rowTaxDetails = details
-      }
-    } else {
-      const taxDetailsResponse = await getTaxDetails(formik.values.header.taxId)
-
-      const details = taxDetailsResponse.map(item => ({
-        invoiceId: formik.values.recordId,
-        taxSeqNo: item.seqNo,
-        taxId: formik.values.header.taxId,
-        taxCodeId: item.taxCodeId,
-        taxBase: item.taxBase,
-        amount: item.amount
-      }))
-      rowTax = formik.values.header.taxId
-      rowTaxDetails = details
-    }
-
-    if (parseFloat(unitPrice) < parseFloat(minPrice)) {
-      ShowMinPriceValueErrorMessage(minPrice, unitPrice)
-    }
-
-    if (setItemInfo) {
-      update({
-        sku: ItemConvertPrice?.sku,
-        barcode: ItemConvertPrice?.barcode,
-        itemName: ItemConvertPrice?.itemName,
-        itemId: ItemConvertPrice?.itemId
-      })
-    }
-
+  async function barcodeSkuSelection(update, row) {
+    const itemRetail = await getItemRetail(row?.itemId)
+    const itemPhysical = await getItemPhysical(row?.itemId)
+    const getItemConvertPrice = await getItemConvertPrice(row?.itemId)
+    const basePrice = ((formik.values.header.KGmetalPrice || 0) * (itemPhysical?.metalPurity || 0)) / 1000
     update({
-      isMetal: isMetal,
-      metalId: metalId,
-      metalPurity: metalPurity,
-      volume: parseFloat(itemPhysProp?.volume) || 0,
-      weight: weight,
-      basePrice:
-        isMetal === false
-          ? parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5)
-          : metalPurity > 0
-          ? basePriceValue
-          : 0,
-      baseLaborPrice: 0,
-      TotPricePerG: TotPricePerG,
-      unitPrice: unitPrice,
-      upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
-      priceType: ItemConvertPrice?.priceType || 1,
-      qty: 0,
-      mdAmount: formik.values.header.maxDiscount ? parseFloat(formik.values.header.maxDiscount).toFixed(2) : 0,
-      mdValue: 0,
-      mdType: MDTYPE_PCT,
-      extendedPrice: parseFloat('0').toFixed(2),
-      mdValue: 0,
-      taxId: rowTax,
-      minPrice,
-      taxDetails: rowTaxDetails
+      posFlags: itemRetail?.posFlags,
+      metalPurity: itemPhysical?.metalPurity || 0,
+      isMetal: itemPhysical?.isMetal || false,
+      metalId: itemPhysical?.metalId || null,
+      weight: itemPhysical?.weight || 0,
+      volume: itemPhysical?.volume || 0,
+      basePrice: basePrice || 0
+    })
+  }
+
+  async function getItemRetail(itemId) {
+    const res = await getRequest({
+      extension: InventoryRepository.ItemRetail.get,
+      parameters: `_itemId=${itemId}`
     })
 
-    formik.setFieldValue(
-      'header.mdAmount',
-      formik.values.header.currentDiscount ? formik.values.header.currentDiscount : 0
-    )
+    return res?.record
+  }
+  async function getItemPhysical(itemId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Physical.get,
+      parameters: `_recordId=${itemId}`
+    })
+
+    return res?.record
+  }
+  async function getItem(itemId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Items.get,
+      parameters: `_recordId=${itemId}`
+    })
+
+    return res?.record
+  }
+  async function getItemConvertPrice(itemId) {
+    const res = await getRequest({
+      extension: SaleRepository.ItemConvertPrice.get,
+      parameters: `_clientId=0&_itemId=${itemId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}`
+    })
+
+    return res?.record
   }
 
   const columns = [
@@ -339,11 +292,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.barcode) return
-
-        const ItemConvertPrice = await getItemConvertPrice2(newRow)
-        const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
-        const itemInfo = await getItem(ItemConvertPrice?.itemId)
-        await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
+        await barcodeSkuSelection(update, newRow)
       }
     },
     {
@@ -366,14 +315,11 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Item Name' }
         ],
-        displayFieldWidth: 5
+        displayFieldWidth: 3
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) return
-        const itemPhysProp = await getItemPhysProp(newRow.itemId)
-        const itemInfo = await getItem(newRow.itemId)
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
-        await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
+        await barcodeSkuSelection(update, newRow)
       }
     },
     {
@@ -503,7 +449,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       name: 'cashAccountRef',
       props: {
         endpointId: PointofSaleRepository.CashAccount.qry,
-        parameters: `_posId= parseInt(posUser?.posId) `,
+        parameters: `_posId= ${parseInt(posUser?.posId)}`,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -769,24 +715,6 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
 
-  async function getItemPhysProp(itemId) {
-    const res = await getRequest({
-      extension: InventoryRepository.ItemPhysProp.get,
-      parameters: `_itemId=${itemId}`
-    })
-
-    return res?.record
-  }
-
-  async function getItem(itemId) {
-    const res = await getRequest({
-      extension: InventoryRepository.Item.get,
-      parameters: `_recordId=${itemId}`
-    })
-
-    return res?.record
-  }
-
   async function getTaxDetails(taxId) {
     const res = await getRequest({
       extension: FinancialRepository.TaxDetailPack.qry,
@@ -794,24 +722,6 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     })
 
     return res?.list
-  }
-
-  async function getItemConvertPrice(itemId) {
-    const res = await getRequest({
-      extension: SaleRepository.ItemConvertPrice.get,
-      parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}`
-    })
-
-    return res?.record
-  }
-
-  async function getItemConvertPrice2(row) {
-    const res = await getRequest({
-      extension: SaleRepository.ItemConvertPrice.get2,
-      parameters: `_barcode=${row?.barcode}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}&_exRate=${formik.values.header.exRate}&_rateCalcMethod=${formik.values.header.rateCalcMethod}`
-    })
-
-    return res?.record
   }
 
   function getItemPriceRow(update, newRow, dirtyField, iconClicked) {
@@ -1104,7 +1014,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
         break
     }
     const hasSingleCashPos = checkSingleCashPos?.record?.value
-    const countryId = defaultsData?.list?.find(({ key }) => key === 'country')
+    const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')
     formik.setFieldValue('singleCashPos', hasSingleCashPos)
     formik.setFieldValue('header.isVatable', isVat)
     formik.setFieldValue('header.taxId', tax)
@@ -1119,6 +1029,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     formik.setFieldValue('header.dtId', posInfo?.dtId)
     formik.setFieldValue('header.spId', posUser?.spId)
     formik.setFieldValue('header.countryId', countryId?.value)
+    console.log('check country ', countryId?.value)
   }
 
   useEffect(() => {}, [address])
@@ -1316,7 +1227,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                   <ResourceLookup
                     endpointId={SystemRepository.City.snapshot}
                     parameters={{
-                      _countryId: formik.values.header.countryId
+                      _countryId: formik.values.header.countryId,
+                      _stateId: formik.values.header.stateId || 0
                     }}
                     valueField='name'
                     displayField='name'
@@ -1452,7 +1364,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
             name='items'
             columns={columns}
             maxAccess={maxAccess}
-            disabled={isPosted || !formik.values.header.clientId || !formik.values.header.currencyId}
+            disabled={isPosted || !formik.values.header.currencyId}
           />
         </Grow>
 
