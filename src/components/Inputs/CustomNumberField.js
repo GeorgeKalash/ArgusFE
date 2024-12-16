@@ -1,12 +1,11 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import PercentIcon from '@mui/icons-material/Percent'
 import PinIcon from '@mui/icons-material/Pin'
 import { NumericFormat } from 'react-number-format'
-import { Button, IconButton, InputAdornment, TextField } from '@mui/material'
+import { IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import { getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { TrxType } from 'src/resources/AccessLevels'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomNumberField = ({
   variant = 'outlined',
@@ -38,15 +37,9 @@ const CustomNumberField = ({
 }) => {
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
 
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
-
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
-
-  const required = props.required || accessLevel === MANDATORY
+  const inputRef = useRef(null)
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/
@@ -98,7 +91,7 @@ const CustomNumberField = ({
     }
   }
 
-  const displayButtons = (!readOnly || allowClear) && !props.disabled && (value || value === 0)
+  const displayButtons = (!_readOnly || allowClear) && !props.disabled && (value || value === 0)
 
   useEffect(() => {
     if (value) formatNumber({ target: { value } })
@@ -110,6 +103,12 @@ const CustomNumberField = ({
       onChange({ ...e, target: { ...e.target, value: '' } })
     }
   }
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.select()
+    }
+  }, [])
 
   return _hidden ? (
     <></>
@@ -127,9 +126,11 @@ const CustomNumberField = ({
       fullWidth
       error={error}
       helperText={helperText}
-      required={required}
+      required={_required}
       onInput={handleInput}
       InputProps={{
+        inputRef,
+        autoFocus: false,
         inputProps: {
           onFocus: handleFocus,
           min: min,
@@ -140,11 +141,13 @@ const CustomNumberField = ({
         },
         autoComplete: 'off',
         readOnly: _readOnly,
-        endAdornment: (!readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
+        endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
           <InputAdornment position='end'>
-            {
-              props.ShowDiscountIcons && <IconButton onClick={handleButtonClick}>{props.isPercentIcon ? <PercentIcon /> : <PinIcon sx={{ minWidth: '40px', height: '70px' }}/>}</IconButton>
-            }
+            {props.ShowDiscountIcons && (
+              <IconButton onClick={handleButtonClick}>
+                {props.isPercentIcon ? <PercentIcon /> : <PinIcon sx={{ minWidth: '40px', height: '70px' }} />}
+              </IconButton>
+            )}
             {displayButtons && (
               <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
                 <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
