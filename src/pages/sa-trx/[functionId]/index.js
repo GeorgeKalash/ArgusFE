@@ -203,7 +203,8 @@ const SaTrx = () => {
         recordId: recordId,
         access,
         functionId: functionId,
-        lockRecord
+        lockRecord,
+        getResourceId
       },
       width: 1330,
       height: 720,

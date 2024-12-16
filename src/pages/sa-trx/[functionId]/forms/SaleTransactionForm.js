@@ -57,7 +57,15 @@ import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirma
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import NormalDialog from 'src/components/Shared/NormalDialog'
 
-export default function SaleTransactionForm({ labels, access, recordId, functionId, window, lockRecord }) {
+export default function SaleTransactionForm({
+  labels,
+  access,
+  recordId,
+  functionId,
+  window,
+  lockRecord,
+  getResourceId
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -1406,21 +1414,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     formik.setFieldValue('header.plantId', userDefaultsDataState.plantId)
     formik.setFieldValue('header.spId', userDefaultsDataState.spId)
     formik.setFieldValue('header.siteId', userDefaultsDataState.siteId)
-  }
-
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.SalesInvoice:
-        return ResourceIds.SalesInvoice
-      case SystemFunction.SalesReturn:
-        return ResourceIds.SaleReturn
-      case SystemFunction.ConsignmentIn:
-        return ResourceIds.ClientGOCIn
-      case SystemFunction.ConsignmentOut:
-        return ResourceIds.ClientGOCOut
-      default:
-        return null
-    }
   }
 
   async function previewBtnClicked() {
