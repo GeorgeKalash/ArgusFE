@@ -278,6 +278,7 @@ export default function FormShell({
                     resourceId: resourceId,
                     scId: form.values?.stockCountId,
                     siteId: form.values?.siteId,
+                    controllerId: form.values?.controllerId,
                     onSuccess: previewBtnClicked
                   },
                   width: 1150,
@@ -447,6 +448,7 @@ export default function FormShell({
                 resourceId: resourceId,
                 scId: form.values?.stockCountId,
                 siteId: form.values?.siteId,
+                controllerId: form.values?.controllerId,
                 onSuccess: previewBtnClicked
               },
               width: 1150,
