@@ -54,7 +54,7 @@ const SaTrx = () => {
     queryFn: fetchGridData,
     endpointId: SaleRepository.SalesTransaction.qry,
     datasetId: ResourceIds.SalesInvoice,
-    accessDatasetId: getResourceId(parseInt(functionId)),
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
       filterFn: fetchWithFilter,
       default: { functionId }
