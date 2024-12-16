@@ -299,7 +299,7 @@ export default function SaleTransactionForm({
           taxId: itemInfo.taxId,
           taxCodeId: item.taxCodeId,
           taxBase: item.taxBase,
-          amount: item.amount
+          amount: item.amount ?? 0
         }))
         rowTax = itemInfo.taxId
         rowTaxDetails = details
@@ -412,7 +412,8 @@ export default function SaleTransactionForm({
         if (!newRow.itemId) return
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
+        const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, filteredMeasurements?.[0]?.recordId)
         await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
       }
     },
@@ -461,6 +462,7 @@ export default function SaleTransactionForm({
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
+          await getItemConvertPrice(newRow.itemId, newRow?.muId)
           const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
           const qtyInBase = newRow?.qty * filteredItems?.muQty
 
@@ -815,7 +817,7 @@ export default function SaleTransactionForm({
       header: {
         ...formik.values.header,
         ...saTrxHeader,
-        amount: parseFloat(saTrxHeader?.amount).toFixed(2),
+        amount: parseFloat(saTrxHeader?.amount).toFixed(2) ?? 0,
         billAddress: billAdd,
         currentDiscount:
           saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
@@ -992,10 +994,10 @@ export default function SaleTransactionForm({
     return res?.list
   }
 
-  async function getItemConvertPrice(itemId) {
+  async function getItemConvertPrice(itemId, muId) {
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
-      parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}`
+      parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}&_muId=${muId}`
     })
 
     return res?.record
@@ -1127,7 +1129,7 @@ export default function SaleTransactionForm({
     sumExtended: parseFloat(subTotal),
     tdAmount: parseFloat(formik.values.header.tdAmount),
     net: 0,
-    miscAmount: miscValue
+    miscAmount: miscValue || 0
   })
 
   const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.header?.qty || 0
