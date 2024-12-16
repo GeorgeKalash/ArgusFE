@@ -102,5 +102,8 @@ export const CashBankRepository = {
     get: service + 'getDTD',
     set: service + 'setDTD',
     del: service + 'delDTD'
+  },
+  CreditCardFees: {
+    qry: service + 'qryCCS'
   }
 }

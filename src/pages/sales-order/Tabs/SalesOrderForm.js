@@ -689,7 +689,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     if (!addressId) return null
 
     const res = await getRequest({
-      extension: SystemRepository.FormattedAddress.get,
+      extension: SystemRepository.Address.format,
       parameters: `_addressId=${addressId}`
     })
 
@@ -712,7 +712,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     formik.setFieldValue('billToAddressId', res?.record?.billAddressId || null)
     const shipAdd = await getAddress(res?.record?.shipAddressId)
     const billAdd = await getAddress(res?.record?.billAddressId)
-  
+
     formik.setFieldValue('shipAddress', shipAdd || '')
     formik.setFieldValue('billAddress', billAdd || '')
   }

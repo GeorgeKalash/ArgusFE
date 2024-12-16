@@ -28,7 +28,20 @@ export const PointofSaleRepository = {
     qry: service + 'qryIVC',
     del: service + 'delIVC',
     get: service + 'getIVC',
+    get2: service + 'get2IVC',
     snapshot: service + 'snapshotIVC',
-    level: service + 'level2_IVC'
+    level: service + 'level2_IVC',
+    set2: service + 'set2IVC',
+    post: service + 'postIVC',
+    unpost: service + 'unpostIVC'
+  },
+  RetailPurchase: {
+    set2: service + 'set2IVP'
+  },
+  RetailReturn: {
+    set2: service + 'set2IVR'
+  },
+  PUItems: {
+    snapshot: service + 'snapshotIT'
   }
 }
