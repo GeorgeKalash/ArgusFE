@@ -54,24 +54,25 @@ export default function ResourceComboBox({
 
   useEffect(() => {
     const fetchDataAsync = async () => {
-      await fetchData()
+      await fetchData(false)
     }
 
     fetchDataAsync()
   }, [parameters])
 
-  const fetchData = async () => {
+  const fetchData = async (refresh = true) => {
     if (parameters && !data && (datasetId || endpointId)) {
       setIsLoading(true)
 
-      const data = cacheStore?.[key]
-        ? cacheStore?.[key]
-        : cacheAvailable
-        ? await fetchWithCache({
-            queryKey: [datasetId || endpointId, parameters],
-            queryFn: () => fetch({ datasetId, endpointId, parameters })
-          })
-        : await fetch({ datasetId, endpointId, parameters })
+      const data =
+        cacheStore?.[key] && !refresh
+          ? cacheStore?.[key]
+          : cacheAvailable
+          ? await fetchWithCache({
+              queryKey: [datasetId || endpointId, parameters],
+              queryFn: () => fetch({ datasetId, endpointId, parameters })
+            })
+          : await fetch({ datasetId, endpointId, parameters })
 
       setApiResponse(!!datasetId ? { list: data } : data)
 
@@ -80,10 +81,6 @@ export default function ResourceComboBox({
       }
       if (typeof setData == 'function') setData(!!datasetId ? { list: data } : data)
       setIsLoading(false)
-
-      if (!values[name]) {
-        selectFirstOption()
-      }
     }
   }
   let finalItemsList = data ? data : reducer(apiResponse)?.filter?.(filter)
