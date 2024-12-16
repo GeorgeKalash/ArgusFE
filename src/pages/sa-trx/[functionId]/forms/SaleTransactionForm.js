@@ -1692,7 +1692,7 @@ export default function SaleTransactionForm({
                 <FormControlLabel
                   control={
                     <Checkbox
-                      name='header.isVattable'
+                      name='isVattable'
                       maxAccess={maxAccess}
                       checked={formik.values?.header?.isVattable}
                       disabled={formik?.values?.items && formik?.values?.items[0]?.itemId}
