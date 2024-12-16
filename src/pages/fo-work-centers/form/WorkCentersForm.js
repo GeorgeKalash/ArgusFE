@@ -15,7 +15,7 @@ import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function WorkCentersForm({ labels, workCenterId, maxAccess }) {
+export default function WorkCentersForm({ labels, recordId, maxAccess }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -26,9 +26,9 @@ export default function WorkCentersForm({ labels, workCenterId, maxAccess }) {
 
   const { formik } = useForm({
     initialValues: {
-      wId: null,
-      workCenterId: null,
-      activity: null
+      workCenterId: '',
+      activity: '',
+      recordId: recordId || null
     },
     maxAccess,
     enableReinitialize: true,
@@ -39,33 +39,35 @@ export default function WorkCentersForm({ labels, workCenterId, maxAccess }) {
       activity: yup.string().required()
     }),
     onSubmit: async obj => {
-      const workCenterId = obj.workCenterId
-
+      const recordId = obj.recordId
       await postRequest({
         extension: FoundryRepository.WorkCenter.set,
         record: JSON.stringify(obj)
       })
+      if (!recordId) {
+        formik.setFieldValue('recordId', obj.workCenterId)
+      }
 
-      if (!workCenterId) {
-        toast.success(platformLabels.Added)
-        formik.setValues(obj)
-      } else toast.success(platformLabels.Edited)
-      formik.setFieldValue('wId', formik.values.workCenterId)
+      toast.success(platformLabels.Submit)
+
       invalidate()
     }
   })
 
-  const editMode = !!formik.values.wId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      if (workCenterId) {
-        const res = await getRequest({
-          extension: FoundryRepository.WorkCenter.get,
-          parameters: `_workCenterId=${workCenterId}`
-        })
-        formik.setValues({ ...res.record, wId: res.record.workCenterId })
-      }
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: FoundryRepository.WorkCenter.get,
+            parameters: `_workCenterId=${recordId}`
+          })
+
+          formik.setValues({ ...res.record, recordId: recordId })
+        }
+      } catch (exception) {}
     })()
   }, [])
 
@@ -87,7 +89,7 @@ export default function WorkCentersForm({ labels, workCenterId, maxAccess }) {
                 label={labels.workCenter}
                 readOnly={editMode}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }

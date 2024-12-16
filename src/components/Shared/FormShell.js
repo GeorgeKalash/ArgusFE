@@ -429,7 +429,7 @@ export default function FormShell({
             stack({
               Component: TransactionLog,
               props: {
-                recordId: form.values?.recordId ?? form.values.clientId ?? form.values?.wId,
+                recordId: form.values?.recordId ?? form.values.clientId,
                 resourceId: resourceId
               },
               width: 900,
