@@ -11,7 +11,13 @@ import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { Grow } from './Layouts/Grow'
 
-const AddressTab = ({ addressValidation, readOnly = false, required = true, defaultReadOnly = {} }) => {
+const AddressTab = ({
+  addressValidation,
+  readOnly = false,
+  required = true,
+  defaultReadOnly = {},
+  setFieldValidation
+}) => {
   const { labels: labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.Address
   })
@@ -46,6 +52,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
               readOnly={readOnly}
               required={required}
               maxLength='20'
+              setFieldValidation={setFieldValidation}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('name', '')}
               error={addressValidation.touched.name && Boolean(addressValidation.errors.name)}
@@ -174,6 +181,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
                   readOnly={readOnly}
                   required={required}
                   maxLength='20'
+                  setFieldValidation={setFieldValidation}
                   onChange={addressValidation.handleChange}
                   onClear={() => addressValidation.setFieldValue('street1', '')}
                   error={addressValidation.touched.street1 && Boolean(addressValidation.errors.street1)}
@@ -186,6 +194,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
                   label={labels.street2}
                   value={addressValidation.values.street2}
                   maxLength='20'
+                  setFieldValidation={setFieldValidation}
                   readOnly={readOnly}
                   onChange={addressValidation.handleChange}
                   onClear={() => addressValidation.setFieldValue('street2', '')}
@@ -200,7 +209,9 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
               name='bldgNo'
               label={labels.bldgNo}
               value={addressValidation.values.bldgNo}
-              maxLength='10'
+              minLength={4}
+              maxLength={4}
+              setFieldValidation={setFieldValidation}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('bldgNo', '')}
@@ -213,7 +224,8 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
               name='unitNo'
               label={labels.unitNo}
               value={addressValidation.values.unitNo}
-              maxLength='10'
+              maxLength='4'
+              setFieldValidation={setFieldValidation}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('unitNo', '')}
@@ -227,6 +239,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
               label={labels.subNo}
               value={addressValidation.values.subNo}
               maxLength='10'
+              setFieldValidation={setFieldValidation}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('subNo', '')}
@@ -238,9 +251,12 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
             <CustomTextField
               name='postalCode'
               label={labels.postalCode}
-              readOnly={readOnly}
               value={addressValidation.values.postalCode}
               onChange={addressValidation.handleChange}
+              readOnly={readOnly}
+              minLength={5}
+              maxLength={5}
+              setFieldValidation={setFieldValidation}
               onClear={() => addressValidation.setFieldValue('postalCode', '')}
               error={addressValidation.touched.postalCode && Boolean(addressValidation.errors.postalCode)}
               maxAccess={maxAccess}
@@ -252,6 +268,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
               label={labels.poBox}
               value={addressValidation.values.poBox}
               maxLength='10'
+              setFieldValidation={setFieldValidation}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('poBox', '')}
@@ -268,6 +285,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
                   value={addressValidation.values.phone}
                   readOnly={readOnly}
                   maxLength='15'
+                  setFieldValidation={setFieldValidation}
                   phone={true}
                   onChange={addressValidation.handleChange}
                   onClear={() => addressValidation.setFieldValue('phone', '')}
@@ -281,6 +299,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
                   label={labels.phone2}
                   value={addressValidation.values.phone2}
                   maxLength='15'
+                  setFieldValidation={setFieldValidation}
                   phone={true}
                   readOnly={readOnly}
                   onChange={addressValidation.handleChange}
@@ -295,6 +314,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
                   label={labels.phone3}
                   value={addressValidation.values.phone3}
                   maxLength='15'
+                  setFieldValidation={setFieldValidation}
                   phone={true}
                   readOnly={readOnly}
                   onChange={addressValidation.handleChange}

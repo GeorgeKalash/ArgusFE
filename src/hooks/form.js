@@ -1,4 +1,5 @@
 import { useFormik } from 'formik'
+import { useState } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import * as yup from 'yup'
 
@@ -45,6 +46,21 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
     return yup.object().shape(updatedSchema)
   }
 
+  const [Validation, setValidation] = useState()
+
+  const setFieldValidation = (field, errors) => {
+    setValidation(prev => {
+      const updatedValidation = { ...prev }
+      if (errors === '') {
+        delete updatedValidation[field]
+      } else {
+        updatedValidation[field] = errors
+      }
+
+      return updatedValidation
+    })
+  }
+
   const formik = useFormik({
     ...formikProps,
     validate(values) {
@@ -89,8 +105,11 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
           }
       })
 
+      const mergedValidation = Validation
+
       return {
         ...maxAccessErrors,
+        ...mergedValidation,
         ...validate(values)
       }
     }
@@ -98,5 +117,5 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
 
-  return { formik }
+  return { formik, setFieldValidation }
 }

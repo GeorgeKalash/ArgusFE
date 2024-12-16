@@ -20,6 +20,7 @@ const CustomTextField = ({
   numberField = false,
   editMode = false,
   maxLength = '1000',
+  minLength,
   position,
   dir = 'ltr',
   hidden = false,
@@ -49,6 +50,17 @@ const CustomTextField = ({
       inputRef.current.setSelectionRange(position, position)
     }
   }, [position])
+
+  useEffect(() => {
+    if (typeof props.setFieldValidation === 'function')
+      if (value && ((minLength && value?.length < minLength) || (maxLength && value?.length > maxLength))) {
+        props.setFieldValidation([name], 'required')
+      } else if (props.required && !value) {
+        props.setFieldValidation([name], ' ')
+      } else {
+        props.setFieldValidation([name], '')
+      }
+  }, [value])
 
   const handleInput = e => {
     const inputValue = e.target.value
@@ -98,6 +110,7 @@ const CustomTextField = ({
         autoComplete: 'off',
         readOnly: _readOnly,
         maxLength: maxLength,
+        minLength: minLength,
         dir: dir,
         inputMode: numberField && 'numeric',
         pattern: numberField && '[0-9]*',
