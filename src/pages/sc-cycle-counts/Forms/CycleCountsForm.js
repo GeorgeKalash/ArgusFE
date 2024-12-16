@@ -65,7 +65,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     validateOnChange: true,
     validationSchema: yup.object({
       genVar: yup.string().required(),
-      plantId: yup.string().required(),
+      plantId: yup.number().required(),
       clientId: yup
         .string()
         .nullable()
@@ -265,7 +265,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -327,7 +327,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 ]}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
+                  formik.setFieldValue('plantId', newValue ? newValue?.recordId : null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />

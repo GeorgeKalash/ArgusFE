@@ -944,9 +944,11 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
             onChange={value => formik.setFieldValue('rows', value)}
             disabled={!formik.values.corId || isClosed}
             value={formik.values.rows}
+            name='rows'
             error={formik.errors.rows}
             columns={columns}
             allowAddNewLine={!isClosed}
+            maxAccess={maxAccess}
             allowDelete={!isClosed}
             bg={
               formik.values.functionId &&

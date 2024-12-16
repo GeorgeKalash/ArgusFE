@@ -113,7 +113,10 @@ const recalcFooter = (_array, _footerSummary) => {
   })
 
   _footerSummary.net =
-    _footerSummary.sumExtended + _footerSummary.sumVat + _footerSummary.miscAmount - _footerSummary.tdAmount
+    _footerSummary.sumExtended +
+    _footerSummary.sumVat +
+    (_footerSummary?.miscAmount || 0) -
+    (_footerSummary?.tdAmount || 0)
 
   return _footerSummary
 }

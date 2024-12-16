@@ -40,6 +40,7 @@ const PhysicalCountItemDe = () => {
   })
 
   const { formik } = useForm({
+    maxAccess: access,
     initialValues: {
       stockCountId: null,
       siteId: null,

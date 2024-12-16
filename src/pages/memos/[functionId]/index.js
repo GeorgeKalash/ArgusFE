@@ -42,6 +42,21 @@ const Financial = () => {
     return { ...response, _startAt: _startAt }
   }
 
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.CreditNote:
+        return ResourceIds.CreditNote
+      case SystemFunction.DebitNote:
+        return ResourceIds.DebitNote
+      case SystemFunction.ServiceBill:
+        return ResourceIds.ServiceBillReceived
+      case SystemFunction.ServiceInvoice:
+        return ResourceIds.ServiceInvoice
+      default:
+        return null
+    }
+  }
+
   const {
     query: { data },
     refetch,
@@ -54,7 +69,7 @@ const Financial = () => {
   } = useResourceQuery({
     endpointId: FinancialRepository.FiMemo.page,
     datasetId: ResourceIds.CreditNote,
-
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
       filterFn: fetchWithSearch,
       default: { functionId }

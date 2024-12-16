@@ -92,6 +92,7 @@ export const SystemRepository = {
     get: service + 'getADD',
     set: service + 'setADD',
     del: service + '',
+    format: service + 'formattedADD',
     snapshot: service + 'snapshotADD'
   },
   PlantGroup: {
@@ -230,9 +231,6 @@ export const SystemRepository = {
   PlantsSchedule: {
     set2: service + 'set2PLS',
     qry: service + 'qryPLS'
-  },
-  FormattedAddress: {
-    get: service + 'formattedADD'
   },
   TrxDetails: {
     qry2: service + 'qryTL2',

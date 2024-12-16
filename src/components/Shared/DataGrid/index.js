@@ -22,6 +22,7 @@ export function DataGrid({
   allowDelete = true,
   allowAddNewLine = true,
   onSelectionChange,
+  rowSelectionModel,
   bg
 }) {
   const gridApiRef = useRef(null)
@@ -64,7 +65,7 @@ export function DataGrid({
     gridApiRef.current.applyTransaction({ remove: [params.data] })
     if (newRows?.length < 1) setReady(true)
 
-    onChange(newRows, 'delete')
+    onChange(newRows, 'delete', params.data)
   }
 
   function openDelete(params) {
@@ -88,6 +89,15 @@ export function DataGrid({
       setReady(false)
     }
   }, [ready, value])
+
+  useEffect(() => {
+    if (gridApiRef.current && rowSelectionModel) {
+      const rowNode = gridApiRef.current.getRowNode(rowSelectionModel)
+      if (rowNode) {
+        rowNode.setSelected(true)
+      }
+    }
+  }, [rowSelectionModel])
 
   const addNewRow = params => {
     const highestIndex = params?.node?.data?.id + 1 || 1
@@ -434,6 +444,19 @@ export function DataGrid({
       rowIndex: rowIndex,
       colKey: colDef.field
     })
+
+    if (params?.data.id !== rowSelectionModel) {
+      const selectedRow = params?.data
+      if (onSelectionChange) {
+        async function update({ newRow }) {
+          updateState({
+            newRow
+          })
+        }
+
+        onSelectionChange(selectedRow, update, params.colDef.field)
+      }
+    }
   }
 
   const gridContainerRef = useRef(null)
@@ -497,18 +520,6 @@ export function DataGrid({
     handleRowChange(newRow)
   }
 
-  const handleRowClick = params => {
-    const selectedRow = params?.data
-    if (onSelectionChange) {
-      async function update({ newRow }) {
-        updateState({
-          newRow
-        })
-      }
-      onSelectionChange(selectedRow, update)
-    }
-  }
-
   const setData = (changes, params) => {
     const id = params.node?.id
 
@@ -564,7 +575,6 @@ export function DataGrid({
               getRowId={params => params?.data?.id}
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}
-              onRowClicked={handleRowClick}
               onCellEditingStopped={onCellEditingStopped}
             />
           )}

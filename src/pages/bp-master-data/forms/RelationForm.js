@@ -128,6 +128,7 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
+                maxAccess={maxAccess}
                 required
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('relationId', newValue?.recordId || '')

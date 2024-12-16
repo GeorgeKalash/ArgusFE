@@ -28,6 +28,12 @@ const RetailTrx = () => {
   const userId = getStorageData('userData')?.userId
   const posObj = useRef(null)
 
+  const getResourceId = {
+    [SystemFunction.RetailInvoice]: ResourceIds.RetailInvoice,
+    [SystemFunction.RetailReturn]: ResourceIds.RetailInvoiceReturn,
+    [SystemFunction.RetailPurchase]: ResourceIds.RetailPurchase
+  }
+
   const {
     query: { data },
     filterBy,
@@ -42,6 +48,7 @@ const RetailTrx = () => {
     queryFn: fetchGridData,
     endpointId: PointofSaleRepository.RetailInvoice.qry,
     datasetId: ResourceIds.RetailInvoice,
+    DatasetIdAccess: getResourceId[parseInt(functionId)],
     filter: {
       filterFn: fetchWithFilter,
       default: { functionId }
@@ -97,6 +104,8 @@ const RetailTrx = () => {
   }
 
   async function getIsActivePOS() {
+    if (!posObj?.current?.posId) return
+
     return await getRequest({
       extension: PointofSaleRepository.PointOfSales.get,
       parameters: `_recordId=${posObj?.current?.posId}`
@@ -113,23 +122,32 @@ const RetailTrx = () => {
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: functionId,
+    functionId: posObj?.current?.posId ? functionId : null,
     action: async () => {
-      const country = await getDefaultCountry()
-      const isActivePOS = await getIsActivePOS()
-      if (!country)
-        stackError({
-          message: labels.noSelectedCountry
-        })
-      else if (!posObj?.current?.posId)
+      if (!posObj?.current?.posId) {
         stackError({
           message: labels.noUserPos
         })
-      else if (isActivePOS?.record.isInactive)
+
+        return
+      }
+      const country = await getDefaultCountry()
+      if (!country) {
+        stackError({
+          message: labels.noSelectedCountry
+        })
+
+        return
+      }
+      const isActivePOS = await getIsActivePOS()
+      if (isActivePOS?.record.isInactive) {
         stackError({
           message: labels.InactivePos
         })
-      else openForm()
+
+        return
+      }
+      openForm()
     },
     hasDT: false
   })
@@ -160,8 +178,8 @@ const RetailTrx = () => {
         posUser: posObj?.current,
         functionId
       },
-      width: 1330,
-      height: 800,
+      width: 1200,
+      height: 725,
       title: getCorrectLabel(parseInt(functionId))
     })
   }
