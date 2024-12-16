@@ -4,11 +4,14 @@ import { DataGrid } from './DataGrid'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
+import { useWindow } from 'src/windows'
+import POSForm from 'src/pages/rt-receipt-vouchers/forms/POSForm'
 
 export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   const { labels: labels } = useResourceQuery({
     datasetId: ResourceIds?.POSPayment
   })
+  const { stack } = useWindow()
 
   useEffect(() => {
     const initialValuePayment = [
