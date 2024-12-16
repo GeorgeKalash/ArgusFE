@@ -101,6 +101,17 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
     invalidate()
   }
 
+  const onUnPost = async () => {
+    await postRequest({
+      extension: FixedAssetsRepository.AssetsDescription.unpost,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(platformLabels.Posted)
+    window.close()
+    invalidate()
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -182,6 +193,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
     }
   ]
   const isStatusNotOne = formik.values.status !== 1
+  const isPosted = formik.values.status === 3
 
   const actions = [
     {
@@ -190,11 +202,19 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       onClick: 'onClickGL',
       disabled: !editMode
     },
+
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnPost,
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || isStatusNotOne
+      disabled: !editMode
     },
     {
       key: 'PR',
