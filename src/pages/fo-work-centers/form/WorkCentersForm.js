@@ -26,7 +26,7 @@ export default function WorkCentersForm({ labels, workCenterId, maxAccess }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      wId: null,
       workCenterId: null,
       activity: null
     },
@@ -50,10 +50,12 @@ export default function WorkCentersForm({ labels, workCenterId, maxAccess }) {
         toast.success(platformLabels.Added)
         formik.setValues(obj)
       } else toast.success(platformLabels.Edited)
-      formik.setFieldValue('recordId', formik.values.workCenterId)
+      formik.setFieldValue('wId', formik.values.workCenterId)
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.wId
 
   useEffect(() => {
     ;(async function () {
@@ -62,8 +64,7 @@ export default function WorkCentersForm({ labels, workCenterId, maxAccess }) {
           extension: FoundryRepository.WorkCenter.get,
           parameters: `_workCenterId=${workCenterId}`
         })
-
-        formik.setValues(res.record)
+        formik.setValues({ ...res.record, wId: res.record.workCenterId })
       }
     })()
   }, [])
