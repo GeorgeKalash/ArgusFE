@@ -224,9 +224,11 @@ const Home = () => {
     aging: []
   })
   const [progress, setProgress] = useState({ pctToTarget: 0, teamPctToTarget: 0 })
+
   useEffect(() => {
     getDataResult()
   }, [])
+
   useEffect(() => {
     if (data.pctToTarget > 0 || data.teamPctToTarget > 0) {
       setProgress({ pctToTarget: data.pctToTarget, teamPctToTarget: data.teamPctToTarget })
@@ -236,26 +238,24 @@ const Home = () => {
   const getDataResult = () => {
     getRequest({
       extension: DashboardRepository.SalesPersonDashboard.spDB
-    })
-      .then(res => {
-        setData({
-          imageUrl: res.record.imageUrl || '',
-          myYearlyGrowthInUnitsSoldList: res.record.myYearlyGrowthInUnitsSoldList || [],
-          myYearlyGrowthInClientsAcquiredList: res.record.myYearlyGrowthInClientsAcquiredList || [],
-          pctToTarget: res.record.pctToTarget || 0.0,
-          unitsSold: res.record.unitsSold || 0.0,
-          performanceVsTeamAverage: res.record.performanceVsTeamAverage || 0.0,
-          teamPctToTarget: res.record.teamPctToTarget || 0.0,
-          newClientsAcquired: res.record.newClientsAcquired || 0,
-          distanceToNextCommissionLeg: res.record.distanceToNextCommissionLeg || 0,
-          commissionAcquired: res.record.commissionAcquired || 0,
-          receivables: res.record.receivables || 0,
-          name: res.record.salesPerson.name || '',
-          teamRace: res.record.teamRace || [],
-          aging: res.record.aging || []
-        })
+    }).then(res => {
+      setData({
+        imageUrl: res.record.imageUrl || '',
+        myYearlyGrowthInUnitsSoldList: res.record.myYearlyGrowthInUnitsSoldList || [],
+        myYearlyGrowthInClientsAcquiredList: res.record.myYearlyGrowthInClientsAcquiredList || [],
+        pctToTarget: res.record.pctToTarget || 0.0,
+        unitsSold: res.record.unitsSold || 0.0,
+        performanceVsTeamAverage: res.record.performanceVsTeamAverage || 0.0,
+        teamPctToTarget: res.record.teamPctToTarget || 0.0,
+        newClientsAcquired: res.record.newClientsAcquired || 0,
+        distanceToNextCommissionLeg: res.record.distanceToNextCommissionLeg || 0,
+        commissionAcquired: res.record.commissionAcquired || 0,
+        receivables: res.record.receivables || 0,
+        name: res.record.salesPerson.name || '',
+        teamRace: res.record.teamRace || [],
+        aging: res.record.aging || []
       })
-      .catch(error => {})
+    })
   }
 
   const list1 = [
