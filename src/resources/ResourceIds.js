@@ -319,5 +319,6 @@ export const ResourceIds = {
   BusinessRules: 20114,
   OpenInwardTransfers: 36327,
   CaDtd: 33103,
-  IVPhysicalCountItemDetails: 44205
+  IVPhysicalCountItemDetails: 44205,
+  OpeningBalances: 30301
 }
