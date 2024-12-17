@@ -40,6 +40,7 @@ import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterfac
 import BeneficiaryListWindow from '../Windows/BeneficiaryListWindow'
 import { getStorageData } from 'src/storage/storage'
 import ReceiptVoucherForm from 'src/pages/rt-receipt-vouchers/forms/ReceiptVoucherForm'
+import CustomSwitch from 'src/components/Inputs/CustomSwitch'
 
 export default function OutwardsForm({ labels, access, recordId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -133,7 +134,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     receiptId: null,
     instantCashDetails: {},
     products: [{}],
-    ICRates: [{}]
+    ICRates: [{}],
+    includingFees: 0
   }
 
   const { formik } = useForm({
@@ -603,10 +605,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       if (!data.fcAmount && !data.lcAmount) {
         return
       }
-      
+
       if (plantId && data.countryId && data.currencyId && data.dispersalType) {
         formik.setFieldValue('products', [])
-        var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${data.dispersalType}&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}`
+        var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${data.dispersalType}&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}&_includingFees=${data.includingFees}`
 
         const res = await getRequest({
           extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
@@ -906,7 +908,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             currencyId: formik.values.currencyId,
                             dispersalType: formik.values.dispersalType,
                             lcAmount: formik.values.lcAmount || 0,
-                            fcAmount: formik.values.fcAmount || 0
+                            fcAmount: formik.values.fcAmount || 0,
+                            includingFees: formik.values.includingFees
                           })
                       }}
                       onClear={() => {
@@ -937,7 +940,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             currencyId: formik.values.currencyId,
                             dispersalType: formik.values.dispersalType,
                             lcAmount: formik.values.lcAmount || 0,
-                            fcAmount: formik.values.fcAmount || 0
+                            fcAmount: formik.values.fcAmount || 0,
+                            includingFees: formik.values.includingFees
                           })
                       }}
                       onClear={() => {
@@ -951,6 +955,26 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       maxLength={10}
                     />
                   </Grid>
+                  <Grid item xs={12}>
+                    <CustomSwitch
+                      label={labels.includeTransferFees}
+                      name='includingFees'
+                      checked={formik.values.includingFees === 1}
+                      onChange={e => {
+                        const value = e.target.checked ? 1 : 0
+                        formik.setFieldValue('includingFees', value),
+                          fillProducts({
+                            countryId: formik.values.countryId,
+                            currencyId: formik.values.currencyId,
+                            dispersalType: formik.values.dispersalType,
+                            lcAmount: formik.values.lcAmount || 0,
+                            fcAmount: formik.values.fcAmount || 0,
+                            includingFees: value
+                          })
+                      }}
+                    />
+                  </Grid>
+
                   <Grid item xs={12}>
                     <Button
                       sx={{ backgroundColor: '#908c8c', color: '#000000' }}
