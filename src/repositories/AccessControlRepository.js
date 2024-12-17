@@ -82,6 +82,13 @@ export const AccessControlRepository = {
     set: service + 'setROW',
     del: service + 'delROW'
   },
+  Notification: {
+    qry: service + 'qryNTX',
+    set: service + 'setNTX',
+    get: service + 'getNTX',
+    del: service + 'delNTX',
+    post: service + 'postNTX',
+  },
   LockedRecords: {
     qry: service + 'qryLOK',
     del: service + 'delLOK',

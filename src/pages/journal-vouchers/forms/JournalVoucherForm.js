@@ -157,7 +157,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                maxAccess={maxAccess}
+                maxAccess={!editMode && maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
