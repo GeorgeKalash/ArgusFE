@@ -308,5 +308,6 @@ export const ResourceIds = {
   GlSync: 30501,
   FyOpening: 30503,
   PurchaseInvoice: 50304,
-  PurchaseReturn: 50306
+  PurchaseReturn: 50306,
+  ItemCostHistory: 50110
 }

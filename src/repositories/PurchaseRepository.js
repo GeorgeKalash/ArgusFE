@@ -75,5 +75,8 @@ export const PurchaseRepository = {
   },
   VendorPrice: {
     get: service + 'getPRI'
+  },
+  ItemCostHistory: {
+    qry: service + 'qryIPH',
   }
 }

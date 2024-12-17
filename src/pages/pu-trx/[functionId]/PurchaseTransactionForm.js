@@ -52,6 +52,7 @@ import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
 import { DataSets } from 'src/resources/DataSets'
+import ItemCostHistory from 'src/components/Shared/ItemCostHistory'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -153,6 +154,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         applyVat: false,
         taxId: null,
         taxDetails: null,
+        costHistory: false,
         notes: ''
       }
     ],
@@ -265,7 +267,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         displayFieldWidth: 5
       },
       async onChange({ row: { update, newRow } }) {
-        if (!newRow.itemId) return
+        if (!newRow?.itemId) {
+          update({
+            enabled: false
+          })
+
+          return
+        }
         const phycialProperty = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
         const vendorPrice = await getVendorPrice(newRow, formik.values.header)
@@ -392,6 +400,28 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
+      }
+    },
+    {
+      component: 'button',
+      name: 'costHistory',
+      defaultValue: true,
+      props: {
+        imgSrc: '/images/buttonsIcons/popup-black.png'
+      },
+      label: labels.salesTrx,
+      onClick: (e, row) => {
+        if (row?.itemId) {
+          stack({
+            Component: ItemCostHistory,
+            props: {
+              itemId: row?.itemId,
+              obj: row
+            },
+            width: 1000,
+            title: platformLabels.CostHistory
+          })
+        }
       }
     },
     {
@@ -807,7 +837,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       extendedPrice: parseFloat('0').toFixed(2),
       mdValue: 0,
       taxId: rowTax,
-      taxDetails: rowTaxDetails
+      taxDetails: rowTaxDetails,
+      costHistory: true
     })
 
     formik.setFieldValue(
@@ -1493,7 +1524,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                       handleCycleButtonClick={handleCycleButtonClick}
                       onChange={e => {
                         let discount = Number(e.target.value.replace(/,/g, ''))
-                      if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
+                        if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
                           if (discount < 0 || discount > 100) discount = 0
                           formik.setFieldValue('header.tdPct', discount)
                         } else {
@@ -1506,16 +1537,16 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                       }}
                       onBlur={async e => {
                         let discountAmount = Number(e.target.value.replace(/,/g, ''))
-                      let tdPct = Number(e.target.value.replace(/,/g, ''))
-                      let tdAmount = Number(e.target.value.replace(/,/g, ''))
+                        let tdPct = Number(e.target.value.replace(/,/g, ''))
+                        let tdAmount = Number(e.target.value.replace(/,/g, ''))
 
-                      if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
-                        tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
+                        if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
+                          tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
                           formik.setFieldValue('header.tdPct', tdPct)
                         }
 
-                      if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
-                        tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
+                        if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
+                          tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
                           formik.setFieldValue('header.tdAmount', tdAmount)
                         }
                         setReCal(true)
