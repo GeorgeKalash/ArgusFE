@@ -135,7 +135,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     instantCashDetails: {},
     products: [{}],
     ICRates: [{}],
-    includingFees: 0
+    includingFees: false
   }
 
   const { formik } = useForm({
@@ -608,7 +608,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
       if (plantId && data.countryId && data.currencyId && data.dispersalType) {
         formik.setFieldValue('products', [])
-        var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${data.dispersalType}&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}&_includingFees=${data.includingFees}`
+
+        var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${
+          data.dispersalType
+        }&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}&_includingFees=${
+          data.includingFees ? 1 : 0
+        }`
 
         const res = await getRequest({
           extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
@@ -892,6 +897,15 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                     />
                   </Grid>
                   <Grid item xs={12}>
+                    <CustomSwitch
+                      readOnly={formik.values.lcAmount || formik.values.fcAmount || editMode}
+                      label={labels.includeTransferFees}
+                      name='includingFees'
+                      checked={formik.values.includingFees}
+                      onChange={formik.handleChange}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='fcAmount'
                       label={labels.fcAmount}
@@ -953,25 +967,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       }}
                       error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
                       maxLength={10}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomSwitch
-                      label={labels.includeTransferFees}
-                      name='includingFees'
-                      checked={formik.values.includingFees === 1}
-                      onChange={e => {
-                        const value = e.target.checked ? 1 : 0
-                        formik.setFieldValue('includingFees', value),
-                          fillProducts({
-                            countryId: formik.values.countryId,
-                            currencyId: formik.values.currencyId,
-                            dispersalType: formik.values.dispersalType,
-                            lcAmount: formik.values.lcAmount || 0,
-                            fcAmount: formik.values.fcAmount || 0,
-                            includingFees: value
-                          })
-                      }}
                     />
                   </Grid>
 
