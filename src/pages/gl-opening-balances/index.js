@@ -13,6 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import OpeningBalancesForm from './Forms/OpeningBalancesForm'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const OpeningBalances = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -30,17 +31,25 @@ const OpeningBalances = () => {
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
   const {
     query: { data },
     labels: _labels,
     paginationParameters,
     refetch,
     access,
-    invalidate
+    invalidate,
+    filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: GeneralLedgerRepository.OpeningBalances.page,
-    datasetId: ResourceIds.OpeningBalances
+    datasetId: ResourceIds.OpeningBalances,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [
@@ -50,7 +59,7 @@ const OpeningBalances = () => {
       flex: 1
     },
     {
-      field: 'reference',
+      field: 'accountRef',
       headerName: _labels.reference,
       flex: 1
     },
@@ -92,20 +101,28 @@ const OpeningBalances = () => {
   }
 
   function openForm(record) {
-
     stack({
       Component: OpeningBalancesForm,
       props: {
         labels: _labels,
         record,
-        recordId:
-          record ? String(record.fiscalYear * 10) + String(record.accountId) + String(record.currencyId) + String(record.costCenterId) : null,
+        recordId: record
+          ? String(record.fiscalYear * 10) +
+            String(record.accountId) +
+            String(record.currencyId) +
+            String(record.costCenterId)
+          : null,
         maxAccess: access
       },
       width: 600,
       height: 500,
       title: _labels.OpeningBalances
     })
+  }
+
+  const onApply = ({ rpbParams }) => {
+    filterBy('params', rpbParams)
+    refetch()
   }
 
   const del = async obj => {
@@ -120,7 +137,7 @@ const OpeningBalances = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} onApply={onApply} reportName={'GLOBA'} hasSearch={false}/>
       </Fixed>
       <Grow>
         <Table
