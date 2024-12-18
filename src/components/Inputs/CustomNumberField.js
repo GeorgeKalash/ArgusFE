@@ -38,6 +38,7 @@ const CustomNumberField = ({
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
+  const [isFocused, setIsFocused] = useState(false)
 
   const inputRef = useRef(null)
 

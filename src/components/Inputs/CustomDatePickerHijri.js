@@ -29,6 +29,7 @@ export default function CustomDatePickerHijri({
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)

@@ -1,6 +1,6 @@
 import React from 'react'
 import { RadioGroup, FormControlLabel, Radio } from '@mui/material'
-import { DISABLED, HIDDEN } from 'src/services/api/maxAccess'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomRadioButtonGroup = ({
   options = [],
@@ -11,11 +11,14 @@ const CustomRadioButtonGroup = ({
   iconStyle = {},
   maxAccess,
   name,
+  readOnly,
+  hidden,
+  required = false,
   ...props
 }) => {
-  const { accessLevel } = (maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? {}
+  const { _readOnly, _required, _hidden } = checkAccess(name, maxAccess, required, readOnly, hidden)
 
-  const _hidden = accessLevel === HIDDEN
+  const _disabled = _readOnly || _hidden
 
   return _hidden ? null : (
     <RadioGroup
@@ -33,9 +36,18 @@ const CustomRadioButtonGroup = ({
       {...props}
     >
       {options.map(({ label, value, disabled = false }) => {
-        const _disabled = accessLevel === DISABLED || disabled
+        const _optionDisabled = _disabled || disabled
 
-        return <FormControlLabel key={value} value={value} control={<Radio />} label={label} disabled={_disabled} />
+        return (
+          <FormControlLabel
+            key={value}
+            value={value}
+            control={<Radio />}
+            label={label}
+            disabled={_optionDisabled}
+            required={_required}
+          />
+        )
       })}
     </RadioGroup>
   )

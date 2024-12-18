@@ -39,6 +39,7 @@ const CustomDatePicker = ({
     window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
 
