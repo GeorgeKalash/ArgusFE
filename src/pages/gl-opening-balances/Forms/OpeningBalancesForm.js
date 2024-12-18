@@ -111,7 +111,7 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
+                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear ||null)
                 }}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
