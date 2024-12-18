@@ -94,8 +94,6 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
     })()
   }, [])
 
-  console.log(formik.values , 'costCenterId')
-
   return (
     <FormShell resourceId={ResourceIds.OpeningBalances} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
@@ -120,11 +118,11 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={FinancialRepository.Account.snapshot}
+                endpointId={GeneralLedgerRepository.Account.snapshot}
                 name='accountId'
                 readOnly={editMode}
                 label={labels.accountName}
-                valueField='reference'
+                valueField='accountRef'
                 displayField='name'
                 valueShow='accountRef'
                 required
@@ -132,7 +130,7 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
                 form={formik}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
-                  formik.setFieldValue('accountRef', newValue?.reference || '')
+                  formik.setFieldValue('accountRef', newValue?.accountRef || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
