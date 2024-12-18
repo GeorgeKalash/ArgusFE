@@ -1,4 +1,5 @@
-import { Button, Checkbox, FormControlLabel, Grid, Radio, RadioGroup } from '@mui/material'
+import { Button, Grid } from '@mui/material'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import React, { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -1309,38 +1310,22 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         />
                       </Grid>
                       <Grid item xs={2}>
-                        <FormControlLabel
-                          sx={{
-                            '.MuiFormControlLabel-label': {
-                              fontSize: '0.9rem'
-                            },
-                            '.MuiSvgIcon-root': {
-                              fontSize: '1.2rem'
-                            }
-                          }}
+                        <CustomCheckBox
                           name='resident'
-                          checked={formik.values.resident}
-                          onChange={formik.handleChange}
-                          control={<Checkbox defaultChecked />}
-                          label='Resident'
+                          value={formik.values.resident}
+                          onChange={event => formik.setFieldValue('resident', event.target.checked)}
+                          label={'Resident'}
+                          maxAccess={maxAccess}
                           disabled={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                         />
                       </Grid>
                       <Grid item xs={2}>
-                        <FormControlLabel
-                          sx={{
-                            '.MuiFormControlLabel-label': {
-                              fontSize: '0.9rem'
-                            },
-                            '.MuiSvgIcon-root': {
-                              fontSize: '1.2rem'
-                            }
-                          }}
+                        <CustomCheckBox
                           name='otp'
-                          checked={formik.values.otp}
-                          onChange={formik.handleChange}
-                          control={<Checkbox defaultChecked />}
-                          label='Otp'
+                          value={formik.values.otp}
+                          onChange={event => formik.setFieldValue('otp', event.target.checked)}
+                          label={'Otp'}
+                          maxAccess={maxAccess}
                           disabled={true}
                         />
                       </Grid>
