@@ -387,6 +387,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       label: labels.baseprice,
       name: 'basePrice',
       updateOn: 'blur',
+      props: {
+        decimalScale: 5
+      },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
       }
@@ -705,12 +708,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     formik.setFieldValue('ptId', res?.record?.ptId)
     formik.setFieldValue('plId', res?.record?.plId || defaults.systemDefaultsList.plId || 0)
     formik.setFieldValue('szId', res?.record?.szId)
-    formik.setFieldValue('shipToAddressId', res?.record?.shipAddressId)
-    formik.setFieldValue('billToAddressId', res?.record?.billAddressId)
+    formik.setFieldValue('shipToAddressId', res?.record?.shipAddressId || null)
+    formik.setFieldValue('billToAddressId', res?.record?.billAddressId || null)
     const shipAdd = await getAddress(res?.record?.shipAddressId)
     const billAdd = await getAddress(res?.record?.billAddressId)
-    formik.setFieldValue('shipAddress', shipAdd)
-    formik.setFieldValue('billAddress', billAdd)
+  
+    formik.setFieldValue('shipAddress', shipAdd || '')
+    formik.setFieldValue('billAddress', billAdd || '')
   }
 
   async function getItemPhysProp(itemId) {
@@ -759,7 +763,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
-      parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${formik.values.currencyId}&_plId=${formik.values.plId}`
+      parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${formik.values.currencyId}&_plId=${formik.values.plId}&_muId=0`
     })
 
     return res?.record
