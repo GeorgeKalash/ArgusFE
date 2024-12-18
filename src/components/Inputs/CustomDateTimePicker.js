@@ -5,12 +5,8 @@ import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
-
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
-
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { DateTimePicker } from '@mui/x-date-pickers'
-import { TrxType } from 'src/resources/AccessLevels'
 
 const CustomDateTimePicker = ({
   name,
@@ -44,13 +40,7 @@ const CustomDateTimePicker = ({
   const [openDatePicker, setOpenDatePicker] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
 
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
-
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
+  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)
@@ -72,8 +62,6 @@ const CustomDateTimePicker = ({
 
   const newDate = new Date(disabledRangeDate.date)
   newDate.setDate(newDate.getDate() + disabledRangeDate.day)
-
-  const isRequired = required || accessLevel === MANDATORY
 
   const getDefaultValue = () => {
     let value
@@ -143,7 +131,7 @@ const CustomDateTimePicker = ({
         shouldDisableDate={disabledDate && shouldDisableDate}
         slotProps={{
           textField: {
-            required: isRequired,
+            required: _required,
             size: size,
             fullWidth: fullWidth,
             error: error,

@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { useState } from 'react'
-
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { DatePicker, PickersActionBar } from '@mui/x-date-pickers'
 import { InputAdornment, IconButton } from '@mui/material'
@@ -9,8 +8,7 @@ import EventIcon from '@mui/icons-material/Event'
 import { AdapterMomentHijri } from '@mui/x-date-pickers/AdapterMomentHijri'
 import moment from 'moment-hijri'
 import PopperComponent from '../Shared/Popper/PopperComponent'
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
-import { TrxType } from 'src/resources/AccessLevels'
+import { checkAccess } from 'src/lib/maxAccess'
 
 export default function CustomDatePickerHijri({
   variant = 'outlined',
@@ -28,18 +26,9 @@ export default function CustomDatePickerHijri({
   editMode = false,
   ...props
 }) {
+  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
+
   const [openDatePicker, setOpenDatePicker] = useState(false)
-
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
-
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
-
-  const isRequired = required || accessLevel === MANDATORY
-  const [isFocused, setIsFocused] = useState(false)
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)
@@ -106,7 +95,8 @@ export default function CustomDatePickerHijri({
         }}
         slotProps={{
           textField: {
-            required: isRequired,
+            required: _required,
+            required: _required,
             readOnly: _readOnly,
             size: size,
             fullWidth: fullWidth,

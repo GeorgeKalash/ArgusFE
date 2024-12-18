@@ -1,7 +1,4 @@
-// ** React Imports
 import { useEffect, useRef, useState } from 'react'
-
-// ** MUI Imports
 import { InputAdornment, IconButton } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -9,11 +6,8 @@ import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
-
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
-
 import PopperComponent from '../Shared/Popper/PopperComponent'
-import { TrxType } from 'src/resources/AccessLevels'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomDatePicker = ({
   name,
@@ -46,14 +40,7 @@ const CustomDatePicker = ({
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
 
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
-
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
-  const [isFocused, setIsFocused] = useState(false)
+  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)
@@ -82,8 +69,6 @@ const CustomDatePicker = ({
 
   const newDate = new Date(disabledRangeDate.date)
   newDate.setDate(newDate.getDate() + disabledRangeDate.day)
-
-  const isRequired = required || accessLevel === MANDATORY
 
   return _hidden ? (
     <></>
@@ -128,7 +113,7 @@ const CustomDatePicker = ({
         shouldDisableDate={disabledDate && shouldDisableDate}
         slotProps={{
           textField: {
-            required: isRequired,
+            required: _required,
             size: size,
             fullWidth: fullWidth,
             error: error,

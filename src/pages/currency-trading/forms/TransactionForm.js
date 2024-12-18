@@ -794,6 +794,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       disabledSubmit={balance > 0 && true}
       previewReport={editMode}
       isParentWindow={false}
+      maxAccess={maxAccess}
     >
       <VertLayout>
         <Grow>

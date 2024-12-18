@@ -124,7 +124,7 @@ const IvItems = () => {
         sku: obj?.sku
       },
       width: 1200,
-      height: 660,
+      height: 670,
       title: _labels.items,
       nextToTitle: obj?.sku
     })
