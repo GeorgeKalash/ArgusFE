@@ -17,9 +17,7 @@ const CurrentCost = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.CurrentCost.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=itemId&_size=50&_params=${
-        params || ''
-      }`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=itemId&_size=50&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -28,11 +26,11 @@ const CurrentCost = () => {
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
-    refetch,
     filterBy,
     clearFilter,
-    access
+    paginationParameters,
+    access,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.CurrentCost.qry,
@@ -67,8 +65,7 @@ const CurrentCost = () => {
     {
       field: 'categoryName',
       headerName: _labels.categoryName,
-      flex: 1,
-      type: 'number'
+      flex: 1
     },
     {
       field: 'groupName',
