@@ -321,5 +321,6 @@ export const ResourceIds = {
   CaDtd: 33103,
   IVPhysicalCountItemDetails: 44205,
   RawMaterialCategory: 42123,
-  FoWorkCenters: 47101
+  FoWorkCenters: 47101,
+  SettingsResources: 20121
 }

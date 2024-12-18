@@ -22,40 +22,41 @@ import { useForm } from 'src/hooks/form'
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const [data, setData] = useState([])
 
-  const {
-    labels: labels,
-    refetch,
-    maxAccess,
-    invalidate,
-    filters,
-    access
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: SaleRepository.SATrx.qry,
-    datasetId: ResourceIds.SalesTrxForm
-  })
-
-  async function fetchGridData() {
-    if (!formik.values.moduleId) return
-
-    const res = await getRequest({
-      extension: SystemRepository.ModuleClassRES.qry,
-      parameters: `_filter=&_moduleId=${formik.values.moduleId}`
-    })
-
-    setData(res)
+  async function fetchWithFilter({ filters }) {
+    if (filters.moduleId)
+      return await getRequest({
+        extension: SystemRepository.ModuleClassRES.qry,
+        parameters: `_filter=${filters.qry ?? ''}&_moduleId=${filters.moduleId}`
+      })
   }
 
-  const { formik } = useForm({
-    initialValues: {
-      moduleId: null
-    },
-    maxAccess,
-    enableReinitialize: true,
-    validateOnChange: true
+  const {
+    query: { data },
+    refetch,
+    labels: labels,
+    filterBy,
+    clearFilter,
+    access,
+    filters,
+    invalidate
+  } = useResourceQuery({
+    queryFn: fetchWithFilter,
+    endpointId: SystemRepository.ModuleClassRES.qry,
+    datasetId: ResourceIds.SettingsResources,
+    filter: {
+      filterFn: fetchWithFilter,
+      default: { moduleId: 10 }
+    }
   })
+
+  const onChange = value => {
+    if (value) {
+      filterBy('moduleId', value)
+    } else {
+      clearFilter('moduleId')
+    }
+  }
 
   function openResourceGlobal(row) {
     stack({
@@ -65,7 +66,7 @@ const GlobalAuthorization = () => {
         maxAccess: access,
         row: { resourceId: row.data.key, resourceName: row.data.value, moduleId: filters.moduleId },
         invalidate,
-        resourceId: ResourceIds.GlobalAuthorization
+        resourceId: ResourceIds.SettingsResources
       },
       width: 450,
       height: 300,
@@ -81,7 +82,7 @@ const GlobalAuthorization = () => {
         maxAccess: access,
         row: { resourceId: row.data.key, resourceName: row.data.value },
         invalidate,
-        resourceId: ResourceIds.GlobalAuthorization
+        resourceId: ResourceIds.SettingsResources
       },
       width: 500,
       height: 480,
@@ -90,31 +91,37 @@ const GlobalAuthorization = () => {
   }
 
   useEffect(() => {
-    ;(async function () {
-      await fetchGridData()
-    })()
-  }, [formik.values.moduleId])
+    filters.moduleId = 10
+  }, [])
 
   return (
     <VertLayout>
       <Fixed>
         <GridToolbar
           maxAccess={access}
+          onSearch={value => {
+            filters.moduleId && filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
           labels={labels}
+          inputSearch={true}
           leftSection={
             <>
               <Grid item sx={{ width: '350px' }}>
                 <ResourceComboBox
                   datasetId={DataSets.MODULE}
-                  label={labels.module}
                   name='moduleId'
-                  values={formik.values}
+                  values={{
+                    moduleId: filters.moduleId
+                  }}
                   valueField='key'
                   displayField='value'
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('moduleId', newValue ? newValue.key : '')
+                    onChange(newValue?.key)
                   }}
-                  error={!formik.values.moduleId}
+                  error={!filters.moduleId}
                 />
               </Grid>
             </>

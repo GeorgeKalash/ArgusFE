@@ -151,7 +151,8 @@ export const SystemRepository = {
     set: service + 'set2DE'
   },
   ModuleClassRES: {
-    qry: service + 'qryRES'
+    qry: service + 'qryRES',
+    snapshot: service + 'snapshotRES'
   },
   ResourceControl: {
     qry: service + 'qryResourceControls'
