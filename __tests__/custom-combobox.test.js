@@ -63,4 +63,50 @@ describe('combobox test', () => {
     const inputElement = screen.getByRole('combobox')
     expect(inputElement).toBeDisabled()
   })
+
+  it('should handle required field validation', () => {
+    render(
+      <CustomComboBox
+        name='testComboBox'
+        store={[]}
+        value={null}
+        label='test required field'
+        required={true}
+        onChange={jest.fn()}
+      />
+    )
+
+    const inputElement = screen.getByRole('combobox')
+    expect(inputElement).toBeRequired()
+  })
+
+  it('should handle error state correctly', () => {
+    render(
+      <CustomComboBox
+        name='testComboBox'
+        store={[]}
+        value={null}
+        label='test required field'
+        onChange={jest.fn()}
+        error={true}
+      />
+    )
+    const inputElement = screen.getByRole('combobox')
+    expect(inputElement).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('should handle readOnly correctly', () => {
+    render(
+      <CustomComboBox
+        name='testComboBox'
+        store={[]}
+        value={null}
+        label='test required field'
+        onChange={jest.fn()}
+        readOnly={true}
+      />
+    )
+    const inputElement = screen.getByRole('combobox')
+    expect(inputElement).toHaveAttribute('readonly')
+  })
 })
