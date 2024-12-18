@@ -154,6 +154,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         applyVat: false,
         taxId: null,
         taxDetails: null,
+        promotionTypeName: 'Regular',
+        promotionType: '1',
         costHistory: false,
         notes: ''
       }
@@ -241,9 +243,26 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
-  console.log(formik.values)
 
   const columns = [
+    {
+      component: 'resourcecombobox',
+      name: 'promotionTypeName',
+      label: labels.promotionType,
+      props: {
+        datasetId: DataSets.PROMOTION_TYPE,
+        valueField: 'key',
+        displayField: 'value',
+        mapping: [
+          { from: 'key', to: 'promotionType' },
+          { from: 'value', to: 'promotionTypeName' }
+        ]
+      },
+      defaultValue: {
+        promotionType: '1',
+        promotionTypeName: 'Regular'
+      }
+    },
     {
       component: 'resourcelookup',
       label: labels.sku,
@@ -276,7 +295,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         }
         const phycialProperty = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        const vendorPrice = await getVendorPrice(newRow, formik.values.header)
+
+        const vendorPrice =
+          newRow?.promotionTypeId === '3' || newRow?.promotionTypeId === '4'
+            ? undefined
+            : await getVendorPrice(newRow, formik.values.header)
         fillItemObject(update, phycialProperty, itemInfo, vendorPrice)
       }
     },
@@ -751,8 +774,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     return res?.list
   }
   async function getVendorPrice(object, form) {
-    console.log(form)
-
     const res = await getRequest({
       extension: PurchaseRepository.VendorPrice.get,
       parameters: `_itemId=${object.itemId}&_vendorId=${form.vendorId}&_currencyId=${form.currencyId}&_functionId=${functionId}`
