@@ -61,11 +61,11 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      amount: yup.string().required(' '),
-      currencyId: yup.string().required(' '),
-      cashAccountId: yup.string().required(' '),
-      dtId: yup.string().required(' '),
-      date: yup.string().required(' ')
+      amount: yup.string().required(),
+      currencyId: yup.string().required(),
+      cashAccountId: yup.string().required(),
+      dtId: yup.string().required(),
+      date: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -307,6 +307,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 valueField='reference'
                 displayField='name'
                 name='cashAccountId'
+                maxAccess={maxAccess}
                 required
                 label={labels.cashAccount}
                 form={formik}

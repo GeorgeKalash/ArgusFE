@@ -55,8 +55,17 @@ import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
+import NormalDialog from 'src/components/Shared/NormalDialog'
 
-export default function SaleTransactionForm({ labels, access, recordId, functionId, window }) {
+export default function SaleTransactionForm({
+  labels,
+  access,
+  recordId,
+  functionId,
+  window,
+  lockRecord,
+  getResourceId
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -290,7 +299,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           taxId: itemInfo.taxId,
           taxCodeId: item.taxCodeId,
           taxBase: item.taxBase,
-          amount: item.amount
+          amount: item.amount ?? 0
         }))
         rowTax = itemInfo.taxId
         rowTaxDetails = details
@@ -403,7 +412,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         if (!newRow.itemId) return
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
+        const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, filteredMeasurements?.[0]?.recordId)
         await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
       }
     },
@@ -452,6 +462,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
+          await getItemConvertPrice(newRow.itemId, newRow?.muId)
           const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
           const qtyInBase = newRow?.qty * filteredItems?.muQty
 
@@ -672,28 +683,32 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   const onUnpost = async () => {
-    const res = await postRequest({
+    await postRequest({
       extension: SaleRepository.SaleTransaction.unpost,
       record: JSON.stringify(formik.values.header)
-    })
-
-    await refetchForm(res.recordId)
-    toast.success(platformLabels.Posted)
-    invalidate()
-  }
-
-  function openUnpostConfirmation(obj) {
-    stack({
-      Component: StrictUnpostConfirmation,
-      props: {
-        action() {
-          onUnpost(obj)
+    }).then(res => {
+      toast.success(platformLabels.Posted)
+      invalidate()
+      lockRecord({
+        recordId: res.recordId,
+        reference: formik.values.header.reference,
+        resourceId: getResourceId(parseInt(functionId)),
+        onSuccess: () => {
+          refetchForm(res.recordId)
+        },
+        isAlreadyLocked: name => {
+          window.close()
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              width: 600,
+              height: 200,
+              title: platformLabels.Dialog
+            }
+          })
         }
-      },
-      width: 500,
-      height: 300,
-      expandable: false,
-      title: platformLabels.UnpostConfirmation
+      })
     })
   }
 
@@ -736,13 +751,14 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       disabled: !editMode
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: isPosted,
-      onClick: () => openUnpostConfirmation(formik.values),
-      disabled: !isPosted
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
     },
     {
-      key: 'Unpost',
+      key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode
@@ -801,7 +817,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       header: {
         ...formik.values.header,
         ...saTrxHeader,
-        amount: parseFloat(saTrxHeader?.amount).toFixed(2),
+        amount: parseFloat(saTrxHeader?.amount).toFixed(2) ?? 0,
         billAddress: billAdd,
         currentDiscount:
           saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
@@ -813,6 +829,12 @@ export default function SaleTransactionForm({ labels, access, recordId, function
 
     const res = await getClientInfo(saTrxHeader.clientId)
     getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
+    !formik.values.recordId &&
+      lockRecord({
+        recordId: saTrxHeader.recordId,
+        reference: saTrxHeader.reference,
+        resourceId: getResourceId(parseInt(functionId))
+      })
   }
 
   async function getSalesTransactionPack(transactionId) {
@@ -972,10 +994,10 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     return res?.list
   }
 
-  async function getItemConvertPrice(itemId) {
+  async function getItemConvertPrice(itemId, muId) {
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
-      parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}`
+      parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}&_muId=${muId}`
     })
 
     return res?.record
@@ -1107,7 +1129,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     sumExtended: parseFloat(subTotal),
     tdAmount: parseFloat(formik.values.header.tdAmount),
     net: 0,
-    miscAmount: miscValue
+    miscAmount: miscValue || 0
   })
 
   const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.header?.qty || 0
@@ -1396,21 +1418,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     formik.setFieldValue('header.siteId', userDefaultsDataState.siteId)
   }
 
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.SalesInvoice:
-        return ResourceIds.SalesInvoice
-      case SystemFunction.SalesReturn:
-        return ResourceIds.SaleReturn
-      case SystemFunction.ConsignmentIn:
-        return ResourceIds.ClientGOCIn
-      case SystemFunction.ConsignmentOut:
-        return ResourceIds.ClientGOCOut
-      default:
-        return null
-    }
-  }
-
   async function previewBtnClicked() {
     const data = { printStatus: 2, recordId: formik.values.header.recordId }
 
@@ -1580,6 +1587,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     valueField='recordId'
                     displayField='name'
                     values={formik.values.header}
+                    maxAccess={maxAccess}
                     displayFieldWidth={1.5}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.szId', newValue ? newValue.recordId : null)
@@ -1686,7 +1694,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                 <FormControlLabel
                   control={
                     <Checkbox
-                      name='header.isVattable'
+                      name='isVattable'
+                      maxAccess={maxAccess}
                       checked={formik.values?.header?.isVattable}
                       disabled={formik?.values?.items && formik?.values?.items[0]?.itemId}
                       onChange={formik.handleChange}
@@ -1757,6 +1766,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     name='KGmetalPrice'
                     label={labels.metalPrice}
                     value={formik.values.header.KGmetalPrice}
+                    maxAccess={maxAccess}
                     readOnly
                   />
                 )}
