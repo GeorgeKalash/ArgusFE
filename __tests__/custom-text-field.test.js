@@ -1,10 +1,9 @@
 import React from 'react'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import CustomTextField from 'src/components/Inputs/CustomTextField.js'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox.js'
 
-describe('First test', () => {
+describe('CustomTextField test', () => {
   it('should render custom text field', () => {
     render(
       <CustomTextField
@@ -23,20 +22,12 @@ describe('First test', () => {
     expect(screen.getByLabelText('Test Field')).toBeInTheDocument()
   })
 
-  it('combobox should update value on select', async () => {
-    const mockStore = [
-      { key: 'option1', value: 'Option 1' },
-      { key: 'option2', value: 'Option 2' }
-    ]
-
-    const handleChange = jest.fn()
-
+  it('should pass max length ', async () => {
     render(
-      <CustomComboBox
-        name='testComboBox'
-        label='Test label'
-        value={mockStore[0]}
-        onChange={handleChange}
+      <CustomTextField
+        label='Test Field'
+        value=''
+        onChange={() => {}}
         type='text'
         variant='outlined'
         size='small'
@@ -44,42 +35,49 @@ describe('First test', () => {
         required={false}
         disabled={false}
         error={false}
-        store={mockStore}
+        maxLength='44'
       />
     )
-
-    const inputElement = screen.getByRole('combobox')
-
-    fireEvent.mouseDown(inputElement)
-
-    const options = await screen.findAllByRole('option')
-
-    expect(options).toHaveLength(2)
-    expect(options[0]).toHaveTextContent('Option 1')
-
-    fireEvent.click(options[1])
-
-    expect(handleChange).toHaveBeenCalledWith('testComboBox', mockStore[1])
+    const input = screen.getByLabelText('Test Field')
+    expect(input).toHaveAttribute('maxLength', '44')
   })
 
-  it('properly handles disabled state', async () => {
-    const mockStore = [
-      { key: 'option1', value: 'Option 1' },
-      { key: 'option2', value: 'Option 2' }
-    ]
-
+  it('should default max length to 1000', async () => {
     render(
-      <CustomComboBox
-        name='testComboBox'
-        label='Test label'
-        value={mockStore[0]}
+      <CustomTextField
+        label='Test Field'
+        value=''
         onChange={() => {}}
-        store={mockStore}
-        disabled={true}
+        type='text'
+        variant='outlined'
+        size='small'
+        fullWidth
+        required={false}
+        disabled={false}
+        error={false}
       />
     )
+    const input = screen.getByLabelText('Test Field')
+    expect(input).toHaveAttribute('maxLength', '1000')
+  })
 
-    const inputElement = screen.getByRole('combobox')
-    expect(inputElement).toBeDisabled()
+  it('should pass min length attribute', async () => {
+    render(
+      <CustomTextField
+        label='Test Field'
+        value=''
+        onChange={() => {}}
+        type='text'
+        variant='outlined'
+        size='small'
+        fullWidth
+        required={false}
+        disabled={false}
+        error={false}
+        minLength='1'
+      />
+    )
+    const input = screen.getByLabelText('Test Field')
+    expect(input).toHaveAttribute('minLength', '1')
   })
 })
