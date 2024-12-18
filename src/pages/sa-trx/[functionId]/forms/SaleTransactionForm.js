@@ -1,19 +1,17 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from 'src/lib/date-helper'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import { SystemFunction } from 'src/resources/SystemFunction'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -56,6 +54,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import NormalDialog from 'src/components/Shared/NormalDialog'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function SaleTransactionForm({
   labels,
@@ -1659,17 +1658,13 @@ export default function SaleTransactionForm({
               />
             </Grid>
             <Grid item xs={1}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='header.isVattable'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.header?.isVattable}
-                    disabled={formik?.values?.items && formik?.values?.items[0]?.itemId}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='isVattable'
+                value={formik.values?.header?.isVattable}
+                onChange={event => formik.setFieldValue('header.isVattable', event.target.checked)}
                 label={labels.VAT}
+                maxAccess={maxAccess}
+                disabled={formik?.values?.items && formik?.values?.items[0]?.itemId}
               />
             </Grid>
             <Grid item xs={2}>

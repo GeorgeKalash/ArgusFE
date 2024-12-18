@@ -1,6 +1,6 @@
 import { TextField, InputAdornment, IconButton, Box } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import DropDownArrow from '/public/images/buttonsIcons/bottom-arrow.png'
 import AddAction from '/public/images/buttonsIcons/add.png'
