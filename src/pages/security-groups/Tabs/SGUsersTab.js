@@ -1,5 +1,5 @@
 import { useForm } from 'src/hooks/form'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
