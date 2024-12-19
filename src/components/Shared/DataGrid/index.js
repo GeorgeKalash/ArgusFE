@@ -6,7 +6,7 @@ import { CacheDataProvider } from 'src/providers/CacheDataContext'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { GridDeleteIcon } from '@mui/x-data-grid'
-import { DISABLED, HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { DISABLED, FORCE_ENABLED, HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 
@@ -92,9 +92,17 @@ export function DataGrid({
   const addNewRow = params => {
     const highestIndex = params?.node?.data?.id + 1 || 1
 
-    const defaultValues = Object.fromEntries(
-      columns.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
-    )
+    const defaultValues = columns
+      .filter(({ name }) => name !== 'id')
+      .reduce((acc, { name, defaultValue }) => {
+        if (typeof defaultValue === 'object' && defaultValue !== null) {
+          acc[name] = defaultValue[name]
+        } else {
+          acc[name] = defaultValue
+        }
+
+        return acc
+      }, {})
 
     const newRow = {
       id: highestIndex,
@@ -417,7 +425,7 @@ export function DataGrid({
       : null
   ]
     .filter(Boolean)
-    .filter(({ name: field }) => accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN)
+    .filter(({ name: field, hidden }) => accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN && !hidden || (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED))
 
   const commit = data => {
     const allRowNodes = []
@@ -525,7 +533,7 @@ export function DataGrid({
   const onCellEditingStopped = params => {
     const { data, colDef } = params
 
-    if (colDef.updateOn === 'blur') {
+    if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
       process(params, data, setData)
     }
   }
