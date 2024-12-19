@@ -35,6 +35,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import MoreDetails from './MoreDetails'
 import { useForm } from 'src/hooks/form'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { SystemChecks } from 'src/resources/SystemChecks'
 
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
@@ -849,7 +850,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     (isCellPhoneTouched || isIdNoTouched) &&
     !isValidatePhoneClicked &&
     !formik.values.govCellVerified &&
-    !systemChecks?.some(item => item.checkId === 3504)
+    !systemChecks?.some(item => item.checkId === SystemChecks.CT_DISABLE_MOBILE_VERIFICATION)
 
   return (
     <FormShell
@@ -1005,7 +1006,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               },
                               title: labels.fetch,
                               width: 400,
-                              height: 350
+                              height: 400
                             })
                           }
                           disabled={
@@ -1481,7 +1482,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         disabled={
                           !formik.values.idNo ||
                           !formik.values.cellPhone ||
-                          systemChecks?.some(item => item.checkId === 3504) ||
+                          systemChecks?.some(item => item.checkId === SystemChecks.CT_DISABLE_MOBILE_VERIFICATION) ||
                           (editMode && !allowEdit)
                         }
                       >
