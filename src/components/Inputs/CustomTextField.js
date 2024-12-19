@@ -3,8 +3,7 @@ import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
 import SearchIcon from '@mui/icons-material/Search'
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
-import { TrxType } from 'src/resources/AccessLevels'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomTextField = ({
   type = 'text', //any valid HTML5 input type
@@ -28,21 +27,15 @@ const CustomTextField = ({
   search = false,
   language = '',
   hasBorder = true,
+  forceUpperCase = false,
   ...props
 }) => {
   const name = props.name
 
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
-
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
-
-  const required = props.required || accessLevel === MANDATORY
+  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
 
   const inputRef = useRef(null)
+
   const [focus, setFocus] = useState(!hasBorder)
 
   useEffect(() => {
@@ -105,45 +98,44 @@ const CustomTextField = ({
         autoComplete: 'off',
         readOnly: _readOnly,
         maxLength: maxLength,
-        dir: dir, // Set direction to right-to-left
-        inputMode: 'numeric',
-        pattern: numberField && '[0-9]*', // Allow only numeric input
+        dir: dir,
+        inputMode: numberField && 'numeric',
+        pattern: numberField && '[0-9]*',
         style: {
           textAlign: numberField && 'right',
-          '-moz-appearance': 'textfield' // Firefox
+          '-moz-appearance': 'textfield',
+          textTransform: forceUpperCase ? 'uppercase' : 'none' // Apply text transform if forceUpperCase is true
         },
-        tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
+        tabIndex: _readOnly ? -1 : 0
       }}
       autoComplete={autoComplete}
       onInput={handleInput}
       onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
       InputProps={{
-        endAdornment: (
+        endAdornment: !_readOnly && (
           <InputAdornment position='end'>
             {search && (
               <IconButton tabIndex={-1} edge='start' onClick={() => onSearch(value)} aria-label='search input'>
                 <SearchIcon sx={{ border: '0px', fontSize: 20 }} />
               </IconButton>
             )}
-            {!clearable &&
-              !readOnly &&
-              (value || value === 0) && ( // Only show the clear icon if readOnly is false
-                <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                  <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
-                </IconButton>
-              )}
+            {!clearable && !readOnly && (value || value === 0) && (
+              <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
+                <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+              </IconButton>
+            )}
           </InputAdornment>
         )
       }}
       sx={{
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
-            border: !hasBorder && 'none' // Hide border
+            border: !hasBorder && 'none'
           },
           height: `${props.height}px !important`
         }
       }}
-      required={required}
+      required={_required}
       {...props}
     />
   )

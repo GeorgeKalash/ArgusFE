@@ -1,10 +1,9 @@
 import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@mui/material'
-import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
-import { DISABLED } from 'src/services/api/maxAccess'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomComboBox = ({
   type = 'text',
@@ -35,33 +34,52 @@ const CustomComboBox = ({
   fetchData,
   refresh = true,
   isLoading,
+  onBlur = () => {},
   ...props
 }) => {
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+  const { _readOnly, _required, _hidden, _disabled } = checkAccess(
+    name,
+    props.maxAccess,
+    required,
+    readOnly,
+    false,
+    disabled
+  )
 
   const [hover, setHover] = useState(false)
 
   const [focus, setAutoFocus] = useState(autoFocus)
-
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const fieldAccess =
-    props.maxAccess && props.maxAccess?.record?.controls?.find(item => item.controlId === name)?.accessLevel
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
-  const _disabled = disabled || fieldAccess === ControlAccessLevel.Disabled
-  const _required = required || fieldAccess === ControlAccessLevel.Mandatory
-  const _hidden = fieldAccess === ControlAccessLevel.Hidden
 
   useEffect(() => {
     if (!value && store?.length > 0 && typeof defaultIndex === 'number' && defaultIndex === 0) {
       onChange(store?.[defaultIndex])
     }
   }, [defaultIndex])
+  const autocompleteRef = useRef(null)
+
+  const valueHighlightedOption = useRef(null)
+
+  const selectFirstValue = useRef(null)
+
+  useEffect(() => {
+    function handleBlur(event) {
+      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
+        selectFirstValue.current = 'click'
+      }
+    }
+
+    document.addEventListener('mousedown', handleBlur)
+
+    return () => {
+      document.removeEventListener('mousedown', handleBlur)
+    }
+  }, [])
 
   return _hidden ? (
     <></>
   ) : (
     <Autocomplete
+      ref={autocompleteRef}
       name={name}
       value={value}
       size={size}
@@ -112,6 +130,12 @@ const CustomComboBox = ({
       freeSolo={_readOnly}
       disabled={_disabled}
       required={_required}
+      onFocus={e => {
+        selectFirstValue.current = ''
+      }}
+      onHighlightChange={(event, newValue) => {
+        valueHighlightedOption.current = newValue
+      }}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
       renderOption={(props, option) => {
         if (columnsInDropDown && columnsInDropDown.length > 0) {
@@ -162,9 +186,15 @@ const CustomComboBox = ({
           onMouseLeave={() => setHover(false)}
           error={error}
           helperText={helperText}
+          onBlur={e => {
+            const listbox = document.querySelector('[role="listbox"]')
+            if (selectFirstValue.current !== 'click' && listbox && listbox.offsetHeight > 0) {
+              onBlur(e, valueHighlightedOption?.current)
+            }
+          }}
           InputProps={{
             ...params.InputProps,
-            endAdornment: (
+            endAdornment: !_readOnly && (
               <React.Fragment>
                 {hover &&
                   (_disabled ? null : isLoading ? (

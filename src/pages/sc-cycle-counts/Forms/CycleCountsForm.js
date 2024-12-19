@@ -65,7 +65,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     validateOnChange: true,
     validationSchema: yup.object({
       genVar: yup.string().required(),
-      plantId: yup.string().required(),
+      plantId: yup.number().required(),
       clientId: yup
         .string()
         .nullable()
@@ -87,32 +87,30 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
           }
 
           return true
-        }),
+        })
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: SCRepository.StockCount.set,
-          record: JSON.stringify(obj)
+      const response = await postRequest({
+        extension: SCRepository.StockCount.set,
+        record: JSON.stringify(obj)
+      })
+
+      if (!obj.recordId) {
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: response.recordId
+        }))
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+        const res2 = await getData(response.recordId)
+
+        formik.setValues({
+          ...res2.record,
+          date: formatDateFromApi(res2.record.date)
         })
+      } else toast.success(platformLabels.Edited)
 
-        if (!obj.recordId) {
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: response.recordId
-          }))
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-          const res2 = await getData(response.recordId);
-
-          formik.setValues({
-            ...res2.record,
-            date: formatDateFromApi(res2.record.date)
-          })
-        } else toast.success(platformLabels.Edited)
-
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
 
@@ -129,76 +127,90 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   }
 
   async function getData(recordId) {
-    try {
-      return await getRequest({
-        extension: SCRepository.StockCount.get,
-        parameters: `_recordId=${recordId}`
-      })
-    } catch (error) {}
+    return await getRequest({
+      extension: SCRepository.StockCount.get,
+      parameters: `_recordId=${recordId}`
+    })
   }
 
   async function refetchForm(recordId) {
     const res2 = await getData(recordId)
     res2.record.date = formatDateFromApi(res2.record.date)
 
-    return res2;
+    return res2
   }
 
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
 
   const onClose = async recId => {
-    try {
-      const res = await postRequest({
-        extension: SCRepository.StockCount.close,
-        record: JSON.stringify({ recordId: recId })
-      })
+    const res = await postRequest({
+      extension: SCRepository.StockCount.close,
+      record: JSON.stringify({ recordId: recId })
+    })
 
-      toast.success(platformLabels.Closed)
-      invalidate()
-      const res2 = await refetchForm(res.recordId)
-      formik.setValues(res2.record)
-      setStore(prevStore => ({
-        ...prevStore,
-        isClosed: res2.record.wip === 2,
-      }))
-      
-    } catch (error) {}
+    toast.success(platformLabels.Closed)
+    invalidate()
+    const res2 = await refetchForm(res.recordId)
+    formik.setValues(res2.record)
+    setStore(prevStore => ({
+      ...prevStore,
+      isClosed: res2.record.wip === 2
+    }))
   }
 
   async function onReopen() {
-    try {
-      const res = await postRequest({
-        extension: SCRepository.StockCount.reopen,
-        record: JSON.stringify(formik.values)
-      })
+    const res = await postRequest({
+      extension: SCRepository.StockCount.reopen,
+      record: JSON.stringify(formik.values)
+    })
 
-      toast.success(platformLabels.Reopened)
-      invalidate()
-      const res2 = await refetchForm(res.recordId)
-      formik.setValues(res2.record)
-      setStore(prevStore => ({
-        ...prevStore,
-        isClosed: res2.record.wip === 2,
-      }))
-      
-    } catch (error) {}
+    toast.success(platformLabels.Reopened)
+    invalidate()
+    const res2 = await refetchForm(res.recordId)
+    formik.setValues(res2.record)
+    setStore(prevStore => ({
+      ...prevStore,
+      isClosed: res2.record.wip === 2
+    }))
   }
 
   const onPost = async () => {
-    try {
-      const copy = { ...formik.values }
-      copy.date = formatDateToApi(copy.date)
+    const copy = { ...formik.values }
+    copy.date = formatDateToApi(copy.date)
 
-      const res = await postRequest({
-        extension: SCRepository.StockCount.post,
-        record: JSON.stringify(copy)
-      })
+    const res = await postRequest({
+      extension: SCRepository.StockCount.post,
+      record: JSON.stringify(copy)
+    })
 
-      toast.success(platformLabels.Posted)
-      invalidate()
-      window.close()
-    } catch (error) {}
+    toast.success(platformLabels.Posted)
+    invalidate()
+    const res2 = await refetchForm(res.recordId)
+    formik.setValues(res2.record)
+    setStore(prevStore => ({
+      ...prevStore,
+      isPosted: res2.record.status === 3
+    }))
+  }
+
+  const onUnpost = async () => {
+    const copy = { ...formik.values }
+    copy.date = formatDateToApi(copy.date)
+
+    const res = await postRequest({
+      extension: SCRepository.StockCount.unpost,
+      record: JSON.stringify(copy)
+    })
+
+    toast.success(platformLabels.Unposted)
+    invalidate()
+    const res2 = await refetchForm(res.recordId)
+    formik.setValues(res2.record)
+    setStore(prevStore => ({
+      ...prevStore,
+      isPosted: res2.record.status !== 3
+    }))
   }
 
   const actions = [
@@ -211,45 +223,46 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     {
       key: 'Close',
       condition: !isClosed,
-      onClick: () => {
-        onClose(formik.values.recordId)
-      },
-      disabled: isClosed || !editMode || isPosted
+      onClick: () => onClose(formik.values.recordId),
+      disabled: isPosted || isClosed || !editMode
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode
+      disabled: !isClosed || isPosted
     },
     {
-      key: 'Post',
-      condition: true,
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: isPosted || !editMode || !isClosed
+      disabled: !editMode || !isClosed
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode || !isClosed
     }
   ]
 
-
-
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getData(recordId);
+      if (recordId) {
+        const res = await getData(recordId)
 
-          setStore(prevStore => ({
-            ...prevStore,
-            isPosted: res.record.status === 3,
-            isClosed: res.record.wip === 2
-          }))
+        setStore(prevStore => ({
+          ...prevStore,
+          isPosted: res.record.status === 3,
+          isClosed: res.record.wip === 2
+        }))
 
-          formik.setValues({
-            ...res.record,
-            date: formatDateFromApi(res.record.date)
-          })
-        }
-      } catch (error) {}
+        formik.setValues({
+          ...res.record,
+          date: formatDateFromApi(res.record.date)
+        })
+      }
     })()
   }, [])
 
@@ -265,7 +278,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -327,7 +340,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 ]}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
+                  formik.setFieldValue('plantId', newValue ? newValue?.recordId : null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />

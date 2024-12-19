@@ -83,5 +83,12 @@ export const GeneralLedgerRepository = {
   IntegrationSystemFunction: {
     qry: service + 'qryISF',
     set2: service + 'set2ISF'
+  },
+  OpeningBalances: {
+    get: service + 'getOBA',
+    qry: service + 'qryOBA',
+    page: service + 'pageOBA',
+    set: service + 'setOBA',
+    del: service + 'delOBA',
   }
 }
