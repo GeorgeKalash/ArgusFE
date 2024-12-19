@@ -35,6 +35,7 @@ export const SCRepository = {
   StockCount: {
     page: service + 'pageHDR',
     post: service + 'postHDR',
+    unpost: service + 'unpostHDR',
     qry: service + 'qryHDR',
     get: service + 'getHDR',
     set: service + 'setHDR',

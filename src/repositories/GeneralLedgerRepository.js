@@ -89,5 +89,12 @@ export const GeneralLedgerRepository = {
     get: service + 'getSEG',
     set: service + 'setSEG',
     del: service + 'delSEG'
+  },
+  OpeningBalances: {
+    get: service + 'getOBA',
+    qry: service + 'qryOBA',
+    page: service + 'pageOBA',
+    set: service + 'setOBA',
+    del: service + 'delOBA'
   }
 }
