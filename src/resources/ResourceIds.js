@@ -321,6 +321,7 @@ export const ResourceIds = {
   OpenInwardTransfers: 36327,
   CaDtd: 33103,
   IVPhysicalCountItemDetails: 44205,
+  Segments: 30108,
   OpeningBalances: 30301,
   RawMaterialCategory: 42123,
   FoWorkCenters: 47101
