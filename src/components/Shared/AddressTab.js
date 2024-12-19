@@ -37,7 +37,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
   return (
     <VertLayout>
       <Grow>
-        <FormGrid container hideonempty xs={12} spacing={1}>
+        <FormGrid container hideonempty xs={12} spacing={2}>
           <FormGrid item hideonempty xs={12}>
             <CustomTextField
               name='name'
