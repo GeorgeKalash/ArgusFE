@@ -78,10 +78,10 @@ const CustomTextArea = ({
         }}
         autoComplete={autoComplete}
         InputProps={{
-          endAdornment: !_readOnly && (
+          endAdornment: (
             <InputAdornment position='end'>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                {!readOnly && value && (
+                {!_readOnly && value && (
                   <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
                     <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
                   </IconButton>
