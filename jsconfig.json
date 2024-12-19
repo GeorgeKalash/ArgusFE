@@ -1,8 +1,15 @@
 {
   "compilerOptions": {
-    "baseUrl": "."
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@/components/*": [
+        "components/*"
+      ]
+    }
   },
   "include": [
-    "src"
-,  ]
+    "src",
+  ]
 }
