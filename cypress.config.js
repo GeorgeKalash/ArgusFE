@@ -8,6 +8,11 @@ module.exports = defineConfig({
   viewportHeight: 1200,
   numTestsKeptInMemory: 0,
   e2e: {
-    baseUrl: 'http://localhost:3001'
+    baseUrl: 'http://localhost:3001',
+    experimentalSourceRewriting: true,
+    chromeWebSecurity: false,
+    actionOptions: {
+      force: true
+    }
   }
 })

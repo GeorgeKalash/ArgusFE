@@ -35,3 +35,7 @@ Cypress.Commands.add('login', (email = 'Hassan.Kourani@softMachine.co', password
 
   cy.get('.css-5k1n1y > img').should('be.visible')
 })
+
+Cypress.Commands.overwrite('click', (originalFn, subject, options = {}) => {
+  return originalFn(subject, { force: true, ...options })
+})
