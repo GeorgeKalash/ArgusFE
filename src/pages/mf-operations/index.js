@@ -22,7 +22,7 @@ const Operationss = () => {
 
     const response = await getRequest({
       extension: ManufacturingRepository.Operation.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=`
     })
 
     return { ...response, _startAt: _startAt }
