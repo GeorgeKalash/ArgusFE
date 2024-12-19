@@ -62,23 +62,21 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
   })
 
   async function fetchGridData(resourceId) {
-    try {
-      const classId = resourceId ?? ResourceIds.DocumentTypes
+    const classId = resourceId ?? ResourceIds.DocumentTypes
 
-      const moduleRes = await getRequest({
-        extension: AccessControlRepository.DataAccessItem.qry,
-        parameters: `_sgId=${recordId}&_filter=&_resourceId=${classId}`
-      })
-      moduleRes.list = moduleRes.list.map(item => {
-        if (item.hasAccess) {
-          item.checked = true
-        }
+    const moduleRes = await getRequest({
+      extension: AccessControlRepository.DataAccessItem.qry,
+      parameters: `_sgId=${recordId}&_filter=&_resourceId=${classId}`
+    })
+    moduleRes.list = moduleRes.list.map(item => {
+      if (item.hasAccess) {
+        item.checked = true
+      }
 
-        return item
-      })
+      return item
+    })
 
-      setData(moduleRes)
-    } catch (error) {}
+    setData(moduleRes)
   }
 
   const filtered = useMemo(
@@ -100,9 +98,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) await fetchGridData()
-      } catch (error) {}
+      if (recordId) await fetchGridData()
     })()
   }, [recordId])
 

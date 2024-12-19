@@ -42,7 +42,9 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
 
     const moduleRes = await getRequest({
       extension: AccessControlRepository.ModuleClass.qry,
-      parameters: `_sgId=${storeRecordId}&_filter=&_moduleId=${filters?.moduleId ?? 10}`
+      parameters: `_sgId=${storeRecordId}&_filter=&_moduleId=${filters?.moduleId ?? 10}&_resourceId=${
+        ResourceIds.SecurityGroup
+      }`
     })
 
     const mergedModules = moduleRes.list.map(moduleItem => {
