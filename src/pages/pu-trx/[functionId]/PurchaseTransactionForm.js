@@ -53,6 +53,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
 import { DataSets } from 'src/resources/DataSets'
 import ItemCostHistory from 'src/components/Shared/ItemCostHistory'
+import TaxDetails from 'src/components/Shared/TaxDetails'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -157,6 +158,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         promotionTypeName: 'Regular',
         promotionType: '1',
         costHistory: false,
+        taxDetailsButton: false,
         notes: ''
       }
     ],
@@ -249,6 +251,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       component: 'resourcecombobox',
       name: 'promotionTypeName',
       label: labels.promotionType,
+      hidden: true,
       props: {
         datasetId: DataSets.PROMOTION_TYPE,
         valueField: 'key',
@@ -432,7 +435,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png'
       },
-      label: labels.salesTrx,
+      label: labels.costHistory,
       onClick: (e, row) => {
         if (row?.itemId) {
           stack({
@@ -484,6 +487,28 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_EXTENDED_PRICE)
+      }
+    },
+    {
+      component: 'button',
+      name: 'taxDetailsButton',
+      defaultValue: true,
+      props: {
+        imgSrc: '/images/buttonsIcons/tax-icon.png'
+      },
+      label: labels.taxDetails,
+      onClick: (e, row) => {
+        if (row?.taxId) {
+          stack({
+            Component: TaxDetails,
+            props: {
+              taxId: row?.taxId,
+              obj: row
+            },
+            width: 1000,
+            title: platformLabels.TaxDetails
+          })
+        }
       }
     },
     {
@@ -859,7 +884,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       mdValue: 0,
       taxId: rowTax,
       taxDetails: rowTaxDetails,
-      costHistory: true
+      costHistory: true,
+      taxDetailsButton: true
     })
 
     formik.setFieldValue(

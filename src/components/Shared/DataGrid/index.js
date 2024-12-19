@@ -6,7 +6,7 @@ import { CacheDataProvider } from 'src/providers/CacheDataContext'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { GridDeleteIcon } from '@mui/x-data-grid'
-import { DISABLED, HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { DISABLED, FORCE_ENABLED, HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 
@@ -411,7 +411,7 @@ export function DataGrid({
       : null
   ]
     .filter(Boolean)
-    .filter(({ name: field }) => accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN)
+    .filter(({ name: field, hidden }) => accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN && !hidden || (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED))
 
   const commit = data => {
     const allRowNodes = []
