@@ -66,16 +66,18 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       spfId: '',
       categoryName: '',
       defSaleMUId: '',
-      pgId: ''
+      pgId: '',
+      isInactive: false,
+      rmItem: false
     },
     maxAccess,
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({
       categoryId: yup.string().required(),
       name: yup.string().required(),
-      priceType: yup.string().required(),
+      priceType: yup.number().required(),
       msId: yup.string().required(),
       lotCategoryId: yup
         .string()
@@ -95,53 +97,48 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
         })
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
+      const response = await postRequest({
+        extension: InventoryRepository.Items.set,
+        record: JSON.stringify({ ...obj, attachment: null })
+      })
 
-      try {
-        const response = await postRequest({
-          extension: InventoryRepository.Items.set,
-          record: JSON.stringify({ ...obj, attachment: null })
+      if (!obj.recordId) {
+        setOnKitItem(false)
+        toast.success(platformLabels.Added)
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
-
-        if (!formik.values.recordId) {
-          setOnKitItem(false)
-          toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: response.recordId,
-            _msId: formik.values.msId,
-            _kit: formik.values.kit,
-            _name: formik.values.name,
-            _reference: formik.values.sku,
-            description: formik.values.description
-          }))
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-        setFormikInitial(formik.values)
-
-        if (imageUploadRef.current) {
-          imageUploadRef.current.value = response.recordId
-
-          await imageUploadRef.current.submit()
-        }
-
-        const res = await getRequest({
-          extension: InventoryRepository.Items.get,
-          parameters: `_recordId=${response.recordId}`
-        })
-
         setStore(prevStore => ({
           ...prevStore,
-          _reference: res.record.sku
+          recordId: response.recordId,
+          _msId: formik.values.msId,
+          _kit: formik.values.kitItem,
+          _name: formik.values.name,
+          _reference: formik.values.sku
         }))
+      } else {
+        toast.success(platformLabels.Edited)
+      }
+      setFormikInitial(formik.values)
 
-        formik.setFieldValue('sku', res.record.sku)
-      } catch (error) {}
+      if (imageUploadRef.current) {
+        imageUploadRef.current.value = response.recordId
+
+        await imageUploadRef.current.submit()
+      }
+
+      const res = await getRequest({
+        extension: InventoryRepository.Items.get,
+        parameters: `_recordId=${response.recordId}`
+      })
+
+      setStore(prevStore => ({
+        ...prevStore,
+        _reference: res.record.sku
+      }))
+
+      formik.setFieldValue('sku', res.record.sku)
 
       invalidate()
     }
@@ -151,35 +148,37 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.Items.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.Items.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          const res2 = await getRequest({
-            extension: InventoryRepository.Category.get,
-            parameters: `_recordId=${res?.record?.categoryId}`
-          })
+        const res2 = await getRequest({
+          extension: InventoryRepository.Category.get,
+          parameters: `_recordId=${res?.record?.categoryId}`
+        })
 
-          setFormikInitial(res.record)
-          formik.setValues({ ...res.record, kitItem: !!res.record.kitItem })
-          setShowLotCategories(res.record.trackBy === 2)
-          setShowSerialProfiles(res.record.trackBy === 1)
-          setStore(prevStore => ({
-            ...prevStore,
-            nraId: res2?.record?.nraId,
-            _msId: res.record.msId,
-            _kit: !!res.record.kitItem,
-            measurementId: res.record.defSaleMUId,
-            priceGroupId: res.record.pgId,
-            returnPolicy: res.record.returnPolicyId,
-            _name: res.record.name,
-            _reference: res.record.sku
-          }))
-        }
-      } catch {}
+        res.record.rmItem = res.record.rmItem || false
+        res.record.isInactive = res.record.isInactive || false
+
+        setFormikInitial(res.record)
+
+        formik.setValues({ ...res.record, kitItem: !!res.record.kitItem })
+        setShowLotCategories(res.record.trackBy === 2)
+        setShowSerialProfiles(res.record.trackBy === 1)
+        setStore(prevStore => ({
+          ...prevStore,
+          nraId: res2?.record?.nraId,
+          _msId: res.record.msId,
+          _kit: res.record.kitItem,
+          measurementId: res.record.defSaleMUId,
+          priceGroupId: res.record.pgId,
+          returnPolicy: res.record.returnPolicyId,
+          _name: res.record.name,
+          _reference: res.record.sku
+        }))
+      }
     })()
   }, [])
 
@@ -194,30 +193,25 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      masterSource: MasterSource.Item,
       disabled: !editMode
     }
   ]
-
   useEffect(() => {
     if (formik.values.kitItem) {
       setOnKitItem(true)
+
       formik.setFieldValue('ivtItem', false)
       formik.setFieldValue('trackBy', '')
       formik.setFieldValue('valuationMethod', '')
     } else {
       setOnKitItem(false)
+      formik.setFieldValue('priceType', '')
     }
   }, [formik.values.kitItem])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Items}
-      masterSource={MasterSource.Item}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      actions={actions}
-    >
+    <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode} actions={actions}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -250,7 +244,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                         nraId: newValue?.nraId
                       }))
                       formik.setFieldValue('categoryId', newValue?.recordId || '')
-                      formik.setFieldValue('priceType', newValue?.priceType || '')
+                      if (!formik.values.kitItem) {
+                        formik.setFieldValue('priceType', newValue?.priceType || '')
+                      }
                       formik.setFieldValue('trackBy', newValue?.trackBy || '')
                       formik.setFieldValue('procurementMethod', newValue?.procurementMethod || '')
                       formik.setFieldValue('msId', newValue?.msId || '')
@@ -282,22 +278,21 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                       return formattedPriceTypes
                     }}
                     values={formik.values}
+                    defaultIndex={onKitItem && 0}
                     name='priceType'
                     label={labels.priceType}
-                    defaultIndex={onKitItem ? 0 : null}
                     readOnly={formik.values.kitItem}
                     valueField='key'
                     displayField='value'
                     displayFieldWidth={1}
-                    required={!formik.values.kitItem}
+                    required
                     maxAccess={!editMode && maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('priceType', newValue?.key || '')
+                    onChange={(e, newValue) => {
+                      formik.setFieldValue('priceType', newValue?.key || null)
                     }}
                     error={formik.touched.priceType && formik.errors.priceType}
                   />
                 </Grid>
-
                 <Grid item xs={6}>
                   <CustomTextField
                     name='sku'
@@ -458,6 +453,19 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onClear={() => formik.setFieldValue('description', '')}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name='isInactive'
+                        checked={formik.values.isInactive}
+                        onChange={formik.handleChange}
+                        maxAccess={maxAccess}
+                      />
+                    }
+                    label={labels.isInactive}
+                  />
+                </Grid>
               </Grid>
             </Grid>
 
@@ -508,7 +516,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid item xs={4}>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -520,6 +528,20 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                       />
                     }
                     label={labels.kitItem}
+                  />
+                </Grid>
+
+                <Grid item xs={4}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name='rmItem'
+                        checked={formik.values.rmItem}
+                        onChange={formik.handleChange}
+                        maxAccess={maxAccess}
+                      />
+                    }
+                    label={labels.rmItem}
                   />
                 </Grid>
 

@@ -387,6 +387,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       label: labels.baseprice,
       name: 'basePrice',
       updateOn: 'blur',
+      props: {
+        decimalScale: 5
+      },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
       }
@@ -423,7 +426,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       name: 'tax'
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.markdown,
       name: 'mdAmount',
       updateOn: 'blur',
@@ -705,12 +708,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     formik.setFieldValue('ptId', res?.record?.ptId)
     formik.setFieldValue('plId', res?.record?.plId || defaults.systemDefaultsList.plId || 0)
     formik.setFieldValue('szId', res?.record?.szId)
-    formik.setFieldValue('shipToAddressId', res?.record?.shipAddressId)
-    formik.setFieldValue('billToAddressId', res?.record?.billAddressId)
+    formik.setFieldValue('shipToAddressId', res?.record?.shipAddressId || null)
+    formik.setFieldValue('billToAddressId', res?.record?.billAddressId || null)
     const shipAdd = await getAddress(res?.record?.shipAddressId)
     const billAdd = await getAddress(res?.record?.billAddressId)
-    formik.setFieldValue('shipAddress', shipAdd)
-    formik.setFieldValue('billAddress', billAdd)
+  
+    formik.setFieldValue('shipAddress', shipAdd || '')
+    formik.setFieldValue('billAddress', billAdd || '')
   }
 
   async function getItemPhysProp(itemId) {
@@ -765,7 +769,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     return res?.record
   }
 
-  const handleCycleButtonClick = () => {
+  const handleButtonClick = () => {
     setReCal(true)
     let currentTdAmount
     let currentPctAmount
@@ -969,7 +973,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     const soItems = await getSalesOrderItems(recordId)
     await fillForm(soHeader, soItems)
   }
-
+  function setAddressValues(obj) {
+    Object.entries(obj).forEach(([key, value]) => {
+      formik.setFieldValue(key, value)
+    })
+  }
   function openAddressFilterForm(clickShip, clickBill) {
     stack({
       Component: AddressFilterForm,
@@ -978,7 +986,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         labels,
         shipment: clickShip,
         bill: clickBill,
-        form: formik
+        form: formik.values,
+        handleAddressValues: setAddressValues
       },
       width: 950,
       height: 600,
@@ -1540,9 +1549,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     value={formik.values.currentDiscount}
                     displayCycleButton={true}
                     readOnly={isClosed}
+                    isPercentIcon={cycleButtonState.text === '%' ? true : false}
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
-                    handleCycleButtonClick={handleCycleButtonClick}
+                    handleButtonClick={handleButtonClick}
+                    ShowDiscountIcons={true}
                     onChange={e => {
                       let discount = Number(e.target.value)
                       if (formik.values.tdType == 1) {
@@ -1571,7 +1582,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                         formik.setFieldValue('tdAmount', tdAmount)
                       }
 
-                      recalcGridVat(formik.values.tdType, tdPct, tdAmount, Number(e.target.value))
+                      recalcGridVat(formik.values.tdType, tdPct, tdAmount, discountAmount)
                     }}
                     onClear={() => {
                       formik.setFieldValue('tdAmount', 0)

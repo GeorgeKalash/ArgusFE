@@ -16,6 +16,7 @@ export const FixedAssetsRepository = {
     del: service + 'delGRP'
   },
   Location: {
+    page: service + 'pageLOC',
     qry: service + 'qryLOC',
     get: service + 'getLOC',
     set: service + 'setLOC',
@@ -26,5 +27,18 @@ export const FixedAssetsRepository = {
     get: service + 'getAST',
     set: service + 'setAST',
     del: service + 'delAST'
+  },
+  AssetsDescription: {
+    qry: service + 'qryDEP',
+    get: service + 'getDEP',
+    set2: service + 'set2DEP',
+    set: service + 'setDEP',
+    del: service + 'delDEP',
+    snapshot: service + 'snapshotDEP',
+    preview: service + 'previewDEP',
+    post: service + 'postDEP'
+  },
+  AssetsTableData: {
+    qry: service + 'qryDEA'
   }
 }

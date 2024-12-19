@@ -1,7 +1,6 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
-import { useState } from 'react'
-
+import { useEffect, useState } from 'react'
 import ItemsForm from '../forms/ItemsForm.js'
 import PhysicalForm from '../forms/PhysicalForm.js'
 import VendorList from '../forms/VendorList.js'
@@ -12,7 +11,7 @@ import ItemProductionForm from '../forms/ItemProductionForm.js'
 import KitForm from '../forms/KitForm.js'
 import RetailForm from '../forms/RetailForm.js'
 
-const ItemWindow = ({ recordId, labels, sku, itemName, msId, maxAccess }) => {
+const ItemWindow = ({ recordId, labels, sku, itemName, msId, maxAccess, setTitle }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [formikInitial, setFormikInitial] = useState([])
   const editMode = !!recordId
@@ -39,16 +38,14 @@ const ItemWindow = ({ recordId, labels, sku, itemName, msId, maxAccess }) => {
     { label: labels.physical, disabled: !store.recordId },
     { label: labels.vendor, disabled: !store.recordId },
     { label: labels.production, disabled: !store.recordId },
-    { label: labels.kit, disabled: !store.recordId || !store._kit },
-    { label: 'retail', disabled: !store.recordId }
+    { label: labels.kit, disabled: !store._kit },
+    { label: labels.retail, disabled: !store.recordId }
   ]
-  console.log(tabs[7].disabled, 'dis')
-  console.log(store, 'store')
 
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={660} index={0} value={activeTab}>
+      <CustomTabPanel height={670} index={0} value={activeTab}>
         <ItemsForm
           labels={labels}
           setStore={setStore}
@@ -58,28 +55,28 @@ const ItemWindow = ({ recordId, labels, sku, itemName, msId, maxAccess }) => {
           setFormikInitial={setFormikInitial}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={660} index={1} value={activeTab}>
-        <BarcodeForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
+      <CustomTabPanel index={1} value={activeTab}>
+        <BarcodeForm labels={labels} setStore={setStore} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel height={660} index={2} value={activeTab}>
+      <CustomTabPanel index={2} value={activeTab}>
         <SalesList labels={labels} maxAccess={maxAccess} store={store} formikInitial={formikInitial} />
       </CustomTabPanel>
-      <CustomTabPanel height={660} index={3} value={activeTab}>
+      <CustomTabPanel index={3} value={activeTab}>
         <PropertiesForm labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel height={660} index={4} value={activeTab}>
+      <CustomTabPanel index={4} value={activeTab}>
         <PhysicalForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} editMode={editMode} />
       </CustomTabPanel>
-      <CustomTabPanel height={660} index={5} value={activeTab}>
+      <CustomTabPanel index={5} value={activeTab}>
         <VendorList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel height={660} index={6} value={activeTab}>
+      <CustomTabPanel index={6} value={activeTab}>
         <ItemProductionForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel height={660} index={7} value={activeTab}>
+      <CustomTabPanel index={7} value={activeTab}>
         <KitForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel height={660} index={8} value={activeTab}>
+      <CustomTabPanel index={8} value={activeTab}>
         <RetailForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>

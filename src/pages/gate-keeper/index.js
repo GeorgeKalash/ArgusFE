@@ -6,6 +6,8 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import Table from 'src/components/Shared/Table'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 import cancelIcon from '../../../public/images/TableIcons/cancel.png'
 import Image from 'next/image'
 import { Box, IconButton } from '@mui/material'
@@ -42,15 +44,28 @@ const GateKeeper = () => {
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
     refetch,
+    search,
+    clear,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview2,
-    datasetId: ResourceIds.GateKeeper
+    datasetId:  ResourceIds.GateKeeper,
+    search: {
+      searchFn: fetchWithSearch
+    },
   })
+
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
 
   const columns = [
     {
@@ -131,6 +146,9 @@ const GateKeeper = () => {
 
   return (
     <VertLayout>
+      <Fixed>
+        <GridToolbar onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true}/>
+      </Fixed>
       <Grow>
         <Table
           columns={columns}

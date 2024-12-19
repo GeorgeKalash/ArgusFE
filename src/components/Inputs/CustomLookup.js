@@ -2,10 +2,9 @@ import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment, Paper }
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
-import { TrxType } from 'src/resources/AccessLevels'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomLookup = ({
   type = 'text',
@@ -15,6 +14,8 @@ const CustomLookup = ({
   secondValue,
   secondDisplayField = true,
   columnsInDropDown,
+  onSecondValueChange,
+  secondFieldName = '',
   store = [],
   setStore,
   onKeyUp,
@@ -43,7 +44,8 @@ const CustomLookup = ({
   onFocus = () => {},
   ...props
 }) => {
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
+
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
 
@@ -52,8 +54,6 @@ const CustomLookup = ({
   const selectFirstValue = useRef(null)
 
   const autocompleteRef = useRef(null)
-
-  const clear = useRef(false)
 
   const [inputValue, setInputValue] = useState(firstValue || '')
 
@@ -76,14 +76,6 @@ const CustomLookup = ({
       setInputValue('')
     }
   }, [firstValue])
-
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
-
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
-
-  const isRequired = required || accessLevel === MANDATORY
 
   return _hidden ? (
     <></>
@@ -205,7 +197,7 @@ const CustomLookup = ({
               type={type}
               variant={variant}
               label={label}
-              required={isRequired}
+              required={_required}
               onKeyUp={e => {
                 onKeyUp(e)
                 if (e.key !== 'Enter') e.target?.value?.length >= minChars ? setFreeSolo(false) : setFreeSolo(true)
@@ -293,13 +285,17 @@ const CustomLookup = ({
             variant={variant}
             placeholder={secondFieldLabel == '' ? displayField.toUpperCase() : secondFieldLabel.toUpperCase()}
             value={secondValue ? secondValue : ''}
-            required={isRequired}
-            disabled={disabled}
+            required={_required}
+            onChange={e => {
+              if (onSecondValueChange && secondFieldName) {
+                onSecondValueChange(secondFieldName, e.target.value)
+              }
+            }}
             InputProps={{
               inputProps: {
-                tabIndex: -1 // Prevent focus on the input field
+                tabIndex: _readOnly || secondFieldName === '' ? -1 : 0 // Prevent focus on the input field
               },
-              readOnly: true
+              readOnly: !!secondFieldName && !_readOnly ? false : true
             }}
             error={error}
             helperText={helperText}

@@ -11,7 +11,6 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useError } from 'src/error'
 import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
-import { formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
@@ -19,25 +18,26 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 
-export default function CloseForm({ form, labels, access, window, recordId, window2 }) {
+export default function CloseForm({ form, labels, access, window }) {
   const { stack: stackError } = useError()
-  const { postRequest } = useContext(RequestsContext)
+  const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [mismatchedFields, setMismatchedFields] = useState([])
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot
+    endpointId: RemittanceOutwardsRepository.InwardsTransfer.open
   })
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: form?.recordId,
       corId: null,
       corRef: '',
       corName: '',
       amount: null,
       receiver_firstName: '',
-      receiver_lastName: ''
+      receiver_lastName: '',
+      trackingNo: ''
     },
     access,
     enableReinitialize: true,
@@ -46,11 +46,18 @@ export default function CloseForm({ form, labels, access, window, recordId, wind
       corId: yup.string().required(),
       amount: yup.number().required(),
       receiver_firstName: yup.string().required(),
-      receiver_lastName: yup.string().required()
+      receiver_lastName: yup.string().required(),
+      trackingNo: yup.string().test('is-trackingNo-required', 'Tracking number is required', function (value) {
+        if (form.trackingNo) {
+          return !!value
+        }
+
+        return true
+      })
     }),
     onSubmit: () => {
       setMismatchedFields([])
-      const mismatches = Object.keys(formik.values).filter(key => formik.values[key] != form.values[key])
+      const mismatches = Object.keys(formik.values).filter(key => formik.values[key] != form[key])
       if (mismatches.length === 0) {
         onClose()
       } else {
@@ -61,29 +68,39 @@ export default function CloseForm({ form, labels, access, window, recordId, wind
   })
 
   const onClose = async () => {
-    try {
-      const copy = { ...form.values }
-      copy.date = formatDateToApi(copy?.date)
-      copy.baseAmount = copy?.baseAmount === '' ? copy?.amount : copy?.baseAmount
-      copy.rateCalcMethod = copy?.rateCalcMethod === '' ? 1 : copy?.rateCalcMethod
-      copy.sender_idIssueDate = copy.sender_idIssueDate ? formatDateToApi(copy?.sender_idIssueDate) : null
-      copy.sender_idExpiryDate = copy.sender_idExpiryDate ? formatDateToApi(copy?.sender_idExpiryDate) : null
-      copy.receiver_idIssueDate = copy.receiver_idIssueDate ? formatDateToApi(copy?.receiver_idIssueDate) : null
-      copy.receiver_idExpiryDate = copy.receiver_idExpiryDate ? formatDateToApi(copy?.receiver_idExpiryDate) : null
+    const copy = { ...form }
+    copy.baseAmount = copy?.baseAmount === '' ? copy?.amount : copy?.baseAmount
+    copy.rateCalcMethod = copy?.rateCalcMethod === '' ? 1 : copy?.rateCalcMethod
 
-      await postRequest({
-        extension: RemittanceOutwardsRepository.InwardsTransfer.close,
-        record: JSON.stringify(copy)
-      })
-      toast.success(platformLabels.Closed)
-      invalidate()
-      window.close()
-      window2.close()
-    } catch (error) {
-      stackError(error)
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.InwardsTransfer.close,
+      record: JSON.stringify(copy)
+    })
+
+    toast.success(platformLabels.Closed)
+
+    const res2 = await getInwards(res.recordId)
+    if (res2.record.status == 4) {
+      await postIW(res2.record)
     }
+
+    invalidate()
+    window.close()
   }
 
+  async function getInwards(recordId) {
+    return await getRequest({
+      extension: RemittanceOutwardsRepository.InwardsTransfer.get,
+      parameters: `_recordId=${recordId}`
+    })
+  }
+
+  async function postIW(obj) {
+    await postRequest({
+      extension: RemittanceOutwardsRepository.InwardsTransfer.post,
+      record: JSON.stringify(obj)
+    })
+  }
   const getFieldError = fieldName => mismatchedFields.includes(fieldName)
 
   return (
@@ -130,6 +147,20 @@ export default function CloseForm({ form, labels, access, window, recordId, wind
                   error={(formik.touched.amount && Boolean(formik.errors.amount)) || getFieldError('amount')}
                   maxLength={15}
                   decimalScale={2}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='trackingNo'
+                  label={labels.trackingNo}
+                  value={formik?.values?.trackingNo}
+                  maxLength='30'
+                  required={form?.trackingNo}
+                  onChange={e => formik.setFieldValue('trackingNo', e.target.value)}
+                  onClear={() => formik.setFieldValue('trackingNo', '')}
+                  error={
+                    (formik.touched.trackingNo && Boolean(formik.errors.trackingNo)) || getFieldError('trackingNo')
+                  }
                 />
               </Grid>
             </Grid>

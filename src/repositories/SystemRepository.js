@@ -178,6 +178,7 @@ export const SystemRepository = {
   },
   SystemChecks: {
     qry: service + 'qryCHK',
+    get: service + 'getCHK',
     set: service + 'set2CHK'
   },
   PosUsers: {
@@ -236,5 +237,9 @@ export const SystemRepository = {
   TrxDetails: {
     qry2: service + 'qryTL2',
     get: service + 'getTL'
+  },
+  BusinessRules: { qry: service + 'qryRUL', set: service + 'setRUL', get: service + 'getRUL', del: service + 'delRUL' },
+  Rules: {
+    qry: service + 'qryADR'
   }
 }

@@ -120,11 +120,13 @@ const IvItems = () => {
         labels: _labels,
         recordId: obj?.recordId,
         msId: obj?.msId,
-        maxAccess: access
+        maxAccess: access,
+        sku: obj?.sku
       },
       width: 1200,
-      height: 660,
-      title: _labels.items + ' ' + (obj?.sku || '')
+      height: 670,
+      title: _labels.items,
+      nextToTitle: obj?.sku
     })
   }
 

@@ -18,72 +18,75 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { DataGrid } from './DataGrid'
-import { useFormik } from 'formik'
-import { AuthContext } from 'src/providers/AuthContext'
 import { formatDateForGetApI, formatDateToApi } from 'src/lib/date-helper'
 import { getRate, DIRTYFIELD_AMOUNT, DIRTYFIELD_BASE_AMOUNT, DIRTYFIELD_RATE } from 'src/utils/RateCalculator'
 import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 import { VertLayout } from './Layouts/VertLayout'
+import { useForm } from 'src/hooks/form'
 
-const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
+const GeneralLedger = ({ functionId, values, valuesPath }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [formik, setformik] = useState(null)
-  const { user, setUser } = useContext(AuthContext)
   const [baseGridData, setBaseGridData] = useState({ credit: 0, debit: 0, balance: 0 })
   const [exRateValue, setExRateValue] = useState(null)
   const [currencyGridData, setCurrencyGridData] = useState([])
-
-  //states
-
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
+  const formValues = valuesPath ? valuesPath : values
+  async function fetchGridData() {
     return await getRequest({
       extension: GeneralLedgerRepository.GeneralLedger.qry,
       parameters: `_functionId=${functionId}&_recordId=${formValues.recordId}`
     })
   }
 
-  const [initialValues, setInitialData] = useState({
-    recordId: formValues.recordId,
-    reference: formValues.reference,
-    date: formValues.date,
-    functionId: functionId,
-    seqNo: '',
-
-    generalAccount: [
-      {
-        id: 1,
-        accountRef: '',
-        accountId: '',
-        accountName: '',
-        tpAccountId: '',
-        tpAccountRef: '',
-        tpAccountName: '',
-        costCenterId: '',
-        costCenterRef: '',
-        costCenterName: '',
-        currencyRef: '',
-        currencyId: '',
-        sign: '',
-        signName: '',
-        sourceReference: '',
-        notes: '',
-        functionId: functionId,
-        exRate: '',
-        amount: '',
-        baseAmount: ''
-      }
-    ]
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    },
+    datasetId: ResourceIds.GeneralLedger
   })
 
-  const formik2 = useFormik({
-    initialValues,
-    enableReinitialize: true,
-
+  const { formik: formik2 } = useForm({
+    maxAccess: access,
+    initialValues: {
+      recordId: formValues.recordId,
+      reference: formValues.reference,
+      date: formValues.date,
+      functionId: functionId,
+      seqNo: '',
+      glTransactions: [
+        {
+          id: 1,
+          accountRef: '',
+          accountId: '',
+          accountName: '',
+          tpAccountId: '',
+          tpAccountRef: '',
+          tpAccountName: '',
+          costCenterId: '',
+          costCenterRef: '',
+          costCenterName: '',
+          currencyRef: '',
+          currencyId: '',
+          sign: '',
+          signName: '',
+          sourceReference: '',
+          notes: '',
+          functionId: functionId,
+          exRate: '',
+          amount: '',
+          baseAmount: ''
+        }
+      ]
+    },
+    enableReinitialize: false,
     validationSchema: yup.object({
-      generalAccount: yup
+      glTransactions: yup
         .array()
         .of(
           yup.object().shape({
@@ -98,13 +101,13 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             exRate: yup.number().required('currencyId recordId is required')
           })
         )
-        .required('generalAccount array is required')
+        .required('glTransactions array is required')
     }),
     validateOnChange: true,
     onSubmit: async values => {
       {
         const data = {
-          transactions: values.generalAccount.map(({ id, tpAccount, functionId, ...rest }) => ({
+          transactions: values.glTransactions.map(({ id, tpAccount, functionId, ...rest }) => ({
             seqNo: id,
             ...rest
           })),
@@ -114,12 +117,12 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
           reference: values.reference
         }
 
-        const response = await postRequest({
+        await postRequest({
           extension: GeneralLedgerRepository.GeneralLedger.set2,
           record: JSON.stringify(data)
+        }).then(res => {
+          toast.success('Record Added Successfully')
         })
-
-        toast.success('Record Added Successfully')
       }
     }
   })
@@ -130,24 +133,11 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
     }
   }, [formValues])
 
-  const {
-    query: { data },
-    labels: _labels,
-    access
-  } = useResourceQuery({
-    filter: {
-      filterFn: fetchGridData,
-      default: { functionId }
-    },
-
-    datasetId: ResourceIds.GeneralLedger
-  })
-
   const isRaw = formValues.status == 1
 
   useEffect(() => {
-    if (formik2 && formik2.values && formik2.values.generalAccount && Array.isArray(formik2.values.generalAccount)) {
-      const generalAccountData = formik2.values.generalAccount
+    if (formik2 && formik2.values && formik2.values.glTransactions && Array.isArray(formik2.values.glTransactions)) {
+      const generalAccountData = formik2.values.glTransactions
 
       const parseNumber = value => {
         const number = parseFloat(value)
@@ -178,7 +168,6 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
           const currency = curr.currencyRef
 
           if (currency) {
-            // Check if currency is selected
             if (!acc[currency]) {
               acc[currency] = { credit: 0, debit: 0 }
             }
@@ -205,18 +194,18 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
 
       const currencyData = Object.entries(filteredCurrencyTotals).map(([currency, { credit, debit }]) => ({
         currency,
-        credit: credit.toLocaleString(), // Format the number with commas
-        debit: debit.toLocaleString(), // Format the number with commas
-        balance: (debit - credit).toLocaleString() // Format the number with commas
+        credit: credit.toLocaleString(),
+        debit: debit.toLocaleString(),
+        balance: (debit - credit).toLocaleString()
       }))
 
       setCurrencyGridData(currencyData)
     }
-  }, [formik2.values])
+  }, [formik2?.values])
 
   useEffect(() => {
     if (data && data.list.length > 0 && Array.isArray(data.list)) {
-      const generalAccount = data.list.map((row, idx) => ({
+      const glTransactions = data.list.map((row, idx) => ({
         id: idx,
         accountRef: row.accountRef,
         accountId: row.accountId,
@@ -240,7 +229,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
         baseAmount: row.baseAmount
       }))
 
-      formik2.setFieldValue('generalAccount', generalAccount)
+      formik2.setFieldValue('glTransactions', glTransactions)
     }
   }, [data])
 
@@ -287,18 +276,16 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
   }
 
   async function getCurrencyApi(_currencyId) {
-    try {
-      const _rateDivision = getRateDivision(functionId)
+    const _rateDivision = getRateDivision(functionId)
 
-      const response = await getRequest({
-        extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${_currencyId}&_date=${formatDateForGetApI(
-          formValues.date
-        )}&_rateDivision=${_rateDivision}`
-      })
+    const response = await getRequest({
+      extension: MultiCurrencyRepository.Currency.get,
+      parameters: `_currencyId=${_currencyId}&_date=${formatDateForGetApI(
+        formValues.date
+      )}&_rateDivision=${_rateDivision}`
+    })
 
-      return response
-    } catch (error) {}
+    return response
   }
 
   return (
@@ -310,334 +297,362 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
       infoVisible={false}
       previewReport={true}
     >
-      {formik && (
-        <Grid container spacing={2} padding={1}>
-          <Grid item xs={12} sm={6}>
-            <CustomTextField name='reference' label={_labels.reference} value={formik.reference} readOnly={true} />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <CustomDatePicker name='date' label={_labels.date} value={formik.date} readOnly={true} />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <CustomTextField name='currency' label={_labels.currency} value={formik.currencyRef} readOnly={true} />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <CustomTextField name='notes' label={_labels.notes} value={formik.notes} readOnly={true} />
-          </Grid>
-        </Grid>
-      )}
-      <Grow>
-        <DataGrid
-          onChange={value => formik2.setFieldValue('generalAccount', value)}
-          allowDelete={!!isRaw}
-          allowAddNewLine={!!isRaw}
-          value={formik2.values.generalAccount}
-          error={formik2.errors.generalAccount}
-          name='glTransactions'
-          maxAccess={access}
-          height={400}
-          columns={[
-            {
-              component: 'resourcelookup',
-              label: _labels.accountRef,
-              name: 'accountRef',
-              props: {
-                displayFieldWidth: 3,
-                endpointId: GeneralLedgerRepository.Account.snapshot,
-                parameters: '_type=',
-                valueField: 'recordId',
-                displayField: 'accountRef',
-                readOnly: !isRaw,
+      <VertLayout>
+        {formik && (
+          <Fixed>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <CustomTextField
+                  name='reference'
+                  label={_labels.reference}
+                  value={formik.reference}
+                  readOnly={true}
+                  maxAccess={access}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <CustomDatePicker
+                  name='date'
+                  label={_labels.date}
+                  value={formik.date}
+                  readOnly={true}
+                  maxAccess={access}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <CustomTextField
+                  name='currency'
+                  label={_labels.currency}
+                  value={formik.currencyRef}
+                  readOnly={true}
+                  maxAccess={access}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <CustomTextField
+                  name='notes'
+                  label={_labels.notes}
+                  value={formik.notes}
+                  readOnly={true}
+                  maxAccess={access}
+                />
+              </Grid>
+            </Grid>
+          </Fixed>
+        )}
+        <Grow>
+          <DataGrid
+            onChange={value => formik2.setFieldValue('glTransactions', value)}
+            allowDelete={!!isRaw}
+            allowAddNewLine={!!isRaw}
+            value={formik2?.values.glTransactions}
+            error={formik2?.errors.glTransactions}
+            name='glTransactions'
+            height={400}
+            maxAccess={access}
+            columns={[
+              {
+                component: 'resourcelookup',
+                label: _labels.accountRef,
+                name: 'accountRef',
+                props: {
+                  displayFieldWidth: 3,
+                  endpointId: GeneralLedgerRepository.Account.snapshot,
+                  parameters: '_type=',
+                  valueField: 'recordId',
+                  displayField: 'accountRef',
+                  readOnly: !isRaw,
 
-                columnsInDropDown: [
-                  { key: 'accountRef', value: 'reference' },
-                  { key: 'name', value: 'name' }
-                ],
-                mapping: [
-                  { from: 'recordId', to: 'accountId' },
-                  { from: 'name', to: 'accountName' },
-                  { from: 'accountRef', to: 'accountRef' }
-                ]
+                  columnsInDropDown: [
+                    { key: 'accountRef', value: 'reference' },
+                    { key: 'name', value: 'name' }
+                  ],
+                  mapping: [
+                    { from: 'recordId', to: 'accountId' },
+                    { from: 'name', to: 'accountName' },
+                    { from: 'accountRef', to: 'accountRef' }
+                  ]
+                },
+
+                async onChange({ row: { update, oldRow, newRow } }) {
+                  if (newRow.accountId) {
+                    update({
+                      currencyRef: formValues.currencyRef,
+                      currencyId: formValues.currencyId,
+                      exRate: exRateValue
+                    })
+
+                    if (formValues.currencyId) {
+                      const result = await getCurrencyApi(formValues.currencyId)
+
+                      const result2 = result?.record
+                      const exRate = result2?.exRate
+                      const rateCalcMethod = result2?.rateCalcMethod
+
+                      const updatedRateRow = getRate({
+                        amount: newRow?.amount,
+                        exRate: exRate,
+                        baseAmount: newRow?.baseAmount,
+                        rateCalcMethod: rateCalcMethod,
+                        dirtyField: DIRTYFIELD_RATE
+                      })
+                      update({
+                        exRate: updatedRateRow.exRate,
+                        amount: updatedRateRow.amount,
+                        baseAmount: updatedRateRow.baseAmount
+                      })
+                    }
+                  }
+                }
               },
+              {
+                component: 'textfield',
+                label: _labels.accountName,
+                name: 'accountName',
+                props: {
+                  readOnly: true
+                }
+              },
+              {
+                component: 'resourcelookup',
+                label: _labels.thirdPartyRef,
+                name: 'tpAccountRef',
+                props: {
+                  endpointId: FinancialRepository.Account.snapshot,
+                  valueField: 'recordId',
+                  displayField: 'reference',
+                  displayFieldWidth: 3,
+                  readOnly: !isRaw,
+                  columnsInDropDown: [
+                    { key: 'reference', value: 'reference' },
+                    { key: 'name', value: 'name' }
+                  ],
+                  mapping: [
+                    { from: 'name', to: 'tpAccountName' },
+                    { from: 'reference', to: 'tpAccountRef' },
+                    { from: 'recordId', to: 'tpAccountId' }
+                  ]
+                }
+              },
+              {
+                component: 'textfield',
+                label: _labels.thirdPartyName,
+                props: {
+                  readOnly: true
+                },
+                name: 'tpAccountName'
+              },
+              {
+                component: 'resourcelookup',
+                label: _labels.costRef,
+                name: 'costCenterRef',
 
-              async onChange({ row: { update, oldRow, newRow } }) {
-                if (newRow.accountId) {
-                  update({
-                    currencyRef: formValues.currencyRef,
-                    currencyId: formValues.currencyId,
-                    exRate: exRateValue
-                  })
+                props: {
+                  endpointId: GeneralLedgerRepository.CostCenter.snapshot,
+                  valueField: 'recordId',
+                  readOnly: !isRaw,
+                  displayField: 'reference',
+                  displayFieldWidth: 3,
+                  columnsInDropDown: [
+                    { key: 'reference', value: 'reference' },
+                    { key: 'name', value: 'name' }
+                  ],
+                  mapping: [
+                    { from: 'name', to: 'costCenterName' },
+                    { from: 'reference', to: 'costCenterRef' },
+                    { from: 'recordId', to: 'costCenterId' }
+                  ]
+                }
+              },
+              {
+                component: 'textfield',
+                label: _labels.costName,
+                props: {
+                  readOnly: true
+                },
+                name: 'costCenterName'
+              },
+              {
+                component: 'resourcecombobox',
+                label: _labels.currency,
+                name: 'currencyRef',
+                props: {
+                  endpointId: SystemRepository.Currency.qry,
+                  displayField: 'reference',
+                  readOnly: !isRaw,
+                  valueField: 'recordId',
+                  mapping: [
+                    { from: 'reference', to: 'currencyRef' },
+                    { from: 'recordId', to: 'currencyId' }
+                  ]
+                },
 
-                  if (formValues.currencyId) {
-                    const result = await getCurrencyApi(formValues.currencyId)
+                async onChange({ row: { update, oldRow, newRow } }) {
+                  if (!newRow?.currencyId) {
+                    return
+                  }
 
+                  try {
+                    const result = await getCurrencyApi(newRow?.currencyId)
                     const result2 = result?.record
                     const exRate = result2?.exRate
                     const rateCalcMethod = result2?.rateCalcMethod
 
-                    const updatedRateRow = getRate({
-                      amount: newRow?.amount,
+                    if (newRow?.amount) {
+                      const amount =
+                        rateCalcMethod === 1
+                          ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
+                          : rateCalcMethod === 2
+                          ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
+                          : 0
+                      update({
+                        baseAmount: amount
+                      })
+                    }
+
+                    update({
+                      currencyId: newRow.currencyId,
                       exRate: exRate,
-                      baseAmount: newRow?.baseAmount,
-                      rateCalcMethod: rateCalcMethod,
-                      dirtyField: DIRTYFIELD_RATE
+                      rateCalcMethod: rateCalcMethod
                     })
-                    update({
-                      exRate: updatedRateRow.exRate,
-                      amount: updatedRateRow.amount,
-                      baseAmount: updatedRateRow.baseAmount
-                    })
-                  }
+                  } catch (error) {}
                 }
-              }
-            },
-            {
-              component: 'textfield',
-              label: _labels.accountName,
-              name: 'accountName',
-              props: {
-                readOnly: true
-              }
-            },
-            {
-              component: 'resourcelookup',
-              label: _labels.thirdPartyRef,
-              name: 'tpAccountRef',
-              props: {
-                endpointId: FinancialRepository.Account.snapshot,
-                valueField: 'recordId',
-                displayField: 'reference',
-                displayFieldWidth: 3,
-                readOnly: !isRaw,
-                columnsInDropDown: [
-                  { key: 'reference', value: 'reference' },
-                  { key: 'name', value: 'name' }
-                ],
-                mapping: [
-                  { from: 'name', to: 'tpAccountName' },
-                  { from: 'reference', to: 'tpAccountRef' },
-                  { from: 'recordId', to: 'tpAccountId' }
-                ]
-              }
-            },
-            {
-              component: 'textfield',
-              label: _labels.thirdPartyName,
-              props: {
-                readOnly: true
               },
-              name: 'tpAccountName'
-            },
-            {
-              component: 'resourcelookup',
-              label: _labels.costRef,
-              name: 'costCenterRef',
-
-              props: {
-                endpointId: GeneralLedgerRepository.CostCenter.snapshot,
-                valueField: 'recordId',
-                readOnly: !isRaw,
-                displayField: 'reference',
-                displayFieldWidth: 3,
-                columnsInDropDown: [
-                  { key: 'reference', value: 'reference' },
-                  { key: 'name', value: 'name' }
-                ],
-                mapping: [
-                  { from: 'name', to: 'costCenterName' },
-                  { from: 'reference', to: 'costCenterRef' },
-                  { from: 'recordId', to: 'costCenterId' }
-                ]
-              }
-            },
-            {
-              component: 'textfield',
-              label: _labels.costName,
-              props: {
-                readOnly: true
-              },
-              name: 'costCenterName'
-            },
-            {
-              component: 'resourcecombobox',
-              label: _labels.currency,
-              name: 'currencyRef',
-              props: {
-                endpointId: SystemRepository.Currency.qry,
-                displayField: 'reference',
-                readOnly: !isRaw,
-                valueField: 'recordId',
-                mapping: [
-                  { from: 'reference', to: 'currencyRef' },
-                  { from: 'recordId', to: 'currencyId' }
-                ]
-              },
-
-              async onChange({ row: { update, oldRow, newRow } }) {
-                if (!newRow?.currencyId) {
-                  return
+              {
+                component: 'resourcecombobox',
+                label: _labels.sign,
+                name: 'signName',
+                props: {
+                  datasetId: DataSets.Sign,
+                  readOnly: !isRaw,
+                  displayField: 'value',
+                  valueField: 'key',
+                  mapping: [
+                    { from: 'value', to: 'signName' },
+                    { from: 'key', to: 'sign' }
+                  ]
                 }
-
-                try {
-                  const result = await getCurrencyApi(newRow?.currencyId)
-                  const result2 = result?.record
-                  const exRate = result2?.exRate
-                  const rateCalcMethod = result2?.rateCalcMethod
-
-                  if (newRow?.amount) {
-                    const amount =
-                      rateCalcMethod === 1
-                        ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
-                        : rateCalcMethod === 2
-                        ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
-                        : 0
-                    update({
-                      baseAmount: amount
-                    })
-                  }
-
-                  update({
-                    currencyId: newRow.currencyId,
-                    exRate: exRate,
-                    rateCalcMethod: rateCalcMethod
+              },
+              {
+                component: 'textfield',
+                label: _labels.sourceReference,
+                name: 'sourceReference',
+                props: {
+                  maxLength: 20,
+                  readOnly: !isRaw
+                }
+              },
+              {
+                component: 'textfield',
+                label: _labels.notes,
+                name: 'notes',
+                props: {
+                  readOnly: !isRaw
+                }
+              },
+              {
+                component: 'numberfield',
+                label: _labels.exRate,
+                props: {
+                  readOnly: !isRaw
+                },
+                name: 'exRate',
+                async onChange({ row: { update, oldRow, newRow } }) {
+                  const updatedRateRow = getRate({
+                    amount: newRow?.amount,
+                    exRate: newRow?.exRate,
+                    baseAmount: newRow?.baseAmount,
+                    rateCalcMethod: newRow?.rateCalcMethod,
+                    dirtyField: DIRTYFIELD_RATE
                   })
-                } catch (error) {}
-              }
-            },
-            {
-              component: 'resourcecombobox',
-              label: _labels.sign,
-              name: 'signName',
-              props: {
-                datasetId: DataSets.Sign,
-                readOnly: !isRaw,
-                displayField: 'value',
-                valueField: 'key',
-                mapping: [
-                  { from: 'value', to: 'signName' },
-                  { from: 'key', to: 'sign' }
-                ]
-              }
-            },
-            {
-              component: 'textfield',
-              label: _labels.sourceReference,
-              name: 'sourceReference',
-              props: {
-                maxLength: 20,
-                readOnly: !isRaw
-              }
-            },
-            {
-              component: 'textfield',
-              label: _labels.notes,
-              name: 'notes',
-              props: {
-                readOnly: !isRaw
-              }
-            },
-            {
-              component: 'numberfield',
-              label: _labels.exRate,
-              props: {
-                readOnly: !isRaw
+                  update({
+                    exRate: updatedRateRow.exRate,
+                    amount: updatedRateRow.amount,
+                    baseAmount: updatedRateRow.baseAmount
+                  })
+                }
               },
-              name: 'exRate',
-              async onChange({ row: { update, oldRow, newRow } }) {
-                const updatedRateRow = getRate({
-                  amount: newRow?.amount,
-                  exRate: newRow?.exRate,
-                  baseAmount: newRow?.baseAmount,
-                  rateCalcMethod: newRow?.rateCalcMethod,
-                  dirtyField: DIRTYFIELD_RATE
-                })
-                update({
-                  exRate: updatedRateRow.exRate,
-                  amount: updatedRateRow.amount,
-                  baseAmount: updatedRateRow.baseAmount
-                })
-              }
-            },
-            {
-              component: 'numberfield',
-              label: _labels.amount,
-              props: {
-                readOnly: !isRaw
+              {
+                component: 'numberfield',
+                label: _labels.amount,
+                props: {
+                  readOnly: !isRaw
+                },
+                name: 'amount',
+                async onChange({ row: { update, oldRow, newRow } }) {
+                  const updatedRateRow = getRate({
+                    amount: newRow?.amount,
+                    exRate: newRow?.exRate,
+                    baseAmount: newRow?.baseAmount,
+                    rateCalcMethod: newRow?.rateCalcMethod,
+                    dirtyField: DIRTYFIELD_AMOUNT
+                  })
+                  update({
+                    exRate: updatedRateRow.exRate,
+                    amount: updatedRateRow.amount,
+                    baseAmount: updatedRateRow.baseAmount
+                  })
+                }
               },
-              name: 'amount',
-              async onChange({ row: { update, oldRow, newRow } }) {
-                const updatedRateRow = getRate({
-                  amount: newRow?.amount,
-                  exRate: newRow?.exRate,
-                  baseAmount: newRow?.baseAmount,
-                  rateCalcMethod: newRow?.rateCalcMethod,
-                  dirtyField: DIRTYFIELD_AMOUNT
-                })
-                update({
-                  exRate: updatedRateRow.exRate,
-                  amount: updatedRateRow.amount,
-                  baseAmount: updatedRateRow.baseAmount
-                })
+              {
+                component: 'numberfield',
+                label: _labels.baseAmount,
+                props: {
+                  readOnly: !isRaw
+                },
+                name: 'baseAmount',
+                async onChange({ row: { update, oldRow, newRow } }) {
+                  const updatedRateRow = getRate({
+                    amount: newRow?.amount,
+                    exRate: newRow?.exRate,
+                    baseAmount: newRow?.baseAmount,
+                    rateCalcMethod: newRow?.rateCalcMethod,
+                    dirtyField: DIRTYFIELD_BASE_AMOUNT
+                  })
+                  update({
+                    exRate: updatedRateRow.exRate,
+                    amount: updatedRateRow.amount,
+                    baseAmount: updatedRateRow.baseAmount
+                  })
+                }
               }
-            },
-            {
-              component: 'numberfield',
-              label: _labels.baseAmount,
-              props: {
-                readOnly: !isRaw
-              },
-              name: 'baseAmount',
-              async onChange({ row: { update, oldRow, newRow } }) {
-                const updatedRateRow = getRate({
-                  amount: newRow?.amount,
-                  exRate: newRow?.exRate,
-                  baseAmount: newRow?.baseAmount,
-                  rateCalcMethod: newRow?.rateCalcMethod,
-                  dirtyField: DIRTYFIELD_BASE_AMOUNT
-                })
-                update({
-                  exRate: updatedRateRow.exRate,
-                  amount: updatedRateRow.amount,
-                  baseAmount: updatedRateRow.baseAmount
-                })
-              }
-            }
-          ]}
-        />
-      </Grow>
-      <Fixed>
-        <Grid container sx={{ flex: 1 }}>
-          <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
-            <Table
-              gridData={{ count: 1, list: [baseGridData] }}
-              maxAccess={access}
-              columns={[
-                { field: 'base', headerName: _labels.base, flex: 1 },
-                { field: 'credit', headerName: _labels.credit, type: 'number', flex: 1 },
-                { field: 'debit', headerName: _labels.debit, type: 'number', flex: 1 },
-                { field: 'balance', headerName: _labels.balance, type: 'number', flex: 1 }
-              ]}
-              rowId={['seqNo']}
-              pagination={false}
-            />
+            ]}
+          />
+        </Grow>
+        <Fixed>
+          <Grid container sx={{ flex: 1 }}>
+            <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
+              <Table
+                gridData={{ count: 1, list: [baseGridData] }}
+                maxAccess={access}
+                columns={[
+                  { field: 'base', headerName: _labels.base, flex: 1 },
+                  { field: 'credit', headerName: _labels.credit, type: 'number', flex: 1 },
+                  { field: 'debit', headerName: _labels.debit, type: 'number', flex: 1 },
+                  { field: 'balance', headerName: _labels.balance, type: 'number', flex: 1 }
+                ]}
+                rowId={['seqNo']}
+                pagination={false}
+              />
+            </Grid>
+            <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
+              <Table
+                columns={[
+                  { field: 'currency', headerName: 'Currency', flex: 1 },
+                  { field: 'debit', headerName: 'Debit', type: 'number', flex: 1 },
+                  { field: 'credit', headerName: 'Credit', type: 'number', flex: 1 },
+                  { field: 'balance', headerName: 'Balance', type: 'number', flex: 1 }
+                ]}
+                gridData={{ count: currencyGridData.length, list: currencyGridData }}
+                rowId={['recordId']}
+                paginationType='client'
+                maxAccess={access}
+                pagination={false}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
-            <Table
-              columns={[
-                { field: 'currency', headerName: 'Currency', flex: 1 },
-                { field: 'debit', headerName: 'Debit', type: 'number', flex: 1 },
-                { field: 'credit', headerName: 'Credit', type: 'number', flex: 1 },
-                { field: 'balance', headerName: 'Balance', type: 'number', flex: 1 }
-              ]}
-              gridData={{ count: currencyGridData.length, list: currencyGridData }}
-              rowId={['recordId']}
-              paginationType='client'
-              maxAccess={access}
-              pagination={false}
-            />
-          </Grid>
-        </Grid>
-      </Fixed>
+        </Fixed>
+      </VertLayout>
     </FormShell>
   )
 }
