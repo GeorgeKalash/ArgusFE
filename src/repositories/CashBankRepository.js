@@ -11,7 +11,11 @@ export const CashBankRepository = {
     set: service + 'setCBX'
   },
   CreditCard: {
-    qry: service + 'qryCC'
+    qry: service + 'qryCC',
+    get: service + 'getCC',
+    set: service + 'setCC',
+    set2: service + 'set2CC',
+    del: service + 'delCC'
   },
   CashTransaction: {
     qry: service + 'qryTRX'
@@ -102,5 +106,8 @@ export const CashBankRepository = {
     get: service + 'getDTD',
     set: service + 'setDTD',
     del: service + 'delDTD'
+  },
+  CreditCardFees: {
+    qry: service + 'qryCCS'
   }
 }

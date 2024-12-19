@@ -323,5 +323,6 @@ export const ResourceIds = {
   IVPhysicalCountItemDetails: 44205,
   OpeningBalances: 30301,
   RawMaterialCategory: 42123,
-  FoWorkCenters: 47101
+  FoWorkCenters: 47101,
+  CreditCard: 33104
 }
