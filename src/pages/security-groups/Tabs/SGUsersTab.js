@@ -35,38 +35,36 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   })
 
   const columns = [
-    [
-      {
-        component: 'resourcecombobox',
-        name: 'sgId',
-        label: labels.name,
-        props: {
-          endpointId: AccessControlRepository.SecurityGroupUser.qry,
-          parameters: `_userId=0&_filter=&_sgId=0`,
-          valueField: 'sgId',
-          displayField: 'fullName',
-          columnsInDropDown: [
-            { key: 'fullName', value: 'Name' },
-            { key: 'email', value: 'Email' }
-          ],
-          mapping: [
-            { from: 'sgId', to: 'sgId' },
-            { from: 'sgName', to: 'sgName' },
-            { from: 'email', to: 'email' },
-            { from: 'userId', to: 'userId' },
-            { from: 'fullName', to: 'fullName' }
-          ]
-        }
-      },
-      {
-        component: 'textfield',
-        label: labels.email,
-        name: 'email',
-        props: {
-          readOnly: true
-        }
+    {
+      component: 'resourcecombobox',
+      name: 'sgId',
+      label: labels.name,
+      props: {
+        endpointId: AccessControlRepository.SecurityGroupUser.qry,
+        parameters: `_userId=0&_filter=&_sgId=0`,
+        valueField: 'sgId',
+        displayField: 'fullName',
+        columnsInDropDown: [
+          { key: 'fullName', value: 'Name' },
+          { key: 'email', value: 'Email' }
+        ],
+        mapping: [
+          { from: 'sgId', to: 'sgId' },
+          { from: 'sgName', to: 'sgName' },
+          { from: 'email', to: 'email' },
+          { from: 'userId', to: 'userId' },
+          { from: 'fullName', to: 'fullName' }
+        ]
       }
-    ]
+    },
+    {
+      component: 'textfield',
+      label: labels.email,
+      name: 'email',
+      props: {
+        readOnly: true
+      }
+    }
   ]
 
   const postGroups = async obj => {
@@ -92,6 +90,7 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
       toast.success(platformLabels.Updated)
     })
   }
+
   useEffect(() => {
     if (recordId) {
       getRequest({
