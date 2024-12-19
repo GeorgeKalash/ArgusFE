@@ -48,6 +48,7 @@ const CustomLookup = ({
 
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
+  const [isFocused, setIsFocused] = useState(false)
 
   const valueHighlightedOption = useRef(null)
 
@@ -84,6 +85,8 @@ const CustomLookup = ({
       <Grid item xs={secondDisplayField ? 6 : 12}>
         <Autocomplete
           ref={autocompleteRef}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           name={name}
           key={firstValue || null}
           value={firstValue}
@@ -128,7 +131,17 @@ const CustomLookup = ({
                       {columnsInDropDown.map(
                         (header, i) =>
                           columnsInDropDown.length > 1 && (
-                            <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
+                            <Box
+                              key={i}
+                              sx={{
+                                flex: 1,
+                                fontWeight: 'bold',
+                                width: header.width || 'auto',
+                                fontSize: '0.7rem',
+                                height: '15px',
+                                display: 'flex'
+                              }}
+                            >
                               {header.value.toUpperCase()}
                             </Box>
                           )
@@ -137,7 +150,16 @@ const CustomLookup = ({
                   )}
                   <li {...props}>
                     {columnsInDropDown.map((header, i) => (
-                      <Box key={i} sx={{ flex: 1 }}>
+                      <Box
+                        key={i}
+                        sx={{
+                          flex: 1,
+                          width: header.width || 'auto',
+                          fontSize: '0.88rem',
+                          height: '20px',
+                          display: 'flex'
+                        }}
+                      >
                         {option[header.key]}
                       </Box>
                     ))}
@@ -149,7 +171,11 @@ const CustomLookup = ({
                 <Box>
                   {props.id.endsWith('-0') && (
                     <li className={props.className}>
-                      {secondDisplayField && <Box sx={{ flex: 1, fontWeight: 'bold' }}>{valueField.toUpperCase()}</Box>}
+                      {secondDisplayField && (
+                        <Box sx={{ flex: 1, fontSize: '0.88rem', height: '20px', display: 'flex', fontWeight: 'bold' }}>
+                          {valueField.toUpperCase()}
+                        </Box>
+                      )}
                       {secondDisplayField && (
                         <Box sx={{ flex: 1, fontWeight: 'bold' }}>{displayField.toUpperCase()}</Box>
                       )}
@@ -157,7 +183,11 @@ const CustomLookup = ({
                   )}
                   <li {...props}>
                     <Box sx={{ flex: 1 }}>{option[valueField]}</Box>
-                    {secondDisplayField && <Box sx={{ flex: 1 }}>{option[displayField]}</Box>}
+                    {secondDisplayField && (
+                      <Box sx={{ flex: 1, fontSize: '0.88rem', height: '20px', display: 'flex' }}>
+                        {option[displayField]}
+                      </Box>
+                    )}
                   </li>
                 </Box>
               )
@@ -234,7 +264,7 @@ const CustomLookup = ({
                         }}
                         aria-label='clear input'
                       >
-                        <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                        <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
                       </IconButton>
                     </InputAdornment>
 
@@ -246,7 +276,7 @@ const CustomLookup = ({
                           edge='end'
                           style={{ pointerEvents: 'none' }}
                         >
-                          <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 20 }} />
+                          <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 17 }} />
                         </IconButton>
                       </InputAdornment>
                     ) : (
@@ -266,8 +296,20 @@ const CustomLookup = ({
                 }),
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
-                    border: !hasBorder && 'none'
-                  }
+                    border: !hasBorder && 'none',
+                    borderColor: '#959d9e',
+                    borderTopLeftRadius: '6px',
+                    borderBottomLeftRadius: '6px'
+                  },
+                  height: '33px !important'
+                },
+                '& .MuiInputLabel-root': {
+                  fontSize: '0.90rem',
+                  top: isFocused || inputValue ? '0px' : '-3px'
+                },
+                '& .MuiInputBase-input': {
+                  fontSize: '0.90rem',
+                  color: 'black'
                 },
                 width: '100%'
               }}
@@ -305,7 +347,25 @@ const CustomLookup = ({
               '& .MuiInputBase-root': {
                 borderTopLeftRadius: 0,
                 borderBottomLeftRadius: 0
-              }
+              },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  border: !hasBorder && 'none',
+                  borderColor: '#959d9e',
+                  borderTopRightRadius: '6px',
+                  borderBottomRightRadius: '6px'
+                },
+                height: '33px !important'
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: '0.90rem',
+                top: firstValue ? '0px' : '-3px'
+              },
+              '& .MuiInputBase-input': {
+                fontSize: '0.90rem',
+                color: 'black'
+              },
+              width: '100%'
             }}
           />
         </Grid>

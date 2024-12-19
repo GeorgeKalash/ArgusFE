@@ -20,26 +20,22 @@ const RelationList = ({ store, labels, maxAccess }) => {
   const editMode = !!store.recordId
 
   const getRelationGridData = async bpId => {
-    try {
-      const res = await getRequest({
-        extension: BusinessPartnerRepository.Relation.qry,
-        parameters: `_bpId=${bpId}`
-      })
+    const res = await getRequest({
+      extension: BusinessPartnerRepository.Relation.qry,
+      parameters: `_bpId=${bpId}`
+    })
 
-      setRelationGridData(res)
-    } catch (error) {}
+    setRelationGridData(res)
   }
 
   const delRelation = async obj => {
-    try {
-      await postRequest({
-        extension: BusinessPartnerRepository.Relation.del,
-        record: JSON.stringify(obj)
-      })
+    await postRequest({
+      extension: BusinessPartnerRepository.Relation.del,
+      record: JSON.stringify(obj)
+    })
 
-      toast.success(platformLabels.Deleted)
-      await getRelationGridData(recordId)
-    } catch (error) {}
+    toast.success(platformLabels.Deleted)
+    await getRelationGridData(recordId)
   }
 
   const columns = [
@@ -87,6 +83,7 @@ const RelationList = ({ store, labels, maxAccess }) => {
         getRelationGridData: getRelationGridData
       },
       width: 500,
+      height: 400,
       title: labels.relation
     })
   }
