@@ -81,6 +81,7 @@ export const InventoryRepository = {
     page: service + 'pageIT',
     qry: service + 'qryIT',
     get: service + 'getIT',
+    get2: service + 'getIT2',
     set: service + 'setIT',
     del: service + 'delIT',
     snapshot: service + 'snapshotIT2'
