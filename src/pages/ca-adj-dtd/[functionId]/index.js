@@ -77,7 +77,7 @@ const CaDocTypeDefaults = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.dtid)
+    openForm(obj?.dtId)
   }
 
   const del = async obj => {
