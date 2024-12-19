@@ -316,7 +316,6 @@ export const ResourceIds = {
   ExpenseTypes: 52102,
   GlEoyClosing: 30502,
   BusinessRules: 20114,
-  CaDtd: 33103,
   AdjDocumentTypeDefault: 33601,
   OutwardReturnSettlement: 36326,
   OpenInwardTransfers: 36327,
