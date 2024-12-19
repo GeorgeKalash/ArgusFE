@@ -957,8 +957,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       mdAmount: parseFloat(newRow?.mdAmount) || 0,
       mdType: newRow?.mdType,
       mdValue: parseFloat(newRow?.mdValue),
-      baseLaborPrice: newRow?.baseLaborPrice,
-      totalWeightPerG: newRow?.totalWeightPerG,
+      baseLaborPrice: newRow?.baseLaborPrice || 0,
+      totalWeightPerG: newRow?.totalWeightPerG || 0,
       tdPct: formik?.values?.header?.tdPct || 0,
       dirtyField: dirtyField
     })
@@ -1477,8 +1477,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 maxAccess={maxAccess}
               />
             </Grid>
-
-            <Grid item xs={4}>
+            <Grid item xs={2.4}>
               {metalPriceVisibility && (
                 <CustomNumberField
                   name='KGmetalPrice'

@@ -533,7 +533,7 @@ export function DataGrid({
   const onCellEditingStopped = params => {
     const { data, colDef } = params
 
-    if (colDef.updateOn === 'blur') {
+    if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
       process(params, data, setData)
     }
   }
