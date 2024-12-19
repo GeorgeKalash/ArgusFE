@@ -37,16 +37,14 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId }) {
       await postRequest({
         extension: DocumentReleaseRepository.ReleaseCode.set,
         record: JSON.stringify(obj)
-      })
-        .then(response => {
-          if (!obj.recordId) {
-            toast.success(platformLabels.Added)
-            formik.setFieldValue('recordId', response.recordId)
-          } else toast.success(platformLabels.Edited)
+      }).then(response => {
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', response.recordId)
+        } else toast.success(platformLabels.Edited)
 
-          invalidate()
-        })
-        .catch(error => {})
+        invalidate()
+      })
     }
   })
 

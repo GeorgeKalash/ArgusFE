@@ -1,4 +1,3 @@
-// ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import ScheduleForm from 'src/pages/commission-schedule/Forms/ScheduleForm'
@@ -41,7 +40,6 @@ const CommissionScheduleWindow = ({
             setSelectedRecordId={setSelectedRecordId}
           />
         </CustomTabPanel>
-
         <CustomTabPanel index={1} value={activeTab}>
           <BracketsForm
             labels={labels}
