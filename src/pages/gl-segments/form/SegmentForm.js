@@ -22,8 +22,6 @@ export default function SegmentForm({ labels, obj, maxAccess, formikSegmentId, f
     endpointId: GeneralLedgerRepository.Segments.qry
   })
 
-  console.log(formikSegmentId, 'ssss')
-
   const { formik } = useForm({
     initialValues: {
       name: '',
