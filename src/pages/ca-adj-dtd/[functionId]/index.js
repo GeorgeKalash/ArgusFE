@@ -77,7 +77,7 @@ const CaDocTypeDefaults = () => {
   }
 
   const edit = obj => {
-    openForm(obj)
+    openForm(obj?.dtid)
   }
 
   const del = async obj => {
@@ -89,13 +89,13 @@ const CaDocTypeDefaults = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(record) {
+  function openForm(dtId) {
     stack({
       Component: AdjDocTypeDefaultsForm,
       props: {
         labels: _labels,
         functionId,
-        recordId: record?.dtId,
+        recordId: dtId,
         maxAccess: access
       },
       width: 500,
