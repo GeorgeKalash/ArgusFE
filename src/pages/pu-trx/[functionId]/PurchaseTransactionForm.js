@@ -459,11 +459,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       }
     },
     {
-      component: 'numberfield',
-      label: labels.tax,
-      name: 'taxDetails'
-    },
-    {
       component: 'textfield',
       label: labels.markdown,
       name: 'mdAmount',

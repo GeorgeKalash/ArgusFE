@@ -45,23 +45,27 @@ const ItemCostHistory = props => {
     {
       field: 'baseLaborPrice',
       headerName: _labels.baseLaborPrice,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'unitPrice',
       headerName: _labels.unitPrice,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'markdown',
       headerName: _labels.markdown,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
 
     {
       field: 'tradeDiscount',
       headerName: _labels.tradeDiscount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     }
   ]
 
