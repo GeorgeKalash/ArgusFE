@@ -15,7 +15,7 @@ const checkAccess = (name, maxAccess, required, readOnly, hidden, disabled) => {
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
-  const _required = (required && !_readOnly) || accessLevel === MANDATORY
+  const _required = (required && !_readOnly) || (readOnly && required) || accessLevel === MANDATORY
 
   const _disabled = disabled || accessLevel === DISABLED
 
