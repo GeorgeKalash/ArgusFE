@@ -27,6 +27,15 @@ const PuTrx = () => {
   const router = useRouter()
   const { functionId } = router.query
 
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.PurchaseInvoice
+      default:
+        return null
+    }
+  }
+
   const {
     query: { data },
     filterBy,
@@ -43,6 +52,7 @@ const PuTrx = () => {
         ? PurchaseRepository.PurchaseInvoiceHeader.qry
         : PurchaseRepository.PurchaseReturnHeader.qry,
     datasetId: ResourceIds.PurchaseInvoice,
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
       filterFn: fetchWithFilter,
       default: { functionId }

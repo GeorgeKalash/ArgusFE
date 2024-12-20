@@ -586,21 +586,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     invalidate()
   }
 
-  // function openUnpostConfirmation(obj) {
-  //   stack({
-  //     Component: StrictUnpostConfirmation,
-  //     props: {
-  //       action() {
-  //         onUnpost(obj)
-  //       }
-  //     },
-  //     width: 500,
-  //     height: 300,
-  //     expandable: false,
-  //     title: platformLabels.UnpostConfirmation
-  //   })
-  // }
-
   const actions = [
     {
       key: 'RecordRemarks',
