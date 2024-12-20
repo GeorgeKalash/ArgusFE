@@ -201,5 +201,14 @@ export const SaleRepository = {
   },
   SalesInquiries: {
     qry: service + 'qryII'
+  },
+  DraftInvoice: {
+    qry: service + 'qryDFT',
+    page: service + 'pageDFT',
+    snapshot: service + 'snapshotDFT',
+    get: service + 'getDFT',
+
+    //set2: service + 'setDFT',
+    del: service + 'delDFT'
   }
 }
