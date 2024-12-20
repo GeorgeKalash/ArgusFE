@@ -12,12 +12,10 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { useEffect } from 'react'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import ResourceGlobalForm from 'src/components/Shared/ResourceGlobalForm'
 import FieldGlobalForm from 'src/components/Shared/FieldGlobalForm'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import { SCRepository } from 'src/repositories/SCRepository'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useForm } from 'src/hooks/form'
+import ReportLayoutsForm from './forms/ReportLayoutsForm'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -58,9 +56,9 @@ const GlobalAuthorization = () => {
     }
   }
 
-  function openResourceGlobal(row) {
+  function openReportLayoutsForm(row) {
     stack({
-      Component: ResourceGlobalForm,
+      Component: ReportLayoutsForm,
       props: {
         labels: labels,
         maxAccess: access,
@@ -68,9 +66,9 @@ const GlobalAuthorization = () => {
         invalidate,
         resourceId: ResourceIds.SettingsResources
       },
-      width: 450,
-      height: 300,
-      title: labels.resourceGlobal
+      width: 650,
+      height: 600,
+      title: 'reports layouts'
     })
   }
 
@@ -144,9 +142,10 @@ const GlobalAuthorization = () => {
             field: 'Report Layout',
             headerName: labels.reportLayout,
             width: 200,
+
             cellRenderer: row => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                <IconButton size='small' onClick={() => openResourceGlobal(row)}>
+                <IconButton size='small' onClick={() => openReportLayoutsForm(row)}>
                   <Icon icon='mdi:application-edit-outline' fontSize={18} />
                 </IconButton>
               </Box>

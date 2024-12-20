@@ -50,7 +50,7 @@ const WindowToolbar = ({
       })
 
       const reportLayoutFilteringObject = await getRequest({
-        extension: SystemRepository.ReportLayoutObject,
+        extension: SystemRepository.ReportLayoutObject.qry,
         parameters: `_resourceId=${resourceId}`
       })
 

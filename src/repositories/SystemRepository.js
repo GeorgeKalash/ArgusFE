@@ -6,7 +6,7 @@ export const SystemRepository = {
   KeyValueStore: service + 'qryKVS',
   ParameterDefinition: service + 'qryRP',
   ReportLayout: service + 'qryRL',
-  ReportLayoutObject: service + 'qryRLO',
+  ReportLayoutObject: { qry: service + 'qryRLO', set2: service + 'set2RLO' },
   ReportTemplate: service + 'qryRT',
   DocumentType: {
     qry: service + 'qryDT',
