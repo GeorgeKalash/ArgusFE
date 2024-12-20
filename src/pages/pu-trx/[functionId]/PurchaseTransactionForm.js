@@ -459,6 +459,28 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       }
     },
     {
+      component: 'button',
+      name: 'taxDetailsButton',
+      defaultValue: true,
+      props: {
+        imgSrc: '/images/buttonsIcons/tax-icon.png'
+      },
+      label: labels.tax,
+      onClick: (e, row) => {
+        if (row?.taxId) {
+          stack({
+            Component: TaxDetails,
+            props: {
+              taxId: row?.taxId,
+              obj: row
+            },
+            width: 1000,
+            title: platformLabels.TaxDetails
+          })
+        }
+      }
+    },
+    {
       component: 'textfield',
       label: labels.markdown,
       name: 'mdAmount',
@@ -484,28 +506,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         getItemPriceRow(update, newRow, DIRTYFIELD_EXTENDED_PRICE)
       }
     },
-    {
-      component: 'button',
-      name: 'taxDetailsButton',
-      defaultValue: true,
-      props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
-      },
-      label: labels.taxDetails,
-      onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
-          })
-        }
-      }
-    },
+
     {
       component: 'textfield',
       label: labels.notes,
@@ -1000,7 +1001,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     sumExtended: parseFloat(subTotal),
     tdAmount: parseFloat(formik.values.header.tdAmount),
     net: 0,
-    miscAmount: miscValue
+    miscAmount: miscValue || 0
   })
 
   const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.header?.qty || 0
@@ -1595,7 +1596,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                       value={formik.values.header.miscAmount}
                       decimalScale={2}
                       readOnly={isPosted}
-                      onChange={e => formik.setFieldValue('header.miscAmount', e.target.value)}
+                      onChange={e => formik.setFieldValue('header.miscAmount', e.target.value || 0)}
                       onBlur={async () => {
                         setReCal(true)
                       }}
