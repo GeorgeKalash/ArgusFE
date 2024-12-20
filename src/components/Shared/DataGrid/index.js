@@ -6,7 +6,7 @@ import { CacheDataProvider } from 'src/providers/CacheDataContext'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { GridDeleteIcon } from '@mui/x-data-grid'
-import { DISABLED, FORCE_ENABLED, HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 
@@ -145,24 +145,28 @@ export function DataGrid({
       (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
   )
 
+  const condition = (i) => {
+    return (
+      (!allColumns?.[i]?.props?.readOnly &&
+        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED) ||
+      (allColumns?.[i]?.props?.readOnly &&
+        (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
+          accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))
+    )
+  }
+
   const findNextEditableColumn = (columnIndex, rowIndex, direction) => {
     const limit = direction > 0 ? allColumns.length : -1
     const step = direction > 0 ? 1 : -1
 
     for (let i = columnIndex + step; i !== limit; i += step) {
-      if (
-        !allColumns?.[i]?.props?.readOnly &&
-        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED
-      ) {
+      if (condition(i)) {
         return { columnIndex: i, rowIndex }
       }
     }
 
     for (let i = direction > 0 ? 0 : allColumns.length - 1; i !== limit; i += step) {
-      if (
-        !allColumns?.[i]?.props?.readOnly &&
-        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED
-      ) {
+      if (condition(i)) {
         return {
           columnIndex: i,
           rowIndex: rowIndex + direction
@@ -174,7 +178,7 @@ export function DataGrid({
   const nextColumn = columnIndex => {
     let count = 0
     for (let i = columnIndex + 1; i < allColumns.length; i++) {
-      if (!allColumns?.[i]?.props?.readOnly) {
+      if (condition(i)) {
         count++
       }
     }
@@ -427,12 +431,6 @@ export function DataGrid({
         }
       : null
   ].filter(Boolean)
-
-  // .filter(
-  //   ({ name: field, hidden }) =>
-  //     (accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN && !hidden) ||
-  //     (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
-  // )
 
   const commit = data => {
     const allRowNodes = []

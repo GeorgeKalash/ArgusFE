@@ -481,7 +481,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       }
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.markdown,
       name: 'mdAmount',
       updateOn: 'blur',
@@ -884,7 +884,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     return res?.list
   }
 
-  const handleCycleButtonClick = () => {
+  const handleButtonClick = () => {
     setReCal(true)
     let currentTdAmount
     let currentPctAmount
@@ -911,11 +911,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
       formik.setFieldValue('header.tdPct', currentPctAmount)
       formik.setFieldValue('header.tdAmount', currentTdAmount)
-      formik.setFieldValue('currentDiscount', currentTdAmount)
+      formik.setFieldValue('header.currentDiscount', currentTdAmount)
     }
     setCycleButtonState(prevState => {
       const newState = prevState.text === '%' ? { text: '123', value: 1 } : { text: '%', value: 2 }
-
       formik.setFieldValue('header.tdType', newState.value)
       recalcGridVat(newState.value, currentPctAmount, currentTdAmount, currentDiscountAmount)
 
@@ -1551,7 +1550,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                       cycleButtonLabel={cycleButtonState.text}
                       decimalScale={2}
                       readOnly={isPosted}
-                      handleCycleButtonClick={handleCycleButtonClick}
+                      isPercentIcon={cycleButtonState.text === '%' ? true : false}
+                      handleButtonClick={handleButtonClick}
+                      ShowDiscountIcons={true}
                       onChange={e => {
                         let discount = Number(e.target.value.replace(/,/g, ''))
                         if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
