@@ -1456,8 +1456,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 label={labels.tax}
                 valueField='recordId'
                 displayField={['name']}
-                readOnly
+                readOnly={!formik.values?.header?.isVattable || (formik?.values?.items?.length > 0 && formik?.values?.items[0]?.sku )}
                 values={formik.values.header}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.taxId', newValue?.recordId || null)
+                }}
                 error={formik.touched.taxId && Boolean(formik.errors.taxId)}
                 maxAccess={maxAccess}
               />
