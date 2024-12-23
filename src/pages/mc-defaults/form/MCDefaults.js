@@ -191,7 +191,7 @@ const MCDefault = ({ _labels }) => {
                 { key: 'name', value: 'Name' }
               ]}
               readOnly={formik.values.baseMetalCuId}
-              values={formik.values}
+              values={formik.values.baseMetalCuId ? formik.values : baseMetalCuId}
               onChange={(event, newValue) => {
                 setBaseMetalCuId(newValue?.recordId || '')
               }}
@@ -205,7 +205,7 @@ const MCDefault = ({ _labels }) => {
               label={_labels.baseSalesMetalId}
               valueField='recordId'
               displayField='reference'
-              values={formik.values}
+              values={formik.values.baseSalesMetalId ? formik.values : baseSalesMetalId}
               readOnly={formik.values.baseSalesMetalId}
               onChange={(event, newValue) => {
                 setBaseSalesMetalId(newValue?.recordId || '')
