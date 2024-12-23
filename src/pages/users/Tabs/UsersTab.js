@@ -88,30 +88,13 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
     }),
     onSubmit: async obj => {
       if (!storeRecordId) {
-        const copy = { ...obj }
-        const encryptedPassword = encryptePWD(copy.password)
-        copy.password = copy.confirmPassword = encryptedPassword
+        const data = { ...obj, password: encryptePWD(obj.password) }
+        await postRequest({
+          extension: AccountRepository.setID,
+          record: JSON.stringify(data)
+        })
 
-        const user = getStorageData('userData')
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/setID`,
-          {
-            record: JSON.stringify({
-              accountId: user.accountId,
-              spId: user.spId,
-              userName: copy.username,
-              password: copy.password,
-              userId: copy.recordId
-            })
-          },
-          {
-            headers: {
-              authorization: `Bearer ${user.accessToken}`,
-              'Content-Type': 'multipart/form-data'
-            }
-          }
-        )
-        postUS(copy)
+        postUS(data)
       } else postUS(obj)
     }
   })
@@ -191,7 +174,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Grid container spacing={3}>
-                <Grid item xs={12}>
+                <FormGrid item hideonempty xs={12}>
                   <CustomTextField
                     name='fullName'
                     label={labels.name}
@@ -203,8 +186,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     onClear={() => formik.setFieldValue('fullName', '')}
                     error={formik.touched.fullName && Boolean(formik.errors.fullName)}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </FormGrid>
+                <FormGrid item hideonempty xs={12}>
                   <CustomTextField
                     name='username'
                     label={labels.username}
@@ -229,8 +212,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                       }
                     }}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </FormGrid>
+                <FormGrid item hideonempty xs={12}>
                   <CustomTextField
                     name='email'
                     label={labels.email}
@@ -243,8 +226,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     onClear={() => formik.setFieldValue('email', '')}
                     error={formik.touched.email && Boolean(formik.errors.email)}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </FormGrid>
+                <FormGrid item hideonempty xs={12}>
                   <CustomTextField
                     name='cellPhone'
                     label={labels.cellPhone}
@@ -259,8 +242,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     onClear={() => formik.setFieldValue('cellPhone', '')}
                     error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </FormGrid>
+                <FormGrid item hideonempty xs={12}>
                   <ResourceComboBox
                     name='activeStatus'
                     label={labels.activeStatus}
@@ -275,8 +258,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     }}
                     error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </FormGrid>
+                <FormGrid item hideonempty xs={12}>
                   <ResourceComboBox
                     name='userType'
                     label={labels.userType}
@@ -291,8 +274,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     }}
                     error={formik.touched.userType && Boolean(formik.errors.userType)}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </FormGrid>
+                <FormGrid item hideonempty xs={12}>
                   <ResourceComboBox
                     name='languageId'
                     label={labels.language}
@@ -307,8 +290,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     }}
                     error={formik.touched.languageId && Boolean(formik.errors.languageId)}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </FormGrid>
+                <FormGrid item hideonempty xs={12}>
                   <ResourceComboBox
                     name='platform'
                     label={labels.platform}
@@ -322,12 +305,12 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     }}
                     error={formik.touched.platform && Boolean(formik.errors.platform)}
                   />
-                </Grid>
+                </FormGrid>
               </Grid>
             </Grid>
             <Grid item xs={6}>
               <Grid container spacing={3}>
-                <Grid item xs={12}>
+                <FormGrid item hideonempty xs={12}>
                   <ResourceComboBox
                     endpointId={AccessControlRepository.NotificationGroup.qry}
                     parameters='filter='
@@ -346,8 +329,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     }}
                     error={formik.touched.notificationGroupId && Boolean(formik.errors.notificationGroupId)}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </FormGrid>
+                <FormGrid item hideonempty xs={12}>
                   <ResourceLookup
                     endpointId={EmployeeRepository.Employee.snapshot}
                     parameters={{
@@ -373,8 +356,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                       formik.setFieldValue('employeeName', newValue ? newValue.fullName : '')
                     }}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </FormGrid>
+                <FormGrid item hideonempty xs={12}>
                   <ResourceLookup
                     endpointId={SaleRepository.SalesPerson.snapshot}
                     name='spId'
@@ -396,8 +379,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     }}
                     maxAccess={maxAccess}
                   />
-                </Grid>
-
+                </FormGrid>
                 <FormGrid item hideonempty xs={12}>
                   <CustomTextField
                     name='password'
@@ -427,7 +409,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
                   />
                 </FormGrid>
-                <Grid item xs={12}>
+                <FormGrid item hideonempty xs={12}>
                   <ResourceComboBox
                     name='dashboardId'
                     label={labels.dashboard}
@@ -441,8 +423,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     }}
                     error={formik.touched.dashboardId && Boolean(formik.errors.dashboardId)}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </FormGrid>
+                <FormGrid item hideonempty xs={12}>
                   <CustomCheckBox
                     name='umcpnl'
                     value={formik.values.umcpnl}
@@ -450,8 +432,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     label={labels.umcpnl}
                     maxAccess={maxAccess}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </FormGrid>
+                <FormGrid item hideonempty xs={12}>
                   <CustomCheckBox
                     name='is2FAEnabled'
                     value={formik.values.is2FAEnabled}
@@ -465,8 +447,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     disabled={!editMode}
                     maxAccess={maxAccess}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </FormGrid>
+                <FormGrid item hideonempty xs={12}>
                   <ResourceComboBox
                     name='otpDevice'
                     label={labels.otpDevice}
@@ -482,7 +464,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     }}
                     error={formik.values.is2FAEnabled && formik.touched.otpDevice && Boolean(formik.errors.otpDevice)}
                   />
-                </Grid>
+                </FormGrid>
               </Grid>
             </Grid>
           </Grid>
