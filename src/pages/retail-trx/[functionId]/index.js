@@ -116,7 +116,7 @@ const RetailTrx = () => {
     if (filters.qry)
       return await getRequest({
         extension: PointofSaleRepository.RetailInvoice.snapshot,
-        parameters: `_filter=${filters.qry}&_dgId=${functionId}&_functionId=${posObj?.current?.posId}`
+        parameters: `_filter=${filters.qry}&_functionId=${functionId}&_posId=${posObj?.current?.posId}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
