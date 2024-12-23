@@ -39,7 +39,7 @@ const RetailTrx = () => {
     filterBy,
     refetch,
     clearFilter,
-    labels: labels,
+    labels,
     access,
     paginationParameters,
     invalidate
@@ -93,7 +93,7 @@ const RetailTrx = () => {
   async function getDefaultCountry() {
     const defaultCountry = defaultsData?.list?.find(({ key }) => key === 'countryId')
 
-    return defaultCountry?.value ? parseInt(defaultCountry.value) : null
+    return parseInt(defaultCountry?.value)
   }
 
   async function getPOSUser() {
@@ -116,7 +116,7 @@ const RetailTrx = () => {
     if (filters.qry)
       return await getRequest({
         extension: PointofSaleRepository.RetailInvoice.snapshot,
-        parameters: `_filter=${filters.qry}&_dgId=${functionId}&_functionId=${posObj?.current?.posId}`
+        parameters: `_filter=${filters.qry}&_functionId=${functionId}&_posId=${posObj?.current?.posId}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
@@ -163,8 +163,6 @@ const RetailTrx = () => {
       return labels.RetailReturn
     } else if (functionId === SystemFunction.RetailPurchase) {
       return labels.RetailPurchase
-    } else {
-      return null
     }
   }
 
@@ -172,7 +170,7 @@ const RetailTrx = () => {
     stack({
       Component: RetailTransactionsForm,
       props: {
-        labels: labels,
+        labels,
         recordId,
         access,
         posUser: posObj?.current,

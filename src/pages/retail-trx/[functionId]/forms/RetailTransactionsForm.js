@@ -45,6 +45,8 @@ import { SystemChecks } from 'src/resources/SystemChecks'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { RateDivision } from 'src/resources/RateDivision'
 
 export default function RetailTransactionsForm({ labels, posUser, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -89,7 +91,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       currencyId: null,
       plantId: null,
       siteId: null,
-      spId: null,
+      spId: parseInt(posUser?.spId),
       addressId: null,
       oDocId: null,
       subtotal: 0,
@@ -102,7 +104,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       taxId: null,
       isVatable: false,
       deliveryNotes: '',
-      name: null,
+      name: '',
       street1: null,
       street2: null,
       countryId: null,
@@ -112,6 +114,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       defPriceType: null,
       posFlags: false,
       priceType: null,
+      clientName: '',
       status: 1
     },
     items: [
@@ -181,7 +184,26 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       header: yup.object({
         date: yup.string().required(),
         dtId: yup.string().required(),
-        spId: yup.string().required()
+        spId: yup.string().required(),
+        name: yup.string().test('Name-Required', 'Name is required when street1 or street2 has a value', function () {
+          const { street1, street2, name, phone, cityId } = this.parent
+
+          return !(street1 || street2 || cityId || phone) ? true : Boolean(name)
+        }),
+        cityId: yup.string().test('City-Required', 'City is required when street1 or street2 has a value', function () {
+          const { street1, street2, phone, cityId } = this.parent
+
+          if (street1 || street2 || phone) {
+            return cityId ? true : this.createError({ message: 'City is required' })
+          }
+
+          return true
+        }),
+        street1: yup.string().test('Street1-Required', 'Street1 is required when street2 has a value', function () {
+          const { street1, street2, phone, cityId } = this.parent
+
+          return !(street2 || phone || cityId) ? true : Boolean(street1)
+        })
       }),
       items: yup.array().of(
         yup.object({
@@ -202,19 +224,21 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       )
     }),
     onSubmit: async obj => {
-      let modifiedAddress = address
+      let modifiedAddress = address || { recordId: '' }
       if ((obj.header.recordId && addressModified) || !obj.header.recordId) {
         modifiedAddress.recordId = ''
       }
+      if (modifiedAddress.name && modifiedAddress.street1 && modifiedAddress.cityId) {
+        const res = await postRequest({
+          extension: SystemRepository.Address.set,
+          record: JSON.stringify(modifiedAddress)
+        })
 
-      const res = await postRequest({
-        extension: SystemRepository.Address.set,
-        record: JSON.stringify(address)
-      })
-
-      obj.header.addressId = res?.recordId
+        obj.header.addressId = res?.recordId
+      }
       obj.header.date = formatDateToApi(obj.header?.date)
       const mapWithSeqNo = rows => rows.map((row, index) => ({ ...row, seqNo: index + 1 }))
+      if (obj.header.name) obj.header.clientName = obj.header.name
 
       const payload = {
         header: obj.header,
@@ -431,12 +455,15 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
 
     const modifiedItemsList = await Promise.all(
       retailTrxItems?.map(async (item, index) => {
+        const taxDetails = await getTaxDetails(item?.taxId)
+
         return {
           ...item,
           id: index + 1,
           qty: parseFloat(item.qty).toFixed(2),
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
-          extendedPrice: parseFloat(item.extendedPrice).toFixed(2)
+          extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+          taxDetails
         }
       })
     )
@@ -451,19 +478,27 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
         }
       })
     )
+    const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')
 
     formik.setValues({
-      ...formik.values,
       recordId: retailTrxHeader.recordId || null,
       header: {
-        ...formik.values.header,
-        ...retailTrxHeader
+        ...retailTrxHeader,
+        countryId: retailTrxHeader?.countryId || countryId?.value,
+        name: addressObj?.record?.name || retailTrxHeader?.clientName,
+        street1: addressObj?.record?.street1,
+        street2: addressObj?.record?.street2,
+        phone: addressObj?.record?.phone,
+        cityId: addressObj?.record?.cityId
       },
       items: modifiedItemsList,
       cash: modifiedCashList
     })
 
-    setAddress(addressObj?.record)
+    setAddress({
+      ...(addressObj?.record || {}),
+      countryId: addressObj?.countryId || countryId?.value
+    })
   }
 
   async function getRetailTransactionPack(transactionId) {
@@ -563,19 +598,24 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     net: 0,
     miscAmount: 0
   })
-  const totalQty = _footerSummary?.totalQty || 0
-  const amount = reCal ? _footerSummary?.net : formik.values?.header.amount || 0
+
+  const totalQty = _footerSummary?.totalQty?.toFixed(2) || 0
+  const amount = reCal ? _footerSummary?.net?.toFixed(2) : parseFloat(formik.values?.header?.amount).toFixed(2) || 0
 
   const totalWeight = reCal
     ? formik.values.items.reduce((curSum, row) => {
         const curValue = parseFloat(row.weight?.toString().replace(/,/g, '')) || 0
+        const result = curSum + curValue
 
-        return curSum + curValue
+        return (parseFloat(result) || 0).toFixed(2)
       }, 0)
-    : formik.values?.header.weight || 0
+    : parseFloat(formik.values?.header?.weight || 0).toFixed(2)
 
-  const subtotal = reCal ? subTotal : formik.values?.header.subtotal || 0
-  const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.header.vatAmount || 0
+  const subtotal = reCal ? subTotal?.toFixed(2) : parseFloat(formik.values?.header?.subtotal).toFixed(2) || 0
+
+  const vatAmount = reCal
+    ? _footerSummary?.sumVat.toFixed(2)
+    : parseFloat(formik.values?.header.vatAmount).toFixed(2) || 0
 
   const cashAmount = formik.values.cash.reduce((curSum, row) => {
     const curValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
@@ -912,7 +952,6 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     formik.setFieldValue('header.posRef', posInfo?.reference)
     formik.setFieldValue('header.plId', posInfo?.plId)
     formik.setFieldValue('header.dtId', formik.values.header.dtId || posInfo?.dtId)
-    formik.setFieldValue('header.spId', posUser?.spId)
     formik.setFieldValue('header.countryId', countryId?.value)
     setAddress(prevAddress => ({
       ...prevAddress,
@@ -969,12 +1008,12 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
   }
 
   useEffect(() => {
-    formik.setFieldValue('header.name', address?.name)
-    formik.setFieldValue('header.street1', address?.street1)
-    formik.setFieldValue('header.street2', address?.street2)
-    formik.setFieldValue('header.cityId', address?.cityId)
-    formik.setFieldValue('header.city', address?.city)
-    formik.setFieldValue('header.phone', address?.phone)
+    formik.setFieldValue('header.name', address?.name || '')
+    formik.setFieldValue('header.street1', address?.street1 || '')
+    formik.setFieldValue('header.street2', address?.street2 || '')
+    formik.setFieldValue('header.cityId', address?.cityId || '')
+    formik.setFieldValue('header.city', address?.city || '')
+    formik.setFieldValue('header.phone', address?.phone || '')
   }, [address])
 
   useEffect(() => {
@@ -1064,7 +1103,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     name='date'
                     required
                     label={labels.date}
-                    readOnly={isPosted}
+                    readOnly
                     value={formik?.values?.header?.date}
                     onChange={formik.setFieldValue}
                     editMode={editMode}
@@ -1142,7 +1181,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                       }))
                       setAddressModified(true)
                     }}
-                    error={formik.errors?.header?.name && Boolean(formik.errors?.header?.name)}
+                    error={formik.touched?.header?.name && Boolean(formik.errors?.header?.name)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1169,7 +1208,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                       }))
                       setAddressModified(true)
                     }}
-                    error={formik.touched.header?.street1 && Boolean(formik.errors.header?.street1)}
+                    error={(formik.touched.header?.street1 || true) && Boolean(formik.errors.header?.street1)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1208,7 +1247,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     }}
                     valueField='name'
                     displayField='name'
-                    name='cityId'
+                    name='city'
                     label={labels.city}
                     readOnly={isPosted}
                     form={formik}
@@ -1217,11 +1256,14 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     onChange={(event, newValue) => {
                       setAddress(prevAddress => ({
                         ...prevAddress,
-                        cityId: newValue?.recordId
+                        cityId: newValue?.recordId,
+                        city: newValue?.name
                       }))
+                      formik.setFieldValue('header.cityId', newValue?.recordId)
+                      formik.setFieldValue('header.city', newValue?.name)
                       setAddressModified(true)
                     }}
-                    errorCheck={'cityId'}
+                    errorCheck={'header.cityId'}
                     maxAccess={maxAccess}
                   />
                 </Grid>

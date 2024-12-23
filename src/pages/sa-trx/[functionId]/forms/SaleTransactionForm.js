@@ -883,7 +883,7 @@ export default function SaleTransactionForm({
   }
 
   async function getAddress(addressId) {
-    if (!addressId) return null
+    if (!addressId) return
 
     const res = await getRequest({
       extension: SystemRepository.Address.format,
