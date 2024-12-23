@@ -11,17 +11,22 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
 const MCDefault = ({ _labels }) => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const [baseMetalCuId, setBaseMetalCuId] = useState(null)
+  const [baseSalesMetalId, setBaseSalesMetalId] = useState(null)
 
   const [initialValues, setInitialValues] = useState({
     mc_defaultRTSA: null,
     mc_defaultRTPU: null,
     mc_defaultRTMF: null,
     mc_defaultRTFI: null,
-    mc_defaultRTTAX: null
+    mc_defaultRTTAX: null,
+    baseMetalCuId: null,
+    baseSalesMetalId: null
   })
 
   useEffect(() => {
@@ -37,7 +42,9 @@ const MCDefault = ({ _labels }) => {
         obj.key === 'mc_defaultRTPU' ||
         obj.key === 'mc_defaultRTMF' ||
         obj.key === 'mc_defaultRTFI' ||
-        obj.key === 'mc_defaultRTTAX'
+        obj.key === 'mc_defaultRTTAX' ||
+        obj.key === 'baseMetalCuId' ||
+        obj.key === 'baseSalesMetalId'
       )
     })
     filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
@@ -55,7 +62,13 @@ const MCDefault = ({ _labels }) => {
 
   const postMcDefault = obj => {
     var data = []
-    Object.entries(obj).forEach(([key, value]) => {
+
+    const updatedData = {
+      ...obj,
+      baseMetalCuId: baseMetalCuId,
+      baseSalesMetalId: baseSalesMetalId
+    }
+    Object.entries(updatedData).forEach(([key, value]) => {
       const newObj = { key: key, value: value }
       data.push(newObj)
     })
@@ -75,14 +88,18 @@ const MCDefault = ({ _labels }) => {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={5} sx={{ pl: '10px', pt: '10px' }} xs={12}>
+        <Grid container spacing={4} sx={{ pl: '10px', pt: '10px' }} xs={12}>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={MultiCurrencyRepository.RateType.qry}
               name='mc_defaultRTSA'
               label={_labels.mc_defaultRTSA}
               valueField='recordId'
-              displayField='name'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('mc_defaultRTSA', newValue?.recordId || '')
@@ -96,7 +113,11 @@ const MCDefault = ({ _labels }) => {
               name='mc_defaultRTPU'
               label={_labels.mc_defaultRTPU}
               valueField='recordId'
-              displayField='name'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('mc_defaultRTPU', newValue?.recordId || '')
@@ -110,7 +131,11 @@ const MCDefault = ({ _labels }) => {
               name='mc_defaultRTMF'
               label={_labels.mc_defaultRTMF}
               valueField='recordId'
-              displayField='name'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('mc_defaultRTMF', newValue?.recordId || '')
@@ -124,7 +149,11 @@ const MCDefault = ({ _labels }) => {
               name='mc_defaultRTFI'
               label={_labels.mc_defaultRTFI}
               valueField='recordId'
-              displayField='name'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('mc_defaultRTFI', newValue?.recordId || '')
@@ -138,12 +167,50 @@ const MCDefault = ({ _labels }) => {
               name='mc_defaultRTTAX'
               label={_labels.mc_defaultRTTAX}
               valueField='recordId'
-              displayField='name'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('mc_defaultRTTAX', newValue?.recordId || '')
               }}
               error={formik.touched.mc_defaultRTTAX && Boolean(formik.errors.mc_defaultRTTAX)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Currency.qry}
+              name='baseMetalCuId'
+              label={_labels.baseMetalCuId}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              readOnly={formik.values.baseMetalCuId}
+              values={formik.values}
+              onChange={(event, newValue) => {
+                setBaseMetalCuId(newValue?.recordId || '')
+              }}
+              error={formik.touched.baseMetalCuId && Boolean(formik.errors.baseMetalCuId)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={InventoryRepository.Metals.qry}
+              name='baseSalesMetalId'
+              label={_labels.baseSalesMetalId}
+              valueField='recordId'
+              displayField='reference'
+              values={formik.values}
+              readOnly={formik.values.baseSalesMetalId}
+              onChange={(event, newValue) => {
+                setBaseSalesMetalId(newValue?.recordId || '')
+              }}
+              error={formik.touched.baseSalesMetalId && Boolean(formik.errors.baseSalesMetalId)}
             />
           </Grid>
         </Grid>
