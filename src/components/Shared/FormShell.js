@@ -22,6 +22,7 @@ import InventoryTransaction from './InventoryTransaction'
 import SalesTrxForm from './SalesTrxForm'
 import StrictUnpostConfirmation from './StrictUnpostConfirmation'
 import ClientSalesTransaction from './ClientSalesTransaction'
+import ItemPromotion from './ItemPromotion'
 
 export default function FormShell({
   form,
@@ -354,6 +355,19 @@ export default function FormShell({
                   height: 550,
                   title: platformLabels.Metals,
                   expandable: false
+                })
+              }
+              break
+            case 'onItemPromotion':
+              action.onClick = () => {
+                stack({
+                  Component: ItemPromotion,
+                  props: {
+                    invoiceId: action.invoiceId
+                  },
+                  width: 1330,
+                  height: 720,
+                  title: platformLabels.ItemPromotion
                 })
               }
               break

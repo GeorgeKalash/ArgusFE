@@ -220,7 +220,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           })),
           taxCodes: [
             ...[
-              ...obj.taxCodes,
               ...obj.items
                 .filter(({ taxDetails }) => taxDetails && taxDetails?.length > 0)
                 .map(({ taxDetails, id }) => ({
@@ -641,6 +640,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       onClick: 'onClickGL',
       valuesPath: formik.values.header,
       disabled: !editMode
+    },
+    {
+      key: 'ItemPromotion',
+      condition: true,
+      onClick: 'onItemPromotion',
+      invoiceId: formik.values.header.recordId,
+      disabled: !editMode
     }
   ]
 
@@ -648,6 +654,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxHeader = puTrxPack?.header
     const puTrxItems = puTrxPack?.items
     const puTrxTaxes = puTrxPack?.taxCodes
+
+    console.log(puTrxTaxes, '--------- puTrxTaxes --------------')
+    console.log( puTrxPack?.items, '------------------------------------ puTrxPack?.items---------------------------')
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -680,10 +689,14 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           puTrx: true,
-          taxDetails: updatedpuTrxTaxes
+          taxDetails: updatedpuTrxTaxes.filter((tax) => tax.seqNo === item.seqNo)
         }
       })
+
+
     )
+
+    console.log(modifiedList, '-----------------modifiedList----------------------------')
     formik.setValues({
       ...formik.values,
       recordId: puTrxHeader.recordId || null,

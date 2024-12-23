@@ -78,5 +78,8 @@ export const PurchaseRepository = {
   },
   ItemCostHistory: {
     qry: service + 'qryIPH',
+  },
+  ItemPromotion: {
+    qry: service + 'qryIVIM'
   }
 }

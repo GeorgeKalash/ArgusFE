@@ -328,5 +328,6 @@ export const ResourceIds = {
   Segments: 30108,
   OpeningBalances: 30301,
   RawMaterialCategory: 42123,
-  FoWorkCenters: 47101
+  FoWorkCenters: 47101,
+  ItemPromotion: 50606,
 }
