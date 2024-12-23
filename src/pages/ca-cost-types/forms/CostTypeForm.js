@@ -69,7 +69,7 @@ export default function CostTypeForm({ labels, maxAccess, recordId }) {
         })
       }
     })()
-  }, [recordId])
+  }, [])
 
   return (
     <FormShell resourceId={ResourceIds.CACostTypes} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -112,7 +112,7 @@ export default function CostTypeForm({ labels, maxAccess, recordId }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('allocationType', newValue?.key)
+                  formik.setFieldValue('allocationType', newValue?.key || null)
                 }}
                 error={formik.touched.allocationType && Boolean(formik.errors.allocationType)}
               />
