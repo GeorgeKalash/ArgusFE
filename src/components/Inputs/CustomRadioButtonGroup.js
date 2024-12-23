@@ -26,11 +26,12 @@ const CustomRadioButtonGroup = ({
       value={value}
       onChange={onChange}
       sx={{
+        ml: 2,
         '.MuiFormControlLabel-label': {
-          fontSize: '0.9rem'
+          fontSize: 15
         },
         '.MuiSvgIcon-root': {
-          fontSize: '1.2rem'
+          fontSize: 15
         }
       }}
       {...props}

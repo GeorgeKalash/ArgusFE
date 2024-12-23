@@ -35,7 +35,7 @@ const CustomCheckBox = ({
           onChange={handleChange}
           disabled={_disabled}
           inputProps={{ 'aria-label': label }}
-          sx={{ '& .MuiSvgIcon-root': { fontSize: 17 } }}
+          sx={{ ml: 2, '& .MuiSvgIcon-root': { fontSize: 15 }, '&.aria-label': { fontSize: 15 } }}
         />
       }
       label={label}
