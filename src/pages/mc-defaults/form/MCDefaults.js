@@ -16,8 +16,6 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 const MCDefault = ({ _labels }) => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
-  const [baseMetalCuId, setBaseMetalCuId] = useState(null)
-  const [baseSalesMetalId, setBaseSalesMetalId] = useState(null)
 
   const [initialValues, setInitialValues] = useState({
     mc_defaultRTSA: null,
@@ -63,12 +61,7 @@ const MCDefault = ({ _labels }) => {
   const postMcDefault = obj => {
     var data = []
 
-    const updatedData = {
-      ...obj,
-      baseMetalCuId: baseMetalCuId,
-      baseSalesMetalId: baseSalesMetalId
-    }
-    Object.entries(updatedData).forEach(([key, value]) => {
+    Object.entries(obj).forEach(([key, value]) => {
       const newObj = { key: key, value: value }
       data.push(newObj)
     })
@@ -83,6 +76,12 @@ const MCDefault = ({ _labels }) => {
 
   const handleSubmit = () => {
     formik.handleSubmit()
+  }
+
+  const isReadOnly = key => {
+    const item = defaultsData?.list?.find(obj => obj.key === key)
+
+    return item && item?.value != null && item?.value !== ''
   }
 
   return (
@@ -190,12 +189,12 @@ const MCDefault = ({ _labels }) => {
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' }
               ]}
-              readOnly={formik.values.baseMetalCuId}
-              values={baseMetalCuId ? baseMetalCuId : formik.values}
+              values={formik.values}
               onChange={(event, newValue) => {
-                setBaseMetalCuId(newValue?.recordId || '')
+                formik.setFieldValue('baseMetalCuId', newValue?.recordId || '')
               }}
               error={formik.touched.baseMetalCuId && Boolean(formik.errors.baseMetalCuId)}
+              readOnly={isReadOnly('baseMetalCuId')}
             />
           </Grid>
           <Grid item xs={12}>
@@ -205,12 +204,12 @@ const MCDefault = ({ _labels }) => {
               label={_labels.baseSalesMetalId}
               valueField='recordId'
               displayField='reference'
-              values={baseSalesMetalId ? baseSalesMetalId : formik.values}
-              readOnly={formik.values.baseSalesMetalId}
+              values={formik.values}
               onChange={(event, newValue) => {
-                setBaseSalesMetalId(newValue?.recordId || '')
+                formik.setFieldValue('baseSalesMetalId', newValue?.recordId || '')
               }}
               error={formik.touched.baseSalesMetalId && Boolean(formik.errors.baseSalesMetalId)}
+              readOnly={isReadOnly('baseSalesMetalId')}
             />
           </Grid>
         </Grid>
