@@ -54,15 +54,18 @@ import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirma
 import { DataSets } from 'src/resources/DataSets'
 import ItemCostHistory from 'src/components/Shared/ItemCostHistory'
 import TaxDetails from 'src/components/Shared/TaxDetails'
+import { CommonContext } from 'src/providers/CommonContext'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: DIRTYFIELD_TDPCT })
   const [measurements, setMeasurements] = useState([])
   const [filteredMu, setFilteredMU] = useState([])
+  const [initialPromotionType, setInitialPromotionType] = useState()
   const [metalPriceVisibility, setmetalPriceVisibility] = useState(false)
   const [defaultsDataState, setDefaultsDataState] = useState(null)
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
@@ -155,8 +158,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         applyVat: false,
         taxId: null,
         taxDetails: null,
-        promotionTypeName: 'Regular',
-        promotionType: '1',
+        promotionTypeName: '',
+        promotionType: '',
         costHistory: false,
         taxDetailsButton: false,
         notes: ''
@@ -246,6 +249,18 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
+  async function getPromotionTypes() {
+    return new Promise((resolve, reject) => {
+      getAllKvsByDataset({
+        _dataset: DataSets.PROMOTION_TYPE,
+        callback: result => {
+          if (result) resolve(result)
+          else reject()
+        }
+      })
+    })
+  }
+
   const columns = [
     {
       component: 'resourcecombobox',
@@ -262,8 +277,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         ]
       },
       defaultValue: {
-        promotionType: '1',
-        promotionTypeName: 'Regular'
+        promotionType: initialPromotionType?.key,
+        promotionTypeName: initialPromotionType?.value
       }
     },
     {
@@ -1123,6 +1138,19 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   useEffect(() => {
     ;(async function () {
+      const promotionTypes = await getPromotionTypes()
+      if (promotionTypes && promotionTypes.length > 0) {
+        const initialType = promotionTypes[0]
+        setInitialPromotionType(initialType)
+        setInitialData(prev => ({
+          ...prev,
+          items: prev.items.map(item => ({
+            ...item,
+            promotionTypeName: initialType.value,
+            promotionType: initialType.key
+          }))
+        }))
+      }
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       setMetalPriceOperations()
@@ -1451,7 +1479,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 label={labels.tax}
                 valueField='recordId'
                 displayField={['name']}
-                readOnly={!formik.values?.header?.isVattable || (formik?.values?.items?.length > 0 && formik?.values?.items[0]?.sku )}
+                readOnly={
+                  !formik.values?.header?.isVattable ||
+                  (formik?.values?.items?.length > 0 && formik?.values?.items[0]?.sku)
+                }
                 values={formik.values.header}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.taxId', newValue?.recordId || null)
