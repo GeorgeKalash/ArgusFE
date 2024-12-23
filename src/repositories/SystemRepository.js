@@ -7,7 +7,7 @@ export const SystemRepository = {
   ParameterDefinition: service + 'qryRP',
   ReportLayout: service + 'qryRL',
   ReportLayoutObject: { qry: service + 'qryRLO', set2: service + 'set2RLO' },
-  ReportTemplate: service + 'qryRT',
+  ReportTemplate: { qry: service + 'qryRT', set2: service + 'set2RT' },
   DocumentType: {
     qry: service + 'qryDT',
     get: service + 'getDT',
@@ -241,6 +241,7 @@ export const SystemRepository = {
   },
   BusinessRules: { qry: service + 'qryRUL', set: service + 'setRUL', get: service + 'getRUL', del: service + 'delRUL' },
   Rules: {
-    qry: service + 'qryADR'
+    qry: service + 'qryADR',
+    set2: service + 'set2ADR'
   }
 }

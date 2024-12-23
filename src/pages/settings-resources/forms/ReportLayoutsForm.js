@@ -1,6 +1,4 @@
-import { Box, Button, Grid, IconButton, Typography } from '@mui/material'
-import Icon from 'src/@core/components/icon'
-
+import { Box, Grid, Typography } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -10,16 +8,13 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { useWindow } from 'src/windows'
 import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import PreviewReport from 'src/components/Shared/PreviewReport'
 
-const ReportLayoutsForm = ({ labels, maxAccess, row, window }) => {
+const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
 
   const [data, setData] = useState([])
 
@@ -81,8 +76,6 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window }) => {
         items: inactiveItems
       }
 
-      console.log(payload, 'Payload to be sent')
-
       await postRequest({
         extension: SystemRepository.ReportLayoutObject.set2,
         record: JSON.stringify(payload)
@@ -90,15 +83,18 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window }) => {
 
       toast.success(platformLabels.Updated)
 
-      window.close()
+      w.close()
     }
   })
 
-  //    {"resourceId":51303,"items":[{"resourceId":51303,"id":19,"isInactive":true},
-  //   {"resourceId":51303,"id":20,"isInactive":true},
-  //   {"resourceId":51303,"id":21,"isInactive":true}]}
+  const returnURL = async rowData => {
+    const response = await getRequest({
+      extension: 'KVS.asmx/getAttachment',
+      parameters: `_resourceId=${formik.values.resourceId}&_layoutId=${rowData.id}`
+    })
 
-  //   http://deploy.arguserp.net/KVS.asmx/getAttachment?_resourceId=51303&_layoutId=1
+    return response.record.url
+  }
 
   useEffect(() => {
     fetchData()
@@ -129,35 +125,31 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window }) => {
     {
       width: 200,
 
-      cellRenderer: row => (
-        <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-          <Typography
-            variant='body2'
-            sx={{
-              color: 'blue',
-              textDecoration: 'underline',
-              cursor: 'pointer',
-              fontSize: '17px'
-            }}
-            onClick={() => {
-              console.log(row.data, 'rrrrrrrrrrrrrrrr')
-              stack({
-                Component: PreviewReport,
-                props: {
-                  selectedReport: row.data,
-                  recordId: row.data.id,
-                  resourceId: row.resourceId
-                },
-                width: 1150,
-                height: 700,
-                title: platformLabels.PreviewReport
-              })
-            }}
-          >
-            preview
-          </Typography>
-        </Box>
-      )
+      cellRenderer: row => {
+        return (
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+            <Typography
+              variant='body2'
+              component='a'
+              onClick={async () => {
+                // Await the URL before opening in a new tab
+                const url = await returnURL(row.data)
+                window.open(url, '_blank') // Opens the URL in a new tab
+              }}
+              target='_blank'
+              rel='noopener noreferrer'
+              sx={{
+                color: 'blue',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontSize: '17px'
+              }}
+            >
+              preview
+            </Typography>
+          </Box>
+        )
+      }
     },
     {
       field: 'isInactive',
@@ -170,7 +162,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window }) => {
   return (
     <FormShell
       form={formik}
-      resourceId={ResourceIds.PointOfSale}
+      resourceId={ResourceIds.SettingsResources}
       isCleared={false}
       infoVisible={false}
       maxAccess={maxAccess}

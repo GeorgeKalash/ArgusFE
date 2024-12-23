@@ -16,6 +16,8 @@ import FieldGlobalForm from 'src/components/Shared/FieldGlobalForm'
 import { useForm } from 'src/hooks/form'
 import ReportLayoutsForm from './forms/ReportLayoutsForm'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import CustomLayoutForm from './forms/CustomLayoutForm'
+import CustomRulesForm from './forms/CustomRulesForm'
 
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -66,15 +68,15 @@ const GlobalAuthorization = () => {
         invalidate,
         resourceId: ResourceIds.SettingsResources
       },
-      width: 650,
+      width: 800,
       height: 600,
       title: 'reports layouts'
     })
   }
 
-  function openFieldGlobal(row) {
+  function openCustomLayout(row) {
     stack({
-      Component: FieldGlobalForm,
+      Component: CustomLayoutForm,
       props: {
         labels: labels,
         maxAccess: access,
@@ -82,9 +84,25 @@ const GlobalAuthorization = () => {
         invalidate,
         resourceId: ResourceIds.SettingsResources
       },
-      width: 500,
+      width: 800,
       height: 480,
-      title: labels.fieldGlobal
+      title: 'Custom Layouts'
+    })
+  }
+
+  function openCustomRules(row) {
+    stack({
+      Component: CustomRulesForm,
+      props: {
+        labels: labels,
+        maxAccess: access,
+        row: { resourceId: row.data.key, resourceName: row.data.value },
+        invalidate,
+        resourceId: ResourceIds.SettingsResources
+      },
+      width: 800,
+      height: 480,
+      title: 'Custom Rules'
     })
   }
 
@@ -157,7 +175,7 @@ const GlobalAuthorization = () => {
             width: 200,
             cellRenderer: row => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                <IconButton size='small' onClick={() => openFieldGlobal(row)}>
+                <IconButton size='small' onClick={() => openCustomLayout(row)}>
                   <Icon icon='mdi:application-edit-outline' fontSize={18} />
                 </IconButton>
               </Box>
@@ -169,7 +187,7 @@ const GlobalAuthorization = () => {
             width: 200,
             cellRenderer: row => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                <IconButton size='small' onClick={() => openFieldGlobal(row)}>
+                <IconButton size='small' onClick={() => openCustomRules(row)}>
                   <Icon icon='mdi:application-edit-outline' fontSize={18} />
                 </IconButton>
               </Box>
