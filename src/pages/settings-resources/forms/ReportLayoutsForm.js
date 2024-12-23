@@ -123,7 +123,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
       flex: 1
     },
     {
-      width: 200,
+      width: 100,
 
       cellRenderer: row => {
         return (
