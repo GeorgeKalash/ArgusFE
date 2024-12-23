@@ -3,26 +3,26 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import GroupInfoWindow from './Windows/GroupInfoWindow'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
-import { useWindow } from 'src/windows'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CostAllocationRepository } from 'src/repositories/CostAllocationRepository'
+import CostTypeForm from './forms/CostTypeForm'
 
-const SecurityGroup = () => {
+const CostTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: AccessControlRepository.SecurityGroup.qry,
+      extension: CostAllocationRepository.CACostTypes.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -32,39 +32,25 @@ const SecurityGroup = () => {
   const {
     query: { data },
     labels: _labels,
-    refetch,
     paginationParameters,
+    refetch,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: AccessControlRepository.SecurityGroup.qry,
-    datasetId: ResourceIds.SecurityGroup
+    endpointId: CostAllocationRepository.CACostTypes.page,
+    datasetId: ResourceIds.CACostTypes
   })
-
-  function openForm(recordId) {
-    stack({
-      Component: GroupInfoWindow,
-      props: {
-        labels: _labels,
-        recordId: recordId,
-        maxAccess: access
-      },
-      width: 900,
-      height: 700,
-      title: _labels.securityGroups
-    })
-  }
 
   const columns = [
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
-      field: 'description',
-      headerName: _labels.description,
+      field: 'name',
+      headerName: _labels.name,
       flex: 1
     }
   ]
@@ -74,12 +60,26 @@ const SecurityGroup = () => {
   }
 
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: CostTypeForm,
+      props: {
+        labels: _labels,
+        recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 500,
+      title: _labels.CostType
+    })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: AccessControlRepository.SecurityGroup.del,
+      extension: CostAllocationRepository.CACostTypes.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -100,14 +100,14 @@ const SecurityGroup = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          maxAccess={access}
-          paginationParameters={paginationParameters}
           paginationType='api'
+          paginationParameters={paginationParameters}
           refetch={refetch}
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default SecurityGroup
+export default CostTypes
