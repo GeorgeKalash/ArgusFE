@@ -311,6 +311,8 @@ export const ResourceIds = {
   GlSync: 30501,
   IrDefault: 46103,
   FyOpening: 30503,
+  PurchaseInvoice: 50304,
+  PurchaseReturn: 50306,
   SystemParams: 30109,
   POSPayment: 36601,
   ExpenseTypes: 52102,
