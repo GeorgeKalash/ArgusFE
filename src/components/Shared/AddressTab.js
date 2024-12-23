@@ -37,7 +37,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
   return (
     <VertLayout>
       <Grow>
-        <Grid container xs={12} spacing={2}>
+        <FormGrid container hideonempty xs={12} spacing={2}>
           <FormGrid item hideonempty xs={12}>
             <CustomTextField
               name='name'
@@ -88,7 +88,6 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
           </FormGrid>
           <FormGrid item hideonempty xs={4}>
             <ResourceComboBox
-              padding={5}
               endpointId={addressValidation.values.countryId && SystemRepository.State.qry}
               parameters={addressValidation.values.countryId && `_countryId=${addressValidation.values.countryId || 0}`}
               name='stateId'
@@ -164,36 +163,33 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
               maxAccess={maxAccess}
             />
           </FormGrid>
-          <FormGrid item hideonempty xs={12}>
-            <FormGrid container hideonempty spacing={2}>
-              <FormGrid item hideonempty xs={6}>
-                <CustomTextField
-                  name='street1'
-                  label={labels.street1}
-                  value={addressValidation.values.street1}
-                  readOnly={readOnly}
-                  required={required}
-                  maxLength='20'
-                  onChange={addressValidation.handleChange}
-                  onClear={() => addressValidation.setFieldValue('street1', '')}
-                  error={addressValidation.touched.street1 && Boolean(addressValidation.errors.street1)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-              <FormGrid item hideonempty xs={6}>
-                <CustomTextField
-                  name='street2'
-                  label={labels.street2}
-                  value={addressValidation.values.street2}
-                  maxLength='20'
-                  readOnly={readOnly}
-                  onChange={addressValidation.handleChange}
-                  onClear={() => addressValidation.setFieldValue('street2', '')}
-                  error={addressValidation.touched.street2 && Boolean(addressValidation.errors.street2)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-            </FormGrid>
+          <Grid item xs={8}></Grid>
+          <FormGrid item hideonempty xs={6}>
+            <CustomTextField
+              name='street1'
+              label={labels.street1}
+              value={addressValidation.values.street1}
+              readOnly={readOnly}
+              required={required}
+              maxLength='20'
+              onChange={addressValidation.handleChange}
+              onClear={() => addressValidation.setFieldValue('street1', '')}
+              error={addressValidation.touched.street1 && Boolean(addressValidation.errors.street1)}
+              maxAccess={maxAccess}
+            />
+          </FormGrid>
+          <FormGrid item hideonempty xs={6}>
+            <CustomTextField
+              name='street2'
+              label={labels.street2}
+              value={addressValidation.values.street2}
+              maxLength='20'
+              readOnly={readOnly}
+              onChange={addressValidation.handleChange}
+              onClear={() => addressValidation.setFieldValue('street2', '')}
+              error={addressValidation.touched.street2 && Boolean(addressValidation.errors.street2)}
+              maxAccess={maxAccess}
+            />
           </FormGrid>
           <FormGrid item hideonempty xs={4}>
             <CustomTextField
@@ -259,87 +255,80 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
               maxAccess={maxAccess}
             />
           </FormGrid>
-          <FormGrid item hideonempty xs={12}>
-            <FormGrid container hideonempty spacing={2}>
-              <FormGrid item hideonempty xs={4}>
-                <CustomTextField
-                  name='phone'
-                  label={labels.phone}
-                  value={addressValidation.values.phone}
-                  readOnly={readOnly}
-                  maxLength='15'
-                  phone={true}
-                  onChange={addressValidation.handleChange}
-                  onClear={() => addressValidation.setFieldValue('phone', '')}
-                  error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-              <FormGrid item hideonempty xs={4}>
-                <CustomTextField
-                  name='phone2'
-                  label={labels.phone2}
-                  value={addressValidation.values.phone2}
-                  maxLength='15'
-                  phone={true}
-                  readOnly={readOnly}
-                  onChange={addressValidation.handleChange}
-                  onClear={() => addressValidation.setFieldValue('phone2', '')}
-                  error={addressValidation.touched.phone2 && Boolean(addressValidation.errors.phone2)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-              <FormGrid item hideonempty xs={4}>
-                <CustomTextField
-                  name='phone3'
-                  label={labels.phone3}
-                  value={addressValidation.values.phone3}
-                  maxLength='15'
-                  phone={true}
-                  readOnly={readOnly}
-                  onChange={addressValidation.handleChange}
-                  onClear={() => addressValidation.setFieldValue('phone3', '')}
-                  error={addressValidation.touched.phone3 && Boolean(addressValidation.errors.phone3)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-            </FormGrid>
+          <Grid item xs={4}></Grid>
+          <FormGrid item hideonempty xs={4}>
+            <CustomTextField
+              name='phone'
+              label={labels.phone}
+              value={addressValidation.values.phone}
+              readOnly={readOnly}
+              maxLength='15'
+              phone={true}
+              onChange={addressValidation.handleChange}
+              onClear={() => addressValidation.setFieldValue('phone', '')}
+              error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}
+              maxAccess={maxAccess}
+            />
           </FormGrid>
-          <FormGrid item hideonempty xs={12}>
-            <FormGrid container hideonempty spacing={2}>
-              <FormGrid item hideonempty xs={6}>
-                <CustomTextField
-                  name='email1'
-                  label={labels.email1}
-                  value={addressValidation.values.email1}
-                  type='email'
-                  onBlur={addressValidation.handleBlur}
-                  readOnly={readOnly}
-                  placeholder='johndoe@email.com'
-                  onChange={addressValidation.handleChange}
-                  onClear={() => addressValidation.setFieldValue('email1', '')}
-                  error={addressValidation.touched.email1 && Boolean(addressValidation.errors.email1)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-              <FormGrid item hideonempty xs={6}>
-                <CustomTextField
-                  name='email2'
-                  type='email'
-                  readOnly={readOnly}
-                  placeholder='johndoe@email.com'
-                  label={labels.email2}
-                  onBlur={addressValidation.handleBlur}
-                  value={addressValidation.values.email2}
-                  onChange={addressValidation.handleChange}
-                  onClear={() => addressValidation.setFieldValue('email2', '')}
-                  error={addressValidation.touched.email2 && Boolean(addressValidation.errors.email2)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-            </FormGrid>
+          <FormGrid item hideonempty xs={4}>
+            <CustomTextField
+              name='phone2'
+              label={labels.phone2}
+              value={addressValidation.values.phone2}
+              maxLength='15'
+              phone={true}
+              readOnly={readOnly}
+              onChange={addressValidation.handleChange}
+              onClear={() => addressValidation.setFieldValue('phone2', '')}
+              error={addressValidation.touched.phone2 && Boolean(addressValidation.errors.phone2)}
+              maxAccess={maxAccess}
+            />
           </FormGrid>
-        </Grid>
+          <FormGrid item hideonempty xs={4}>
+            <CustomTextField
+              name='phone3'
+              label={labels.phone3}
+              value={addressValidation.values.phone3}
+              maxLength='15'
+              phone={true}
+              readOnly={readOnly}
+              onChange={addressValidation.handleChange}
+              onClear={() => addressValidation.setFieldValue('phone3', '')}
+              error={addressValidation.touched.phone3 && Boolean(addressValidation.errors.phone3)}
+              maxAccess={maxAccess}
+            />
+          </FormGrid>
+          <FormGrid item hideonempty xs={6}>
+            <CustomTextField
+              name='email1'
+              label={labels.email1}
+              value={addressValidation.values.email1}
+              type='email'
+              onBlur={addressValidation.handleBlur}
+              readOnly={readOnly}
+              placeholder='johndoe@email.com'
+              onChange={addressValidation.handleChange}
+              onClear={() => addressValidation.setFieldValue('email1', '')}
+              error={addressValidation.touched.email1 && Boolean(addressValidation.errors.email1)}
+              maxAccess={maxAccess}
+            />
+          </FormGrid>
+          <FormGrid item hideonempty xs={6}>
+            <CustomTextField
+              name='email2'
+              type='email'
+              readOnly={readOnly}
+              placeholder='johndoe@email.com'
+              label={labels.email2}
+              onBlur={addressValidation.handleBlur}
+              value={addressValidation.values.email2}
+              onChange={addressValidation.handleChange}
+              onClear={() => addressValidation.setFieldValue('email2', '')}
+              error={addressValidation.touched.email2 && Boolean(addressValidation.errors.email2)}
+              maxAccess={maxAccess}
+            />
+          </FormGrid>
+        </FormGrid>
       </Grow>
     </VertLayout>
   )

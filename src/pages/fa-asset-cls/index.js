@@ -83,7 +83,7 @@ const FaAssetCls = () => {
         maxAccess: access
       },
       width: 600,
-      height: 400,
+      height: 350,
       title: _labels?.assetClass
     })
   }

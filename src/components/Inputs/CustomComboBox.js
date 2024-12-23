@@ -49,6 +49,7 @@ const CustomComboBox = ({
   const [hover, setHover] = useState(false)
 
   const [focus, setAutoFocus] = useState(autoFocus)
+  const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
     if (!value && store?.length > 0 && typeof defaultIndex === 'number' && defaultIndex === 0) {
@@ -142,10 +143,20 @@ const CustomComboBox = ({
           return (
             <Box>
               {props.id.endsWith('-0') && (
-                <li className={props.className}>
+                <li className={props.className} style={{ borderBottom: '1px solid #ccc' }}>
                   {columnsInDropDown.map((header, i) => {
                     return (
-                      <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
+                      <Box
+                        key={i}
+                        sx={{
+                          flex: 1,
+                          fontWeight: 'bold',
+                          width: header.width || 'auto',
+                          fontSize: '0.7rem',
+                          height: '15px',
+                          display: 'flex'
+                        }}
+                      >
                         {header.value.toUpperCase()}
                       </Box>
                     )
@@ -155,7 +166,16 @@ const CustomComboBox = ({
               <li {...props}>
                 {columnsInDropDown.map((header, i) => {
                   return (
-                    <Box key={i} sx={{ flex: 1 }}>
+                    <Box
+                      key={i}
+                      sx={{
+                        flex: 1,
+                        width: header.width || 'auto',
+                        fontSize: '0.88rem',
+                        height: '20px',
+                        display: 'flex'
+                      }}
+                    >
                       {option[header.key]}
                     </Box>
                   )
@@ -167,7 +187,7 @@ const CustomComboBox = ({
           return (
             <Box>
               <li {...props}>
-                <Box sx={{ flex: 1 }}>{option[displayField]}</Box>
+                <Box sx={{ flex: 1, fontSize: '0.88rem', height: '20px', display: 'flex' }}>{option[displayField]}</Box>
               </li>
             </Box>
           )
@@ -184,6 +204,7 @@ const CustomComboBox = ({
           autoFocus={focus}
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
+          onFocus={() => setIsFocused(true)}
           error={error}
           helperText={helperText}
           onBlur={e => {
@@ -198,7 +219,7 @@ const CustomComboBox = ({
               <React.Fragment>
                 {hover &&
                   (_disabled ? null : isLoading ? (
-                    <CircularProgress color='inherit' size={18} />
+                    <CircularProgress color='inherit' size={17} />
                   ) : (
                     refresh &&
                     !readOnly && (
@@ -210,9 +231,8 @@ const CustomComboBox = ({
                           p: '0px !important',
                           marginRight: '-10px'
                         }}
-                        size='small'
                       >
-                        <RefreshIcon />
+                        <RefreshIcon size={17} />
                       </IconButton>
                     )
                   ))}
@@ -223,8 +243,19 @@ const CustomComboBox = ({
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                border: !hasBorder && 'none'
-              }
+                border: !hasBorder && 'none',
+                borderColor: '#959d9e',
+                borderRadius: '6px'
+              },
+              height: `33px !important`
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: '0.90rem',
+              top: isFocused || value ? '0px' : '-3px'
+            },
+            '& .MuiInputBase-input': {
+              fontSize: '0.90rem',
+              color: 'black'
             },
             '& .MuiAutocomplete-clearIndicator': {
               pl: '0px !important',

@@ -52,40 +52,36 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
         issueDate: formatDateToApi(obj.issueDate)
       }
 
-      try {
-        const response = await postRequest({
-            extension: CashBankRepository.CACheckbook.set,
-            record: JSON.stringify(data)
-          })
-    
-            !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
-            formik.setValues({
-                ...obj,
-                recordId: response.recordId
-            })
-    
-        invalidate()
-      } catch (exception) {}
+      const response = await postRequest({
+        extension: CashBankRepository.CACheckbook.set,
+        record: JSON.stringify(data)
+      })
+
+      !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
+      formik.setValues({
+        ...obj,
+        recordId: response.recordId
+      })
+
+      invalidate()
     }
   })
 
-  const editMode = !!formik.values.recordId;
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: CashBankRepository.CACheckbook.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: CashBankRepository.CACheckbook.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues({
-            ...res.record,
-            issueDate: formatDateFromApi(res.record.issueDate)
-          })
-        }
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          issueDate: formatDateFromApi(res.record.issueDate)
+        })
+      }
     })()
   }, [])
 
@@ -94,7 +90,7 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
-          <Grid item xs={12}>
+            <Grid item xs={12}>
               <ResourceLookup
                 endpointId={CashBankRepository.CashAccount.snapshot}
                 parameters={{
@@ -142,36 +138,35 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
             <Grid item xs={12}>
-                <CustomNumberField
-                    name='size'
-                    required
-                    label={labels.size}
-                    value={formik.values.size}
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('size', '')}
-                    error={formik.touched.size && Boolean(formik.errors.size)}
-                    maxLength={2}
-                    decimalScale={0}
-                    allowNegative={false}
-                />
-              </Grid>
+              <CustomNumberField
+                name='size'
+                required
+                label={labels.size}
+                value={formik.values.size}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('size', '')}
+                error={formik.touched.size && Boolean(formik.errors.size)}
+                maxLength={2}
+                decimalScale={0}
+                allowNegative={false}
+              />
+            </Grid>
             <Grid item xs={12}>
-                <CustomDatePicker
-                  name='issueDate'
-                  label={labels.issueDate}
-                  value={formik.values?.issueDate}
-                  required
-                  onChange={formik.setFieldValue}
-                  onClear={() => formik.setFieldValue('issueDate', '')}
-                  error={formik.touched.issueDate && Boolean(formik.errors.issueDate)}
-                  maxAccess={maxAccess}
-                />
+              <CustomDatePicker
+                name='issueDate'
+                label={labels.issueDate}
+                value={formik.values?.issueDate}
+                required
+                onChange={formik.setFieldValue}
+                onClear={() => formik.setFieldValue('issueDate', '')}
+                error={formik.touched.issueDate && Boolean(formik.errors.issueDate)}
+                maxAccess={maxAccess}
+              />
             </Grid>
           </Grid>
         </Grow>
       </VertLayout>
-      
     </FormShell>
   )
 }

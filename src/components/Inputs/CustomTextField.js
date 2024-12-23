@@ -37,6 +37,7 @@ const CustomTextField = ({
   const inputRef = useRef(null)
 
   const [focus, setFocus] = useState(!hasBorder)
+  const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
     if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && value?.length < 1) {
@@ -94,6 +95,8 @@ const CustomTextField = ({
       size={size}
       fullWidth={fullWidth}
       autoFocus={focus}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
       inputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
@@ -116,12 +119,12 @@ const CustomTextField = ({
           <InputAdornment position='end'>
             {search && (
               <IconButton tabIndex={-1} edge='start' onClick={() => onSearch(value)} aria-label='search input'>
-                <SearchIcon sx={{ border: '0px', fontSize: 20 }} />
+                <SearchIcon sx={{ border: '0px', fontSize: 17 }} />
               </IconButton>
             )}
             {!clearable && !readOnly && (value || value === 0) && (
               <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
               </IconButton>
             )}
           </InputAdornment>
@@ -130,9 +133,18 @@ const CustomTextField = ({
       sx={{
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
-            border: !hasBorder && 'none'
+            border: !hasBorder && 'none',
+            borderColor: '#959d9e',
+            borderRadius: '6px'
           },
-          height: `${props.height}px !important`
+          height: `33px !important`
+        },
+        '& .MuiInputLabel-root': {
+          fontSize: '0.90rem',
+          top: isFocused || value ? '0px' : '-3px'
+        },
+        '& .MuiInputBase-input': {
+          fontSize: '0.90rem'
         }
       }}
       required={_required}

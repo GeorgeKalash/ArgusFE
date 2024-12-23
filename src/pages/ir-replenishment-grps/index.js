@@ -60,14 +60,12 @@ const ReplenishmentGroups = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: IVReplenishementRepository.ReplenishmentGroups.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: IVReplenishementRepository.ReplenishmentGroups.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
@@ -80,7 +78,7 @@ const ReplenishmentGroups = () => {
         maxAccess: access
       },
       width: 600,
-      height: 500,
+      height: 450,
       title: _labels.repGroups
     })
   }

@@ -70,7 +70,7 @@ const PurposeExchange = () => {
         maxAccess: access
       },
       width: 600,
-      height: 500,
+      height: 400,
       title: _labels.purposeOfExchange
     })
   }
@@ -84,14 +84,12 @@ const PurposeExchange = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: CurrencyTradingSettingsRepository.PurposeExchange.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: CurrencyTradingSettingsRepository.PurposeExchange.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (

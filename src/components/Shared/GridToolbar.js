@@ -84,7 +84,7 @@ const GridToolbar = ({
                         opacity: 0.8
                       },
                       width: '20px',
-                      height: '35px',
+                      height: '33px',
                       objectFit: 'contain'
                     }}
                   >
@@ -106,7 +106,6 @@ const GridToolbar = ({
                   }}
                   onSearch={onSearch}
                   search={true}
-                  height={35}
                 />
               </Grid>
             )}
@@ -140,7 +139,7 @@ const GridToolbar = ({
                             },
                             border: button.border,
                             width: 'auto',
-                            height: '35px',
+                            height: '33px',
                             objectFit: 'contain'
                           }}
                           disabled={isDisabled}
