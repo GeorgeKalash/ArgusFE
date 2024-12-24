@@ -1,5 +1,4 @@
-import { Grid, Box, Checkbox } from '@mui/material'
-import { useFormik } from 'formik'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
@@ -16,6 +15,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useState } from 'react'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { useForm } from 'src/hooks/form'
 
 const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
   const { recordId: pId, countries, _seqNo, rowSelectionSaved } = store
@@ -68,10 +68,10 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
       .catch(error => {})
   }
 
-  const formik = useFormik({
+  const { formik } = useForm({
     initialValues: {
       seqNo: '',
-      productLegs: [
+      productRanges: [
         {
           id: 1,
           seqNo: '',
@@ -82,9 +82,10 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
       ]
     },
     enableReinitialize: false,
+    maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      productLegs: yup
+      productRanges: yup
         .array()
         .of(
           yup.object().shape({
@@ -95,7 +96,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
         .required()
     }),
     onSubmit: values => {
-      post(values.productLegs)
+      post(values.productRanges)
     }
   })
 
@@ -188,9 +189,9 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
           }
         })
 
-        const productLegs = await Promise.all(productLegsPromises)
+        const productScheduleRanges = await Promise.all(productLegsPromises)
 
-        formik.setFieldValue('productLegs', productLegs)
+        formik.setFieldValue('productRanges', productScheduleRanges)
       } catch (error) {}
     }
   }
@@ -275,10 +276,12 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
           {active && rowSelectionSaved && commissionColumns.length > 0 && (
             <Grow key={active}>
               <DataGrid
-                onChange={value => formik.setFieldValue('productLegs', value)}
-                value={formik.values.productLegs}
-                error={formik.errors.productLegs}
+                onChange={value => formik.setFieldValue('productRanges', value)}
+                value={formik.values.productRanges}
+                error={formik.errors.productRanges}
                 columns={commissionColumns}
+                name='productRanges'
+                maxAccess={maxAccess}
               />
             </Grow>
           )}

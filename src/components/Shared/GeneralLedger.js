@@ -18,12 +18,12 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { DataGrid } from './DataGrid'
-import { useFormik } from 'formik'
 import { formatDateForGetApI, formatDateToApi } from 'src/lib/date-helper'
 import { getRate, DIRTYFIELD_AMOUNT, DIRTYFIELD_BASE_AMOUNT, DIRTYFIELD_RATE } from 'src/utils/RateCalculator'
 import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 import { VertLayout } from './Layouts/VertLayout'
+import { useForm } from 'src/hooks/form'
 
 const GeneralLedger = ({ functionId, values, valuesPath }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -39,14 +39,27 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
     })
   }
 
-  const formik2 = useFormik({
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    },
+    datasetId: ResourceIds.GeneralLedger
+  })
+
+  const { formik: formik2 } = useForm({
+    maxAccess: access,
     initialValues: {
       recordId: formValues.recordId,
       reference: formValues.reference,
       date: formValues.date,
       functionId: functionId,
       seqNo: '',
-      generalAccount: [
+      glTransactions: [
         {
           id: 1,
           accountRef: '',
@@ -71,9 +84,9 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
         }
       ]
     },
-    enableReinitialize: true,
+    enableReinitialize: false,
     validationSchema: yup.object({
-      generalAccount: yup
+      glTransactions: yup
         .array()
         .of(
           yup.object().shape({
@@ -88,13 +101,13 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
             exRate: yup.number().required('currencyId recordId is required')
           })
         )
-        .required('generalAccount array is required')
+        .required('glTransactions array is required')
     }),
     validateOnChange: true,
     onSubmit: async values => {
       {
         const data = {
-          transactions: values.generalAccount.map(({ id, tpAccount, functionId, ...rest }) => ({
+          transactions: values.glTransactions.map(({ id, tpAccount, functionId, ...rest }) => ({
             seqNo: id,
             ...rest
           })),
@@ -120,23 +133,11 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
     }
   }, [formValues])
 
-  const {
-    query: { data },
-    labels: _labels,
-    access
-  } = useResourceQuery({
-    filter: {
-      filterFn: fetchGridData,
-      default: { functionId }
-    },
-    datasetId: ResourceIds.GeneralLedger
-  })
-
   const isRaw = formValues.status == 1
 
   useEffect(() => {
-    if (formik2 && formik2.values && formik2.values.generalAccount && Array.isArray(formik2.values.generalAccount)) {
-      const generalAccountData = formik2.values.generalAccount
+    if (formik2 && formik2.values && formik2.values.glTransactions && Array.isArray(formik2.values.glTransactions)) {
+      const generalAccountData = formik2.values.glTransactions
 
       const parseNumber = value => {
         const number = parseFloat(value)
@@ -200,11 +201,11 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
 
       setCurrencyGridData(currencyData)
     }
-  }, [formik2.values])
+  }, [formik2?.values])
 
   useEffect(() => {
     if (data && data.list.length > 0 && Array.isArray(data.list)) {
-      const generalAccount = data.list.map((row, idx) => ({
+      const glTransactions = data.list.map((row, idx) => ({
         id: idx,
         accountRef: row.accountRef,
         accountId: row.accountId,
@@ -228,7 +229,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
         baseAmount: row.baseAmount
       }))
 
-      formik2.setFieldValue('generalAccount', generalAccount)
+      formik2.setFieldValue('glTransactions', glTransactions)
     }
   }, [data])
 
@@ -301,30 +302,54 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
           <Fixed>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <CustomTextField name='reference' label={_labels.reference} value={formik.reference} readOnly={true} />
+                <CustomTextField
+                  name='reference'
+                  label={_labels.reference}
+                  value={formik.reference}
+                  readOnly={true}
+                  maxAccess={access}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <CustomDatePicker name='date' label={_labels.date} value={formik.date} readOnly={true} />
+                <CustomDatePicker
+                  name='date'
+                  label={_labels.date}
+                  value={formik.date}
+                  readOnly={true}
+                  maxAccess={access}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <CustomTextField name='currency' label={_labels.currency} value={formik.currencyRef} readOnly={true} />
+                <CustomTextField
+                  name='currency'
+                  label={_labels.currency}
+                  value={formik.currencyRef}
+                  readOnly={true}
+                  maxAccess={access}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <CustomTextField name='notes' label={_labels.notes} value={formik.notes} readOnly={true} />
+                <CustomTextField
+                  name='notes'
+                  label={_labels.notes}
+                  value={formik.notes}
+                  readOnly={true}
+                  maxAccess={access}
+                />
               </Grid>
             </Grid>
           </Fixed>
         )}
         <Grow>
           <DataGrid
-            onChange={value => formik2.setFieldValue('generalAccount', value)}
+            onChange={value => formik2.setFieldValue('glTransactions', value)}
             allowDelete={!!isRaw}
             allowAddNewLine={!!isRaw}
-            value={formik2.values.generalAccount}
-            error={formik2.errors.generalAccount}
+            value={formik2?.values.glTransactions}
+            error={formik2?.errors.glTransactions}
             name='glTransactions'
-            maxAccess={access}
             height={400}
+            maxAccess={access}
             columns={[
               {
                 component: 'resourcelookup',

@@ -67,6 +67,7 @@ export default function AssetClassesForm({ labels, maxAccess, recordId }) {
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      masterSource: MasterSource.AssetClass,
       disabled: !recordId && !formik.values.recordId
     }
   ]
@@ -78,7 +79,6 @@ export default function AssetClassesForm({ labels, maxAccess, recordId }) {
       maxAccess={maxAccess}
       editMode={!!recordId || !!formik.values.recordId}
       actions={actions}
-      masterSource={MasterSource.AssetClass}
     >
       <VertLayout>
         <Grow>
