@@ -80,7 +80,7 @@ const OpeningBalances = () => {
       type: 'number'
     },
     {
-      field: 'sign',
+      field: 'signName',
       headerName: _labels.sign,
       flex: 1
     },
