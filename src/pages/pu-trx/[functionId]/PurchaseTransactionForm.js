@@ -505,7 +505,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         iconsClicked: (id, updateRow) => handleIconClick(id, updateRow),
         gridData: formik.values.items,
         type: 'numeric',
-        concatenateWith: '%'
+        concatenateWith: '%',
+        defaultValue: 0
       },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)
@@ -655,9 +656,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxItems = puTrxPack?.items
     const puTrxTaxes = puTrxPack?.taxCodes
 
-    console.log(puTrxTaxes, '--------- puTrxTaxes --------------')
-    console.log( puTrxPack?.items, '------------------------------------ puTrxPack?.items---------------------------')
-
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
@@ -689,14 +687,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           puTrx: true,
-          taxDetails: updatedpuTrxTaxes.filter((tax) => tax.seqNo === item.seqNo)
+          taxDetails: updatedpuTrxTaxes.filter(tax => tax.seqNo === item.seqNo)
         }
       })
-
-
     )
 
-    console.log(modifiedList, '-----------------modifiedList----------------------------')
     formik.setValues({
       ...formik.values,
       recordId: puTrxHeader.recordId || null,

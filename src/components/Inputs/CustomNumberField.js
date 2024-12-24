@@ -141,14 +141,14 @@ const CustomNumberField = ({
         },
         autoComplete: 'off',
         readOnly: _readOnly,
-        endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
+        endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (
           <InputAdornment position='end'>
             {props.ShowDiscountIcons && (
               <IconButton onClick={handleButtonClick}>
                 {props.isPercentIcon ? <PercentIcon /> : <PinIcon sx={{ minWidth: '40px', height: '70px' }} />}
               </IconButton>
             )}
-            {displayButtons && (
+            {displayButtons && (value || value === 0) && (
               <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
                 <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
               </IconButton>
