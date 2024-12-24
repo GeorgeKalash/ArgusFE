@@ -9,6 +9,7 @@ import { GridDeleteIcon } from '@mui/x-data-grid'
 import { DISABLED, HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
 
 export function DataGrid({
   name, // maxAccess
@@ -34,6 +35,17 @@ export function DataGrid({
 
   const process = (params, oldRow, setData) => {
     const column = columns.find(({ name }) => name === params.colDef.field)
+    if (
+      params.colDef?.disableDuplicate &&
+      value.find(
+        item =>
+          item.id != params.data.id &&
+          item?.[params.colDef.field] &&
+          item?.[params.colDef.field] == params.data?.[params.colDef.field]
+      )
+    ) {
+      return
+    }
 
     const updateCommit = changes => {
       setData(changes, params)
@@ -52,9 +64,80 @@ export function DataGrid({
       commit({ changes: updatedRow })
     }
 
+    const addRow = async ({ changes }) => {
+      if (params.rowIndex === value.length - 1 && !changes) {
+        addNewRow(params)
+
+        return
+      }
+
+      const index = value.findIndex(({ id }) => id === changes.id)
+      const row = value[index]
+      const updatedRow = { ...row, ...changes }
+      let rows
+
+      gridApiRef.current.setRowData(value.map(row => (row.id === updatedRow?.id ? updatedRow : row)))
+
+      if (params.rowIndex === value.length - 1 && column.jumpToNextLine) {
+        const highestIndex = value?.length
+          ? value.reduce((max, current) => (max.id > current.id ? max : current)).id + 1
+          : 1
+
+        const defaultValues = Object.fromEntries(
+          columns?.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
+        )
+        rows = [
+          ...value.map(row => (row.id === updatedRow.id ? updatedRow : row)),
+          {
+            id: highestIndex,
+            ...defaultValues
+          }
+        ]
+        onChange(rows)
+
+        setTimeout(() => {
+          params.api.startEditingCell({
+            rowIndex: index + 1,
+            colKey: column?.name
+          })
+        }, 10)
+      } else {
+        rows = [...value.map(row => (row.id === updatedRow.id ? updatedRow : row))]
+        const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
+        onChange(rows)
+        params.api.startEditingCell({
+          rowIndex: index,
+          colKey: allColumns[currentColumnIndex + 2].colId
+        })
+      }
+    }
+
+    if (
+      params.colDef.disableDuplicate &&
+      value.find(
+        item =>
+          item.id != params.data.id &&
+          item?.[params.colDef.field] &&
+          item?.[params.colDef.field] == params.data?.[params.colDef.field]
+      )
+    ) {
+      return
+    }
+
     if (column.onChange) {
       column.onChange({
-        row: { oldRow: oldRow, newRow: params.node.data, update: updateCommit, updateRow: updateRowCommit }
+        row: {
+          oldRow: value[params.rowIndex],
+          newRow: params.node.data,
+          update: updateCommit,
+          updateRow: updateRowCommit,
+          addRow:
+            params.rowIndex === value.length - 1 && !column.updateOn
+              ? column.jumpToNextLine
+                ? addNewRow
+                : () => {}
+              : addRow
+        }
       })
     }
   }
@@ -89,8 +172,8 @@ export function DataGrid({
     }
   }, [ready, value])
 
-  const addNewRow = params => {
-    const highestIndex = params?.node?.data?.id + 1 || 1
+  const addNewRow = () => {
+    const highestIndex = Math.max(...value?.map(item => item.id), 0) + 1
 
     const defaultValues = Object.fromEntries(
       columns.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
@@ -172,7 +255,33 @@ export function DataGrid({
   }
 
   const onCellKeyDown = params => {
-    const { event, api, node } = params
+    const { event, api, node, data, colDef } = params
+
+    if (
+      colDef.disableDuplicate &&
+      value.find(
+        item =>
+          item.id != data.id &&
+          item?.[params.colDef.field] &&
+          item?.[colDef.field]?.toLowerCase() === data?.[colDef.field]?.toLowerCase()
+      )
+    ) {
+      stack({
+        Component: ConfirmationDialog,
+        props: {
+          DialogText: 'You cant add the same item twice ',
+          okButtonAction: window => {
+            deleteRow(params), window.close()
+          },
+          fullScreen: false
+        },
+        onClose: () => deleteRow(params),
+        width: 450,
+        height: 150,
+        title: 'platformLabels.Confirmation'
+      })
+      return
+    }
 
     const allColumns = api.getColumnDefs()
     const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
