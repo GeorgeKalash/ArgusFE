@@ -18,6 +18,7 @@ import ReportLayoutsForm from './forms/ReportLayoutsForm'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomLayoutForm from './forms/CustomLayoutForm'
 import CustomRulesForm from './forms/CustomRulesForm'
+import SecurityGroupsForm from './forms/SecurityGroupsForm'
 
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -106,6 +107,22 @@ const GlobalAuthorization = () => {
     })
   }
 
+  function openSecurityGroupsForm(row) {
+    stack({
+      Component: SecurityGroupsForm,
+      props: {
+        labels: labels,
+        maxAccess: access,
+        row: { resourceId: row.data.key, resourceName: row.data.value, moduleId: filters.moduleId },
+        invalidate,
+        resourceId: ResourceIds.SettingsResources
+      },
+      width: 1000,
+      height: 600,
+      title: 'reports layouts'
+    })
+  }
+
   useEffect(() => {
     filters.moduleId = 10
   }, [])
@@ -188,6 +205,19 @@ const GlobalAuthorization = () => {
             cellRenderer: row => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
                 <IconButton size='small' onClick={() => openCustomRules(row)}>
+                  <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                </IconButton>
+              </Box>
+            )
+          },
+          {
+            field: 'Security Groups',
+            headerName: labels.securityGroup,
+            width: 200,
+
+            cellRenderer: row => (
+              <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+                <IconButton size='small' onClick={() => openSecurityGroupsForm(row)}>
                   <Icon icon='mdi:application-edit-outline' fontSize={18} />
                 </IconButton>
               </Box>
