@@ -114,7 +114,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
 
     {
       field: 'parameters',
-      headerName: labels.parameters,
+      headerName: labels.params,
       flex: 1
     },
     {
@@ -132,9 +132,8 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
               variant='body2'
               component='a'
               onClick={async () => {
-                // Await the URL before opening in a new tab
                 const url = await returnURL(row.data)
-                window.open(url, '_blank') // Opens the URL in a new tab
+                window.open(url, '_blank')
               }}
               target='_blank'
               rel='noopener noreferrer'
@@ -171,8 +170,8 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
         <Grid container spacing={2}>
           <Grid item width={'50.1%'}>
             <CustomTextField
-              name='resourceName'
-              label={labels.name}
+              name='resourceId'
+              label={labels.resourceId}
               value={formik.values.resourceId}
               readOnly
               maxAccess={maxAccess}
@@ -180,8 +179,8 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
           </Grid>
           <Grid item width={'50.1%'}>
             <CustomTextField
-              name='resourceId'
-              label={labels.reference}
+              name='resourceName'
+              label={labels.resourceName}
               value={formik.values.resourceName}
               readOnly
               maxAccess={maxAccess}

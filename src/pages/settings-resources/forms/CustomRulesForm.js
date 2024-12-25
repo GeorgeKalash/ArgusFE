@@ -171,8 +171,8 @@ const CustomRulesForm = ({ labels, maxAccess, row, window }) => {
         <Grid container spacing={2}>
           <Grid item width={'50.1%'}>
             <CustomTextField
-              name='resourceName'
-              label={labels.name}
+              name='resourceId'
+              label={labels.resourceId}
               value={formik.values.resourceId}
               readOnly
               maxAccess={maxAccess}
@@ -180,8 +180,8 @@ const CustomRulesForm = ({ labels, maxAccess, row, window }) => {
           </Grid>
           <Grid item width={'50.1%'}>
             <CustomTextField
-              name='resourceId'
-              label={labels.reference}
+              name='resourceName'
+              label={labels.resourceName}
               value={formik.values.resourceName}
               readOnly
               maxAccess={maxAccess}

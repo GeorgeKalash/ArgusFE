@@ -71,7 +71,7 @@ const GlobalAuthorization = () => {
       },
       width: 1000,
       height: 600,
-      title: 'reports layouts'
+      title: labels.reportLayout
     })
   }
 
@@ -87,7 +87,7 @@ const GlobalAuthorization = () => {
       },
       width: 800,
       height: 480,
-      title: 'Custom Layouts'
+      title: labels.printTemplates
     })
   }
 
@@ -103,7 +103,7 @@ const GlobalAuthorization = () => {
       },
       width: 800,
       height: 480,
-      title: 'Custom Rules'
+      title: labels.customRules
     })
   }
 
@@ -145,6 +145,7 @@ const GlobalAuthorization = () => {
               <Grid item sx={{ width: '350px' }}>
                 <ResourceComboBox
                   datasetId={DataSets.MODULE}
+                  label={labels.module}
                   name='moduleId'
                   values={{
                     moduleId: filters.moduleId

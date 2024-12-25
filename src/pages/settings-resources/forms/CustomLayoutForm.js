@@ -146,7 +146,7 @@ const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
   const columns = [
     {
       component: 'textfield',
-      label: labels.wsName,
+      label: labels.api,
       name: 'wsName'
     },
     {
@@ -161,7 +161,7 @@ const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
     },
     {
       component: 'textfield',
-      label: labels.parameters,
+      label: labels.params,
       name: 'parameters'
     },
     {
@@ -204,8 +204,8 @@ const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
         <Grid container spacing={2}>
           <Grid item width={'50.1%'}>
             <CustomTextField
-              name='resourceName'
-              label={labels.name}
+              name='resourceId'
+              label={labels.resourceId}
               value={formik.values.resourceId}
               readOnly
               maxAccess={maxAccess}
@@ -213,8 +213,8 @@ const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
           </Grid>
           <Grid item width={'50.1%'}>
             <CustomTextField
-              name='resourceId'
-              label={labels.reference}
+              name='resourceName'
+              label={labels.resourceName}
               value={formik.values.resourceName}
               readOnly
               maxAccess={maxAccess}
