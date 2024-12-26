@@ -96,7 +96,9 @@ export function DataGrid({
       .filter(({ name }) => name !== 'id')
       .reduce((acc, { name, defaultValue }) => {
         if (typeof defaultValue === 'object' && defaultValue !== null) {
-          acc[name] = defaultValue[name]
+          Object.entries(defaultValue).forEach(([key, value]) => {
+            acc[key] = value
+          })
         } else {
           acc[name] = defaultValue
         }
@@ -145,7 +147,7 @@ export function DataGrid({
       (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
   )
 
-  const condition = (i) => {
+  const condition = i => {
     return (
       (!allColumns?.[i]?.props?.readOnly &&
         accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED) ||

@@ -159,7 +159,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         taxId: null,
         taxDetails: null,
         promotionTypeName: '',
-        promotionType: '',
+        promotionType: null,
         costHistory: false,
         taxDetailsButton: false,
         notes: ''
