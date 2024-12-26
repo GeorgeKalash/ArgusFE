@@ -57,9 +57,14 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
       itemId: yup.string().required()
     }),
     onSubmit: async values => {
+      const data = {
+        ...values,
+        recordId: parseInt(recordId)
+      }
+
       const res = await postRequest({
         extension: InventoryRepository.Barcodes.set,
-        record: JSON.stringify(values)
+        record: JSON.stringify(data)
       })
 
       if (imageUploadRef.current) {
@@ -70,7 +75,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
 
       if (!values.recordId) {
         toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', parseInt(res?.recordId))
+        formik.setFieldValue('recordId', formik.values.barcode)
       } else toast.success(platformLabels.Edited)
       invalidate()
     }
@@ -92,7 +97,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
 
         return
       }
-      if (barcode) {
+      if (barcode && recordId) {
         const res = await getRequest({
           extension: InventoryRepository.Barcodes.get,
           parameters: `_barcode=${barcode}`
@@ -102,7 +107,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
           ...res.record,
           scaleDescription: res.record.scaleDescription,
           posDescription: res.record.posDescription,
-          recordId: parseInt(res?.record.recordId)
+          recordId: res?.record.barcode
         })
       }
     })()
