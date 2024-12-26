@@ -18,7 +18,10 @@ const KitForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [numRows, setNumRows] = useState(0)
+
+  const isRowEmpty = row => {
+    return !row.componentId && !row.qty
+  }
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -29,22 +32,33 @@ const KitForm = ({ store, labels, maxAccess }) => {
         .of(
           yup.object().shape({
             componentSKU: yup.string().test(function (value) {
-              if (numRows > 1) {
-                return !!value
-              }
+              const row = this.parent
+              const isAnyFieldFilled = row.qty || row.componentSKU
 
-              return true
-            }),
-            qty: yup.number().test({
-              test: function (value) {
-                const { componentSKU } = this.parent
-
-                if (componentSKU) {
-                  return value > 0
+              if (this.options.from[1]?.value?.kit?.length === 1) {
+                if (isAnyFieldFilled) {
+                  return !!value
                 }
 
                 return true
               }
+
+              return !!value
+            }),
+
+            qty: yup.string().test(function (value) {
+              const row = this.parent
+              const isAnyFieldFilled = row.qty || row.componentSKU
+
+              if (this.options.from[1]?.value?.kit?.length === 1) {
+                if (isAnyFieldFilled) {
+                  return !!value
+                }
+
+                return true
+              }
+
+              return !!value
             })
           })
         )
@@ -65,7 +79,11 @@ const KitForm = ({ store, labels, maxAccess }) => {
       ]
     },
     onSubmit: values => {
-      postKit(values)
+      if (items.length === 1 && isRowEmpty(items[0])) {
+        postData({ kitId: recordId, components: [] })
+      } else {
+        postKit(values)
+      }
     }
   })
 
@@ -133,10 +151,6 @@ const KitForm = ({ store, labels, maxAccess }) => {
     }
   ]
 
-  useEffect(() => {
-    setNumRows(formik?.values?.kit?.length)
-  }, [formik.values.kit])
-
   function getData() {
     getRequest({
       extension: InventoryRepository.Kit.qry,
@@ -202,6 +216,7 @@ const KitForm = ({ store, labels, maxAccess }) => {
             value={formik.values.kit || []}
             error={formik.errors.kit}
             allowDelete
+            allowAddNewLine
             columns={columns}
           />
         </Grow>
