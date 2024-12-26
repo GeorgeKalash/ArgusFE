@@ -24,72 +24,60 @@ const ItemPromotion = props => {
   const columns = [
     {
       field: 'promotionTypeName',
-      headerName: _labels.promType,
-      flex: 1
+      headerName: _labels.promType
     },
     {
       field: 'sku',
-      headerName: _labels.sku,
-      flex: 1
+      headerName: _labels.sku
     },
     {
       field: 'itemName',
-      headerName: _labels.itemName,
-      flex: 3
+      headerName: _labels.itemName
     },
     {
       field: 'qty',
       headerName: _labels.qty,
-      flex: 1,
       type: 'number'
     },
     {
       field: 'netUnitPrice',
       headerName: _labels.netUnitPrice,
-      flex: 1,
       type: 'number'
     },
     {
       field: 'currentCost',
       headerName: _labels.currentCost,
-      flex: 1,
       type: 'number'
     },
     {
       field: 'netExtendedPrice',
       headerName: _labels.netExtendedPrice,
-      flex: 1,
       type: 'number'
     },
     {
       field: 'extendedCurrentCostInDocumentCurrency',
       headerName: _labels.extendedCurrent,
-      flex: 1,
       type: 'number'
     },
     ,
     {
       field: 'invoicePct',
       headerName: _labels.invoicePct,
-      flex: 1,
       type: 'number'
     },
     {
       field: 'freeOnInvoiceUnitMarkdown',
       headerName: _labels.freeOnInvoiceUnitMarkdown,
-      flex: 1,
       type: 'number'
     },
     {
       field: 'kitPct',
       headerName: _labels.kitPct,
-      flex: 1,
       type: 'number'
     },
     {
       field: 'promotionUnitMarkdown',
       headerName: _labels.promotionUnitMarkdown,
-      flex: 1,
       type: 'number'
     }
   ]
