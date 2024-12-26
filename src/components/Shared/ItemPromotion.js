@@ -37,7 +37,24 @@ const ItemPromotion = props => {
       headerName: _labels.itemName,
       flex: 3
     },
-
+    {
+      field: 'qty',
+      headerName: _labels.qty,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'netUnitPrice',
+      headerName: _labels.netUnitPrice,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'currentCost',
+      headerName: _labels.currentCost,
+      flex: 1,
+      type: 'number'
+    },
     {
       field: 'netExtendedPrice',
       headerName: _labels.netExtendedPrice,
