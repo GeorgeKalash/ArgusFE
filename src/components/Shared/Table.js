@@ -29,6 +29,7 @@ import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 
 const Table = ({
+  name,
   paginationType = '',
   globalStatus = true,
   viewCheckButtons = false,
@@ -59,7 +60,7 @@ const Table = ({
       ({ field }) =>
         accessLevel({
           maxAccess: props?.maxAccess,
-          name: field
+          name: name ? `${name}.${field}` : field
         }) !== HIDDEN
     )
     .map(col => {
