@@ -54,7 +54,8 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      itemId: yup.string().required()
+      itemId: yup.string().required(),
+      barcode: yup.string().required()
     }),
     onSubmit: async values => {
       const data = {
@@ -159,6 +160,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
                     value={formik?.values?.barcode}
                     maxLength='20'
                     readOnly={editMode}
+                    required
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('barcode', '')}
