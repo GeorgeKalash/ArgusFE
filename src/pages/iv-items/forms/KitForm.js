@@ -155,15 +155,13 @@ const KitForm = ({ store, labels, maxAccess }) => {
     getRequest({
       extension: InventoryRepository.Kit.qry,
       parameters: `_kitId=${recordId}`
+    }).then(res => {
+      const modifiedList = res.list?.map((kitItems, index) => ({
+        ...kitItems,
+        id: index + 1
+      }))
+      modifiedList.length > 0 && formik.setValues({ kit: modifiedList })
     })
-      .then(res => {
-        const modifiedList = res.list?.map((kitItems, index) => ({
-          ...kitItems,
-          id: index + 1
-        }))
-        formik.setValues({ kit: modifiedList })
-      })
-      .catch(error => {})
   }
   useEffect(() => {
     if (recordId) {
@@ -180,6 +178,8 @@ const KitForm = ({ store, labels, maxAccess }) => {
     enableReinitialize: true,
     validateOnChange: true
   })
+
+  console.log(formik.values, 'Foooooo')
 
   return (
     <FormShell
