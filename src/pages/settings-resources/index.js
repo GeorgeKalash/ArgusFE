@@ -119,7 +119,7 @@ const GlobalAuthorization = () => {
       },
       width: 1000,
       height: 600,
-      title: 'reports layouts'
+      title: labels.securityGroup
     })
   }
 

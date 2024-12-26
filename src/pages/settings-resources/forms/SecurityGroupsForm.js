@@ -19,67 +19,10 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  //   const isRowEmpty = row => {
-  //     return !row.seqNo && !row.description && !row.name
-  //   }
-
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
 
-    // validationSchema: yup.object({
-    //   items: yup
-    //     .array()
-    //     .of(
-    //       yup.object().shape({
-    //         seqNo: yup.string().test(function (value) {
-    //           const row = this.parent
-    //           const isAnyFieldFilled = row.seqNo || row.description || row.name
-
-    //           if (this.options.from[1]?.value?.items?.length === 1) {
-    //             if (isAnyFieldFilled) {
-    //               return !!value
-    //             }
-
-    //             return true
-    //           }
-
-    //           return !!value
-    //         }),
-
-    //         name: yup.string().test(function (value) {
-    //           const row = this.parent
-    //           const isAnyFieldFilled = row.seqNo || row.description || row.name
-
-    //           if (this.options.from[1]?.value?.items?.length === 1) {
-    //             if (isAnyFieldFilled) {
-    //               return !!value
-    //             }
-
-    //             return true
-    //           }
-
-    //           return !!value
-    //         }),
-
-    //         description: yup.string().test(function (value) {
-    //           const row = this.parent
-    //           const isAnyFieldFilled = row.seqNo || row.description || row.name
-
-    //           if (this.options.from[1]?.value?.items?.length === 1) {
-    //             if (isAnyFieldFilled) {
-    //               return !!value
-    //             }
-
-    //             return true
-    //           }
-
-    //           return !!value
-    //         })
-    //       })
-    //     )
-    //     .required()
-    // }),
     initialValues: {
       resourceId: row.resourceId,
       resourceName: row.resourceName,
@@ -89,32 +32,27 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
           accessLevelName: '',
           resourceId: '',
           sgId: null,
-          noduleId: ''
+          moduleId: ''
         }
       ]
     },
     onSubmit: values => {
-      //   const { items } = values
-
-      //   if (items.length === 1 && isRowEmpty(items[0])) {
-      //     postData({ resourceId: row.resourceId, items: [] })
-      //   } else {
       postData(values)
-
-      //   }
     }
   })
 
   const postData = async obj => {
-    const items =
-      obj?.items?.map((item, index) => ({
-        ...item,
-        resourceId: row.resourceId
-      })) || []
+    const filteredItems =
+      obj?.items
+        ?.filter(item => item.accessLevel !== null && item.accessLevel !== '')
+        .map((item, index) => ({
+          ...item,
+          resourceId: row.resourceId
+        })) || []
 
     const data = {
       resourceId: row.resourceId,
-      data: items || []
+      data: filteredItems
     }
 
     await postRequest({
@@ -129,7 +67,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   const columns = [
     {
       component: 'textfield',
-      label: labels.sgName,
+      label: labels.name,
       name: 'sgName',
       props: {
         readOnly: true
@@ -137,7 +75,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
     },
     {
       component: 'textfield',
-      label: labels.sgDescription,
+      label: labels.description,
       name: 'sgDescription',
       props: {
         readOnly: true
@@ -159,48 +97,43 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
     }
   ]
 
-  //   <ResourceComboBox
-  //               datasetId={DataSets.ACCESS_LEVEL}
-  //               name='accessLevel'
-  //               label={labels.accessLevel}
-  //               valueField='key'
-  //               displayField='value'
-  //               values={formik.values}
-  //               maxAccess={maxAccess}
-  //               onChange={(event, newValue) => {
-  //                 formik.setFieldValue('accessLevel', newValue?.key)
-  //               }}
-  //               error={formik.touched.accessLevel && Boolean(formik.errors.accessLevel)}
-  //             />
-
   useEffect(() => {
-    getRequest({
-      extension: AccessControlRepository.SecurityGroup.qry,
-      parameters: `_moduleId=${row.moduleId}&_sgId=0&_filter=`
-    }).then(res => {
-      console.log(res)
+    const fetchData = async () => {
+      const res1 = await getRequest({
+        extension: AccessControlRepository.SecurityGroup.qry,
+        parameters: '_startAt=0&_pageSize=1000'
+      })
 
-      const filteredList = res.list?.filter(item => item.resourceId === row.resourceId)
+      const res2 = await getRequest({
+        extension: AccessControlRepository.ModuleClass.qry0,
+        parameters: `_resourceId=${row.resourceId}`
+      })
 
-      const modifiedList = filteredList?.map((item, index) => ({
-        ...item,
-        id: index + 1
-      }))
+      const list1 = res1.list || []
+      const list2 = res2.list || []
+
+      const combinedList = list1.map((item1, index) => {
+        const match = list2.find(item2 => item2.sgId === item1.recordId)
+
+        return {
+          id: index + 1,
+          accessLevelName: match ? match.accessLevelName : '',
+          accessLevel: match ? match.accessLevel : null,
+          resourceId: row.resourceId,
+          sgId: item1.recordId,
+          moduleId: row.moduleId,
+          sgName: item1.name,
+          sgDescription: item1.description
+        }
+      })
 
       formik.setValues({
         ...formik.values,
-        items: modifiedList
+        items: combinedList
       })
-    })
-  }, [])
+    }
 
-  useEffect(() => {
-    getRequest({
-      extension: AccessControlRepository.ModuleClass.qry0,
-      parameters: `_resourceId=${row.resourceId}`
-    }).then(res => {
-      console.log(res, 'resssssssssssssssssssssssssssss')
-    })
+    fetchData()
   }, [])
 
   return (
@@ -215,8 +148,8 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
         <Grid container spacing={2}>
           <Grid item width={'50.1%'}>
             <CustomTextField
-              name='resourceName'
-              label={labels.name}
+              name='resourceId'
+              label={labels.resourceId}
               value={formik.values.resourceId}
               readOnly
               maxAccess={maxAccess}
@@ -224,8 +157,8 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
           </Grid>
           <Grid item width={'50.1%'}>
             <CustomTextField
-              name='resourceId'
-              label={labels.reference}
+              name='resourceName'
+              label={labels.resourceName}
               value={formik.values.resourceName}
               readOnly
               maxAccess={maxAccess}
@@ -237,7 +170,8 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values.items}
             error={formik.errors.items}
-            allowDelete
+            allowDelete={false}
+            allowAddNewLine={false}
             columns={columns}
           />
         </Grow>
