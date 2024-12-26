@@ -179,8 +179,6 @@ const KitForm = ({ store, labels, maxAccess }) => {
     validateOnChange: true
   })
 
-  console.log(formik.values, 'Foooooo')
-
   return (
     <FormShell
       form={formik}
