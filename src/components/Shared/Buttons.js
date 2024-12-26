@@ -1,5 +1,58 @@
 export const getButtons = platformLabels => [
   {
+    key: 'Clear',
+    label: platformLabels.Clear,
+    condition: 'isCleared',
+    onClick: 'onClear',
+    color: '#f44336',
+    image: 'clear.png',
+    main: true
+  },
+  {
+    key: 'ClearGrid',
+    label: platformLabels.clearGrid,
+    color: '#f44336',
+    image: 'clear.png',
+    main: false
+  },
+  {
+    key: 'ClearHG', //HeaderGrid
+    label: platformLabels.clearAll,
+    color: '#4682B4',
+    image: 'clear.png',
+    main: false
+  },
+  {
+    key: 'Info',
+    label: platformLabels.Info,
+    condition: 'isInfo && infoVisible',
+    onClick: 'onInfo',
+    color: '#4355a5',
+    disabled: '!editMode',
+    image: 'info.png',
+    main: true
+  },
+  {
+    key: 'saveClear',
+    label: platformLabels.saveClear,
+    condition: 'isSavedClear',
+    onClick: 'onSaveClear',
+    color: '#231f20',
+    image: 'saveclear.png',
+    main: true,
+    disabled: 'disabledSavedClear || isPosted || isClosed'
+  },
+  {
+    key: 'Submit',
+    label: platformLabels.Submit,
+    condition: 'isSaved',
+    onClick: 'onSave',
+    color: '#4eb558',
+    disabled: 'disabledSubmit || isPosted || isClosed',
+    image: 'save.png',
+    main: true
+  },
+  {
     key: 'Post',
     label: platformLabels.Post,
     color: '#231f20',
@@ -259,15 +312,6 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Clear',
-    label: platformLabels.Clear,
-    condition: 'isCleared',
-    onClick: 'onClear',
-    color: '#f44336',
-    image: 'clear.png',
-    main: true
-  },
-  {
     key: 'generate',
     label: platformLabels.Generate,
     condition: 'isGenerated',
@@ -283,36 +327,6 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'info.png',
     main: false
-  },
-  {
-    key: 'Info',
-    label: platformLabels.Info,
-    condition: 'isInfo && infoVisible',
-    onClick: 'onInfo',
-    color: '#4355a5',
-    disabled: '!editMode',
-    image: 'info.png',
-    main: true
-  },
-  {
-    key: 'saveClear',
-    label: platformLabels.saveClear,
-    condition: 'isSavedClear',
-    onClick: 'onSaveClear',
-    color: '#231f20',
-    image: 'saveclear.png',
-    main: true,
-    disabled: 'disabledSavedClear || isPosted || isClosed'
-  },
-  {
-    key: 'Submit',
-    label: platformLabels.Submit,
-    condition: 'isSaved',
-    onClick: 'onSave',
-    color: '#4eb558',
-    disabled: 'disabledSubmit || isPosted || isClosed',
-    image: 'save.png',
-    main: true
   },
   {
     key: 'Import',
@@ -371,10 +385,51 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
+    key: 'PR',
+    label: platformLabels.PR,
+    color: '#231f20',
+    image: 'preview.png',
+    main: false
+  },
+  {
     key: 'Transfer',
     label: platformLabels.Transfer,
     color: '#4eb558',
     image: 'exchange-refresh-icon.png',
     main: false
   },
+  {
+    key: 'generateIV',
+    label: platformLabels.GenerateInvoice,
+    color: 'black',
+    image: 'generate.png',
+    main: false
+  },
+  {
+    key: 'Generate Invoice',
+    label: platformLabels.GenerateInvoice,
+    color: '#231f20',
+    main: false
+  },
+  {
+    key: 'ClientSalesTransaction',
+    label: platformLabels.ClientSalesTransaction,
+    color: 'blue',
+    image: 'popup-window.png',
+    main: false
+  },
+  {
+    key: 'Locked',
+    label: platformLabels.Locked,
+    color: '#231f20',
+    image: 'lock.png',
+    main: false
+  },
+  {
+    key: 'Unlocked',
+    label: platformLabels.Unlocked,
+    color: '#231f20',
+    image: 'unlock.png',
+    main: false
+  }
 ]

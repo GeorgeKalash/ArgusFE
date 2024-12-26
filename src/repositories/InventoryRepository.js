@@ -8,7 +8,8 @@ export const InventoryRepository = {
   },
   Item: {
     snapshot: service + 'snapshotIT',
-    get: service + 'getIT'
+    get: service + 'getIT',
+    quickView: service + 'quickViewIT'
   },
   Group: {
     qry: service + 'qryGRP',
@@ -80,6 +81,7 @@ export const InventoryRepository = {
     page: service + 'pageIT',
     qry: service + 'qryIT',
     get: service + 'getIT',
+    get2: service + 'getIT2',
     set: service + 'setIT',
     del: service + 'delIT',
     snapshot: service + 'snapshotIT2'
@@ -149,6 +151,24 @@ export const InventoryRepository = {
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
   },
+  MaterialsTransfer: {
+    page: service + 'pageTFR',
+    snapshot: service + 'snapshotTFR',
+    get: service + 'getTFR',
+    set2: service + 'set2TFR',
+    del: service + 'delTFR',
+    close: service + 'closeTFR',
+    reopen: service + 'reopenTFR',
+    post: service + 'postTFR',
+    unpost: service + 'unpostTFR',
+    print: service + 'setTFR_PS'
+  },
+  MaterialsTransferItems: {
+    qry: service + 'qryTFI',
+  },
+  Cost: {
+    get: service + 'getCOS',
+  },
   ItemPhysProp: {
     get: service + 'getPP'
   },
@@ -202,10 +222,17 @@ export const InventoryRepository = {
   },
   Transaction: {
     qry2: service + 'qry2TRX',
-    qry3: service + 'qry3TRX',
+    qry3: service + 'qry3TRX'
   },
   GenerateFiscalYear: {
     gen: service + 'genFIS'
+  },
+  IVMDParts: {
+    qry: service + 'qryIT'
+  },
+  ItemParts: {
+    qry: service + 'qryITP',
+    set2: service + 'set2ITP'
   },
   CurrentCost: {
     get: service + 'getCOS',
@@ -219,6 +246,10 @@ export const InventoryRepository = {
     qry: service + 'qryPRT',
     del: service + 'delPRT',
     get: service + 'getPRT',
-    set: service + 'setPRT'
+    set: service + 'setPRT',
+    snapshot: service + 'snapshotPRT'
+  },
+  DocumentTypeDefaults: {
+    get: service + 'getDTD'
   }
 }

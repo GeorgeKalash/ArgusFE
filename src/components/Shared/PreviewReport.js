@@ -11,6 +11,7 @@ export default function PreviewReport({
   outerGrid = false,
   scId,
   siteId,
+  controllerId,
   onSuccess
 }) {
   const { postRequest } = useContext(RequestsContext)
@@ -24,8 +25,13 @@ export default function PreviewReport({
     if (!outerGrid) {
       if (resourceId === ResourceIds.JournalVoucher) {
         parameters = `?_recordId=${recordId}&_functionId=${functionId}`
-      } else if (resourceId === ResourceIds.IVPhysicalCountItem) {
+      } else if (
+        resourceId === ResourceIds.IVPhysicalCountItem ||
+        resourceId === ResourceIds.PhysicalCountSerialSummary
+      ) {
         parameters = `?_stockCountId=${scId}&_siteId=${siteId}`
+      } else if (resourceId === ResourceIds.IVPhysicalCountItemDetails) {
+        parameters = `?_stockCountId=${scId}&_siteId=${siteId}&_controllerId=${controllerId}`
       } else {
         parameters = `?_recordId=${recordId}`
       }

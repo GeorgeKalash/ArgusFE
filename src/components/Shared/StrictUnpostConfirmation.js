@@ -4,7 +4,7 @@ import WindowToolbar from './WindowToolbar'
 import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const StrictUnpostConfirmation = ({ window, action }) => {
+const StrictUnpostConfirmation = ({ window, onSuccess }) => {
   const [confirmationText, setConfirmationText] = useState('')
   const { platformLabels } = useContext(ControlContext)
 
@@ -18,7 +18,7 @@ const StrictUnpostConfirmation = ({ window, action }) => {
   }
 
   const handleSubmit = async () => {
-    action()
+    onSuccess()
     window.close()
   }
 

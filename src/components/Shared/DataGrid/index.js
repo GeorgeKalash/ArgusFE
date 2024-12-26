@@ -22,6 +22,7 @@ export function DataGrid({
   allowDelete = true,
   allowAddNewLine = true,
   onSelectionChange,
+  rowSelectionModel,
   bg
 }) {
   const gridApiRef = useRef(null)
@@ -35,13 +36,27 @@ export function DataGrid({
   const process = (params, oldRow, setData) => {
     const column = columns.find(({ name }) => name === params.colDef.field)
 
-    const updateRowCommit = changes => {
+    const updateCommit = changes => {
       setData(changes, params)
       commit({ changes: { ...params.node.data, changes } })
     }
 
+    const updateRowCommit = changes => {
+      const rowToUpdate = value?.find(item => item?.id === changes?.id)
+
+      const updatedRow = { ...rowToUpdate, ...changes.changes }
+
+      gridApiRef.current.applyTransaction({
+        update: [updatedRow]
+      })
+
+      commit({ changes: updatedRow })
+    }
+
     if (column.onChange) {
-      column.onChange({ row: { oldRow: oldRow, newRow: params.node.data, update: updateRowCommit } })
+      column.onChange({
+        row: { oldRow: oldRow, newRow: params.node.data, update: updateCommit, updateRow: updateRowCommit }
+      })
     }
   }
 
@@ -50,7 +65,7 @@ export function DataGrid({
     gridApiRef.current.applyTransaction({ remove: [params.data] })
     if (newRows?.length < 1) setReady(true)
 
-    onChange(newRows)
+    onChange(newRows, 'delete', params.data)
   }
 
   function openDelete(params) {
@@ -74,6 +89,15 @@ export function DataGrid({
       setReady(false)
     }
   }, [ready, value])
+
+  useEffect(() => {
+    if (gridApiRef.current && rowSelectionModel) {
+      const rowNode = gridApiRef.current.getRowNode(rowSelectionModel)
+      if (rowNode) {
+        rowNode.setSelected(true)
+      }
+    }
+  }, [rowSelectionModel])
 
   const addNewRow = params => {
     const highestIndex = params?.node?.data?.id + 1 || 1
@@ -343,7 +367,7 @@ export function DataGrid({
           value={currentValue}
           column={{
             ...column.colDef,
-            props: column.propsReducer ? column?.propsReducer({ data, props }) : props
+            props: column?.colDef?.propsReducer ? column?.colDef?.propsReducer({ row: data, props }) : props
           }}
           updateRow={updateRow}
           update={update}
@@ -420,6 +444,19 @@ export function DataGrid({
       rowIndex: rowIndex,
       colKey: colDef.field
     })
+
+    if (params?.data.id !== rowSelectionModel) {
+      const selectedRow = params?.data
+      if (onSelectionChange) {
+        async function update({ newRow }) {
+          updateState({
+            newRow
+          })
+        }
+
+        onSelectionChange(selectedRow, update)
+      }
+    }
   }
 
   const gridContainerRef = useRef(null)
@@ -483,18 +520,6 @@ export function DataGrid({
     handleRowChange(newRow)
   }
 
-  const handleRowClick = params => {
-    const selectedRow = params?.data
-    if (onSelectionChange) {
-      async function update({ newRow }) {
-        updateState({
-          newRow
-        })
-      }
-      onSelectionChange(selectedRow, update)
-    }
-  }
-
   const setData = (changes, params) => {
     const id = params.node?.id
 
@@ -513,15 +538,6 @@ export function DataGrid({
 
     if (colDef.updateOn === 'blur') {
       process(params, data, setData)
-    }
-  }
-
-  const onCellFocused = params => {
-    if (params.rowIndex >= 0 && params.column) {
-      params.api.startEditingCell({
-        rowIndex: params.rowIndex,
-        colKey: params.column.getId()
-      })
     }
   }
 
@@ -544,7 +560,6 @@ export function DataGrid({
               rowData={value}
               columnDefs={columnDefs}
               suppressRowClickSelection={false}
-              suppressHeaderFocus={true}
               stopEditingWhenCellsLoseFocus={false}
               rowSelection='single'
               editType='cell'
@@ -560,9 +575,7 @@ export function DataGrid({
               getRowId={params => params?.data?.id}
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}
-              onRowClicked={handleRowClick}
               onCellEditingStopped={onCellEditingStopped}
-              onCellFocused={onCellFocused}
             />
           )}
         </Box>

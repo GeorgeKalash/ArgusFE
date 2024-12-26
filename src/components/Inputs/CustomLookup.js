@@ -1,11 +1,10 @@
 import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useState } from 'react'
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
+import { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
-import { TrxType } from 'src/resources/AccessLevels'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomLookup = ({
   type = 'text',
@@ -15,6 +14,8 @@ const CustomLookup = ({
   secondValue,
   secondDisplayField = true,
   columnsInDropDown,
+  onSecondValueChange,
+  secondFieldName = '',
   store = [],
   setStore,
   onKeyUp,
@@ -39,15 +40,36 @@ const CustomLookup = ({
   hidden = false,
   isLoading,
   minChars,
-  userTypes = true,
   onBlur = () => {},
+  onFocus = () => {},
   ...props
 }) => {
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
+
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
 
+  const valueHighlightedOption = useRef(null)
+
+  const selectFirstValue = useRef(null)
+
+  const autocompleteRef = useRef(null)
+
   const [inputValue, setInputValue] = useState(firstValue || '')
+
+  useEffect(() => {
+    function handleBlur(event) {
+      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
+        selectFirstValue.current = 'click'
+      }
+    }
+
+    document.addEventListener('mousedown', handleBlur)
+
+    return () => {
+      document.removeEventListener('mousedown', handleBlur)
+    }
+  }, [])
 
   useEffect(() => {
     if (!firstValue) {
@@ -55,24 +77,17 @@ const CustomLookup = ({
     }
   }, [firstValue])
 
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
-
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
-
-  const isRequired = required || accessLevel === MANDATORY
-
   return _hidden ? (
     <></>
   ) : (
     <Grid container spacing={0} sx={{ width: '100%' }}>
       <Grid item xs={secondDisplayField ? 6 : 12}>
         <Autocomplete
+          ref={autocompleteRef}
           name={name}
           key={firstValue || null}
           value={firstValue}
-          {...(userTypes && !firstValue && { inputValue: inputValue })}
+          {...(!firstValue && { inputValue: inputValue })}
           size={size}
           options={store}
           filterOptions={options => {
@@ -96,6 +111,9 @@ const CustomLookup = ({
             setInputValue(newValue ? newValue[valueField] : '')
             onChange(name, newValue)
             setAutoFocus(true)
+          }}
+          onHighlightChange={(event, newValue) => {
+            valueHighlightedOption.current = newValue
           }}
           PopperComponent={PopperComponent}
           PaperComponent={({ children }) =>
@@ -167,19 +185,22 @@ const CustomLookup = ({
                   setFreeSolo(true)
                 }
 
-                onBlur(e)
+                if (selectFirstValue.current !== 'click') {
+                  onBlur(e, valueHighlightedOption?.current)
+                }
               }}
-              onFocus={() => {
+              onFocus={e => {
                 setStore([]), setFreeSolo(true)
+                selectFirstValue.current = ''
+                onFocus(e)
               }}
               type={type}
               variant={variant}
               label={label}
-              required={isRequired}
+              required={_required}
               onKeyUp={e => {
                 onKeyUp(e)
-
-                if (e.key !== 'Enter') e.target.value >= minChars ? setFreeSolo(true) : setFreeSolo(false)
+                if (e.key !== 'Enter') e.target?.value?.length >= minChars ? setFreeSolo(false) : setFreeSolo(true)
               }}
               inputProps={{
                 ...params.inputProps,
@@ -264,13 +285,17 @@ const CustomLookup = ({
             variant={variant}
             placeholder={secondFieldLabel == '' ? displayField.toUpperCase() : secondFieldLabel.toUpperCase()}
             value={secondValue ? secondValue : ''}
-            required={isRequired}
-            disabled={disabled}
+            required={_required}
+            onChange={e => {
+              if (onSecondValueChange && secondFieldName) {
+                onSecondValueChange(secondFieldName, e.target.value)
+              }
+            }}
             InputProps={{
               inputProps: {
-                tabIndex: -1 // Prevent focus on the input field
+                tabIndex: _readOnly || secondFieldName === '' ? -1 : 0 // Prevent focus on the input field
               },
-              readOnly: true
+              readOnly: !!secondFieldName && !_readOnly ? false : true
             }}
             error={error}
             helperText={helperText}

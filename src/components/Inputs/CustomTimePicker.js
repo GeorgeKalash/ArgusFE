@@ -9,9 +9,7 @@ import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import PopperComponent from '../Shared/Popper/PopperComponent'
-
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
-import { TrxType } from 'src/resources/AccessLevels'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomTimePicker = ({
   name,
@@ -35,15 +33,7 @@ const CustomTimePicker = ({
 }) => {
   const [openTimePicker, setOpenTimePicker] = useState(false)
 
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
-
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
-
-  const isRequired = required || accessLevel === MANDATORY
+  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
 
   return _hidden ? (
     <></>
@@ -71,7 +61,7 @@ const CustomTimePicker = ({
         clearable
         slotProps={{
           textField: {
-            required: isRequired,
+            required: _required,
             size: size,
             fullWidth: fullWidth,
             error: error,
