@@ -109,8 +109,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
     const items =
       obj?.items?.map((item, index) => ({
         ...item,
-        resourceId: row.resourceId,
-        moduleId: 0
+        resourceId: row.resourceId
       })) || []
 
     const data = {
@@ -176,14 +175,12 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
 
   useEffect(() => {
     getRequest({
-      extension: AccessControlRepository.ModuleClass.qry,
-      parameters: `_moduleId=${row.moduleId}&_resourceId=${row.resourceId}&_sgId=0&_filter=`
+      extension: AccessControlRepository.SecurityGroup.qry,
+      parameters: `_moduleId=${row.moduleId}&_sgId=0&_filter=`
     }).then(res => {
       console.log(res)
 
       const filteredList = res.list?.filter(item => item.resourceId === row.resourceId)
-
-      console.log(filteredList)
 
       const modifiedList = filteredList?.map((item, index) => ({
         ...item,
@@ -194,6 +191,15 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
         ...formik.values,
         items: modifiedList
       })
+    })
+  }, [])
+
+  useEffect(() => {
+    getRequest({
+      extension: AccessControlRepository.ModuleClass.qry0,
+      parameters: `_resourceId=${row.resourceId}`
+    }).then(res => {
+      console.log(res, 'resssssssssssssssssssssssssssss')
     })
   }, [])
 
