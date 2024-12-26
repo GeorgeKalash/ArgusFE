@@ -3,87 +3,88 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import GroupInfoWindow from './Windows/GroupInfoWindow'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useWindow } from 'src/windows'
+import { useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import CreditCardForm from './CreditCardForm'
 
-const SecurityGroup = () => {
+const CreditCards = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+  const { stack } = useWindow()
 
-    const response = await getRequest({
-      extension: AccessControlRepository.SecurityGroup.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+  async function fetchGridData() {
+    return await getRequest({
+      extension: CashBankRepository.CreditCard.qry,
+      parameters: ``
     })
-
-    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels: _labels,
-    refetch,
-    paginationParameters,
     access,
+    refetch,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: AccessControlRepository.SecurityGroup.qry,
-    datasetId: ResourceIds.SecurityGroup
+    endpointId: CashBankRepository.CreditCard.qry,
+    datasetId: ResourceIds.CreditCard
   })
 
-  function openForm(recordId) {
-    stack({
-      Component: GroupInfoWindow,
-      props: {
-        labels: _labels,
-        recordId: recordId,
-        maxAccess: access
-      },
-      width: 900,
-      height: 700,
-      title: _labels.securityGroups
-    })
-  }
-
   const columns = [
+    {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
     {
       field: 'name',
       headerName: _labels.name,
       flex: 1
     },
     {
-      field: 'description',
-      headerName: _labels.description,
+      field: 'bankName',
+      headerName: _labels.bank,
       flex: 1
     }
   ]
+
+  const del = async obj => {
+    await postRequest({
+      extension: CashBankRepository.CreditCard.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+  }
+
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
 
   const add = () => {
     openForm()
   }
 
-  const edit = obj => {
-    openForm(obj.recordId)
-  }
-
-  const del = async obj => {
-    await postRequest({
-      extension: AccessControlRepository.SecurityGroup.del,
-      record: JSON.stringify(obj)
+  function openForm(recordId) {
+    stack({
+      Component: CreditCardForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 800,
+      height: 600,
+      title: _labels.creditCard
     })
-    invalidate()
-    toast.success(platformLabels.Deleted)
   }
 
   return (
@@ -98,16 +99,14 @@ const SecurityGroup = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
-          pageSize={50}
           maxAccess={access}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          pageSize={50}
           refetch={refetch}
+          paginationType='client'
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default SecurityGroup
+export default CreditCards
