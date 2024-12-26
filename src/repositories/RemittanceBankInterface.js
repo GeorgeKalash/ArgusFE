@@ -14,6 +14,13 @@ export const RemittanceBankInterface = {
     snapshot: service + 'snapshotBank'
   },
   InstantCashRates: {
-    qry: service + 'qryICRates'
+    qry: service + 'qryICFees',
+    get: service + 'getICFees'
+  },
+  exchange: {
+    get: service + 'getICExchangeRates'
+  },
+  Agents: {
+    qry: service + 'qryAgents'
   }
 }

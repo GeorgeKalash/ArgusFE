@@ -15,8 +15,18 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
 
-export default function InstantCash({ onSubmit, cashData = {}, window, clientData, outwardsData }) {
+export default function InstantCash({
+  onSubmit,
+  cashData = {},
+  window,
+  clientData,
+  deliveryModeId,
+  payingAgent,
+  payingCurrency,
+  outwardsData
+}) {
   const { getRequest } = useContext(RequestsContext)
+
   const { stack: stackError } = useError()
 
   const { labels: _labels, maxAccess } = useResourceQuery({
@@ -26,42 +36,44 @@ export default function InstantCash({ onSubmit, cashData = {}, window, clientDat
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      deliveryModeId: '',
+      deliveryModeId: deliveryModeId,
+      payingAgent: payingAgent,
+      payingCurrency: payingCurrency,
       currency: '',
       sourceAmount: outwardsData?.amount || 0,
       toCountryId: '',
       totalTransactionAmountPerAnnum: clientData.hiddenTrxAmount,
       transactionsPerAnnum: clientData.hiddenTrxCount,
       remitter: {
-        relation: '',
-        otherRelation: '',
-        employerName: clientData.hiddenSponserName,
-        employerStatus: ''
+        relation: clientData.relation,
+        otherRelation: clientData.otherRelation,
+        employerName: clientData.employerName,
+        employerStatus: clientData.employerStatus
       },
       beneficiary: {
         address: {
-          postCode: ''
+          postCode: clientData.postCode
         },
         bankDetails: {
-          bankCode: '',
-          bankName: '',
-          bankAddress1: ''
+          bankCode: clientData.bankDetails?.bankCode,
+          bankName: clientData.bankDetails?.bankName,
+          bankAddress1: clientData.bankDetails?.bankAddress1
         }
       }
     },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      deliveryModeId: yup.string().required(' '),
-      toCountryId: yup.string().required(' '),
-      payingAgent: yup.string().required(' '),
-      sourceAmount: yup.string().required(' '),
+      deliveryModeId: yup.string().required(),
+      toCountryId: yup.string().required(),
+      payingAgent: yup.string().required(),
+      sourceAmount: yup.string().required(),
       remitter: yup.object().shape({
-        employerName: yup.string().required(' ')
+        employerName: yup.string().required()
       }),
       beneficiary: yup.object().shape({
         bankDetails: yup.object().shape({
-          bankName: yup.string().required(' ')
+          bankName: yup.string().required()
         })
       })
     }),
@@ -102,67 +114,6 @@ export default function InstantCash({ onSubmit, cashData = {}, window, clientDat
       maxAccess={maxAccess}
     >
       <Grid container>
-        {/* First Column */}
-        <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
-          <Grid hideonempty xs={12}>
-            <ResourceComboBox
-              endpointId={RemittanceBankInterface.Combos.qry}
-              parameters={`_combo=1`}
-              name='deliveryModeId'
-              label={_labels.deliveryMode}
-              valueField='recordId'
-              displayField='name'
-              values={formik.values}
-              required
-              onChange={(event, newValue) => {
-                formik.setFieldValue('deliveryModeId', newValue ? newValue.recordId : '')
-                formik.setFieldValue('payingAgent', '')
-              }}
-              maxAccess={maxAccess}
-              error={formik.touched.deliveryModeId && Boolean(formik.errors.deliveryModeId)}
-            />
-          </Grid>
-          <Grid hideonempty xs={12}>
-            <CustomTextField
-              name='toCountryId'
-              required
-              readOnly
-              onChange={formik.handleChange}
-              label={_labels.toCountry}
-              value={formik.values.toCountryId}
-              error={formik.touched.toCountryId && Boolean(formik.errors.toCountryId)}
-            />
-          </Grid>
-          <Grid hideonempty xs={12}>
-            <ResourceComboBox
-              endpointId={
-                formik.values.deliveryModeId && formik.values.toCountryId && RemittanceBankInterface.PayingAgent.qry
-              }
-              parameters={
-                formik.values.deliveryModeId &&
-                formik.values.toCountryId &&
-                `_deliveryMode=${formik.values.deliveryModeId}&_receivingCountry=${formik.values.toCountryId}`
-              }
-              name='payingAgent'
-              label={_labels.payingAgent}
-              readOnly={!(formik.values.deliveryModeId && formik.values.toCountryId)}
-              valueField='recordId'
-              required
-              displayField='description'
-              columnsInDropDown={[
-                { key: 'description', value: 'Paying Agent' },
-                { key: 'payingCurrency', value: 'Paying Currency' }
-              ]}
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('payingAgent', newValue ? newValue.recordId : '')
-                formik.setFieldValue('currency', newValue ? newValue.payingCurrency : '')
-              }}
-              maxAccess={maxAccess}
-              error={formik.touched.payingAgent && Boolean(formik.errors.payingAgent)}
-            />
-          </Grid>
-        </Grid>
         {/* Second Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2, height: '50%' }}>
           <Grid hideonempty xs={12}>
@@ -208,10 +159,10 @@ export default function InstantCash({ onSubmit, cashData = {}, window, clientDat
             <Grid item xs={12}>
               <CustomTextField
                 name='otherRelation'
-                onChange={formik.handleChange}
+                onChange={event => formik.setFieldValue('remitter.otherRelation', event.target.value)}
                 label={_labels.otherRelation}
                 value={formik.values.remitter.otherRelation}
-                error={formik.touched.otherRelation && Boolean(formik.errors.otherRelation)}
+                error={formik.touched.remitter?.otherRelation && Boolean(formik.errors.remitter?.otherRelation)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -252,7 +203,8 @@ export default function InstantCash({ onSubmit, cashData = {}, window, clientDat
                 parameters={{
                   _receivingCountry: formik.values.toCountryId,
                   _payingAgent: formik.values.payingAgent,
-                  _deliveryMode: formik.values.deliveryModeId
+                  _deliveryMode: formik.values.deliveryModeId,
+                  _payoutCurrency: formik.values.payingCurrency
                 }}
                 required
                 valueField='name'
@@ -261,7 +213,7 @@ export default function InstantCash({ onSubmit, cashData = {}, window, clientDat
                 label={_labels.bank}
                 form={formik}
                 firstValue={formik.values.beneficiary.bankDetails.bankName}
-                readOnly={!(formik.values.deliveryModeId && formik.values.toCountryId && formik.values.payingAgent)}
+                readOnly={!(formik.values.deliveryModeId && formik.values.payingAgent)}
                 maxAccess={maxAccess}
                 secondDisplayField={false}
                 onChange={async (event, newValue) => {

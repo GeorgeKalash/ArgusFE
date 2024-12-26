@@ -3,18 +3,75 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Button } from '@mui/material'
 import { useWindow } from 'src/windows'
 import SelectAgent from '../Tabs/SelectAgent'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
+import { useError } from 'src/error'
 
-const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, editMode, window }) => {
+const ProductsWindow = ({
+  labels,
+  maxAccess,
+  onProductSubmit,
+  products,
+  editMode,
+  targetCurrency,
+  countryRef,
+  sysDefault,
+  defaultAgentCode,
+  fcAmount,
+  lcAmount,
+  productId,
+  window
+}) => {
   const [gridData, setGridData] = useState([])
   const { stack } = useWindow()
+  const { getRequest } = useContext(RequestsContext)
 
-  const setData = (agentName, productId) => {
+  const { stack: stackError } = useError()
+
+  const setData = async ({ productId, agentId, agentName, agentCode, payingCurrency, deliveryModeId }) => {
+    const targetAmount = fcAmount || 0
+    const srcAmount = lcAmount || 0
+
+    const getRates = await getRequest({
+      extension: RemittanceBankInterface.InstantCashRates.get,
+      parameters: `_deliveryMode=${deliveryModeId}&_sourceCurrency=${payingCurrency}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_targetAmount=${targetAmount}&_originatingCountry=${sysDefault.countryRef}&_destinationCountry=${countryRef}`
+    })
+
+    const data = getRates.record
+
+    const change = await getRequest({
+      extension: RemittanceBankInterface.exchange.get,
+      parameters: `_sendingAgent=${'AE01BH'}&_settlementCurrency=${payingCurrency}&_receivingAgent=${agentCode}&_payoutCurrency=${
+        sysDefault?.currencyRef
+      }&_destinationCountry=${countryRef}&_lcAmount=${srcAmount}&_fcAmount=${targetAmount}`
+    })
+
+    const result = change?.record
+    if (!result) {
+      stackError({ message: 'This agent is not available for use.' })
+
+      return
+    }
+
     const updatedData = gridData?.list.map(row =>
-      row.productId === productId ? { ...row, agentName: agentName, originAmount: 800000, baseAmount: 600000 } : row
+      row.productId === productId
+        ? {
+            ...row,
+            agentName,
+            agentId,
+            originAmount: result?.originalAmount,
+            baseAmount: result?.baseAmount,
+            fees: data?.charge,
+            exRate: result.settlementRate,
+            deliveryModeId: deliveryModeId,
+            payingCurrency: payingCurrency,
+            agentCode
+          }
+        : row
     )
 
     setGridData({ list: updatedData })
@@ -52,16 +109,25 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, editMode
                 props: {
                   setData,
                   productId: params.data?.productId,
+                  agentId: params.data?.agentId,
+                  baseAmount: params.data?.baseAmount,
+                  originAmount: params.data?.originAmount,
+                  receivingCountry: countryRef,
+                  deliveryModeId: params.data?.deliveryModeId,
+                  defaultAgentCode,
+                  payingCurrency: params.data?.payingCurrency,
+                  agentCode: params.data?.agentCode,
+                  sysDefault,
                   labels,
                   maxAccess
                 },
-                width: 400,
-                height: 200,
+                width: 600,
+                height: 400,
                 title: labels.Agent
               })
             }
           >
-            select
+            {labels.select}
           </Button>
         )
       }
@@ -86,7 +152,12 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, editMode
   useEffect(() => {
     ;(async function () {
       try {
-        setGridData({ list: products })
+        setGridData({
+          list: products.map(item => ({
+            ...item,
+            checked: item.productId === productId ? true : false
+          }))
+        })
       } catch (error) {}
     })()
   }, [])

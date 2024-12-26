@@ -5,19 +5,41 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 
-export default function SelectAgent({ labels, maxAccess, productId, setData, window }) {
+export default function SelectAgent({
+  labels,
+  maxAccess,
+  originAmount,
+  baseAmount,
+  productId,
+  payingCurrency,
+  receivingCountry,
+  agentCode,
+  deliveryModeId,
+  setData,
+  sysDefault,
+  window
+}) {
   const { formik } = useForm({
     initialValues: {
-      agentId: null,
-      agentName: ''
+      agentCode: agentCode,
+      agentName: '',
+      productId: productId,
+      fees: '',
+      exRate: '',
+      originAmount: originAmount,
+      baseAmount: baseAmount,
+      bankName: '',
+      bankNameCode: '',
+      deliveryModeId: deliveryModeId,
+      payingCurrency: payingCurrency
     },
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
     onSubmit: async obj => {
-      setData(obj.agentName, productId)
+      setData(obj)
       window.close()
     }
   })
@@ -26,21 +48,52 @@ export default function SelectAgent({ labels, maxAccess, productId, setData, win
     <FormShell form={formik} isCleared={false} infoVisible={false}>
       <VertLayout>
         <Grow>
-          <Grid container>
-            <Grid xs={12}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={RemittanceSettingsRepository.CorrespondentAgents.qry}
-                name='agentId'
-                label={labels.Agent}
+                endpointId={RemittanceBankInterface.Combos.qry}
+                parameters={`_combo=1`}
+                name='deliveryModeId'
+                label={labels.deliveryMode}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
+                required
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('agentId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('agentName', newValue ? newValue.name : '')
+                  formik.setFieldValue('deliveryModeId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('agentCode', null)
+                  formik.setFieldValue('agentName', '')
+                  formik.setFieldValue('payingCurrency')
                 }}
                 maxAccess={maxAccess}
-                error={formik.touched.agentId && Boolean(formik.errors.agentId)}
+                error={formik.touched.deliveryModeId && Boolean(formik.errors.deliveryModeId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={formik.values.deliveryModeId && RemittanceBankInterface.PayingAgent.qry}
+                parameters={
+                  formik.values.deliveryModeId &&
+                  `_deliveryMode=${formik.values.deliveryModeId}&_receivingCountry=${receivingCountry}&_payoutCurrency=${sysDefault?.currencyRef}`
+                }
+                name='agentCode'
+                label={labels.payingAgent}
+                valueField='recordId'
+                required
+                displayField='description'
+                columnsInDropDown={[
+                  { key: 'description', value: 'Paying Agent' },
+                  { key: 'payingCurrency', value: 'Paying Currency' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('agentCode', newValue?.recordId || null)
+                  formik.setFieldValue('agentName', newValue?.description)
+                  formik.setFieldValue('payingCurrency', newValue.payingCurrency)
+                }}
+                readOnly={!formik.values.deliveryModeId}
+                maxAccess={maxAccess}
+                error={formik.touched.agentCode && Boolean(formik.errors.agentCode)}
               />
             </Grid>
           </Grid>

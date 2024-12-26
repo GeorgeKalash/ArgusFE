@@ -73,28 +73,32 @@ const OutwardsOrder = () => {
 
   async function openForm(recordId) {
     const plantId = await getPlantId()
-    if (!plantId && !recordId) {
-      stackError({
-        message: _labels.PlantDefaultError
-      })
-    } else {
-      const dtId = await getDefaultDT()
-      stack({
-        Component: OutwardsForm,
-        props: {
-          plantId: plantId,
-          userId: userData.userId,
-          access,
-          labels: _labels,
-          recordId: recordId,
-          invalidate,
-          dtId
-        },
-        width: 1100,
-        height: 600,
-        title: _labels.OutwardsOrder
-      })
-    }
+
+    // if (!plantId && !recordId) {
+    //   stackError({
+    //     message: _labels.PlantDefaultError
+    //   })
+    // } else {
+    //   const dtId = await getDefaultDT()
+
+    stack({
+      Component: OutwardsForm,
+      props: {
+        plantId: plantId,
+        userId: userData?.userId,
+        access,
+        labels: _labels,
+        recordId: recordId
+
+        // invalidate,
+        // dtId
+      },
+      width: 1100,
+      height: 600,
+      title: _labels.OutwardsOrder
+    })
+
+    // }
   }
 
   const onApply = ({ search, rpbParams }) => {
