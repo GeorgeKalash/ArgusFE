@@ -15,7 +15,8 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
 
-export default function InstantCash({ onSubmit, cashData = {}, window, clientData, outwardsData }) {
+export default function InstantCash({ onSubmit, cashData = {}, window, clientData, agentCode, outwardsData }) {
+  console.log('outwardsData', (cashData = {}), clientData, agentCode, outwardsData)
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
 
@@ -107,7 +108,7 @@ export default function InstantCash({ onSubmit, cashData = {}, window, clientDat
           <Grid hideonempty xs={12}>
             <ResourceComboBox
               endpointId={RemittanceBankInterface.Combos.qry}
-              parameters={`_combo=1`}
+              parameters={`_combo=1&_agentCode=${agentCode}`}
               name='deliveryModeId'
               label={_labels.deliveryMode}
               valueField='recordId'
@@ -141,7 +142,7 @@ export default function InstantCash({ onSubmit, cashData = {}, window, clientDat
               parameters={
                 formik.values.deliveryModeId &&
                 formik.values.toCountryId &&
-                `_deliveryMode=${formik.values.deliveryModeId}&_receivingCountry=${formik.values.toCountryId}`
+                `_deliveryMode=${formik.values.deliveryModeId}&_receivingCountry=${formik.values.toCountryId}&_agentCode=${agentCode}`
               }
               name='payingAgent'
               label={_labels.payingAgent}
@@ -229,7 +230,7 @@ export default function InstantCash({ onSubmit, cashData = {}, window, clientDat
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={RemittanceBankInterface.Combos.qry}
-                parameters={`_combo=4`}
+                parameters={`_combo=4&_agentCode=${agentCode}`}
                 name='remitter.employerStatus'
                 label={_labels.employerStatus}
                 valueField='recordId'

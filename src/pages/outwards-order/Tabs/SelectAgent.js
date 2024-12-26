@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import React from 'react'
+import React, { useContext } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -7,17 +7,32 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-export default function SelectAgent({ labels, maxAccess, productId, setData, window }) {
+export default function SelectAgent({
+  labels,
+  maxAccess,
+  originAmount,
+  baseAmount,
+  productId,
+  agentId,
+  setData,
+  window
+}) {
   const { formik } = useForm({
     initialValues: {
-      agentId: null,
-      agentName: ''
+      agentId: agentId,
+      agentName: '',
+      productId: productId,
+      fees: '',
+      exRate: '',
+      originAmount: originAmount,
+      baseAmount: baseAmount,
+      agentCode: ''
     },
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
     onSubmit: async obj => {
-      setData(obj.agentName, productId)
+      setData(obj)
       window.close()
     }
   })
@@ -38,6 +53,7 @@ export default function SelectAgent({ labels, maxAccess, productId, setData, win
                 onChange={(event, newValue) => {
                   formik.setFieldValue('agentId', newValue ? newValue.recordId : '')
                   formik.setFieldValue('agentName', newValue ? newValue.name : '')
+                  formik.setFieldValue('agentCode', 'AE01BH')
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.agentId && Boolean(formik.errors.agentId)}
