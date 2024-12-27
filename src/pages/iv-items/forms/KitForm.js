@@ -80,7 +80,7 @@ const KitForm = ({ store, labels, maxAccess }) => {
     },
     onSubmit: values => {
       if (items.length === 1 && isRowEmpty(items[0])) {
-        postData({ kitId: recordId, components: [] })
+        postKit({ kitId: recordId, components: [] })
       } else {
         postKit(values)
       }
@@ -213,8 +213,6 @@ const KitForm = ({ store, labels, maxAccess }) => {
             onChange={value => formik.setFieldValue('kit', value)}
             value={formik.values.kit || []}
             error={formik.errors.kit}
-            allowDelete
-            allowAddNewLine
             columns={columns}
           />
         </Grow>
