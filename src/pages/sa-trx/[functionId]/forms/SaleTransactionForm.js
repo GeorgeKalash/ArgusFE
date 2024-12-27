@@ -184,7 +184,7 @@ export default function SaleTransactionForm({
       lots: [],
       taxes: []
     },
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
