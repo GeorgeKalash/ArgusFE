@@ -19,10 +19,6 @@ const KitForm = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const isRowEmpty = row => {
-    return !row.componentId && !row.qty
-  }
-
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
@@ -79,11 +75,7 @@ const KitForm = ({ store, labels, maxAccess }) => {
       ]
     },
     onSubmit: values => {
-      if (items.length === 1 && isRowEmpty(items[0])) {
-        postKit({ kitId: recordId, components: [] })
-      } else {
-        postKit(values)
-      }
+      postKit(values)
     }
   })
 
