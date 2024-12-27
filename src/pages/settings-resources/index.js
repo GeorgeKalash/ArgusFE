@@ -1,6 +1,6 @@
 import { Box, Grid, IconButton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
@@ -67,7 +67,7 @@ const GlobalAuthorization = () => {
         invalidate,
         resourceId: ResourceIds.SettingsResources
       },
-      width: 1000,
+      width: 1200,
       height: 600,
       title: labels.reportLayout
     })
@@ -139,24 +139,22 @@ const GlobalAuthorization = () => {
           labels={labels}
           inputSearch={true}
           leftSection={
-            <>
-              <Grid item sx={{ width: '350px' }}>
-                <ResourceComboBox
-                  datasetId={DataSets.MODULE}
-                  label={labels.module}
-                  name='moduleId'
-                  values={{
-                    moduleId: filters.moduleId
-                  }}
-                  valueField='key'
-                  displayField='value'
-                  onChange={(event, newValue) => {
-                    onChange(newValue?.key)
-                  }}
-                  error={!filters.moduleId}
-                />
-              </Grid>
-            </>
+            <Grid item sx={{ width: '350px' }}>
+              <ResourceComboBox
+                datasetId={DataSets.MODULE}
+                label={labels.module}
+                name='moduleId'
+                values={{
+                  moduleId: filters.moduleId
+                }}
+                valueField='key'
+                displayField='value'
+                onChange={(event, newValue) => {
+                  onChange(newValue?.key)
+                }}
+                error={!filters.moduleId}
+              />
+            </Grid>
           }
         />
       </Fixed>
@@ -170,7 +168,7 @@ const GlobalAuthorization = () => {
           {
             field: 'value',
             headerName: labels.resourceName,
-            flex: 1
+            flex: 2
           },
           {
             field: 'Report Layout',

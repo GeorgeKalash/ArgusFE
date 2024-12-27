@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -144,7 +144,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
     >
       <VertLayout>
         <Grid container spacing={2}>
-          <Grid item width={'50.1%'}>
+          <Grid item xs={4}>
             <CustomTextField
               name='resourceId'
               label={labels.resourceId}
@@ -153,7 +153,8 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
               maxAccess={maxAccess}
             />
           </Grid>
-          <Grid item width={'50.1%'}>
+          <Grid xs={5}></Grid>
+          <Grid item xs={4}>
             <CustomTextField
               name='resourceName'
               label={labels.resourceName}
@@ -171,6 +172,8 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
             allowDelete={false}
             allowAddNewLine={false}
             columns={columns}
+            maxAccess={maxAccess}
+            name='items'
           />
         </Grow>
       </VertLayout>

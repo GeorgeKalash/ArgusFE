@@ -169,7 +169,7 @@ const CustomRulesForm = ({ labels, maxAccess, row, window }) => {
     >
       <VertLayout>
         <Grid container spacing={2}>
-          <Grid item width={'50.1%'}>
+          <Grid item xs={4}>
             <CustomTextField
               name='resourceId'
               label={labels.resourceId}
@@ -178,7 +178,8 @@ const CustomRulesForm = ({ labels, maxAccess, row, window }) => {
               maxAccess={maxAccess}
             />
           </Grid>
-          <Grid item width={'50.1%'}>
+          <Grid xs={5}></Grid>
+          <Grid item xs={4}>
             <CustomTextField
               name='resourceName'
               label={labels.resourceName}
@@ -194,7 +195,9 @@ const CustomRulesForm = ({ labels, maxAccess, row, window }) => {
             value={formik.values.items}
             error={formik.errors.items}
             allowDelete
+            name='items'
             columns={columns}
+            maxAccess={maxAccess}
           />
         </Grow>
       </VertLayout>

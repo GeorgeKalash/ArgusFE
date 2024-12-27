@@ -11,6 +11,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { KVSRepository } from 'src/repositories/KVSRepository'
 
 const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -89,7 +90,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
 
   const returnURL = async rowData => {
     const response = await getRequest({
-      extension: 'KVS.asmx/getAttachment',
+      extension: KVSRepository.getAttachement,
       parameters: `_resourceId=${formik.values.resourceId}&_layoutId=${rowData.id}`
     })
 
@@ -109,7 +110,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
     {
       field: 'instanceName',
       headerName: labels.instanceName,
-      flex: 1
+      flex: 2
     },
 
     {
@@ -141,7 +142,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
                 color: 'blue',
                 textDecoration: 'underline',
                 cursor: 'pointer',
-                fontSize: '17px'
+                fontSize: '14px'
               }}
             >
               preview
@@ -168,7 +169,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
     >
       <VertLayout>
         <Grid container spacing={2}>
-          <Grid item width={'50.1%'}>
+          <Grid item xs={4}>
             <CustomTextField
               name='resourceId'
               label={labels.resourceId}
@@ -177,7 +178,8 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
               maxAccess={maxAccess}
             />
           </Grid>
-          <Grid item width={'50.1%'}>
+          <Grid xs={5}></Grid>
+          <Grid item xs={4}>
             <CustomTextField
               name='resourceName'
               label={labels.resourceName}
