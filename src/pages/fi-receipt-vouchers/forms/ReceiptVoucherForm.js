@@ -111,7 +111,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         labels: _labels,
         maxAccess: MRCMaxAccess,
         data,
-        amount,
+        amount: amount || 0,
         currencyName,
         onOk: childFormikValues => {
           formik.setValues(prevValues => ({

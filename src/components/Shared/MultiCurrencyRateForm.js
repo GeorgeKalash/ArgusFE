@@ -19,7 +19,7 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, amount,
       rateCalcMethodName: data?.rateCalcMethodName,
       rateTypeId: data?.rateTypeId,
       exRate: data?.exRate,
-      amount: amount,
+      amount: amount || 0,
       baseAmount: data?.baseAmount,
       rateTypeName: data?.rateTypeName
     },
@@ -30,7 +30,7 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, amount,
 
   useEffect(() => {
     const updatedRateRow = getRate({
-      amount: amount,
+      amount: amount || 0,
       exRate: formik?.values?.exRate,
       baseAmount: parseFloat(formik?.values?.baseAmount).toFixed(2),
       rateCalcMethod: formik?.values?.rateCalcMethod,
@@ -109,9 +109,10 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, amount,
                 name='exRate'
                 value={formik?.values?.exRate}
                 label={labels.rate}
+                readOnly={formik?.values?.amount === 0}
                 onChange={e => {
                   const updatedRateRow = getRate({
-                    amount: amount,
+                    amount: amount || 0,
                     exRate: e.target.value,
                     baseAmount: parseFloat(formik?.values?.baseAmount).toFixed(2),
                     rateCalcMethod: formik?.values?.rateCalcMethod,
@@ -127,19 +128,20 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, amount,
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField name='amount' value={formik?.values?.amount} label={labels.amount} readOnly />
+              <CustomNumberField name='amount' value={formik?.values?.amount} label={labels.amount} readOnly />
             </Grid>
             <Grid item xs={12}>
               <CustomNumberField
                 name='baseAmount'
                 value={formik?.values?.baseAmount}
                 label={labels.baseAmount}
+                readOnly={formik?.values?.amount === 0}
                 onChange={e => {
                   const inputValue = e.target.value
                   formik.setFieldValue('baseAmount', inputValue)
 
                   const updatedRateRow = getRate({
-                    amount: amount,
+                    amount: amount || 0,
                     exRate: formik?.values?.exRate,
                     baseAmount: parseFloat(inputValue || 0).toFixed(2),
                     rateCalcMethod: formik?.values?.rateCalcMethod,
