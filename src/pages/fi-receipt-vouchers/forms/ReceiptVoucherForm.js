@@ -29,13 +29,13 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { RateDivision } from 'src/resources/RateDivision'
 import { useWindow } from 'src/windows'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
+import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [defaultsDataState, setDefaultsDataState] = useState(null)
-  const [MCRData, setMCRData] = useState()
   const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -126,6 +126,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     })
   }
 
+  console.log(formik)
+
   async function getUserDefaultsData() {
     const myObject = {}
 
@@ -209,9 +211,35 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         extension: MultiCurrencyRepository.Currency.get,
         parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
       })
-      setMCRData(res.record)
+
+      const updatedRateRow = getRate({
+        amount: res.record?.amount || 0,
+        exRate: res.record?.exRate,
+        baseAmount: parseFloat(res.record?.baseAmount).toFixed(2),
+        rateCalcMethod: res.record?.rateCalcMethod,
+        dirtyField: DIRTYFIELD_RATE
+      })
+
+      formik.setValues({
+        ...formik.values,
+        ...updatedRateRow,
+        baseAmount: parseFloat(updatedRateRow.baseAmount).toFixed(2),
+        ...res.record,
+        currencyId: currencyId,
+        currencyName: formik.values.currencyName
+      })
     }
   }
+
+  useEffect(() => {
+    ;(async function () {
+      await getMultiCurrencyFormData(
+        formik.values.currencyId,
+        formatDateForGetApI(formik.values.date),
+        RateDivision.FINANCIALS
+      )
+    })()
+  }, [])
 
   const onCancel = async () => {
     const obj = formik.values
@@ -343,7 +371,14 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               <CustomDatePicker
                 name='date'
                 label={labels.date}
-                onChange={formik.setFieldValue}
+                onChange={async (e, newValue) => {
+                  formik.setFieldValue('date', newValue.date)
+                  await getMultiCurrencyFormData(
+                    formik.values.currencyId,
+                    formatDateForGetApI(formik.values.date),
+                    RateDivision.FINANCIALS
+                  )
+                }}
                 readOnly={readOnly}
                 value={formik.values.date}
                 maxAccess={maxAccess}
@@ -522,7 +557,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   <Button
                     variant='contained'
                     size='small'
-                    onClick={() => openMCRForm(MCRData, formik.values.amount, formik.values.currencyName)}
+                    onClick={() => openMCRForm(formik.values, formik.values.amount, formik.values.currencyName)}
                     disabled={formik.values.currencyId === defaultsDataState?.currencyId}
                   >
                     <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
