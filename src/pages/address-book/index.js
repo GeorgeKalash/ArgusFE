@@ -108,7 +108,7 @@ const AddressBook = () => {
         invalidate
       },
       width: 600,
-      height: 600,
+      height: 500,
       title: _labels.address
     })
   }

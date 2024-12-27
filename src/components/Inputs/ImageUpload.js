@@ -26,15 +26,12 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
   }, [])
 
   async function getData() {
-    try {
+    const result = await getRequest({
+      extension: SystemRepository.Attachment.get,
+      parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${uniqueRecord}`
+    })
 
-      const result = await getRequest({
-        extension: SystemRepository.Attachment.get,
-        parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${uniqueRecord}`
-      })
-
-      setInitialData(result?.record)
-    } catch (e) {}
+    setInitialData(result?.record)
   }
 
   const handleClick = () => {
@@ -101,11 +98,9 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
         extension: SystemRepository.Attachment.del,
         record: JSON.stringify(initialValues),
         file: initialValues?.url
+      }).then(res => {
+        return res
       })
-        .then(res => {
-          return res
-        })
-        .catch(e => {})
     }
   }
 
