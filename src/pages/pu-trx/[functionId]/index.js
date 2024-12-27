@@ -12,8 +12,6 @@ import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useWindow } from 'src/windows'
-
-// import SaleTransactionForm from './forms/SaleTransactionForm'
 import { useResourceQuery } from 'src/hooks/resource'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import Table from 'src/components/Shared/Table'
