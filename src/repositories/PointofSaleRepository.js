@@ -24,5 +24,11 @@ export const PointofSaleRepository = {
   CashAccount: {
     qry: service + 'qryCA',
     set2: service + 'set2CA'
+  },
+  DocumentTypeDefault: {
+    qry: service + 'qryDTD',
+    get: service + 'getDTD',
+    set: service + 'setDTD',
+    del: service + 'delDTD'
   }
 }
