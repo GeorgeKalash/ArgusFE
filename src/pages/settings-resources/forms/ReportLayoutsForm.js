@@ -12,6 +12,7 @@ import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { KVSRepository } from 'src/repositories/KVSRepository'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -168,27 +169,29 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
       maxAccess={maxAccess}
     >
       <VertLayout>
-        <Grid container spacing={2}>
-          <Grid item xs={4}>
-            <CustomTextField
-              name='resourceId'
-              label={labels.resourceId}
-              value={formik.values.resourceId}
-              readOnly
-              maxAccess={maxAccess}
-            />
+        <Fixed>
+          <Grid container spacing={2}>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='resourceId'
+                label={labels.resourceId}
+                value={formik.values.resourceId}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid xs={5}></Grid>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='resourceName'
+                label={labels.resourceName}
+                value={formik.values.resourceName}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
           </Grid>
-          <Grid xs={5}></Grid>
-          <Grid item xs={4}>
-            <CustomTextField
-              name='resourceName'
-              label={labels.resourceName}
-              value={formik.values.resourceName}
-              readOnly
-              maxAccess={maxAccess}
-            />
-          </Grid>
-        </Grid>
+        </Fixed>
         <Grow>
           <Table columns={columns} gridData={data} rowId={['id']} pagination={false} />
         </Grow>

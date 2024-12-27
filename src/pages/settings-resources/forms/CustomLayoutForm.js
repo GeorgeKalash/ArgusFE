@@ -12,6 +12,7 @@ import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -201,27 +202,29 @@ const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
       maxAccess={maxAccess}
     >
       <VertLayout>
-        <Grid container spacing={2}>
-          <Grid item xs={4}>
-            <CustomTextField
-              name='resourceId'
-              label={labels.resourceId}
-              value={formik.values.resourceId}
-              readOnly
-              maxAccess={maxAccess}
-            />
+        <Fixed>
+          <Grid container spacing={2}>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='resourceId'
+                label={labels.resourceId}
+                value={formik.values.resourceId}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid xs={5}></Grid>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='resourceName'
+                label={labels.resourceName}
+                value={formik.values.resourceName}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
           </Grid>
-          <Grid xs={5}></Grid>
-          <Grid item xs={4}>
-            <CustomTextField
-              name='resourceName'
-              label={labels.resourceName}
-              value={formik.values.resourceName}
-              readOnly
-              maxAccess={maxAccess}
-            />
-          </Grid>
-        </Grid>
+        </Fixed>
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('items', value)}
