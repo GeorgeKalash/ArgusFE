@@ -112,7 +112,6 @@ const ProductionSheet = () => {
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
-
   function OpenProductionSheetForm(plantId, recordId) {
     stack({
       Component: ProductionSheetForm,
@@ -165,18 +164,19 @@ const ProductionSheet = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar 
+        <RPBGridToolbar
           onSearch={onSearch}
-          onClear={onClear} 
+          onClear={onClear}
           onAdd={add}
-          labels={_labels} 
-          maxAccess={access} 
-          onApply={onApply} 
-          reportName={'MFPST'} 
+          labels={_labels}
+          maxAccess={access}
+          onApply={onApply}
+          reportName={'MFPST'}
         />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

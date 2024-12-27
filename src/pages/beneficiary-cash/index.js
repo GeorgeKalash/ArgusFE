@@ -162,6 +162,7 @@ const BeneficiaryCash = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           refetch={refetch}

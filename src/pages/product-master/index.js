@@ -96,12 +96,10 @@ const ProductMaster = () => {
     postRequest({
       extension: RemittanceSettingsRepository.ProductMaster.del,
       record: JSON.stringify(obj)
+    }).then(res => {
+      toast.success(platformLabels.Deleted)
+      invalidate()
     })
-      .then(res => {
-        toast.success(platformLabels.Deleted)
-        invalidate()
-      })
-      .catch(error => {})
   }
 
   const add = () => {
@@ -160,6 +158,7 @@ const ProductMaster = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

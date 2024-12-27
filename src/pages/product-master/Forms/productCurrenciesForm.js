@@ -8,7 +8,6 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
@@ -197,6 +196,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
       <VertLayout>
         <Grow>
           <DataGrid
+            name='rows'
             onChange={value => formik.setFieldValue('currencies', value)}
             value={formik.values.currencies}
             error={formik.errors.currencies}
