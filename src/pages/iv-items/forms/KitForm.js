@@ -1,4 +1,3 @@
-import { useFormik } from 'formik'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -20,8 +19,20 @@ const KitForm = ({ store, labels, maxAccess }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
+    initialValues: {
+      kit: [
+        {
+          id: 1,
+          kitId: recordId,
+          muiId: '',
+          componentId: '',
+          componentName: '',
+          componentSKU: '',
+          qty: ''
+        }
+      ]
+    },
     validationSchema: yup.object({
       kit: yup
         .array()
@@ -61,19 +72,6 @@ const KitForm = ({ store, labels, maxAccess }) => {
         .required()
     }),
 
-    initialValues: {
-      Kit: [
-        {
-          id: 1,
-          kitId: recordId,
-          muiId: '',
-          componentId: '',
-          componentName: '',
-          componentSKU: '',
-          qty: ''
-        }
-      ]
-    },
     onSubmit: values => {
       postKit(values)
     }
@@ -161,16 +159,6 @@ const KitForm = ({ store, labels, maxAccess }) => {
     }
   }, [recordId])
 
-  const formik2 = useFormik({
-    maxAccess,
-    initialValues: {
-      name: store._name || '',
-      reference: store._reference
-    },
-    enableReinitialize: true,
-    validateOnChange: true
-  })
-
   return (
     <FormShell
       form={formik}
@@ -182,19 +170,13 @@ const KitForm = ({ store, labels, maxAccess }) => {
       <VertLayout>
         <Grid container spacing={2}>
           <Grid item width={'50.1%'}>
-            <CustomTextField
-              name='name'
-              label={labels.name}
-              value={formik2?.values?.name}
-              readOnly
-              maxAccess={maxAccess}
-            />
+            <CustomTextField name='name' label={labels.name} value={store?._name} readOnly maxAccess={maxAccess} />
           </Grid>
           <Grid item width={'50.1%'}>
             <CustomTextField
               name='reference'
               label={labels.reference}
-              value={formik2?.values?.reference}
+              value={store?._reference}
               readOnly
               maxAccess={maxAccess}
             />
@@ -203,9 +185,11 @@ const KitForm = ({ store, labels, maxAccess }) => {
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('kit', value)}
-            value={formik.values.kit || []}
+            value={formik.values.kit}
             error={formik.errors.kit}
             columns={columns}
+            maxAccess={maxAccess}
+            name='kit'
           />
         </Grow>
       </VertLayout>
