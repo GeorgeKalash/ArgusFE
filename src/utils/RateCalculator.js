@@ -1,6 +1,7 @@
 const DIRTYFIELD_AMOUNT = 1
 const DIRTYFIELD_RATE = 2
 const DIRTYFIELD_BASE_AMOUNT = 3
+const DIRTYFIELD_BASE_AMOUNT_MCR = 4
 
 const MULTIPLY = 1
 const DIVIDE = 2
@@ -73,6 +74,9 @@ function recalcRateCalc(rateRow) {
       if (rateRow.exRate == 0) rateRow = recalcExRate(rateRow)
       else rateRow = recalcAmount(rateRow)
       break
+    case DIRTYFIELD_BASE_AMOUNT_MCR:
+      if (rateRow.baseAmount !== 0) rateRow = recalcExRate(rateRow)
+      break;
     default:
       console.error("I don't know such dirty Field " + rateRow.dirtyField)
   }
@@ -88,4 +92,4 @@ function getRate(_rateRow) {
   return _rateRow
 }
 
-export { RateCalculator, getRate, DIRTYFIELD_AMOUNT, DIRTYFIELD_RATE, DIRTYFIELD_BASE_AMOUNT, MULTIPLY, DIVIDE }
+export { RateCalculator, getRate, DIRTYFIELD_AMOUNT, DIRTYFIELD_RATE, DIRTYFIELD_BASE_AMOUNT, DIRTYFIELD_BASE_AMOUNT_MCR, MULTIPLY, DIVIDE }
