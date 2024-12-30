@@ -126,8 +126,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     })
   }
 
-  console.log(formik)
-
   async function getUserDefaultsData() {
     const myObject = {}
 
@@ -205,7 +203,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     }
   }
 
-  async function getMultiCurrencyFormData(currencyId, date, rateType) {
+  async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
     if (currencyId && date && rateType) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
@@ -213,24 +211,18 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       })
 
       const updatedRateRow = getRate({
-        amount: res.record?.amount || 0,
+        amount: amount === 0 ? 0 : amount ?? formik.values.amount,
         exRate: res.record?.exRate,
-        baseAmount: parseFloat(res.record?.baseAmount).toFixed(2),
+        baseAmount: 0,
         rateCalcMethod: res.record?.rateCalcMethod,
         dirtyField: DIRTYFIELD_RATE
       })
 
-      formik.setValues({
-        ...formik.values,
-        ...updatedRateRow,
-        baseAmount: parseFloat(updatedRateRow.baseAmount).toFixed(2),
-        ...res.record,
-        currencyId: currencyId,
-        currencyName: formik.values.currencyName
-      })
+      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('exRate', res.record?.exRate)
+      formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
   }
-
   useEffect(() => {
     ;(async function () {
       await getMultiCurrencyFormData(
@@ -542,13 +534,13 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('currencyId', newValue?.recordId || null)
-                      formik.setFieldValue('currencyName', newValue?.name || null)
                       await getMultiCurrencyFormData(
                         newValue?.recordId,
                         formatDateForGetApI(formik.values.date),
                         RateDivision.FINANCIALS
                       )
+                      formik.setFieldValue('currencyId', newValue?.recordId)
+                      formik.setFieldValue('currencyName', newValue?.name)
                     }}
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
@@ -568,7 +560,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
             <Grid item xs={6}>
               <CustomNumberField
                 name='amount'
-                type='text'
                 required
                 label={labels.amount}
                 readOnly={readOnly}
@@ -576,20 +567,24 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
                 maxLength={'10'}
                 decimalScale={2}
-                onChange={e =>
-                  formik.setValues({
-                    ...formik.values,
-                    amount: e.target.value,
-                    baseAmount: e.target.value
-                  })
-                }
-                onClear={() =>
-                  formik.setValues({
-                    ...formik.values,
-                    amount: '',
-                    basAmount: ''
-                  })
-                }
+                onBlur={async e => {
+                  await getMultiCurrencyFormData(
+                    formik.values.currencyId,
+                    formatDateForGetApI(formik.values.date),
+                    RateDivision.FINANCIALS,
+                    Number(e.target.value.replace(/,/g, ''))
+                  )
+                  formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
+                }}
+                onClear={async () => {
+                  await getMultiCurrencyFormData(
+                    formik.values.currencyId,
+                    formatDateForGetApI(formik.values.date),
+                    RateDivision.FINANCIALS,
+                    0
+                  )
+                  formik.setFieldValue('amount', 0)
+                }}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
               />
             </Grid>
