@@ -40,6 +40,7 @@ import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterfac
 import BeneficiaryListWindow from '../Windows/BeneficiaryListWindow'
 import { getStorageData } from 'src/storage/storage'
 import ReceiptVoucherForm from 'src/pages/rt-receipt-vouchers/forms/ReceiptVoucherForm'
+import CustomSwitch from 'src/components/Inputs/CustomSwitch'
 
 export default function OutwardsForm({ labels, access, recordId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -133,7 +134,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     receiptId: null,
     instantCashDetails: {},
     products: [{}],
-    ICRates: [{}]
+    ICRates: [{}],
+    includingFees: false
   }
 
   const { formik } = useForm({
@@ -603,10 +605,15 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       if (!data.fcAmount && !data.lcAmount) {
         return
       }
-      
+
       if (plantId && data.countryId && data.currencyId && data.dispersalType) {
         formik.setFieldValue('products', [])
-        var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${data.dispersalType}&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}`
+
+        var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${
+          data.dispersalType
+        }&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}&_includingFees=${
+          data.includingFees ? 1 : 0
+        }`
 
         const res = await getRequest({
           extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
@@ -746,7 +753,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       <VertLayout>
         <Grow>
           <Grid container xs={12} spacing={2}>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2}>
               <CustomTextField
                 name='reference'
                 label={labels.Reference}
@@ -758,7 +765,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </FormGrid>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2}>
               <CustomDatePicker
                 name='date'
                 required
@@ -773,7 +780,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                 helperText={formik.touched.date && formik.errors.date}
               />
             </FormGrid>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2}>
               <ResourceComboBox
                 datasetId={DataSets.DOCUMENT_STATUS}
                 name='status'
@@ -784,7 +791,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                 values={formik.values}
               />
             </FormGrid>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2}>
               <CustomDatePicker
                 name='valueDate'
                 label={labels.valueDate}
@@ -798,7 +805,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                 helperText={formik.touched.valueDate && formik.errors.valueDate}
               />
             </FormGrid>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2}>
               <ResourceComboBox
                 datasetId={DataSets.WF_STATUS}
                 name='wfStatus'
@@ -809,10 +816,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                 values={formik.values}
               />
             </FormGrid>
-            <Grid item xs={9}></Grid>
+            <Grid item xs={2}></Grid>
             <Grid item xs={4.5}>
               <FieldSet title='Transaction Details'>
-                <Grid container spacing={2}>
+                <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={RemittanceOutwardsRepository.Country.qry}
@@ -890,6 +897,15 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                     />
                   </Grid>
                   <Grid item xs={12}>
+                    <CustomSwitch
+                      readOnly={formik.values.lcAmount || formik.values.fcAmount || editMode}
+                      label={labels.includeTransferFees}
+                      name='includingFees'
+                      checked={formik.values.includingFees}
+                      onChange={formik.handleChange}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       name='fcAmount'
                       label={labels.fcAmount}
@@ -906,7 +922,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             currencyId: formik.values.currencyId,
                             dispersalType: formik.values.dispersalType,
                             lcAmount: formik.values.lcAmount || 0,
-                            fcAmount: formik.values.fcAmount || 0
+                            fcAmount: formik.values.fcAmount || 0,
+                            includingFees: formik.values.includingFees
                           })
                       }}
                       onClear={() => {
@@ -937,7 +954,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             currencyId: formik.values.currencyId,
                             dispersalType: formik.values.dispersalType,
                             lcAmount: formik.values.lcAmount || 0,
-                            fcAmount: formik.values.fcAmount || 0
+                            fcAmount: formik.values.fcAmount || 0,
+                            includingFees: formik.values.includingFees
                           })
                       }}
                       onClear={() => {
@@ -951,9 +969,15 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       maxLength={10}
                     />
                   </Grid>
+
                   <Grid item xs={12}>
                     <Button
-                      sx={{ backgroundColor: '#908c8c', color: '#000000' }}
+                      sx={{
+                        backgroundColor: '#908c8c',
+                        color: '#000000',
+                        height: '33px',
+                        objectFit: 'contain'
+                      }}
                       disabled={
                         !(plantId && formik.values.countryId && formik.values.currencyId && formik.values.dispersalType)
                       }
@@ -1060,7 +1084,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <FieldSet title='Client Details'>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={3}>
                       <Grid item xs={12}>
                         <ResourceLookup
                           endpointId={CTCLRepository.ClientCorporate.snapshot}
@@ -1339,7 +1363,9 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       '&:disabled': {
                         backgroundColor: '#eaeaea',
                         color: '#000000'
-                      }
+                      },
+                      height: '33px',
+                      objectFit: 'contain'
                     }}
                     disabled={!formik.values.beneficiaryId}
                     onClick={() => openBankWindow()}

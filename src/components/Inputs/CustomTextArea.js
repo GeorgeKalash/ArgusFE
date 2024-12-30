@@ -1,7 +1,6 @@
-// ** MUI Imports
 import { TextField, InputAdornment, IconButton, Box } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import DropDownArrow from '/public/images/buttonsIcons/bottom-arrow.png'
 import AddAction from '/public/images/buttonsIcons/add.png'
@@ -42,6 +41,7 @@ const CustomTextArea = ({
   )
 
   const inputRef = useRef(null)
+  const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
     // Save the cursor position before the value changes
@@ -53,57 +53,73 @@ const CustomTextArea = ({
   return _hidden ? (
     <></>
   ) : (
-    <Box sx={{ width: '100%' }}>
-      <TextField
-        multiline
-        rows={rows} // You can adjust the number of rows as needed
-        inputRef={inputRef}
-        name={name}
-        type={type}
-        variant={variant}
-        value={value}
-        size={size}
-        fullWidth={fullWidth}
-        autoFocus={autoFocus}
-        inputProps={{
-          tabIndex: _readOnly ? -1 : 0, // Add tabIndex here
-          readOnly: _readOnly,
-          maxLength: maxLength,
-          inputMode: 'numeric',
-          pattern: numberField && '[0-9]*', // Allow only numeric input
-          style: {
-            textAlign: numberField && 'right',
-            paddingRight: paddingRight
+    <TextField
+      multiline
+      rows={rows}
+      inputRef={inputRef}
+      name={name}
+      type={type}
+      variant={variant}
+      value={value}
+      size={size}
+      fullWidth={fullWidth}
+      autoFocus={autoFocus}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+      inputProps={{
+        tabIndex: _readOnly ? -1 : 0,
+        readOnly: _readOnly,
+        maxLength: maxLength,
+        inputMode: 'numeric',
+        pattern: numberField && '[0-9]*',
+        style: {
+          textAlign: numberField && 'right',
+          paddingRight: paddingRight
+        }
+      }}
+      sx={{
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: '#959d9e',
+            borderRadius: '6px'
           }
-        }}
-        autoComplete={autoComplete}
-        InputProps={{
-          endAdornment: !_readOnly && (
-            <InputAdornment position='end'>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                {!readOnly && value && (
-                  <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                    <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
-                  </IconButton>
-                )}
-                {viewAdd && (
-                  <IconButton tabIndex={-1} edge='end' onClick={handleAddAction} aria-label='Add' disabled={_disabled}>
-                    <Image src={AddAction} alt='Add' width={18} height={18} />
-                  </IconButton>
-                )}
-                {viewDropDown && (
-                  <IconButton tabIndex={-1} edge='end' onClick={onDropDown} aria-label='Drop down' disabled={_disabled}>
-                    <Image src={DropDownArrow} alt='Drop Down' width={18} height={18} />
-                  </IconButton>
-                )}
-              </div>
-            </InputAdornment>
-          )
-        }}
-        required={_required}
-        {...props}
-      />
-    </Box>
+        },
+        '& .MuiInputLabel-root': {
+          fontSize: '0.90rem',
+          top: isFocused || value ? '0px' : '-3px'
+        },
+        '& .MuiInputBase-input': {
+          fontSize: '0.90rem',
+          color: 'black'
+        }
+      }}
+      autoComplete={autoComplete}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position='end'>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              {!_readOnly && value && (
+                <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
+                  <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
+                </IconButton>
+              )}
+              {viewAdd && (
+                <IconButton tabIndex={-1} edge='end' onClick={handleAddAction} aria-label='Add' disabled={_disabled}>
+                  <Image src={AddAction} alt='Add' width={18} height={18} />
+                </IconButton>
+              )}
+              {viewDropDown && (
+                <IconButton tabIndex={-1} edge='end' onClick={onDropDown} aria-label='Drop down' disabled={_disabled}>
+                  <Image src={DropDownArrow} alt='Drop Down' width={18} height={18} />
+                </IconButton>
+              )}
+            </div>
+          </InputAdornment>
+        )
+      }}
+      required={_required}
+      {...props}
+    />
   )
 }
 
