@@ -108,7 +108,7 @@ const DocumentTypes = () => {
         maxAccess: access
       },
       width: 700,
-      height: 600,
+      height: 500,
       title: _labels.DocumentType
     })
   }
