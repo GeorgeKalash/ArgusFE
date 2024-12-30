@@ -83,7 +83,7 @@ const AccountGroups = () => {
         invalidate: invalidate
       },
       width: 600,
-      height: 600,
+      height: 300,
       title: _labels.accountGroup
     })
   }

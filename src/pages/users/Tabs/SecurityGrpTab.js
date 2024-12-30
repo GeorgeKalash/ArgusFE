@@ -93,13 +93,13 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
                   name: 'sgId',
                   label: labels.group,
                   props: {
-                    endpointId: AccessControlRepository.SecurityGroupUser.qry,
-                    parameters: `_userId=${storeRecordId}&_filter=&_sgId=0`,
-                    valueField: 'sgId',
-                    displayField: 'sgName',
+                    endpointId: AccessControlRepository.SecurityGroup.qry,
+                    parameters: '_startAt=0&_pageSize=1000',
+                    valueField: 'recordId',
+                    displayField: 'name',
                     mapping: [
-                      { from: 'sgId', to: 'sgId' },
-                      { from: 'sgName', to: 'sgName' }
+                      { from: 'recordId', to: 'sgId' },
+                      { from: 'name', to: 'sgName' }
                     ]
                   }
                 }
