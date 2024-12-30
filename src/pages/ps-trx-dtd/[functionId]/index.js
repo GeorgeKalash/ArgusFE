@@ -97,7 +97,7 @@ const RetailDtd = () => {
         maxAccess: access
       },
       width: 500,
-      height: 360,
+      height: 300,
       title: _labels.doctypeDefault
     })
   }

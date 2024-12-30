@@ -11,6 +11,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -33,7 +34,7 @@ export default function RetailDocTypeForm({ labels, maxAccess, recordId, functio
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      dtId: yup.string().required(' ')
+      dtId: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -55,16 +56,14 @@ export default function RetailDocTypeForm({ labels, maxAccess, recordId, functio
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: PointofSaleRepository.DocumentTypeDefault.get,
-            parameters: `_dtId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: PointofSaleRepository.DocumentTypeDefault.get,
+          parameters: `_dtId=${recordId}`
+        })
 
-          formik.setValues({ ...res.record, recordId: recordId })
-        }
-      } catch (exception) {}
+        formik.setValues({ ...res.record, recordId: recordId })
+      }
     })()
   }, [])
 
@@ -101,17 +100,14 @@ export default function RetailDocTypeForm({ labels, maxAccess, recordId, functio
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
             </Grid>
+
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    maxAccess={maxAccess}
-                    name='disableSKULookup'
-                    checked={formik.values?.disableSKULookup}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='disableSKULookup'
+                value={formik.values.disableSKULookup}
+                onChange={event => formik.setFieldValue('disableSKULookup', event.target.checked)}
                 label={labels.dsl}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
