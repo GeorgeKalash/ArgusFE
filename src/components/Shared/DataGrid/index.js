@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton } from '@mui/material'
 import components from './components'
@@ -10,6 +10,7 @@ import { DISABLED, HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export function DataGrid({
   name, // maxAccess
@@ -27,23 +28,43 @@ export function DataGrid({
 }) {
   const gridApiRef = useRef(null)
 
+  const isDup = useRef(null)
+
+  const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   const [ready, setReady] = useState(false)
 
   const skip = allowDelete ? 1 : 0
 
+  function checkDuplicates(field, data) {
+    return value.find(
+      item => item.id != data.id && item?.[field] && item?.[field]?.toLowerCase() === data?.[field]?.toLowerCase()
+    )
+  }
+
+  function stackDuplicate(params) {
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: platformLabels?.duplicateItem,
+        okButtonAction: window => {
+          deleteRow(params), window.close()
+        },
+        fullScreen: false
+      },
+      onClose: () => deleteRow(params),
+      width: 450,
+      height: 150,
+      title: platformLabels.Confirmation
+    })
+  }
+
   const process = (params, oldRow, setData) => {
     const column = columns.find(({ name }) => name === params.colDef.field)
-    if (
-      params.colDef?.disableDuplicate &&
-      value.find(
-        item =>
-          item.id != params.data.id &&
-          item?.[params.colDef.field] &&
-          item?.[params.colDef.field] == params.data?.[params.colDef.field]
-      )
-    ) {
+
+    if (params.colDef?.disableDuplicate && checkDuplicates(params.colDef.field, params.data)) {
       return
     }
 
@@ -110,18 +131,6 @@ export function DataGrid({
           colKey: allColumns[currentColumnIndex + 2].colId
         })
       }
-    }
-
-    if (
-      params.colDef.disableDuplicate &&
-      value.find(
-        item =>
-          item.id != params.data.id &&
-          item?.[params.colDef.field] &&
-          item?.[params.colDef.field] == params.data?.[params.colDef.field]
-      )
-    ) {
-      return
     }
 
     if (column.onChange) {
@@ -257,30 +266,12 @@ export function DataGrid({
   const onCellKeyDown = params => {
     const { event, api, node, data, colDef } = params
 
-    if (
-      colDef.disableDuplicate &&
-      value.find(
-        item =>
-          item.id != data.id &&
-          item?.[params.colDef.field] &&
-          item?.[colDef.field]?.toLowerCase() === data?.[colDef.field]?.toLowerCase()
-      )
-    ) {
-      stack({
-        Component: ConfirmationDialog,
-        props: {
-          DialogText: 'You cant add the same item twice ',
-          okButtonAction: window => {
-            deleteRow(params), window.close()
-          },
-          fullScreen: false
-        },
-        onClose: () => deleteRow(params),
-        width: 450,
-        height: 150,
-        title: 'platformLabels.Confirmation'
-      })
+    if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && event.key !== 'Enter') {
+      isDup.current = true
+
       return
+    } else {
+      isDup.current = false
     }
 
     const allColumns = api.getColumnDefs()
@@ -440,6 +431,12 @@ export function DataGrid({
 
       setData(changes, params)
 
+      if (params?.colDef?.disableDuplicate && checkDuplicates(params.colDef?.field, params.node?.data)) {
+        stackDuplicate(params)
+
+        return
+      }
+
       if (column.colDef.updateOn !== 'blur') {
         commit(changes)
 
@@ -549,8 +546,14 @@ export function DataGrid({
 
   useEffect(() => {
     function handleBlur(event) {
-      if (gridContainerRef.current && !gridContainerRef.current.contains(event.target)) {
+      if (
+        gridContainerRef.current &&
+        !gridContainerRef.current.contains(event.target) &&
+        gridApiRef.current?.getEditingCells()?.length > 0
+      ) {
         gridApiRef.current?.stopEditing()
+      } else {
+        return
       }
     }
 
@@ -572,7 +575,8 @@ export function DataGrid({
       if (
         gridContainerRef.current &&
         !event.target.value &&
-        event.target.classList.contains('ag-center-cols-viewport')
+        event.target.classList.contains('ag-center-cols-viewport') &&
+        gridApiRef.current?.getEditingCells()?.length > 0
       ) {
         gridApiRef.current?.stopEditing()
       }
@@ -633,8 +637,13 @@ export function DataGrid({
 
   const onCellEditingStopped = params => {
     const { data, colDef } = params
-
     if (colDef.updateOn === 'blur') {
+      if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
+        stackDuplicate(params)
+
+        return
+      }
+
       process(params, data, setData)
     }
   }

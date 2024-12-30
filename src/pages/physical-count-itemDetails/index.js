@@ -47,6 +47,7 @@ const PhysicalCountItemDe = () => {
 
     return res?.record
   }
+
   const { formik } = useForm({
     maxAccess,
     initialValues: {
@@ -133,8 +134,6 @@ const PhysicalCountItemDe = () => {
       handleClick(items)
     }
   })
-
-  console.log(formik.errors)
 
   async function fetchGridData(controllerId) {
     const stockCountId = formik.values.stockCountId
@@ -224,6 +223,7 @@ const PhysicalCountItemDe = () => {
 
     setDisSkuLookup(disableSKULookup)
   }
+
   async function getSysChecks() {
     const Jres = await getRequest({
       extension: SystemRepository.SystemChecks.get,
@@ -290,15 +290,16 @@ const PhysicalCountItemDe = () => {
           }
         }
         if (disSkuLookup) {
-          var txtRes
-
           if (newRow.sku !== oldRow?.sku) {
-            txtRes = await getRequest({
+            const txtRes = await getRequest({
               extension: InventoryRepository.Items.get2,
               parameters: `_sku=${newRow.sku}`
             })
-            if (txtRes?.record) {
-              const itemId = txtRes?.record?.recordId ? txtRes?.record?.recordId : ''
+
+            const res = txtRes?.record
+
+            if (res) {
+              itemId = res.recordId
 
               const result = await getItemDetails(itemId)
 
@@ -306,10 +307,10 @@ const PhysicalCountItemDe = () => {
                 fieldName: 'sku',
                 changes: {
                   id: newRow.id,
-                  sku: newRow.sku,
+                  sku: res.sku,
                   itemId: itemId,
-                  itemName: txtRes?.record?.name ? txtRes?.record?.name : oldRow?.itemName,
-                  priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : oldRow?.priceType,
+                  itemName: res?.name,
+                  priceType: res?.priceType,
                   weight: result?.weight,
                   metalPurity: result?.metalPurity,
                   metalId: result?.metalId,
@@ -383,8 +384,6 @@ const PhysicalCountItemDe = () => {
   const isPosted = formik.values.status === 3
 
   const emptyGrid = formik?.values?.rows?.length === 0
-
-  console.log(formik?.values?.rows)
 
   const isHeader =
     formik.values.controllerId != null &&
@@ -507,7 +506,6 @@ const PhysicalCountItemDe = () => {
 
   const emptyRows = formik.values.rows.filter(row => row.id !== 1 && !row.sku && !row.itemName && !row.qty)
 
-  //initial error first row
   const errors = []
 
   return (
@@ -516,7 +514,7 @@ const PhysicalCountItemDe = () => {
       isInfo={false}
       isCleared={false}
       isSavedClear={false}
-      // disabledSubmit={!isSaved}
+      disabledSubmit={!isSaved}
       actions={actions}
       maxAccess={maxAccess}
       resourceId={ResourceIds.IVPhysicalCountItemDetails}
@@ -621,7 +619,7 @@ const PhysicalCountItemDe = () => {
             error={formik.errors?.rows}
             columns={columns}
             disabled={formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}
-            // allowDelete={formik.values?.SCStatus != 3 && formik.values?.SCWIP != 2 && formik.values?.status != 3}
+            allowDelete={formik.values?.SCStatus != 3 && formik.values?.SCWIP != 2 && formik.values?.status != 3}
             allowAddNewLine={
               formik.values.controllerId && formik.values?.SCStatus != 3 && formik.values?.EndofSiteStatus != 3
             }
