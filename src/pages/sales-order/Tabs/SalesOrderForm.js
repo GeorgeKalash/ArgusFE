@@ -43,6 +43,7 @@ import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -712,7 +713,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     formik.setFieldValue('billToAddressId', res?.record?.billAddressId || null)
     const shipAdd = await getAddress(res?.record?.shipAddressId)
     const billAdd = await getAddress(res?.record?.billAddressId)
-  
+
     formik.setFieldValue('shipAddress', shipAdd || '')
     formik.setFieldValue('billAddress', billAdd || '')
   }
@@ -1335,17 +1336,14 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 errorCheck={'clientId'}
               />
             </Grid>
-            <Grid item xs={1}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isVattable'
-                    checked={formik.values?.isVattable}
-                    disabled={formik.values.items[0]?.itemId}
-                    onChange={formik.handleChange}
-                  />
-                }
+            <Grid item xs={0.8}>
+              <CustomCheckBox
+                name='isVattable'
+                value={formik.values.isVattable}
+                onChange={event => formik.setFieldValue('isVattable', event.target.checked)}
                 label={labels.VAT}
+                maxAccess={maxAccess}
+                disabled={formik.values.items[0]?.itemId}
               />
             </Grid>
             <Grid item xs={2}>
@@ -1391,7 +1389,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SaleRepository.SalesZone.qry}
                 parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
@@ -1402,30 +1400,25 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 displayField='name'
                 readOnly={isClosed}
                 values={formik.values}
-                displayFieldWidth={1.5}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('szId', newValue ? newValue.recordId : null)
                 }}
                 error={formik.touched.szId && Boolean(formik.errors.szId)}
               />
             </Grid>
-            <Grid item xs={2}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='exWorks'
-                    disabled={isClosed}
-                    checked={formik.values?.exWorks}
-                    onChange={event => {
-                      const { name, checked } = event.target
-                      formik.setFieldValue(name, checked)
-                      if (checked) {
-                        formik.setFieldValue('shipAddress', '')
-                      }
-                    }}
-                  />
-                }
+            <Grid item xs={1.2}>
+              <CustomCheckBox
+                name='exWorks'
+                value={formik.values.exWorks}
+                onChange={event => {
+                  const { name, checked } = event.target
+                  formik.setFieldValue(name, checked)
+                  if (checked) {
+                    formik.setFieldValue('shipAddress', '')
+                  }
+                }}
                 label={labels.exWorks}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
