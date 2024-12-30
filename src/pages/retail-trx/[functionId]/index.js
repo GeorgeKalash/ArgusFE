@@ -63,7 +63,7 @@ const RetailTrx = () => {
     },
     {
       field: 'dtName',
-      headerName: labels.docType,
+      headerName: labels.documentType,
       flex: 1
     },
     {
