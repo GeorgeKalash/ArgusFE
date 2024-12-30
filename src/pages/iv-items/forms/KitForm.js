@@ -1,7 +1,7 @@
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -141,23 +141,23 @@ const KitForm = ({ store, labels, maxAccess }) => {
     }
   ]
 
-  function getData() {
-    getRequest({
-      extension: InventoryRepository.Kit.qry,
-      parameters: `_kitId=${recordId}`
-    }).then(res => {
-      const modifiedList = res.list?.map((kitItems, index) => ({
-        ...kitItems,
-        id: index + 1
-      }))
-      modifiedList.length > 0 && formik.setValues({ kit: modifiedList })
-    })
-  }
   useEffect(() => {
     if (recordId) {
+      function getData() {
+        getRequest({
+          extension: InventoryRepository.Kit.qry,
+          parameters: `_kitId=${recordId}`
+        }).then(res => {
+          const modifiedList = res.list?.map((kitItems, index) => ({
+            ...kitItems,
+            id: index + 1
+          }))
+          modifiedList.length > 0 && formik.setValues({ kit: modifiedList })
+        })
+      }
       getData()
     }
-  }, [recordId])
+  }, [])
 
   return (
     <FormShell
