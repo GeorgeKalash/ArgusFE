@@ -142,21 +142,22 @@ const KitForm = ({ store, labels, maxAccess }) => {
   ]
 
   useEffect(() => {
-    if (recordId) {
-      function getData() {
-        getRequest({
+    ;(async function () {
+      if (recordId) {
+        const res = await getRequest({
           extension: InventoryRepository.Kit.qry,
           parameters: `_kitId=${recordId}`
-        }).then(res => {
-          const modifiedList = res.list?.map((kitItems, index) => ({
-            ...kitItems,
-            id: index + 1
-          }))
-          modifiedList.length > 0 && formik.setValues({ kit: modifiedList })
         })
+
+        const modifiedList = res.list?.map((kitItems, index) => ({
+          ...kitItems,
+          id: index + 1
+        }))
+        if (modifiedList?.length > 0) {
+          formik.setValues({ kit: modifiedList })
+        }
       }
-      getData()
-    }
+    })()
   }, [])
 
   return (
