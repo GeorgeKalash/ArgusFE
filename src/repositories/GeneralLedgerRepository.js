@@ -55,6 +55,7 @@ export const GeneralLedgerRepository = {
     get: service + 'getJV',
     set: service + 'setJV',
     post: service + 'postJV',
+    unpost: service + 'unpostJV',
     del: service + 'delJV'
   },
   GeneralLedger: {

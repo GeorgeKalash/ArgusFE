@@ -107,10 +107,23 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
     })
 
     getData(formik.values.recordId)
-    toast.success(platformLabels.Added)
+    toast.success(platformLabels.Posted)
 
     invalidate()
   }
+
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.unpost,
+      record: JSON.stringify(formik.values)
+    })
+
+    getData(formik.values.recordId)
+    toast.success(platformLabels.Unposted)
+
+    invalidate()
+  }
+  const isPosted = formik.values.status === 3
 
   const actions = [
     {
@@ -120,10 +133,17 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       disabled: !editMode
     },
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !isRaw || !editMode
+      disabled: !editMode
     }
   ]
 
