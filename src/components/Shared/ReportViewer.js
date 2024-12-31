@@ -21,20 +21,18 @@ const ReportViewer = ({ resourceId }) => {
     getRequest({
       extension: SystemRepository.ReportLayout,
       parameters: parameters
+    }).then(res => {
+      setReportStore(prevReportStore => [
+        ...prevReportStore,
+        ...res.list.map(item => ({
+          api_url: item.api,
+          reportClass: item.instanceName,
+          parameters: item.parameters,
+          layoutName: item.layoutName,
+          assembly: 'ArgusRPT.dll'
+        }))
+      ])
     })
-      .then(res => {
-        setReportStore(prevReportStore => [
-          ...prevReportStore,
-          ...res.list.map(item => ({
-            api_url: item.api,
-            reportClass: item.instanceName,
-            parameters: item.parameters,
-            layoutName: item.layoutName,
-            assembly: 'ArgusRPT.dll'
-          }))
-        ])
-      })
-      .catch(error => {})
   }
 
   const getReportTemplate = () => {
@@ -42,20 +40,18 @@ const ReportViewer = ({ resourceId }) => {
     getRequest({
       extension: SystemRepository.ReportTemplate,
       parameters: parameters
+    }).then(res => {
+      setReportStore(prevReportStore => [
+        ...prevReportStore,
+        ...res.list.map(item => ({
+          api_url: item.wsName,
+          reportClass: item.reportName,
+          parameters: item.parameters,
+          layoutName: item.caption,
+          assembly: item.assembly
+        }))
+      ])
     })
-      .then(res => {
-        setReportStore(prevReportStore => [
-          ...prevReportStore,
-          ...res.list.map(item => ({
-            api_url: item.wsName,
-            reportClass: item.reportName,
-            parameters: item.parameters,
-            layoutName: item.caption,
-            assembly: item.assembly
-          }))
-        ])
-      })
-      .catch(error => {})
   }
 
   const generateReport = ({ params = '', paramsDict = '' }) => {
@@ -70,19 +66,17 @@ const ReportViewer = ({ resourceId }) => {
       url: process.env.NEXT_PUBLIC_REPORT_URL,
       extension: DevExpressRepository.generate,
       record: JSON.stringify(obj)
-    })
-      .then(res => {
-        switch (selectedFormat.key) {
-          case 1:
-            setPDF(res.recordId)
-            break
+    }).then(res => {
+      switch (selectedFormat.key) {
+        case 1:
+          setPDF(res.recordId)
+          break
 
-          default:
-            window.location.href = res.recordId
-            break
-        }
-      })
-      .catch(error => {})
+        default:
+          window.location.href = res.recordId
+          break
+      }
+    })
   }
 
   useEffect(() => {

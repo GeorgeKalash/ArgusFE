@@ -330,4 +330,6 @@ export const ResourceIds = {
   RawMaterialCategory: 42123,
   FoWorkCenters: 47101,
   ItemPromotion: 50606,
+  CreditCard: 33104,
+  CACostTypes: 53101
 }
