@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -8,18 +8,25 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomNumberField from '../Inputs/CustomNumberField'
 import { DIRTYFIELD_BASE_AMOUNT_MCR, DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { formatDateForGetApI } from 'src/lib/date-helper'
+import { RateDivision } from 'src/resources/RateDivision'
 
-export default function MultiCurrencyRateForm({ labels, maxAccess, data, amount, currencyName, onOk, window }) {
+export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, window }) {
+  const { getRequest } = useContext(RequestsContext)
+
   const { formik } = useForm({
     initialValues: {
-      currencyName: currencyName,
+      currencyId: data?.currencyId,
+      currencyName: data?.currencyName,
       exchangeId: data?.exchangeId,
       exchangeName: data?.exchangeName,
       rateCalcMethod: data?.rateCalcMethod,
       rateCalcMethodName: data?.rateCalcMethodName,
       rateTypeId: data?.rateTypeId,
       exRate: data?.exRate,
-      amount: amount || 0,
+      amount: data?.amount || 0,
       baseAmount: data?.baseAmount,
       rateTypeName: data?.rateTypeName
     },
@@ -28,20 +35,42 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, amount,
     validateOnChange: true
   })
 
-  useEffect(() => {
-    const updatedRateRow = getRate({
-      amount: amount || 0,
-      exRate: formik?.values?.exRate,
-      baseAmount: parseFloat(formik?.values?.baseAmount).toFixed(2),
-      rateCalcMethod: formik?.values?.rateCalcMethod,
-      dirtyField: DIRTYFIELD_RATE
-    })
+  async function getMultiCurrencyFormData() {
+    if (data?.currencyId && data?.date) {
+      const res = await getRequest({
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${data?.currencyId}&_date=${formatDateForGetApI(data?.date)}&_rateDivision=${
+          RateDivision.FINANCIALS
+        }`
+      })
+      formik.setFieldValue('exRate', res.record?.exRate)
+      formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
+      formik.setFieldValue('exchangeId', res.record?.exchangeId)
+      formik.setFieldValue('exchangeName', res.record?.exchangeName)
+      formik.setValues({
+        ...formik.values,
+        ...res.record
+      })
+    }
+  }
 
-    formik.setValues({
-      ...formik.values,
-      ...updatedRateRow,
-      baseAmount: parseFloat(updatedRateRow.baseAmount).toFixed(2)
-    })
+  useEffect(() => {
+    ;(async function () {
+      const updatedRateRow = getRate({
+        amount: data?.amount || 0,
+        exRate: formik?.values?.exRate,
+        baseAmount: parseFloat(formik?.values?.baseAmount).toFixed(2),
+        rateCalcMethod: formik?.values?.rateCalcMethod,
+        dirtyField: DIRTYFIELD_RATE
+      })
+
+      formik.setValues({
+        ...formik.values,
+        ...updatedRateRow,
+        baseAmount: parseFloat(updatedRateRow.baseAmount).toFixed(2)
+      })
+      await getMultiCurrencyFormData()
+    })()
   }, [])
 
   const actions = [
@@ -50,7 +79,7 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, amount,
       condition: true,
       onClick: () => {
         if (onOk) {
-          onOk(formik.values);
+          onOk(formik.values)
           window.close()
         }
       },
@@ -112,7 +141,7 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, amount,
                 readOnly={formik?.values?.amount === 0}
                 onChange={e => {
                   const updatedRateRow = getRate({
-                    amount: amount || 0,
+                    amount: data?.amount || 0,
                     exRate: e.target.value,
                     baseAmount: parseFloat(formik?.values?.baseAmount).toFixed(2),
                     rateCalcMethod: formik?.values?.rateCalcMethod,
@@ -141,7 +170,7 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, amount,
                   formik.setFieldValue('baseAmount', inputValue)
 
                   const updatedRateRow = getRate({
-                    amount: amount || 0,
+                    amount: data?.amount || 0,
                     exRate: formik?.values?.exRate,
                     baseAmount: parseFloat(inputValue || 0).toFixed(2),
                     rateCalcMethod: formik?.values?.rateCalcMethod,

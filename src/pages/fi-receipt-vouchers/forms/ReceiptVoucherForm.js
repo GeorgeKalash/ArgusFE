@@ -104,15 +104,13 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     }
   })
 
-  function openMCRForm(data, amount, currencyName) {
+  function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
       props: {
         labels: _labels,
         maxAccess: MRCMaxAccess,
         data,
-        amount: amount || 0,
-        currencyName,
         onOk: childFormikValues => {
           formik.setValues(prevValues => ({
             ...prevValues,
@@ -549,7 +547,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   <Button
                     variant='contained'
                     size='small'
-                    onClick={() => openMCRForm(formik.values, formik.values.amount, formik.values.currencyName)}
+                    onClick={() => openMCRForm(formik.values)}
                     disabled={formik.values.currencyId === defaultsDataState?.currencyId}
                   >
                     <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
