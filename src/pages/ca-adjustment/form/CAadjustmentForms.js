@@ -86,21 +86,18 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
         formik.setValues({
           ...obj,
           baseAmount: obj.amount,
-
           recordId: response.recordId
         })
       } else {
         toast.success(platformLabels.Edited)
       }
 
-      try {
-        const res = await getRequest({
-          extension: CashBankRepository.CAadjustment.get,
-          parameters: `_recordId=${response.recordId}`
-        })
+      const res = await getRequest({
+        extension: CashBankRepository.CAadjustment.get,
+        parameters: `_recordId=${response.recordId}`
+      })
 
-        formik.setFieldValue('reference', res.record.reference)
-      } catch (error) {}
+      formik.setFieldValue('reference', res.record.reference)
       invalidate()
     }
   })
@@ -108,43 +105,38 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: CashBankRepository.CAadjustment.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: CashBankRepository.CAadjustment.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues({
-            ...res.record,
-
-            date: formatDateFromApi(res.record.date)
-          })
-        }
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          date: formatDateFromApi(res.record.date)
+        })
+      }
     })()
   }, [])
 
   const onPost = async () => {
-    try {
-      const res = await postRequest({
-        extension: CashBankRepository.CAadjustment.post,
-        record: JSON.stringify(formik.values)
+    const res = await postRequest({
+      extension: CashBankRepository.CAadjustment.post,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res?.recordId) {
+      toast.success(platformLabels.Posted)
+      invalidate()
+
+      const getRes = await getRequest({
+        extension: CashBankRepository.CAadjustment.get,
+        parameters: `_recordId=${formik.values.recordId}`
       })
 
-      if (res?.recordId) {
-        toast.success(platformLabels.Posted)
-        invalidate()
-
-        const getRes = await getRequest({
-          extension: CashBankRepository.CAadjustment.get,
-          parameters: `_recordId=${formik.values.recordId}`
-        })
-
-        getRes.record.date = formatDateFromApi(getRes.record.date)
-        formik.setValues(getRes.record)
-      }
-    } catch (error) {}
+      getRes.record.date = formatDateFromApi(getRes.record.date)
+      formik.setValues(getRes.record)
+    }
   }
 
   const onWorkFlowClick = async () => {
