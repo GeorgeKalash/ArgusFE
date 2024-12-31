@@ -84,14 +84,12 @@ const MfAccounts = () => {
   ]
 
   const delAccounts = async obj => {
-    try {
-      await postRequest({
-        extension: FinancialRepository.Account.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
+    await postRequest({
+      extension: FinancialRepository.Account.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const addAccounts = () => {
@@ -107,7 +105,7 @@ const MfAccounts = () => {
         maxAccess: access
       },
       width: 600,
-      height: 600,
+      height: 450,
       title: _labels.Accounts
     })
   }
