@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Grid, Button } from '@mui/material'
 import * as yup from 'yup'
 import { useWindow } from 'src/windows'
@@ -46,9 +46,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const DEFAULT_DELIVERYMODE = 7
   const userData = getStorageData('userData')
+  const [sysDefault, setDefault] = useState({})
 
   const { labels: RVLabels, access: RVAccess } = useResourceQuery({
     datasetId: ResourceIds.RemittanceReceiptVoucher
@@ -135,7 +136,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     instantCashDetails: {},
     products: [{}],
     ICRates: [{}],
-    includingFees: false
+    includingFees: false,
+    agentCode: 'AE01BH'
   }
 
   const { formik } = useForm({
@@ -289,6 +291,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     formik.setFieldValue('dispersalId', selectedRowData?.dispersalId)
     formik.setFieldValue('exRate', parseFloat(selectedRowData?.exRate).toFixed(5))
     formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod)
+    selectedRowData?.agentCode && formik.setFieldValue('agentCode', selectedRowData?.agentCode)
     formik.setFieldValue('corId', selectedRowData?.corId)
     formik.setFieldValue('corRef', selectedRowData?.corRef)
     formik.setFieldValue('corName', selectedRowData?.corName)
@@ -487,6 +490,9 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         maxAccess: maxAccess,
         labels: labels,
         products: formik.values.products,
+        targetCurrency: formik.values.currencyRef,
+        countryRef: formik.values.currencyRef,
+        sysDefault,
         onProductSubmit,
         editMode
       },
@@ -506,6 +512,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
             countryId: formik.values.countryId,
             amount: formik.values.amount || amount
           },
+          agentCode: formik.values.agentCode,
           clientData: {
             hiddenTrxAmount: formik.values.hiddenTrxAmount,
             hiddenTrxCount: formik.values.hiddenTrxCount,
@@ -555,28 +562,23 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }
 
   async function getDefaultCountry() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=countryId`
-    })
+    const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')?.value
 
     const countryRef = await getRequest({
       extension: SystemRepository.Country.get,
-      parameters: `_recordId=${res?.record?.value}`
+      parameters: `_recordId=${countryId}`
     })
 
     return countryRef.record.reference
   }
 
   async function getDefaultCurrency() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=baseCurrencyId`
-    })
+    console.log(defaultsData?.list)
+    const currencyId = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
 
     const currencyRef = await getRequest({
       extension: SystemRepository.Currency.get,
-      parameters: `_recordId=${res?.record?.value}`
+      parameters: `_recordId=${currencyId}`
     })
 
     return currencyRef.record.reference
@@ -625,7 +627,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           const InstantCashProduct = res.list.find(item => item.interfaceId === 1)
           InstantCashProduct ? await mergeICRates(res.list, data) : await displayProduct(res.list, data.productId)
         } else {
-          formik.setFieldValue('products', [])
+          // formik.setFieldValue('products', [])
           handleSelectedProduct()
         }
       }
@@ -634,9 +636,18 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       handleSelectedProduct()
     }
   }
+
+  useEffect(() => {
+    ;(async function () {
+      const syCountryId = await getDefaultCountry()
+      const srcCurrency = await getDefaultCurrency()
+      setDefault({ syCountryId, srcCurrency })
+    })()
+  }, [])
+
   async function mergeICRates(data, outwardsList) {
-    const syCountryId = await getDefaultCountry()
-    const srcCurrency = await getDefaultCurrency()
+    const syCountryId = formik.values.countryRef // sysDefault?.syCountryId for testing// await getDefaultCountry()
+    const srcCurrency = formik.values.currencyRef || outwardsList.currencyRef //sysDefault?.srcCurrency //await getDefaultCurrency()
     const targetCurrency = formik.values.currencyRef || outwardsList.currencyRef
     const srcAmount = outwardsList?.lcAmount || formik.values.lcAmount || 0
     const trgtAmount = outwardsList?.fcAmount || formik.values.fcAmount || 0
@@ -644,8 +655,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
     try {
       const getRates = await getRequest({
-        extension: RemittanceBankInterface.InstantCashRates.qry,
-        parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=${srcCurrency}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_targetAmount=${trgtAmount}&_originatingCountry=${syCountryId}&_destinationCountry=${countryRef}`
+        extension: RemittanceBankInterface.InstantCashRates.get,
+        parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=${srcCurrency}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_targetAmount=${trgtAmount}&_originatingCountry=${syCountryId}&_destinationCountry=${countryRef}&_agentCode=${formik.values.agentCode}`
       })
 
       const updateICProduct = (product, matchingRate) => {
@@ -660,13 +671,13 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         return product
       }
 
-      if (getRates?.list) {
+      if (getRates?.record) {
         if (data.length === 1) {
-          const matchingRate = getRates.list.find(
-            rate => data[0].originAmount >= rate.amountRangeFrom && data[0].originAmount <= rate.amountRangeTo
-          )
+          // const matchingRate = getRates.list.find(
+          //   rate => data[0].originAmount >= rate.amountRangeFrom && data[0].originAmount <= rate.amountRangeTo
+          // )
 
-          const updatedProduct = updateICProduct(data[0], matchingRate)
+          const updatedProduct = updateICProduct(data[0], getRates.record)
 
           if (matchingRate) {
             if (formik.values.lcAmount) formik.setFieldValue('fcAmount', matchingRate.originAmount)
