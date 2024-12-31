@@ -129,6 +129,21 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
     setIsPosted(true)
   }
 
+  const onUnpost = async () => {
+    const values = { ...formik.values }
+    values.date = formatDateToApi(values.date)
+
+    await postRequest({
+      extension: InventoryRepository.MaterialsAdjustment.unpost,
+      record: JSON.stringify(values)
+    })
+    toast.success(platformLabels.Unposted)
+
+    setIsPosted(false)
+
+    invalidate()
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -215,6 +230,19 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: handlePost,
       disabled: !editMode
     }
   ]
