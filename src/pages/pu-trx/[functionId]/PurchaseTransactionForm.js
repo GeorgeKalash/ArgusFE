@@ -216,42 +216,38 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       )
     }),
     onSubmit: async obj => {
-      try {
-        const payload = {
-          header: {
-            ...obj.header,
-            date: formatDateToApi(obj.header.date),
-            dueDate: formatDateToApi(obj.header.dueDate)
-          },
-          items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
-            seqNo: id,
-            applyVat: isVattable,
-            ...rest
-          })),
-          taxCodes: [
-            ...[
-              ...obj.items
-                .filter(({ taxDetails }) => taxDetails && taxDetails?.length > 0)
-                .map(({ taxDetails, id }) => ({
-                  seqNo: id,
-                  ...taxDetails[0]
-                }))
-            ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
-          ],
-          ...(({ header, items, taxCodes, ...rest }) => rest)(obj)
-        }
-
-        const puTrxRes = await postRequest({
-          extension: PurchaseRepository.PurchaseInvoiceHeader.set2,
-          record: JSON.stringify(payload)
-        })
-        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
-        await refetchForm(puTrxRes.recordId)
-        invalidate()
-      } catch (error) {
-        console.log(error)
+      const payload = {
+        header: {
+          ...obj.header,
+          date: formatDateToApi(obj.header.date),
+          dueDate: formatDateToApi(obj.header.dueDate)
+        },
+        items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
+          seqNo: id,
+          applyVat: isVattable,
+          ...rest
+        })),
+        taxCodes: [
+          ...[
+            ...obj.items
+              .filter(({ taxDetails }) => taxDetails && taxDetails?.length > 0)
+              .map(({ taxDetails, id }) => ({
+                seqNo: id,
+                ...taxDetails[0]
+              }))
+          ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
+        ],
+        ...(({ header, items, taxCodes, ...rest }) => rest)(obj)
       }
+
+      const puTrxRes = await postRequest({
+        extension: PurchaseRepository.PurchaseInvoiceHeader.set2,
+        record: JSON.stringify(payload)
+      })
+      const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+      toast.success(actionMessage)
+      await refetchForm(puTrxRes.recordId)
+      invalidate()
     }
   })
 
@@ -872,9 +868,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     setFilteredMU(filteredMeasurements)
 
     update({
-      sku: itemInfo?.sku,
-      itemName: itemInfo?.name,
-      itemId: itemInfo?.recordId,
+      sku: itemInfo?.sku || null,
+      itemName: itemInfo?.name || null,
+      itemId: itemInfo?.recordId || null,
       isMetal: isMetal,
       metalId: metalId,
       metalPurity: metalPurity,
@@ -1252,6 +1248,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         return null
     }
   }
+
+  console.log(formik.values)
 
   return (
     <FormShell
