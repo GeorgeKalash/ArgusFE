@@ -79,12 +79,12 @@ const ItemCostHistory = props => {
   return (
     <VertLayout>
       <Fixed>
-        <Grid container xs={9} spacing={2} sx={{ p: 2 }}>
-          <Grid item xs={6}>
+        <Grid container spacing={2} sx={{ p: 2 }}>
+          <Grid item xs={5}>
             <CustomTextField label={_labels.sku} value={obj.sku} readOnly />
           </Grid>
-          <Grid item xs={5}></Grid>
-          <Grid item xs={6}>
+          <Grid item xs={6}></Grid>
+          <Grid item xs={5}>
             <CustomTextField label={_labels.itemName} value={obj.itemName} readOnly />
           </Grid>
         </Grid>

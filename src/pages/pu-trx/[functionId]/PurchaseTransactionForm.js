@@ -48,17 +48,15 @@ import {
 } from 'src/utils/FooterCalculator'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
-import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
-import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
 import { DataSets } from 'src/resources/DataSets'
 import ItemCostHistory from 'src/components/Shared/ItemCostHistory'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import { CommonContext } from 'src/providers/CommonContext'
+import ItemPromotion from 'src/components/Shared/ItemPromotion'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
@@ -77,106 +75,118 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     enabled: !recordId
   })
 
-  const [initialValues, setInitialData] = useState({
-    recordId: recordId || null,
-    header: {
-      dgId: functionId,
-      functionId: functionId,
-      recordId: null,
-      dtId: documentType?.dtId,
-      reference: '',
-      date: new Date(),
-      dueDate: new Date(),
-      plantId: null,
-      vendorId: null,
-      vendorName: '',
-      vendorRef: '',
-      currencyId: null,
-      szId: null,
-      spId: null,
-      siteId: null,
-      description: '',
-      status: 1,
-      isVattable: false,
-      taxId: null,
-      subtotal: 0,
-      miscAmount: 0,
-      amount: 0,
-      vatAmount: 0,
-      tdAmount: 0,
-      plId: null,
-      ptId: null,
-      maxDiscount: '',
-      currentDiscount: '',
-      exRate: 1,
-      rateCalcMethod: 1,
-      tdType: DIRTYFIELD_TDPCT,
-      tdPct: 0,
-      baseAmount: 0,
-      volume: 0,
-      weight: 0,
-      qty: 0,
-      isVerified: false,
-      contactId: null,
-      commitItems: false,
-      postMetalToFinancials: false,
-      metalPrice: 0,
-      KGmetalPrice: 0
-    },
-    items: [
-      {
-        id: 1,
-        orderId: recordId || 0,
-        itemId: '',
-        sku: '',
-        itemName: '',
-        seqNo: 1,
-        siteId: '',
-        muId: null,
-        qty: 0,
-        volume: 0,
-        weight: 0,
-        isMetal: false,
-        metalId: null,
-        metalPurity: 0,
-        msId: 0,
-        muRef: '',
-        muQty: 0,
-        baseQty: 0,
-        mdType: MDTYPE_PCT,
-        basePrice: 0,
-        baseLaborPrice: 0,
-        TotPricePerG: 0,
-        mdValue: 0,
-        unitPrice: 0,
-        unitCost: 0,
-        overheadId: '',
-        vatAmount: 0,
-        mdAmount: 0,
-        extendedPrice: 0,
-        priceType: 0,
-        applyVat: false,
-        taxId: null,
-        taxDetails: null,
-        promotionTypeName: '',
-        promotionType: null,
-        costHistory: false,
-        taxDetailsButton: false,
-        notes: ''
-      }
-    ],
-    serials: [],
-    lots: [],
-    taxCodes: []
-  })
+  const [initialValues, setInitialData] = useState()
 
   const invalidate = useInvalidate({
     endpointId: PurchaseRepository.PurchaseInvoiceHeader.qry
   })
 
+  const onClick = () => {
+    stack({
+      Component: ItemPromotion,
+      props: {
+        invoiceId: formik.values.header.recordId
+      },
+      width: 1330,
+      height: 720,
+      title: platformLabels.ItemPromotion
+    })
+  }
+
   const { formik } = useForm({
     maxAccess,
-    initialValues,
+    initialValues: {
+      recordId: recordId,
+      header: {
+        dgId: functionId,
+        functionId: functionId,
+        recordId: null,
+        dtId: documentType?.dtId,
+        reference: '',
+        date: new Date(),
+        dueDate: new Date(),
+        plantId: null,
+        vendorId: null,
+        vendorName: '',
+        vendorRef: '',
+        currencyId: null,
+        szId: null,
+        spId: null,
+        siteId: null,
+        description: '',
+        status: 1,
+        isVattable: false,
+        taxId: null,
+        subtotal: 0,
+        miscAmount: 0,
+        amount: 0,
+        vatAmount: 0,
+        tdAmount: 0,
+        plId: null,
+        ptId: null,
+        maxDiscount: '',
+        currentDiscount: '',
+        exRate: 1,
+        rateCalcMethod: 1,
+        tdType: DIRTYFIELD_TDPCT,
+        tdPct: 0,
+        baseAmount: 0,
+        volume: 0,
+        weight: 0,
+        qty: 0,
+        isVerified: false,
+        contactId: null,
+        commitItems: false,
+        postMetalToFinancials: false,
+        metalPrice: 0,
+        KGmetalPrice: 0
+      },
+      items: [
+        {
+          id: 1,
+          orderId: recordId || 0,
+          itemId: '',
+          sku: '',
+          itemName: '',
+          seqNo: 1,
+          siteId: '',
+          muId: null,
+          qty: 0,
+          volume: 0,
+          weight: 0,
+          isMetal: false,
+          metalId: null,
+          metalPurity: 0,
+          msId: 0,
+          muRef: '',
+          muQty: 0,
+          baseQty: 0,
+          mdType: MDTYPE_PCT,
+          basePrice: 0,
+          baseLaborPrice: 0,
+          TotPricePerG: 0,
+          mdValue: 0,
+          unitPrice: 0,
+          unitCost: 0,
+          overheadId: '',
+          vatAmount: 0,
+          mdAmount: 0,
+          extendedPrice: 0,
+          priceType: 0,
+          applyVat: false,
+          taxId: null,
+          taxDetails: null,
+          promotionTypeName: '',
+          promotionType: null,
+          costHistory: false,
+          taxDetailsButton: false,
+          notes: ''
+        }
+      ],
+      serials: [],
+      lots: [],
+      taxCodes: []
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -645,8 +655,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     {
       key: 'ItemPromotion',
       condition: true,
-      onClick: 'onItemPromotion',
-      invoiceId: formik.values.header.recordId,
+      onClick: onClick,
       disabled: !editMode
     }
   ]
@@ -1528,8 +1537,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         </Grow>
 
         <Fixed>
-          <Grid container rowGap={1}>
-            <Grid item xs={6} sx={{ mt: '10px', pr: '5px' }}>
+          <Grid container spacing={2} sx={{ mt: '5px' }}>
+            <Grid item xs={6}>
               <CustomTextArea
                 name='description'
                 label={labels.description}
@@ -1542,117 +1551,102 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 error={formik.touched.description && Boolean(formik.errors.description)}
               />
             </Grid>
-
-            <Grid item xs={6} sx={{ overflow: 'hidden', pt: '5px' }}>
-              <Grid container spacing={2} sx={{ flexWrap: 'nowrap' }}>
-                <Grid item xs={6}>
-                  <Stack spacing={2} sx={{ px: 2, mt: 1 }}>
-                    <CustomNumberField
-                      name='qty'
-                      maxAccess={maxAccess}
-                      label={labels.totQty}
-                      value={totalQty}
-                      readOnly
-                    />
-                    <CustomNumberField
-                      name='volume'
-                      maxAccess={maxAccess}
-                      label={labels.totVolume}
-                      value={totalVolume}
-                      readOnly
-                    />
-                    <CustomNumberField
-                      name='weight'
-                      maxAccess={maxAccess}
-                      label={labels.totWeight}
-                      value={totalWeight}
-                      readOnly
-                    />
-                  </Stack>
-                </Grid>
-
-                <Grid item xs={6}>
-                  <Stack spacing={2} sx={{ px: 2, mt: 1 }}>
-                    <CustomNumberField
-                      name='subTotal'
-                      maxAccess={maxAccess}
-                      label={labels.subtotal}
-                      value={subtotal}
-                      readOnly
-                    />
-                    <CustomNumberField
-                      name='tdAmount'
-                      maxAccess={maxAccess}
-                      label={labels.discount}
-                      value={formik.values.header.tdAmount}
-                      displayCycleButton={true}
-                      cycleButtonLabel={cycleButtonState.text}
-                      decimalScale={2}
-                      readOnly={isPosted}
-                      isPercentIcon={cycleButtonState.text === '%' ? true : false}
-                      handleButtonClick={handleButtonClick}
-                      ShowDiscountIcons={true}
-                      onChange={e => {
-                        let discount = Number(e.target.value.replace(/,/g, ''))
-                        if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
-                          if (discount < 0 || discount > 100) discount = 0
-                          formik.setFieldValue('header.tdPct', discount)
-                        } else {
-                          if (discount < 0 || formik.values.header.subtotal < discount) {
-                            discount = 0
-                          }
-                          formik.setFieldValue('header.tdAmount', discount)
-                        }
-                        formik.setFieldValue('header.currentDiscount', discount)
-                      }}
-                      onBlur={async e => {
-                        let discountAmount = Number(e.target.value.replace(/,/g, ''))
-                        let tdPct = Number(e.target.value.replace(/,/g, ''))
-                        let tdAmount = Number(e.target.value.replace(/,/g, ''))
-
-                        if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
-                          tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
-                          formik.setFieldValue('header.tdPct', tdPct)
-                        }
-
-                        if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
-                          tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
-                          formik.setFieldValue('header.tdAmount', tdAmount)
-                        }
-                        setReCal(true)
-
-                        await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, discountAmount)
-                      }}
-                      onClear={() => {
-                        formik.setFieldValue('header.tdAmount', 0)
-                        formik.setFieldValue('header.tdPct', 0)
-                        recalcGridVat(formik.values.header.tdType, 0, 0, 0)
-                      }}
-                    />
-                    <CustomNumberField
-                      name='miscAmount'
-                      maxAccess={maxAccess}
-                      label={labels.misc}
-                      value={formik.values.header.miscAmount}
-                      decimalScale={2}
-                      readOnly={isPosted}
-                      onChange={e => formik.setFieldValue('header.miscAmount', e.target.value || 0)}
-                      onBlur={async () => {
-                        setReCal(true)
-                      }}
-                      onClear={() => formik.setFieldValue('header.miscAmount', 0)}
-                    />
-                    <CustomNumberField
-                      name='vatAmount'
-                      maxAccess={maxAccess}
-                      label={labels.VAT}
-                      value={vatAmount}
-                      readOnly
-                    />
-                    <CustomNumberField name='amount' maxAccess={maxAccess} label={labels.net} value={amount} readOnly />
-                  </Stack>
-                </Grid>
-              </Grid>
+            <Grid item xs={3}>
+              <Stack spacing={2}>
+                <CustomNumberField name='qty' maxAccess={maxAccess} label={labels.totQty} value={totalQty} readOnly />
+                <CustomNumberField
+                  name='volume'
+                  maxAccess={maxAccess}
+                  label={labels.totVolume}
+                  value={totalVolume}
+                  readOnly
+                />
+                <CustomNumberField
+                  name='weight'
+                  maxAccess={maxAccess}
+                  label={labels.totWeight}
+                  value={totalWeight}
+                  readOnly
+                />
+              </Stack>
+            </Grid>
+            <Grid item xs={3}>
+              <Stack spacing={2}>
+                <CustomNumberField
+                  name='subTotal'
+                  maxAccess={maxAccess}
+                  label={labels.subtotal}
+                  value={subtotal}
+                  readOnly
+                />
+                <CustomNumberField
+                  name='tdAmount'
+                  maxAccess={maxAccess}
+                  label={labels.discount}
+                  value={formik.values.header.tdAmount}
+                  displayCycleButton={true}
+                  cycleButtonLabel={cycleButtonState.text}
+                  decimalScale={2}
+                  readOnly={isPosted}
+                  isPercentIcon={cycleButtonState.text === '%' ? true : false}
+                  handleButtonClick={handleButtonClick}
+                  ShowDiscountIcons={true}
+                  onChange={e => {
+                    let discount = Number(e.target.value.replace(/,/g, ''))
+                    if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
+                      if (discount < 0 || discount > 100) discount = 0
+                      formik.setFieldValue('header.tdPct', discount)
+                    } else {
+                      if (discount < 0 || formik.values.header.subtotal < discount) {
+                        discount = 0
+                      }
+                      formik.setFieldValue('header.tdAmount', discount)
+                    }
+                    formik.setFieldValue('header.currentDiscount', discount)
+                  }}
+                  onBlur={async e => {
+                    let discountAmount = Number(e.target.value.replace(/,/g, ''))
+                    let tdPct = Number(e.target.value.replace(/,/g, ''))
+                    let tdAmount = Number(e.target.value.replace(/,/g, ''))
+                    if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
+                      tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
+                      formik.setFieldValue('header.tdPct', tdPct)
+                    }
+                    if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
+                      tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
+                      formik.setFieldValue('header.tdAmount', tdAmount)
+                    }
+                    setReCal(true)
+                    await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, discountAmount)
+                  }}
+                  onClear={() => {
+                    formik.setFieldValue('header.tdAmount', 0)
+                    formik.setFieldValue('header.tdPct', 0)
+                    recalcGridVat(formik.values.header.tdType, 0, 0, 0)
+                  }}
+                />
+                <CustomNumberField
+                  name='miscAmount'
+                  maxAccess={maxAccess}
+                  label={labels.misc}
+                  value={formik.values.header.miscAmount}
+                  decimalScale={2}
+                  readOnly={isPosted}
+                  onChange={e => formik.setFieldValue('header.miscAmount', e.target.value || 0)}
+                  onBlur={async () => {
+                    setReCal(true)
+                  }}
+                  onClear={() => formik.setFieldValue('header.miscAmount', 0)}
+                />
+                <CustomNumberField
+                  name='vatAmount'
+                  maxAccess={maxAccess}
+                  label={labels.VAT}
+                  value={vatAmount}
+                  readOnly
+                />
+                <CustomNumberField name='amount' maxAccess={maxAccess} label={labels.net} value={amount} readOnly />
+              </Stack>
             </Grid>
           </Grid>
         </Fixed>
