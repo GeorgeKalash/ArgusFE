@@ -135,6 +135,7 @@ const App = props => {
           <meta name='description' content={`Argus ERP`} />
           <meta name='keywords' content='Argus, ERP, ArgusERP' />
           <meta name='viewport' content='initial-scale=1, width=device-width' />
+          <meta name='google' content='notranslate' />
         </Head>
         <AuthProvider>
           <GuestGuard fallback={<Spinner />}>

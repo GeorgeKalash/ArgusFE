@@ -21,12 +21,10 @@ const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props })
     getRequest({
       extension: BusinessPartnerRepository.BPAddress.qry,
       parameters: parameters
+    }).then(res => {
+      res.list = res.list.map(row => (row = row.address))
+      setAddressGridData(res)
     })
-      .then(res => {
-        res.list = res.list.map(row => (row = row.address))
-        setAddressGridData(res)
-      })
-      .catch(error => {})
   }
 
   const delAddress = obj => {
@@ -36,13 +34,11 @@ const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props })
     postRequest({
       extension: BusinessPartnerRepository.BPAddress.del,
       record: JSON.stringify(obj)
-    })
-      .then(res => {
-        toast.success(platformLabels.Deleted)
+    }).then(res => {
+      toast.success(platformLabels.Deleted)
 
-        getAddressGridData(bpId)
-      })
-      .catch(error => {})
+      getAddressGridData(bpId)
+    })
   }
 
   function addAddress() {
@@ -61,6 +57,7 @@ const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props })
         getAddressGridData: getAddressGridData
       },
       width: 600,
+      height: 500,
       title: labels.address
     })
   }
