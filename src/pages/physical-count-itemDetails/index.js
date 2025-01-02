@@ -30,7 +30,7 @@ const PhysicalCountItemDe = () => {
   const [controllerStore, setControllerStore] = useState([])
   const [filteredItems, setFilteredItems] = useState([])
   const [editMode, setEditMode] = useState(false)
-  const [disSkuLookup, setDisSkuLookup] = useState(false) //better to put them in formik not states if possible
+  const [disSkuLookup, setDisSkuLookup] = useState('') //better to put them in formik not states if possible
   const [jumpToNextLine, setJumpToNextLine] = useState(false) //better to put them in formik not states if possible
   const [showDefaultQty, setShowDefaultQty] = useState(false) //better to put them in formik not states if possible
   const [disableItemDuplicate, setDisableItemDuplicate] = useState(false) //better to put them in formik not states if possible
@@ -283,7 +283,8 @@ const PhysicalCountItemDe = () => {
                 weight: result?.weight || 0,
                 metalPurity: result?.metalPurity || 0,
                 metalId: result?.metalId,
-                isMetal: result?.isMetal
+                isMetal: result?.isMetal,
+                countedQty: defaultQty
               })
               addRow()
             }
@@ -309,6 +310,7 @@ const PhysicalCountItemDe = () => {
                   id: newRow.id,
                   sku: res.sku,
                   itemId: itemId,
+                  countedQty: defaultQty,
                   itemName: res?.name,
                   priceType: res?.priceType,
                   weight: result?.weight,
@@ -334,8 +336,7 @@ const PhysicalCountItemDe = () => {
     {
       component: 'numberfield',
       label: _labels.qty,
-      name: 'countedQty',
-      defaultValue: formik.values.controllerId && defaultQty
+      name: 'countedQty'
     },
     {
       component: 'numberfield',
@@ -610,12 +611,12 @@ const PhysicalCountItemDe = () => {
             </Grid>
           </Grid>
         </Fixed>
-        <Grow key={disSkuLookup}>
+        <Grow key={formik.values.controllerId}>
           <DataGrid
             onChange={value => {
               formik.setFieldValue('rows', value)
             }}
-            value={formik.values.controllerId ? formik.values?.rows : []}
+            value={formik.values.controllerId && typeof disSkuLookup === 'boolean' ? formik.values?.rows : []}
             error={formik.errors?.rows}
             columns={columns}
             disabled={formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}

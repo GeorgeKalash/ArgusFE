@@ -24,6 +24,7 @@ export function DataGrid({
   allowDelete = true,
   allowAddNewLine = true,
   onSelectionChange,
+  rowSelectionModel,
   bg
 }) {
   const gridApiRef = useRef(null)
@@ -99,7 +100,7 @@ export function DataGrid({
 
       gridApiRef.current.setRowData(value.map(row => (row.id === updatedRow?.id ? updatedRow : row)))
 
-      if (params.rowIndex === value.length - 1 && column.jumpToNextLine) {
+      if (params.rowIndex === value.length - 1 && column?.jumpToNextLine) {
         const highestIndex = value?.length
           ? value.reduce((max, current) => (max.id > current.id ? max : current)).id + 1
           : 1
@@ -142,7 +143,7 @@ export function DataGrid({
           updateRow: updateRowCommit,
           addRow:
             params.rowIndex === value.length - 1 && !column.updateOn
-              ? column.jumpToNextLine
+              ? column?.jumpToNextLine
                 ? addNewRow
                 : () => {}
               : addRow
@@ -156,7 +157,7 @@ export function DataGrid({
     gridApiRef.current.applyTransaction({ remove: [params.data] })
     if (newRows?.length < 1) setReady(true)
 
-    onChange(newRows, 'delete')
+    onChange(newRows, 'delete', params.data)
   }
 
   function openDelete(params) {
@@ -180,6 +181,15 @@ export function DataGrid({
       setReady(false)
     }
   }, [ready, value])
+
+  useEffect(() => {
+    if (gridApiRef.current && rowSelectionModel) {
+      const rowNode = gridApiRef.current.getRowNode(rowSelectionModel)
+      if (rowNode) {
+        rowNode.setSelected(true)
+      }
+    }
+  }, [rowSelectionModel])
 
   const addNewRow = () => {
     const highestIndex = Math.max(...value?.map(item => item.id), 0) + 1
@@ -309,7 +319,7 @@ export function DataGrid({
     ) {
       if (allowAddNewLine && !error) {
         event.stopPropagation()
-        addNewRow(params)
+        addNewRow()
       }
     }
 
@@ -487,7 +497,7 @@ export function DataGrid({
         onClick={() => openDelete(params)}
       >
         <IconButton>
-          <GridDeleteIcon />
+          <GridDeleteIcon sx={{ fontSize: '1.3rem' }} />
         </IconButton>
       </Box>
     )
@@ -540,6 +550,19 @@ export function DataGrid({
       rowIndex: rowIndex,
       colKey: colDef.field
     })
+
+    if (params?.data.id !== rowSelectionModel) {
+      const selectedRow = params?.data
+      if (onSelectionChange) {
+        async function update({ newRow }) {
+          updateState({
+            newRow
+          })
+        }
+
+        onSelectionChange(selectedRow, update)
+      }
+    }
   }
 
   const gridContainerRef = useRef(null)
@@ -610,18 +633,6 @@ export function DataGrid({
     handleRowChange(newRow)
   }
 
-  const handleRowClick = params => {
-    const selectedRow = params?.data
-    if (onSelectionChange) {
-      async function update({ newRow }) {
-        updateState({
-          newRow
-        })
-      }
-      onSelectionChange(selectedRow, update)
-    }
-  }
-
   const setData = (changes, params) => {
     const id = params.node?.id
 
@@ -655,8 +666,26 @@ export function DataGrid({
           className='ag-theme-alpine'
           style={{ height: '100%', width: '100%' }}
           sx={{
+            fontSize: '0.9rem',
             '.ag-header': {
-              background: bg
+              height: '40px !important',
+              minHeight: '40px !important'
+            },
+            '.ag-header-cell': {
+              height: '40px !important',
+              minHeight: '40px !important'
+            },
+            '.ag-cell': {
+              borderRight: '1px solid #d0d0d0 !important',
+              fontSize: '0.8rem !important'
+            },
+            '.ag-cell .MuiBox-root': {
+              padding: '0px !important'
+            },
+            '.ag-header-row': {
+              background: bg,
+              height: '35px !important',
+              minHeight: '35px !important'
             }
           }}
           ref={gridContainerRef}
@@ -678,11 +707,10 @@ export function DataGrid({
               }}
               onCellKeyDown={onCellKeyDown}
               onCellClicked={onCellClicked}
-              rowHeight={45}
+              rowHeight={35}
               getRowId={params => params?.data?.id}
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}
-              onRowClicked={handleRowClick}
               onCellEditingStopped={onCellEditingStopped}
             />
           )}

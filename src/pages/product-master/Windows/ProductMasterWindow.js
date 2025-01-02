@@ -22,7 +22,8 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
     plantId: null,
     currencyId: null,
     countryId: null,
-    dispersalId: null
+    dispersalId: null,
+    rowSelectionSaved: false
   })
 
   const tabs = [
@@ -98,6 +99,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
           setStore={setStore}
           labels={labels}
           maxAccess={maxAccess}
+          active={activeTab === 5}
           expanded={expanded}
           height={height}
           editMode={editMode}
