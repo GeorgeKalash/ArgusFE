@@ -23,6 +23,7 @@ export function DataGrid({
   allowAddNewLine = true,
   onSelectionChange,
   rowSelectionModel,
+  rowSelectionModel,
   bg
 }) {
   const gridApiRef = useRef(null)
