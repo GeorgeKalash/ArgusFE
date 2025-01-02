@@ -49,7 +49,7 @@ function recalcExRate(rateRow) {
   if (rateRow.amount == 0) return rateRow
 
   if (rateRow.rateCalcMethod == MULTIPLY) rateRow.exRate = rateRow.baseAmount / rateRow.amount
-  else rateRow.exRate = rateRow.baseAmount * rateRow.amount
+  else rateRow.exRate = rateRow.amount / rateRow.baseAmount
 
   return rateRow
 }
@@ -75,8 +75,8 @@ function recalcRateCalc(rateRow) {
       else rateRow = recalcAmount(rateRow)
       break
     case DIRTYFIELD_BASE_AMOUNT_MCR:
-      if (rateRow.baseAmount !== 0) rateRow = recalcExRate(rateRow)
-      break;
+      if (rateRow.baseAmount != 0) rateRow = recalcExRate(rateRow)
+      break
     default:
       console.error("I don't know such dirty Field " + rateRow.dirtyField)
   }
@@ -92,4 +92,13 @@ function getRate(_rateRow) {
   return _rateRow
 }
 
-export { RateCalculator, getRate, DIRTYFIELD_AMOUNT, DIRTYFIELD_RATE, DIRTYFIELD_BASE_AMOUNT, DIRTYFIELD_BASE_AMOUNT_MCR, MULTIPLY, DIVIDE }
+export {
+  RateCalculator,
+  getRate,
+  DIRTYFIELD_AMOUNT,
+  DIRTYFIELD_RATE,
+  DIRTYFIELD_BASE_AMOUNT,
+  DIRTYFIELD_BASE_AMOUNT_MCR,
+  MULTIPLY,
+  DIVIDE
+}
