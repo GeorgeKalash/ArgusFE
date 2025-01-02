@@ -1,10 +1,10 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Button, Checkbox, FormControlLabel, Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -13,7 +13,7 @@ import { useForm } from 'src/hooks/form'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateForGetApI, formatDateFromApi } from 'src/lib/date-helper'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -21,6 +21,11 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
+import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { useWindow } from 'src/windows'
+import { RateDivision } from 'src/resources/RateDivision'
+import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 
 export default function MemosForm({ labels, access, recordId, functionId, getEndpoint }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -29,7 +34,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     enabled: !recordId
   })
 
-  const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const [defaultsDataState, setDefaultsDataState] = useState(null)
 
   const [initialVatPct, setInitialVatPct] = useState('')
 
@@ -47,6 +54,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       date: new Date(),
       plantId: '',
       currencyId: '',
+      currencyName: null,
       status: '',
       accountId: '',
       amount: '',
@@ -111,6 +119,11 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   })
   const editMode = !!formik.values.recordId || !!recordId
 
+  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
+    endpointId: MultiCurrencyRepository.Currency.get,
+    datasetId: ResourceIds.MultiCurrencyRate
+  })
+
   useEffect(() => {
     ;(async function () {
       try {
@@ -121,6 +134,11 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
         const vatPctValue = res.list.find(item => item.key === 'vatPct')?.value || '0'
         setInitialVatPct(vatPctValue)
+        await getMultiCurrencyFormData(
+          formik.values.currencyId,
+          formatDateForGetApI(formik.values.date),
+          RateDivision.FINANCIALS
+        )
       } catch (exception) {}
     })()
   }, [])
@@ -142,6 +160,23 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     formik.setFieldValue('baseAmount', calculatedAmount)
   }, [formik.values.isSubjectToVAT, initialVatPct, formik.values.subtotal])
 
+  async function getDefaultsData() {
+    const myObject = {}
+
+    const filteredList = defaultsData?.list?.filter(obj => {
+      return obj.key === 'currencyId'
+    })
+
+    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+    setDefaultsDataState(myObject)
+
+    return myObject
+  }
+
+  useEffect(() => {
+    formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
+  }, [defaultsDataState])
+
   useEffect(() => {
     ;(async function () {
       try {
@@ -157,6 +192,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
             date: formatDateFromApi(res.record.date)
           })
         }
+        await getDefaultsData()
       } catch (exception) {}
     })()
   }, [])
@@ -211,6 +247,27 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   }
   const postedOrCanceled = formik.values.status === -1 || formik.values.status === 3
 
+  async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
+    if (currencyId && date && rateType) {
+      const res = await getRequest({
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
+      })
+
+      const updatedRateRow = getRate({
+        amount: amount === 0 ? 0 : amount ?? formik.values.amount,
+        exRate: res.record?.exRate,
+        baseAmount: 0,
+        rateCalcMethod: res.record?.rateCalcMethod,
+        dirtyField: DIRTYFIELD_RATE
+      })
+
+      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('exRate', res.record?.exRate)
+      formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
+    }
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -263,6 +320,26 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       default:
         return null
     }
+  }
+
+  function openMCRForm(data) {
+    stack({
+      Component: MultiCurrencyRateForm,
+      props: {
+        labels: _labels,
+        maxAccess: MRCMaxAccess,
+        data,
+        onOk: childFormikValues => {
+          formik.setValues(prevValues => ({
+            ...prevValues,
+            ...childFormikValues
+          }))
+        }
+      },
+      width: 500,
+      height: 500,
+      title: _labels.MultiCurrencyRate
+    })
   }
 
   return (
@@ -323,7 +400,14 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     readOnly={postedOrCanceled}
                     label={labels.date}
                     value={formik.values.date}
-                    onChange={formik.setFieldValue}
+                    onChange={async (e, newValue) => {
+                      formik.setFieldValue('date', newValue.date)
+                      await getMultiCurrencyFormData(
+                        formik.values.currencyId,
+                        formatDateForGetApI(formik.values.date),
+                        RateDivision.FINANCIALS
+                      )
+                    }}
                     required
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('date', '')}
@@ -366,25 +450,45 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 </Grid>
 
                 <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
-                    name='currencyId'
-                    readOnly={postedOrCanceled}
-                    label={labels.currency}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik.values}
-                    required
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('currencyId', newValue?.recordId || null)
-                    }}
-                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                  />
+                  <Grid container spacing={1} alignItems='center'>
+                    <Grid item xs={8}>
+                      <ResourceComboBox
+                        endpointId={SystemRepository.Currency.qry}
+                        name='currencyId'
+                        readOnly={postedOrCanceled}
+                        label={labels.currency}
+                        valueField='recordId'
+                        displayField={['reference', 'name']}
+                        columnsInDropDown={[
+                          { key: 'reference', value: 'Reference' },
+                          { key: 'name', value: 'Name' }
+                        ]}
+                        values={formik.values}
+                        required
+                        maxAccess={maxAccess}
+                        onChange={async (event, newValue) => {
+                          await getMultiCurrencyFormData(
+                            newValue?.recordId,
+                            formatDateForGetApI(formik.values.date),
+                            RateDivision.FINANCIALS
+                          )
+                          formik.setFieldValue('currencyId', newValue?.recordId)
+                          formik.setFieldValue('currencyName', newValue?.name)
+                        }}
+                        error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Button
+                        variant='contained'
+                        size='small'
+                        onClick={() => openMCRForm(formik.values)}
+                        disabled={formik.values.currencyId === defaultsDataState?.currencyId}
+                      >
+                        <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
+                      </Button>
+                    </Grid>
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
@@ -445,13 +549,28 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='amount'
-                    readOnly
                     label={labels.amount}
                     value={formik.values.amount}
                     required
                     maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('amount', e.target.value)}
-                    onClear={() => formik.setFieldValue('amount', '')}
+                    onBlur={async e => {
+                      await getMultiCurrencyFormData(
+                        formik.values.currencyId,
+                        formatDateForGetApI(formik.values.date),
+                        RateDivision.FINANCIALS,
+                        Number(e.target.value.replace(/,/g, ''))
+                      )
+                      formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
+                    }}
+                    onClear={async () => {
+                      await getMultiCurrencyFormData(
+                        formik.values.currencyId,
+                        formatDateForGetApI(formik.values.date),
+                        RateDivision.FINANCIALS,
+                        0
+                      )
+                      formik.setFieldValue('amount', 0)
+                    }}
                     error={formik.touched.amount && Boolean(formik.errors.amount)}
                     maxLength={10}
                   />
