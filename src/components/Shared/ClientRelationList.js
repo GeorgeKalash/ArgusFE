@@ -26,6 +26,7 @@ export const ClientRelationList = ({ recordId, name, reference, category }) => {
   }
 
   const {
+    query: { data },
     labels: _labels,
     refetch,
     access
