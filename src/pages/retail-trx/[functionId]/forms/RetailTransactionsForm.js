@@ -1,6 +1,6 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-import { Grid, FormControlLabel, Checkbox, Button } from '@mui/material'
+import { Grid, Button } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -47,6 +47,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function RetailTransactionsForm({ labels, posUser, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -236,12 +237,15 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
 
         obj.header.addressId = res?.recordId
       }
-      obj.header.date = formatDateToApi(obj.header?.date)
+
       const mapWithSeqNo = rows => rows.map((row, index) => ({ ...row, seqNo: index + 1 }))
       if (obj.header.name) obj.header.clientName = obj.header.name
 
       const payload = {
-        header: obj.header,
+        header: {
+          ...obj.header,
+          date: formatDateToApi(obj.header?.date)
+        },
         items: mapWithSeqNo(obj.items),
         cash: mapWithSeqNo(obj.cash)
       }
@@ -1362,16 +1366,13 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                   />
                 </Grid>
                 <Grid item xs={2}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='header.isVatable'
-                        checked={formik.values?.header?.isVatable}
-                        onChange={formik.handleChange}
-                        disabled={formik?.values?.items?.some(item => item.sku)}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='isVatable'
+                    value={formik.values?.header?.isVatable}
+                    onChange={event => formik.setFieldValue('header.isVatable', event.target.checked)}
                     label={labels.vat}
+                    maxAccess={maxAccess}
+                    disabled={formik?.values?.items?.some(item => item.sku)}
                   />
                 </Grid>
               </Grid>
