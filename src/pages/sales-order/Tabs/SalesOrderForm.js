@@ -1395,7 +1395,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
                 name='szId'
                 label={labels.saleZone}
-                columnsInDropDown={[{ key: 'name', value: 'Name' }]}
                 valueField='recordId'
                 displayField='name'
                 readOnly={isClosed}
