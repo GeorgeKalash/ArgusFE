@@ -66,7 +66,6 @@ export function DataGrid({
     if (newRows?.length < 1) setReady(true)
 
     onChange(newRows, 'delete', params.data)
-    onChange(newRows, 'delete', params.data)
   }
 
   function openDelete(params) {
