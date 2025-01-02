@@ -19,11 +19,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, window }) {
   const [isPosted, setIsPosted] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -51,7 +53,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
   })
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.MaterialsAdjustment.qry
+    endpointId: InventoryRepository.MaterialsAdjustment.page
   })
 
   const { formik } = useForm({
