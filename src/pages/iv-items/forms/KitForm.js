@@ -1,8 +1,7 @@
-import { useFormik } from 'formik'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -18,41 +17,11 @@ const KitForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [numRows, setNumRows] = useState(0)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
-      kit: yup
-        .array()
-        .of(
-          yup.object().shape({
-            componentSKU: yup.string().test(function (value) {
-              if (numRows > 1) {
-                return !!value
-              }
-
-              return true
-            }),
-            qty: yup.number().test({
-              test: function (value) {
-                const { componentSKU } = this.parent
-
-                if (componentSKU) {
-                  return value > 0
-                }
-
-                return true
-              }
-            })
-          })
-        )
-        .required()
-    }),
-
     initialValues: {
-      Kit: [
+      kit: [
         {
           id: 1,
           kitId: recordId,
@@ -64,6 +33,45 @@ const KitForm = ({ store, labels, maxAccess }) => {
         }
       ]
     },
+    validationSchema: yup.object({
+      kit: yup
+        .array()
+        .of(
+          yup.object().shape({
+            componentSKU: yup.string().test(function (value) {
+              const row = this.parent
+              const isAnyFieldFilled = row.qty || row.componentSKU
+
+              if (this.options.from[1]?.value?.kit?.length === 1) {
+                if (isAnyFieldFilled) {
+                  return !!value
+                }
+
+                return true
+              }
+
+              return !!value
+            }),
+
+            qty: yup.string().test(function (value) {
+              const row = this.parent
+              const isAnyFieldFilled = row.qty || row.componentSKU
+
+              if (this.options.from[1]?.value?.kit?.length === 1) {
+                if (isAnyFieldFilled) {
+                  return !!value
+                }
+
+                return true
+              }
+
+              return !!value
+            })
+          })
+        )
+        .required()
+    }),
+
     onSubmit: values => {
       postKit(values)
     }
@@ -134,38 +142,23 @@ const KitForm = ({ store, labels, maxAccess }) => {
   ]
 
   useEffect(() => {
-    setNumRows(formik?.values?.kit?.length)
-  }, [formik.values.kit])
+    ;(async function () {
+      if (recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.Kit.qry,
+          parameters: `_kitId=${recordId}`
+        })
 
-  function getData() {
-    getRequest({
-      extension: InventoryRepository.Kit.qry,
-      parameters: `_kitId=${recordId}`
-    })
-      .then(res => {
         const modifiedList = res.list?.map((kitItems, index) => ({
           ...kitItems,
           id: index + 1
         }))
-        formik.setValues({ kit: modifiedList })
-      })
-      .catch(error => {})
-  }
-  useEffect(() => {
-    if (recordId) {
-      getData()
-    }
-  }, [recordId])
-
-  const formik2 = useFormik({
-    maxAccess,
-    initialValues: {
-      name: store._name || '',
-      reference: store._reference
-    },
-    enableReinitialize: true,
-    validateOnChange: true
-  })
+        if (modifiedList?.length > 0) {
+          formik.setValues({ kit: modifiedList })
+        }
+      }
+    })()
+  }, [])
 
   return (
     <FormShell
@@ -178,19 +171,13 @@ const KitForm = ({ store, labels, maxAccess }) => {
       <VertLayout>
         <Grid container spacing={2}>
           <Grid item width={'50.1%'}>
-            <CustomTextField
-              name='name'
-              label={labels.name}
-              value={formik2?.values?.name}
-              readOnly
-              maxAccess={maxAccess}
-            />
+            <CustomTextField name='name' label={labels.name} value={store?._name} readOnly maxAccess={maxAccess} />
           </Grid>
           <Grid item width={'50.1%'}>
             <CustomTextField
               name='reference'
               label={labels.reference}
-              value={formik2?.values?.reference}
+              value={store?._reference}
               readOnly
               maxAccess={maxAccess}
             />
@@ -199,10 +186,11 @@ const KitForm = ({ store, labels, maxAccess }) => {
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('kit', value)}
-            value={formik.values.kit || []}
+            value={formik.values.kit}
             error={formik.errors.kit}
-            allowDelete
             columns={columns}
+            maxAccess={maxAccess}
+            name='kit'
           />
         </Grow>
       </VertLayout>
