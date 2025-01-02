@@ -45,31 +45,15 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
       })
       formik.setFieldValue('exRate', res.record?.exRate)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
+      formik.setFieldValue('rateCalcMethodName', res.record?.rateCalcMethodName)
       formik.setFieldValue('exchangeId', res.record?.exchangeId)
       formik.setFieldValue('exchangeName', res.record?.exchangeName)
-      formik.setValues({
-        ...formik.values,
-        ...res.record
-      })
+      formik.setFieldValue('rateTypeName', res.record?.rateTypeName)
     }
   }
 
   useEffect(() => {
     ;(async function () {
-      const updatedRateRow = getRate({
-        amount: data?.amount || 0,
-        exRate: formik?.values?.exRate,
-        baseAmount: parseFloat(formik?.values?.baseAmount).toFixed(2),
-        rateCalcMethod: formik?.values?.rateCalcMethod,
-        dirtyField: DIRTYFIELD_RATE
-      })
-
-      formik.setValues({
-        ...formik.values,
-        ...updatedRateRow,
-        exRate: updatedRateRow.exRate || null,
-        baseAmount: parseFloat(updatedRateRow.baseAmount).toFixed(2)
-      })
       await getMultiCurrencyFormData()
     })()
   }, [])
@@ -80,17 +64,24 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
       condition: true,
       onClick: () => {
         if (onOk) {
-          onOk(formik.values)
+          const updatedValues = {
+            ...formik.values,
+            exRate: formik.values.exRate,
+            baseAmount: formik.values.baseAmount,
+            amount: formik.values.amount,
+          };
+          onOk(updatedValues);
           window.close()
         }
       },
-      disabled: false
-    }
-  ]
+      disabled: false,
+    },
+  ];
+  
 
   return (
     <FormShell
-      resourceId={ResourceIds.MaterialsTransfer}
+      resourceId={ResourceIds.MultiCurrencyRate}
       form={formik}
       actions={actions}
       maxAccess={maxAccess}
