@@ -9,9 +9,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-
 import { useRouter } from 'next/router'
-
 import { ControlContext } from 'src/providers/ControlContext'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import RetailDocTypeForm from './form/RetailDocTypeForm'
