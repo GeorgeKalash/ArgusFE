@@ -326,5 +326,7 @@ export const ResourceIds = {
   RawMaterialCategory: 42123,
   FoWorkCenters: 47101,
   CreditCard: 33104,
-  CACostTypes: 53101
+  CACostTypes: 53101,
+  MetalReceiptVoucher: 31315,
+  MetalPaymentVoucher: 31316
 }
