@@ -183,6 +183,10 @@ export const FinancialRepository = {
 
   MetalReceiptVoucher: {
     qry: service + 'qryMTX',
-    snapshot: service + 'snapshotMTX'
+    snapshot: service + 'snapshotMTX',
+    set2R: service + 'set2MRV',
+    set2P: service + 'set2MPV',
+    get: service + 'qryMTI',
+    get2: service + 'getMTX'
   }
 }

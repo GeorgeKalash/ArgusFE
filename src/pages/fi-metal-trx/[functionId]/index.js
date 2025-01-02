@@ -17,8 +17,9 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { ControlContext } from 'src/providers/ControlContext'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import MetalTrxFinancialForm from './form/MetalTrxFinancialForm'
 
-const Financial = () => {
+const MetalTrxFinancial = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -155,7 +156,7 @@ const Financial = () => {
 
   function openForm(recordId) {
     stack({
-      Component: MemosForm,
+      Component: MetalTrxFinancialForm,
       props: {
         labels: _labels,
         recordId: recordId,
@@ -210,7 +211,14 @@ const Financial = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} onApply={onApply} onSearch={onSearch} onClear={onClear} />
+        <RPBGridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onApply={onApply}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'FIMTX'}
+        />
       </Fixed>
       <Grow>
         <Table
@@ -232,4 +240,4 @@ const Financial = () => {
   )
 }
 
-export default Financial
+export default MetalTrxFinancial
