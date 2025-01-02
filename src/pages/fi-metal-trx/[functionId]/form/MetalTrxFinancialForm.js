@@ -22,13 +22,18 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
+import { DataGrid } from 'src/components/Shared/DataGrid'
 
-export default function MetalTrxFinancialForm({ labels, access, recordId, functionId }) {
+export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, date }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
     enabled: !recordId
   })
+
+  console.log(formatDateFromApi(date), 'datttttttttteeeeeeeee')
 
   const { platformLabels } = useContext(ControlContext)
 
@@ -78,22 +83,25 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       siteRef: '',
       status: null,
       statusName: '',
-      items: {
-        baseMetalQty: null,
-        creditAmount: null,
-        itemId: null,
-        itemName: '',
-        metalId: null,
-        metalRef: '',
-        purity: null,
-        qty: null,
-        seqNo: null,
-        sku: '',
-        stdPurity: null,
-        totalCredit: null,
-        trackBy: null,
-        trxId: null
-      }
+      items: [
+        {
+          id: 1,
+          baseMetalQty: null,
+          creditAmount: null,
+          itemId: null,
+          itemName: '',
+          metalId: null,
+          metalRef: '',
+          purity: null,
+          qty: null,
+          seqNo: null,
+          sku: '',
+          stdPurity: null,
+          totalCredit: null,
+          trackBy: null,
+          trxId: null
+        }
+      ]
     },
     maxAccess,
     enableReinitialize: false,
@@ -149,9 +157,14 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           extension: FinancialRepository.MetalReceiptVoucher.get2,
           parameters: `_recordId=${recordId}&_functionId=${functionId}`
         })
+        console.log(res.list, 'ressssss')
 
         formik.setFieldValue('items', res.list)
-        formik.setFieldValue('header', res2.record)
+        formik.setValues({
+          ...formik.values,
+          ...res2.record,
+          date: formatDateFromApi(res2.record.date)
+        })
       }
     })()
   }, [])
@@ -169,6 +182,33 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         return null
     }
   }
+
+  const columns = [
+    {
+      component: 'resourcecombobox',
+      label: labels.metalId,
+      name: 'metalId',
+      props: {
+        endpointId: InventoryRepository.Metals.qry,
+        valueField: 'recordId',
+        displayField: 'reference',
+        displayFieldWidth: 1.5,
+        mapping: [
+          { from: 'name', to: 'purcRateTypeName' },
+          { from: 'reference', to: 'purcRateTypeRef' },
+          { from: 'recordId', to: 'purcRateTypeId' }
+        ]
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.controlName,
+      name: 'name',
+      props: {
+        readOnly: true
+      }
+    }
+  ]
 
   return (
     <FormShell
@@ -225,31 +265,127 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
               <CustomTextField readOnly={true} name='plantName' value={formik.values.plantName} />
             </Grid>
             <Grid item xs={3}>
-              <CustomTextField />
+              <ResourceComboBox
+                endpointId={formik.values?.accountId && FinancialRepository.Contact.qry}
+                parameters={formik.values?.accountId && `_accountId=${formik.values?.accountId}`}
+                name='contactId'
+                readOnly={false}
+                label={labels.contact}
+                valueField='recordId'
+                displayField={'name'}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('contactId', newValue?.recordId || null)
+                }}
+                error={formik.touched.contactId && Boolean(formik.errors.contactId)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Site.qry}
+                name='siteId'
+                label={labels.site}
+                values={formik.values}
+                valueField='recordId'
+                displayField='reference'
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Ref.' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                displayFieldWidth={3}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('siteId', newValue?.recordId || null)
+                  formik.setFieldValue('siteName', newValue?.name || '')
+                }}
+                error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+              />
             </Grid>
             <Grid item xs={3}>
-              <CustomTextField />
+              <CustomTextField readOnly={true} name='siteName' value={formik.values.siteName} />
             </Grid>
             <Grid item xs={3}>
-              <CustomTextField />
+              <ResourceComboBox
+                endpointId={LogisticsRepository.LoCollector.qry}
+                name='collectorId'
+                label={labels.collector}
+                valueField='recordId'
+                displayField='reference'
+                values={formik.values}
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('collectorId', newValue?.recordId || '')
+                }}
+                error={formik.touched.collectorId && Boolean(formik.errors.collectorId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomDatePicker
+                name='date'
+                label={labels.date}
+                value={formik.values.date}
+                onChange={formik.setFieldValue}
+                onClear={() => formik.setFieldValue('date', '')}
+                error={false}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <ResourceLookup
+                endpointId={FinancialRepository.Account.snapshot}
+                name='accountId'
+                readOnly={editMode}
+                label={labels.accountReference}
+                valueField='reference'
+                displayField='reference'
+                valueShow='accountRef'
+                form={formik}
+                secondDisplayField={false}
+                filter={{ type: formik.values.accountType }}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('accountId', newValue?.recordId || '')
+                  formik.setFieldValue('accountRef', newValue?.reference || '')
+                  formik.setFieldValue('accountName', newValue?.name || '')
+                }}
+                error={formik.touched.accountId && Boolean(formik.errors.accountId)}
+                maxAccess={maxAccess}
+              />
             </Grid>
             <Grid item xs={3}>
-              <CustomTextField />
-            </Grid>
-            <Grid item xs={3}>
-              <CustomTextField />
-            </Grid>
-            <Grid item xs={3}>
-              <CustomTextField />
-            </Grid>
-            <Grid item xs={3}>
-              <CustomTextField />
-            </Grid>
-            <Grid item xs={3}>
-              <CustomTextField />
+              <CustomTextField name='accountName' value={formik.values.accountName} readOnly={true} />
             </Grid>
           </Grid>
         </Fixed>
+        <Grow>
+          <Grow>
+            {/* <DataGrid
+              onChange={value => formik.setFieldValue('items', value)}
+              value={formik.values.items}
+              error={formik.errors.items}
+              name='items'
+              maxAccess={maxAccess}
+              columns={columns}
+            /> */}
+          </Grow>
+        </Grow>
       </VertLayout>
     </FormShell>
   )

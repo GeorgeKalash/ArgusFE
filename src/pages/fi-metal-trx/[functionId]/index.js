@@ -141,7 +141,7 @@ const MetalTrxFinancial = () => {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.date)
   }
 
   const getcorrectLabel = functionId => {
@@ -154,12 +154,13 @@ const MetalTrxFinancial = () => {
     }
   }
 
-  function openForm(recordId) {
+  function openForm(recordId, date) {
     stack({
       Component: MetalTrxFinancialForm,
       props: {
         labels: _labels,
         recordId: recordId,
+        date,
         access,
         functionId: functionId
       },
