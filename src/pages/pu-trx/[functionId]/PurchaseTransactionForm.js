@@ -54,6 +54,7 @@ import ItemCostHistory from 'src/components/Shared/ItemCostHistory'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import { CommonContext } from 'src/providers/CommonContext'
 import ItemPromotion from 'src/components/Shared/ItemPromotion'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -75,7 +76,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     enabled: !recordId
   })
 
-  const [initialValues, setInitialData] = useState({
+  const initialValues = {
     recordId: recordId,
     header: {
       dgId: functionId,
@@ -125,9 +126,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       {
         id: 1,
         orderId: recordId || 0,
-        itemId: '',
-        sku: '',
-        itemName: '',
+        itemId: null,
+        sku: null,
+        itemName: null,
         seqNo: 1,
         siteId: '',
         muId: null,
@@ -166,7 +167,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     serials: [],
     lots: [],
     taxCodes: []
-  })
+  }
 
   const invalidate = useInvalidate({
     endpointId: PurchaseRepository.PurchaseInvoiceHeader.qry
@@ -187,7 +188,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const { formik } = useForm({
     maxAccess,
     initialValues: initialValues,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -208,12 +209,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           })
       }),
       items: yup.array().of(
-        yup.object({
-          sku: yup.string().required(),
-          itemName: yup.string().required(),
-          qty: yup.number().required().min(1)
-        })
-      )
+          yup.object({
+            sku: yup.string().required(),
+            itemName: yup.string().required(),
+            qty: yup.number().required().min(1)
+          })
+        )
+        .required()
     }),
     onSubmit: async obj => {
       const payload = {
@@ -672,8 +674,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
         const taxDetailsResponse = []
 
-        //const taxDetailsResponse = puTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
-
         const updatedpuTrxTaxes =
           puTrxTaxes?.map(tax => {
             const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
@@ -868,8 +868,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     setFilteredMU(filteredMeasurements)
 
     update({
-      sku: itemInfo?.sku || null,
-      itemName: itemInfo?.name || null,
+      sku: itemInfo?.sku || '',
+      itemName: itemInfo?.name || '',
       itemId: itemInfo?.recordId || null,
       isMetal: isMetal,
       metalId: metalId,
@@ -1249,8 +1249,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   }
 
-  console.log(formik.values)
-
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
@@ -1475,16 +1473,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
               />
             </Grid>
             <Grid item xs={2.4}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='header.isVattable'
-                    checked={formik.values?.header?.isVattable}
-                    disabled={formik?.values?.items && formik?.values?.items[0]?.itemId}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='header.isVattable'
+                value={formik.values?.header?.isVattable}
+                onChange={event => formik.setFieldValue('header.isVattable', event.target.checked)}
                 label={labels.VAT}
+                disabled={formik?.values?.items && formik?.values?.items[0]?.itemId}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={2.4}>
