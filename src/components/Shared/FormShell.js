@@ -49,7 +49,8 @@ export default function FormShell({
   setIDInfoAutoFilled,
   visibleClear,
   actions,
-  filteredItems = []
+  filteredItems = [],
+  isParentWindow = true
 }) {
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
@@ -409,8 +410,9 @@ export default function FormShell({
           flexDirection: 'column',
           overflow: 'auto',
           '.MuiBox-root': {
-            paddingTop: '5px !important',
-            px: '0px !important'
+            paddingTop: isParentWindow ? '5px !important' : '0px !important',
+            px: '0px !important',
+            pb: '0px !important'
           }
         }}
       >

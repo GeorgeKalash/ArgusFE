@@ -35,8 +35,8 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      agentId: yup.string().required(' '),
-      swiftCode: yup.string().required(' ')
+      agentId: yup.string().required(),
+      swiftCode: yup.string().required()
     }),
     onSubmit: async obj => {
       const addressId = address?.recordId || null
@@ -108,7 +108,6 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
                 maxAccess={maxAccess}
               />
             </Grid>
-
             <Grid item xs={12}>
               <CustomTextField
                 name='swiftCode'

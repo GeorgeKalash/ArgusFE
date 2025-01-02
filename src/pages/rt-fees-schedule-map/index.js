@@ -80,14 +80,12 @@ const FeeScheduleMap = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: RemittanceOutwardsRepository.FeeScheduleOutwards.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
+    await postRequest({
+      extension: RemittanceOutwardsRepository.FeeScheduleOutwards.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(record) {
@@ -106,7 +104,7 @@ const FeeScheduleMap = () => {
           : null
       },
       width: 700,
-      height: 560,
+      height: 460,
       title: _labels.fsm
     })
   }

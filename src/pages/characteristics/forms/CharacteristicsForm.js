@@ -1,8 +1,8 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
@@ -16,6 +16,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -26,23 +27,21 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
     endpointId: DocumentReleaseRepository.CharacteristicsGeneral.qry
   })
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: null,
-    dataType: null,
-    propertyName: null,
-    isRange: false,
-    isMultiple: false,
-    allowNegative: false,
-    caseSensitive: false,
-    textSize: '',
-    validFrom: null
-  })
-
   const formik = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
-    initialValues,
+    initialValues: {
+      recordId: null,
+      name: null,
+      dataType: null,
+      propertyName: null,
+      isRange: false,
+      isMultiple: false,
+      allowNegative: false,
+      caseSensitive: false,
+      textSize: '',
+      validFrom: null
+    },
     validationSchema: yup.object({
       name: yup.string().required(),
       dataType: yup.string().required(),
@@ -100,7 +99,7 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
     <FormShell form={formik} resourceId={ResourceIds.Characteristics} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={3}>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'
@@ -144,55 +143,39 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isRange'
-                    checked={formik.values?.isRange}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='isRange'
+                value={formik.values.isRange}
+                onChange={event => formik.setFieldValue('isRange', event.target.checked)}
                 label={labels.isRange}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isMultiple'
-                    checked={formik.values?.isMultiple}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='isMultiple'
+                value={formik.values.isMultiple}
+                onChange={event => formik.setFieldValue('isMultiple', event.target.checked)}
                 label={labels.isMultiple}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='allowNegative'
-                    checked={formik.values?.allowNegative}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='allowNegative'
+                value={formik.values.allowNegative}
+                onChange={event => formik.setFieldValue('allowNegative', event.target.checked)}
                 label={labels.allowNegative}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='caseSensitive'
-                    checked={formik.values?.caseSensitive}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='caseSensitive'
+                value={formik.values.caseSensitive}
+                onChange={event => formik.setFieldValue('caseSensitive', event.target.checked)}
                 label={labels.caseSensitive}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

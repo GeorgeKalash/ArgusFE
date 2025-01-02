@@ -11,24 +11,22 @@ const BPAddressForm = ({ getAddressGridData, recordId, bpId, window, props }) =>
   const { platformLabels } = useContext(ControlContext)
 
   const onSubmit = async obj => {
-    try {
-      if (obj) {
-        obj.bpId = bpId
-        await postRequest({
-          extension: BusinessPartnerRepository.BPAddress.set,
-          record: JSON.stringify(obj)
-        }).then(res => {
-          if (!recordId) {
-            toast.success(platformLabels.Added)
-          } else {
-            toast.success(platformLabels.Edited)
-          }
+    if (obj) {
+      obj.bpId = bpId
+      await postRequest({
+        extension: BusinessPartnerRepository.BPAddress.set,
+        record: JSON.stringify(obj)
+      }).then(res => {
+        if (!recordId) {
+          toast.success(platformLabels.Added)
+        } else {
+          toast.success(platformLabels.Edited)
+        }
 
-          getAddressGridData(bpId)
-        })
-        window.close()
-      }
-    } catch (error) {}
+        getAddressGridData(bpId)
+      })
+      window.close()
+    }
   }
 
   return <AddressForm {...{ ...props, address, setAddress, recordId, onSubmit }} />

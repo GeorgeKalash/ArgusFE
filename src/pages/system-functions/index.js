@@ -12,6 +12,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { DataSets } from 'src/resources/DataSets'
 
 const SystemFunction = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,10 +23,12 @@ const SystemFunction = () => {
       extension: SystemRepository.SystemFunction.qry,
       parameters: `_filter=`
     })
+
     formik.setValues({
       ...formik.values,
-      rows: resSystemFunction.list.map(({ ...rest }, index) => ({
+      rows: resSystemFunction.list.map(({ integrationLevel, ...rest }, index) => ({
         id: index + 1,
+        integrationLevel: integrationLevel ?? '1',
         ...rest
       }))
     })
@@ -50,7 +53,9 @@ const SystemFunction = () => {
           nraId: '',
           nraRef: '',
           batchNRAId: '',
-          batchNRARef: ''
+          batchNRARef: '',
+          integrationLevel: '',
+          integrationLevelName: ''
         }
       ]
     },
@@ -121,6 +126,20 @@ const SystemFunction = () => {
           { from: 'recordId', to: 'batchNRAId' },
           { from: 'reference', to: 'batchNRARef' },
           { from: 'name', to: 'batchNRAName' }
+        ]
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      name: 'integrationLevel',
+      label: labels.integrationLevel,
+      props: {
+        datasetId: DataSets.GLI_INTEGRATION_LEVEL,
+        valueField: 'key',
+        displayField: 'value',
+        mapping: [
+          { from: 'key', to: 'integrationLevel' },
+          { from: 'value', to: 'integrationLevelName' }
         ]
       }
     }

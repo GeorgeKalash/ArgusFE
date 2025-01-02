@@ -112,7 +112,7 @@ const DimensionsValues = () => {
         const result = data.list.filter(item => item.value)
         setTpaValues(result)
 
-        filterBy('qry', result[0].key)
+        filterBy('qry', result[0]?.key)
       }
     })()
   }, [])

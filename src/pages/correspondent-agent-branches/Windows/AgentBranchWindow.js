@@ -19,7 +19,6 @@ const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
 
   const editMode = !!store.recordId
   const { platformLabels } = useContext(ControlContext)
-
   const [activeTab, setActiveTab] = useState(0)
   const tabs = [{ label: labels.agentBranch }, { label: labels.address, disabled: !editMode }]
   const { postRequest } = useContext(RequestsContext)
@@ -37,11 +36,9 @@ const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
       postRequest({
         extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
         record: JSON.stringify(data)
+      }).then(() => {
+        toast.success(platformLabels.Edited)
       })
-        .then(() => {
-          toast.success(platformLabels.Edited)
-        })
-        .catch(error => {})
     }
   }
 

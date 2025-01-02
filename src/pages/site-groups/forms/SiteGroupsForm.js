@@ -36,19 +36,17 @@ export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
       reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: InventoryRepository.SiteGroups.set,
-          record: JSON.stringify(obj)
-        })
-  
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else toast.success(platformLabels.Edited)
-  
-        invalidate()
-      } catch (error) {}
+      const response = await postRequest({
+        extension: InventoryRepository.SiteGroups.set,
+        record: JSON.stringify(obj)
+      })
+
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else toast.success(platformLabels.Edited)
+
+      invalidate()
     }
   })
 
@@ -56,16 +54,14 @@ export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.SiteGroups.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.SiteGroups.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (error) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

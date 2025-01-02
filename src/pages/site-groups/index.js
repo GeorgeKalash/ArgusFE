@@ -79,14 +79,12 @@ const SiteGroups = () => {
   ]
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: InventoryRepository.SiteGroups.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: InventoryRepository.SiteGroups.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const edit = obj => {
@@ -106,7 +104,7 @@ const SiteGroups = () => {
         maxAccess: access
       },
       width: 500,
-      height: 400,
+      height: 300,
       title: _labels.siteGroup
     })
   }
