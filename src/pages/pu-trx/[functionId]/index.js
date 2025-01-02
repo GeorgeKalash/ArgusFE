@@ -12,10 +12,7 @@ import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useWindow } from 'src/windows'
-
-// import SaleTransactionForm from './forms/SaleTransactionForm'
 import { useResourceQuery } from 'src/hooks/resource'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import Table from 'src/components/Shared/Table'
 import PurchaseTransactionForm from './PurchaseTransactionForm'
 
@@ -26,6 +23,15 @@ const PuTrx = () => {
   const { stack: stackError } = useError()
   const router = useRouter()
   const { functionId } = router.query
+
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.PurchaseInvoice
+      default:
+        return null
+    }
+  }
 
   const {
     query: { data },
@@ -43,6 +49,7 @@ const PuTrx = () => {
         ? PurchaseRepository.PurchaseInvoiceHeader.qry
         : PurchaseRepository.PurchaseReturnHeader.qry,
     datasetId: ResourceIds.PurchaseInvoice,
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
       filterFn: fetchWithFilter,
       default: { functionId }
@@ -153,7 +160,7 @@ const PuTrx = () => {
   async function getDefaultSalesCurrency() {
     const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
 
-    return defaultCurrency?.value ? parseInt(defaultCurrency.value) : null
+    return parseInt(defaultCurrency?.value) || null
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -178,8 +185,6 @@ const PuTrx = () => {
       return labels.purchaseInvoice
     } else if (parseFloat(functionId) === SystemFunction.PurchaseReturn) {
       return labels.purchaseReturn
-    } else {
-      return null
     }
   }
 
@@ -187,10 +192,10 @@ const PuTrx = () => {
     stack({
       Component: PurchaseTransactionForm,
       props: {
-        labels: labels,
-        recordId: recordId,
+        labels,
+        recordId,
         access,
-        functionId: functionId
+        functionId
       },
       width: 1330,
       height: 720,
