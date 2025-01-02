@@ -139,29 +139,23 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
   }
 
   function openMCRForm(data) {
-    try {
-      console.log('here')
-      stack({
-        Component: MultiCurrencyRateForm,
-        props: {
-          labels: _labels,
-          maxAccess: MRCMaxAccess,
-          data,
-          onOk: childFormikValues => {
-            formik.setValues(prevValues => ({
-              ...prevValues,
-              ...childFormikValues
-            }))
-          }
-        },
-        width: 500,
-        height: 500,
-        title: _labels.MultiCurrencyRate
-      })
-    } catch( e) {
-      console.log(e)
-    }
-    
+    stack({
+      Component: MultiCurrencyRateForm,
+      props: {
+        labels: _labels,
+        maxAccess: MRCMaxAccess,
+        data,
+        onOk: childFormikValues => {
+          formik.setValues(prevValues => ({
+            ...prevValues,
+            ...childFormikValues
+          }))
+        }
+      },
+      width: 500,
+      height: 500,
+      title: _labels.MultiCurrencyRate
+    })
   }
 
   const isPosted = formik.values.status === 3
