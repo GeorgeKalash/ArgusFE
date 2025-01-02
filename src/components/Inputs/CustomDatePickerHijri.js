@@ -29,6 +29,7 @@ export default function CustomDatePickerHijri({
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)
@@ -69,10 +70,29 @@ export default function CustomDatePickerHijri({
         open={openDatePicker}
         minDate={moment(new Date(1938, 0, 1))}
         maxDate={moment(new Date(2075, 11, 31))}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         shouldDisableDate={disabledDate && shouldDisableDate} // Enable this prop for date disabling
         slots={{
           actionBar: props => <PickersActionBar {...props} actions={['accept', 'today']} />,
           popper: PopperComponent
+        }}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              borderColor: '#959d9e',
+              borderRadius: '6px'
+            },
+            height: `33px !important`
+          },
+          '& .MuiInputLabel-root': {
+            fontSize: '0.90rem',
+            top: isFocused || value ? '0px' : '-3px'
+          },
+          '& .MuiInputBase-input': {
+            fontSize: '0.90rem',
+            color: 'black'
+          }
         }}
         slotProps={{
           textField: {
@@ -82,18 +102,18 @@ export default function CustomDatePickerHijri({
             size: size,
             fullWidth: fullWidth,
             inputProps: {
-              tabIndex: _readOnly ? -1 : 0 // Prevent focus on the input field
+              tabIndex: _readOnly ? -1 : 0
             },
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {Boolean(value) && (
-                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
-                      <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -3 }}>
+                      <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
                     </IconButton>
                   )}
                   <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
-                    <EventIcon />
+                    <EventIcon sx={{ border: '0px', fontSize: 18 }} />
                   </IconButton>
                 </InputAdornment>
               )

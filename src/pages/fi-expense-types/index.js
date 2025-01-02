@@ -21,14 +21,12 @@ const ExpenseTypes = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    try {
-      const response = await getRequest({
-        extension: FinancialRepository.ExpenseTypes.page,
-        parameters: `_pageSize=${_pageSize}&_startAt=${_startAt}&_filter=`
-      })
+    const response = await getRequest({
+      extension: FinancialRepository.ExpenseTypes.page,
+      parameters: `_pageSize=${_pageSize}&_startAt=${_startAt}&_filter=`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
   }
 
   const invalidate = useInvalidate({
@@ -88,14 +86,12 @@ const ExpenseTypes = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: FinancialRepository.ExpenseTypes.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: FinancialRepository.ExpenseTypes.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
@@ -108,7 +104,7 @@ const ExpenseTypes = () => {
         invalidate: invalidate
       },
       width: 600,
-      height: 600,
+      height: 400,
       title: _labels.expenseType
     })
   }

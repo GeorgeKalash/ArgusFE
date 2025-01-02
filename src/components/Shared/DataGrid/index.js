@@ -23,6 +23,7 @@ export function DataGrid({
   allowAddNewLine = true,
   onSelectionChange,
   rowSelectionModel,
+  rowSelectionModel,
   bg
 }) {
   const gridApiRef = useRef(null)
@@ -66,6 +67,7 @@ export function DataGrid({
     if (newRows?.length < 1) setReady(true)
 
     onChange(newRows, 'delete', params.data)
+    onChange(newRows, 'delete', params.data)
   }
 
   function openDelete(params) {
@@ -89,6 +91,15 @@ export function DataGrid({
       setReady(false)
     }
   }, [ready, value])
+
+  useEffect(() => {
+    if (gridApiRef.current && rowSelectionModel) {
+      const rowNode = gridApiRef.current.getRowNode(rowSelectionModel)
+      if (rowNode) {
+        rowNode.setSelected(true)
+      }
+    }
+  }, [rowSelectionModel])
 
   useEffect(() => {
     if (gridApiRef.current && rowSelectionModel) {
@@ -391,7 +402,7 @@ export function DataGrid({
         onClick={() => openDelete(params)}
       >
         <IconButton>
-          <GridDeleteIcon />
+          <GridDeleteIcon sx={{ fontSize: '1.3rem' }} />
         </IconButton>
       </Box>
     )
@@ -548,8 +559,26 @@ export function DataGrid({
           className='ag-theme-alpine'
           style={{ height: '100%', width: '100%' }}
           sx={{
+            fontSize: '0.9rem',
             '.ag-header': {
-              background: bg
+              height: '40px !important',
+              minHeight: '40px !important'
+            },
+            '.ag-header-cell': {
+              height: '40px !important',
+              minHeight: '40px !important'
+            },
+            '.ag-cell': {
+              borderRight: '1px solid #d0d0d0 !important',
+              fontSize: '0.8rem !important'
+            },
+            '.ag-cell .MuiBox-root': {
+              padding: '0px !important'
+            },
+            '.ag-header-row': {
+              background: bg,
+              height: '35px !important',
+              minHeight: '35px !important'
             }
           }}
           ref={gridContainerRef}
@@ -571,7 +600,7 @@ export function DataGrid({
               }}
               onCellKeyDown={onCellKeyDown}
               onCellClicked={onCellClicked}
-              rowHeight={45}
+              rowHeight={35}
               getRowId={params => params?.data?.id}
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}

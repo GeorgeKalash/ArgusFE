@@ -13,7 +13,7 @@ import OperationsForms from './forms/OperationsForm'
 import { useWindow } from 'src/windows'
 
 const Operationss = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest, platformLabels } = useContext(RequestsContext)
 
   const { stack } = useWindow()
 
@@ -22,7 +22,7 @@ const Operationss = () => {
 
     const response = await getRequest({
       extension: ManufacturingRepository.Operation.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -83,7 +83,6 @@ const Operationss = () => {
       },
       width: 600,
       height: 380,
-
       title: _labels.Operations
     })
   }
@@ -94,13 +93,13 @@ const Operationss = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />{' '}
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
