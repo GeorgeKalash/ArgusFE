@@ -1,10 +1,10 @@
-import { Grid } from '@mui/material'
+import { Button, Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
@@ -25,10 +25,13 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { useWindow } from 'src/windows'
+import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 
 export default function FiPaymentVouchersForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const [defaultsDataState, setDefaultsDataState] = useState(null)
   const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -106,6 +109,31 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     }
   })
 
+  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
+    endpointId: MultiCurrencyRepository.Currency.get,
+    datasetId: ResourceIds.MultiCurrencyRate
+  })
+
+  function openMCRForm(data) {
+    stack({
+      Component: MultiCurrencyRateForm,
+      props: {
+        labels: _labels,
+        maxAccess: MRCMaxAccess,
+        data,
+        onOk: childFormikValues => {
+          formik.setValues(prevValues => ({
+            ...prevValues,
+            ...childFormikValues
+          }))
+        }
+      },
+      width: 500,
+      height: 500,
+      title: _labels.MultiCurrencyRate
+    })
+  }
+
   const isPosted = formik.values.status === 3
   const isCancelled = formik.values.status === -1
   const editMode = !!formik.values.recordId
@@ -160,6 +188,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
           date: formatDateFromApi(res.record.date)
         })
       }
+      getDefaultsData()
     })()
   }, [])
 
@@ -241,6 +270,23 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       disabled: !editMode
     }
   ]
+
+  async function getDefaultsData() {
+    const myObject = {}
+
+    const filteredList = defaultsData?.list?.filter(obj => {
+      return obj.key === 'currencyId'
+    })
+
+    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+    setDefaultsDataState(myObject)
+
+    return myObject
+  }
+
+  useEffect(() => {
+    formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
+  }, [defaultsDataState])
 
   return (
     <FormShell
@@ -409,24 +455,39 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
               />
             </Grid>
             <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Currency.qry}
-                name='currencyId'
-                label={labels.currency}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                required
-                readOnly={isPosted || isCancelled}
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue ? newValue?.recordId : null)
-                }}
-                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-              />
+              <Grid container spacing={1} alignItems='center'>
+                <Grid item xs={8}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Currency.qry}
+                    name='currencyId'
+                    label={labels.currency}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    required
+                    readOnly={isPosted || isCancelled}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('currencyId', newValue ? newValue?.recordId : null)
+                      formik.setFieldValue('currencyName', newValue?.name)
+                    }}
+                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <Button
+                    variant='contained'
+                    size='small'
+                    onClick={() => openMCRForm(formik.values)}
+                    disabled={formik.values.currencyId === defaultsDataState?.currencyId}
+                  >
+                    <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
+                  </Button>
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
