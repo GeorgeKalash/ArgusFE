@@ -6,7 +6,7 @@ import { CacheDataProvider } from 'src/providers/CacheDataContext'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { GridDeleteIcon } from '@mui/x-data-grid'
-import { DISABLED, HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 
@@ -99,12 +99,31 @@ export function DataGrid({
     }
   }, [rowSelectionModel])
 
+  useEffect(() => {
+    if (gridApiRef.current && rowSelectionModel) {
+      const rowNode = gridApiRef.current.getRowNode(rowSelectionModel)
+      if (rowNode) {
+        rowNode.setSelected(true)
+      }
+    }
+  }, [rowSelectionModel])
+
   const addNewRow = params => {
     const highestIndex = params?.node?.data?.id + 1 || 1
 
-    const defaultValues = Object.fromEntries(
-      columns.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
-    )
+    const defaultValues = allColumns
+      .filter(({ name }) => name !== 'id')
+      .reduce((acc, { name, defaultValue }) => {
+        if (typeof defaultValue === 'object' && defaultValue !== null) {
+          Object.entries(defaultValue).forEach(([key, value]) => {
+            acc[key] = value
+          })
+        } else {
+          acc[name] = defaultValue
+        }
+
+        return acc
+      }, {})
 
     const newRow = {
       id: highestIndex,
@@ -123,7 +142,7 @@ export function DataGrid({
           const rowIndex = rowNode.rowIndex
           gridApiRef.current.startEditingCell({
             rowIndex: rowIndex,
-            colKey: columns[0].name
+            colKey: allColumns[0].name
           })
         }
       }, 0)
@@ -142,26 +161,33 @@ export function DataGrid({
   }
 
   const allColumns = columns.filter(
-    ({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== HIDDEN
+    ({ name: field, hidden }) =>
+      (accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN && !hidden) ||
+      (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
   )
+
+  const condition = i => {
+    return (
+      (!allColumns?.[i]?.props?.readOnly &&
+        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED) ||
+      (allColumns?.[i]?.props?.readOnly &&
+        (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
+          accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))
+    )
+  }
 
   const findNextEditableColumn = (columnIndex, rowIndex, direction) => {
     const limit = direction > 0 ? allColumns.length : -1
     const step = direction > 0 ? 1 : -1
+
     for (let i = columnIndex + step; i !== limit; i += step) {
-      if (
-        !allColumns?.[i]?.props?.readOnly &&
-        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED
-      ) {
+      if (condition(i)) {
         return { columnIndex: i, rowIndex }
       }
     }
 
     for (let i = direction > 0 ? 0 : allColumns.length - 1; i !== limit; i += step) {
-      if (
-        !allColumns?.[i]?.props?.readOnly &&
-        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED
-      ) {
+      if (condition(i)) {
         return {
           columnIndex: i,
           rowIndex: rowIndex + direction
@@ -173,7 +199,7 @@ export function DataGrid({
   const nextColumn = columnIndex => {
     let count = 0
     for (let i = columnIndex + 1; i < allColumns.length; i++) {
-      if (!allColumns?.[i]?.props?.readOnly) {
+      if (condition(i)) {
         count++
       }
     }
@@ -398,7 +424,7 @@ export function DataGrid({
   }
 
   const columnDefs = [
-    ...columns.map(column => ({
+    ...allColumns.map(column => ({
       ...column,
       field: column.name,
       headerName: column.label || column.name,
@@ -425,9 +451,7 @@ export function DataGrid({
           cellRenderer: ActionCellRenderer
         }
       : null
-  ]
-    .filter(Boolean)
-    .filter(({ name: field }) => accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN)
+  ].filter(Boolean)
 
   const commit = data => {
     const allRowNodes = []
@@ -454,7 +478,7 @@ export function DataGrid({
           })
         }
 
-        onSelectionChange(selectedRow, update)
+        onSelectionChange(selectedRow, update, params.colDef.field)
       }
     }
   }
@@ -536,7 +560,7 @@ export function DataGrid({
   const onCellEditingStopped = params => {
     const { data, colDef } = params
 
-    if (colDef.updateOn === 'blur') {
+    if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
       process(params, data, setData)
     }
   }
