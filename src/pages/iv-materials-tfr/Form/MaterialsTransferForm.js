@@ -953,7 +953,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
               formik?.setFieldValue('transfers', data)
             }}
-            name='items'
+            name='transfers'
             maxAccess={maxAccess}
             value={formik?.values?.transfers}
             error={formik?.errors?.transfers}
