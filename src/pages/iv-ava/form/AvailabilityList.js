@@ -50,6 +50,12 @@ const AvailabilityList = ({ obj, labels, access }) => {
       headerName: labels.siteName,
       flex: 1
     },
+    {
+      field: 'onhand',
+      headerName: labels.onHand,
+      flex: 1,
+      type: 'number'
+    },
 
     {
       flex: 0.5,

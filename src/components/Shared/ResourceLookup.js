@@ -78,7 +78,7 @@ export const ResourceLookup = ({
     if (fieldPath.length > 1) {
       const [parent, child] = fieldPath
 
-      return form.touched?.[parent]?.[child] && Boolean(form.errors?.[parent]?.[child])
+      return (form.touched?.[parent]?.[child] || true) && Boolean(form.errors?.[parent]?.[child])
     }
 
     return form.touched?.[errorCheck] && Boolean(form.errors?.[errorCheck])

@@ -433,10 +433,11 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Attachment',
-    label: 'platformLabels.Attachment',
-    color: '#9B1944',
-    image: 'attachment.png',
+    key: 'ItemPromotion',
+    label: platformLabels.ItemPromotion,
+    color: '#231f43',
+    image: 'popup-window.png',
     main: false
-  }
+  },
+  { key: 'Attachment', label: 'platformLabels.Attachment', color: '#9B1944', image: 'attachment.png', main: false }
 ]

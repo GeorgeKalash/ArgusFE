@@ -200,7 +200,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     if (!addressId) return null
 
     const res = await getRequest({
-      extension: SystemRepository.FormattedAddress.get,
+      extension: SystemRepository.Address.format,
       parameters: `_addressId=${addressId}`
     })
 

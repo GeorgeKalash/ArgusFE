@@ -56,7 +56,9 @@ export const AccessControlRepository = {
   },
   ModuleClass: {
     qry: service + 'qryRES',
-    set: service + 'setRES'
+    qry0: service + 'qryRES0',
+    set: service + 'setRES',
+    set2: service + 'set2RES'
   },
   SGControlAccess: {
     qry: service + 'qryCRL',
@@ -87,7 +89,7 @@ export const AccessControlRepository = {
     set: service + 'setNTX',
     get: service + 'getNTX',
     del: service + 'delNTX',
-    post: service + 'postNTX',
+    post: service + 'postNTX'
   },
   LockedRecords: {
     qry: service + 'qryLOK',
