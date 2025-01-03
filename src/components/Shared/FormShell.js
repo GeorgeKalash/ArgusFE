@@ -22,6 +22,7 @@ import InventoryTransaction from './InventoryTransaction'
 import SalesTrxForm from './SalesTrxForm'
 import StrictUnpostConfirmation from './StrictUnpostConfirmation'
 import ClientSalesTransaction from './ClientSalesTransaction'
+import AttachmentList from './AttachmentList'
 
 export default function FormShell({
   form,
@@ -355,6 +356,21 @@ export default function FormShell({
                   height: 550,
                   title: platformLabels.Metals,
                   expandable: false
+                })
+              }
+              break
+            case 'onClickAttachment':
+              action.onClick = () => {
+                stack({
+                  Component: AttachmentList,
+                  props: {
+                    recordId: form.values?.recordId,
+                    resourceId,
+                    functionId: functionId
+                  },
+                  width: 1000,
+                  height: 650,
+                  title: platformLabels.Attachment
                 })
               }
               break

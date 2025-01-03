@@ -38,32 +38,30 @@ export const InterfacesForm = ({ recordId, resourceId, name }) => {
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async values => {
-      try {
-        const rows = formik.values.rows.map(rest => ({
-          recordId: recordId,
-          resourceId: resourceId,
-          ...rest
-        }))
+      const rows = formik.values.rows.map(rest => ({
+        recordId: recordId,
+        resourceId: resourceId,
+        ...rest
+      }))
 
-        const hasEmptyRows = rows.every(row => row.interfaceId === '')
+      const hasEmptyRows = rows.every(row => row.interfaceId === '')
 
-        const resultRows = hasEmptyRows ? [] : rows
+      const resultRows = hasEmptyRows ? [] : rows
 
-        const data = {
-          recordId: recordId,
-          resourceId: resourceId,
-          items: resultRows
-        }
+      const data = {
+        recordId: recordId,
+        resourceId: resourceId,
+        items: resultRows
+      }
 
-        const res = await postRequest({
-          extension: RemittanceSettingsRepository.InterfaceMaps.set2,
-          record: JSON.stringify(data)
-        })
+      const res = await postRequest({
+        extension: RemittanceSettingsRepository.InterfaceMaps.set2,
+        record: JSON.stringify(data)
+      })
 
-        if (res.recordId) {
-          toast.success('Record Successfully')
-        }
-      } catch (error) {}
+      if (res.recordId) {
+        toast.success('Record Successfully')
+      }
     }
   })
   async function getAllInterfaces() {
@@ -80,38 +78,37 @@ export const InterfacesForm = ({ recordId, resourceId, name }) => {
 
   useEffect(() => {
     ;(async function () {
-      if (recordId)
-        try {
-          const interfaceData = await getAllInterfaces()
+      if (recordId) {
+        const interfaceData = await getAllInterfaces()
 
-          const resInterfaces = await getRequest({
-            extension: RemittanceSettingsRepository.InterfaceMaps.qry,
-            parameters: `_recordId=${recordId}&_resourceId=${resourceId}`
-          })
+        const resInterfaces = await getRequest({
+          extension: RemittanceSettingsRepository.InterfaceMaps.qry,
+          parameters: `_recordId=${recordId}&_resourceId=${resourceId}`
+        })
 
-          const mergedInterfaces = interfaceData.map(interfaceItem => {
-            const item = {
-              interfaceId: interfaceItem.key,
-              interfaceName: interfaceItem.value,
-              reference: ''
-            }
-            const matchingInterface = resInterfaces.list.find(y => item.interfaceId == y.interfaceId)
+        const mergedInterfaces = interfaceData.map(interfaceItem => {
+          const item = {
+            interfaceId: interfaceItem.key,
+            interfaceName: interfaceItem.value,
+            reference: ''
+          }
+          const matchingInterface = resInterfaces.list.find(y => item.interfaceId == y.interfaceId)
 
-            if (matchingInterface) {
-              item.reference = matchingInterface.reference
-            }
+          if (matchingInterface) {
+            item.reference = matchingInterface.reference
+          }
 
-            return item
-          })
+          return item
+        })
 
-          formik.setValues({
-            ...formik.values,
-            rows: mergedInterfaces.map((items, index) => ({
-              ...items,
-              id: index + 1
-            }))
-          })
-        } catch (error) {}
+        formik.setValues({
+          ...formik.values,
+          rows: mergedInterfaces.map((items, index) => ({
+            ...items,
+            id: index + 1
+          }))
+        })
+      }
     })()
   }, [recordId])
 

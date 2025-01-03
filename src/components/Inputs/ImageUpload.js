@@ -88,11 +88,9 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
         extension: SystemRepository.Attachment.set,
         record: JSON.stringify(obj),
         file: formik.values?.file
+      }).then(res => {
+        return res
       })
-        .then(res => {
-          return res
-        })
-        .catch(e => {})
     } else if (!image && initialValues?.url && !formik.values?.url) {
       return postRequest({
         extension: SystemRepository.Attachment.del,

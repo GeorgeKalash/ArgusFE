@@ -31,22 +31,19 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
 
   useEffect(() => {
     ;(async function () {
-      if (seqNo && clientId)
-        try {
-          var parameters = `_seqNo=${seqNo}&_clientId=${clientId}`
+      if (seqNo && clientId) var parameters = `_seqNo=${seqNo}&_clientId=${clientId}`
 
-          const res = await getRequest({
-            extension: RTCLRepository.ClientRelation.get,
-            parameters: parameters
-          })
+      const res = await getRequest({
+        extension: RTCLRepository.ClientRelation.get,
+        parameters: parameters
+      })
 
-          const result = res.record
-          formik.setValues({
-            ...result,
-            activationDate: formatDateFromApi(result.activationDate),
-            expiryDate: formatDateFromApi(result.expiryDate)
-          })
-        } catch (e) {}
+      const result = res.record
+      formik.setValues({
+        ...result,
+        activationDate: formatDateFromApi(result.activationDate),
+        expiryDate: formatDateFromApi(result.expiryDate)
+      })
     })()
   }, [])
 

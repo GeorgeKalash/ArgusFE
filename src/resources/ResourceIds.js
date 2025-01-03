@@ -336,6 +336,8 @@ export const ResourceIds = {
   ItemPromotion: 50606,
   CreditCard: 33104,
   CACostTypes: 53101,
+  PuCostAllocation: 53301,
+  SystemAttachments: 20203,
   FoWorkCenters: 47101,
   RetailInvoice: 54201,
   RetailInvoiceReturn: 54301,

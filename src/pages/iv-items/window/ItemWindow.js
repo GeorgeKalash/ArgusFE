@@ -1,6 +1,6 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import ItemsForm from '../forms/ItemsForm.js'
 import PhysicalForm from '../forms/PhysicalForm.js'
 import VendorList from '../forms/VendorList.js'

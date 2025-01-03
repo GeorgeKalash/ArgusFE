@@ -241,5 +241,11 @@ export const SystemRepository = {
   Rules: {
     qry: service + 'qryADR',
     set2: service + 'set2ADR'
+  },
+  Attachment: {
+    qry: service + 'qryAT',
+    set: service + 'setAT',
+    get: service + 'getAT',
+    del: service + 'delAT'
   }
 }
