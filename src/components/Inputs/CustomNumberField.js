@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react'
 import PercentIcon from '@mui/icons-material/Percent'
 import PinIcon from '@mui/icons-material/Pin'
+import React, { useEffect, useState, useRef } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
@@ -38,6 +38,7 @@ const CustomNumberField = ({
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
+  const [isFocused, setIsFocused] = useState(false)
 
   const inputRef = useRef(null)
 
@@ -128,6 +129,8 @@ const CustomNumberField = ({
       helperText={helperText}
       required={_required}
       onInput={handleInput}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
       InputProps={{
         inputRef,
         autoFocus: false,
@@ -141,16 +144,16 @@ const CustomNumberField = ({
         },
         autoComplete: 'off',
         readOnly: _readOnly,
-        endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
+        endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (
           <InputAdornment position='end'>
             {props.ShowDiscountIcons && (
               <IconButton onClick={handleButtonClick}>
                 {props.isPercentIcon ? <PercentIcon /> : <PinIcon sx={{ minWidth: '40px', height: '70px' }} />}
               </IconButton>
             )}
-            {displayButtons && (
+            {displayButtons && (value || value === 0) && (
               <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
               </IconButton>
             )}
           </InputAdornment>
@@ -162,8 +165,24 @@ const CustomNumberField = ({
       sx={{
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
-            border: !hasBorder && 'none'
-          }
+            border: !hasBorder && 'none',
+            borderColor: '#959d9e',
+            borderRadius: '6px'
+          },
+          height: `33px !important`
+        },
+        '& .MuiInputLabel-root': {
+          fontSize: '0.90rem',
+          top: isFocused || value ? '0px' : '-3px'
+        },
+        '& .MuiInputBase-input': {
+          fontSize: '0.90rem',
+          color: 'black'
+        },
+        '& .MuiAutocomplete-clearIndicator': {
+          pl: '0px !important',
+          marginRight: '-10px',
+          visibility: 'visible'
         }
       }}
       {...props}

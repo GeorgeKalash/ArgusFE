@@ -26,20 +26,18 @@ export default function AssignCorrespondentForm({ maxAccess, labels, outwardsLis
       corId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const data = {
-          corId: obj.corId,
-          outwards: outwardsList
-        }
+      const data = {
+        corId: obj.corId,
+        outwards: outwardsList
+      }
 
-        await postRequest({
-          extension: RemittanceOutwardsRepository.CorrespondentOutwards.set,
-          record: JSON.stringify(data)
-        })
-        refetch()
-        toast.success(platformLabels.Updated)
-        window.close()
-      } catch (error) {}
+      await postRequest({
+        extension: RemittanceOutwardsRepository.CorrespondentOutwards.set,
+        record: JSON.stringify(data)
+      })
+      refetch()
+      toast.success(platformLabels.Updated)
+      window.close()
     }
   })
 

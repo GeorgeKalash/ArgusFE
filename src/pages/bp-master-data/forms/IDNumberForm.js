@@ -45,24 +45,22 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
   ]
 
   const postIdNumber = async obj => {
-    try {
-      const postBody = Object.entries(obj).map(async ([key, value]) => {
-        if (value?.idNum === '') value.idNum = null
+    const postBody = Object.entries(obj).map(async ([key, value]) => {
+      if (value?.idNum === '') value.idNum = null
 
-        return await postRequest({
-          extension: BusinessPartnerRepository.MasterIDNum.set,
-          record: JSON.stringify(value)
-        })
+      return await postRequest({
+        extension: BusinessPartnerRepository.MasterIDNum.set,
+        record: JSON.stringify(value)
       })
+    })
 
-      await Promise.all(postBody)
+    await Promise.all(postBody)
 
-      if (!recordId) {
-        toast.success(platformLabels.Added)
-      } else {
-        toast.success(platformLabels.Edited)
-      }
-    } catch (error) {}
+    if (!recordId) {
+      toast.success(platformLabels.Added)
+    } else {
+      toast.success(platformLabels.Edited)
+    }
   }
 
   async function getIdNumber(recordId) {
