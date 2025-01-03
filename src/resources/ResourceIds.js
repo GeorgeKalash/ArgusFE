@@ -327,5 +327,6 @@ export const ResourceIds = {
   FoWorkCenters: 47101,
   SettingsResources: 20121,
   CreditCard: 33104,
-  CACostTypes: 53101
+  CACostTypes: 53101,
+  MultiCurrencyRate: 32601
 }

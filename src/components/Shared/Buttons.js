@@ -431,5 +431,11 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'unlock.png',
     main: false
-  }
+  },
+  {
+    key: 'Ok',
+    label: platformLabels.OK,
+    color: '#231f20',
+    main: false
+  },
 ]
