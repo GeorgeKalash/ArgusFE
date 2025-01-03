@@ -53,7 +53,7 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
         let data = {
           resourceId: resourceId,
           recordId: uniqueRecord,
-          seqNo: seqNo,
+          seqNo: null,
           fileName: selectedFile.name,
           folderId: null,
           folderName: null,
@@ -103,23 +103,29 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
         recordId: ref.current.value || recordId
       }))
 
-      return Promise.all(
-        filesToUpload.map(file =>
-          postRequest({
-            extension: SystemRepository.Attachment.set,
-            record: JSON.stringify(file),
-            file: file.file
-          })
-        )
-      ).then(res => {
+      console.log(
+        ...filesToUpload.map((file, index) => ({
+          file: file.file
+        }))
+      )
+
+      const data = {
+        extension: SystemRepository.Attachment.set,
+        record: JSON.stringify(filesToUpload[0]),
+        files: filesToUpload
+      }
+
+      postRequest(data).then(res => {
         return res
       })
-    } else if (!files.length && initialValues?.url && !formik.values?.url) {
-      return postRequest({
+    } else if (!formik.values?.files?.length && initialValues?.url && !formik.values?.url) {
+      const data = {
         extension: SystemRepository.Attachment.del,
         record: JSON.stringify(initialValues),
         file: initialValues?.url
-      }).then(res => {
+      }
+
+      postRequest(data).then(res => {
         return res
       })
     }
@@ -160,15 +166,14 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
                 sx={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  alignItems: 'center',
-                  border: 'black solid 1px'
+                  border: 'black solid 1px',
+                  borderRadius: '4px'
                 }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mx: 3 }}>
+                <Box sx={{ display: 'flex', gap: 1, mx: 3 }}>
                   <Typography variant='body2'>{file.fileName}</Typography>
-                  <Typography variant='caption'>({Math.round(file.file.size / 1024)} KB)</Typography>
+                  <Typography variant='body2'>({Math.round(file.file.size / 1024)} KB)</Typography>
                 </Box>
-
                 <IconButton onClick={() => handleRemoveFile(index)} size='small' sx={{ color: 'red' }}>
                   <DeleteIcon />
                 </IconButton>
