@@ -108,38 +108,28 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     validateOnChange: true,
 
     onSubmit: async obj => {
-      if (!obj.recordId) {
-        obj.baseAmount = obj.amount
-        obj.status = 1
-        obj.rateCalcMethod = 1
-        obj.exRate = 1
+      const { items, ...header } = obj
+
+      const payload = {
+        header,
+        items: items.map(({ id, itemName, metalRef, ...rest }) => rest)
       }
 
       const response = await postRequest({
         extension: getEndpoint(parseInt(formik.values.functionId)),
-        record: JSON.stringify(obj)
+        record: JSON.stringify(payload)
       })
 
       if (!obj.recordId) {
         toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
-          baseAmount: obj.amount,
-
           recordId: response.recordId
         })
       } else {
         toast.success(platformLabels.Edited)
       }
 
-      try {
-        const res = await getRequest({
-          extension: FinancialRepository.MetalReceiptVoucher.get,
-          parameters: `_recordId=${response.recordId}`
-        })
-
-        formik.setFieldValue('reference', res.record.reference)
-      } catch (error) {}
       invalidate()
     }
   })
@@ -159,12 +149,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         })
         console.log(res.list, 'ressssss')
 
-        formik.setFieldValue('items', res.list)
-        formik.setValues({
-          ...formik.values,
-          ...res2.record,
-          date: formatDateFromApi(res2.record.date)
-        })
+        const modifiedList = res.list?.map((item, index) => ({
+          ...item,
+          id: index + 1
+        }))
+
+        formik.setValues({ ...res2.record, items: modifiedList })
       }
     })()
   }, [])
@@ -194,19 +184,59 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         displayField: 'reference',
         displayFieldWidth: 1.5,
         mapping: [
-          { from: 'name', to: 'purcRateTypeName' },
-          { from: 'reference', to: 'purcRateTypeRef' },
-          { from: 'recordId', to: 'purcRateTypeId' }
+          { from: 'reference', to: 'metalRef' },
+          { from: 'recordId', to: 'metalId' }
+        ]
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.sku,
+      name: 'sku',
+      props: {
+        endpointId: InventoryRepository.Scrap.qry,
+        parameters: `_metalId=0`,
+
+        valueField: 'metalId',
+        displayField: 'sku',
+
+        mapping: [
+          { from: 'itemName', to: 'itemName' },
+          { from: 'metalId', to: 'itemId' },
+          { from: 'sku', to: 'sku' },
+          { from: 'purity', to: 'purity' }
         ]
       }
     },
     {
       component: 'textfield',
-      label: labels.controlName,
-      name: 'name',
+      label: labels.name,
+      name: 'itemName',
       props: {
         readOnly: true
       }
+    },
+    {
+      component: 'textfield',
+      label: labels.name,
+      name: 'itemName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'purity',
+      label: labels.purity,
+      props: { readOnly: true },
+      defaultValue: 0
+    },
+    {
+      component: 'numberfield',
+      name: 'qty',
+      label: labels.qty,
+      props: { allowNegative: false },
+      defaultValue: 0
     }
   ]
 
@@ -376,14 +406,14 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         </Fixed>
         <Grow>
           <Grow>
-            {/* <DataGrid
+            <DataGrid
               onChange={value => formik.setFieldValue('items', value)}
               value={formik.values.items}
               error={formik.errors.items}
               name='items'
               maxAccess={maxAccess}
               columns={columns}
-            /> */}
+            />
           </Grow>
         </Grow>
       </VertLayout>
