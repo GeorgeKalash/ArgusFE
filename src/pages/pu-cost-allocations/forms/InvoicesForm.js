@@ -38,17 +38,13 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
       ]
     },
     onSubmit: async values => {
-      console.log(values, 'values')
-
       const item = formik.values.items.map((item, index) => ({
         ...item,
         id: index + 1,
         date: formatDateToApi(item.date)
       }))
-      console.log(item, 'item')
 
       const data = { ...values, items: item }
-      console.log(data, 'data')
 
       const res = await postRequest({
         extension: CostAllocationRepository.Invoice.set2,

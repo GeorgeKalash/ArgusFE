@@ -12,6 +12,7 @@ import { Fixed } from './Layouts/Fixed'
 import GridToolbar from './GridToolbar'
 import AttachmentForm from './AttachmentForm'
 import toast from 'react-hot-toast'
+import { Box, Button } from '@mui/material'
 
 const AttachmentList = ({ resourceId, recordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,7 +23,8 @@ const AttachmentList = ({ resourceId, recordId }) => {
   const {
     query: { data },
     labels: _labels,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.Attachment.qry,
@@ -34,6 +36,75 @@ const AttachmentList = ({ resourceId, recordId }) => {
       field: 'fileName',
       headerName: _labels.reference,
       flex: 1
+    },
+    {
+      width: 100,
+      headerName: _labels.preview,
+      cellRenderer: row => {
+        return (
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+            <Button
+              onClick={() => {
+                const url = row.data.url
+                window.open(url, '_blank')
+              }}
+              variant='contained'
+              sx={{
+                mr: 1,
+                backgroundColor: 'transparent',
+                '&:hover': {
+                  backgroundColor: 'transparent',
+                  opacity: 0.8
+                },
+                width: '50px',
+                height: '35px',
+                objectFit: 'contain',
+                minWidth: '30px'
+              }}
+            >
+              <img src='/images/buttonsIcons/preview-black.png' alt='Preview' />
+            </Button>
+          </Box>
+        )
+      }
+    },
+    {
+      width: 100,
+      headerName: _labels.download,
+      cellRenderer: row => {
+        return (
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+            <Button
+              onClick={() => {
+                const url = row.data.url
+                fetch(url)
+                  .then(response => response.blob())
+                  .then(blob => {
+                    const link = document.createElement('a')
+                    link.href = URL.createObjectURL(blob)
+                    link.download = row.data.fileName
+                    link.click()
+                  })
+              }}
+              variant='contained'
+              sx={{
+                mr: 1,
+                backgroundColor: 'transparent',
+                '&:hover': {
+                  backgroundColor: 'transparent',
+                  opacity: 0.8
+                },
+                width: '50px',
+                height: '35px',
+                objectFit: 'contain',
+                minWidth: '30px'
+              }}
+            >
+              <img src='/images/buttonsIcons/download-black.png' alt='Download' />
+            </Button>
+          </Box>
+        )
+      }
     }
   ]
 
@@ -50,13 +121,12 @@ const AttachmentList = ({ resourceId, recordId }) => {
       setMaxSeqNo(maxSeq + 1)
     }
   }, [data])
+
   function openForm() {
     stack({
       Component: AttachmentForm,
       props: {
-        labels: _labels,
         recordId,
-        maxAccess: access,
         resourceId,
         seqNo: maxSeqNo
       },

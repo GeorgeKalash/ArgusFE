@@ -157,6 +157,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
   return (
     <FormShell
       resourceId={ResourceIds.PuCostAllocation}
+      functionId={SystemFunction.CostAllocation}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}

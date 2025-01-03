@@ -26,7 +26,6 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
   const invalidate = useInvalidate({
     endpointId: CostAllocationRepository.TrxCostType.qry
   })
-  console.log(seqNo, 'recordId')
 
   const { formik } = useForm({
     initialValues: {

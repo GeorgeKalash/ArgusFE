@@ -20,17 +20,9 @@ const AttachmentForm = ({ resourceId, recordId, maxAccess, seqNo, window }) => {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
-      classId: 0,
       resourceId: resourceId,
-      seqNo: seqNo,
-      fileName: '',
-      url: null,
-      folderId: null,
-      folderName: '',
-      date: null
+      seqNo: seqNo
     },
-    maxAccess,
     enableReinitialize: false,
     validateOnChange: false,
     onSubmit: async obj => {
@@ -47,7 +39,6 @@ const AttachmentForm = ({ resourceId, recordId, maxAccess, seqNo, window }) => {
     <FormShell
       resourceId={ResourceIds.SystemAttachments}
       form={formik}
-      maxAccess={maxAccess}
       isSavedClear={false}
       isCleared={false}
       isInfo={false}

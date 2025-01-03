@@ -15,10 +15,11 @@ import { useWindow } from 'src/windows'
 const TransactionTab = ({ store, labels, access }) => {
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const [baseAmounts, setBaseAmounts] = useState(0)
   const { stack } = useWindow()
   const [valueGridData, setValueGridData] = useState()
+  const [maxSeqNo, setMaxSeqNo] = useState(0)
 
   const columns = [
     {
@@ -63,14 +64,17 @@ const TransactionTab = ({ store, labels, access }) => {
     }).then(res => {
       setValueGridData(res)
       let totalBaseAmounts = 0
+      let maxSeq = 0
 
       res.list = res.list.map(item => {
         totalBaseAmounts += item.baseAmount
+        maxSeq = Math.max(maxSeq, item.seqNo)
 
         return item
       })
 
       setBaseAmounts(totalBaseAmounts)
+      setMaxSeqNo(maxSeq + 1)
     })
   }
 
@@ -90,7 +94,7 @@ const TransactionTab = ({ store, labels, access }) => {
         labels: labels,
         recordId: obj?.caId,
         caId: recordId,
-        seqNo: obj?.seqNo,
+        seqNo: obj?.seqNo ?? maxSeqNo,
         maxAccess: access
       },
       width: 600,

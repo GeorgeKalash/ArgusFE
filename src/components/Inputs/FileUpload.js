@@ -1,4 +1,4 @@
-import { Box, Typography, IconButton } from '@mui/material'
+import { Box, Typography, IconButton, Button } from '@mui/material'
 import React, { useContext, useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react'
 import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -16,7 +16,6 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
     validateOnChange: true,
     initialValues
   })
-  console.log(seqNo, 'seqNo')
 
   const uniqueRecord = recordId || ref?.current?.value
 
@@ -194,26 +193,25 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
           </Box>
         </Box>
       </Box>
-      <Box
-        onClick={handleInputFileReset}
-        variant='contained'
-        sx={{
-          mr: 1,
-          backgroundColor: '#f44336',
-          '&:hover': {
-            opacity: 0.8
-          },
-          width: 40,
-          height: 30,
-          objectFit: 'contain',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: '20%',
-          marginTop: 2
-        }}
-      >
-        <img src={`/images/buttonsIcons/clear.png`} alt={'clear'} />
+      <Box sx={{ display: 'flex', width: '100%' }}>
+        <Button
+          onClick={handleInputFileReset}
+          variant='contained'
+          sx={{
+            mr: 1,
+            backgroundColor: '#f44336',
+            '&:hover': {
+              backgroundColor: '#f44336',
+              opacity: 0.8
+            },
+            width: '50px',
+            height: '35px',
+            objectFit: 'contain',
+            minWidth: '30px'
+          }}
+        >
+          <img src={`/images/buttonsIcons/clear.png`} alt={'clear'} style={{ width: '20px', height: '20px' }} />
+        </Button>
       </Box>
     </>
   )

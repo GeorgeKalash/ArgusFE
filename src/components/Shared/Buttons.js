@@ -439,5 +439,5 @@ export const getButtons = platformLabels => [
     image: 'popup-window.png',
     main: false
   },
-  { key: 'Attachment', label: 'platformLabels.Attachment', color: '#9B1944', image: 'attachment.png', main: false }
+  { key: 'Attachment', label: platformLabels.Attachment, color: '#9B1944', image: 'attachment.png', main: false }
 ]
