@@ -6,8 +6,8 @@ export const SystemRepository = {
   KeyValueStore: service + 'qryKVS',
   ParameterDefinition: service + 'qryRP',
   ReportLayout: service + 'qryRL',
-  ReportLayoutObject: service + 'qryRLO',
-  ReportTemplate: service + 'qryRT',
+  ReportLayoutObject: { qry: service + 'qryRLO', set2: service + 'set2RLO' },
+  ReportTemplate: { qry: service + 'qryRT', set2: service + 'set2RT' },
   DocumentType: {
     qry: service + 'qryDT',
     get: service + 'getDT',
@@ -151,7 +151,8 @@ export const SystemRepository = {
     set: service + 'set2DE'
   },
   ModuleClassRES: {
-    qry: service + 'qryRES'
+    qry: service + 'qryRES',
+    snapshot: service + 'snapshotRES'
   },
   ResourceControl: {
     qry: service + 'qryResourceControls'
@@ -240,6 +241,7 @@ export const SystemRepository = {
   },
   BusinessRules: { qry: service + 'qryRUL', set: service + 'setRUL', get: service + 'getRUL', del: service + 'delRUL' },
   Rules: {
-    qry: service + 'qryADR'
+    qry: service + 'qryADR',
+    set2: service + 'set2ADR'
   }
 }
