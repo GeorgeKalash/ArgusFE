@@ -30,10 +30,10 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
         } else {
           const { gridName, fieldName } = explode(controlId)
 
-          if (updatedSchema.fields[gridName]) {
+          if (updatedSchema.fields[gridName] && updatedSchema?.fields?.[gridName]?.innerType?.fields?.[fieldName]) {
             updatedSchema.fields[gridName] = yup.array().of(
               yup.object().shape({
-                ...updatedSchema.fields[gridName].fields,
+                ...updatedSchema?.fields?.[gridName]?.innerType?.fields,
                 [fieldName]: yup.string().notRequired()
               })
             )
