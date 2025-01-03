@@ -26,6 +26,7 @@ import { useWindow } from 'src/windows'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import FieldSet from 'src/components/Shared/FieldSet'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function OutwardsReturnForm({
   labels,
@@ -615,17 +616,13 @@ export default function OutwardsReturnForm({
                     />
                   </Grid>
                   <Grid item xs={6}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          name='otpVerified'
-                          checked={formik.values?.otpVerified}
-                          disabled={true}
-                          onChange={formik.handleChange}
-                          maxAccess={access}
-                        />
-                      }
+                    <CustomCheckBox
+                      name='otpVerified'
+                      value={formik.values?.otpVerified}
+                      onChange={event => formik.setFieldValue('otpVerified', event.target.checked)}
                       label={labels.otpVerified}
+                      disabled={true}
+                      maxAccess={access}
                     />
                   </Grid>
                   <Grid item xs={6}>

@@ -43,6 +43,7 @@ import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -712,7 +713,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     formik.setFieldValue('billToAddressId', res?.record?.billAddressId || null)
     const shipAdd = await getAddress(res?.record?.shipAddressId)
     const billAdd = await getAddress(res?.record?.billAddressId)
-  
+
     formik.setFieldValue('shipAddress', shipAdd || '')
     formik.setFieldValue('billAddress', billAdd || '')
   }
@@ -1336,16 +1337,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
               />
             </Grid>
             <Grid item xs={1}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isVattable'
-                    checked={formik.values?.isVattable}
-                    disabled={formik.values.items[0]?.itemId}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='isVattable'
+                value={formik.values?.isVattable}
+                onChange={event => formik.setFieldValue('isVattable', event.target.checked)}
                 label={labels.VAT}
+                disabled={formik.values.items[0]?.itemId}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={2}>
@@ -1410,22 +1408,19 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
               />
             </Grid>
             <Grid item xs={2}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='exWorks'
-                    disabled={isClosed}
-                    checked={formik.values?.exWorks}
-                    onChange={event => {
-                      const { name, checked } = event.target
-                      formik.setFieldValue(name, checked)
-                      if (checked) {
-                        formik.setFieldValue('shipAddress', '')
-                      }
-                    }}
-                  />
-                }
+              <CustomCheckBox
+                name='exWorks'
+                value={formik.values?.exWorks}
+                onChange={event => {
+                  const { name, checked } = event.target
+                  formik.setFieldValue(name, checked)
+                  if (checked) {
+                    formik.setFieldValue('shipAddress', '')
+                  }
+                }}
                 label={labels.exWorks}
+                maxAccess={maxAccess}
+                disabled={isClosed}
               />
             </Grid>
           </Grid>
@@ -1464,9 +1459,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={<Checkbox name='overdraft' checked={formik.values?.overdraft} readOnly />}
+                  <CustomCheckBox
+                    name='overdraft'
+                    value={formik.values?.overdraft}
+                    onChange={event => formik.setFieldValue('overdraft', event.target.checked)}
+                    readOnly
                     label={labels.overdraft}
+                    maxAccess={access}
                   />
                 </Grid>
               </Grid>

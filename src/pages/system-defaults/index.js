@@ -14,6 +14,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import FormShell from 'src/components/Shared/FormShell'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const SystemDefaults = () => {
   const { postRequest } = useContext(RequestsContext)
@@ -224,18 +225,12 @@ const SystemDefaults = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='enableHijri'
-                    maxAccess={access}
-                    checked={formik.values?.enableHijri}
-                    onChange={event => {
-                      formik.setFieldValue('enableHijri', event.target.checked)
-                    }}
-                  />
-                }
-                label={_labels.enableHijri}
+              <CustomCheckBox
+                name='enableHijri'
+                value={formik.values?.enableHijri}
+                onChange={event => formik.setFieldValue('enableHijri', event.target.checked)}
+                label={_labels.isCostElement}
+                maxAccess={access}
               />
             </Grid>
           </Grid>
