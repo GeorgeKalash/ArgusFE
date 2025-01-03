@@ -62,7 +62,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     enabled: !recordId
   })
 
-  const [initialValues, setInitialData] = useState({
+  const initialValues = {
     recordId: recordId || null,
     dtId: documentType?.dtId,
     reference: '',
@@ -140,7 +140,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         notes: ''
       }
     ]
-  })
+  }
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.SalesOrder.page
@@ -149,7 +149,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
@@ -686,7 +686,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }
 
   async function getAddress(addressId) {
-    if (!addressId) return null
+    if (!addressId) return
 
     const res = await getRequest({
       extension: SystemRepository.Address.format,
@@ -1017,7 +1017,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }
 
   async function getSiteRef(siteId) {
-    if (!siteId) return null
+    if (!siteId) return
 
     const res = await getRequest({
       extension: InventoryRepository.Site.get,
