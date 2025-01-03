@@ -9,7 +9,6 @@ export const PointofSaleRepository = {
     page: service + 'pageUSR',
     set2: service + 'set2USR'
   },
-
   PointOfSales: {
     page: service + 'pagePOS',
     qry: service + 'qryPOS',
@@ -24,5 +23,25 @@ export const PointofSaleRepository = {
   CashAccount: {
     qry: service + 'qryCA',
     set2: service + 'set2CA'
+  },
+  RetailInvoice: {
+    qry: service + 'qryIVC',
+    del: service + 'delIVC',
+    get: service + 'getIVC',
+    get2: service + 'get2IVC',
+    snapshot: service + 'snapshotIVC',
+    level: service + 'level2_IVC',
+    set2: service + 'set2IVC',
+    post: service + 'postIVC',
+    unpost: service + 'unpostIVC'
+  },
+  RetailPurchase: {
+    set2: service + 'set2IVP'
+  },
+  RetailReturn: {
+    set2: service + 'set2IVR'
+  },
+  PUItems: {
+    snapshot: service + 'snapshotIT'
   }
 }

@@ -192,7 +192,7 @@ export default function FormShell({
                     recordId: form.values?.recordId,
                     functionId: functionId,
                     itemId: 0,
-                    clientId: form?.values?.header?.clientId
+                    clientId: form?.values?.header?.clientId || 0
                   },
                   width: 1200,
                   title: platformLabels.SalesTransactions

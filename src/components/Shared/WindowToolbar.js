@@ -45,12 +45,12 @@ const WindowToolbar = ({
       })
 
       const reportTemplateRes = await getRequest({
-        extension: SystemRepository.ReportTemplate,
+        extension: SystemRepository.ReportTemplate.qry,
         parameters: `_resourceId=${resourceId}`
       })
 
       const reportLayoutFilteringObject = await getRequest({
-        extension: SystemRepository.ReportLayoutObject,
+        extension: SystemRepository.ReportLayoutObject.qry,
         parameters: `_resourceId=${resourceId}`
       })
 
