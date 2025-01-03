@@ -172,6 +172,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         return null
     }
   }
+  const [rowMetal, setRowMetal] = useState(false)
+  console.log(rowMetal, 'aaaaaaaaaaaaaaaaaaaaaaaaaa')
 
   const columns = [
     {
@@ -194,9 +196,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       label: labels.sku,
       name: 'sku',
       props: {
-        endpointId: InventoryRepository.Scrap.qry,
-        parameters: `_metalId=0`,
-
+        endpointId: !!rowMetal && InventoryRepository.Scrap.qry,
+        parameters: `_metalId=${rowMetal}`,
+        readOnly: !formik.values.metalId,
         valueField: 'metalId',
         displayField: 'sku',
 
@@ -206,6 +208,11 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           { from: 'sku', to: 'sku' },
           { from: 'purity', to: 'purity' }
         ]
+      },
+      propsReducer({ row, props }) {
+        setRowMetal(row.metalId)
+
+        return { ...props, readOnly: !row.metalId }
       }
     },
     {
