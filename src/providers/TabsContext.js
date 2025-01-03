@@ -16,6 +16,7 @@ function CustomTabPanel(props) {
       role='tabpanel'
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
+      hidden={value !== index}
       sx={{
         display: value !== index ? 'none !important' : 'flex !important',
         flexDirection: 'column',

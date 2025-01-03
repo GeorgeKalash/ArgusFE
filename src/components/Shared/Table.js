@@ -621,6 +621,7 @@ const Table = ({
           className='ag-theme-alpine'
           style={{ flex: 1, width: '1000px !important', height: props?.height || 'auto' }}
           sx={{
+            all: 'unset',
             '.ag-header': {
               height: '40px !important',
               minHeight: '40px !important'
