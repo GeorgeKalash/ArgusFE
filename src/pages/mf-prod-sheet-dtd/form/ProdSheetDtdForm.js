@@ -15,6 +15,7 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function ProdSheetDtdForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
@@ -121,16 +122,12 @@ export default function ProdSheetDtdForm({ labels, maxAccess, recordId }) {
             </Grid>
 
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    maxAccess={maxAccess}
-                    name='disableSKULookup'
-                    checked={formik.values?.disableSKULookup}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='disableSKULookup'
+                value={formik.values?.disableSKULookup}
+                onChange={event => formik.setFieldValue('disableSKULookup', event.target.checked)}
                 label={labels.dsl}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

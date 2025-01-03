@@ -18,6 +18,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useForm } from 'src/hooks/form'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, maxAccess: access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -265,25 +266,23 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='posMsgIsActive'
-                      checked={formik.values?.posMsgIsActive}
-                      onChange={formik.handleChange}
-                    />
-                  }
+                <CustomCheckBox
+                  name='posMsgIsActive'
+                  value={formik.values?.posMsgIsActive}
+                  onChange={event => formik.setFieldValue('posMsgIsActive', event.target.checked)}
                   label={labels.activateCounterMessage}
+                  maxAccess={maxAccess}
                 />
               </Grid>
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={6} sx={{ px: 2 }}>
-              <FormControlLabel
-                control={
-                  <Checkbox name='isInactive' checked={formik.values?.isInactive} onChange={formik.handleChange} />
-                }
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values?.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                 label={labels.isInactive}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

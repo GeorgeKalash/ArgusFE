@@ -15,6 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function ProfessionsForm({ labels, maxAccess, recordId, setStore }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -226,16 +227,12 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isInactive'
-                    checked={formik.values?.isInactive}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values?.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                 label={labels.isInActive}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

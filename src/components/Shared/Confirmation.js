@@ -14,6 +14,7 @@ import { useForm } from 'src/hooks/form'
 import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
+import CustomCheckBox from '../Inputs/CustomCheckBox'
 
 const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refreshProf = () => {}, window }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
@@ -177,17 +178,13 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
               />
             </Grid>
             <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='liveRequest'
-                    checked={formik.values?.liveRequest}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                    disabled={!systemChecks?.some(item => item.checkId === SystemChecks.CT_YAKEEN_INFORMATION)}
-                  />
-                }
+              <CustomCheckBox
+                name='liveRequest'
+                value={formik.values?.liveRequest}
+                onChange={event => formik.setFieldValue('liveRequest', event.target.checked)}
                 label={labels.yakeenLiveRequest}
+                maxAccess={maxAccess}
+                disabled={!systemChecks?.some(item => item.checkId === SystemChecks.CT_YAKEEN_INFORMATION)}
               />
             </Grid>
           </Grid>

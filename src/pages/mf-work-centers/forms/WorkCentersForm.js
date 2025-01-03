@@ -18,6 +18,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function WorkCentersForm({ labels, maxAccess, recordId, onSubmit }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -240,16 +241,12 @@ export default function WorkCentersForm({ labels, maxAccess, recordId, onSubmit 
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isInactive'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isInactive}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values?.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                 label={labels.inactive}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

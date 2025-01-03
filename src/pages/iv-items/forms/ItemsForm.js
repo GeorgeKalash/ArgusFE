@@ -17,6 +17,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 import { MasterSource } from 'src/resources/MasterSource'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial }) {
   const { platformLabels } = useContext(ControlContext)
@@ -454,16 +455,12 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='isInactive'
-                        checked={formik.values.isInactive}
-                        onChange={formik.handleChange}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='isInactive'
+                    value={formik.values?.isInactive}
+                    onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                     label={labels.isInactive}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
@@ -475,73 +472,53 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   <ImageUpload ref={imageUploadRef} resourceId={ResourceIds.Items} seqNo={0} recordId={recordId} />
                 </Grid>
                 <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='ivtItem'
-                        checked={formik.values.ivtItem}
-                        onChange={formik.handleChange}
-                        disabled={formik.values.kitItem}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='ivtItem'
+                    value={formik.values?.ivtItem}
+                    onChange={event => formik.setFieldValue('ivtItem', event.target.checked)}
                     label={labels.inventory}
+                    maxAccess={maxAccess}
+                    disabled={formik.values.kitItem}
                   />
                 </Grid>
                 <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='salesItem'
-                        checked={formik.values.salesItem}
-                        onChange={formik.handleChange}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='salesItem'
+                    value={formik.values?.salesItem}
+                    onChange={event => formik.setFieldValue('salesItem', event.target.checked)}
                     label={labels.sales}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
 
                 <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='purchaseItem'
-                        checked={formik.values.purchaseItem}
-                        onChange={formik.handleChange}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='purchaseItem'
+                    value={formik.values?.purchaseItem}
+                    onChange={event => formik.setFieldValue('purchaseItem', event.target.checked)}
                     label={labels.purchase}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
 
                 <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='kitItem'
-                        checked={formik.values.kitItem}
-                        onChange={formik.handleChange}
-                        disabled={editMode}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='kitItem'
+                    value={formik.values?.kitItem}
+                    onChange={event => formik.setFieldValue('kitItem', event.target.checked)}
                     label={labels.kitItem}
+                    disabled={editMode}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
 
                 <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='rmItem'
-                        checked={formik.values.rmItem}
-                        onChange={formik.handleChange}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='rmItem'
+                    value={formik.values?.rmItem}
+                    onChange={event => formik.setFieldValue('rmItem', event.target.checked)}
                     label={labels.rmItem}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
 

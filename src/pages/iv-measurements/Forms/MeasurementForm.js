@@ -12,6 +12,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useInvalidate } from 'src/hooks/resource'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function MeasurementForm({ labels, maxAccess, setStore, store }) {
   const { recordId } = store
@@ -75,12 +76,7 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
   }, [])
 
   return (
-    <FormShell 
-      resourceId={ResourceIds.Measurement} 
-      form={formik} 
-      maxAccess={maxAccess} 
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.Measurement} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -109,16 +105,12 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='serialItems'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.serialItems}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='serialItems'
+                value={formik.values?.serialItems}
+                onChange={event => formik.setFieldValue('serialItems', event.target.checked)}
                 label={labels.serialItem}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

@@ -17,6 +17,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -190,16 +191,12 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isPreferred'
-                    checked={formik.values?.isPreferred}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='isPreferred'
+                value={formik.values?.isPreferred}
+                onChange={event => formik.setFieldValue('isPreferred', event.target.checked)}
                 label={labels.isPreffered}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

@@ -263,10 +263,9 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
     >
       <VertLayout>
         <Fixed>
-          <Grid container xs={12} sx={{ overflow: 'hidden', pt: 1 }}>
-            {/* First Column */}
-            <Grid container rowGap={1} xs={6}>
-              <Grid item xs={12}>
+          <Grid container spacing={2} sx={{ overflow: 'hidden', pt: 1 }}>
+            <Grid item xs={6} container spacing={2} direction='column'>
+              <Grid item>
                 <ResourceComboBox
                   endpointId={SystemRepository.DocumentType.qry}
                   parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MaterialAdjustment}`}
@@ -287,7 +286,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item>
                 <CustomTextField
                   name='reference'
                   label={labels[12]}
@@ -300,7 +299,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item>
                 <CustomDatePicker
                   name='date'
                   label={labels[3]}
@@ -313,7 +312,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   error={formik.touched.date && Boolean(formik.errors.date)}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item>
                 <ResourceComboBox
                   endpointId={SystemRepository.Plant.qry}
                   name='plantId'
@@ -334,8 +333,9 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                 />
               </Grid>
             </Grid>
-            <Grid container rowGap={1} xs={6} sx={{ px: 2 }}>
-              <Grid item xs={12}>
+
+            <Grid item xs={6} container spacing={2} direction='column'>
+              <Grid item>
                 <ResourceComboBox
                   endpointId={InventoryRepository.Site.qry}
                   name='siteId'
@@ -356,7 +356,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                 />
               </Grid>
-              <Grid item xs={12} sx={{ pb: 6 }}>
+              <Grid item>
                 <CustomTextArea
                   name='description'
                   label={labels[13]}

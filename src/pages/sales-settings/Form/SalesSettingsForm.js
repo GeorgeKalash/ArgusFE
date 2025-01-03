@@ -16,6 +16,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DataSets } from 'src/resources/DataSets'
 import FieldSet from 'src/components/Shared/FieldSet'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function SalesSettingsForm({ _labels, access }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -220,70 +221,50 @@ export default function SalesSettingsForm({ _labels, access }) {
             <Grid item xs={11.5}>
             <FieldSet title={_labels.salesColumnsDisabled}>
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='sdpClientName'
-                      checked={formik?.values?.sdpClientName}
-                      onChange={formik.handleChange}
-                      maxAccess={access}
-                    />
-                  }
+                <CustomCheckBox
+                  name='sdpClientName'
+                  value={formik.values?.sdpClientName}
+                  onChange={event => formik.setFieldValue('sdpClientName', event.target.checked)}
                   label={_labels.sdpClientName}
+                  maxAccess={access}
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='sdpItemName'
-                      checked={formik?.values?.sdpItemName}
-                      onChange={formik.handleChange}
-                      maxAccess={access}
-                    />
-                  }
+                <CustomCheckBox
+                  name='sdpItemName'
+                  value={formik.values?.sdpItemName}
+                  onChange={event => formik.setFieldValue('sdpItemName', event.target.checked)}
                   label={_labels.sdpItemName}
+                  maxAccess={access}
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='sdpUnitPrice'
-                      checked={formik?.values?.sdpUnitPrice}
-                      onChange={formik.handleChange}
-                      maxAccess={access}
-                    />
-                  }
+                <CustomCheckBox
+                  name='sdpUnitPrice'
+                  value={formik.values?.sdpUnitPrice}
+                  onChange={event => formik.setFieldValue('sdpUnitPrice', event.target.checked)}
                   label={_labels.sdpUnitPrice}
+                  maxAccess={access}
                 />
               </Grid>
             </FieldSet>
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='allowSalesNoLinesTrx'
-                    checked={formik?.values?.allowSalesNoLinesTrx}
-                    onChange={formik.handleChange}
-                    maxAccess={access}
-                  />
-                }
+              <CustomCheckBox
+                name='allowSalesNoLinesTrx'
+                value={formik.values?.allowSalesNoLinesTrx}
+                onChange={event => formik.setFieldValue('allowSalesNoLinesTrx', event.target.checked)}
                 label={_labels.allowSalesNoLinesTrx}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='salesTD'
-                    checked={formik?.values?.salesTD}
-                    onChange={formik.handleChange}
-                    maxAccess={access}
-                  />
-                }
+              <CustomCheckBox
+                name='salesTD'
+                value={formik.values?.salesTD}
+                onChange={event => formik.setFieldValue('salesTD', event.target.checked)}
                 label={_labels.salesTD}
+                maxAccess={access}
               />
             </Grid>
           </Grid>

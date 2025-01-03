@@ -11,6 +11,7 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, record }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -122,35 +123,23 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='required'
-                    valueField='recordId'
-                    maxAccess={maxAccess}
-                    checked={formik.values.required}
-                    onChange={event => {
-                      formik && formik.setFieldValue('required', event.target.checked)
-                    }}
-                  />
-                }
+              <CustomCheckBox
+                name='required'
+                valueField='recordId'
+                value={formik.values?.required}
+                onChange={event => formik.setFieldValue('required', event.target.checked)}
                 label={labels.required}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='mandatory'
-                    valueField='recordId'
-                    maxAccess={maxAccess}
-                    checked={formik.values.mandatory}
-                    onChange={event => {
-                      formik && formik.setFieldValue('mandatory', event.target.checked)
-                    }}
-                  />
-                }
+              <CustomCheckBox
+                name='mandatory'
+                valueField='recordId'
+                value={formik.values?.mandatory}
+                onChange={event => formik.setFieldValue('mandatory', event.target.checked)}
                 label={labels.mandatory}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

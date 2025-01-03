@@ -12,6 +12,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { MasterSource } from 'src/resources/MasterSource'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function TaxCodesForm({ labels, maxAccess, setStore, store, editMode }) {
   const { recordId } = store
@@ -118,16 +119,12 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
             </Grid>
 
             <Grid item sx={{ pb: '10px' }} xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='nonDeductible'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.nonDeductible}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='nonDeductible'
+                value={formik.values?.nonDeductible}
+                onChange={event => formik.setFieldValue('nonDeductible', event.target.checked)}
                 label={labels.nonDeductible}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

@@ -14,6 +14,7 @@ import { useForm } from 'src/hooks/form'
 import SegmentedInput from 'src/components/Shared/SegmentedInput'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onChange }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -177,16 +178,12 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isCostElement'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isCostElement}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='isCostElement'
+                value={formik.values?.isCostElement}
+                onChange={event => formik.setFieldValue('isCostElement', event.target.checked)}
                 label={labels.isCostElement}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

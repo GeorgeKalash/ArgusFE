@@ -30,6 +30,7 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { getStorageData } from 'src/storage/storage'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function InwardSettlementForm({ labels, recordId, access, plantId, cashAccountId, dtId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -988,17 +989,14 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
               />
             </Grid>
             <Grid item xs={4}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isResident'
-                    checked={formik.values.isResident}
-                    disabled
-                    maxAccess={maxAccess}
-                    readOnly
-                  />
-                }
+              <CustomCheckBox
+                name='isResident'
+                value={formik.values?.isResident}
+                onChange={event => formik.setFieldValue('isResident', event.target.checked)}
                 label={labels.isResident}
+                disabled
+                maxAccess={maxAccess}
+                readOnly
               />
             </Grid>
           </FieldSet>
