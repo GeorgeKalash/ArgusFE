@@ -19,31 +19,32 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
-export default function TransactionForm({ labels, maxAccess, recordId, seqNo }) {
+export default function TransactionForm({ labels, maxAccess, recordId, seqNo, caId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: CostAllocationRepository.TrxCostType.qry
   })
+  console.log(seqNo, 'recordId')
 
   const { formik } = useForm({
     initialValues: {
       recordId: null,
       costTypeId: null,
-      caId: null,
+      caId: caId,
       currencyId: null,
       accountId: null,
       functionId: null,
       baseAmount: 0.0,
       reference: '',
-      seqNo: null,
+      seqNo: seqNo || null,
       amount: 0.0
     },
-    enableReinitialize: true,
-    validateOnChange: true,
+    enableReinitialize: false,
+    validateOnChange: false,
     validationSchema: yup.object({
-      caId: yup.number().required(),
+      // caId: yup.number().required(),
       costTypeId: yup.number().required(),
       baseAmount: yup.number().required(),
       reference: yup.string().required()
@@ -84,9 +85,9 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo }) 
           <Grid container spacing={4}>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
+                endpointId={CostAllocationRepository.CACostTypes.qry}
                 name='costTypeId'
-                label={labels.plant}
+                label={labels.costType}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -117,7 +118,7 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo }) 
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                datasetId={DataSets.RT_Function}
+                datasetId={DataSets.CA_FNCTN}
                 name='functionId'
                 label={labels.function}
                 required

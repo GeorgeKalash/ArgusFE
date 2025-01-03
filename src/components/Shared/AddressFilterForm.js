@@ -140,13 +140,11 @@ export default function AddressFilterForm({
   }
 
   async function getDefaultCountry() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=countryId`
-      })
-      formik.setFieldValue('countryId', parseInt(res?.record?.value))
-    } catch (error) {}
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=countryId`
+    })
+    formik.setFieldValue('countryId', parseInt(res?.record?.value))
   }
 
   useEffect(() => {

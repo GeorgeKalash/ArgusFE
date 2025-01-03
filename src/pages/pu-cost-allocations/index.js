@@ -24,7 +24,7 @@ const PuCostAllocations = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: CostAllocationRepository.PuCostAllocations.qry,
+      extension: CostAllocationRepository.PuCostAllocations.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params}&_sortBy=recordId`
     })
 
@@ -52,7 +52,7 @@ const PuCostAllocations = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CostAllocationRepository.PuCostAllocations.qry,
+    endpointId: CostAllocationRepository.PuCostAllocations.page,
     datasetId: ResourceIds.PuCostAllocation,
     search: {
       searchFn: fetchWithSearch

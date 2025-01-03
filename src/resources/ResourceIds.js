@@ -327,5 +327,6 @@ export const ResourceIds = {
   FoWorkCenters: 47101,
   CreditCard: 33104,
   CACostTypes: 53101,
-  PuCostAllocation: 53301
+  PuCostAllocation: 53301,
+  SystemAttachments: 20203
 }

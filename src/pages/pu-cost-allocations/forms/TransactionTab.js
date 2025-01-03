@@ -89,12 +89,13 @@ const TransactionTab = ({ store, labels, access }) => {
       props: {
         labels: labels,
         recordId: obj?.caId,
+        caId: recordId,
         seqNo: obj?.seqNo,
         maxAccess: access
       },
       width: 600,
       height: 400,
-      title: labels.Transaction
+      title: labels.transaction
     })
   }
 

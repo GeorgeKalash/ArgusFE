@@ -9,20 +9,6 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
-    key: 'ClearGrid',
-    label: platformLabels.clearGrid,
-    color: '#f44336',
-    image: 'clear.png',
-    main: false
-  },
-  {
-    key: 'ClearHG', //HeaderGrid
-    label: platformLabels.clearAll,
-    color: '#4682B4',
-    image: 'clear.png',
-    main: false
-  },
-  {
     key: 'Info',
     label: platformLabels.Info,
     condition: 'isInfo && infoVisible',
@@ -51,6 +37,20 @@ export const getButtons = platformLabels => [
     disabled: 'disabledSubmit || isPosted || isClosed',
     image: 'save.png',
     main: true
+  },
+  {
+    key: 'ClearGrid',
+    label: platformLabels.clearGrid,
+    color: '#f44336',
+    image: 'clear.png',
+    main: false
+  },
+  {
+    key: 'ClearHG', //HeaderGrid
+    label: platformLabels.clearAll,
+    color: '#4682B4',
+    image: 'clear.png',
+    main: false
   },
   {
     key: 'Post',
@@ -430,6 +430,13 @@ export const getButtons = platformLabels => [
     label: platformLabels.Unlocked,
     color: '#231f20',
     image: 'unlock.png',
+    main: false
+  },
+  {
+    key: 'Attachment',
+    label: 'platformLabels.Attachment',
+    color: '#9B1944',
+    image: 'attachment.png',
     main: false
   }
 ]

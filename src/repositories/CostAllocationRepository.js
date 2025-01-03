@@ -10,6 +10,7 @@ export const CostAllocationRepository = {
   },
   PuCostAllocations: {
     qry: service + 'qryTRX',
+    page: service + 'pageTRX',
     get: service + 'getTRX',
     set: service + 'setTRX',
     del: service + 'delTRX',
@@ -24,9 +25,13 @@ export const CostAllocationRepository = {
     del: service + 'delTCT'
   },
   Invoice: {
-    qry: service + 'qryIVC'
+    qry: service + 'qryIVC',
+    set2: service + 'set2IVC'
   },
   TrxDstribution: {
     qry: service + 'qryICT'
+  },
+  InvoicesItems: {
+    qry: service + 'qryITM'
   }
 }

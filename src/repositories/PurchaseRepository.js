@@ -56,5 +56,8 @@ export const PurchaseRepository = {
     set: service + 'setIVC',
     del: service + 'delIVC',
     snapshot: service + 'snapshotIVC'
+  },
+  Invoice: {
+    snapshot: service + 'snapshotINV'
   }
 }

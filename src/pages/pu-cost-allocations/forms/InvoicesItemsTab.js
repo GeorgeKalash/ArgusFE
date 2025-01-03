@@ -5,22 +5,12 @@ import Table from 'src/components/Shared/Table'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const DistributionTab = ({ store, labels, access }) => {
+const InvoicesItemsTab = ({ store, labels, access }) => {
   const { recordId } = store
   const { getRequest } = useContext(RequestsContext)
   const [valueGridData, setValueGridData] = useState()
 
   const columns = [
-    {
-      field: 'costTypeRef',
-      headerName: labels.costTypeRef,
-      flex: 1
-    },
-    {
-      field: 'costTypeName',
-      headerName: labels.costTypeName,
-      flex: 1
-    },
     {
       field: 'sku',
       headerName: labels.sku,
@@ -28,12 +18,18 @@ const DistributionTab = ({ store, labels, access }) => {
     },
     {
       field: 'itemName',
-      headerName: labels.itemName,
+      headerName: labels.name,
       flex: 1
     },
     {
-      field: 'baseAmount',
-      headerName: labels.baseAmount,
+      field: 'qty',
+      headerName: labels.qty,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'netPrice',
+      headerName: labels.netPrice,
       flex: 1,
       type: 'number'
     }
@@ -41,8 +37,8 @@ const DistributionTab = ({ store, labels, access }) => {
 
   async function fetchGridData() {
     await getRequest({
-      extension: CostAllocationRepository.TrxDstribution.qry,
-      parameters: `_recordId=${recordId}`
+      extension: CostAllocationRepository.InvoicesItems.qry,
+      parameters: `_invoiceId=0&_caId=${recordId}`
     }).then(res => {
       setValueGridData(res)
     })
@@ -69,4 +65,4 @@ const DistributionTab = ({ store, labels, access }) => {
   )
 }
 
-export default DistributionTab
+export default InvoicesItemsTab

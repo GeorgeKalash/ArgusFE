@@ -27,7 +27,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
   const functionId = SystemFunction.CostAllocation
 
   const invalidate = useInvalidate({
-    endpointId: CostAllocationRepository.PuCostAllocations.qry
+    endpointId: CostAllocationRepository.PuCostAllocations.page
   })
 
   const { formik } = useForm({
@@ -63,16 +63,11 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
         if (!recordId) {
           setStore(prevStore => ({
             ...prevStore,
-            recordId: res.recordId,
-            data: { data }
+            recordId: res.recordId
           }))
           formik.setFieldValue('recordId', res.recordId)
           toast.success(platformLabels.Added)
         } else {
-          setStore(prevStore => ({
-            ...prevStore,
-            data: { data }
-          }))
           toast.success(platformLabels.Edited)
         }
         invalidate()
@@ -150,6 +145,12 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
       condition: true,
       onClick: onPost,
       disabled: !editMode || formik.values.status !== 1
+    },
+    {
+      key: 'Attachment',
+      condition: true,
+      onClick: 'onClickAttachment',
+      disabled: !editMode
     }
   ]
 

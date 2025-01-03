@@ -5,14 +5,14 @@ import TRXForm from '../forms/TRXForm.js'
 import InvoicesForm from '../forms/InvoicesForm.js'
 import TransactionTab from '../forms/TransactionTab.js'
 import DistributionTab from '../forms/DistributionTab.js'
+import InvoicesItemsTab from '../forms/InvoicesItemsTab.js'
 
 const PuCostAllocationWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
   const editMode = !!recordId
 
   const [store, setStore] = useState({
-    recordId: recordId || null,
-    data: null
+    recordId: recordId || null
   })
 
   const tabs = [
@@ -32,9 +32,9 @@ const PuCostAllocationWindow = ({ recordId, labels, maxAccess }) => {
       <CustomTabPanel index={1} value={activeTab}>
         <InvoicesForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
-      {/*<CustomTabPanel index={2} value={activeTab}>
-        <SalesList labels={labels} maxAccess={maxAccess} store={store} formikInitial={formikInitial} />
-      </CustomTabPanel>*/}
+      <CustomTabPanel index={2} value={activeTab}>
+        <InvoicesItemsTab labels={labels} maxAccess={maxAccess} store={store} />
+      </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab}>
         <TransactionTab store={store} labels={labels} access={maxAccess} />
       </CustomTabPanel>
