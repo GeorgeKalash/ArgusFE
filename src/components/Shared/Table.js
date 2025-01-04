@@ -617,8 +617,6 @@ const Table = ({
 
   const onGridReady = params => {
     gridRef.current = params.api
-    // Store column API if needed
-    const columnApi = params.columnApi
   }
 
   return (
