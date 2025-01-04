@@ -1,14 +1,11 @@
-import React, { useContext, useRef } from 'react'
+import React, { useContext } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import 'ag-grid-community/styles/ag-grid.css'
-import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
 import { useState } from 'react'
 import { useEffect } from 'react'
-import 'ag-grid-community'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -148,7 +145,7 @@ const Table = ({
             if (paginationType === 'api') {
               api({ _startAt: (newPage - 1) * pageSize, _pageSize: pageSize })
             } else {
-              var slicedGridData = props?.gridData?.list.slice((newPage - 2) * pageSize, newPage * pageSize)
+              var slicedGridData = props?.gridData?.list?.slice((newPage - 2) * pageSize, newPage * pageSize)
               setGridData({
                 ...props?.gridData?.list,
                 list: slicedGridData
@@ -613,11 +610,6 @@ const Table = ({
       'even-row': params => params.node.rowIndex % 2 === 0
     }
   }
-  const gridRef = useRef(null)
-
-  const onGridReady = params => {
-    gridRef.current = params.api
-  }
 
   return (
     <VertLayout>
@@ -643,7 +635,6 @@ const Table = ({
           }}
         >
           <AgGridReact
-            ref={gridRef}
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
             enableRangeSelection={true}
@@ -655,7 +646,6 @@ const Table = ({
             rowHeight={35}
             onFirstDataRendered={onFirstDataRendered}
             gridOptions={gridOptions}
-            onGridReady={onGridReady}
           />
         </Box>
       </Grow>
