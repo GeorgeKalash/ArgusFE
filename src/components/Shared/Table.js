@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
@@ -613,6 +613,13 @@ const Table = ({
       'even-row': params => params.node.rowIndex % 2 === 0
     }
   }
+  const gridRef = useRef(null)
+
+  const onGridReady = params => {
+    gridRef.current = params.api
+    // Store column API if needed
+    const columnApi = params.columnApi
+  }
 
   return (
     <VertLayout>
@@ -621,7 +628,6 @@ const Table = ({
           className='ag-theme-alpine'
           style={{ flex: 1, width: '1000px !important', height: props?.height || 'auto' }}
           sx={{
-            all: 'unset',
             '.ag-header': {
               height: '40px !important',
               minHeight: '40px !important'
@@ -639,6 +645,7 @@ const Table = ({
           }}
         >
           <AgGridReact
+            ref={gridRef}
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
             enableRangeSelection={true}
@@ -650,6 +657,7 @@ const Table = ({
             rowHeight={35}
             onFirstDataRendered={onFirstDataRendered}
             gridOptions={gridOptions}
+            onGridReady={onGridReady}
           />
         </Box>
       </Grow>
