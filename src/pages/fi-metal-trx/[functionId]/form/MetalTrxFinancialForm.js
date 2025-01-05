@@ -1,5 +1,5 @@
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -32,8 +32,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     access: access,
     enabled: !recordId
   })
-
-  console.log(formatDateFromApi(date), 'datttttttttteeeeeeeee')
 
   const { platformLabels } = useContext(ControlContext)
 
@@ -147,7 +145,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           extension: FinancialRepository.MetalReceiptVoucher.get2,
           parameters: `_recordId=${recordId}&_functionId=${functionId}`
         })
-        console.log(res.list, 'ressssss')
 
         const modifiedList = res.list?.map((item, index) => ({
           ...item,
@@ -158,8 +155,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       }
     })()
   }, [])
-
-  console.log(formik.values, 'aaaaaa')
 
   const getResourceId = functionId => {
     switch (functionId) {
@@ -172,8 +167,29 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         return null
     }
   }
-  const [rowMetal, setRowMetal] = useState(false)
-  console.log(rowMetal, 'aaaaaaaaaaaaaaaaaaaaaaaaaa')
+  const [allMetals, setAllMetals] = useState([])
+  const filteredCreditCard = useRef()
+
+  function getFilteredMetal(metalId) {
+    console.log('MetalId', metalId)
+    if (!metalId) return []
+
+    const array = allMetals.filter(metal => {
+      return metal.metalId === metalId
+    })
+    console.log(array, 'array')
+
+    return array
+  }
+
+  useEffect(() => {
+    getRequest({
+      extension: InventoryRepository.Scrap.qry,
+      parameters: '_metalId=0'
+    }).then(res => {
+      setAllMetals(res.list)
+    })
+  }, [])
 
   const columns = [
     {
@@ -189,6 +205,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           { from: 'reference', to: 'metalRef' },
           { from: 'recordId', to: 'metalId' }
         ]
+      },
+      onChange: async ({ row: { update, newRow } }) => {
+        filteredCreditCard.current = newRow.metalId
       }
     },
     {
@@ -196,9 +215,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       label: labels.sku,
       name: 'sku',
       props: {
-        endpointId: !!rowMetal && InventoryRepository.Scrap.qry,
-        parameters: `_metalId=${rowMetal}`,
-        readOnly: !formik.values.metalId,
+        store: getFilteredMetal(filteredCreditCard?.current),
         valueField: 'metalId',
         displayField: 'sku',
 
@@ -210,9 +227,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         ]
       },
       propsReducer({ row, props }) {
-        setRowMetal(row.metalId)
-
-        return { ...props, readOnly: !row.metalId }
+        return { ...props, store: getFilteredMetal(filteredCreditCard?.current) }
+      },
+      onChange: async ({ row: { update, newRow } }) => {
+        filteredCreditCard.current = newRow.metalId
       }
     },
     {
