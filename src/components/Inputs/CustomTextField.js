@@ -20,6 +20,7 @@ const CustomTextField = ({
   numberField = false,
   editMode = false,
   maxLength = '1000',
+  minLength = '0',
   position,
   dir = 'ltr',
   hidden = false,
@@ -100,6 +101,7 @@ const CustomTextField = ({
       inputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
+        minLength,
         maxLength: maxLength,
         dir: dir,
         inputMode: numberField && 'numeric',
