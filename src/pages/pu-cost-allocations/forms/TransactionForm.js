@@ -43,10 +43,8 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
-      // caId: yup.number().required(),
       costTypeId: yup.number().required(),
-      baseAmount: yup.number().required(),
-      reference: yup.string().required()
+      baseAmount: yup.number().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -86,6 +84,7 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
               <ResourceComboBox
                 endpointId={CostAllocationRepository.CACostTypes.qry}
                 name='costTypeId'
+                required
                 label={labels.costType}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -120,7 +119,6 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
                 datasetId={DataSets.CA_FNCTN}
                 name='functionId'
                 label={labels.function}
-                required
                 valueField='key'
                 displayField='value'
                 values={formik.values}
@@ -157,7 +155,6 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
-                required
                 rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}

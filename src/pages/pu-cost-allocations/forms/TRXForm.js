@@ -63,7 +63,8 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
         if (!recordId) {
           setStore(prevStore => ({
             ...prevStore,
-            recordId: res.recordId
+            recordId: res.recordId,
+            isPosted: res?.status == 3 ? true : false
           }))
           formik.setFieldValue('recordId', res.recordId)
           toast.success(platformLabels.Added)
@@ -75,32 +76,31 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
     }
   })
 
-  const isPosted = formik.values.status === 3
   const editMode = !!recordId || formik.values.recordId
+  const isClosed = formik.values.wip === 2
+  const isPosted = formik.values.status === 3
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: CostAllocationRepository.PuCostAllocations.get,
-          parameters: `_recordId=${recordId}`
-        })
-
-        formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res.record.date)
-        })
-
-        setStore(prevStore => ({
-          ...prevStore,
-          data: {
-            ...res.record,
-            date: formatDateFromApi(res.record.date)
-          }
-        }))
-      }
-    })()
+    if (recordId) {
+      fetchData(recordId)
+    }
   }, [])
+  async function fetchData() {
+    await getRequest({
+      extension: CostAllocationRepository.PuCostAllocations.get,
+      parameters: `_recordId=${recordId}`
+    }).then(res => {
+      setStore(prevStore => ({
+        ...prevStore,
+        isPosted: res.record.status === 3,
+        isClosed: res.record.wip === 2
+      }))
+      formik.setValues({
+        ...res.record,
+        date: formatDateFromApi(res.record.date)
+      })
+    })
+  }
 
   const onPost = async () => {
     const data = {
@@ -108,23 +108,62 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
       date: formatDateToApi(formik.values.date)
     }
 
-    const res = await postRequest({
+    await postRequest({
       extension: CostAllocationRepository.PuCostAllocations.post,
       record: JSON.stringify(data)
-    })
-
-    if (res?.recordId) {
+    }).then(res => {
+      fetchData(res.recordId)
       toast.success(platformLabels.Posted)
       invalidate()
+    })
+  }
 
-      const getRes = await getRequest({
-        extension: CostAllocationRepository.PuCostAllocations.get,
-        parameters: `_recordId=${formik.values.recordId}`
-      })
-
-      getRes.record.date = formatDateFromApi(getRes.record.date)
-      formik.setValues(getRes.record)
+  const onUnpost = async () => {
+    const data = {
+      ...formik.values,
+      date: formatDateToApi(formik.values.date)
     }
+
+    await postRequest({
+      extension: CostAllocationRepository.PuCostAllocations.unpost,
+      record: JSON.stringify(data)
+    }).then(res => {
+      fetchData(res.recordId)
+      toast.success(platformLabels.Unposted)
+      invalidate()
+    })
+  }
+
+  async function onClose() {
+    const data = {
+      ...formik.values,
+      date: formatDateToApi(formik.values.date)
+    }
+
+    await postRequest({
+      extension: CostAllocationRepository.PuCostAllocations.close,
+      record: JSON.stringify(data)
+    }).then(res => {
+      fetchData(res.recordId)
+      toast.success(platformLabels.Closed)
+      invalidate()
+    })
+  }
+
+  async function onReopen() {
+    const data = {
+      ...formik.values,
+      date: formatDateToApi(formik.values.date)
+    }
+
+    await postRequest({
+      extension: CostAllocationRepository.PuCostAllocations.reopen,
+      record: JSON.stringify(data)
+    }).then(res => {
+      fetchData(res.recordId)
+      toast.success(platformLabels.Reopened)
+      invalidate()
+    })
   }
 
   const actions = [
@@ -141,10 +180,29 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
       disabled: !editMode || !isPosted
     },
     {
-      key: 'Post',
-      condition: true,
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: !editMode || isPosted
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !editMode || isPosted
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || formik.values.status !== 1
+      disabled: !editMode || !isClosed
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode || !isClosed
     },
     {
       key: 'Attachment',
@@ -162,7 +220,8 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      disabledSubmit={isPosted}
+      disabledSubmit={isPosted || isClosed}
+      disableSubmitAndClear={isPosted || isClosed}
     >
       <VertLayout>
         <Grow>
@@ -184,6 +243,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || '')
                 }}
+                readOnly={isPosted || editMode}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
             </Grid>
@@ -203,6 +263,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId || '')
                 }}
+                readOnly={isPosted}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
@@ -215,6 +276,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
+                readOnly={isPosted || editMode}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
@@ -228,6 +290,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('baseAmount', e.target.value)}
                 onClear={() => formik.setFieldValue('baseAmount', '')}
+                readOnly={isPosted}
                 error={formik.touched.baseAmount && Boolean(formik.errors.baseAmount)}
                 maxLength={10}
                 decimalScale={2}
@@ -243,6 +306,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
+                readOnly={isPosted}
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 helperText={formik.touched.date && formik.errors.date}
               />
@@ -256,6 +320,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
+                readOnly={isPosted}
                 onClear={() => formik.setFieldValue('notes', '')}
                 error={formik.touched.notes && Boolean(formik.errors.notes)}
               />

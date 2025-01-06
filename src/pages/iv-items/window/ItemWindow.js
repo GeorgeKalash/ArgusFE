@@ -11,7 +11,7 @@ import ItemProductionForm from '../forms/ItemProductionForm.js'
 import KitForm from '../forms/KitForm.js'
 import RetailForm from '../forms/RetailForm.js'
 
-const ItemWindow = ({ recordId, labels, sku, itemName, msId, maxAccess, setTitle }) => {
+const ItemWindow = ({ recordId, labels, msId, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [formikInitial, setFormikInitial] = useState([])
   const editMode = !!recordId

@@ -12,7 +12,9 @@ const PuCostAllocationWindow = ({ recordId, labels, maxAccess }) => {
   const editMode = !!recordId
 
   const [store, setStore] = useState({
-    recordId: recordId || null
+    recordId: recordId || null,
+    isPosted: false,
+    isClosed: false
   })
 
   const tabs = [

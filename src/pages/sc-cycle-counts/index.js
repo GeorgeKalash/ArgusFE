@@ -25,14 +25,13 @@ const CycleCounts = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    try {
-      const response = await getRequest({
-        extension: SCRepository.StockCount.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
-      })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    const response = await getRequest({
+      extension: SCRepository.StockCount.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
+    })
+
+    return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithFilter({ filters, pagination }) {
@@ -54,7 +53,7 @@ const CycleCounts = () => {
     refetch,
     filterBy,
     clearFilter,
-    paginationParameters,
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SCRepository.StockCount.qry,
@@ -100,7 +99,7 @@ const CycleCounts = () => {
       field: 'clientName',
       headerName: _labels.client,
       flex: 1
-    },
+    }
   ]
 
   const edit = obj => {
@@ -108,14 +107,12 @@ const CycleCounts = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SCRepository.StockCount.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
+    await postRequest({
+      extension: SCRepository.StockCount.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -131,16 +128,12 @@ const CycleCounts = () => {
   const userId = getStorageData('userData').userId
 
   const getPlantId = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userId}&_key=plantId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userId}&_key=plantId`
+    })
 
-      return res.record.value
-    } catch (e) {
-      return ''
-    }
+    return res.record.value
   }
 
   async function openCycleCountsWindow(plantId, recordId) {
@@ -188,10 +181,10 @@ const CycleCounts = () => {
       <Fixed>
         <RPBGridToolbar
           onSearch={onSearch}
-          onClear={onClear} 
-          labels={_labels} 
+          onClear={onClear}
+          labels={_labels}
           onAdd={add}
-          maxAccess={access} 
+          maxAccess={access}
           onApply={onApply}
           reportName={'SCHDR'}
         />

@@ -15,6 +15,9 @@ export const CostAllocationRepository = {
     set: service + 'setTRX',
     del: service + 'delTRX',
     post: service + 'postTRX',
+    unpost: service + 'unpostTRX',
+    close: service + 'closeTRX',
+    reopen: service + 'reopenTRX',
     snapshot: service + 'snapshotTRX'
   },
   TrxCostType: {

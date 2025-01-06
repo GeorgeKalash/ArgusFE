@@ -14,7 +14,7 @@ import { useWindow } from 'src/windows'
 
 const TransactionTab = ({ store, labels, access }) => {
   const { platformLabels } = useContext(ControlContext)
-  const { recordId } = store
+  const { recordId, isPosted } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [baseAmounts, setBaseAmounts] = useState(0)
   const { stack } = useWindow()
@@ -118,7 +118,7 @@ const TransactionTab = ({ store, labels, access }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar maxAccess={access} labels={labels} onAdd={add} />
+        <GridToolbar maxAccess={access} labels={labels} onAdd={add} disableAdd={isPosted} />
       </Fixed>
       <Grow>
         <Table
@@ -127,8 +127,8 @@ const TransactionTab = ({ store, labels, access }) => {
           gridData={valueGridData}
           rowId={['recordId']}
           isLoading={false}
-          onDelete={del}
-          onEdit={edit}
+          onDelete={isPosted ? null : del}
+          onEdit={isPosted ? null : edit}
           maxAccess={access}
           pagination={false}
         />

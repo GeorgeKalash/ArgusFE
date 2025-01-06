@@ -80,6 +80,11 @@ const PuCostAllocations = () => {
       field: 'statusName',
       headerName: _labels.status,
       flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: _labels.wipName,
+      flex: 1
     }
   ]
 

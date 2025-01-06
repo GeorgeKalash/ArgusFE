@@ -12,8 +12,8 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
-  const { recordId } = store
+const InvoicesForm = ({ store, maxAccess, labels, editMode }) => {
+  const { recordId, isPosted } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -79,6 +79,8 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
       maxAccess={maxAccess}
       infoVisible={false}
       isSavedClear={false}
+      isCleared={false}
+      disabledSubmit={isPosted}
       editMode={editMode}
     >
       <VertLayout>
@@ -87,6 +89,8 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values.items}
             error={formik.errors.items}
+            disabled={isPosted}
+            allowDelete={!isPosted}
             columns={[
               {
                 component: 'resourcelookup',
