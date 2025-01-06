@@ -219,7 +219,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     getRequest({
       extension: RTCLRepository.CtClientIndividual.get2,
       parameters: parameters
-    }).then(res => {
+    }).then(async res => {
       const obj = res?.record
 
       obj?.workAddressView && setAddress(obj?.workAddressView)
@@ -268,11 +268,11 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         birthDate: obj.clientIndividual?.birthDate && formatDateFromApi(obj.clientIndividual.birthDate),
         firstName: obj.clientIndividual?.firstName,
         lastName: obj.clientIndividual?.lastName,
-        middleName: obj.clientIndividual?.middleName + ' ' + obj.clientIndividual?.familyName,
+        middleName: obj.clientIndividual?.middleName,
         familyName: obj.clientIndividual?.familyName,
         fl_firstName: obj.clientIndividual?.fl_firstName,
         fl_lastName: obj.clientIndividual?.fl_lastName,
-        fl_middleName: obj.clientIndividual?.fl_middleName + ' ' + obj.clientIndividual?.fl_familyName,
+        fl_middleName: obj.clientIndividual?.fl_middleName,
         fl_familyName: obj.clientIndividual?.fl_familyName,
         isResident: obj.clientIndividual?.isResident,
         incomeSourceId: obj.clientIndividual?.incomeSourceId,
@@ -347,18 +347,17 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         (obj.clientMaster?.idScanMode == 1 || obj.clientMaster?.idScanMode == 2)
       ) {
         setLoading(true)
+
         const parameters = `_number=${obj.clientIDView?.idNo}&_clientId=${obj.clientRemittance?.clientId}&_idType=${obj.clientIDView?.idtId}&_idScanMode=${obj.clientMaster?.idScanMode}`
-        getRequest({
+
+        const res = await getRequest({
           extension: CurrencyTradingSettingsRepository.PreviewImageID.get,
           parameters: parameters
         })
-          .then(res => {
-            setImageUrl(res?.record?.imageContent ?? null)
-            setLoading(false)
-          })
-          .catch(() => {
-            setLoading(false)
-          })
+
+        setImageUrl(res?.record?.imageContent ?? null)
+
+        setLoading(false)
       }
     })
   }
@@ -766,24 +765,51 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     setNewProf(!newProf)
   }
 
-  const handleClickDigitalId = confirmWindow => {
+  const handleClickDigitalId = async confirmWindow => {
+    setLoading(true)
+
     const parameters = `_number=${formik.values.idNo}&_idType=${formik.values.idtId}`
-    getRequest({
+
+    const res = await getRequest({
       extension: CurrencyTradingSettingsRepository.Absher.get,
       parameters
-    }).then(res => {
-      formik.setFieldValue('idScanMode', 2)
-      setImageUrl(res.record.imageContent)
-      confirmWindow.close()
     })
+
+    const result = res?.record
+
+    if (result) {
+      formik.setFieldValue('idScanMode', 2)
+
+      setImageUrl(result?.imageContent)
+
+      confirmWindow.close()
+    } else {
+      formik.setFieldValue('idScanMode', null)
+
+      setImageUrl(null)
+    }
+
+    setLoading(false)
   }
 
-  const handleClickScanner = confirmWindow => {
-    getRequestFullEndPoint({ endPoint: process.env.NEXT_PUBLIC_SCANNER_URL }).then(response => {
+  const handleClickScanner = async confirmWindow => {
+    setLoading(true)
+
+    const response = await getRequestFullEndPoint({ endPoint: process.env.NEXT_PUBLIC_SCANNER_URL })
+
+    if (response?.imageContent) {
       formik.setFieldValue('idScanMode', 1)
+
       setImageUrl(response?.imageContent)
+
       confirmWindow.close()
-    })
+    } else {
+      formik.setFieldValue('idScanMode', null)
+
+      setImageUrl(null)
+    }
+
+    setLoading(false)
   }
 
   const digitalIdConfirmation = mode => {
@@ -848,6 +874,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
+      previewReport={editMode}
       disabledSubmit={editMode && !allowEdit && true}
     >
       <VertLayout>
