@@ -86,6 +86,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           id: 1,
           baseMetalQty: null,
           creditAmount: null,
+          stdPurity: null,
           itemId: null,
           itemName: '',
           metalId: null,
@@ -148,6 +149,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
         const modifiedList = res.list?.map((item, index) => ({
           ...item,
+          purity: item.purity && item.purity <= 1 ? item.purity * 1000 : item.purity,
+
           id: index + 1
         }))
 
@@ -171,13 +174,11 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const filteredCreditCard = useRef()
 
   function getFilteredMetal(metalId) {
-    console.log('MetalId', metalId)
     if (!metalId) return []
 
     const array = allMetals.filter(metal => {
       return metal.metalId === metalId
     })
-    console.log(array, 'array')
 
     return array
   }
@@ -203,11 +204,17 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         displayFieldWidth: 1.5,
         mapping: [
           { from: 'reference', to: 'metalRef' },
-          { from: 'recordId', to: 'metalId' }
+          { from: 'recordId', to: 'metalId' },
+          { from: 'purity', to: 'purity' },
+          { from: 'purity', to: 'stdPurity' }
         ]
       },
       onChange: async ({ row: { update, newRow } }) => {
         filteredCreditCard.current = newRow.metalId
+
+        if (newRow.purity) {
+          update({ purity: newRow.purity * 1000, stdPurity: newRow.stdPurity * 1000 })
+        }
       }
     },
     {
@@ -218,19 +225,24 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         store: getFilteredMetal(filteredCreditCard?.current),
         valueField: 'metalId',
         displayField: 'sku',
-
         mapping: [
           { from: 'itemName', to: 'itemName' },
           { from: 'metalId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'purity', to: 'purity' }
+          { from: 'purity', to: 'purity' },
+          { from: 'laborValuePerGram', to: 'creditAmount' }
         ]
       },
       propsReducer({ row, props }) {
         return { ...props, store: getFilteredMetal(filteredCreditCard?.current) }
       },
-      onChange: async ({ row: { update, newRow } }) => {
-        filteredCreditCard.current = newRow.metalId
+      onChange: ({ row: { update, newRow } }) => {
+        if (newRow.purity) {
+          const totalCredit = newRow.purity
+            ? newRow.qty * newRow.creditAmount
+            : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
+          update({ purity: newRow.purity * 1000, totalCredit })
+        }
       }
     },
     {
@@ -253,17 +265,46 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       component: 'numberfield',
       name: 'purity',
       label: labels.purity,
-      props: { readOnly: true },
-      defaultValue: 0
+      props: { readOnly: false },
+      defaultValue: 0,
+      onChange: ({ row: { update, newRow } }) => {
+        const baseSalesMetalValue = (newRow.qty * newRow.purity) / (App.currentMetalPurity.getValue() * 1000)
+
+        const totalCredit = newRow.purity
+          ? newRow.qty * newRow.creditAmount
+          : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
+
+        update({ baseSalesMetalValue, totalCredit })
+      }
     },
     {
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
       props: { allowNegative: false },
-      defaultValue: 0
+      defaultValue: 0,
+      onChange: ({ row: { update, newRow } }) => {
+        const totalCredit = newRow.purity
+          ? newRow.qty * newRow.creditAmount
+          : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
+        update({ totalCredit })
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'creditAmount',
+      label: labels.creditAmount,
+      props: { allowNegative: false, readOnly: true }
+    },
+    {
+      component: 'numberfield',
+      name: 'totalCredit',
+      label: labels.totalCredit,
+      props: { allowNegative: false, readOnly: true }
     }
   ]
+
+  console.log(formik.values, 'aaaaaaaaaaa')
 
   return (
     <FormShell
