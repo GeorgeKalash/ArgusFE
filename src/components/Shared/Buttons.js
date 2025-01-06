@@ -438,4 +438,11 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     main: false
   },
+  {
+    key: 'ItemPromotion',
+    label: platformLabels.ItemPromotion,
+    color: '#231f43',
+    image: 'popup-window.png',
+    main: false
+  }
 ]
