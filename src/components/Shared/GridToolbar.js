@@ -1,9 +1,10 @@
-import { Box, Button, Grid, Tooltip, DialogActions } from '@mui/material'
+import { Button, Grid, Tooltip, DialogActions } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useState, useContext } from 'react'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ControlContext } from 'src/providers/ControlContext'
 import { getButtons } from './Buttons'
+import CustomButton from '../Inputs/CustomButton'
 
 const GridToolbar = ({
   onAdd,
@@ -22,22 +23,12 @@ const GridToolbar = ({
   const addBtnVisible = onAdd && maxAccess > TrxType.GET
   const [searchValue, setSearchValue] = useState('')
   const { platformLabels } = useContext(ControlContext)
-  const [tooltip, setTooltip] = useState('')
 
   function clear() {
     setSearchValue('')
     onSearch('')
     if (onSearchClear) onSearchClear()
   }
-
-  const handleButtonMouseEnter = text => {
-    setTooltip(text)
-  }
-
-  const handleButtonMouseLeave = () => {
-    setTooltip(null)
-  }
-
   const buttons = getButtons(platformLabels)
 
   return (
@@ -121,37 +112,16 @@ const GridToolbar = ({
 
                   return (
                     isVisible && (
-                      <div
-                        className='button-container'
-                        onMouseEnter={() => (isDisabled ? null : handleButtonMouseEnter(button.label))}
-                        onMouseLeave={handleButtonMouseLeave}
+                      <CustomButton
                         key={index}
-                      >
-                        <Button
-                          onClick={handleClick}
-                          variant='contained'
-                          sx={{
-                            mr: 1,
-                            backgroundColor: button.color,
-                            '&:hover': {
-                              backgroundColor: button.color,
-                              opacity: 0.8
-                            },
-                            border: button.border,
-                            width: 'auto',
-                            height: '33px',
-                            objectFit: 'contain'
-                          }}
-                          disabled={isDisabled}
-                        >
-                          {button.image ? (
-                            <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
-                          ) : (
-                            button.label
-                          )}
-                        </Button>
-                        {button.image ? tooltip && <div className='toast'>{tooltip}</div> : null}
-                      </div>
+                        onClick={handleClick}
+                        label={button.label}
+                        image={button.image}
+                        color={button.color}
+                        border={button.border}
+                        disabled={isDisabled}
+                        tooltipText={button.label}
+                      />
                     )
                   )
                 })}
