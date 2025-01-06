@@ -63,7 +63,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       accountId: null,
       date: new Date(),
       currencyId: null,
-      currencyName: null,
+      currencyName: '',
       dtId: documentType?.dtId,
       sptId: null,
       dgId: '',

@@ -111,7 +111,7 @@ export default function SaleTransactionForm({
         clientName: '',
         clientRef: '',
         currencyId: null,
-        currencyName: null,
+        currencyName: '',
         szId: null,
         spId: null,
         siteId: null,

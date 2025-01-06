@@ -54,7 +54,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       date: new Date(),
       plantId: '',
       currencyId: '',
-      currencyName: null,
+      currencyName: '',
       status: '',
       accountId: '',
       amount: '',

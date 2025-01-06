@@ -49,7 +49,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     accountId: '',
     accountType: 3,
     currencyId: null,
-    currencyName: null,
+    currencyName: '',
     paymentMethod: '',
     date: new Date(),
     glId: null,

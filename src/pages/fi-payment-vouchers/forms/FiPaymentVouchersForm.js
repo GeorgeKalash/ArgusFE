@@ -53,7 +53,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       accountId: '',
       accountType: '',
       currencyId: null,
-      currencyName: null,
+      currencyName: '',
       paymentMethod: '',
       date: new Date(),
       glId: null,

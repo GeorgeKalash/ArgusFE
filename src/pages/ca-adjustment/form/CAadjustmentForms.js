@@ -53,7 +53,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       plantId: '',
       date: new Date(),
       currencyId: '',
-      currencyName: null,
+      currencyName: '',
       status: 1,
       cashAccountId: '',
       amount: '',
