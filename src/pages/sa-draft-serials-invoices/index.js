@@ -12,7 +12,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import DraftForm from './Tabs/DraftForm'
+import DraftForm from './forms/DraftForm'
 import { useError } from 'src/error'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
@@ -64,7 +64,7 @@ const DraftSerialsInvoices = () => {
     },
     {
       field: 'amount',
-      headerName: labels.net,
+      headerName: labels.amount,
       flex: 1,
       type: 'number'
     },
@@ -140,6 +140,10 @@ const DraftSerialsInvoices = () => {
     proxyAction()
   }*/
 
+  const add = async () => {
+    openForm()
+  }
+
   const editDSI = obj => {
     openForm(obj.recordId)
   }
@@ -151,7 +155,8 @@ const DraftSerialsInvoices = () => {
       props: {
         labels,
         access,
-        currency,
+
+        //currency,
         recordId
       },
       width: 1300,

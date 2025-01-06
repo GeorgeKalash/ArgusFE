@@ -164,10 +164,10 @@ export const InventoryRepository = {
     print: service + 'setTFR_PS'
   },
   MaterialsTransferItems: {
-    qry: service + 'qryTFI',
+    qry: service + 'qryTFI'
   },
   Cost: {
-    get: service + 'getCOS',
+    get: service + 'getCOS'
   },
   ItemPhysProp: {
     get: service + 'getPP'
@@ -251,5 +251,8 @@ export const InventoryRepository = {
   },
   DocumentTypeDefaults: {
     get: service + 'getDTD'
+  },
+  Serial: {
+    qry: service + 'qrySRL'
   }
 }
