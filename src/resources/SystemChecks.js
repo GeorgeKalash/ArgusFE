@@ -19,6 +19,7 @@ export const SystemChecks = {
   ENABLE_IVMU_TRX: Module.Inventory * 100 + 3,
   ALLOW_PUIVC_MULTI_SITE: Module.Inventory * 100 + 4,
   ALLOW_SATRX_MULTI_SITE: Module.Inventory * 100 + 5,
+  DEFAULT_QTY_PIECES: Module.Inventory * 100 + 9,
 
   // GL Checks
   ALLOW_GL_TRX_RATE_DISCREPENCY: Module.GeneralLedger * 100 + 1,
@@ -34,5 +35,8 @@ export const SystemChecks = {
   POS_JUMP_TO_NEXT_LINE: Module.PointOfSale * 100 + 1,
   SINGLE_CASH_POS: Module.PointOfSale * 100 + 2,
   POS_SKU_DISABLE_LOOKUP: Module.PointOfSale * 100 + 3,
-  ENABLE_RETAIL_SCALE_BARCODE: Module.PointOfSale * 100 + 6
+  ENABLE_RETAIL_SCALE_BARCODE: Module.PointOfSale * 100 + 6,
+
+  CT_YAKEEN_INFORMATION: Module.CurrencyTrading * 100 + 5,
+  CT_DISABLE_MOBILE_VERIFICATION: Module.CurrencyTrading * 100 + 4
 }

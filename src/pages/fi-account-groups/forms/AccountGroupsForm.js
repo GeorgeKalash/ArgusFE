@@ -45,20 +45,17 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
       type: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: FinancialRepository.Group.set,
-          record: JSON.stringify(obj)
-        })
-  
-        
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else toast.success(platformLabels.Edited)
+      const response = await postRequest({
+        extension: FinancialRepository.Group.set,
+        record: JSON.stringify(obj)
+      })
 
-        invalidate()
-      } catch (error) {}
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else toast.success(platformLabels.Edited)
+
+      invalidate()
     }
   })
 
@@ -66,15 +63,13 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: FinancialRepository.Group.get,
-            parameters: `_recordId=${recordId}`
-          })
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.Group.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 
@@ -83,6 +78,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      masterSource: MasterSource.AccountGroup,
       disabled: !editMode
     }
   ]
@@ -94,11 +90,10 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      masterSource={MasterSource.AccountGroup}
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={3}>
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'

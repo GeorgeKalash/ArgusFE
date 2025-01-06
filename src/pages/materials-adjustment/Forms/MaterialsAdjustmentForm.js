@@ -2,7 +2,6 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -19,11 +18,14 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, window }) {
   const [isPosted, setIsPosted] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -51,15 +53,17 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
   })
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.MaterialsAdjustment.qry
+    endpointId: InventoryRepository.MaterialsAdjustment.page
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
     initialValues,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       siteId: yup.string().required(),
+      date: yup.date().required(),
       rows: yup
         .array()
         .of(
@@ -125,6 +129,21 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
     })
     invalidate()
     setIsPosted(true)
+  }
+
+  const onUnpost = async () => {
+    const values = { ...formik.values }
+    values.date = formatDateToApi(values.date)
+
+    await postRequest({
+      extension: InventoryRepository.MaterialsAdjustment.unpost,
+      record: JSON.stringify(values)
+    })
+    toast.success(platformLabels.Unposted)
+
+    setIsPosted(false)
+
+    invalidate()
   }
 
   const columns = [
@@ -214,6 +233,19 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
       condition: true,
       onClick: 'onRecordRemarks',
       disabled: !editMode
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: handlePost,
+      disabled: !editMode
     }
   ]
 
@@ -248,9 +280,9 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   valueField='recordId'
                   displayField={['reference', 'name']}
                   values={formik.values}
-                  maxAccess={maxAccess}
+                  maxAccess={!editMode && maxAccess}
                   onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('dtId', newValue?.recordId)
+                    formik && formik.setFieldValue('dtId', newValue?.recordId || null)
                   }}
                   error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 />
@@ -260,7 +292,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   name='reference'
                   label={labels[12]}
                   value={formik?.values?.reference}
-                  maxAccess={maxAccess}
+                  maxAccess={!editMode && maxAccess}
                   maxLength='30'
                   readOnly={isPosted}
                   onChange={formik.handleChange}
@@ -274,9 +306,10 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   label={labels[3]}
                   readOnly={isPosted}
                   value={formik?.values?.date}
-                  onChange={formik.handleChange}
+                  onChange={formik.setFieldValue}
+                  required
                   maxAccess={maxAccess}
-                  onClear={() => formik.setFieldValue('date', '')}
+                  onClear={() => formik.setFieldValue('date', null)}
                   error={formik.touched.date && Boolean(formik.errors.date)}
                 />
               </Grid>
@@ -344,6 +377,8 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
             onChange={value => formik.setFieldValue('rows', value)}
             value={formik.values.rows}
             error={formik.errors.rows}
+            name='rows'
+            maxAccess={maxAccess}
             columns={columns}
             allowAddNewLine={!isPosted}
             allowDelete={!isPosted}

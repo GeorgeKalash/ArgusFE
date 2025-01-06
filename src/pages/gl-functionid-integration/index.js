@@ -5,7 +5,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
-import FormShell from 'src/components/Shared/FormShell'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -13,7 +12,6 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import { Formik } from 'formik'
 
 const SystemFunctionIntegration = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -104,11 +102,12 @@ const SystemFunctionIntegration = () => {
 
   const columns = [
     {
-      component: 'numberfield',
+      component: 'textfield',
       label: labels.functionId,
       name: 'functionId',
       props: {
-        readOnly: true
+        readOnly: true,
+        type: 'number'
       }
     },
     {

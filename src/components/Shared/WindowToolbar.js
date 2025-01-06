@@ -45,12 +45,12 @@ const WindowToolbar = ({
       })
 
       const reportTemplateRes = await getRequest({
-        extension: SystemRepository.ReportTemplate,
+        extension: SystemRepository.ReportTemplate.qry,
         parameters: `_resourceId=${resourceId}`
       })
 
       const reportLayoutFilteringObject = await getRequest({
-        extension: SystemRepository.ReportLayoutObject,
+        extension: SystemRepository.ReportLayoutObject.qry,
         parameters: `_resourceId=${resourceId}`
       })
 
@@ -176,22 +176,22 @@ const WindowToolbar = ({
               sx={{ width: 250 }}
               disableClearable
             />
-            <Button
-              sx={{ width: '20px', height: '35px', ml: 1 }}
-              variant='contained'
-              disabled={!selectedReport}
-              onClick={onGenerateReport}
-              size='small'
+            <div
+              className='button-container'
+              onMouseEnter={() => handleButtonMouseEnter(platformLabels.Preview)}
+              onMouseLeave={handleButtonMouseLeave}
             >
-              <div
-                className='button-container'
-                onMouseEnter={() => handleButtonMouseEnter(platformLabels.Preview)}
-                onMouseLeave={handleButtonMouseLeave}
+              <Button
+                sx={{ width: '20px', height: '33px', ml: 1 }}
+                variant='contained'
+                disabled={!selectedReport}
+                onClick={onGenerateReport}
+                size='small'
               >
                 <img src='/images/buttonsIcons/preview.png' alt='Preview' />
                 {tooltip && <div className='toast'>{tooltip}</div>}
-              </div>
-            </Button>
+              </Button>
+            </div>
           </Box>
         ) : (
           <Box></Box>
@@ -224,14 +224,18 @@ const WindowToolbar = ({
                           opacity: 0.8
                         },
                         border: button.border,
-                        width: '50px !important',
+                        width: button?.image ? '50px !important' : 'auto',
                         height: '35px',
                         objectFit: 'contain',
-                        minWidth: '30px !important'
+                        minWidth: button?.image ? '30px !important' : 'auto'
                       }}
                       disabled={isDisabled}
                     >
-                      <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                      {button?.image ? (
+                        <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                      ) : (
+                        button?.label
+                      )}
                     </Button>
                     {tooltip && <div className='toast'>{tooltip}</div>}
                   </div>
@@ -267,7 +271,7 @@ const WindowToolbar = ({
                       },
                       border: button.border,
                       width: '50px !important',
-                      height: '35px',
+                      height: '33px',
                       objectFit: 'contain',
                       minWidth: '30px !important'
                     }}

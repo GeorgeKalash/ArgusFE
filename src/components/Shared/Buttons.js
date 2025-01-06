@@ -9,6 +9,20 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
+    key: 'ClearGrid',
+    label: platformLabels.clearGrid,
+    color: '#f44336',
+    image: 'clear.png',
+    main: false
+  },
+  {
+    key: 'ClearHG', //HeaderGrid
+    label: platformLabels.clearAll,
+    color: '#4682B4',
+    image: 'clear.png',
+    main: false
+  },
+  {
     key: 'Info',
     label: platformLabels.Info,
     condition: 'isInfo && infoVisible',
@@ -385,6 +399,19 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'generateIV',
+    label: platformLabels.GenerateInvoice,
+    color: 'black',
+    image: 'generate.png',
+    main: false
+  },
+  {
+    key: 'Generate Invoice',
+    label: platformLabels.GenerateInvoice,
+    color: '#231f20',
+    main: false
+  },
+  {
     key: 'ClientSalesTransaction',
     label: platformLabels.ClientSalesTransaction,
     color: 'blue',
@@ -403,6 +430,13 @@ export const getButtons = platformLabels => [
     label: platformLabels.Unlocked,
     color: '#231f20',
     image: 'unlock.png',
+    main: false
+  },
+  {
+    key: 'ItemPromotion',
+    label: platformLabels.ItemPromotion,
+    color: '#231f43',
+    image: 'popup-window.png',
     main: false
   }
 ]

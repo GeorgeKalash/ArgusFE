@@ -16,14 +16,30 @@ import SaleTransactionForm from './forms/SaleTransactionForm'
 import { useResourceQuery } from 'src/hooks/resource'
 import Table from 'src/components/Shared/Table'
 import toast from 'react-hot-toast'
+import NormalDialog from 'src/components/Shared/NormalDialog'
 
 const SaTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
   const router = useRouter()
   const { functionId } = router.query
+
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.SalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.SaleReturn
+      case SystemFunction.ConsignmentIn:
+        return ResourceIds.ClientGOCIn
+      case SystemFunction.ConsignmentOut:
+        return ResourceIds.ClientGOCOut
+      default:
+        return null
+    }
+  }
 
   const {
     query: { data },
@@ -38,6 +54,7 @@ const SaTrx = () => {
     queryFn: fetchGridData,
     endpointId: SaleRepository.SalesTransaction.qry,
     datasetId: ResourceIds.SalesInvoice,
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
       filterFn: fetchWithFilter,
       default: { functionId }
@@ -161,7 +178,7 @@ const SaTrx = () => {
   })
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
   const getCorrectLabel = functionId => {
@@ -178,19 +195,47 @@ const SaTrx = () => {
     }
   }
 
-  async function openForm(recordId) {
+  function openStack(recordId) {
     stack({
       Component: SaleTransactionForm,
       props: {
         labels: labels,
         recordId: recordId,
         access,
-        functionId: functionId
+        functionId: functionId,
+        lockRecord,
+        getResourceId
       },
       width: 1330,
       height: 720,
       title: getCorrectLabel(parseInt(functionId))
     })
+  }
+
+  async function openForm(recordId, reference, status) {
+    if (recordId && status !== 3) {
+      await lockRecord({
+        recordId: recordId,
+        reference: reference,
+        resourceId: getResourceId(parseInt(functionId)),
+        onSuccess: () => {
+          openStack(recordId)
+        },
+        isAlreadyLocked: name => {
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              width: 600,
+              height: 200,
+              title: platformLabels.Dialog
+            }
+          })
+        }
+      })
+    } else {
+      openStack(recordId)
+    }
   }
 
   const add = async () => {
@@ -239,6 +284,7 @@ const SaTrx = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

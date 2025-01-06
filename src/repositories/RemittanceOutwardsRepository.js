@@ -52,7 +52,8 @@ export const RemittanceOutwardsRepository = {
     snapshot2: service + 'snapshotIW2',
     close: service + 'closeIW',
     reopen: service + 'reopenIW',
-    post: service + 'postIW'
+    post: service + 'postIW',
+    open: service + 'openIW'
   },
   InwardGLInformation: {
     get: service + 'getIWI'
@@ -170,5 +171,17 @@ export const RemittanceOutwardsRepository = {
   },
   AssignedDispersalType: {
     assigned: service + 'assignedDT'
+  },
+  OutwardReturnSettlement: {
+    qry: service + 'qryORS',
+    page: service + 'pageORS',
+    get: service + 'getORS',
+    set: service + 'setORS',
+    set2: service + 'set2ORS',
+    del: service + 'delORS',
+    post: service + 'postORS',
+    close: service + 'closeORS',
+    reopen: service + 'reopenORS',
+    snapshot: service + 'snapshotORS'
   }
 }

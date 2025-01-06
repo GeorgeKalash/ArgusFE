@@ -5,6 +5,8 @@ export const AccessControlRepository = {
   setBMK: service + 'setBMK',
   delBMK: service + 'delBMK',
   checkOTP: service + 'checkOTP ',
+  unlockRecord: service + 'unlockRecord ',
+  lockRecord: service + 'lockRecord',
   NotificationGroup: {
     qry: service + 'qryNOT',
     page: service + 'pageNOT',
@@ -54,7 +56,9 @@ export const AccessControlRepository = {
   },
   ModuleClass: {
     qry: service + 'qryRES',
-    set: service + 'setRES'
+    qry0: service + 'qryRES0',
+    set: service + 'setRES',
+    set2: service + 'set2RES'
   },
   SGControlAccess: {
     qry: service + 'qryCRL',
@@ -80,9 +84,17 @@ export const AccessControlRepository = {
     set: service + 'setROW',
     del: service + 'delROW'
   },
+  Notification: {
+    qry: service + 'qryNTX',
+    set: service + 'setNTX',
+    get: service + 'getNTX',
+    del: service + 'delNTX',
+    post: service + 'postNTX'
+  },
   LockedRecords: {
     qry: service + 'qryLOK',
     del: service + 'delLOK',
+    get: service + 'getLOK',
     snapshot: service + 'snapshotLOK'
   },
   UserOTPQrcode: {

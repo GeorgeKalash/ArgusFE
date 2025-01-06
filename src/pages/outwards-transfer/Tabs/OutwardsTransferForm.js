@@ -24,6 +24,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { useWindow } from 'src/windows'
 import AuditForm from './AuditForm'
+import CustomSwitch from 'src/components/Inputs/CustomSwitch'
 
 export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
   const { getRequest } = useContext(RequestsContext)
@@ -72,7 +73,8 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
       vatAmount: null,
       taxPercent: null,
       tdAmount: 0,
-      corCurrencyId: null
+      corCurrencyId: null,
+      includingFees: false
     },
     validateOnChange: true
   })
@@ -309,6 +311,15 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                         valueField='currencyId'
                         values={formik.values}
                         readOnly
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <CustomSwitch
+                        readOnly={true}
+                        label={labels.includeTransferFees}
+                        name='includingFees'
+                        checked={formik.values.includingFees}
+                        onChange={formik.handleChange}
                       />
                     </Grid>
                     <Grid item xs={12}>
