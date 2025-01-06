@@ -78,19 +78,17 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: RemittanceSettingsRepository.Profession.get,
-            parameters: `_recordId=${recordId}`
-          })
-          setStore({
-            recordId: res.record.recordId,
-            name: res.record.name
-          })
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: RemittanceSettingsRepository.Profession.get,
+          parameters: `_recordId=${recordId}`
+        })
+        setStore({
+          recordId: res.record.recordId,
+          name: res.record.name
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

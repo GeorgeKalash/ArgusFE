@@ -70,12 +70,10 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
     await postRequest({
       extension: RemittanceSettingsRepository.ProductCountries.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      if (res) toast.success(platformLabels.Edited)
+      getCountries(pId)
     })
-      .then(res => {
-        if (res) toast.success(platformLabels.Edited)
-        getCountries(pId)
-      })
-      .catch(error => {})
   }
 
   const column = [
@@ -165,25 +163,23 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
     getRequest({
       extension: RemittanceSettingsRepository.ProductCountries.qry,
       parameters: parameters
-    })
-      .then(res => {
-        if (res.list.length > 0) {
-          const countries = res.list.map(({ countryId, countryRef, countryName, ...rest }, index) => ({
-            id: index,
-            countryId,
-            countryRef,
-            countryName,
-            ...rest
-          }))
-          formik.setValues({ countries: countries })
+    }).then(res => {
+      if (res.list.length > 0) {
+        const countries = res.list.map(({ countryId, countryRef, countryName, ...rest }, index) => ({
+          id: index,
+          countryId,
+          countryRef,
+          countryName,
+          ...rest
+        }))
+        formik.setValues({ countries: countries })
 
-          setStore(prevStore => ({
-            ...prevStore,
-            countries: countries
-          }))
-        }
-      })
-      .catch(error => {})
+        setStore(prevStore => ({
+          ...prevStore,
+          countries: countries
+        }))
+      }
+    })
   }
 
   return (
@@ -198,6 +194,7 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
       <VertLayout>
         <Grow>
           <DataGrid
+            name='rows'
             onChange={value => formik.setFieldValue('countries', value)}
             value={formik.values.countries}
             error={formik.errors.countries}
