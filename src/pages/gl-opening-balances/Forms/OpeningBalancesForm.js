@@ -197,7 +197,6 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
                 name='amount'
                 label={labels.amount}
                 value={formik.values.amount}
-                readOnly={editMode}
                 required
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('amount', e.target.value)}
