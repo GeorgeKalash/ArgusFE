@@ -376,7 +376,7 @@ export default function SaleTransactionForm({
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.barcode) return
 
-        const ItemConvertPrice = await getItemConvertPrice2(newRow)
+        const ItemConvertPrice = await mdType(newRow)
         const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
         const itemInfo = await getItem(ItemConvertPrice?.itemId)
         await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
@@ -881,10 +881,10 @@ export default function SaleTransactionForm({
   }
 
   async function getAddress(addressId) {
-    if (!addressId) return null
+    if (!addressId) return
 
     const res = await getRequest({
-      extension: SystemRepository.FormattedAddress.get,
+      extension: SystemRepository.Address.format,
       parameters: `_addressId=${addressId}`
     })
 

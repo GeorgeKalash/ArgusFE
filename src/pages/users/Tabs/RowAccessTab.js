@@ -13,11 +13,11 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import { POSRepository } from 'src/repositories/POSRepository'
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 
 const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const [data, setData] = useState([])
@@ -93,7 +93,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     const posRequestPromise =
       classId == ResourceIds.PointOfSale &&
       getRequest({
-        extension: POSRepository.PointOfSale.qry,
+        extension: PointofSaleRepository.PointOfSales.qry,
         parameters: '_filter='
       })
 
