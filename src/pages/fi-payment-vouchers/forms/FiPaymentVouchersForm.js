@@ -213,11 +213,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
         })
       }
       getDefaultsData()
-      await getMultiCurrencyFormData(
-        formik.values.currencyId,
-        formatDateForGetApI(formik.values.date),
-        RateDivision.FINANCIALS
-      )
     })()
   }, [])
 

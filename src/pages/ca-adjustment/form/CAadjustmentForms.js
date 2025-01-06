@@ -187,11 +187,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
           })
         }
         await getDefaultsData()
-        await getMultiCurrencyFormData(
-          formik.values.currencyId,
-          formatDateForGetApI(formik.values.date),
-          RateDivision.FINANCIALS
-        )
       } catch (exception) {}
     })()
   }, [])

@@ -134,11 +134,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
         const vatPctValue = res.list.find(item => item.key === 'vatPct')?.value || '0'
         setInitialVatPct(vatPctValue)
-        await getMultiCurrencyFormData(
-          formik.values.currencyId,
-          formatDateForGetApI(formik.values.date),
-          RateDivision.FINANCIALS
-        )
       } catch (exception) {}
     })()
   }, [])

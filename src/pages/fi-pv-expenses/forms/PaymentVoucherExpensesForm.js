@@ -216,11 +216,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         }
         await getDefaultVAT()
         await getDefaultsData()
-        await getMultiCurrencyFormData(
-          formik.values.currencyId,
-          formatDateForGetApI(formik.values.date),
-          RateDivision.FINANCIALS
-        )
       } catch (e) {}
     })()
   }, [])

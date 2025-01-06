@@ -43,7 +43,6 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
           RateDivision.FINANCIALS
         }`
       })
-      formik.setFieldValue('exRate', res.record?.exRate)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
       formik.setFieldValue('rateCalcMethodName', res.record?.rateCalcMethodName)
       formik.setFieldValue('exchangeId', res.record?.exchangeId)

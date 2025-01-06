@@ -221,15 +221,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
   }
-  useEffect(() => {
-    ;(async function () {
-      await getMultiCurrencyFormData(
-        formik.values.currencyId,
-        formatDateForGetApI(formik.values.date),
-        RateDivision.FINANCIALS
-      )
-    })()
-  }, [])
 
   const onCancel = async () => {
     const obj = formik.values

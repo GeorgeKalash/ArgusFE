@@ -278,10 +278,10 @@ export default function SaleTransactionForm({
         maxAccess: MRCMaxAccess,
         data: data,
         onOk: childFormikValues => {
-          formik.setFieldValue('header', prevValues => ({
-            ...prevValues,
+          formik.setFieldValue('header', {
+            ...formik.values.header,
             ...childFormikValues
-          }))
+          })
         }
       },
       width: 500,
@@ -289,6 +289,8 @@ export default function SaleTransactionForm({
       title: _labels.MultiCurrencyRate
     })
   }
+
+  console.log(formik)
 
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
@@ -1364,16 +1366,6 @@ export default function SaleTransactionForm({
   }
 
   useEffect(() => {
-    ;(async function () {
-      await getMultiCurrencyFormData(
-        formik.values.header.currencyId,
-        formatDateForGetApI(formik.values.header.date),
-        RateDivision.FINANCIALS
-      )
-    })()
-  }, [])
-
-  useEffect(() => {
     formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
     formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
     formik.setFieldValue('header.volume', parseFloat(totalVolume).toFixed(2))
@@ -1418,11 +1410,6 @@ export default function SaleTransactionForm({
           formik.setFieldValue('header.tdType', 1)
         }
       }
-      await getMultiCurrencyFormData(
-        formik.values.header.currencyId,
-        formatDateForGetApI(formik.values.header.date),
-        RateDivision.FINANCIALS
-      )
     })()
   }, [])
 
@@ -1615,7 +1602,7 @@ export default function SaleTransactionForm({
                     readOnly={isPosted}
                     value={formik?.values?.header?.date}
                     onChange={async (e, newValue) => {
-                      formik.setFieldValue('date', newValue.date)
+                      formik.setFieldValue('header.date', newValue.date)
                       await getMultiCurrencyFormData(
                         formik.values.header.currencyId,
                         formatDateForGetApI(formik.values.header.date),
