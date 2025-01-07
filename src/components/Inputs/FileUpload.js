@@ -96,6 +96,8 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
     }))
   }
 
+  const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+
   const submit = () => {
     if (formik.values?.files?.length) {
       const filesToUpload = formik.values.files.map(file => ({
@@ -103,17 +105,19 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
         recordId: ref.current.value || recordId
       }))
 
-      return Promise.all(
-        filesToUpload.map(file =>
-          postRequest({
-            extension: SystemRepository.Attachment.set,
-            record: JSON.stringify(file),
-            file: file.file
+      return filesToUpload
+        .reduce((promise, file) => {
+          return promise.then(async () => {
+            await postRequest({
+              extension: SystemRepository.Attachment.set,
+              record: JSON.stringify(file),
+              file: file.file
+            })
           })
-        )
-      ).then(res => {
-        return res
-      })
+        }, Promise.resolve())
+        .then(res => {
+          return res
+        })
     } else if (!files.length && initialValues?.url && !formik.values?.url) {
       return postRequest({
         extension: SystemRepository.Attachment.del,
