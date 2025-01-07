@@ -30,6 +30,7 @@ import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -558,8 +559,9 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       disabledSubmit={isPosted || isCancelled}
     >
       <VertLayout>
-        <Grow>
-          <Grid container spacing={4}>
+        <Fixed>
+
+        <Grid container spacing={2}>
             <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -828,6 +830,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
               />
             </Grid>
           </Grid>
+        </Fixed>
           <DataGrid
             onChange={value => {
               formik.setFieldValue('expenses', value)
@@ -838,7 +841,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
             allowDelete={!isPosted && !isCancelled}
             allowAddNewLine={!isPosted && !isCancelled}
           />
-        </Grow>
       </VertLayout>
     </FormShell>
   )
