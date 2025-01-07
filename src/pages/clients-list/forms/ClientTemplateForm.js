@@ -220,7 +220,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     getRequest({
       extension: RTCLRepository.CtClientIndividual.get2,
       parameters: parameters
-    }).then(res => {
+    }).then(async res => {
       const obj = res?.record
 
       obj?.workAddressView && setAddress(obj?.workAddressView)
@@ -348,18 +348,17 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         (obj.clientMaster?.idScanMode == 1 || obj.clientMaster?.idScanMode == 2)
       ) {
         setLoading(true)
+
         const parameters = `_number=${obj.clientIDView?.idNo}&_clientId=${obj.clientRemittance?.clientId}&_idType=${obj.clientIDView?.idtId}&_idScanMode=${obj.clientMaster?.idScanMode}`
-        getRequest({
+
+        const res = await getRequest({
           extension: CurrencyTradingSettingsRepository.PreviewImageID.get,
           parameters: parameters
         })
-          .then(res => {
-            setImageUrl(res?.record?.imageContent ?? null)
-            setLoading(false)
-          })
-          .catch(() => {
-            setLoading(false)
-          })
+
+        setImageUrl(res?.record?.imageContent ?? null)
+
+        setLoading(false)
       }
     })
   }
@@ -525,12 +524,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       clientId: obj.clientId || 0,
       firstName: obj.firstName,
       lastName: obj.lastName,
-      middleName: obj.middleName,
-      familyName: obj.familyName,
+      middleName: obj.familyName ? obj.middleName + '' + obj.familyName : obj.middleName,
+      familyName: null,
       fl_firstName: obj.fl_firstName,
       fl_lastName: obj.fl_lastName,
-      fl_middleName: obj.fl_middleName,
-      fl_familyName: obj.fl_familyName,
+      fl_middleName: obj.fl_familyName ? obj.fl_middleName + ' ' + obj.fl_familyName : obj.fl_middleName,
+      fl_familyName: null,
       birthDate: formatDateToApi(obj.birthDate),
       isResident: obj.isResident,
       sponsorName: obj.sponsorName,
@@ -767,24 +766,51 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     setNewProf(!newProf)
   }
 
-  const handleClickDigitalId = confirmWindow => {
+  const handleClickDigitalId = async confirmWindow => {
+    setLoading(true)
+
     const parameters = `_number=${formik.values.idNo}&_idType=${formik.values.idtId}`
-    getRequest({
+
+    const res = await getRequest({
       extension: CurrencyTradingSettingsRepository.Absher.get,
       parameters
-    }).then(res => {
-      formik.setFieldValue('idScanMode', 2)
-      setImageUrl(res.record.imageContent)
-      confirmWindow.close()
     })
+
+    const result = res?.record
+
+    if (result) {
+      formik.setFieldValue('idScanMode', 2)
+
+      setImageUrl(result?.imageContent)
+
+      confirmWindow.close()
+    } else {
+      formik.setFieldValue('idScanMode', null)
+
+      setImageUrl(null)
+    }
+
+    setLoading(false)
   }
 
-  const handleClickScanner = confirmWindow => {
-    getRequestFullEndPoint({ endPoint: process.env.NEXT_PUBLIC_SCANNER_URL }).then(response => {
+  const handleClickScanner = async confirmWindow => {
+    setLoading(true)
+
+    const response = await getRequestFullEndPoint({ endPoint: process.env.NEXT_PUBLIC_SCANNER_URL })
+
+    if (response?.imageContent) {
       formik.setFieldValue('idScanMode', 1)
+
       setImageUrl(response?.imageContent)
+
       confirmWindow.close()
-    })
+    } else {
+      formik.setFieldValue('idScanMode', null)
+
+      setImageUrl(null)
+    }
+
+    setLoading(false)
   }
 
   const digitalIdConfirmation = mode => {
@@ -849,6 +875,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
+      previewReport={editMode}
       disabledSubmit={editMode && !allowEdit && true}
     >
       <VertLayout>
@@ -1135,7 +1162,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       </Grid>
                       <Grid item xs={12}>
                         <Grid container spacing={2}>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='firstName'
                               label={labels.first}
@@ -1153,7 +1180,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='middleName'
                               label={labels.middle}
@@ -1167,7 +1194,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='lastName'
                               label={labels.last}
@@ -1185,7 +1212,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          {/* <Grid item xs={3}>
                             <CustomTextField
                               name='familyName'
                               label={labels.family}
@@ -1198,12 +1225,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               error={formik.touched.familyName && Boolean(formik.errors.familyName)}
                               maxAccess={maxAccess}
                             />
-                          </Grid>
+                          </Grid> */}
                         </Grid>
                       </Grid>
                       <Grid item xs={12}>
                         <Grid container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
                               label={labels.fl_first}
@@ -1219,7 +1246,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_middleName'
                               label={labels.fl_middle}
@@ -1233,7 +1260,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_lastName'
                               label={labels.fl_last}
@@ -1248,7 +1275,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          {/* <Grid item xs={3}>
                             <CustomTextField
                               name='fl_familyName'
                               label={labels.fl_family}
@@ -1261,7 +1288,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
                               maxAccess={maxAccess}
                             />
-                          </Grid>
+                          </Grid> */}
                         </Grid>
                       </Grid>
                       <Grid item xs={4}>
