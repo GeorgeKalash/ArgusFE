@@ -36,6 +36,7 @@ import { useForm } from 'src/hooks/form'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import CustomButton from 'src/components/Inputs/CustomButton'
+import MoreDetails from './MoreDetails'
 
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
@@ -1656,7 +1657,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                 </Grid>
                 <Grid item xs={12}>
                   <Grid container spacing={2}>
-                    <Grid item xs={3}>
+                    <Grid item xs={5}>
                       <CustomButton
                         onClick={() =>
                           stack({
@@ -1679,12 +1680,26 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         color='primary'
                       />
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={4}>
                       <CustomButton
-                        onClick={() => handleClickDigitalId(confirmWindow)}
-                        label={labels.digitalId}
+                        onClick={() =>
+                          stack({
+                            Component: MoreDetails,
+                            props: {
+                              readOnly: editMode && !allowEdit,
+                              labels: labels,
+                              clientFormik: formik,
+                              maxAccess: maxAccess,
+                              editMode: editMode,
+                              allowEdit
+                            },
+                            width: 500,
+                            height: 400,
+                            title: labels.moreDetails
+                          })
+                        }
+                        label={labels.moreDetails}
                         color='primary'
-                        disabled={loading || (editMode && !allowEdit)}
                       />
                     </Grid>
                   </Grid>
