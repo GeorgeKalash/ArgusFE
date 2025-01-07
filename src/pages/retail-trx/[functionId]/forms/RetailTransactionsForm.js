@@ -48,6 +48,7 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import TaxDetails from 'src/components/Shared/TaxDetails'
 
 export default function RetailTransactionsForm({ labels, posUser, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -151,7 +152,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
         posFlags: null,
         taxId: null,
         taxId_base: null,
-        taxId_amount: null
+        taxId_amount: null,
+        taxDetailsButton: false
       }
     ],
     cash: [
@@ -309,7 +311,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       mdAmount: 0,
       mdValue: 0,
       taxId: row?.taxId || formik.values.header.taxId,
-      taxDetails: taxDetailsInfo || null
+      taxDetails: taxDetailsInfo || null,
+      taxDetailsButton: true
     }
     update(result)
     const result2 = await getItemPriceRow(update, result, DIRTYFIELD_UNIT_PRICE)
@@ -744,9 +747,26 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       }
     },
     {
-      component: 'numberfield',
+      component: 'button',
+      name: 'taxDetailsButton',
+      defaultValue: true,
+      props: {
+        imgSrc: '/images/buttonsIcons/tax-icon.png'
+      },
       label: labels.tax,
-      name: 'taxDetails'
+      onClick: (e, row) => {
+        if (row?.taxId) {
+          stack({
+            Component: TaxDetails,
+            props: {
+              taxId: row?.taxId,
+              obj: row
+            },
+            width: 1000,
+            title: platformLabels.TaxDetails
+          })
+        }
+      }
     },
     {
       component: 'textfield',
