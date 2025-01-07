@@ -69,10 +69,10 @@ export default function AddressFilterForm({
   })
 
   async function getAddress(addressId) {
-    if (!addressId) return null
+    if (!addressId) return
 
     const res = await getRequest({
-      extension: SystemRepository.FormattedAddress.get,
+      extension: SystemRepository.Address.format,
       parameters: `_addressId=${addressId}`
     })
 
@@ -122,7 +122,7 @@ export default function AddressFilterForm({
       const formattedAddressList = await Promise.all(
         res.list.map(async item => {
           const res2 = await getRequest({
-            extension: SystemRepository.FormattedAddress.get,
+            extension: SystemRepository.Address.format,
             parameters: `_addressId=${item.addressId}`
           })
           const formattedAddress = res2.record.formattedAddress.replace(/[\r\n]+/g, ',').replace(/,$/, '')

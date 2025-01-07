@@ -38,7 +38,7 @@ const ReportViewer = ({ resourceId }) => {
   const getReportTemplate = () => {
     var parameters = `_resourceId=${resourceId}`
     getRequest({
-      extension: SystemRepository.ReportTemplate,
+      extension: SystemRepository.ReportTemplate.qry,
       parameters: parameters
     }).then(res => {
       setReportStore(prevReportStore => [
