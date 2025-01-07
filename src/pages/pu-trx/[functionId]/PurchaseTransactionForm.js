@@ -585,12 +585,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }
 
   const onPost = async () => {
-    const res = await postRequest({
+    await postRequest({
       extension: PurchaseRepository.PurchaseInvoiceHeader.post,
       record: JSON.stringify(formik.values.header)
     })
 
-    await refetchForm(res.recordId)
+    await refetchForm(formik.values.recordId)
     toast.success(platformLabels.Posted)
     invalidate()
     window.close()
