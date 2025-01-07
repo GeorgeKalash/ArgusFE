@@ -689,7 +689,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     if (!addressId) return null
 
     const res = await getRequest({
-      extension: SystemRepository.FormattedAddress.get,
+      extension: SystemRepository.Address.format,
       parameters: `_addressId=${addressId}`
     })
 
