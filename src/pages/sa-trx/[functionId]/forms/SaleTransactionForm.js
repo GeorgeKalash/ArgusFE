@@ -1445,7 +1445,7 @@ export default function SaleTransactionForm({
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={9}>
+            <Grid item xs={9} container direction='column' gap={2}>
               <Grid container spacing={2}>
                 <Grid item xs={3}>
                   <ResourceComboBox
@@ -1532,82 +1532,83 @@ export default function SaleTransactionForm({
                   />
                 </Grid>
               </Grid>
-
-              <Grid item xs={3}>
-                <CustomTextField
-                  name='reference'
-                  label={labels.reference}
-                  value={formik?.values?.header?.reference}
-                  maxAccess={!editMode && maxAccess}
-                  readOnly={editMode}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('header.reference', '')}
-                  error={formik.touched.reference && Boolean(formik.errors.reference)}
-                />
-              </Grid>
-              <Grid item xs={3}>
-                <CustomDatePicker
-                  name='date'
-                  required
-                  label={labels.date}
-                  readOnly={isPosted}
-                  value={formik?.values?.header?.date}
-                  onChange={formik.setFieldValue}
-                  editMode={editMode}
-                  maxAccess={maxAccess}
-                  onClear={() => formik.setFieldValue('header.date', '')}
-                  error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
-                />
-              </Grid>
-              <Grid item xs={3}>
-                <ResourceComboBox
-                  endpointId={SaleRepository.SalesZone.qry}
-                  parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
-                  name='szId'
-                  label={labels.saleZone}
-                  readOnly={isPosted}
-                  columnsInDropDown={[{ key: 'name', value: 'Name' }]}
-                  valueField='recordId'
-                  displayField='name'
-                  values={formik.values.header}
-                  maxAccess={maxAccess}
-                  displayFieldWidth={1.5}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('header.szId', newValue ? newValue.recordId : null)
-                  }}
-                  error={formik.touched.szId && Boolean(formik.errors.szId)}
-                />
-              </Grid>
-              <Grid item xs={3}>
-                <ResourceComboBox
-                  endpointId={InventoryRepository.Site.qry}
-                  name='siteId'
-                  label={labels.site}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  values={formik.values.header}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  maxAccess={maxAccess}
-                  displayFieldWidth={2}
-                  readOnly={
-                    formik?.values?.header.dtId ||
-                    (formik?.values?.header.dtId && formik?.values?.header.commitItems == false) ||
-                    isPosted
-                  }
-                  required={
-                    !formik?.values?.header.dtId ||
-                    (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
-                  }
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('header.siteId', newValue ? newValue.recordId : null)
-                    formik.setFieldValue('header.siteRef', newValue ? newValue.reference : null)
-                    formik.setFieldValue('header.siteName', newValue ? newValue.name : null)
-                  }}
-                  error={formik.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
-                />
+              <Grid container spacing={2}>
+                <Grid item xs={3}>
+                  <CustomTextField
+                    name='reference'
+                    label={labels.reference}
+                    value={formik?.values?.header?.reference}
+                    maxAccess={!editMode && maxAccess}
+                    readOnly={editMode}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('header.reference', '')}
+                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <CustomDatePicker
+                    name='date'
+                    required
+                    label={labels.date}
+                    readOnly={isPosted}
+                    value={formik?.values?.header?.date}
+                    onChange={formik.setFieldValue}
+                    editMode={editMode}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('header.date', '')}
+                    error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <ResourceComboBox
+                    endpointId={SaleRepository.SalesZone.qry}
+                    parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
+                    name='szId'
+                    label={labels.saleZone}
+                    readOnly={isPosted}
+                    columnsInDropDown={[{ key: 'name', value: 'Name' }]}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values.header}
+                    maxAccess={maxAccess}
+                    displayFieldWidth={1.5}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('header.szId', newValue ? newValue.recordId : null)
+                    }}
+                    error={formik.touched.szId && Boolean(formik.errors.szId)}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Site.qry}
+                    name='siteId'
+                    label={labels.site}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values.header}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    maxAccess={maxAccess}
+                    displayFieldWidth={2}
+                    readOnly={
+                      formik?.values?.header.dtId ||
+                      (formik?.values?.header.dtId && formik?.values?.header.commitItems == false) ||
+                      isPosted
+                    }
+                    required={
+                      !formik?.values?.header.dtId ||
+                      (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
+                    }
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('header.siteId', newValue ? newValue.recordId : null)
+                      formik.setFieldValue('header.siteRef', newValue ? newValue.reference : null)
+                      formik.setFieldValue('header.siteName', newValue ? newValue.name : null)
+                    }}
+                    error={formik.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
+                  />
+                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={3}>
