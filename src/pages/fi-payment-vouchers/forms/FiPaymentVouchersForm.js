@@ -309,7 +309,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
   }
 
   useEffect(() => {
-    formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
+    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
   }, [defaultsDataState])
 
   console.log(formik)

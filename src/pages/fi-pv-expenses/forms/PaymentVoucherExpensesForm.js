@@ -204,7 +204,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
   }
 
   useEffect(() => {
-    formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
+    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
   }, [defaultsDataState])
 
   useEffect(() => {
@@ -560,8 +560,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     >
       <VertLayout>
         <Fixed>
-
-        <Grid container spacing={2}>
+          <Grid container spacing={2}>
             <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -831,16 +830,16 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
             </Grid>
           </Grid>
         </Fixed>
-          <DataGrid
-            onChange={value => {
-              formik.setFieldValue('expenses', value)
-            }}
-            value={formik?.values?.expenses}
-            error={formik?.errors?.expenses}
-            columns={columns}
-            allowDelete={!isPosted && !isCancelled}
-            allowAddNewLine={!isPosted && !isCancelled}
-          />
+        <DataGrid
+          onChange={value => {
+            formik.setFieldValue('expenses', value)
+          }}
+          value={formik?.values?.expenses}
+          error={formik?.errors?.expenses}
+          columns={columns}
+          allowDelete={!isPosted && !isCancelled}
+          allowAddNewLine={!isPosted && !isCancelled}
+        />
       </VertLayout>
     </FormShell>
   )
