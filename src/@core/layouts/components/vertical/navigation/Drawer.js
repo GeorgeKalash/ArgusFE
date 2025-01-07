@@ -9,8 +9,7 @@ const SwipeableDrawer = styled(MuiSwipeableDrawer)({
     listStyle: 'none'
   },
   '& .MuiListItem-gutters': {
-    paddingLeft: 4,
-    paddingRight: 4
+    padding: '20px'
   },
   '& .MuiDrawer-paper': {
     left: 'unset',
@@ -21,7 +20,6 @@ const SwipeableDrawer = styled(MuiSwipeableDrawer)({
 })
 
 const Drawer = props => {
-  
   const {
     hidden,
     children,
@@ -50,7 +48,7 @@ const Drawer = props => {
   const DesktopDrawerProps = {
     open: true,
     onOpen: () => null,
-    onClose: () => null,
+    onClose: () => null
   }
   let userNavMenuStyle = {}
   let userNavMenuPaperStyle = {}
