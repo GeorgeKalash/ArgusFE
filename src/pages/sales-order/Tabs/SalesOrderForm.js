@@ -63,7 +63,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   })
 
   const initialValues = {
-    recordId: recordId || null,
+    recordId: recordId,
     dtId: documentType?.dtId,
     reference: '',
     date: new Date(),
