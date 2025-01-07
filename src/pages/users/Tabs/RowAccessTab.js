@@ -13,15 +13,17 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import { POSRepository } from 'src/repositories/POSRepository'
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 
 const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [search, setSearch] = useState('')
 
   const rowColumns = [
     {
@@ -91,7 +93,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     const posRequestPromise =
       classId == ResourceIds.PointOfSale &&
       getRequest({
-        extension: POSRepository.PointOfSale.qry,
+        extension: PointofSaleRepository.PointOfSales.qry,
         parameters: '_filter='
       })
 
@@ -161,12 +163,22 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     )
   }
 
+  const handleSearchChange = event => {
+    setSearch(event?.target?.value ?? '')
+  }
+
   useEffect(() => {
     if (storeRecordId) {
       formik.setFieldValue('classId', ResourceIds.Plants)
       fetchGridData()
     }
   }, [storeRecordId])
+
+  const filteredData = search
+    ? {
+        list: data?.list?.filter(item => item?.name && item?.name?.toLowerCase().includes(search.toLowerCase()))
+      }
+    : data
 
   return (
     <FormShell
@@ -180,27 +192,42 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     >
       <VertLayout>
         <Fixed>
-          <Grid item xs={6}>
-            <ResourceComboBox
-              label={labels.rowAccess}
-              valueField='key'
-              displayField='value'
-              name='classId'
-              datasetId={DataSets.ROW_ACCESS}
-              values={formik.values}
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('classId', newValue ? newValue.key : ResourceIds.Plants)
-                fetchGridData(newValue ? newValue.key : ResourceIds.Plants)
-              }}
-              error={formik.touched.classId && Boolean(formik.errors.classId)}
-            />
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                label={labels.rowAccess}
+                valueField='key'
+                displayField='value'
+                name='classId'
+                datasetId={DataSets.ROW_ACCESS}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('classId', newValue ? newValue.key : ResourceIds.Plants)
+                  fetchGridData(newValue ? newValue.key : ResourceIds.Plants)
+                }}
+                error={formik.touched.classId && Boolean(formik.errors.classId)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='search'
+                value={search}
+                label={platformLabels.Search}
+                onClear={() => {
+                  setSearch('')
+                }}
+                onChange={handleSearchChange}
+                onSearch={e => setSearch(e)}
+                search={true}
+              />
+            </Grid>
           </Grid>
         </Fixed>
         <Grow>
           <Table
             columns={rowColumns}
-            gridData={data ? data : { list: [] }}
+            gridData={filteredData ? filteredData : { list: [] }}
             setData={setData}
             rowId={['recordId']}
             isLoading={false}

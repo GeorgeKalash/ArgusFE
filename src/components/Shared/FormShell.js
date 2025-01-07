@@ -37,7 +37,6 @@ export default function FormShell({
   infoVisible = true,
   postVisible = false,
   resourceId,
-  masterSource,
   onGenerate,
   functionId,
   maxAccess,
@@ -50,7 +49,8 @@ export default function FormShell({
   setIDInfoAutoFilled,
   visibleClear,
   actions,
-  filteredItems = []
+  filteredItems = [],
+  isParentWindow = true
 }) {
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
@@ -136,7 +136,7 @@ export default function FormShell({
                     recordId: form.values.recordId,
                     functionId: functionId
                   },
-                  width: 1000,
+                  width: 700,
                   title: platformLabels.InventoryTransaction
                 })
               }
@@ -192,7 +192,7 @@ export default function FormShell({
                     recordId: form.values?.recordId,
                     functionId: functionId,
                     itemId: 0,
-                    clientId: form?.values?.header?.clientId
+                    clientId: form?.values?.header?.clientId || 0
                   },
                   width: 1200,
                   title: platformLabels.SalesTransactions
@@ -205,7 +205,7 @@ export default function FormShell({
                   Component: GlobalIntegrationGrid,
                   props: {
                     masterId: form.values?.recordId,
-                    masterSource: masterSource
+                    masterSource: action?.masterSource
                   },
                   width: 800,
                   height: 500,
@@ -279,6 +279,7 @@ export default function FormShell({
                     resourceId: resourceId,
                     scId: form.values?.stockCountId,
                     siteId: form.values?.siteId,
+                    controllerId: form.values?.controllerId,
                     onSuccess: previewBtnClicked
                   },
                   width: 1150,
@@ -409,8 +410,9 @@ export default function FormShell({
           flexDirection: 'column',
           overflow: 'auto',
           '.MuiBox-root': {
-            paddingTop: '5px !important',
-            px: '0px !important'
+            paddingTop: isParentWindow ? '5px !important' : '0px !important',
+            px: '0px !important',
+            pb: '0px !important'
           }
         }}
       >
@@ -448,6 +450,7 @@ export default function FormShell({
                 resourceId: resourceId,
                 scId: form.values?.stockCountId,
                 siteId: form.values?.siteId,
+                controllerId: form.values?.controllerId,
                 onSuccess: previewBtnClicked
               },
               width: 1150,
@@ -472,7 +475,6 @@ export default function FormShell({
           clientRelation={clientRelation}
           addClientRelation={addClientRelation}
           resourceId={resourceId}
-          masterSource={masterSource}
           recordId={form.values?.recordId}
           selectedReport={selectedReport}
           setSelectedReport={setSelectedReport}

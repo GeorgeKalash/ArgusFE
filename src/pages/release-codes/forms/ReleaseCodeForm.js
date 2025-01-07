@@ -37,16 +37,14 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId }) {
       await postRequest({
         extension: DocumentReleaseRepository.ReleaseCode.set,
         record: JSON.stringify(obj)
-      })
-        .then(response => {
-          if (!obj.recordId) {
-            toast.success(platformLabels.Added)
-            formik.setFieldValue('recordId', response.recordId)
-          } else toast.success(platformLabels.Edited)
+      }).then(response => {
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', response.recordId)
+        } else toast.success(platformLabels.Edited)
 
-          invalidate()
-        })
-        .catch(error => {})
+        invalidate()
+      })
     }
   })
 
@@ -54,16 +52,14 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: DocumentReleaseRepository.ReleaseCode.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: DocumentReleaseRepository.ReleaseCode.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (error) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 
@@ -71,33 +67,35 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId }) {
     <FormShell resourceId={ResourceIds.ReleaseCodes} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='reference'
-              label={labels.reference}
-              readOnly={editMode}
-              value={formik.values.reference}
-              required
-              maxAccess={maxAccess}
-              maxLength='10'
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('reference', '')}
-              error={formik.touched.reference && Boolean(formik.errors.reference)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='name'
-              label={labels.name}
-              maxLength='30'
-              value={formik.values.name}
-              required
-              rows={2}
-              maxAccess={maxAccess}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('name', '')}
-              error={formik.touched.name && Boolean(formik.errors.name)}
-            />
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                readOnly={editMode}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='10'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                maxLength='30'
+                value={formik.values.name}
+                required
+                rows={2}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
           </Grid>
         </Grow>
       </VertLayout>

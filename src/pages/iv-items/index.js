@@ -124,7 +124,7 @@ const IvItems = () => {
         sku: obj?.sku
       },
       width: 1200,
-      height: 660,
+      height: 670,
       title: _labels.items,
       nextToTitle: obj?.sku
     })
@@ -184,6 +184,7 @@ const IvItems = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

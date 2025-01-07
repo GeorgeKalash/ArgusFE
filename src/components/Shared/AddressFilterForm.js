@@ -18,6 +18,7 @@ export default function AddressFilterForm({
   labels,
   shipment = false,
   bill = false,
+  deliveryOrder = false,
   form,
   handleAddressValues,
   checkedAddressId,
@@ -33,13 +34,13 @@ export default function AddressFilterForm({
     onSubmit: async obj => {
       const checkedADD = data?.list?.find(obj => obj.checked)
       if (!checkedADD.addressId) {
-        handleAddressValues({ shipAddress: '', BillAddress: '' })
+        handleAddressValues({ shipAddress: '', BillAddress: '', address: '' })
         window.close()
 
         return
       }
 
-      if (shipment || bill) {
+      if (shipment || bill || deliveryOrder) {
         const address = await getAddress(checkedADD.addressId)
         if (shipment)
           handleAddressValues({
@@ -54,6 +55,13 @@ export default function AddressFilterForm({
             billAddressId: checkedADD.addressId,
             billToAddressId: checkedADD.addressId
           })
+
+        if (deliveryOrder) {
+          handleAddressValues({
+            address: address,
+            addressId: checkedADD.addressId
+          })
+        }
       }
 
       window.close()
@@ -61,10 +69,10 @@ export default function AddressFilterForm({
   })
 
   async function getAddress(addressId) {
-    if (!addressId) return null
+    if (!addressId) return
 
     const res = await getRequest({
-      extension: SystemRepository.FormattedAddress.get,
+      extension: SystemRepository.Address.format,
       parameters: `_addressId=${addressId}`
     })
 
@@ -114,7 +122,7 @@ export default function AddressFilterForm({
       const formattedAddressList = await Promise.all(
         res.list.map(async item => {
           const res2 = await getRequest({
-            extension: SystemRepository.FormattedAddress.get,
+            extension: SystemRepository.Address.format,
             parameters: `_addressId=${item.addressId}`
           })
           const formattedAddress = res2.record.formattedAddress.replace(/[\r\n]+/g, ',').replace(/,$/, '')

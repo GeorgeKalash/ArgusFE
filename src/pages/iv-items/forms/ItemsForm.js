@@ -17,7 +17,6 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 import { MasterSource } from 'src/resources/MasterSource'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial }) {
   const { platformLabels } = useContext(ControlContext)
@@ -67,7 +66,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       spfId: '',
       categoryName: '',
       defSaleMUId: '',
-      pgId: ''
+      pgId: '',
+      isInactive: false,
+      rmItem: false
     },
     maxAccess,
     enableReinitialize: true,
@@ -158,6 +159,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           parameters: `_recordId=${res?.record?.categoryId}`
         })
 
+        res.record.rmItem = res.record.rmItem || false
+        res.record.isInactive = res.record.isInactive || false
+
         setFormikInitial(res.record)
 
         formik.setValues({ ...res.record, kitItem: !!res.record.kitItem })
@@ -189,6 +193,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      masterSource: MasterSource.Item,
       disabled: !editMode
     }
   ]
@@ -206,14 +211,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   }, [formik.values.kitItem])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Items}
-      masterSource={MasterSource.Item}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      actions={actions}
-    >
+    <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode} actions={actions}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -288,9 +286,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     displayField='value'
                     displayFieldWidth={1}
                     required
-                    maxAccess={!editMode && maxAccess}
-                    onChange={newValue => {
-                      formik.setFieldValue('priceType', newValue?.key || '')
+                    maxAccess={maxAccess}
+                    onChange={(e, newValue) => {
+                      formik.setFieldValue('priceType', newValue?.key || null)
                     }}
                     error={formik.touched.priceType && formik.errors.priceType}
                   />
@@ -300,7 +298,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     name='sku'
                     label={labels.reference}
                     value={formik.values.sku}
-                    maxAccess={maxAccess}
+                    maxAccess={access}
                     readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('sku', '')}
@@ -455,6 +453,19 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onClear={() => formik.setFieldValue('description', '')}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name='isInactive'
+                        checked={formik.values.isInactive}
+                        onChange={formik.handleChange}
+                        maxAccess={maxAccess}
+                      />
+                    }
+                    label={labels.isInactive}
+                  />
+                </Grid>
               </Grid>
             </Grid>
 
@@ -505,7 +516,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid item xs={4}>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -517,6 +528,20 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                       />
                     }
                     label={labels.kitItem}
+                  />
+                </Grid>
+
+                <Grid item xs={4}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name='rmItem'
+                        checked={formik.values.rmItem}
+                        onChange={formik.handleChange}
+                        maxAccess={maxAccess}
+                      />
+                    }
+                    label={labels.rmItem}
                   />
                 </Grid>
 

@@ -2,9 +2,7 @@ import { useContext } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useWindow } from 'src/windows'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -13,7 +11,6 @@ import ReceiptVoucherForm from './forms/ReceiptVoucherForm'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { Checkbox } from '@mui/material'
 import toast from 'react-hot-toast'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
@@ -66,14 +63,13 @@ export default function CurrencyTrading() {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    try {
-      const response = await getRequest({
-        extension: FinancialRepository.ReceiptVouchers.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=recordId desc`
-      })
 
-      return { ...response, _startAt: _startAt }
-    } catch (e) {}
+    const response = await getRequest({
+      extension: FinancialRepository.ReceiptVouchers.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=recordId desc`
+    })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -90,14 +86,12 @@ export default function CurrencyTrading() {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: FinancialRepository.ReceiptVouchers.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success('Record Deleted Successfully')
-    } catch (e) {}
+    await postRequest({
+      extension: FinancialRepository.ReceiptVouchers.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
 
   const onApply = ({ search, rpbParams }) => {
@@ -177,6 +171,7 @@ export default function CurrencyTrading() {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           onEdit={edit}
           onDelete={del}

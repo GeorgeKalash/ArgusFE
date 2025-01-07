@@ -29,6 +29,7 @@ import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 
 const Table = ({
+  name,
   paginationType = '',
   globalStatus = true,
   viewCheckButtons = false,
@@ -59,7 +60,7 @@ const Table = ({
       ({ field }) =>
         accessLevel({
           maxAccess: props?.maxAccess,
-          name: field
+          name: name ? `${name}.${field}` : field
         }) !== HIDDEN
     )
     .map(col => {
@@ -452,7 +453,6 @@ const Table = ({
   }
 
   const onFirstDataRendered = async params => {
-    params.api.sizeColumnsToFit()
     await params.api.forEachNode(node => {
       if (rowSelection === 'single') {
         const checked = node.data?.checked || false
@@ -532,6 +532,7 @@ const Table = ({
             headerName: '',
             field: 'checked',
             flex: checkboxFlex,
+            width: 100,
             cellRenderer: checkboxCellRenderer,
             headerComponent: params =>
               rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
