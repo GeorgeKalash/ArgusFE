@@ -339,5 +339,6 @@ export const ResourceIds = {
   FoWorkCenters: 47101,
   RetailInvoice: 54201,
   RetailInvoiceReturn: 54301,
-  RetailPurchase: 54302
+  RetailPurchase: 54302,
+  CashTransfers: 33302
 }
