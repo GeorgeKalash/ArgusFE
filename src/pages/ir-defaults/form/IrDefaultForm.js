@@ -12,6 +12,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import * as yup from 'yup'
 
 const IrDefaultForm = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -36,6 +37,17 @@ const IrDefaultForm = ({ _labels, access }) => {
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: { ir_amcShortTerm: null, ir_amcLongTerm: null, ir_tfr_DocTypeId: null, recordId: 'N/A' },
+    validationSchema: yup.object().shape({
+      ir_amcShortTerm: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { ir_amcLongTerm } = this.parent
+
+          return value == null || ir_amcLongTerm == null || value <= ir_amcLongTerm
+        }),
+      ir_amcLongTerm: yup.number().nullable()
+    }),
     onSubmit: values => {
       postDefault(values)
     }

@@ -49,7 +49,8 @@ export default function FormShell({
   setIDInfoAutoFilled,
   visibleClear,
   actions,
-  filteredItems = []
+  filteredItems = [],
+  isParentWindow = true
 }) {
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
@@ -191,7 +192,7 @@ export default function FormShell({
                     recordId: form.values?.recordId,
                     functionId: functionId,
                     itemId: 0,
-                    clientId: form?.values?.header?.clientId
+                    clientId: form?.values?.header?.clientId || 0
                   },
                   width: 1200,
                   title: platformLabels.SalesTransactions
@@ -278,6 +279,7 @@ export default function FormShell({
                     resourceId: resourceId,
                     scId: form.values?.stockCountId,
                     siteId: form.values?.siteId,
+                    controllerId: form.values?.controllerId,
                     onSuccess: previewBtnClicked
                   },
                   width: 1150,
@@ -408,8 +410,9 @@ export default function FormShell({
           flexDirection: 'column',
           overflow: 'auto',
           '.MuiBox-root': {
-            paddingTop: '5px !important',
-            px: '0px !important'
+            paddingTop: isParentWindow ? '7px !important' : '0px !important',
+            px: '0px !important',
+            pb: '0px !important'
           }
         }}
       >
@@ -447,6 +450,7 @@ export default function FormShell({
                 resourceId: resourceId,
                 scId: form.values?.stockCountId,
                 siteId: form.values?.siteId,
+                controllerId: form.values?.controllerId,
                 onSuccess: previewBtnClicked
               },
               width: 1150,

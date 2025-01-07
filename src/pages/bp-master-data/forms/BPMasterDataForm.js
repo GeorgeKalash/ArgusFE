@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
@@ -19,9 +19,9 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store, setStore }) {
-  const [isLoading, setIsLoading] = useState(false)
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -36,7 +36,6 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
       category: null,
       categoryName: null,
       groupId: null,
-      groupName: null,
       flName: '',
       defaultInc: '',
       defaultId: '',
@@ -49,11 +48,7 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
       birthPlace: '',
       nationalityId: null,
       legalStatusId: null,
-      isBlackListed: false,
-      groupName: null,
-      nationalityName: null,
-      nationalityRef: null,
-      legalStatus: null
+      isBlackListed: false
     },
     enableReinitialize: false,
     validateOnChange: true,
@@ -83,12 +78,10 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
             idNum: obj.defaultId,
             incId: obj.defaultInc
           }
-          try {
-            await postRequest({
-              extension: BusinessPartnerRepository.MasterIDNum.set,
-              record: JSON.stringify(data)
-            })
-          } catch (error) {}
+          await postRequest({
+            extension: BusinessPartnerRepository.MasterIDNum.set,
+            record: JSON.stringify(data)
+          })
         }
 
         setStore(prevStore => ({
@@ -145,22 +138,15 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
   ]
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
+      if (recordId) {
+        const res = await getRequest({
+          extension: BusinessPartnerRepository.MasterData.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          const res = await getRequest({
-            extension: BusinessPartnerRepository.MasterData.get,
-            parameters: `_recordId=${recordId}`
-          })
-
-          res.record.birthDate = formatDateFromApi(res.record.birthDate)
-          formik.setValues(res.record)
-          setIsLoading(false)
-          await getDefaultId(res.record.defaultInc)
-        }
-      } catch (exception) {
-        setIsLoading(false)
+        res.record.birthDate = formatDateFromApi(res.record.birthDate)
+        formik.setValues(res.record)
+        await getDefaultId(res.record.defaultInc)
       }
     })()
   }, [recordId])
@@ -188,214 +174,208 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
     >
       <VertLayout>
         <Grow>
-          <Grid container>
-            {/* First Column */}
-            <Grid container rowGap={2} xs={6}>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  datasetId={DataSets.BP_CATEGORY}
-                  name='category'
-                  label={labels.category}
-                  valueField='key'
-                  displayField='value'
-                  values={formik.values}
-                  required
-                  readOnly={editMode}
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('category', newValue?.key)
-                    formik.setFieldValue('defaultInc', '')
-                    formik.setFieldValue('defaultId', '')
-                  }}
-                  error={formik.touched.category && Boolean(formik.errors.category)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={BusinessPartnerRepository.Group.qry}
-                  name='groupId'
-                  label={labels.groupName}
-                  valueField='recordId'
-                  displayField='name'
-                  values={formik.values}
-                  required
-                  readOnly={editMode}
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('groupId', newValue?.recordId)
-                  }}
-                  error={formik.touched.groupId && Boolean(formik.errors.groupId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='reference'
-                  label={labels.reference}
-                  value={formik.values.reference}
-                  required
-                  readOnly={editMode}
-                  maxLength='15'
-                  maxAccess={maxAccess}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('reference', '')}
-                  error={formik.touched.reference && Boolean(formik.errors.reference)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='name'
-                  label={labels.name}
-                  value={formik.values.name}
-                  required
-                  maxLength='70'
-                  maxAccess={maxAccess}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('name', '')}
-                  error={formik.touched.name && Boolean(formik.errors.name)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomDatePicker
-                  name='birthDate'
-                  label={labels.birthDate}
-                  value={formik.values.birthDate}
-                  onChange={formik.setFieldValue}
-                  maxAccess={maxAccess}
-                  onClear={() => formik.setFieldValue('birthDate', '')}
-                  error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='birthPlace'
-                  label={labels.birthPlace}
-                  value={formik.values.birthPlace}
-                  maxLength='30'
-                  maxAccess={maxAccess}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('birthPlace', '')}
-                  error={formik.touched.birthPlace && Boolean(formik.errors.birthPlace)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='flName'
-                  label={labels.flName}
-                  value={formik.values.flName}
-                  maxLength='70'
-                  maxAccess={maxAccess}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('flName', '')}
-                  error={formik.touched.flName && Boolean(formik.errors.flName)}
-                />
+          <Grid container spacing={3}>
+            <Grid item xs={6}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    datasetId={DataSets.BP_CATEGORY}
+                    name='category'
+                    label={labels.category}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    required
+                    readOnly={editMode}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('category', newValue?.key)
+                      formik.setFieldValue('defaultInc', '')
+                      formik.setFieldValue('defaultId', '')
+                    }}
+                    error={formik.touched.category && Boolean(formik.errors.category)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={BusinessPartnerRepository.Group.qry}
+                    name='groupId'
+                    label={labels.groupName}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    required
+                    readOnly={editMode}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik && formik.setFieldValue('groupId', newValue?.recordId)
+                    }}
+                    error={formik.touched.groupId && Boolean(formik.errors.groupId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='reference'
+                    label={labels.reference}
+                    value={formik.values.reference}
+                    required
+                    readOnly={editMode}
+                    maxLength='15'
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('reference', '')}
+                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='name'
+                    label={labels.name}
+                    value={formik.values.name}
+                    required
+                    maxLength='70'
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('name', '')}
+                    error={formik.touched.name && Boolean(formik.errors.name)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='birthDate'
+                    label={labels.birthDate}
+                    value={formik.values.birthDate}
+                    onChange={formik.setFieldValue}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('birthDate', '')}
+                    error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='birthPlace'
+                    label={labels.birthPlace}
+                    value={formik.values.birthPlace}
+                    maxLength='30'
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('birthPlace', '')}
+                    error={formik.touched.birthPlace && Boolean(formik.errors.birthPlace)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='flName'
+                    label={labels.flName}
+                    value={formik.values.flName}
+                    maxLength='70'
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('flName', '')}
+                    error={formik.touched.flName && Boolean(formik.errors.flName)}
+                  />
+                </Grid>
               </Grid>
             </Grid>
-            {/* Second Column */}
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='keywords'
-                  label={labels.keywords}
-                  value={formik.values.keywords}
-                  maxLength='30'
-                  maxAccess={maxAccess}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('keywords', '')}
-                  error={formik.touched.keywords && Boolean(formik.errors.keywords)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomComboBox
-                  name='defaultInc'
-                  label={labels.idCategory}
-                  valueField='recordId'
-                  displayField='name'
-                  readOnly={!formik.values.category || !store?.category?.length > 0}
-                  store={store.category}
-                  value={store?.category?.filter(item => item.recordId === parseInt(formik.values.defaultInc))[0]}
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('defaultId', '')
-                    formik.setFieldValue('defaultInc', newValue ? newValue.recordId : null)
-                    getDefaultId(newValue?.recordId)
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomNumberField
-                  name='defaultId'
-                  label={labels.defaultId}
-                  value={formik.values.defaultId}
-                  maxAccess={maxAccess}
-                  readOnly={!formik.values?.defaultInc}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('defaultId', '')}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.Country.qry}
-                  name='nationalityId'
-                  label={labels.nationalityId}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  values={formik.values}
-                  valueField='recordId'
-                  displayField='name'
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('nationalityId', newValue?.recordId)
-                  }}
-                  error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={BusinessPartnerRepository.LegalStatus.qry}
-                  parameters={`_startAt=0&_pageSize=100`}
-                  name='legalStatusId'
-                  label={labels.legalStatus}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  valueField='recordId'
-                  displayField='name'
-                  values={formik.values}
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('legalStatusId', newValue?.recordId)
-                  }}
-                  error={formik.touched.legalStatusId && Boolean(formik.errors.legalStatusId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='isInactive'
-                      maxAccess={maxAccess}
-                      checked={formik.values?.isInactive}
-                      onChange={formik.handleChange}
-                    />
-                  }
-                  label={labels.inactive}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='isBlackListed'
-                      maxAccess={maxAccess}
-                      checked={formik.values?.isBlackListed}
-                      onChange={formik.handleChange}
-                    />
-                  }
-                  label={labels.isBlackListed}
-                />
+            <Grid item xs={6}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='keywords'
+                    label={labels.keywords}
+                    value={formik.values.keywords}
+                    maxLength='30'
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('keywords', '')}
+                    error={formik.touched.keywords && Boolean(formik.errors.keywords)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomComboBox
+                    name='defaultInc'
+                    label={labels.idCategory}
+                    valueField='recordId'
+                    displayField='name'
+                    readOnly={!formik.values.category || !store?.category?.length > 0}
+                    store={store.category}
+                    value={store?.category?.filter(item => item.recordId === parseInt(formik.values.defaultInc))[0]}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('defaultId', '')
+                      formik.setFieldValue('defaultInc', newValue ? newValue.recordId : null)
+                      getDefaultId(newValue?.recordId)
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='defaultId'
+                    label={labels.defaultId}
+                    value={formik.values.defaultId}
+                    maxAccess={maxAccess}
+                    readOnly={!formik.values?.defaultInc}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('defaultId', '')}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Country.qry}
+                    name='nationalityId'
+                    label={labels.nationalityId}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    valueField='recordId'
+                    displayField='name'
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik && formik.setFieldValue('nationalityId', newValue?.recordId)
+                    }}
+                    error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={BusinessPartnerRepository.LegalStatus.qry}
+                    parameters={`_startAt=0&_pageSize=100`}
+                    name='legalStatusId'
+                    label={labels.legalStatus}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik && formik.setFieldValue('legalStatusId', newValue?.recordId)
+                    }}
+                    error={formik.touched.legalStatusId && Boolean(formik.errors.legalStatusId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomCheckBox
+                    name='isInactive'
+                    value={formik.values.isInactive}
+                    onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
+                    label={labels.inactive}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomCheckBox
+                    name='isBlackListed'
+                    value={formik.values?.isBlackListed}
+                    onChange={event => formik.setFieldValue('isBlackListed', event.target.checked)}
+                    label={labels.isBlackListed}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
               </Grid>
             </Grid>
           </Grid>

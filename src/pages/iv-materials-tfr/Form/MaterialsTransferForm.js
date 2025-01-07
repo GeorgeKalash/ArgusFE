@@ -88,7 +88,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         metalRef: '',
         totalCost: 0,
         priceType: null,
-        enabled: false
+        details: false
       }
     ]
   }
@@ -99,7 +99,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
   async function getDefaultFromSiteId() {
     if (editMode) {
-      return 
+      return
     }
 
     if (documentType?.dtId) {
@@ -109,10 +109,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     } else {
       const defaultFromSiteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
 
-      if (defaultFromSiteId?.value && !formik.values.fromSiteId) formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value || ''))
+      if (defaultFromSiteId?.value && !formik.values.fromSiteId)
+        formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value || ''))
     }
-
-    
   }
 
   async function handleNotificationSubmission(recordId, reference, formik, status) {
@@ -334,7 +333,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.itemId) {
           update({
-            enabled: false
+            details: false
           })
 
           return
@@ -352,7 +351,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             weight,
             unitCost,
             totalCost,
-            enabled: true,
+            details: true,
             msId: itemInfo?.msId,
             muRef: filteredMeasurements?.[0]?.reference,
             muId: filteredMeasurements?.[0]?.recordId,
@@ -364,7 +363,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     },
     {
       component: 'button',
-      name: 'enabled',
+      name: 'details',
       defaultValue: !!formik.values?.plId,
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png'
@@ -690,11 +689,11 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       getDefaultFromSiteId()
-      
-    if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
-      getDTD(documentType?.dtId)
-    }
+
+      if (documentType?.dtId) {
+        formik.setFieldValue('dtId', documentType.dtId)
+        getDTD(documentType?.dtId)
+      }
     })()
   }, [])
 
@@ -735,7 +734,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     })()
   }, [recordId, measurements, formik.values.toSiteId])
 
-
   async function previewBtnClicked() {
     const data = { printStatus: 2, recordId: formik.values.recordId }
 
@@ -746,6 +744,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
     invalidate()
   }
+
+  console.log(formik)
 
   return (
     <FormShell
@@ -934,7 +934,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                   maxAccess={maxAccess}
                   onClear={() => formik.setFieldValue('plantId', '')}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('plantId', newValue?.recordId)
+                    formik.setFieldValue('plantId', newValue?.recordId || null)
                   }}
                   error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                 />
@@ -946,14 +946,14 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
               const data = value?.map(transfer => {
                 return {
                   ...transfer,
-                  enabled: false,
+                  details: false,
                   qtyInBase: 0
                 }
               })
 
               formik?.setFieldValue('transfers', data)
             }}
-            name='items'
+            name='transfers'
             maxAccess={maxAccess}
             value={formik?.values?.transfers}
             error={formik?.errors?.transfers}
