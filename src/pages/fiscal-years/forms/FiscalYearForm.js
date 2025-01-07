@@ -1,5 +1,6 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
+import { startOfYear, endOfYear } from 'date-fns'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -32,8 +33,8 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
     initialValues: {
       recordId: null,
       fiscalYear: '',
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: startOfYear(new Date()),
+      endDate: endOfYear(new Date()),
       periods: '',
       status: ''
     },
