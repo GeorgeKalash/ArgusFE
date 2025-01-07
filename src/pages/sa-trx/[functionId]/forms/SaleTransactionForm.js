@@ -290,8 +290,6 @@ export default function SaleTransactionForm({
     })
   }
 
-  console.log(formik)
-
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
@@ -1464,7 +1462,7 @@ export default function SaleTransactionForm({
   }
 
   const setDefaultFields = () => {
-    formik.setFieldValue('header.currencyId', defaultsDataState.currencyId)
+    if (!editMode) formik.setFieldValue('header.currencyId', defaultsDataState.currencyId)
     formik.setFieldValue('header.plantId', userDefaultsDataState.plantId)
     formik.setFieldValue('header.spId', userDefaultsDataState.spId)
     formik.setFieldValue('header.siteId', userDefaultsDataState.siteId)

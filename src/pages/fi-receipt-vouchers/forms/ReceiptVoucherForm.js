@@ -150,7 +150,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   }
 
   useEffect(() => {
-    formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
+    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
   }, [defaultsDataState])
 
   const setDefaultFields = () => {

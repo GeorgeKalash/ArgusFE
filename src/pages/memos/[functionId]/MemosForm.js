@@ -169,7 +169,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   }
 
   useEffect(() => {
-    formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
+    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
   }, [defaultsDataState])
 
   useEffect(() => {

@@ -182,7 +182,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
 
           formik.setValues({
             ...res.record,
-
             date: formatDateFromApi(res.record.date)
           })
         }
@@ -260,7 +259,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   ]
 
   useEffect(() => {
-    formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
+    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
   }, [defaultsDataState])
 
   return (
