@@ -96,8 +96,6 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
     }))
   }
 
-  const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
-
   const submit = () => {
     if (formik.values?.files?.length) {
       const filesToUpload = formik.values.files.map(file => ({
