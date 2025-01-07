@@ -19,11 +19,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, window }) {
   const [isPosted, setIsPosted] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -51,7 +53,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
   })
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.MaterialsAdjustment.qry
+    endpointId: InventoryRepository.MaterialsAdjustment.page
   })
 
   const { formik } = useForm({
@@ -127,6 +129,21 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
     })
     invalidate()
     setIsPosted(true)
+  }
+
+  const onUnpost = async () => {
+    const values = { ...formik.values }
+    values.date = formatDateToApi(values.date)
+
+    await postRequest({
+      extension: InventoryRepository.MaterialsAdjustment.unpost,
+      record: JSON.stringify(values)
+    })
+    toast.success(platformLabels.Unposted)
+
+    setIsPosted(false)
+
+    invalidate()
   }
 
   const columns = [
@@ -215,6 +232,19 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: handlePost,
       disabled: !editMode
     }
   ]

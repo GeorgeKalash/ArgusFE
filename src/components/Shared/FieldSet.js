@@ -9,7 +9,7 @@ const FieldSet = ({ children, title, ...props }) => {
       sx={{
         border: '1px solid #0111',
         padding: '10px',
-        paddingTop: '15px',
+        paddingTop: '20px',
         position: 'relative',
         marginY: '10px',
         marginLeft: '0px',
