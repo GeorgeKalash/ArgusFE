@@ -103,29 +103,23 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
         recordId: ref.current.value || recordId
       }))
 
-      console.log(
-        ...filesToUpload.map((file, index) => ({
-          file: file.file
-        }))
-      )
-
-      const data = {
-        extension: SystemRepository.Attachment.set,
-        record: JSON.stringify(filesToUpload[0]),
-        files: filesToUpload
-      }
-
-      postRequest(data).then(res => {
+      return Promise.all(
+        filesToUpload.map(file =>
+          postRequest({
+            extension: SystemRepository.Attachment.set,
+            record: JSON.stringify(file),
+            file: file.file
+          })
+        )
+      ).then(res => {
         return res
       })
-    } else if (!formik.values?.files?.length && initialValues?.url && !formik.values?.url) {
-      const data = {
+    } else if (!files.length && initialValues?.url && !formik.values?.url) {
+      return postRequest({
         extension: SystemRepository.Attachment.del,
         record: JSON.stringify(initialValues),
         file: initialValues?.url
-      }
-
-      postRequest(data).then(res => {
+      }).then(res => {
         return res
       })
     }

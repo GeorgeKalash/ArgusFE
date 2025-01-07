@@ -221,7 +221,6 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
       editMode={editMode}
       actions={actions}
       disabledSubmit={isPosted || isClosed}
-      disableSubmitAndClear={isPosted || isClosed}
     >
       <VertLayout>
         <Grow>
@@ -243,7 +242,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || '')
                 }}
-                readOnly={isPosted || editMode}
+                readOnly={editMode}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
             </Grid>
@@ -263,7 +262,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId || '')
                 }}
-                readOnly={isPosted}
+                readOnly={isPosted || isClosed}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
@@ -276,7 +275,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
-                readOnly={isPosted || editMode}
+                readOnly={editMode}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
@@ -290,7 +289,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('baseAmount', e.target.value)}
                 onClear={() => formik.setFieldValue('baseAmount', '')}
-                readOnly={isPosted}
+                readOnly={isPosted || isClosed}
                 error={formik.touched.baseAmount && Boolean(formik.errors.baseAmount)}
                 maxLength={10}
                 decimalScale={2}
@@ -306,7 +305,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
-                readOnly={isPosted}
+                readOnly={isPosted || isClosed}
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 helperText={formik.touched.date && formik.errors.date}
               />
@@ -320,7 +319,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
-                readOnly={isPosted}
+                readOnly={isPosted || isClosed}
                 onClear={() => formik.setFieldValue('notes', '')}
                 error={formik.touched.notes && Boolean(formik.errors.notes)}
               />

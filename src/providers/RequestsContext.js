@@ -163,10 +163,6 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     var bodyFormData = new FormData()
     bodyFormData.append('record', body.record)
     body?.file && bodyFormData.append('file', body.file)
-    body?.files &&
-      body?.files.forEach(file => {
-        bodyFormData.append('file', file.file)
-      })
     const disableLoading = body.disableLoading || false
     !disableLoading && !loading && setLoading(true)
 

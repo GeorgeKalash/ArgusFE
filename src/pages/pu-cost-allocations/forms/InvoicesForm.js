@@ -13,7 +13,7 @@ import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 
 const InvoicesForm = ({ store, maxAccess, labels, editMode }) => {
-  const { recordId, isPosted } = store
+  const { recordId, isPosted, isClosed } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -80,7 +80,7 @@ const InvoicesForm = ({ store, maxAccess, labels, editMode }) => {
       infoVisible={false}
       isSavedClear={false}
       isCleared={false}
-      disabledSubmit={isPosted}
+      disabledSubmit={isPosted || isClosed}
       editMode={editMode}
     >
       <VertLayout>
@@ -89,8 +89,8 @@ const InvoicesForm = ({ store, maxAccess, labels, editMode }) => {
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values.items}
             error={formik.errors.items}
-            disabled={isPosted}
-            allowDelete={!isPosted}
+            disabled={isPosted || isClosed}
+            allowDelete={!isPosted && !isClosed}
             columns={[
               {
                 component: 'resourcelookup',
