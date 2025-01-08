@@ -93,7 +93,8 @@ const VerticalNavItems = props => {
                   display: 'flex',
                   alignItems: navCollapsed ? 'center !important' : 'left',
                   justifyContent: navCollapsed ? 'center' : 'left',
-                  paddingLeft: '8px'
+                  paddingLeft: '8px',
+                  paddingRight: '8px'
                 }}
               >
                 <Image src={imgName} alt={node.title} width={22} height={22} />
