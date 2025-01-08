@@ -49,7 +49,7 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
           width: '200px'
         },
         '& .css-n4sunj-MuiAutocomplete-listbox': {
-          maxHeight: maxHeight
+          maxHeight: `${maxHeight} !important`
         },
         '& .MuiMenuItem-root': {
           paddingRight: '10px'
