@@ -24,12 +24,15 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
+import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
+import { useWindow } from 'src/windows'
 
 export default function CashTransfersForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const [defaultsDataState, setDefaultsDataState] = useState(null)
   const { stack: stackError } = useError()
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.CashTransfers,
@@ -46,8 +49,8 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
     rateCalcMethod: 1,
     fromCashAccountId: null,
     toCashAccountId: null,
-    amount: null,
-    baseAmount: null,
+    amount: '',
+    baseAmount: '',
     dtName: null,
     notes: '',
     fromCARef: '',
@@ -174,14 +177,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
     return res
   }
 
-  async function refetchForm(recordId) {
-    const res = await getData(recordId)
 
-    formik.setValues({
-      ...res.record,
-      recordId
-    })
-  }
 
   const onPost = async () => {
     const copy = { ...formik.values }
@@ -225,12 +221,12 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
         rateCalcMethod: res.record?.rateCalcMethod,
         dirtyField: DIRTYFIELD_RATE
       })
-
       formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
       formik.setFieldValue('exRate', res.record?.exRate)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
   }
+
 
   useEffect(() => {
     ;(async function () {
@@ -241,6 +237,15 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
       await getDefaultsData()
     })()
   }, [])
+
+  async function refetchForm(recordId) {
+    const res = await getData(recordId)
+
+    formik.setValues({
+      ...res.record,
+      recordId
+    })
+  }
 
   useEffect(() => {
     if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
