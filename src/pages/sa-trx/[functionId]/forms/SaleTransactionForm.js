@@ -1652,6 +1652,7 @@ export default function SaleTransactionForm({
                 secondValueShow='clientName'
                 formObject={formik.values.header}
                 form={formik}
+                autoSelectFistValue={!formik.values.clientId}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' },
