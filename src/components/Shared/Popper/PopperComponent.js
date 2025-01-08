@@ -35,7 +35,7 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
   }, [anchorEl])
 
   const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
-  console.log(zoom, 'zooooooom')
+  const maxHeight = `${43 / zoom}vh`
 
   const canRenderBelow = window.innerHeight - rect?.bottom > popperRef?.current?.getBoundingClientRect()?.height
 
@@ -49,7 +49,7 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
           width: '200px'
         },
         '& .css-n4sunj-MuiAutocomplete-listbox': {
-          maxHeight: `${43 / zoom}vh`
+          maxHeight: maxHeight
         },
         '& .MuiMenuItem-root': {
           paddingRight: '10px'
