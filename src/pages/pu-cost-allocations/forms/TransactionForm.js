@@ -4,7 +4,6 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -19,13 +18,9 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
-export default function TransactionForm({ labels, maxAccess, recordId, seqNo, caId }) {
+export default function TransactionForm({ labels, maxAccess, recordId, seqNo, fetchGridData, caId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  const invalidate = useInvalidate({
-    endpointId: CostAllocationRepository.TrxCostType.qry
-  })
 
   const { formik } = useForm({
     initialValues: {
@@ -47,17 +42,18 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
       baseAmount: yup.number().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
+      await postRequest({
         extension: CostAllocationRepository.TrxCostType.set,
         record: JSON.stringify(obj)
+      }).then(res => {
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', res.recordId)
+        } else {
+          toast.success(platformLabels.Edited)
+        }
+        fetchGridData()
       })
-
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', response.recordId)
-      } else toast.success(platformLabels.Edited)
-
-      invalidate()
     }
   })
   const editMode = !!formik.values.recordId

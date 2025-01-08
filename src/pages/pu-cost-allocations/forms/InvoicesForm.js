@@ -46,11 +46,12 @@ const InvoicesForm = ({ store, maxAccess, labels, editMode }) => {
 
       const data = { ...values, items: item }
 
-      const res = await postRequest({
+      await postRequest({
         extension: CostAllocationRepository.Invoice.set2,
         record: JSON.stringify(data)
+      }).then(res => {
+        toast.success(platformLabels.Edited)
       })
-      toast.success(platformLabels.Edited)
     }
   })
 
@@ -109,10 +110,7 @@ const InvoicesForm = ({ store, maxAccess, labels, editMode }) => {
                     { from: 'vendorName', to: 'vendorName' },
                     { from: 'date', to: 'date' }
                   ],
-                  columnsInDropDown: [
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'date', value: 'date' }
-                  ]
+                  columnsInDropDown: [{ key: 'reference', value: 'Reference' }]
                 },
                 onChange({ row: { update, newRow } }) {
                   const formattedDate = newRow?.date ? formatDateFromApi(newRow?.date) : ''

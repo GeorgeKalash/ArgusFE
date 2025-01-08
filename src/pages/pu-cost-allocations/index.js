@@ -31,22 +31,23 @@ const PuCostAllocations = () => {
     return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithSearch({ filters, pagination = {} }) {
-    const { _startAt = 0, _size = 50 } = pagination
-    if (filters.qry) {
-      const response = await getRequest({
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
         extension: CostAllocationRepository.PuCostAllocations.snapshot,
-        parameters: `_filter=${filters.qry}&_startAt=${_startAt}&_size=${_size}`
+        parameters: `_filter=${filters.qry}&_startAt=${pagination._startAt || 0}&_size=${pagination._size || 50}`
       })
-
-      return { ...response, _startAt: _startAt }
-    } else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
 
   const {
     query: { data },
     refetch,
     labels: _labels,
+    filterBy,
+    clearFilter,
     paginationParameters,
     access,
     invalidate
@@ -54,8 +55,8 @@ const PuCostAllocations = () => {
     queryFn: fetchGridData,
     endpointId: CostAllocationRepository.PuCostAllocations.page,
     datasetId: ResourceIds.PuCostAllocation,
-    search: {
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
   })
 

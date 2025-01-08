@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CostAllocationRepository } from 'src/repositories/CostAllocationRepository'
 import { Grid } from '@mui/material'
+import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -83,7 +84,7 @@ const TransactionTab = ({ store, labels, access }) => {
       extension: CostAllocationRepository.TrxCostType.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
+    fetchGridData()
     toast.success(platformLabels.Deleted)
   }
 
@@ -95,6 +96,7 @@ const TransactionTab = ({ store, labels, access }) => {
         recordId: obj?.caId,
         caId: recordId,
         seqNo: obj?.seqNo ?? maxSeqNo,
+        fetchGridData: fetchGridData,
         maxAccess: access
       },
       width: 600,
