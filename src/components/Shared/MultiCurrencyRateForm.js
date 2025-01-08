@@ -170,10 +170,9 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
                     dirtyField: DIRTYFIELD_BASE_AMOUNT_MCR
                   })
 
-                  const { baseAmount, ...rest } = updatedRateRow
                   formik.setValues({
                     ...formik.values,
-                    ...rest
+                    ...updatedRateRow
                   })
                 }}
               />
