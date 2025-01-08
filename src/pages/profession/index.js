@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
@@ -28,7 +28,7 @@ const Professions = () => {
 
     return { ...response, _startAt: _startAt }
   }
-  
+
   async function fetchWithSearch({ filters }) {
     return await getRequest({
       extension: RemittanceSettingsRepository.Profession.snapshot,
@@ -115,8 +115,8 @@ const Professions = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar 
-          onAdd={add} 
+        <GridToolbar
+          onAdd={add}
           maxAccess={access}
           onSearch={value => {
             filterBy('qry', value)
@@ -124,11 +124,12 @@ const Professions = () => {
           onSearchClear={() => {
             clearFilter('qry')
           }}
-          inputSearch={true} 
+          inputSearch={true}
         />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

@@ -57,6 +57,7 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
+import TaxDetails from 'src/components/Shared/TaxDetails'
 
 export default function SaleTransactionForm({
   labels,
@@ -186,7 +187,8 @@ export default function SaleTransactionForm({
           taxId: null,
           taxDetails: null,
           notes: '',
-          saTrx: true
+          saTrx: true,
+          taxDetailsButton: false
         }
       ],
       serials: [],
@@ -387,7 +389,8 @@ export default function SaleTransactionForm({
       mdValue: 0,
       taxId: rowTax,
       minPrice,
-      taxDetails: rowTaxDetails
+      taxDetails: rowTaxDetails,
+      taxDetailsButton: true
     })
 
     formik.setFieldValue(
@@ -613,12 +616,29 @@ export default function SaleTransactionForm({
       }
     },
     {
-      component: 'numberfield',
+      component: 'button',
+      name: 'taxDetailsButton',
+      defaultValue: true,
+      props: {
+        imgSrc: '/images/buttonsIcons/tax-icon.png'
+      },
       label: labels.tax,
-      name: 'taxDetails'
+      onClick: (e, row) => {
+        if (row?.taxId) {
+          stack({
+            Component: TaxDetails,
+            props: {
+              taxId: row?.taxId,
+              obj: row
+            },
+            width: 1000,
+            title: platformLabels.TaxDetails
+          })
+        }
+      }
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.markdown,
       name: 'mdAmount',
       updateOn: 'blur',
@@ -1898,6 +1918,8 @@ export default function SaleTransactionForm({
                     decimalScale={2}
                     readOnly={isPosted}
                     handleButtonClick={handleButtonClick}
+                    isPercentIcon={cycleButtonState.text === '%' ? true : false}
+                    ShowDiscountIcons={true}
                     onChange={e => {
                       let discount = Number(e.target.value.replace(/,/g, ''))
                       if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
