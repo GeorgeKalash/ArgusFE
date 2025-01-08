@@ -12,6 +12,7 @@ export const ManufacturingRepository = {
   ProductionLine: {
     page: service + 'pageLIN',
     qry: service + 'qryLIN',
+    qry2: service + 'qry2LIN',
     set: service + 'setLIN',
     get: service + 'getLIN',
     del: service + 'delLIN'
@@ -24,7 +25,8 @@ export const ManufacturingRepository = {
     qry: service + 'qryWCT',
     set: service + 'setWCT',
     get: service + 'getWCT',
-    del: service + 'delWCT'
+    del: service + 'delWCT',
+    snapshot: service + 'snapshotWCT'
   },
   Routing: {
     page: service + 'pageRTN',
@@ -147,5 +149,8 @@ export const ManufacturingRepository = {
     set: service + 'setRMC',
     del: service + 'delRMC',
     page: service + 'pageRMC'
+  },
+  JobCategory: {
+    qry: service + 'qryJCA'
   }
 }
