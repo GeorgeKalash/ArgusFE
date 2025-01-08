@@ -36,15 +36,6 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
 
   const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
 
-  const [calculatedZoom, setCalculatedZoom] = useState(1)
-
-  useEffect(() => {
-    const zoomValue = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom')) || 1
-    setCalculatedZoom(zoomValue)
-  }, [])
-
-  const maxHeight = `${43 / calculatedZoom}vh`
-
   const canRenderBelow = window.innerHeight - rect?.bottom > popperRef?.current?.getBoundingClientRect()?.height
 
   return ReactDOM.createPortal(
@@ -57,7 +48,7 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
           width: '200px'
         },
         '& .css-n4sunj-MuiAutocomplete-listbox': {
-          maxHeight: `${maxHeight} !important`
+          maxHeight: `${43 / zoom}vh`
         },
         '& .MuiMenuItem-root': {
           paddingRight: '10px'
