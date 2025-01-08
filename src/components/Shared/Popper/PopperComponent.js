@@ -35,7 +35,15 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
   }, [anchorEl])
 
   const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
-  const maxHeight = `${43 / zoom}vh`
+
+  const [calculatedZoom, setCalculatedZoom] = useState(1)
+
+  useEffect(() => {
+    const zoomValue = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom')) || 1
+    setCalculatedZoom(zoomValue)
+  }, [])
+
+  const maxHeight = `${43 / calculatedZoom}vh`
 
   const canRenderBelow = window.innerHeight - rect?.bottom > popperRef?.current?.getBoundingClientRect()?.height
 
