@@ -9,7 +9,8 @@ const SwipeableDrawer = styled(MuiSwipeableDrawer)({
     listStyle: 'none'
   },
   '& .MuiListItem-gutters': {
-    padding: '20px'
+    paddingLeft: 4,
+    paddingRight: 4
   },
   '& .MuiDrawer-paper': {
     left: 'unset',

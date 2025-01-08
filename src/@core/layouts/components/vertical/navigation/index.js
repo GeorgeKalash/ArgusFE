@@ -243,7 +243,7 @@ const Navigation = props => {
         {(beforeVerticalNavMenuContentPosition === 'static' || !beforeNavMenuContent) && (
           <StyledBoxForShadow ref={shadowRef} />
         )}
-        <Box sx={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pb: '10px', pt: 2 }}>
           <TextField
             placeholder={platformLabels.Filter}
             variant='outlined'
