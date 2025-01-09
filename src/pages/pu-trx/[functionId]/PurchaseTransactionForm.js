@@ -198,7 +198,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         vendorId: yup.string().required(),
         siteId: yup
           .number()
-          .nullable()
           .test('', function (value) {
             const { dtId } = this.parent
             if (dtId == null) {
