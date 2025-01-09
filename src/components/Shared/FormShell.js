@@ -426,7 +426,7 @@ export default function FormShell({
           flexDirection: 'column',
           overflow: 'auto',
           '.MuiBox-root': {
-            paddingTop: isParentWindow ? '5px !important' : '0px !important',
+            paddingTop: isParentWindow ? '7px !important' : '0px !important',
             px: '0px !important',
             pb: '0px !important'
           }

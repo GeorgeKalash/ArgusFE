@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton } from '@mui/material'
 import components from './components'
@@ -9,6 +9,8 @@ import { GridDeleteIcon } from '@mui/x-data-grid'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export function DataGrid({
   name, // maxAccess
@@ -27,14 +29,45 @@ export function DataGrid({
 }) {
   const gridApiRef = useRef(null)
 
+  const isDup = useRef(null)
+
+  const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   const [ready, setReady] = useState(false)
 
   const skip = allowDelete ? 1 : 0
 
+  function checkDuplicates(field, data) {
+    return value.find(
+      item => item.id != data.id && item?.[field] && item?.[field]?.toLowerCase() === data?.[field]?.toLowerCase()
+    )
+  }
+
+  function stackDuplicate(params) {
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: platformLabels?.duplicateItem,
+        okButtonAction: window => {
+          deleteRow(params), window.close()
+        },
+        fullScreen: false
+      },
+      onClose: () => deleteRow(params),
+      width: 450,
+      height: 150,
+      title: platformLabels.Confirmation
+    })
+  }
+
   const process = (params, oldRow, setData) => {
     const column = columns.find(({ name }) => name === params.colDef.field)
+
+    if (params.colDef?.disableDuplicate && checkDuplicates(params.colDef.field, params.data)) {
+      return
+    }
 
     const updateCommit = changes => {
       setData(changes, params)
@@ -53,9 +86,68 @@ export function DataGrid({
       commit({ changes: updatedRow })
     }
 
+    const addRow = async ({ changes }) => {
+      if (params.rowIndex === value.length - 1 && !changes) {
+        addNewRow(params)
+
+        return
+      }
+
+      const index = value.findIndex(({ id }) => id === changes.id)
+      const row = value[index]
+      const updatedRow = { ...row, ...changes }
+      let rows
+
+      gridApiRef.current.setRowData(value.map(row => (row.id === updatedRow?.id ? updatedRow : row)))
+
+      if (params.rowIndex === value.length - 1 && column?.jumpToNextLine) {
+        const highestIndex = value?.length
+          ? value.reduce((max, current) => (max.id > current.id ? max : current)).id + 1
+          : 1
+
+        const defaultValues = Object.fromEntries(
+          columns?.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
+        )
+        rows = [
+          ...value.map(row => (row.id === updatedRow.id ? updatedRow : row)),
+          {
+            id: highestIndex,
+            ...defaultValues
+          }
+        ]
+        onChange(rows)
+
+        setTimeout(() => {
+          params.api.startEditingCell({
+            rowIndex: index + 1,
+            colKey: column?.name
+          })
+        }, 10)
+      } else {
+        rows = [...value.map(row => (row.id === updatedRow.id ? updatedRow : row))]
+        const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
+        onChange(rows)
+        params.api.startEditingCell({
+          rowIndex: index,
+          colKey: allColumns[currentColumnIndex + 2].colId
+        })
+      }
+    }
+
     if (column.onChange) {
       column.onChange({
-        row: { oldRow: oldRow, newRow: params.node.data, update: updateCommit, updateRow: updateRowCommit }
+        row: {
+          oldRow: value[params.rowIndex],
+          newRow: params.node.data,
+          update: updateCommit,
+          updateRow: updateRowCommit,
+          addRow:
+            params.rowIndex === value.length - 1 && !column.updateOn
+              ? column?.jumpToNextLine
+                ? addNewRow
+                : () => {}
+              : addRow
+        }
       })
     }
   }
@@ -108,8 +200,8 @@ export function DataGrid({
     }
   }, [rowSelectionModel])
 
-  const addNewRow = params => {
-    const highestIndex = params?.node?.data?.id + 1 || 1
+  const addNewRow = () => {
+    const highestIndex = Math.max(...value?.map(item => item.id), 0) + 1
 
     const defaultValues = allColumns
       .filter(({ name }) => name !== 'id')
@@ -208,7 +300,15 @@ export function DataGrid({
   }
 
   const onCellKeyDown = params => {
-    const { event, api, node } = params
+    const { event, api, node, data, colDef } = params
+
+    if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && event.key !== 'Enter') {
+      isDup.current = true
+
+      return
+    } else {
+      isDup.current = false
+    }
 
     const allColumns = api.getColumnDefs()
     const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
@@ -245,7 +345,7 @@ export function DataGrid({
     ) {
       if (allowAddNewLine && !error) {
         event.stopPropagation()
-        addNewRow(params)
+        addNewRow()
       }
     }
 
@@ -367,6 +467,12 @@ export function DataGrid({
 
       setData(changes, params)
 
+      if (params?.colDef?.disableDuplicate && checkDuplicates(params.colDef?.field, params.node?.data)) {
+        stackDuplicate(params)
+
+        return
+      }
+
       if (column.colDef.updateOn !== 'blur') {
         commit(changes)
 
@@ -487,8 +593,14 @@ export function DataGrid({
 
   useEffect(() => {
     function handleBlur(event) {
-      if (gridContainerRef.current && !gridContainerRef.current.contains(event.target)) {
+      if (
+        gridContainerRef.current &&
+        !gridContainerRef.current.contains(event.target) &&
+        gridApiRef.current?.getEditingCells()?.length > 0
+      ) {
         gridApiRef.current?.stopEditing()
+      } else {
+        return
       }
     }
 
@@ -510,7 +622,8 @@ export function DataGrid({
       if (
         gridContainerRef.current &&
         !event.target.value &&
-        event.target.classList.contains('ag-center-cols-viewport')
+        event.target.classList.contains('ag-center-cols-viewport') &&
+        gridApiRef.current?.getEditingCells()?.length > 0
       ) {
         gridApiRef.current?.stopEditing()
       }
@@ -559,8 +672,13 @@ export function DataGrid({
 
   const onCellEditingStopped = params => {
     const { data, colDef } = params
-
     if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
+      if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
+        stackDuplicate(params)
+
+        return
+      }
+
       process(params, data, setData)
     }
   }
