@@ -152,7 +152,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     }
 
     formik.setFieldValue('amount', calculatedAmount)
-    formik.setFieldValue('baseAmount', calculatedAmount)
+    if (!formik.values.baseAmount) formik.setFieldValue('baseAmount', calculatedAmount)
   }, [formik.values.isSubjectToVAT, initialVatPct, formik.values.subtotal])
 
   async function getDefaultsData() {
@@ -548,14 +548,16 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     value={formik.values.amount}
                     required
                     maxAccess={maxAccess}
-                    onBlur={async e => {
-                      await getMultiCurrencyFormData(
-                        formik.values.currencyId,
-                        formatDateForGetApI(formik.values.date),
-                        RateDivision.FINANCIALS,
-                        Number(e.target.value.replace(/,/g, ''))
-                      )
-                      formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
+                    onChange={async e => {
+                      if (e.target.value) {
+                        await getMultiCurrencyFormData(
+                          formik.values.currencyId,
+                          formatDateForGetApI(formik.values.date),
+                          RateDivision.FINANCIALS,
+                          Number(e.target.value.replace(/,/g, ''))
+                        )
+                        formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
+                      }
                     }}
                     onClear={async () => {
                       await getMultiCurrencyFormData(

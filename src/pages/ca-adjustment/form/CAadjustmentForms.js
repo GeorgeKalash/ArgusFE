@@ -91,7 +91,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
         toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
-          baseAmount: obj.amount,
+          baseAmount: !formik.values.baseAmount ? obj.amount : formik.values.baseAmount,
 
           recordId: response.recordId
         })
@@ -432,14 +432,16 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 readOnly={formik.values.status == '3'}
                 required
                 maxAccess={maxAccess}
-                onBlur={async e => {
-                  await getMultiCurrencyFormData(
-                    formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
-                    RateDivision.FINANCIALS,
-                    Number(e.target.value.replace(/,/g, ''))
-                  )
-                  formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
+                onChange={async e => {
+                  if (e.target.value) {
+                    await getMultiCurrencyFormData(
+                      formik.values.currencyId,
+                      formatDateForGetApI(formik.values.date),
+                      RateDivision.FINANCIALS,
+                      Number(e.target.value.replace(/,/g, ''))
+                    )
+                    formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
+                  }
                 }}
                 onClear={async () => {
                   await getMultiCurrencyFormData(
