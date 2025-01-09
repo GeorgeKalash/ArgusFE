@@ -22,11 +22,11 @@ const InvoicesForm = ({ store, maxAccess, labels, editMode }) => {
     validateOnChange: true,
     maxAccess,
     initialValues: {
-      caId: recordId || null,
+      caId: recordId,
       items: [
         {
           id: 1,
-          caId: recordId || null,
+          caId: recordId,
           invoiceId: null,
           invoiceRef: '',
           currencyRef: null,

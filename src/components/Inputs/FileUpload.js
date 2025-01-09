@@ -4,10 +4,12 @@ import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import DeleteIcon from '@mui/icons-material/Delete'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
   const hiddenInputRef = useRef()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [files, setFiles] = useState([])
   const [initialValues, setInitialData] = useState({})
 
@@ -64,7 +66,7 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
 
         const fileSizeInKB = Math.round(selectedFile.size / 1024)
         if (parseInt(fileSizeInKB) > 500) {
-          alert('Max file size is 500KB.')
+          alert(platformLabels.MaxFileSize)
 
           continue
         }
@@ -190,7 +192,7 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
               flex: 1
             }}
           >
-            <span>Click to upload files</span>
+            <span>{platformLabels.fileUpload}</span>
           </Box>
         </Box>
       </Box>

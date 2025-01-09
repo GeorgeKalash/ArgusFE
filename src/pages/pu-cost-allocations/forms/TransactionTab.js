@@ -34,7 +34,6 @@ const TransactionTab = ({ store, labels, access }) => {
       flex: 1,
       type: 'number'
     },
-    ,
     {
       field: 'accountRef',
       headerName: labels.accountRef,
