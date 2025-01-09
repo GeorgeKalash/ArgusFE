@@ -47,6 +47,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
   const [itemGridData, setItemGridData] = useState([])
   const [defaultsDataState, setDefaultsDataState] = useState(null)
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
+  const [taxDetailsStore, setTaxDetailsStore] = useState([])
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
@@ -68,14 +69,14 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     status: 1,
     wip: 1,
     isVattable: false,
-    taxId: '',
+    taxId: null,
     subtotal: '',
     amount: 0,
     vatAmount: '',
     totalWeight: 0,
     plId: '',
     ptId: '',
-    weight: '',
+    weight: 0,
     search: '',
     serials: [
       {
@@ -96,7 +97,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
         vatAmount: 0,
         vatPct: 0,
         unitPrice: 0,
-        taxId: '',
+        taxId: null,
         taxDetails: null,
         taxDetailsButton: false,
         priceType: 0,
@@ -263,6 +264,12 @@ export default function DraftForm({ labels, access, recordId, currency, window }
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
 
+  const FilteredListByTaxId = (store, taxId) => {
+    if (!store?.data?.items) return []
+
+    return store.data.items.map(item => item.data).filter(obj => obj.taxId === taxId)
+  }
+
   const serialsColumns = [
     {
       component: 'resourcelookup',
@@ -271,80 +278,60 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       flex: 2,
       props: {
         endpointId: InventoryRepository.Serial.qry,
-        parameters: { _itemId: 0, _siteId: formik.values.siteId, _srlNo: 0, _startAt: 0, _pageSize: 1000 }, //page size, filter
+        parameters: { _itemId: 0, _siteId: formik?.values?.siteId || 0, _srlNo: 0, _startAt: 0, _pageSize: 1000 },
         displayField: 'srlNo',
         valueField: 'srlNo',
-        displayFieldWidth: 5
-      }
-
-      //async onChange({ row: { update, newRow } }) {
-      /*   if (!newRow.itemId) {
-          update({
-            saTrx: false
-          })
-
+        displayFieldWidth: 2,
+        columnsInDropDown: [{ key: 'srlNo', value: 'Serial No' }]
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow?.srlNo) {
           return
         }
-        const itemPhysProp = await getItemPhysProp(newRow.itemId)
-        const itemInfo = await getItem(newRow.itemId)
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update)
-        let rowTax = null
-        let rowTaxDetails = null
 
-        if (!formik.values.taxId) {
-          if (itemInfo.taxId) {
-            const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
+        if (newRow?.srlNo) {
+          if (!formik.values.plId) {
+            //error msg
+          } else {
+            const res = await getRequest({
+              extension: SaleRepository.DraftInvoiceSerial.get,
+              parameters: `_currencyId=${formik?.values?.currencyId}&_plId=${formik?.values?.plId}&_srlNo=${newRow?.srlNo}&_siteId=${formik?.values?.siteId}`
+            })
+            update({
+              //sitereadonly condition
+              sku: res?.record?.sku || '',
+              itemName: res?.record?.itemName || '',
+              weight: res?.record?.weight || 0,
+              itemId: res?.record?.itemId || null,
+              priceType: res?.record?.priceType || 0,
+              metalId: res?.record?.metalId || null,
+              metalRef: res?.record?.metalRef || '',
+              designId: res?.record?.designId || null,
+              designRef: res?.record?.designRef || '',
+              volume: res?.record?.volume || 0,
+              baseLaborPrice: res?.record?.baseLaborPrice || 0,
+              extendedPrice: res?.record?.extendedPrice || 0,
+              unitPrice: res?.record?.unitPrice || 0,
+              vatPct: res?.record?.vatPct || 0
+            })
+            if (res?.record?.taxId) {
+              if (formik.values?.taxId) {
+                update({
+                  taxId: formik.values?.taxId,
+                  taxDetails: FilteredListByTaxId(taxDetailsStore, formik.values?.taxId)
+                })
+              } else {
+                update({
+                  taxId: res?.record?.taxId,
+                  taxDetails: FilteredListByTaxId(taxDetailsStore, res?.record?.taxId)
+                })
+              }
+            }
 
-            const details = taxDetailsResponse.map(item => ({
-              taxId: itemInfo.taxId,
-              taxCodeId: item.taxCodeId,
-              taxBase: item.taxBase,
-              amount: item.amount
-            }))
-            rowTax = itemInfo.taxId
-            rowTaxDetails = details
+            //autosave
           }
-        } else {
-          const taxDetailsResponse = await getTaxDetails(formik.values.taxId)
-
-          const details = taxDetailsResponse.map(item => ({
-            taxId: formik.values.taxId,
-            taxCodeId: item.taxCodeId,
-            taxBase: item.taxBase,
-            amount: item.amount
-          }))
-          rowTax = formik.values.taxId
-          rowTaxDetails = details
         }
-
-        const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-        setFilteredMU(filteredMeasurements)
-
-        update({
-          volume: parseFloat(itemPhysProp?.volume) || 0,
-          weight: parseFloat(itemPhysProp?.weight || 0).toFixed(2),
-          vatAmount: parseFloat(itemInfo?.vatPct || 0).toFixed(2),
-          basePrice: parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5),
-          unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
-          upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
-          priceType: ItemConvertPrice?.priceType || 1,
-          mdAmount: formik.values.maxDiscount ? parseFloat(formik.values.maxDiscount).toFixed(2) : 0,
-          qty: 0,
-          msId: itemInfo?.msId,
-          muRef: filteredMeasurements?.[0]?.reference,
-          muId: filteredMeasurements?.[0]?.recordId,
-          extendedPrice: parseFloat('0').toFixed(2),
-          mdValue: 0,
-          taxId: rowTax,
-          taxDetails: formik.values.isVattable ? rowTaxDetails : null,
-          mdType: 1,
-          siteId: formik?.values?.siteId,
-          siteRef: await getSiteRef(formik?.values?.siteId),
-          saTrx: true
-        })
-
-        formik.setFieldValue('mdAmount', formik.values.currentDiscount ? formik.values.currentDiscount : 0) */
-      //}
+      }
     },
     {
       component: 'numberfield',
@@ -478,7 +465,12 @@ export default function DraftForm({ labels, access, recordId, currency, window }
   async function onImportClick() {
     stack({
       Component: ImportSerials,
-      props: { maxAccess },
+      props: {
+        endPoint: SaleRepository.DraftInvoiceSerial.batch,
+        draftId: formik.values.recordId,
+        //onCloseimport: fillGrids,
+        maxAccess: maxAccess
+      },
       width: 550,
       height: 270,
       title: platformLabels.importSerials
@@ -496,7 +488,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || formik.values.status == 3 || formik.values.deliveryStatus == 4
+      disabled: !isClosed || formik.values.status == 3 || formik.values.deliveryStatus == 4 || !editMode
     },
     {
       key: 'WorkFlow',
@@ -511,6 +503,28 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       disabled: !editMode || formik.values.status != 1
     }
   ]
+
+  async function fillGrids(diHeader, diItems) {
+    const modifiedList = await Promise.all(
+      diItems.list?.map(async (item, index) => {
+        const taxDetailsResponse = diHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
+
+        //tax js function
+
+        return {
+          ...item,
+          id: index + 1,
+          baseLaborPrice: parseFloat(item.baseLaborPrice).toFixed(2),
+          unitPrice: parseFloat(item.unitPrice).toFixed(2),
+          vatAmount: parseFloat(item.vatAmount).toFixed(2),
+          taxDetailsButton: true,
+          taxDetails: taxDetailsResponse
+        }
+      })
+    )
+
+    formik.setFieldValue('serials', modifiedList)
+  }
 
   async function fillForm(diHeader, diItems) {
     console.log('in fill form ', diHeader, diItems)
@@ -533,6 +547,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       })
     )
 
+    console.log('ll', modifiedList)
     formik.setValues({
       ...diHeader.record,
       amount: parseFloat(diHeader?.record?.amount).toFixed(2),
@@ -627,7 +642,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
             acc[metalId] = { metal: metalRef, pcs: 0, totalWeight: 0 }
           }
           acc[metalId].pcs += 1
-          acc[metalId].totalWeight = parseFloat(weight || 0)
+          acc[metalId].totalWeight += parseFloat(weight || 0)
         }
 
         return acc
@@ -636,12 +651,13 @@ export default function DraftForm({ labels, access, recordId, currency, window }
 
       setMetalGridData(Object.values(metalMap))
 
+      var seqNo = 0
+
       const itemMap = serials.reduce((acc, { sku, itemId, itemName, weight }) => {
-        var seqNo = 0
         if (itemId) {
           if (!acc[itemId]) {
-            acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, seqNo: seqNo + 1 }
             seqNo++
+            acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, seqNo: seqNo }
           }
           acc[itemId].pcs += 1
           acc[itemId].weight += parseFloat(weight || 0)
@@ -649,9 +665,9 @@ export default function DraftForm({ labels, access, recordId, currency, window }
 
         return acc
       }, {})
-      console.log('itemGrp', Object.values(itemMap))
+      console.log('itemGrp', Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo))
 
-      setItemGridData(Object.values(itemMap))
+      setItemGridData(Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo))
     }
   }, [formik?.values?.serials])
 
@@ -708,8 +724,8 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       if (recordId) {
         refetchForm(recordId)
       } else {
-        formik.setFieldValue('currencyId', parseInt(defaultsDataState.currencyId))
-        formik.setFieldValue('plId', parseInt(defaultsDataState.plId))
+        formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
+        formik.setFieldValue('plId', parseInt(defaultsDataState?.plId))
         if (documentType?.dtId) {
           //search for documentType?.dtId
           formik.setFieldValue('dtId', documentType.dtId)

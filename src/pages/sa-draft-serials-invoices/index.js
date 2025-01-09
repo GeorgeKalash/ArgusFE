@@ -75,7 +75,7 @@ const DraftSerialsInvoices = () => {
       type: 'number'
     },
     {
-      field: 'totalWeight',
+      field: 'weight',
       headerName: labels.totalWeight,
       flex: 1,
       type: 'number'

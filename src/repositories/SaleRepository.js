@@ -214,6 +214,8 @@ export const SaleRepository = {
     reopen: service + 'reopenDFT'
   },
   DraftInvoiceSerial: {
-    qry: service + 'qryDFS'
+    qry: service + 'qryDFS',
+    get: service + 'get2DFS',
+    batch: service + 'batchDFS'
   }
 }

@@ -13,12 +13,24 @@ import CustomTextArea from '../Inputs/CustomTextArea'
 import { useFormik } from 'formik'
 import { useContext, useEffect, useState, useRef } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
+import ImportConfirmation from './ImportConfirmation'
+import { ThreadProgress } from './ThreadProgress'
+import { useWindow } from 'src/windows'
+import { useError } from 'src/error'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
-const ImportSerials = maxAccess => {
+const ImportSerials = (endPoint, draftId, maxAccess, window) => {
+  console.log('th', maxAccess)
+  console.log(endPoint)
+  console.log(draftId)
+  //console.log(onCloseimport)
+  const { stack } = useWindow()
+  const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const imageInputRef = useRef(null)
   const [file, setFile] = useState(null)
   const [parsedFileContent, setParsedFileContent] = useState([])
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const formik = useFormik({
     initialValues: {
@@ -36,39 +48,6 @@ const ImportSerials = maxAccess => {
     formik.setFieldValue('serialCount', rowCountWithData)
   }
 
-  const parseCSV = (text, columns) => {
-    const lines = text.split('\n').filter(line => line.trim())
-
-    if (lines.length === 0) return
-
-    const headers = lines[0].split(',').map(header => header.trim())
-
-    const columnMap = columns.reduce((map, col) => {
-      map[col.headerName] = col
-
-      return map
-    }, {})
-
-    const orderedColumns = headers.map(header => columnMap[header])
-
-    const rows = lines.slice(1).map(line => {
-      const values = line.split(',').map(value => value.trim())
-
-      return orderedColumns.reduce((obj, col, index) => {
-        const header = headers[index]
-        if (col) {
-          obj[col.field] = convertValue(values[index], col.dataType)
-        } else {
-          obj[header] = values[index]
-        }
-
-        return obj
-      }, {})
-    })
-
-    return transform(rows)
-  }
-
   const handleFileChange = event => {
     const file = event.target.files[0]
 
@@ -78,9 +57,8 @@ const ImportSerials = maxAccess => {
       const reader = new FileReader()
       reader.onload = e => {
         const text = e.target.result
-
-        const data = parseCSV(text, columns)
-        //setParsedFileContent(data)
+        console.log('text', text)
+        setParsedFileContent(text)
       }
       reader.readAsText(file)
     }
@@ -92,12 +70,70 @@ const ImportSerials = maxAccess => {
     imageInputRef.current.value = null
   }
 
+  const onImportConfirmation = async () => {
+    stack({
+      Component: ImportConfirmation,
+      props: {
+        open: { flag: true },
+        fullScreen: false,
+        onConfirm: importSerialsData,
+        dialogText: platformLabels.importConfirmation
+      },
+      width: 470,
+      height: 170,
+      title: platformLabels.import
+    })
+  }
+
+  const importSerialsData = async () => {
+    try {
+      const transformedSerials = formik.values.serials?.replace(/\n/g, ',\r\n')
+      formik.values.serials && setParsedFileContent(transformedSerials)
+
+      const SerialsPack = {
+        draftId: draftId,
+        serials: parsedFileContent
+      }
+
+      try {
+        await postRequest({
+          extension: endPoint,
+          record: JSON.stringify(SerialsPack)
+        })
+
+        stack({
+          Component: ThreadProgress,
+          props: {
+            recordId: Number(draftId),
+            access: maxAccess
+          },
+          width: 500,
+          height: 450,
+          closable: false,
+          title: platformLabels.Progress
+        })
+
+        toast.success(platformLabels.Imported)
+        //onCloseimport()
+        window.close()
+      } catch (exception) {}
+    } catch (error) {
+      formik.resetForm()
+      setFile(null)
+      setParsedFileContent([])
+      imageInputRef.current.value = null
+      stackError({
+        message: error?.message
+      })
+    }
+  }
+
   const actions = [
     {
       key: 'Import',
       condition: true,
-      onClick: () => handleClick(),
-      disabled: !formik?.values?.name && !formik?.values?.serials
+      onClick: onImportConfirmation,
+      disabled: !file?.name && !formik?.values?.serials
     }
   ]
 
@@ -137,19 +173,19 @@ const ImportSerials = maxAccess => {
                   onChange={handleFileChange}
                 />
                 <Button
-                onClick={clearFile}
-                sx={{
-                  backgroundColor: '#f44336',
-                  '&:hover': {
+                  onClick={clearFile}
+                  sx={{
                     backgroundColor: '#f44336',
-                    opacity: 0.8
-                  },
-                  ml: 2
-                }}
-                variant='contained'
-              >
-                <img src='/images/buttonsIcons/clear.png' alt={platformLabels.Clear} />
-              </Button>
+                    '&:hover': {
+                      backgroundColor: '#f44336',
+                      opacity: 0.8
+                    },
+                    ml: 2
+                  }}
+                  variant='contained'
+                >
+                  <img src='/images/buttonsIcons/clear.png' alt={platformLabels.Clear} />
+                </Button>
               </Grid>
             </Grid>
           </Grid>
@@ -177,7 +213,7 @@ const ImportSerials = maxAccess => {
         </Grid>
       </Fixed>
       <Fixed>
-        <WindowToolbar smallBox={true} actions={actions}  />
+        <WindowToolbar smallBox={true} actions={actions} />
       </Fixed>
     </VertLayout>
   )

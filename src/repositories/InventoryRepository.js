@@ -254,6 +254,7 @@ export const InventoryRepository = {
     get: service + 'getDTD'
   },
   Serial: {
-    qry: service + 'qrySRL'
+    qry: service + 'qrySRL',
+    snapshot: service + 'snapshotSRL'
   }
 }
