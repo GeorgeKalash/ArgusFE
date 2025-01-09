@@ -35,6 +35,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import Table from 'src/components/Shared/Table'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import ImportSerials from 'src/components/Shared/ImportSerials'
+import { getIPR, DIRTYFIELD_BASE_PRICE } from 'src/utils/ItemPriceCalculator'
 
 export default function DraftForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -48,6 +49,10 @@ export default function DraftForm({ labels, access, recordId, currency, window }
   const [defaultsDataState, setDefaultsDataState] = useState(null)
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [taxDetailsStore, setTaxDetailsStore] = useState([])
+
+  //MISSING
+  // delete function of grid and api request
+  //
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
@@ -146,24 +151,19 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     }),
     onSubmit: async obj => {
       const copy = { ...obj }
-      copy.pcs = copy.items.length
-      delete copy.items
+      console.log('obj', obj)
+      console.log('obj', copy.serials.length)
+      copy.pcs = copy.serials.length
+      delete copy.serials
       copy.date = formatDateToApi(copy.date)
-
-      //copy.dueDate = formatDateToApi(copy.dueDate)
-      //copy.miscAmount = copy.miscAmount || 0
 
       //if (!obj.rateCalcMethod) delete copy.rateCalcMethod
 
-      const updatedRows = formik.values.items.map((itemDetails, index) => {
-        //const { physicalProperty, ...rest } = itemDetails
-
+      const updatedRows = formik.values.serials.map((copy, index, ...rest) => {
         return {
           ...rest,
           seqNo: index + 1,
-          draftId: obj.recordId
-
-          //applyVat: obj.isVattable
+          draftId: copy?.recordId || 0
         }
       })
 
@@ -231,15 +231,12 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     })
 
     const vatCalcRow = getVatCalc({
-      basePrice: itemPriceRow?.basePrice,
+      basePrice: 0,
+      qty: parseFloat(newRow?.weight),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
-      upo: parseFloat(itemPriceRow?.upo).toFixed(2),
-      mdValue: itemPriceRow?.mdValue,
-      mdType: itemPriceRow?.mdType,
-      mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),
-      baseLaborPrice: parseFloat(itemPriceRow?.unitPrice).toFixed(3),
-      unitPrice: parseFloat(itemPriceRow?.extendedPrice).toFixed(2),
-      totalWeightPerG: parseFloat(itemPriceRow?.totalWeightPerG)
+      tdPct: 0,
+      baseLaborPrice: 0,
+      taxDetails: parseFloat(itemPriceRow?.taxDetails)
     })
 
     let commonData = {
@@ -264,6 +261,25 @@ export default function DraftForm({ labels, access, recordId, currency, window }
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
 
+  const assignStoreTaxDetails = () => {
+    let serials = formik?.values?.serials
+    console.log('in assign', serials)
+
+    const updatedSer = serials?.map(serial => {
+      if (serial.taxId != null) {
+        return {
+          ...serial,
+          extendedPrice: serial.unitPrice,
+          taxDetails: FilteredListByTaxId(taxDetailsStore, serial.taxId)
+        }
+      }
+
+      return serial
+    })
+    console.log('in assign', updatedSer)
+    formik.setFieldValue('serials', updatedSer)
+  }
+
   const FilteredListByTaxId = (store, taxId) => {
     if (!store?.data?.items) return []
 
@@ -282,7 +298,10 @@ export default function DraftForm({ labels, access, recordId, currency, window }
         displayField: 'srlNo',
         valueField: 'srlNo',
         displayFieldWidth: 2,
-        columnsInDropDown: [{ key: 'srlNo', value: 'Serial No' }]
+        columnsInDropDown: [{ key: 'srlNo', value: 'Serial No' }],
+        mapping: [{ from: 'srlNo', to: 'srlNo' }]
+
+        //readOnly: if rlNo is selected
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.srlNo) {
@@ -327,7 +346,9 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                 })
               }
             }
+            getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
 
+            //check if on update fill bottom grids or call it
             //autosave
           }
         }
@@ -383,6 +404,8 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       },
       label: labels.tax,
       onClick: (e, row) => {
+        row.qty = row.weight
+        row.basePrice = 0
         if (row?.taxId) {
           stack({
             Component: TaxDetails,
@@ -405,9 +428,9 @@ export default function DraftForm({ labels, access, recordId, currency, window }
         decimalScale: 2
       },
       async onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
+        await getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
 
-        //calctotals
+        //calctotals check if calculated
       }
     },
     {
@@ -468,7 +491,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       props: {
         endPoint: SaleRepository.DraftInvoiceSerial.batch,
         draftId: formik.values.recordId,
-        //onCloseimport: fillGrids,
+        onCloseimport: fillGrids,
         maxAccess: maxAccess
       },
       width: 550,
@@ -504,12 +527,13 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     }
   ]
 
-  async function fillGrids(diHeader, diItems) {
+  async function fillGrids() {
+    let diHeader = await getDraftInv(recordId)
+    let diItems = await getDraftInvItems(recordId)
+
     const modifiedList = await Promise.all(
       diItems.list?.map(async (item, index) => {
         const taxDetailsResponse = diHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
-
-        //tax js function
 
         return {
           ...item,
@@ -524,6 +548,23 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     )
 
     formik.setFieldValue('serials', modifiedList)
+
+    // vat calc
+    const updatedSer = modifiedList?.map(serial => {
+      if (serial.taxId != null) {
+        return {
+          ...serial,
+          extendedPrice: serial.unitPrice,
+          taxDetails: FilteredListByTaxId(taxDetailsStore, serial.taxId)
+        }
+      }
+
+      return serial
+    })
+    console.log('in assign', updatedSer)
+    formik.setFieldValue('serials', updatedSer)
+
+    // focus scrollBottom
   }
 
   async function fillForm(diHeader, diItems) {
@@ -532,8 +573,6 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     const modifiedList = await Promise.all(
       diItems.list?.map(async (item, index) => {
         const taxDetailsResponse = diHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
-
-        //tax js function
 
         return {
           ...item,
@@ -555,6 +594,21 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       subtotal: parseFloat(diHeader?.record?.subtotal).toFixed(2),
       serials: modifiedList
     })
+
+    // vat calc
+    const updatedSer = modifiedList?.map(serial => {
+      if (serial.taxId != null) {
+        return {
+          ...serial,
+          extendedPrice: serial.unitPrice,
+          taxDetails: FilteredListByTaxId(taxDetailsStore, serial.taxId)
+        }
+      }
+
+      return serial
+    })
+    console.log('in assign', updatedSer)
+    formik.setFieldValue('serials', updatedSer)
   }
 
   async function getTaxDetails(taxId) {
@@ -566,24 +620,6 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     })
 
     return res?.list
-  }
-
-  async function fillClientData(clientId) {
-    if (!clientId) return
-
-    const res = await getRequest({
-      extension: SaleRepository.Client.get,
-      parameters: `_recordId=${clientId}`
-    })
-
-    //formik.setFieldValue('currencyId', res?.record?.currencyId)
-    /* formik.setFieldValue('spId', res?.record?.spId || formik.values.spId)
-    formik.setFieldValue('accountId', res?.record?.accountId) //do it in edit mode
-    formik.setFieldValue('plId', res?.record?.plId || defaults.systemDefaultsList.plId || 0)
-    formik.setFieldValue('isVattable', res?.record?.IsSubjectToVat)
-    formik.setFieldValue('taxId', res?.record?.taxId) */
-
-    //TestClientInfo
   }
 
   const filteredData = formik.values.search
@@ -665,7 +701,10 @@ export default function DraftForm({ labels, access, recordId, currency, window }
 
         return acc
       }, {})
-      console.log('itemGrp', Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo))
+      console.log(
+        'itemGrp',
+        Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo)
+      )
 
       setItemGridData(Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo))
     }
@@ -718,14 +757,19 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       //const muList = await getMeasurementUnits()
       //setMeasurements(muList?.list)
 
-      getDefaultsData()
+      const myObject = await getDefaultsData()
       getUserDefaultsData()
 
+      formik.setFieldValue('plId', parseInt(myObject?.plId)) //or error msg
+
       if (recordId) {
-        refetchForm(recordId)
+        await refetchForm(recordId)
+
+        //assignStoreTaxDetails()
       } else {
-        formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
-        formik.setFieldValue('plId', parseInt(defaultsDataState?.plId))
+        console.log('def', myObject)
+        formik.setFieldValue('currencyId', parseInt(myObject?.currencyId))
+
         if (documentType?.dtId) {
           //search for documentType?.dtId
           formik.setFieldValue('dtId', documentType.dtId)
@@ -735,7 +779,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     })()
   }, [])
 
-  const { subtotal, vatAmount, total, totalWeight } = formik?.values?.serials?.reduce(
+  const { subtotal, vatAmount, totalWeight } = formik?.values?.serials?.reduce(
     (acc, row) => {
       const subTot = parseFloat(row?.unitPrice) || 0
       const vatAmountTot = parseFloat(row?.vatAmount) || 0
@@ -962,7 +1006,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                   <Grid item xs={6}>
                     <Grid item>
                       <ResourceLookup
-                        endpointId={SaleRepository.Client.snapshot}
+                        endpointId={SaleRepository.Client.snapshot} //inactive condition
                         valueField='reference'
                         displayField='name'
                         secondFieldLabel={labels.name}
@@ -979,17 +1023,18 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                         columnsInDropDown={[
                           { key: 'reference', value: 'Reference' },
                           { key: 'name', value: 'Name' },
-                          { key: 'szName', value: 'Sales Zone' }
+                          { key: 'szName', value: 'Sales Zone' },
+                          { key: 'keywords', value: 'Keywords' },
+                          { key: 'cgName', value: 'Client Group' }
                         ]}
                         onChange={async (event, newValue) => {
+                          console.log('clientSEl', newValue?.taxId)
                           formik.setFieldValue('clientId', newValue?.recordId)
                           formik.setFieldValue('clientName', newValue?.name)
-                          formik.setFieldValue('clientRef', newValue?.reference)
                           formik.setFieldValue('plId', newValue?.plId)
                           formik.setFieldValue('accountId', newValue?.accountId)
                           formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                           formik.setFieldValue('taxId', newValue?.taxId)
-                          fillClientData(newValue?.recordId)
                         }}
                         errorCheck={'clientId'} //?
                       />

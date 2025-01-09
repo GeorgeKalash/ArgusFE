@@ -18,12 +18,14 @@ import { ThreadProgress } from './ThreadProgress'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import toast from 'react-hot-toast'
 
-const ImportSerials = (endPoint, draftId, maxAccess, window) => {
+const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) => {
   console.log('th', maxAccess)
   console.log(endPoint)
   console.log(draftId)
-  //console.log(onCloseimport)
+  console.log(onCloseimport)
+
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
@@ -88,11 +90,10 @@ const ImportSerials = (endPoint, draftId, maxAccess, window) => {
   const importSerialsData = async () => {
     try {
       const transformedSerials = formik.values.serials?.replace(/\n/g, ',\r\n')
-      formik.values.serials && setParsedFileContent(transformedSerials)
 
       const SerialsPack = {
         draftId: draftId,
-        serials: parsedFileContent
+        serials: transformedSerials ? transformedSerials : parsedFileContent
       }
 
       try {
@@ -101,7 +102,7 @@ const ImportSerials = (endPoint, draftId, maxAccess, window) => {
           record: JSON.stringify(SerialsPack)
         })
 
-        stack({
+        /* stack({
           Component: ThreadProgress,
           props: {
             recordId: Number(draftId),
@@ -111,10 +112,10 @@ const ImportSerials = (endPoint, draftId, maxAccess, window) => {
           height: 450,
           closable: false,
           title: platformLabels.Progress
-        })
+        }) */
 
         toast.success(platformLabels.Imported)
-        //onCloseimport()
+        onCloseimport()
         window.close()
       } catch (exception) {}
     } catch (error) {

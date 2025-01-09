@@ -117,29 +117,6 @@ const DraftSerialsInvoices = () => {
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
-  /* async function getDefaultSalesCurrency() {
-    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
-
-    return defaultCurrency?.value ? parseInt(defaultCurrency.value) : null
-  }
-
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.SalesOrder,
-    action: async () => {
-      const currency = await getDefaultSalesCurrency()
-      currency
-        ? openForm()
-        : stackError({
-            message: labels.noSelectedCurrency
-          })
-    },
-    hasDT: false
-  }) 
-
-  const add = async () => {
-    proxyAction()
-  }*/
-
   const add = async () => {
     openForm()
   }
@@ -149,14 +126,11 @@ const DraftSerialsInvoices = () => {
   }
 
   async function openForm(recordId) {
-    //const currency = await getDefaultSalesCurrency() //check
     stack({
       Component: DraftForm,
       props: {
         labels,
         access,
-
-        //currency,
         recordId
       },
       width: 1300,
