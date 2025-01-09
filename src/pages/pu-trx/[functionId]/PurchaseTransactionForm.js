@@ -197,8 +197,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         currencyId: yup.string().required(),
         vendorId: yup.string().required(),
         siteId: yup
-          .string()
-          .nullable()
+          .number()
           .test('', function (value) {
             const { dtId } = this.parent
             if (dtId == null) {
@@ -208,7 +207,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             return true
           })
       }),
-      items: yup.array().of(
+      items: yup
+        .array()
+        .of(
           yup.object({
             sku: yup.string().required(),
             itemName: yup.string().required(),
@@ -589,6 +590,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       record: JSON.stringify(formik.values.header)
     })
 
+    await refetchForm(formik.values.recordId)
     toast.success(platformLabels.Posted)
     invalidate()
     window.close()
@@ -1114,10 +1116,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
     formik.setFieldValue('header.plantId', dtd?.record?.plantId ?? userDefaultsDataState?.plantId)
     formik.setFieldValue('header.spId', dtd?.record?.spId ?? userDefaultsDataState?.spId)
-    formik.setFieldValue('header.siteId', dtd?.record?.siteId ?? userDefaultsDataState?.siteId)
+    formik.setFieldValue('header.siteId', dtd?.record?.siteId ?? userDefaultsDataState?.siteId ?? null)
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
-    if (dtd?.record?.commitItems == false) formik.setFieldValue('header.siteId', null)
   }
 
   useEffect(() => {
@@ -1235,7 +1236,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     formik.setFieldValue('header.currencyId', defaultsDataState.currencyId)
     formik.setFieldValue('header.plantId', userDefaultsDataState.plantId)
     formik.setFieldValue('header.spId', userDefaultsDataState.spId)
-    formik.setFieldValue('header.siteId', userDefaultsDataState.siteId)
+    formik.setFieldValue('header.siteId', userDefaultsDataState.siteId ?? null)
   }
 
   const getResourceId = functionId => {
