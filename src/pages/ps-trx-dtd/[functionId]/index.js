@@ -9,13 +9,12 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
-import CAadjustmentForm from '../form/CAadjustmentForms'
 import { useRouter } from 'next/router'
-import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
+import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
+import RetailDocTypeForm from './form/RetailDocTypeForm'
 
-const CAadjustment = () => {
+const RetailDtd = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -30,8 +29,8 @@ const CAadjustment = () => {
     } = options
 
     const response = await getRequest({
-      extension: CashBankRepository.CAadjustment.page,
-      parameters: `_startAt=${_startAt}&_params=&_pageSize=50&_sortBy=reference&_functionId=${functionId}`
+      extension: PointofSaleRepository.DocumentTypeDefault.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -45,8 +44,8 @@ const CAadjustment = () => {
     invalidate,
     refetch
   } = useResourceQuery({
-    endpointId: CashBankRepository.CAadjustment.page,
-    datasetId: ResourceIds.IncreaseDecreaseAdj,
+    endpointId: PointofSaleRepository.DocumentTypeDefault.qry,
+    datasetId: ResourceIds.POSDocTypeDefault,
 
     filter: {
       filterFn: fetchGridData,
@@ -56,86 +55,49 @@ const CAadjustment = () => {
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
-
-    {
       field: 'dtName',
       headerName: _labels.doctype,
       flex: 1
     },
 
     {
-      field: 'cashAccountName',
-      headerName: _labels.cashAccount,
-      flex: 1
-    },
-    {
-      field: 'date',
-      headerName: _labels.date,
-      flex: 1,
-      type: 'date'
-    },
-    {
-      field: 'amount',
-      headerName: _labels.amount,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'currencyRef',
-      headerName: _labels.currency,
-      flex: 1
-    },
-    {
-      field: 'statusName',
-      headerName: _labels.status,
-      flex: 1
-    },
-    {
-      field: 'notes',
-      headerName: _labels.notes,
+      field: 'disableSKULookup',
+      headerName: _labels.dsl,
+      type: 'checkbox',
       flex: 1
     }
   ]
 
+  const add = () => {
+    openForm()
+  }
+
   const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
-  function openForm(recordId) {
-    stack({
-      Component: CAadjustmentForm,
-      props: {
-        labels: _labels,
-        recordId: recordId,
-        access,
-        functionId
-      },
-      width: 900,
-      height: 600,
-      title: functionId == 3301 ? _labels.increaseAdj : _labels.decreaseAdj
-    })
-  }
-
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: functionId,
-    action: openForm
-  })
-
-  const add = async () => {
-    await proxyAction()
+    openForm(obj)
   }
 
   const del = async obj => {
     await postRequest({
-      extension: CashBankRepository.CAadjustment.del,
+      extension: PointofSaleRepository.DocumentTypeDefault.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
+  }
+
+  function openForm(record) {
+    stack({
+      Component: RetailDocTypeForm,
+      props: {
+        labels: _labels,
+        functionId,
+        recordId: record?.dtId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 300,
+      title: _labels.doctypeDefault
+    })
   }
 
   return (
@@ -145,13 +107,11 @@ const CAadjustment = () => {
       </Fixed>
       <Grow>
         <Table
-          name='table'
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['dtId']}
           onEdit={edit}
           onDelete={del}
-          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
@@ -164,4 +124,4 @@ const CAadjustment = () => {
   )
 }
 
-export default CAadjustment
+export default RetailDtd
