@@ -338,7 +338,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
       setIdScanner(obj.clientMaster?.idScanMode)
       setEditMode(true)
-
       if (
         requestImage === true &&
         obj.clientRemittance?.clientId &&
@@ -623,7 +622,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         clientRemittance: obj4,
         clientMaster: obj1, //CTCL
         address: obj5,
-        workAddress: obj6.name && obj6.countryId && obj6.cityId && obj6.phone && obj6.street1 ? obj6 : null
+        workAddress: obj6 ? obj6 : null
       }
 
       await postRequest({
@@ -870,8 +869,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     !systemChecks?.some(item => item.checkId === SystemChecks.CT_DISABLE_MOBILE_VERIFICATION)
 
   function onAddressSubmit(values) {
-    formik.setValues({
-      ...formik.values,
+    setAddress({
       ...values
     })
   }
