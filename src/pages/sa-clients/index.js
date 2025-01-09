@@ -12,6 +12,8 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { Box, IconButton } from '@mui/material'
+import PreviewForm from './forms/PreviewForm'
 
 const SAClients = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -112,8 +114,36 @@ const SAClients = () => {
       headerName: _labels.acquisitionDate,
       flex: 1,
       type: 'date'
+    },
+    {
+      flex: 0.5,
+      headerName: '',
+      cellRenderer: row => {
+        return (
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+            <IconButton size='small' onClick={() => openPreview(row.data.recordId, row.data.addressId)}>
+              <img src='/images/password/forgotPWD1.png' alt={'preview'} />
+            </IconButton>
+          </Box>
+        )
+      }
     }
   ]
+
+  const openPreview = (clientId, addressId) => {
+    stack({
+      Component: PreviewForm,
+      props: {
+        labels: _labels,
+        maxAccess: access,
+        clientId,
+        addressId
+      },
+      width: 800,
+      height: 400,
+      title: _labels.preview
+    })
+  }
 
   const Delete = async obj => {
     await postRequest({
