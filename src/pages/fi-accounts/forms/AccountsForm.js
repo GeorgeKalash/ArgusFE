@@ -40,7 +40,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       BpRef: null,
       szId: null,
       spId: null,
-      inactive: false
+      isInactive: false
     },
     maxAccess: maxAccess,
     validateOnChange: true,
@@ -267,9 +267,9 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
               </Grid>
               <Grid item xs={12}>
                 <CustomCheckBox
-                  name='inactive'
-                  value={formik.values?.inactive}
-                  onChange={event => formik.setFieldValue('inactive', event.target.checked)}
+                  name='isInactive'
+                  value={formik.values?.isInactive}
+                  onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                   label={labels.inactive}
                   maxAccess={maxAccess}
                 />
