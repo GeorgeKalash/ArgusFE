@@ -146,9 +146,7 @@ const FiPaymentVouchers = () => {
     return getRequest({
       extension: SystemRepository.UserDefaults.get,
       parameters: parameters
-    })
-      .then(res => res.record.value)
-      .catch(error => {})
+    }).then(res => res.record.value)
   }
 
   function openOutWardsWindow(plantId, recordId) {
@@ -167,10 +165,8 @@ const FiPaymentVouchers = () => {
   }
 
   async function openForm(recordId) {
-    try {
-      const plantId = await getPlantId()
-      openOutWardsWindow(plantId, recordId)
-    } catch (error) {}
+    const plantId = await getPlantId()
+    openOutWardsWindow(plantId, recordId)
   }
 
   const del = async obj => {
@@ -216,6 +212,7 @@ const FiPaymentVouchers = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

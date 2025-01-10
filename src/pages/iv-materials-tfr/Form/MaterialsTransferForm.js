@@ -88,7 +88,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         metalRef: '',
         totalCost: 0,
         priceType: null,
-        enabled: false
+        details: false
       }
     ]
   }
@@ -333,7 +333,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.itemId) {
           update({
-            enabled: false
+            details: false
           })
 
           return
@@ -351,7 +351,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             weight,
             unitCost,
             totalCost,
-            enabled: true,
+            details: true,
             msId: itemInfo?.msId,
             muRef: filteredMeasurements?.[0]?.reference,
             muId: filteredMeasurements?.[0]?.recordId,
@@ -363,7 +363,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     },
     {
       component: 'button',
-      name: 'enabled',
+      name: 'details',
       defaultValue: !!formik.values?.plId,
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png'
@@ -946,7 +946,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
               const data = value?.map(transfer => {
                 return {
                   ...transfer,
-                  enabled: false,
+                  details: false,
                   qtyInBase: 0
                 }
               })

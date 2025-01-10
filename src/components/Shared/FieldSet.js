@@ -7,12 +7,13 @@ const FieldSet = ({ children, title, ...props }) => {
       spacing={2}
       xs={12}
       sx={{
-        border: '2px solid #0111',
+        border: '1px solid #0111',
         padding: '10px',
-        paddingTop: '15px',
+        paddingTop: title ? '20px' : '10px',
         position: 'relative',
-        marginY: '10px',
+        marginY: title ? '10px' : '0px',
         marginLeft: '0px',
+        borderColor: '#cdd3d4',
         ...props.sx
       }}
     >

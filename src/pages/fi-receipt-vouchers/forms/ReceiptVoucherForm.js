@@ -275,7 +275,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={2}>
+          <Grid container spacing={3}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -362,24 +362,23 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={12}>
-              <Grid item xs={6}>
-                <ResourceComboBox
-                  endpointId={SaleRepository.SalesPerson.qry}
-                  name='sptId'
-                  readOnly={!formik.values.accountId}
-                  label={labels.salePerson}
-                  valueField='recordId'
-                  displayField={'name'}
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('sptId', newValue?.recordId)
-                  }}
-                  error={formik.touched.sptId && Boolean(formik.errors.sptId)}
-                  maxAccess={maxAccess}
-                />
-              </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={SaleRepository.SalesPerson.qry}
+                name='sptId'
+                readOnly={!formik.values.accountId}
+                label={labels.salePerson}
+                valueField='recordId'
+                displayField={'name'}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('sptId', newValue?.recordId)
+                }}
+                error={formik.touched.sptId && Boolean(formik.errors.sptId)}
+                maxAccess={maxAccess}
+              />
             </Grid>
+            <Grid item xs={6}></Grid>
             <Grid item xs={6}>
               <ResourceComboBox
                 datasetId={DataSets.PAYMENT_METHOD}
@@ -510,7 +509,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
               />
             </Grid>
-
             <Grid item xs={6}>
               <CustomTextField
                 name='sourceReference'
@@ -523,7 +521,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 error={formik.touched.sourceReference && Boolean(formik.errors.sourceReference)}
               />
             </Grid>
-
             <Grid item xs={6}>
               <ResourceComboBox
                 neverPopulate
@@ -542,7 +539,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
               />
             </Grid>
-
             <Grid item xs={12}>
               <CustomTextArea
                 name='notes'

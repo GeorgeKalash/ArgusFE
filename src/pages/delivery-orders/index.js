@@ -170,7 +170,7 @@ const DeliveryOrders = () => {
   return (
     <VertLayout>
       <Fixed>
-      <RPBGridToolbar
+        <RPBGridToolbar
           onAdd={add}
           maxAccess={access}
           onApply={onApply}
@@ -181,6 +181,7 @@ const DeliveryOrders = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

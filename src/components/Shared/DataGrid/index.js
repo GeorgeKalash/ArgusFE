@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton } from '@mui/material'
 import components from './components'
@@ -6,9 +6,11 @@ import { CacheDataProvider } from 'src/providers/CacheDataContext'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { GridDeleteIcon } from '@mui/x-data-grid'
-import { DISABLED, HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export function DataGrid({
   name, // maxAccess
@@ -27,14 +29,45 @@ export function DataGrid({
 }) {
   const gridApiRef = useRef(null)
 
+  const isDup = useRef(null)
+
+  const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   const [ready, setReady] = useState(false)
 
   const skip = allowDelete ? 1 : 0
 
+  function checkDuplicates(field, data) {
+    return value.find(
+      item => item.id != data.id && item?.[field] && item?.[field]?.toLowerCase() === data?.[field]?.toLowerCase()
+    )
+  }
+
+  function stackDuplicate(params) {
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: platformLabels?.duplicateItem,
+        okButtonAction: window => {
+          deleteRow(params), window.close()
+        },
+        fullScreen: false
+      },
+      onClose: () => deleteRow(params),
+      width: 450,
+      height: 150,
+      title: platformLabels.Confirmation
+    })
+  }
+
   const process = (params, oldRow, setData) => {
     const column = columns.find(({ name }) => name === params.colDef.field)
+
+    if (params.colDef?.disableDuplicate && checkDuplicates(params.colDef.field, params.data)) {
+      return
+    }
 
     const updateCommit = changes => {
       setData(changes, params)
@@ -53,9 +86,68 @@ export function DataGrid({
       commit({ changes: updatedRow })
     }
 
+    const addRow = async ({ changes }) => {
+      if (params.rowIndex === value.length - 1 && !changes) {
+        addNewRow(params)
+
+        return
+      }
+
+      const index = value.findIndex(({ id }) => id === changes.id)
+      const row = value[index]
+      const updatedRow = { ...row, ...changes }
+      let rows
+
+      gridApiRef.current.setRowData(value.map(row => (row.id === updatedRow?.id ? updatedRow : row)))
+
+      if (params.rowIndex === value.length - 1 && column?.jumpToNextLine) {
+        const highestIndex = value?.length
+          ? value.reduce((max, current) => (max.id > current.id ? max : current)).id + 1
+          : 1
+
+        const defaultValues = Object.fromEntries(
+          columns?.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
+        )
+        rows = [
+          ...value.map(row => (row.id === updatedRow.id ? updatedRow : row)),
+          {
+            id: highestIndex,
+            ...defaultValues
+          }
+        ]
+        onChange(rows)
+
+        setTimeout(() => {
+          params.api.startEditingCell({
+            rowIndex: index + 1,
+            colKey: column?.name
+          })
+        }, 10)
+      } else {
+        rows = [...value.map(row => (row.id === updatedRow.id ? updatedRow : row))]
+        const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
+        onChange(rows)
+        params.api.startEditingCell({
+          rowIndex: index,
+          colKey: allColumns[currentColumnIndex + 2].colId
+        })
+      }
+    }
+
     if (column.onChange) {
       column.onChange({
-        row: { oldRow: oldRow, newRow: params.node.data, update: updateCommit, updateRow: updateRowCommit }
+        row: {
+          oldRow: value[params.rowIndex],
+          newRow: params.node.data,
+          update: updateCommit,
+          updateRow: updateRowCommit,
+          addRow:
+            params.rowIndex === value.length - 1 && !column.updateOn
+              ? column?.jumpToNextLine
+                ? addNewRow
+                : () => {}
+              : addRow
+        }
       })
     }
   }
@@ -99,12 +191,31 @@ export function DataGrid({
     }
   }, [rowSelectionModel])
 
-  const addNewRow = params => {
-    const highestIndex = params?.node?.data?.id + 1 || 1
+  useEffect(() => {
+    if (gridApiRef.current && rowSelectionModel) {
+      const rowNode = gridApiRef.current.getRowNode(rowSelectionModel)
+      if (rowNode) {
+        rowNode.setSelected(true)
+      }
+    }
+  }, [rowSelectionModel])
 
-    const defaultValues = Object.fromEntries(
-      columns.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
-    )
+  const addNewRow = () => {
+    const highestIndex = Math.max(...value?.map(item => item.id), 0) + 1
+
+    const defaultValues = allColumns
+      .filter(({ name }) => name !== 'id')
+      .reduce((acc, { name, defaultValue }) => {
+        if (typeof defaultValue === 'object' && defaultValue !== null) {
+          Object.entries(defaultValue).forEach(([key, value]) => {
+            acc[key] = value
+          })
+        } else {
+          acc[name] = defaultValue
+        }
+
+        return acc
+      }, {})
 
     const newRow = {
       id: highestIndex,
@@ -123,7 +234,7 @@ export function DataGrid({
           const rowIndex = rowNode.rowIndex
           gridApiRef.current.startEditingCell({
             rowIndex: rowIndex,
-            colKey: columns[0].name
+            colKey: allColumns[0].name
           })
         }
       }, 0)
@@ -142,26 +253,33 @@ export function DataGrid({
   }
 
   const allColumns = columns.filter(
-    ({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== HIDDEN
+    ({ name: field, hidden }) =>
+      (accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN && !hidden) ||
+      (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
   )
+
+  const condition = i => {
+    return (
+      (!allColumns?.[i]?.props?.readOnly &&
+        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED) ||
+      (allColumns?.[i]?.props?.readOnly &&
+        (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
+          accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))
+    )
+  }
 
   const findNextEditableColumn = (columnIndex, rowIndex, direction) => {
     const limit = direction > 0 ? allColumns.length : -1
     const step = direction > 0 ? 1 : -1
+
     for (let i = columnIndex + step; i !== limit; i += step) {
-      if (
-        !allColumns?.[i]?.props?.readOnly &&
-        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED
-      ) {
+      if (condition(i)) {
         return { columnIndex: i, rowIndex }
       }
     }
 
     for (let i = direction > 0 ? 0 : allColumns.length - 1; i !== limit; i += step) {
-      if (
-        !allColumns?.[i]?.props?.readOnly &&
-        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED
-      ) {
+      if (condition(i)) {
         return {
           columnIndex: i,
           rowIndex: rowIndex + direction
@@ -173,7 +291,7 @@ export function DataGrid({
   const nextColumn = columnIndex => {
     let count = 0
     for (let i = columnIndex + 1; i < allColumns.length; i++) {
-      if (!allColumns?.[i]?.props?.readOnly) {
+      if (condition(i)) {
         count++
       }
     }
@@ -182,7 +300,15 @@ export function DataGrid({
   }
 
   const onCellKeyDown = params => {
-    const { event, api, node } = params
+    const { event, api, node, data, colDef } = params
+
+    if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && event.key !== 'Enter') {
+      isDup.current = true
+
+      return
+    } else {
+      isDup.current = false
+    }
 
     const allColumns = api.getColumnDefs()
     const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
@@ -219,7 +345,7 @@ export function DataGrid({
     ) {
       if (allowAddNewLine && !error) {
         event.stopPropagation()
-        addNewRow(params)
+        addNewRow()
       }
     }
 
@@ -341,6 +467,12 @@ export function DataGrid({
 
       setData(changes, params)
 
+      if (params?.colDef?.disableDuplicate && checkDuplicates(params.colDef?.field, params.node?.data)) {
+        stackDuplicate(params)
+
+        return
+      }
+
       if (column.colDef.updateOn !== 'blur') {
         commit(changes)
 
@@ -391,14 +523,14 @@ export function DataGrid({
         onClick={() => openDelete(params)}
       >
         <IconButton>
-          <GridDeleteIcon />
+          <GridDeleteIcon sx={{ fontSize: '1.3rem' }} />
         </IconButton>
       </Box>
     )
   }
 
   const columnDefs = [
-    ...columns.map(column => ({
+    ...allColumns.map(column => ({
       ...column,
       field: column.name,
       headerName: column.label || column.name,
@@ -425,9 +557,7 @@ export function DataGrid({
           cellRenderer: ActionCellRenderer
         }
       : null
-  ]
-    .filter(Boolean)
-    .filter(({ name: field }) => accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN)
+  ].filter(Boolean)
 
   const commit = data => {
     const allRowNodes = []
@@ -454,7 +584,7 @@ export function DataGrid({
           })
         }
 
-        onSelectionChange(selectedRow, update)
+        onSelectionChange(selectedRow, update, params.colDef.field)
       }
     }
   }
@@ -463,8 +593,14 @@ export function DataGrid({
 
   useEffect(() => {
     function handleBlur(event) {
-      if (gridContainerRef.current && !gridContainerRef.current.contains(event.target)) {
+      if (
+        gridContainerRef.current &&
+        !gridContainerRef.current.contains(event.target) &&
+        gridApiRef.current?.getEditingCells()?.length > 0
+      ) {
         gridApiRef.current?.stopEditing()
+      } else {
+        return
       }
     }
 
@@ -486,7 +622,8 @@ export function DataGrid({
       if (
         gridContainerRef.current &&
         !event.target.value &&
-        event.target.classList.contains('ag-center-cols-viewport')
+        event.target.classList.contains('ag-center-cols-viewport') &&
+        gridApiRef.current?.getEditingCells()?.length > 0
       ) {
         gridApiRef.current?.stopEditing()
       }
@@ -535,8 +672,13 @@ export function DataGrid({
 
   const onCellEditingStopped = params => {
     const { data, colDef } = params
+    if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
+      if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
+        stackDuplicate(params)
 
-    if (colDef.updateOn === 'blur') {
+        return
+      }
+
       process(params, data, setData)
     }
   }
@@ -548,8 +690,26 @@ export function DataGrid({
           className='ag-theme-alpine'
           style={{ height: '100%', width: '100%' }}
           sx={{
+            fontSize: '0.9rem',
             '.ag-header': {
-              background: bg
+              height: '40px !important',
+              minHeight: '40px !important'
+            },
+            '.ag-header-cell': {
+              height: '40px !important',
+              minHeight: '40px !important'
+            },
+            '.ag-cell': {
+              borderRight: '1px solid #d0d0d0 !important',
+              fontSize: '0.8rem !important'
+            },
+            '.ag-cell .MuiBox-root': {
+              padding: '0px !important'
+            },
+            '.ag-header-row': {
+              background: bg,
+              height: '35px !important',
+              minHeight: '35px !important'
             }
           }}
           ref={gridContainerRef}
@@ -571,7 +731,7 @@ export function DataGrid({
               }}
               onCellKeyDown={onCellKeyDown}
               onCellClicked={onCellClicked}
-              rowHeight={45}
+              rowHeight={35}
               getRowId={params => params?.data?.id}
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}

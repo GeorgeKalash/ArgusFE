@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import FormShell from './FormShell'
 import AddressTab from './AddressTab'
 import { useForm } from 'src/hooks/form'
+import { VertLayout } from './Layouts/VertLayout'
+import { Grow } from './Layouts/Grow'
 
 export const AddressFormShell = ({
   setAddress,
@@ -83,12 +85,10 @@ export const AddressFormShell = ({
     initialValues,
     onSubmit: values => {
       setAddress(values)
-
       if (allowPost) {
         onSubmit(values)
-      } else {
-        window.close()
       }
+      window.close()
     }
   })
 
@@ -118,7 +118,11 @@ export const AddressFormShell = ({
       isCleared={isCleared}
       {...props}
     >
-      <AddressTab addressValidation={formik} readOnly={readOnly} required={required} {...props} />
+      <VertLayout>
+        <Grow>
+          <AddressTab addressValidation={formik} readOnly={readOnly} required={required} {...props} />
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }
