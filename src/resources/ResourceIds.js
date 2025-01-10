@@ -338,7 +338,7 @@ export const ResourceIds = {
   CACostTypes: 53101,
   PuCostAllocation: 53301,
   SystemAttachments: 20203,
-  FoWorkCenters: 47101,
+  POSDocTypeDefault: 54105,
   RetailInvoice: 54201,
   RetailInvoiceReturn: 54301,
   RetailPurchase: 54302
