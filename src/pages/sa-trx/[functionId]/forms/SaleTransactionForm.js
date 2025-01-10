@@ -1669,10 +1669,8 @@ export default function SaleTransactionForm({
                 errorCheck={'header.clientId'}
                 maxAccess={maxAccess}
                 required
-                readOnly={
-                  formik.values.items.length === 0 ? false :
-                  isPosted ? isPosted : editMode
-                }
+                autoSelectFistValue={!formik.values.clientId}
+                readOnly={formik.values.items.length > 0}
                 displayFieldWidth={3}
                 editMode={editMode}
               />
