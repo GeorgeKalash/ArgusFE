@@ -1670,7 +1670,7 @@ export default function SaleTransactionForm({
                 maxAccess={maxAccess}
                 required
                 autoSelectFistValue={!formik.values.clientId}
-                readOnly={formik.values.items.length > 0}
+                readOnly={formik.values.items.length > 0 && formik.values.items[0].sku !== ''}
                 displayFieldWidth={3}
                 editMode={editMode}
               />
