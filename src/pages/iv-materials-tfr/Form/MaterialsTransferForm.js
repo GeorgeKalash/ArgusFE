@@ -239,6 +239,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   }
 
   function calcTotalCost(rec) {
+    console.log(rec)
     if (rec.priceType === 1) return (Math.round(rec.qty * rec.unitCost * 100) / 100).toFixed(2)
     else if (rec.priceType === 2) return (Math.round(rec.qty * rec.unitCost * rec.volume * 100) / 100).toFixed(2)
     else if (rec.priceType === 3) return (Math.round(rec.qty * rec.unitCost * rec.weight * 100) / 100).toFixed(2)
@@ -280,7 +281,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
       return {
         totalQty: acc?.totalQty + qtyValue,
-        totalCost: (Math.round((acc?.totalCost + totalCostValue) * 100) / 100).toFixed(2),
+        totalCost: (Math.round((parseInt(acc?.totalCost) + totalCostValue) * 100) / 100).toFixed(2),
         totalWeight: acc?.totalWeight + weightValue
       }
     },
@@ -744,8 +745,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
     invalidate()
   }
-
-  console.log(formik)
 
   return (
     <FormShell
