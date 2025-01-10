@@ -37,7 +37,15 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      dtId: yup.string().required()
+      dtId: yup.string().required(),
+      allocateBy: yup
+        .string()
+        .when('commitItems', {
+          is: true,
+          then: (schema) =>
+            schema.required(),
+          otherwise: (schema) => schema.notRequired()
+        })
     }),
 
     onSubmit: async obj => {
@@ -160,6 +168,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
                 onChange={(event, newValue) => {
                   formik.setFieldValue('allocateBy', newValue?.key)
                 }}
+                required={formik.values?.commitItems}
                 error={formik.touched.allocateBy && Boolean(formik.errors.allocateBy)}
               />
             </Grid>
