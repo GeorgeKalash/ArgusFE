@@ -131,7 +131,7 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
                 label={labels.rate}
                 readOnly={formik?.values?.amount === 0}
                 onClear={() => formik.setFieldValue('exRate', '')}
-                decimalScale={5}
+                decimalScale={7}
                 onChange={e => {
                   const updatedRateRow = getRate({
                     amount: data?.amount || 0,
