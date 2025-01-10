@@ -19,7 +19,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const { recordId } = store
 
   const invalidate = useInvalidate({
@@ -90,7 +90,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
       return
     }
 
-    const defaultSiteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
+    const defaultSiteId = defaultsData?.list?.find(({ key }) => key === 'de_siteId')
 
     if (defaultSiteId?.value && !formik.values.fromSiteId)
       formik.setFieldValue('siteId', parseInt(defaultSiteId?.value || ''))
