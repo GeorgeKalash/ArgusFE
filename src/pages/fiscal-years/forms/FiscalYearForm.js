@@ -20,7 +20,7 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 import Typography from '@mui/material/Typography'
 
-export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
+export default function FiscalYearForm({ labels, maxAccess, setStore, store, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -54,27 +54,33 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
       status: yup.string().required()
     }),
     onSubmit: async obj => {
-      const data = {
-        ...obj,
-        startDate: formatDateToApi(obj.startDate),
-        endDate: formatDateToApi(obj.endDate)
+      try {
+        const data = {
+          ...obj,
+          startDate: formatDateToApi(obj.startDate),
+          endDate: formatDateToApi(obj.endDate)
+        }
+
+        await postRequest({
+          extension: SystemRepository.FiscalYears.set,
+          record: JSON.stringify(data)
+        })
+
+        if (!recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', obj.fiscalYear)
+          setStore(prevStore => ({
+            ...prevStore,
+            recordId: obj.fiscalYear
+          }))
+        } else toast.success(platformLabels.Edited)
+
+        invalidate()
+
+        window.close()
+      } catch (e) {
+        console.log(e)
       }
-
-      await postRequest({
-        extension: SystemRepository.FiscalYears.set,
-        record: JSON.stringify(data)
-      })
-
-      if (!recordId) {
-        toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', obj.fiscalYear)
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: obj.fiscalYear
-        }))
-      } else toast.success(platformLabels.Edited)
-
-      invalidate()
     }
   })
 
@@ -107,7 +113,7 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
       if (year) {
         formik.setFieldValue('startDate', startOfYear(new Date(year, 0, 1)))
         formik.setFieldValue('endDate', endOfYear(new Date(year, 11, 31)))
-      } 
+      }
     } else {
       formik.setFieldValue('startDate', null)
       formik.setFieldValue('endDate', null)
