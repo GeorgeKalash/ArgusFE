@@ -85,12 +85,10 @@ export const AddressFormShell = ({
     initialValues,
     onSubmit: values => {
       setAddress(values)
-
       if (allowPost) {
         onSubmit(values)
-      } else {
-        window.close()
       }
+      window.close()
     }
   })
 
