@@ -379,7 +379,7 @@ export default function SaleTransactionForm({
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.barcode) return
 
-        const ItemConvertPrice = await mdType(newRow)
+        const ItemConvertPrice = await getItemConvertPrice2(newRow)
         const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
         const itemInfo = await getItem(ItemConvertPrice?.itemId)
         await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
@@ -1652,7 +1652,6 @@ export default function SaleTransactionForm({
                 secondValueShow='clientName'
                 formObject={formik.values.header}
                 form={formik}
-                autoSelectFistValue={!formik.values.clientId}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' },
@@ -1670,7 +1669,10 @@ export default function SaleTransactionForm({
                 errorCheck={'header.clientId'}
                 maxAccess={maxAccess}
                 required
-                readOnly={isPosted}
+                readOnly={
+                  formik.values.items.length === 0 ? false :
+                  isPosted ? isPosted : editMode
+                }
                 displayFieldWidth={3}
                 editMode={editMode}
               />
