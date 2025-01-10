@@ -4,24 +4,31 @@ import AddressTab from './AddressTab'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
+import useResourceParams from 'src/hooks/useResourceParams'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 export const AddressFormShell = ({
   setAddress,
   address,
-  maxAccess,
   editMode,
   window,
   readOnly,
   allowPost,
   optional = false,
+  addressValidation,
   onSubmit,
   isSavedClear = true,
   isCleared = true,
+  isForm = true,
   ...props
 }) => {
   const [required, setRequired] = useState(!optional)
 
-  const initialValues = {
+  const { access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.Address
+  })
+
+  const initialValues = addressValidation.values || {
     recordId: address?.recordId || null,
     name: address?.name || '',
     countryId: address?.countryId || '',
@@ -107,7 +114,7 @@ export const AddressFormShell = ({
     }
   }, [formik.values])
 
-  return (
+  return isForm ? (
     <FormShell
       form={formik}
       maxAccess={maxAccess}
@@ -120,9 +127,11 @@ export const AddressFormShell = ({
     >
       <VertLayout>
         <Grow>
-          <AddressTab addressValidation={formik} readOnly={readOnly} required={required} {...props} />
+          <AddressTab addressForm={formik} readOnly={readOnly} required={required} {...props} />
         </Grow>
       </VertLayout>
     </FormShell>
+  ) : (
+    <AddressTab addressForm={formik} readOnly={readOnly} required={required} {...props} />
   )
 }

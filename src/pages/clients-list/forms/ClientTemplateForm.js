@@ -1713,12 +1713,11 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                 </Grid>
                 <Grid item xs={12}>
                   <FieldSet title={labels.address}>
-                    <AddressTab
-                      labels={labels}
+                    <AddressFormShell
+                      isForm={false}
                       defaultReadOnly={{ countryId: true }}
                       addressValidation={formik}
                       readOnly={editMode && !allowEdit && true}
-                      access={maxAccess}
                     />
                   </FieldSet>
                 </Grid>

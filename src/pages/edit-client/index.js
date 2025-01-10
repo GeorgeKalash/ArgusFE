@@ -35,9 +35,7 @@ const ClientsList = () => {
       default: { category: 1 }
     }
   })
-  async function fetchWithSearch({ options = {}, filters }) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
+  async function fetchWithSearch({ filters }) {
     return (
       filters.qry &&
       (await getRequest({
@@ -155,7 +153,7 @@ const ClientsList = () => {
       </Grow>
       {errorMessage?.error && (
         <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-      )}{' '}
+      )}
     </VertLayout>
   )
 }
