@@ -1,5 +1,5 @@
-import { useEffect, useState, useContext } from 'react'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { useEffect, useContext } from 'react'
+import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
@@ -41,7 +41,7 @@ const SystemDefaults = () => {
       )
     })
     filteredList?.forEach(obj => {
-      if (obj.key === 'dateFormat' || obj.key === 'backofficeEmail') {
+      if (obj.key === 'dateFormat' || obj.key === 'backofficeEmail' || obj.key === 'enableHijri') {
         myObject[obj.key] = obj.value || null
       } else {
         myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
@@ -229,7 +229,7 @@ const SystemDefaults = () => {
                 name='enableHijri'
                 value={formik.values?.enableHijri}
                 onChange={event => formik.setFieldValue('enableHijri', event.target.checked)}
-                label={_labels.isCostElement}
+                label={_labels.enableHijri}
                 maxAccess={access}
               />
             </Grid>
