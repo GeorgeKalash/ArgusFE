@@ -19,7 +19,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { recordId } = store
 
   const invalidate = useInvalidate({
@@ -85,37 +85,45 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
   })
   const editMode = !!recordId
 
+  async function getDefaultSiteId() {
+    if (editMode) {
+      return
+    }
+
+    const defaultSiteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
+
+    if (defaultSiteId?.value && !formik.values.fromSiteId)
+      formik.setFieldValue('siteId', parseInt(defaultSiteId?.value || ''))
+  }
+
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: IVReplenishementRepository.IvReplenishements.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: IVReplenishementRepository.IvReplenishements.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues({
-            ...res.record,
+        formik.setValues({
+          ...res.record,
 
-            date: formatDateFromApi(res.record.date),
-            dateFrom: formatDateFromApi(res.record.dateFrom),
-            dateTo: formatDateFromApi(res.record.dateTo)
-          })
-        }
-      } catch (error) {}
+          date: formatDateFromApi(res.record.date),
+          dateFrom: formatDateFromApi(res.record.dateFrom),
+          dateTo: formatDateFromApi(res.record.dateTo)
+        })
+      }
+      await getDefaultSiteId()
     })()
   }, [])
 
   const onGenerate = async () => {
-    try {
-      await postRequest({
-        extension: IVReplenishementRepository.GenerateIvReplenishements.generate,
-        record: JSON.stringify(formik.values)
-      })
+    await postRequest({
+      extension: IVReplenishementRepository.GenerateIvReplenishements.generate,
+      record: JSON.stringify(formik.values)
+    })
 
-      toast.success(platformLabels.Generated)
-      invalidate()
-    } catch (error) {}
+    toast.success(platformLabels.Generated)
+    invalidate()
   }
 
   const actions = [
@@ -144,15 +152,11 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'
-                readOnly={editMode}
+                readOnly
                 label={labels.site}
                 values={formik.values}
                 displayField='name'
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('siteId', newValue?.recordId)
-                }}
-                error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
             </Grid>
             <Grid item xs={12}>
