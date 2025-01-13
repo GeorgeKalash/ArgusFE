@@ -168,6 +168,21 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
     const throwError = body.throwError || false
 
+    if(body?.noHandleError)
+    {
+      return axios({
+        method: 'POST',
+        url: url + body.extension,
+        headers: {
+          Authorization: 'Bearer ' + accessToken,
+          'Content-Type': 'multipart/form-data',
+          LanguageId: user.languageId
+        },
+        data: bodyFormData
+      })
+
+    }
+
     return new Promise(async (resolve, reject) => {
       axios({
         method: 'POST',

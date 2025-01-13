@@ -39,6 +39,8 @@ export function DataGrid({
 
   const skip = allowDelete ? 1 : 0
 
+  let lastCellStopped = useRef()
+
   function checkDuplicates(field, data) {
     return value.find(
       item => item.id != data.id && item?.[field] && item?.[field]?.toLowerCase() === data?.[field]?.toLowerCase()
@@ -157,6 +159,7 @@ export function DataGrid({
     gridApiRef.current.applyTransaction({ remove: [params.data] })
     if (newRows?.length < 1) setReady(true)
 
+    lastCellStopped.current = ''
     onChange(newRows, 'delete', params.data)
   }
 
@@ -671,14 +674,15 @@ export function DataGrid({
   }
 
   const onCellEditingStopped = params => {
+    const cellId = `${params.node.id}-${params.column.colId}`
+    if (lastCellStopped.current == cellId) return // Prevent duplicate calls
+    lastCellStopped.current = cellId
     const { data, colDef } = params
     if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
         stackDuplicate(params)
-
         return
       }
-
       process(params, data, setData)
     }
   }

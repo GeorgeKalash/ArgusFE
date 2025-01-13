@@ -286,7 +286,6 @@ export default function DraftForm({ labels, access, recordId, currency, window }
   async function autoDelete() {
     var count = formik?.values?.serials?.length
     let lastLine = formik?.values?.serials[count - 1]
-    //lastLine.draftId = formik?.values?.recordId
     delete lastLine.taxDetails
 
     if (lastLine?.itemId) {
@@ -308,23 +307,21 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     console.log('in autosave', lastLine)
 
     if (lastLine?.srlNo) {
-      lastLine.draftId = draftId
-
       const LastSerPack = {
         draftId: draftId,
         lineItem: lastLine
       }
 
-      const resp = await postRequest({
-        extension: SaleRepository.DraftInvoiceSerial.append,
-        record: JSON.stringify(LastSerPack)
-      })
-
-      console.log('resp', resp)
-
-      if (resp.error) {
+      try {
+        const resp = await postRequest({
+          extension: SaleRepository.DraftInvoiceSerial.append,
+          record: JSON.stringify(LastSerPack),
+          noHandleError: true
+        })
+      } catch (error) {
+        console.log('resp', error)
         stackError({
-          message: resp.error
+          message: error
         })
         return false
       }
@@ -482,25 +479,25 @@ export default function DraftForm({ labels, access, recordId, currency, window }
             console.log(lineObj.changes)
             console.log(formik?.values?.recordId)
 
-            const successSave = formik?.values?.recordId
-              ? autoSave(formik?.values?.recordId, lineObj.changes)
-              : saveHeader(lineObj.changes)
+            addRow(lineObj)
 
+            const successSave = formik?.values?.recordId
+              ? await autoSave(formik?.values?.recordId, lineObj.changes)
+              : await saveHeader(lineObj.changes)
+
+            console.log('successSave', successSave)
             if (!successSave) {
+              console.log('in condition', {
+                ...initialValues.serials[0],
+                id: newRow.id
+              })
               update({
-                srlNo: ''
+                ...initialValues.serials[0],
+                id: newRow.id
               })
             }
           }
         }
-      }
-    },
-    {
-      component: 'textfield',
-      updateOn: 'blur',
-      name: 'test',
-      onChange({ row: { update, newRow, oldRow, addRow } }) {
-        console.log('in test')
       }
     },
     {
@@ -1064,6 +1061,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                     <ResourceComboBox
                       endpointId={SaleRepository.Contact.contact}
                       parameters={`_clientId=${formik.values.clientId}`}
+
                       name='contactId'
                       label={labels.contact}
                       readOnly={isClosed}
@@ -1141,7 +1139,8 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                   <Grid item xs={6}>
                     <Grid item>
                       <ResourceLookup
-                        endpointId={SaleRepository.Client.snapshot} //inactive condition
+                        endpointId={SaleRepository.Client.snapshot}
+                        filter={{ isInactive : false}}
                         valueField='reference'
                         displayField='name'
                         secondFieldLabel={labels.name}
