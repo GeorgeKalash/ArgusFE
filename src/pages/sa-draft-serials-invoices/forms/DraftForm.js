@@ -46,6 +46,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
   const [defaultsDataState, setDefaultsDataState] = useState(null)
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [taxDetailsStore, setTaxDetailsStore] = useState([])
+  const [jumpToNextLine, setJumpToNextLine] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
@@ -75,7 +76,6 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     ptId: '',
     weight: 0,
     disSkuLookup: false,
-    jumpToNextLine: false,
     autoSrlNo: true,
     search: '',
     serials: [
@@ -198,17 +198,19 @@ export default function DraftForm({ labels, access, recordId, currency, window }
   }
 
   useEffect(() => {
-    SystemChecks.POS_JUMP_TO_NEXT_LINE && SystemChecks.SRLNO_TEXT_CHECK && getSysChecks()
-  }, [])
+    getSysChecks()
+  }, [SystemChecks.POS_JUMP_TO_NEXT_LINE])
 
   async function getSysChecks() {
+    console.log('in sys check')
     const Jres = await getRequest({
       extension: SystemRepository.SystemChecks.get,
       parameters: `_checkId=${SystemChecks.POS_JUMP_TO_NEXT_LINE}&_scopeId=1&_masterId=0`
     })
 
-    if (Jres?.record?.value) formik.setFieldValue('jumpToNextLine', Jres?.record?.value)
+    if (Jres?.record?.value) setJumpToNextLine(Jres?.record?.value)
 
+    console.log('in sys check', Jres?.record?.value)
     /* const STres = await getRequest({
       extension: SystemRepository.SystemChecks.get,
       parameters: `_checkId=${SystemChecks.SRLNO_TEXT_CHECK}&_scopeId=1&_masterId=0`
@@ -374,7 +376,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       name: 'srlNo',
       flex: 2,
       ...(formik?.values?.autoSrlNo && { updateOn: 'blur' }),
-      jumpToNextLine: formik?.values?.jumpToNextLine,
+      jumpToNextLine: jumpToNextLine,
       disableDuplicate: true,
       propsReducer({ row, props }) {
         return { ...props, readOnly: row?.srlNo }
@@ -1061,7 +1063,6 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                     <ResourceComboBox
                       endpointId={SaleRepository.Contact.contact}
                       parameters={`_clientId=${formik.values.clientId}`}
-
                       name='contactId'
                       label={labels.contact}
                       readOnly={isClosed}
@@ -1140,7 +1141,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                     <Grid item>
                       <ResourceLookup
                         endpointId={SaleRepository.Client.snapshot}
-                        filter={{ isInactive : false}}
+                        filter={{ isInactive: false }}
                         valueField='reference'
                         displayField='name'
                         secondFieldLabel={labels.name}
