@@ -253,28 +253,27 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (validSubmit) {
-          const data = {
-            outwardId: formik.values.outwardId,
-            beneficiaryCashPack: dispersalMode === DISPERSAL_MODE_CASH ? formik.values.beneficiaryData : null,
-            beneficiaryBankPack: dispersalMode === DISPERSAL_MODE_BANK ? formik.values.beneficiaryData : null
-          }
-
-          const res = await postRequest({
-            extension: RemittanceOutwardsRepository.OutwardsModification.set2,
-            record: JSON.stringify(data)
-          })
-
-          const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-          toast.success(actionMessage)
-          await refetchForm(res.recordId)
-          invalidate()
-          !recordId && viewOTP(res.recordId)
-        }
-      } catch (error) {
+      if (validSubmit) {
         setSubmitted(false)
         setValidSubmit(false)
+
+        const data = {
+          outwardId: formik.values.outwardId,
+          beneficiaryCashPack: dispersalMode === DISPERSAL_MODE_CASH ? formik.values.beneficiaryData : null,
+          beneficiaryBankPack: dispersalMode === DISPERSAL_MODE_BANK ? formik.values.beneficiaryData : null
+        }
+
+        const res = await postRequest({
+          extension: RemittanceOutwardsRepository.OutwardsModification.set2,
+          record: JSON.stringify(data)
+        })
+        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+        toast.success(actionMessage)
+        setSubmitted(true)
+        setValidSubmit(true)
+        await refetchForm(res.recordId)
+        invalidate()
+        !recordId && viewOTP(res.recordId)
       }
     })()
   }, [validSubmit])
