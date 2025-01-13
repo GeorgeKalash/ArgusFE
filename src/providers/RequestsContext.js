@@ -168,8 +168,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
     const throwError = body.throwError || false
 
-    if(body?.noHandleError)
-    {
+    if (body?.noHandleError) {
       return axios({
         method: 'POST',
         url: url + body.extension,
@@ -180,7 +179,6 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         },
         data: bodyFormData
       })
-
     }
 
     return new Promise(async (resolve, reject) => {

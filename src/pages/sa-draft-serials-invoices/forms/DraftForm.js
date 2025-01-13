@@ -34,6 +34,7 @@ import ImportSerials from 'src/components/Shared/ImportSerials'
 import { getIPR, DIRTYFIELD_UNIT_PRICE } from 'src/utils/ItemPriceCalculator'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import { useError } from 'src/error'
+import { RiceBowlOutlined } from '@mui/icons-material'
 
 export default function DraftForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -46,7 +47,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
   const [defaultsDataState, setDefaultsDataState] = useState(null)
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [taxDetailsStore, setTaxDetailsStore] = useState([])
-
+  const [deleted, setDeleted] = useState(false)
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
     access: access,
@@ -283,29 +284,23 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     return store.data.items.map(item => item.data).filter(obj => obj.taxId === taxId)
   }
 
-  async function autoDelete() {
-    var count = formik?.values?.serials?.length
-    let lastLine = formik?.values?.serials[count - 1]
-    delete lastLine.taxDetails
-
-    if (lastLine?.itemId) {
-      const LastSerPack = {
-        draftId: formik?.values?.recordId,
-        lineItem: lastLine
-      }
-
-      await postRequest({
-        extension: SaleRepository.DraftInvoiceSerial.del,
-        record: JSON.stringify(LastSerPack)
-      })
-
-      toast.success(platformLabels.Deleted)
+  const autoDelete = async row => {
+    if (!row?.itemName) return true
+    // row.draftId = 0
+    const LastSerPack = {
+      draftId: formik?.values?.recordId,
+      lineItem: row
     }
+
+    await postRequest({
+      extension: SaleRepository.DraftInvoiceSerial.del,
+      record: JSON.stringify(LastSerPack)
+    })
+
+    return true
   }
 
   async function autoSave(draftId, lastLine) {
-    console.log('in autosave', lastLine)
-
     if (lastLine?.srlNo) {
       const LastSerPack = {
         draftId: draftId,
@@ -313,11 +308,13 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       }
 
       try {
-        const resp = await postRequest({
+        await postRequest({
           extension: SaleRepository.DraftInvoiceSerial.append,
           record: JSON.stringify(LastSerPack),
           noHandleError: true
         })
+        toast.success(platformLabels.Saved)
+        return true
       } catch (error) {
         console.log('resp', error)
         stackError({
@@ -325,9 +322,6 @@ export default function DraftForm({ labels, access, recordId, currency, window }
         })
         return false
       }
-
-      toast.success(platformLabels.Saved)
-      return true
     }
   }
 
@@ -374,7 +368,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       name: 'srlNo',
       flex: 2,
       ...(formik?.values?.autoSrlNo && { updateOn: 'blur' }),
-      jumpToNextLine: formik?.values?.jumpToNextLine,
+      jumpToNextLine: formik?.values?.jumpToNextLine || true,
       disableDuplicate: true,
       propsReducer({ row, props }) {
         return { ...props, readOnly: row?.srlNo }
@@ -432,6 +426,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
             await getItemPriceRow(update, newRow, addRow, DIRTYFIELD_UNIT_PRICE)
             addRow()
           } */
+
           if (formik?.values?.autoSrlNo) {
             let lineObj = {
               fieldName: 'srlNo',
@@ -476,10 +471,8 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                 (lineObj.changes.taxDetails = FilteredListByTaxId(taxDetailsStore, lineObj.changes.taxId))
             }
 
-            console.log(lineObj.changes)
-            console.log(formik?.values?.recordId)
-
-            addRow(lineObj)
+            // console.log(lineObj.changes)
+            // console.log(formik?.values?.recordId)
 
             const successSave = formik?.values?.recordId
               ? await autoSave(formik?.values?.recordId, lineObj.changes)
@@ -488,13 +481,14 @@ export default function DraftForm({ labels, access, recordId, currency, window }
             console.log('successSave', successSave)
             if (!successSave) {
               console.log('in condition', {
-                ...initialValues.serials[0],
-                id: newRow.id
+                id: newRow?.id
               })
               update({
-                ...initialValues.serials[0],
-                id: newRow.id
+                id: newRow?.id,
+                srlNo: ''
               })
+            } else {
+              addRow(lineObj)
             }
           }
         }
@@ -725,6 +719,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       ))
 
     console.log('PLID', formik.values, diHeader.record)
+
     await formik.setValues({
       ...formik.values,
       ...diHeader.record,
@@ -1061,7 +1056,6 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                     <ResourceComboBox
                       endpointId={SaleRepository.Contact.contact}
                       parameters={`_clientId=${formik.values.clientId}`}
-
                       name='contactId'
                       label={labels.contact}
                       readOnly={isClosed}
@@ -1140,7 +1134,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                     <Grid item>
                       <ResourceLookup
                         endpointId={SaleRepository.Client.snapshot}
-                        filter={{ isInactive : false}}
+                        filter={{ isInactive: false }}
                         valueField='reference'
                         displayField='name'
                         secondFieldLabel={labels.name}
@@ -1207,9 +1201,8 @@ export default function DraftForm({ labels, access, recordId, currency, window }
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={(value, action) => {
+            onChange={value => {
               formik.setFieldValue('serials', value)
-              action === 'delete' && formik?.values?.autoSrlNo && autoDelete()
             }}
             value={filteredData}
             error={formik.errors.serials}
@@ -1218,6 +1211,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
             maxAccess={maxAccess}
             disabled={isClosed || !formik.values.clientId}
             allowDelete={!isClosed}
+            autoDelete={autoDelete}
           />
         </Grow>
         <Fixed>
