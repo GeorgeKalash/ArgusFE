@@ -54,33 +54,29 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
       status: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const data = {
-          ...obj,
-          startDate: formatDateToApi(obj.startDate),
-          endDate: formatDateToApi(obj.endDate)
-        }
-
-        await postRequest({
-          extension: SystemRepository.FiscalYears.set,
-          record: JSON.stringify(data)
-        })
-
-        if (!recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', obj.fiscalYear)
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: obj.fiscalYear
-          }))
-        } else toast.success(platformLabels.Edited)
-
-        invalidate()
-
-        window.close()
-      } catch (e) {
-        console.log(e)
+      const data = {
+        ...obj,
+        startDate: formatDateToApi(obj.startDate),
+        endDate: formatDateToApi(obj.endDate)
       }
+
+      await postRequest({
+        extension: SystemRepository.FiscalYears.set,
+        record: JSON.stringify(data)
+      })
+
+      if (!recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', obj.fiscalYear)
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: obj.fiscalYear
+        }))
+      } else toast.success(platformLabels.Edited)
+
+      invalidate()
+
+      window.close()
     }
   })
 
