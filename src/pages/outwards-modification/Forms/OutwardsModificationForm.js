@@ -162,7 +162,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
 
     const res = await getRequest({
       extension: RemittanceOutwardsRepository.OutwardsOrder.get2,
-      parameters: `_recordId=${data.outwardId}`
+      parameters: `_recordId=${data?.owoId || data?.outwardId}`
     })
 
     const { headerView, ttNo } = res.record
@@ -269,8 +269,6 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
         })
         const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
         toast.success(actionMessage)
-        setSubmitted(true)
-        setValidSubmit(true)
         await refetchForm(res.recordId)
         invalidate()
         !recordId && viewOTP(res.recordId)
@@ -296,6 +294,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       isClosed={isClosed}
       actions={actions}
       functionId={SystemFunction.OutwardsModification}
+      previewReport={editMode}
     >
       <VertLayout>
         <Grow>
