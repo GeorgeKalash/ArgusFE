@@ -25,9 +25,12 @@ export function DataGrid({
   allowAddNewLine = true,
   onSelectionChange,
   rowSelectionModel,
+  autoDelete,
   bg
 }) {
   const gridApiRef = useRef(null)
+
+  let lastCellStopped = useRef()
 
   const isDup = useRef(null)
 
@@ -38,8 +41,6 @@ export function DataGrid({
   const [ready, setReady] = useState(false)
 
   const skip = allowDelete ? 1 : 0
-
-  let lastCellStopped = useRef()
 
   function checkDuplicates(field, data) {
     return value.find(
@@ -154,16 +155,21 @@ export function DataGrid({
     }
   }
 
-  function deleteRow(params) {
+  async function deleteRow(params) {
+    if (typeof autoDelete === 'function') {
+      if (!(await autoDelete(params.data))) {
+        return
+      }
+    }
     const newRows = value.filter(({ id }) => id !== params.data.id)
     gridApiRef.current.applyTransaction({ remove: [params.data] })
     if (newRows?.length < 1) setReady(true)
 
-    lastCellStopped.current = ''
     onChange(newRows, 'delete', params.data)
   }
 
   function openDelete(params) {
+    lastCellStopped.current = ''
     stack({
       Component: DeleteDialog,
       props: {
