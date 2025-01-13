@@ -83,10 +83,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     }),
     onSubmit: async obj => {
       if (!obj.recordId) {
-        obj.baseAmount = obj.amount
         obj.status = 1
         obj.rateCalcMethod = 1
-        obj.exRate = 1
       }
 
       const response = await postRequest({
@@ -98,7 +96,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
-          baseAmount: obj.amount,
+          baseAmount: !formik.values.baseAmount ? obj.amount : formik.values.baseAmount,
 
           recordId: response.recordId
         })
@@ -548,17 +546,15 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     value={formik.values.amount}
                     required
                     maxAccess={maxAccess}
-                    onChange={async e => {
-                      if (e.target.value) {
-                        await getMultiCurrencyFormData(
-                          formik.values.currencyId,
-                          formatDateForGetApI(formik.values.date),
-                          RateDivision.FINANCIALS,
-                          Number(e.target.value.replace(/,/g, ''))
-                        )
-                        formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
-                      }
+                    onBlur={async () => {
+                      if (!editMode) await getMultiCurrencyFormData(
+                        formik.values.currencyId,
+                        formatDateForGetApI(formik.values.date),
+                        RateDivision.FINANCIALS,
+                        formik.values.amount
+                      );
                     }}
+                    onChange={(e) => formik.setFieldValue("amount", e.target.value)}
                     onClear={async () => {
                       await getMultiCurrencyFormData(
                         formik.values.currencyId,

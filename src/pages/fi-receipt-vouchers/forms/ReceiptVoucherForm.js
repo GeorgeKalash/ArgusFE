@@ -555,17 +555,17 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
                 maxLength={'10'}
                 decimalScale={2}
-                onChange={async e => {
-                  if (e.target.value) {
+                onBlur={async e => {
+                  if (!editMode) {
                     await getMultiCurrencyFormData(
                       formik.values.currencyId,
                       formatDateForGetApI(formik.values.date),
                       RateDivision.FINANCIALS,
                       Number(e.target.value.replace(/,/g, ''))
                     )
-                    formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
                   }
                 }}
+                onChange={e => formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))}
                 onClear={async () => {
                   await getMultiCurrencyFormData(
                     formik.values.currencyId,

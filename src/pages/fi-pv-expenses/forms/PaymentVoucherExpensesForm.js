@@ -769,15 +769,17 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                 value={amountSum}
                 readOnly
                 maxAccess={maxAccess}
-                onChange={async e => {
-                  await getMultiCurrencyFormData(
-                    formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
-                    RateDivision.FINANCIALS,
-                    Number(e.target.value.replace(/,/g, ''))
-                  )
-                  formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
+                onBlur={async e => {
+                  if (!editMode) {
+                    await getMultiCurrencyFormData(
+                      formik.values.currencyId,
+                      formatDateForGetApI(formik.values.date),
+                      RateDivision.FINANCIALS,
+                      Number(e.target.value.replace(/,/g, ''))
+                    )
+                  }
                 }}
+                onChange={e => formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))}
                 onClear={async () => {
                   await getMultiCurrencyFormData(
                     formik.values.currencyId,
