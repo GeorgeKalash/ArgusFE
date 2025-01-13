@@ -25,7 +25,7 @@ const JobOrder = () => {
     filterBy,
     refetch,
     clearFilter,
-    labels: labels,
+    labels,
     access,
     paginationParameters,
     invalidate
@@ -197,7 +197,7 @@ const JobOrder = () => {
       </Fixed>
       <Grow>
         <Table
-          name='table'
+          name='jobTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

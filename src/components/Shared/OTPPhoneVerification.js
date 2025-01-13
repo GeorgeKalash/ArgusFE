@@ -92,6 +92,11 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
       if (index < otp.length - 1 && value !== '') {
         document.getElementById(`otp-input-${index + 1}`).focus()
         document.getElementById(`otp-input-${index + 1}`).select()
+      } else if (index === otp.length - 1) {
+        const isOtpComplete = newOtp.every(digit => digit !== '')
+        if (isOtpComplete) {
+          handleVerifyOtp(newOtp)
+        }
       }
     } else if (e.nativeEvent.inputType === 'deleteContentBackward') {
       newOtp[index] = ''

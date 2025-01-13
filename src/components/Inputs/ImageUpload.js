@@ -4,40 +4,35 @@ import { useRef } from 'react'
 import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
+import CustomButton from './CustomButton'
+import { ControlContext } from 'src/providers/ControlContext'
 const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidth, customHeight }, ref) => {
   const hiddenInputRef = useRef()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [image, setImage] = useState()
   const [initialValues, setInitialData] = useState({})
-
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
     initialValues
   })
-
   const uniqueRecord = recordId || ref?.current?.value
-
   useEffect(() => {
     if (uniqueRecord) {
       getData()
     }
   }, [])
-
   async function getData() {
     const result = await getRequest({
       extension: SystemRepository.Attachment.get,
       parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${uniqueRecord}`
     })
-
     setInitialData(result?.record)
   }
-
   const handleClick = () => {
     hiddenInputRef.current.click()
   }
-
   const handleInputImageChange = event => {
     const file = event?.target?.files[0]
     if (file) {
@@ -45,7 +40,6 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
       const year = dateObject.getFullYear()
       const month = dateObject.getMonth() + 1
       const day = dateObject.getDate()
-
       let data = {
         resourceId: resourceId,
         recordId: uniqueRecord,
@@ -57,16 +51,13 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
         url: null,
         file: null
       }
-
       const fileSizeInKB = Math.round(file.size / 1024)
       if (parseInt(fileSizeInKB) > 500) {
         alert('Allowed PNG or JPEG. Max size of 500KB.')
-
         return
       }
       data = { ...data, file } //binary
       formik.setValues(data)
-
       const reader = new FileReader()
       reader.onloadend = e => {
         setImage(e.target.result)
@@ -74,25 +65,20 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
       reader.readAsDataURL(file)
     }
   }
-
   const handleInputImageReset = () => {
     formik.setValues({})
     setImage('')
   }
-
   const submit = () => {
     if (formik.values?.file) {
       const obj = { ...formik.values, recordId: ref.current.value || recordId }
-
       return postRequest({
         extension: SystemRepository.Attachment.set,
         record: JSON.stringify(obj),
         file: formik.values?.file
+      }).then(res => {
+        return res
       })
-        .then(res => {
-          return res
-        })
-        .catch(e => {})
     } else if (!image && initialValues?.url && !formik.values?.url) {
       return postRequest({
         extension: SystemRepository.Attachment.del,
@@ -103,11 +89,9 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
       })
     }
   }
-
   useImperativeHandle(ref, () => ({
     submit
   }))
-
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
       <img
@@ -120,7 +104,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
           height: customHeight || 140,
           objectFit: 'contain',
           marginRight: 16,
-          border: error && '2px solid #f44336'
+          border: error && '2px solid #F44336'
         }}
         onClick={handleClick}
       />
@@ -132,30 +116,9 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
           onChange={handleInputImageChange}
           accept='image/png, image/jpeg, image/jpg'
         />
-        <Box
-          onClick={handleInputImageReset}
-          variant='contained'
-          sx={{
-            mr: 1,
-            backgroundColor: '#f44336',
-            '&:hover': {
-              opacity: 0.8
-            },
-            width: 40,
-            height: 30,
-            objectFit: 'contain',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '20%',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
-          }}
-        >
-          <img src={`/images/buttonsIcons/clear.png`} alt={'clear'} />
-        </Box>
+        <CustomButton onClick={handleInputImageReset} label={platformLabels.Clear} color='#F44336' image='clear.png' />
       </Box>
     </Box>
   )
 })
-
 export default ImageUpload
