@@ -38,5 +38,8 @@ export const SystemChecks = {
   ENABLE_RETAIL_SCALE_BARCODE: Module.PointOfSale * 100 + 6,
 
   CT_YAKEEN_INFORMATION: Module.CurrencyTrading * 100 + 5,
-  CT_DISABLE_MOBILE_VERIFICATION: Module.CurrencyTrading * 100 + 4
+  CT_DISABLE_MOBILE_VERIFICATION: Module.CurrencyTrading * 100 + 4,
+
+  //Sales
+  SRLNO_TEXT_CHECK: Module.Sales * 100 + 2
 }

@@ -272,6 +272,7 @@ const PhysicalCountItemDe = () => {
         })
       },
       async onChange({ row: { update, newRow, oldRow, addRow } }) {
+        console.log('in phy on change')
         let itemId
         itemId = newRow?.itemId
 

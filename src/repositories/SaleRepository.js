@@ -209,13 +209,14 @@ export const SaleRepository = {
     get: service + 'getDFT',
     set2: service + 'set2DFT',
     del: service + 'delDFT',
-
     close: service + 'closeDFT',
     reopen: service + 'reopenDFT'
   },
   DraftInvoiceSerial: {
     qry: service + 'qryDFS',
     get: service + 'get2DFS',
-    batch: service + 'batchDFS'
+    batch: service + 'batchDFS',
+    append: service + 'appendDFS',
+    del: service + 'delDFS'
   }
 }

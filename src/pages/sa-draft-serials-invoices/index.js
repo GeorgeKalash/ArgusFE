@@ -9,18 +9,14 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
-import { SystemFunction } from 'src/resources/SystemFunction'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import DraftForm from './forms/DraftForm'
-import { useError } from 'src/error'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const DraftSerialsInvoices = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const { stack: stackError } = useError()
 
   const {
     query: { data },
@@ -109,10 +105,11 @@ const DraftSerialsInvoices = () => {
   }
 
   async function fetchWithFilter({ filters, pagination }) {
+    const status = '0'
     if (filters.qry)
       return await getRequest({
-        extension: SaleRepository.SalesOrder.snapshot,
-        parameters: `_filter=${filters.qry}`
+        extension: SaleRepository.DraftInvoice.snapshot,
+        parameters: `_filter=${filters.qry}&_status=${status}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }

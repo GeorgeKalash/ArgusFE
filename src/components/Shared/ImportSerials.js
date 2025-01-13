@@ -102,18 +102,6 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
           record: JSON.stringify(SerialsPack)
         })
 
-        /* stack({
-          Component: ThreadProgress,
-          props: {
-            recordId: Number(draftId),
-            access: maxAccess
-          },
-          width: 500,
-          height: 450,
-          closable: false,
-          title: platformLabels.Progress
-        }) */
-
         toast.success(platformLabels.Imported)
         onCloseimport()
         window.close()
