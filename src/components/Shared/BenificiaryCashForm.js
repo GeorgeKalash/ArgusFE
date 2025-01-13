@@ -20,10 +20,10 @@ import { useForm } from 'src/hooks/form'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import { HIDDEN } from 'src/services/api/maxAccess'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { Fixed } from './Layouts/Fixed'
 
 const BenificiaryCashForm = ({
   viewBtns = true,
@@ -395,7 +395,7 @@ const BenificiaryCashForm = ({
       isSaved={viewBtns}
     >
       <VertLayout>
-        <Grow>
+        <Fixed>
           <Grid container spacing={2}>
             <FormGrid item hideonempty xs={6}>
               <ResourceLookup
@@ -806,7 +806,7 @@ const BenificiaryCashForm = ({
               />
             </FormGrid>
           </Grid>
-        </Grow>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )
