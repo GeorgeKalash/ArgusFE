@@ -139,7 +139,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
   }
 
   function openMCRForm(data) {
-    console.log(data, '----------------------------------')
     stack({
       Component: MultiCurrencyRateForm,
       props: {
@@ -314,8 +313,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
   useEffect(() => {
     if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
   }, [defaultsDataState])
-
-  console.log(formik)
 
   return (
     <FormShell
@@ -560,17 +557,17 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 readOnly={isPosted || isCancelled}
                 value={formik.values.amount}
                 maxAccess={maxAccess}
-                onChange={async e => {
-                  if (e.target.value) {
+                onBlur={async e => {
+                  if (!editMode) {
                     await getMultiCurrencyFormData(
                       formik.values.currencyId,
                       formatDateForGetApI(formik.values.date),
                       RateDivision.FINANCIALS,
                       Number(e.target.value.replace(/,/g, ''))
                     )
-                    formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
                   }
                 }}
+                onChange={(e) => formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))}
                 onClear={async () => {
                   await getMultiCurrencyFormData(
                     formik.values.currencyId,
