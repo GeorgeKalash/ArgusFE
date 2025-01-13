@@ -17,10 +17,15 @@ import { DataSets } from 'src/resources/DataSets'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { useInvalidate } from 'src/hooks/resource'
 
-export default function TransactionForm({ labels, maxAccess, recordId, seqNo, fetchGridData, caId }) {
+export default function TransactionForm({ labels, maxAccess, recordId, seqNo, caId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: CostAllocationRepository.TrxCostType.qry
+  })
 
   const { formik } = useForm({
     initialValues: {
@@ -52,7 +57,7 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, fe
         } else {
           toast.success(platformLabels.Edited)
         }
-        fetchGridData()
+        invalidate()
       })
     }
   })

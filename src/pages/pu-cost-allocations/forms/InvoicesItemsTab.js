@@ -1,14 +1,15 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CostAllocationRepository } from 'src/repositories/CostAllocationRepository'
 import Table from 'src/components/Shared/Table'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { useResourceQuery } from 'src/hooks/resource'
 
 const InvoicesItemsTab = ({ store, labels, access }) => {
   const { recordId } = store
   const { getRequest } = useContext(RequestsContext)
-  const [valueGridData, setValueGridData] = useState()
 
   const columns = [
     {
@@ -36,17 +37,20 @@ const InvoicesItemsTab = ({ store, labels, access }) => {
   ]
 
   async function fetchGridData() {
-    await getRequest({
+    return await getRequest({
       extension: CostAllocationRepository.InvoicesItems.qry,
       parameters: `_invoiceId=0&_caId=${recordId}`
-    }).then(res => {
-      setValueGridData(res)
     })
   }
 
-  useEffect(() => {
-    recordId && fetchGridData()
-  }, [recordId])
+  const {
+    query: { data }
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: CostAllocationRepository.InvoicesItems.qry,
+    datasetId: ResourceIds.PuCostAllocation,
+    enabled: Boolean(recordId)
+  })
 
   return (
     <VertLayout>
@@ -54,7 +58,7 @@ const InvoicesItemsTab = ({ store, labels, access }) => {
         <Table
           name='dstributionTable'
           columns={columns}
-          gridData={valueGridData}
+          gridData={data}
           rowId={['recordId']}
           isLoading={false}
           maxAccess={access}

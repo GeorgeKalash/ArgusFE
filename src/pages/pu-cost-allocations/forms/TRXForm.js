@@ -19,15 +19,28 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function TRXForm({ labels, maxAccess, setStore, store }) {
-  const { platformLabels } = useContext(ControlContext)
+export default function TRXForm({ labels, access, setStore, store }) {
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const functionId = SystemFunction.CostAllocation
 
+  async function getDefaultPlant() {
+    const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')
+
+    return defaultPlant?.value ? parseInt(defaultPlant.value) : null
+  }
+
   const invalidate = useInvalidate({
     endpointId: CostAllocationRepository.PuCostAllocations.page
+  })
+
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId: functionId,
+    access: access,
+    enabled: !recordId
   })
 
   const { formik } = useForm({
@@ -37,7 +50,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
       baseAmount: 0.0,
       notes: '',
       wip: 1,
-      dtId: null,
+      dtId: documentType?.dtId,
       reference: '',
       status: 1,
       releaseStatus: null,
@@ -81,10 +94,18 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
   const isPosted = formik.values.status === 3
 
   useEffect(() => {
-    if (recordId) {
-      fetchData(recordId)
+    const fetchDataAndSetPlant = async () => {
+      if (recordId) {
+        await fetchData(recordId)
+      } else {
+        const defaultPlant = await getDefaultPlant()
+        formik.setFieldValue('plantId', defaultPlant)
+      }
     }
+
+    fetchDataAndSetPlant()
   }, [])
+
   async function fetchData() {
     await getRequest({
       extension: CostAllocationRepository.PuCostAllocations.get,
@@ -240,7 +261,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId || '')
+                  formik.setFieldValue('dtId', newValue?.recordId || ''), changeDT(newValue)
                 }}
                 readOnly={editMode}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -286,11 +307,7 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
                 label={labels.amount}
                 value={formik.values.baseAmount}
                 maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('baseAmount', e.target.value)}
-                onClear={() => formik.setFieldValue('baseAmount', '')}
-                readOnly={isPosted || isClosed}
-                error={formik.touched.baseAmount && Boolean(formik.errors.baseAmount)}
-                maxLength={10}
+                readOnly
                 decimalScale={2}
               />
             </Grid>

@@ -12,6 +12,8 @@ import { ControlContext } from 'src/providers/ControlContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import TransactionForm from './TransactionForm'
 import { useWindow } from 'src/windows'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const TransactionTab = ({ store, labels, access }) => {
   const { platformLabels } = useContext(ControlContext)
@@ -19,8 +21,17 @@ const TransactionTab = ({ store, labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [baseAmounts, setBaseAmounts] = useState(0)
   const { stack } = useWindow()
-  const [valueGridData, setValueGridData] = useState()
   const [maxSeqNo, setMaxSeqNo] = useState(0)
+
+  const {
+    query: { data },
+    invalidate
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: CostAllocationRepository.TrxCostType.qry,
+    datasetId: ResourceIds.PuCostAllocation,
+    enabled: Boolean(recordId)
+  })
 
   const columns = [
     {
@@ -58,23 +69,9 @@ const TransactionTab = ({ store, labels, access }) => {
   ]
 
   async function fetchGridData() {
-    await getRequest({
+    return await getRequest({
       extension: CostAllocationRepository.TrxCostType.qry,
       parameters: `_caId=${recordId}`
-    }).then(res => {
-      setValueGridData(res)
-      let totalBaseAmounts = 0
-      let maxSeq = 0
-
-      res.list = res.list.map(item => {
-        totalBaseAmounts += item.baseAmount
-        maxSeq = Math.max(maxSeq, item.seqNo)
-
-        return item
-      })
-
-      setBaseAmounts(totalBaseAmounts)
-      setMaxSeqNo(maxSeq + 1)
     })
   }
 
@@ -83,7 +80,7 @@ const TransactionTab = ({ store, labels, access }) => {
       extension: CostAllocationRepository.TrxCostType.del,
       record: JSON.stringify(obj)
     })
-    fetchGridData()
+    invalidate()
     toast.success(platformLabels.Deleted)
   }
 
@@ -95,7 +92,6 @@ const TransactionTab = ({ store, labels, access }) => {
         recordId: obj?.caId,
         caId: recordId,
         seqNo: obj?.seqNo ?? maxSeqNo,
-        fetchGridData: fetchGridData,
         maxAccess: access
       },
       width: 600,
@@ -113,8 +109,21 @@ const TransactionTab = ({ store, labels, access }) => {
   }
 
   useEffect(() => {
-    recordId && fetchGridData()
-  }, [recordId])
+    if (data) {
+      let totalBaseAmounts = 0
+      let maxSeq = 0
+
+      data.list = data.list.map(item => {
+        totalBaseAmounts += item.baseAmount
+        maxSeq = Math.max(maxSeq, item.seqNo)
+
+        return item
+      })
+
+      setBaseAmounts(totalBaseAmounts)
+      setMaxSeqNo(maxSeq + 1)
+    }
+  }, [data])
 
   return (
     <VertLayout>
@@ -125,7 +134,7 @@ const TransactionTab = ({ store, labels, access }) => {
         <Table
           name='transactionTable'
           columns={columns}
-          gridData={valueGridData}
+          gridData={data}
           rowId={['recordId']}
           isLoading={false}
           onDelete={isPosted || isClosed ? null : del}

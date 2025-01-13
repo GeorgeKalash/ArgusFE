@@ -1,25 +1,26 @@
-import { useContext, useState } from 'react'
-import toast from 'react-hot-toast'
-import Table from 'src/components/Shared/Table'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { useContext } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import Table from 'src/components/Shared/Table'
+import toast from 'react-hot-toast'
+import { useWindow } from 'src/windows'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { CostAllocationRepository } from 'src/repositories/CostAllocationRepository'
-import PuCostAllocationWindow from './window/PuCostAllocationWindow'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { useError } from 'src/error'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import PuCostAllocationWindow from './window/PuCostAllocationWindow'
+import { CostAllocationRepository } from 'src/repositories/CostAllocationRepository'
 
 const PuCostAllocations = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
-  const [params, setParams] = useState('')
-
+  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
-
+  const { stack: stackError } = useError()
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
@@ -44,12 +45,12 @@ const PuCostAllocations = () => {
 
   const {
     query: { data },
-    refetch,
-    labels: _labels,
     filterBy,
+    refetch,
     clearFilter,
-    paginationParameters,
+    labels: labels,
     access,
+    paginationParameters,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -63,52 +64,60 @@ const PuCostAllocations = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'baseAmount',
-      headerName: _labels.amount,
+      headerName: labels.amount,
       flex: 1
     },
     {
       field: 'date',
-      headerName: _labels.date,
+      headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
       field: 'statusName',
-      headerName: _labels.status,
+      headerName: labels.status,
       flex: 1
     },
     {
       field: 'wipName',
-      headerName: _labels.wipName,
+      headerName: labels.wipName,
       flex: 1
     }
   ]
 
-  function openForm(obj) {
-    stack({
-      Component: PuCostAllocationWindow,
-      props: {
-        labels: _labels,
-        recordId: obj?.recordId,
-        maxAccess: access
-      },
-      width: 800,
-      height: 500,
-      title: _labels.PuCostAllocations
-    })
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.CostAllocation,
+    action: async () => {
+      openForm()
+    },
+    hasDT: false
+  })
+
+  const add = async () => {
+    proxyAction()
   }
 
   const edit = obj => {
     openForm(obj)
   }
 
-  const add = () => {
-    openForm()
+  async function openForm(obj) {
+    stack({
+      Component: PuCostAllocationWindow,
+      props: {
+        labels: labels,
+        recordId: obj?.recordId,
+        maxAccess: access
+      },
+      width: 800,
+      height: 500,
+      title: labels.PuCostAllocations
+    })
   }
 
   const del = async obj => {
@@ -120,6 +129,14 @@ const PuCostAllocations = () => {
     toast.success(platformLabels.Deleted)
   }
 
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   const onApply = ({ search, rpbParams }) => {
     if (!search && rpbParams.length === 0) {
       clearFilter('params')
@@ -128,19 +145,7 @@ const PuCostAllocations = () => {
     } else {
       filterBy('qry', search)
     }
-    if (rpbParams) {
-      setParams(rpbParams)
-    }
     refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    onApply({ search: '', rpbParams: params })
-    clearFilter('qry')
   }
 
   return (
@@ -162,14 +167,14 @@ const PuCostAllocations = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
+          refetch={refetch}
           onDelete={del}
           deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
-          paginationType='api'
-          paginationParameters={paginationParameters}
-          refetch={refetch}
           maxAccess={access}
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Grow>
     </VertLayout>
