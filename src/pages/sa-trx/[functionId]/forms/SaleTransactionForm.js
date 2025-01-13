@@ -134,7 +134,7 @@ export default function SaleTransactionForm({
         rateCalcMethod: 1,
         tdType: DIRTYFIELD_TDPCT,
         tdPct: 0,
-        baseAmount: 0,
+        baseAmount: null,
         volume: 0,
         weight: 0,
         qty: 0,
@@ -404,7 +404,7 @@ export default function SaleTransactionForm({
       })
 
       const updatedRateRow = getRate({
-        amount: amount === 0 ? 0 : amount ?? formik.values.amount,
+        amount: amount === 0 ? 0 : amount ?? formik.values.header.amount,
         exRate: res.record?.exRate,
         baseAmount: 0,
         rateCalcMethod: res.record?.rateCalcMethod,
@@ -1368,6 +1368,7 @@ export default function SaleTransactionForm({
     formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
     formik.setFieldValue('header.volume', parseFloat(totalVolume).toFixed(2))
     formik.setFieldValue('header.amount', parseFloat(amount).toFixed(2))
+    formik.setFieldValue('header.baseAmount', parseFloat(formik.values.header.baseAmount).toFixed(2))
     formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
