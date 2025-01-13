@@ -76,10 +76,8 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     onSubmit: async obj => {
       const recordId = obj.recordId
       if (!recordId) {
-        obj.baseAmount = obj.amount
         obj.status = 1
         obj.rateCalcMethod = 1
-        obj.exRate = 1
       }
 
       const response = await postRequest({
