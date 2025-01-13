@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import { useEffect, useContext, useState, useRef } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -23,9 +23,9 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { useError } from 'src/error'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { HIDDEN } from 'src/services/api/maxAccess'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
+import { Fixed } from './Layouts/Fixed'
 
 export default function BenificiaryBankForm({
   viewBtns = true,
@@ -360,7 +360,7 @@ export default function BenificiaryBankForm({
       isSaved={viewBtns}
     >
       <VertLayout>
-        <Grow>
+        <Fixed>
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Grid container spacing={2}>
@@ -883,7 +883,7 @@ export default function BenificiaryBankForm({
               </Grid>
             </Grid>
           </Grid>
-        </Grow>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )
