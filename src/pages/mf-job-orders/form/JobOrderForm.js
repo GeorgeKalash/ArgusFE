@@ -28,13 +28,12 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
-export default function JobOrderForm({ labels, access, setStore, store, window }) {
+export default function JobOrderForm({ labels, access, setStore, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
   const [plStore, setPlStore] = useState([])
-  const { recordId } = store
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrder,

@@ -1,10 +1,9 @@
 import { useContext } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import MaterialsAdjustmentForm from './Forms/MaterialsAdjustmentForm'
@@ -12,9 +11,13 @@ import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import SystemFunction from '../system-functions'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 
 const MaterialsAdjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -36,7 +39,7 @@ const MaterialsAdjustment = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     paginationParameters,
     refetch,
     access,
@@ -54,57 +57,66 @@ const MaterialsAdjustment = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels[12],
+      headerName: labels.refernce,
       flex: 1
     },
     {
       field: 'date',
-      headerName: _labels[3],
+      headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
       field: 'siteRef',
-      headerName: _labels[10],
+      headerName: labels.siteRef,
       flex: 1
     },
     {
       field: 'siteName',
-      headerName: _labels[11],
+      headerName: labels.siteName,
       flex: 1
     },
     {
       field: 'description',
-      headerName: _labels[13],
+      headerName: labels.description,
       flex: 1
     },
     {
       field: 'statusName',
-      headerName: _labels[14],
+      headerName: labels.status,
       flex: 1
     },
     {
       field: 'qty',
-      headerName: _labels[15],
+      headerName: labels.qty,
       flex: 1
     }
   ]
 
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.materialsAdjustment,
+    action: openForm
+  })
+
+  const add = async () => {
+    await proxyAction()
+  }
+
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj?.recordId)
   }
 
   function openForm(recordId) {
     stack({
       Component: MaterialsAdjustmentForm,
       props: {
-        recordId: recordId ? recordId : null,
-        labels: _labels,
-        maxAccess: access
+        recordId,
+        labels,
+        access
       },
       width: 1200,
       height: 700,
-      title: _labels[1]
+      title: labels.materialsAdjustment
     })
   }
 
@@ -114,7 +126,7 @@ const MaterialsAdjustment = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   const onApply = ({ rpbParams }) => {
@@ -125,7 +137,7 @@ const MaterialsAdjustment = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} maxAccess={access} onApply={onApply} reportName={'IVADJ'} />
+        <RPBGridToolbar hasSearch={false} maxAccess={access} onAdd={add} onApply={onApply} reportName={'IVADJ'} />
       </Fixed>
       <Grow>
         <Table

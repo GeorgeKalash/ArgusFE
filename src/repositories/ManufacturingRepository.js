@@ -41,8 +41,7 @@ export const ManufacturingRepository = {
     page: service + 'pageOPR',
     set: service + 'setOPR',
     get: service + 'getOPR',
-    del: service + 'delOPR',
-    qry: service + 'qryOPR'
+    del: service + 'delOPR'
   },
   Labor: {
     page: service + 'pageLBR',
@@ -152,5 +151,11 @@ export const ManufacturingRepository = {
   },
   JobCategory: {
     qry: service + 'qryJCA'
+  },
+  JobRouting: {
+    qry: service + 'qryJRO',
+    get: service + 'getJRO',
+    set: service + 'setJRO',
+    del: service + 'delJRO'
   }
 }
