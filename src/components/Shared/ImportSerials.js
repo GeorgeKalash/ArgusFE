@@ -1,9 +1,4 @@
 import React from 'react'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
 import { Button, Grid } from '@mui/material'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -11,20 +6,15 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomTextArea from '../Inputs/CustomTextArea'
 import { useFormik } from 'formik'
-import { useContext, useEffect, useState, useRef } from 'react'
+import { useContext, useState, useRef } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 import ImportConfirmation from './ImportConfirmation'
-import { ThreadProgress } from './ThreadProgress'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 
 const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) => {
-  console.log('th', maxAccess)
-  console.log(endPoint)
-  console.log(draftId)
-  console.log(onCloseimport)
 
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -32,7 +22,7 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
   const imageInputRef = useRef(null)
   const [file, setFile] = useState(null)
   const [parsedFileContent, setParsedFileContent] = useState([])
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
 
   const formik = useFormik({
     initialValues: {
@@ -59,7 +49,6 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
       const reader = new FileReader()
       reader.onload = e => {
         const text = e.target.result
-        console.log('text', text)
         setParsedFileContent(text)
       }
       reader.readAsText(file)

@@ -681,7 +681,7 @@ export function DataGrid({
 
   const onCellEditingStopped = params => {
     const cellId = `${params.node.id}-${params.column.colId}`
-    if (lastCellStopped.current == cellId) return // Prevent duplicate calls
+    if (lastCellStopped.current == cellId) return
     lastCellStopped.current = cellId
     const { data, colDef } = params
     if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {

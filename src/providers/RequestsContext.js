@@ -168,19 +168,6 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
     const throwError = body.throwError || false
 
-    if (body?.noHandleError) {
-      return axios({
-        method: 'POST',
-        url: url + body.extension,
-        headers: {
-          Authorization: 'Bearer ' + accessToken,
-          'Content-Type': 'multipart/form-data',
-          LanguageId: user.languageId
-        },
-        data: bodyFormData
-      })
-    }
-
     return new Promise(async (resolve, reject) => {
       axios({
         method: 'POST',
@@ -196,14 +183,19 @@ const RequestsProvider = ({ showLoading = false, children }) => {
           if (!disableLoading) {
             debouncedCloseLoading()
           }
+          if (body?.noHandleError) return resolve(response.data)
           resolve(response.data)
         })
         .catch(error => {
+          if (body?.noHandleError) {
+            return resolve(error.response.data)
+          }
           debouncedCloseLoading()
           showError({
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
+
           if (throwError) reject(error)
         })
     })
