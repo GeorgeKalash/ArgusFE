@@ -283,7 +283,6 @@ export default function TRXForm({ labels, maxAccess, setStore, store }) {
             <Grid item xs={6}>
               <CustomNumberField
                 name='baseAmount'
-                required
                 label={labels.amount}
                 value={formik.values.baseAmount}
                 maxAccess={maxAccess}
