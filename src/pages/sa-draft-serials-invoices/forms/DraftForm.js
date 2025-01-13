@@ -149,6 +149,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
         .filter(row => row.srlNo)
         .map((copy, index) => {
           const { taxDetails, ...rest } = copy
+          
           return {
             ...rest,
             seqNo: index + 1,
@@ -276,6 +277,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
 
   const autoDelete = async row => {
     if (!row?.itemName) return true
+
     const LastSerPack = {
       draftId: formik?.values?.recordId,
       lineItem: row
@@ -292,6 +294,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
   async function autoSave(draftId, lastLine) {
     if (lastLine?.srlNo) {
       lastLine.draftId = draftId
+
       const LastSerPack = {
         draftId: draftId,
         lineItem: lastLine
@@ -306,9 +309,11 @@ export default function DraftForm({ labels, access, recordId, currency, window }
         stackError({
           message: response?.error
         })
+
         return false
       }
       toast.success(platformLabels.Saved)
+
       return true
     }
   }
@@ -342,9 +347,11 @@ export default function DraftForm({ labels, access, recordId, currency, window }
 
       const diHeader = await getDraftInv(diRes.recordId)
       const diItems = await getDraftInvItems(diRes.recordId)
-      await fillForm(diHeader, diItems)
+      await fillForm(diHeader, diItems) 
+
       return true
     } else {
+
       return false
     }
   }
