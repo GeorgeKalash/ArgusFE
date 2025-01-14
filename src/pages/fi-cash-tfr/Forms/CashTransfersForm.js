@@ -143,7 +143,14 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
     return myObject
   }
 
-  function openMCRForm(data) {
+  async function openMCRForm(data) {
+    await getMultiCurrencyFormData(
+      formik.values.currencyId,
+      formatDateForGetApI(formik.values.date),
+      RateDivision.FINANCIALS,
+      Number(formik.values.amount)
+    )
+
     stack({
       Component: MultiCurrencyRateForm,
       props: {
@@ -474,8 +481,9 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
               label={labels.amount}
               value={formik.values.amount}
               maxAccess={maxAccess}
+              thousandSeparator={false}
               onChange={async e => {
-                formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
+                formik.setFieldValue('amount', e.target.value)
               }}
               onClear={async () => {
                 formik.setFieldValue('amount', 0)

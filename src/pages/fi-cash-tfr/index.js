@@ -122,14 +122,15 @@ const FiCashTransfers = () => {
   }
 
   async function getPlantId() {
-    const myObject = {}
-
-    const filteredList = userDefaultsData?.list?.filter(obj => {
-      return obj.key === 'plantId'
-    })
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-
-    return myObject.plantId
+    const myObject = {};
+    
+    const foundItem = userDefaultsData?.list?.find(obj => obj.key === 'plantId');
+    
+    if (foundItem) {
+      myObject[foundItem.key] = foundItem.value ? parseInt(foundItem.value) : null;
+    }
+  
+    return myObject.plantId;
   }
 
   function openWindow(plantId, recordId) {
