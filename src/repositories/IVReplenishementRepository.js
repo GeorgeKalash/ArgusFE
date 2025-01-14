@@ -19,5 +19,19 @@ export const IVReplenishementRepository = {
   },
   GenerateIvReplenishements: {
     generate: service + 'generateTFR'
+  },
+  MaterialReplenishment: {
+    qry: service + 'qryREQ',
+    del: service + 'delREQ',
+    get: service + 'getREQ',
+    set2: service + 'set2REQ',
+    snapshot: service + 'snapshotREQ',
+    close: service + 'closeREQ',
+    reopen: service + 'reopenREQ',
+    cancel: service + 'cancelREQ',
+    print: service + 'printREQ',
+  },
+  OrderItem: {
+    qry: service + 'qryREI',
   }
 }
