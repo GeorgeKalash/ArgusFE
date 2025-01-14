@@ -92,7 +92,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
 
     const defaultSiteId = defaultsData?.list?.find(({ key }) => key === 'de_siteId')
 
-    if (defaultSiteId?.value && !formik.values.fromSiteId)
+    if (defaultSiteId?.value)
       formik.setFieldValue('siteId', parseInt(defaultSiteId?.value || ''))
   }
 
