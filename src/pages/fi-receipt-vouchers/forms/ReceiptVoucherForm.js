@@ -127,6 +127,13 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   }
 
   async function openMCRForm(data) {
+    await getMultiCurrencyFormData(
+      formik.values.currencyId,
+      formatDateForGetApI(formik.values.date),
+      RateDivision.FINANCIALS,
+      Number(formik.values.amount)
+    )
+
     stack({
       Component: MultiCurrencyRateForm,
       props: {
@@ -558,7 +565,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
                 maxLength={'10'}
                 decimalScale={2}
-                onChange={e => formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))}
+                onChange={e => formik.setFieldValue('amount', e.target.value)}
                 onClear={async () => {
                   formik.setFieldValue('amount', 0)
                 }}
