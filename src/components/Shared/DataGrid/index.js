@@ -687,6 +687,7 @@ export function DataGrid({
     if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
         stackDuplicate(params)
+
         return
       }
       process(params, data, setData)
