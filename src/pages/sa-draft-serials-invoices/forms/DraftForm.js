@@ -72,8 +72,8 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     subtotal: 0,
     amount: 0,
     vatAmount: 0,
-    plId: 0,
-    ptId: '',
+    plId: null,
+    ptId: null,
     weight: 0,
     disSkuLookup: false,
     autoSrlNo: true,
@@ -149,7 +149,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
         .filter(row => row.srlNo)
         .map((copy, index) => {
           const { taxDetails, ...rest } = copy
-          
+
           return {
             ...rest,
             seqNo: index + 1,
@@ -347,11 +347,10 @@ export default function DraftForm({ labels, access, recordId, currency, window }
 
       const diHeader = await getDraftInv(diRes.recordId)
       const diItems = await getDraftInvItems(diRes.recordId)
-      await fillForm(diHeader, diItems) 
+      await fillForm(diHeader, diItems)
 
       return true
     } else {
-
       return false
     }
   }
