@@ -10,7 +10,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
-import { useError } from 'src/error'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
@@ -19,7 +18,6 @@ import CashTransfersForm from './Forms/CashTransfersForm'
 const FiCashTransfers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
-  const { stack: stackError } = useError()
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {

@@ -474,22 +474,10 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
               label={labels.amount}
               value={formik.values.amount}
               maxAccess={maxAccess}
-              onBlur={async e => {
-                await getMultiCurrencyFormData(
-                  formik.values.currencyId,
-                  formatDateForGetApI(formik.values.date),
-                  RateDivision.FINANCIALS,
-                  Number(e.target.value.replace(/,/g, ''))
-                )
+              onChange={async e => {
                 formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
               }}
               onClear={async () => {
-                await getMultiCurrencyFormData(
-                  formik.values.currencyId,
-                  formatDateForGetApI(formik.values.date),
-                  RateDivision.FINANCIALS,
-                  0
-                )
                 formik.setFieldValue('amount', 0)
               }}
               error={formik.touched.amount && Boolean(formik.errors.amount)}
