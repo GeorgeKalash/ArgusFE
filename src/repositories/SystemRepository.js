@@ -173,11 +173,6 @@ export const SystemRepository = {
     get: service + 'getCOM',
     set: service + 'setCOM'
   },
-  Attachment: {
-    get: service + 'getAT',
-    set: service + 'setAT',
-    del: service + 'delAT'
-  },
   SystemChecks: {
     qry: service + 'qryCHK',
     get: service + 'getCHK',

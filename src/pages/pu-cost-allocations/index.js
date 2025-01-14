@@ -11,16 +11,14 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { useError } from 'src/error'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import PuCostAllocationWindow from './window/PuCostAllocationWindow'
 import { CostAllocationRepository } from 'src/repositories/CostAllocationRepository'
 
 const PuCostAllocations = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const { stack: stackError } = useError()
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
@@ -48,7 +46,7 @@ const PuCostAllocations = () => {
     filterBy,
     refetch,
     clearFilter,
-    labels: labels,
+    labels,
     access,
     paginationParameters,
     invalidate

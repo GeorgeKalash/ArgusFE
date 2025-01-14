@@ -17,7 +17,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 const TransactionTab = ({ store, labels, access }) => {
   const { platformLabels } = useContext(ControlContext)
-  const { recordId, isPosted, isClosed } = store
+  const { recordId, isClosed } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [baseAmounts, setBaseAmounts] = useState(0)
   const { stack } = useWindow()
@@ -88,7 +88,7 @@ const TransactionTab = ({ store, labels, access }) => {
     stack({
       Component: TransactionForm,
       props: {
-        labels: labels,
+        labels,
         recordId: obj?.caId,
         caId: recordId,
         seqNo: obj?.seqNo ?? maxSeqNo,
@@ -128,7 +128,7 @@ const TransactionTab = ({ store, labels, access }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar maxAccess={access} labels={labels} onAdd={add} disableAdd={isPosted || isClosed} />
+        <GridToolbar maxAccess={access} labels={labels} onAdd={add} disableAdd={isClosed} />
       </Fixed>
       <Grow>
         <Table
@@ -137,8 +137,8 @@ const TransactionTab = ({ store, labels, access }) => {
           gridData={data}
           rowId={['recordId']}
           isLoading={false}
-          onDelete={isPosted || isClosed ? null : del}
-          onEdit={isPosted || isClosed ? null : edit}
+          onDelete={isClosed ? null : del}
+          onEdit={isClosed ? null : edit}
           maxAccess={access}
           pagination={false}
         />

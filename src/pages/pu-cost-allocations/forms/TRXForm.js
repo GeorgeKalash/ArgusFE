@@ -77,7 +77,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
           setStore(prevStore => ({
             ...prevStore,
             recordId: res.recordId,
-            isPosted: res?.status == 3 ? true : false
+            isPosted: res?.status == 3
           }))
           formik.setFieldValue('recordId', res.recordId)
           toast.success(platformLabels.Added)
@@ -132,8 +132,8 @@ export default function TRXForm({ labels, access, setStore, store }) {
     await postRequest({
       extension: CostAllocationRepository.PuCostAllocations.post,
       record: JSON.stringify(data)
-    }).then(res => {
-      fetchData(res.recordId)
+    }).then(async res => {
+      await fetchData(res.recordId)
       toast.success(platformLabels.Posted)
       invalidate()
     })
@@ -148,8 +148,8 @@ export default function TRXForm({ labels, access, setStore, store }) {
     await postRequest({
       extension: CostAllocationRepository.PuCostAllocations.unpost,
       record: JSON.stringify(data)
-    }).then(res => {
-      fetchData(res.recordId)
+    }).then(async res => {
+      await fetchData(res.recordId)
       toast.success(platformLabels.Unposted)
       invalidate()
     })
@@ -164,8 +164,8 @@ export default function TRXForm({ labels, access, setStore, store }) {
     await postRequest({
       extension: CostAllocationRepository.PuCostAllocations.close,
       record: JSON.stringify(data)
-    }).then(res => {
-      fetchData(res.recordId)
+    }).then(async res => {
+      await fetchData(res.recordId)
       toast.success(platformLabels.Closed)
       invalidate()
     })
@@ -180,8 +180,8 @@ export default function TRXForm({ labels, access, setStore, store }) {
     await postRequest({
       extension: CostAllocationRepository.PuCostAllocations.reopen,
       record: JSON.stringify(data)
-    }).then(res => {
-      fetchData(res.recordId)
+    }).then(async res => {
+      await fetchData(res.recordId)
       toast.success(platformLabels.Reopened)
       invalidate()
     })
@@ -236,12 +236,12 @@ export default function TRXForm({ labels, access, setStore, store }) {
   return (
     <FormShell
       resourceId={ResourceIds.PuCostAllocation}
-      functionId={SystemFunction.CostAllocation}
+      functionId={functionId}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      disabledSubmit={isPosted || isClosed}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Grow>
@@ -283,7 +283,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId || '')
                 }}
-                readOnly={isPosted || isClosed}
+                readOnly={isClosed}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
@@ -323,7 +323,6 @@ export default function TRXForm({ labels, access, setStore, store }) {
                 onClear={() => formik.setFieldValue('date', '')}
                 readOnly={isPosted || isClosed}
                 error={formik.touched.date && Boolean(formik.errors.date)}
-                helperText={formik.touched.date && formik.errors.date}
               />
             </Grid>
             <Grid item xs={6}>

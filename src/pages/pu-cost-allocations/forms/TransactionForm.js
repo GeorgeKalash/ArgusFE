@@ -43,8 +43,11 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
-      costTypeId: yup.number().required(),
-      baseAmount: yup.number().required()
+      reference: yup.number().when('functionId', {
+        is: functionId => functionId != null && functionId !== '',
+        then: yup.number().required(),
+        otherwise: yup.number().nullable()
+      })
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -85,7 +88,6 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
               <ResourceComboBox
                 endpointId={CostAllocationRepository.CACostTypes.qry}
                 name='costTypeId'
-                required
                 label={labels.costType}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -124,9 +126,17 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
                 displayField='value'
                 values={formik.values}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('functionId', '')}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('functionId', newValue?.key || '')
+                  newValue
+                    ? formik.setFieldValue('functionId', newValue?.key)
+                    : formik.setValues({
+                        ...formik.values,
+                        reference: '',
+                        currencyId: null,
+                        baseAmount: '',
+                        amount: '',
+                        functionId: ''
+                      })
                 }}
                 error={formik.touched.functionId && Boolean(formik.errors.functionId)}
               />
@@ -152,15 +162,29 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField
+              <ResourceLookup
+                endpointId={FinancialRepository.AgingDoc.snapshot}
+                parameters={{
+                  _functionId: formik.values.functionId
+                }}
+                readOnly={!formik.values.functionId}
+                required={formik.values.functionId}
+                valueField='reference'
+                displayField='reference'
                 name='reference'
                 label={labels.reference}
-                value={formik.values.reference}
-                rows={2}
+                form={formik}
+                secondDisplayField={false}
+                onChange={(event, newValue) => {
+                  formik.setValues({
+                    ...formik.values,
+                    reference: newValue?.reference || '',
+                    currencyId: newValue?.currencyId || null,
+                    baseAmount: newValue?.baseAmount || null,
+                    amount: newValue?.amount || null
+                  })
+                }}
                 maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
             <Grid item xs={6}>

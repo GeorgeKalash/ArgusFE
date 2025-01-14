@@ -366,7 +366,7 @@ export default function FormShell({
                   props: {
                     recordId: form.values?.recordId,
                     resourceId,
-                    functionId: functionId
+                    functionId
                   },
                   width: 1000,
                   height: 650,

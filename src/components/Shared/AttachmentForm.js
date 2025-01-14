@@ -10,7 +10,7 @@ import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-const AttachmentForm = ({ resourceId, recordId, maxAccess, seqNo, window }) => {
+const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
   const { platformLabels } = useContext(ControlContext)
   const fileUploadRef = useRef(null)
 
