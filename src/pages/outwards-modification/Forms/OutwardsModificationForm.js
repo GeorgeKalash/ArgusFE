@@ -1,4 +1,4 @@
-import { Button, Grid, alpha } from '@mui/material'
+import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import { useContext, useEffect, useState } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -24,7 +24,8 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import CustomButton from 'src/components/Inputs/CustomButton'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function OutwardsModificationForm({ access, labels, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -77,13 +78,15 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       otpVerified: false,
       plantId: '',
       seqNo: '',
+      modificationType: '',
       beneficiaryData: {}
     },
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       owRef: yup.string().required(),
-      date: yup.string().required()
+      date: yup.string().required(),
+      modificationType: yup.string().required()
     }),
     onSubmit: async () => {
       setSubmitted(true)
@@ -175,7 +178,8 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       ttNo: ttNo,
       dispersalType: headerView.dispersalType,
       countryId: headerView.countryId,
-      corId: headerView.corId
+      corId: headerView.corId,
+      modificationType: data?.modificationType
     }
 
     setFieldValues(fieldValues)
@@ -246,6 +250,14 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     res2.record.date = formatDateFromApi(res2.record.date)
     await fillOutwardData(res2.record)
   }
+  async function getOutwardOrder(owoId) {
+    if (!owoId) return
+
+    return await getRequest({
+      extension: RemittanceOutwardsRepository.OutwardsOrder.get,
+      parameters: `_recordId=${owoId}`
+    })
+  }
 
   useEffect(() => {
     ;(async function () {
@@ -255,6 +267,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
 
         const data = {
           outwardId: formik.values.outwardId,
+          modificationType: formik.values.modificationType,
           beneficiaryCashPack: dispersalMode === DISPERSAL_MODE_CASH ? formik.values.beneficiaryData : null,
           beneficiaryBankPack: dispersalMode === DISPERSAL_MODE_BANK ? formik.values.beneficiaryData : null
         }
@@ -320,7 +333,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                       error={formik.touched.date && Boolean(formik.errors.date)}
                     />
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid item xs={2}>
                     <ResourceLookup
                       endpointId={RemittanceOutwardsRepository.OutwardsOrder.snapshot}
                       valueField='reference'
@@ -328,25 +341,57 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                       name='owRef'
                       secondDisplayField={false}
                       required
-                      readOnly={editMode}
-                      label={labels.outward}
+                      readOnly={editMode || formik.values.owtRef}
+                      label={labels.outwardOrder}
                       form={formik}
                       onChange={(event, newValue) => {
                         if (!newValue?.recordId) clearForm()
                         else
                           fillOutwardData({
-                            outwardId: newValue ? newValue.recordId : '',
-                            owRef: newValue ? newValue.reference : '',
-                            oldBeneficiaryId: newValue ? newValue.beneficiaryId : '',
-                            oldBeneficiarySeqNo: newValue ? newValue.beneficiarySeqNo : '',
-                            oldBeneficiaryName: newValue ? newValue.beneficiaryName : '',
-                            newBeneficiaryId: newValue ? newValue.beneficiaryId : '',
-                            newBeneficiarySeqNo: newValue ? newValue.beneficiarySeqNo : '',
-                            newBeneficiaryName: newValue ? newValue.beneficiaryName : '',
-                            dispersalType: newValue ? newValue.dispersalType : ''
+                            outwardId: newValue?.recordId,
+                            owRef: newValue?.reference,
+                            oldBeneficiaryId: newValue?.beneficiaryId,
+                            oldBeneficiarySeqNo: newValue?.beneficiarySeqNo,
+                            oldBeneficiaryName: newValue?.beneficiaryName,
+                            newBeneficiaryId: newValue?.beneficiaryId,
+                            newBeneficiarySeqNo: newValue?.beneficiarySeqNo,
+                            newBeneficiaryName: newValue?.beneficiaryName,
+                            dispersalType: newValue?.dispersalType
                           })
                       }}
                       error={formik.touched.owRef && Boolean(formik.errors.owRef)}
+                      maxAccess={maxAccess}
+                    />
+                  </Grid>
+                  <Grid item xs={2}>
+                    <ResourceLookup
+                      endpointId={RemittanceOutwardsRepository.OutwardsTransfer.snapshot}
+                      valueField='reference'
+                      displayField='reference'
+                      name='owtRef'
+                      secondDisplayField={false}
+                      readOnly={editMode || formik.values.owRef}
+                      label={labels.outwardTransfer}
+                      form={formik}
+                      onChange={async (event, newValue) => {
+                        if (!newValue?.recordId) clearForm()
+                        const order = await getOutwardOrder(newValue?.owoId)
+                        console.log('check data in ', order?.record?.recordId)
+                        await fillOutwardData({
+                          outwardId: newValue?.owoId,
+                          owRef: order?.record?.reference,
+                          owtId: newValue?.recordId,
+                          owtRef: newValue?.reference,
+                          oldBeneficiaryId: order?.record?.beneficiaryId,
+                          oldBeneficiarySeqNo: order?.record?.beneficiarySeqNo,
+                          oldBeneficiaryName: order?.record?.beneficiaryName,
+                          newBeneficiaryId: order?.record?.beneficiaryId,
+                          newBeneficiarySeqNo: order?.record?.beneficiarySeqNo,
+                          newBeneficiaryName: order?.record?.beneficiaryName,
+                          dispersalType: order?.record?.dispersalType
+                        })
+                      }}
+                      error={formik.touched.owtRef && Boolean(formik.errors.owtRef)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -392,6 +437,29 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                     />
                   </Grid>
                   <Grid item xs={4}>
+                    <ResourceComboBox
+                      datasetId={DataSets.OW_MODIFICATION_TYPE}
+                      name='modificationType'
+                      label={labels.modificationType}
+                      values={formik.values}
+                      valueField='key'
+                      displayField='value'
+                      required
+                      readOnly={editMode}
+                      maxAccess={maxAccess}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('modificationType', newValue?.key)
+                        if (newValue?.key == 3) {
+                          setResetForm(true)
+                          formik.setFieldValue('newBeneficiaryId', '')
+                          formik.setFieldValue('newBeneficiarySeqNo', '')
+                          formik.setFieldValue('headerBenName', '')
+                        }
+                      }}
+                      error={formik.touched.modificationType && Boolean(formik.errors.modificationType)}
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
                     <ResourceLookup
                       endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot2}
                       parameters={{
@@ -404,17 +472,23 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                       name='headerBenName'
                       label={labels.beneficiary}
                       form={formik}
-                      readOnly={!formik.values.clientId || !formik.values.dispersalType || editMode || isPosted}
+                      readOnly={
+                        !formik.values.clientId ||
+                        !formik.values.dispersalType ||
+                        editMode ||
+                        isPosted ||
+                        formik.values.modificationType != 2
+                      }
                       maxAccess={maxAccess}
                       editMode={editMode}
                       secondDisplayField={false}
                       onChange={async (event, newValue) => {
                         if (newValue?.beneficiaryId)
                           fillBeneficiaryData({
-                            headerBenId: newValue ? newValue.beneficiaryId : '',
-                            headerBenName: newValue ? newValue.name : '',
-                            headerBenSeqNo: newValue ? newValue.seqNo : '',
-                            dispersalType: newValue ? newValue.dispersalType : ''
+                            headerBenId: newValue?.beneficiaryId,
+                            headerBenName: newValue?.name,
+                            headerBenSeqNo: newValue?.seqNo,
+                            dispersalType: newValue?.dispersalType
                           })
                         else {
                           formik.setFieldValue('headerBenId', '')
@@ -423,28 +497,6 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                         }
                       }}
                       errorCheck={'headerBenId'}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <CustomButton
-                      onClick={() => {
-                        setResetForm(true)
-                        formik.setFieldValue('newBeneficiaryId', '')
-                        formik.setFieldValue('newBeneficiarySeqNo', '')
-                        formik.setFieldValue('headerBenName', '')
-                      }}
-                      label={'Add Beneficiary'}
-                      style={{
-                        backgroundColor: '#4eb558',
-                        color: '#FFFFFF',
-                        '&:hover': {
-                          backgroundColor: alpha('#4eb558', 0.8)
-                        },
-                        '&:disabled': {
-                          backgroundColor: alpha('#4eb558', 0.8)
-                        }
-                      }}
-                      disabled={editMode}
                     />
                   </Grid>
                 </Grid>
