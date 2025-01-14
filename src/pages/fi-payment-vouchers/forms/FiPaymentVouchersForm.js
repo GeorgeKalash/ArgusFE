@@ -557,7 +557,19 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 readOnly={isPosted || isCancelled}
                 value={formik.values.amount}
                 maxAccess={maxAccess}
-                onChange={(e) => formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))}
+                thousandSeparator={false}
+                onChange={async e => {
+                  formik.setFieldValue('amount', e.target.value)
+
+                  const updatedRateRow = getRate({
+                    amount: formik.values.amount ?? 0,
+                    exRate: formik.values?.exRate,
+                    baseAmount: 0,
+                    rateCalcMethod: formik.values?.rateCalcMethod,
+                    dirtyField: DIRTYFIELD_RATE
+                  })
+                  formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                }}
                 onClear={async () => {
                   formik.setFieldValue('amount', 0)
                 }}
