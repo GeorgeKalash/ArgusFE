@@ -19,6 +19,7 @@ export default function SelectAgent({
   deliveryModeId,
   setData,
   sysDefault,
+  targetCurrency,
   window
 }) {
   const { formik } = useForm({
@@ -74,7 +75,7 @@ export default function SelectAgent({
                 endpointId={formik.values.deliveryModeId && RemittanceBankInterface.PayingAgent.qry}
                 parameters={
                   formik.values.deliveryModeId &&
-                  `_deliveryMode=${formik.values.deliveryModeId}&_receivingCountry=${receivingCountry}&_payoutCurrency=${sysDefault?.currencyRef}`
+                  `_deliveryMode=${formik.values.deliveryModeId}&_receivingCountry=${receivingCountry}&_payoutCurrency=${targetCurrency}`
                 }
                 name='agentCode'
                 label={labels.payingAgent}

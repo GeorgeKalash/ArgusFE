@@ -142,7 +142,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       releaseStatus: null,
       date: new Date(),
       isVerified: null,
-      recordId: recordId || null
+      recordId: recordId || null,
+      includingFees: false //test
     },
     bankType: '',
     products: [{}],
@@ -672,16 +673,16 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
   useEffect(() => {
     ;(async function () {
-      const syCountryId = await getDefaultCountry()
-      const srcCurrency = await getDefaultCurrency()
+      const countryRef = await getDefaultCountry()
+      const currencyRef = await getDefaultCurrency()
 
-      // setDefault({ syCountryId, srcCurrency })
+      setDefault({ countryRef, currencyRef })
     })()
   }, [])
 
   async function mergeICRates(data, outwardsList) {
     const sysCountryRef = sysDefault?.countryRef
-    const srcCurrency = sysDefault?.currencyRef //await getDefaultCurrency()
+    const srcCurrency = sysDefault?.currencyRef
     const targetCurrency = formik.values.header.currencyRef || outwardsList.currencyRef
     const srcAmount = outwardsList?.lcAmount || formik.values.lcAmount || 0
     const trgtAmount = outwardsList?.fcAmount || formik.values.fcAmount || 0
@@ -941,7 +942,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       label={labels.includeTransferFees}
                       name='includingFees'
                       checked={formik.values.header.includingFees}
-                      onChange={formik.handleChange}
+                      onChange={e => formik.setFieldValue('header.includingFees', e.target.checked)}
                     />
                   </Grid>
                   <Grid item xs={12}>

@@ -38,16 +38,14 @@ const ProductsWindow = ({
 
     const getRates = await getRequest({
       extension: RemittanceBankInterface.InstantCashRates.get,
-      parameters: `_deliveryMode=${deliveryModeId}&_sourceCurrency=${payingCurrency}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_targetAmount=${targetAmount}&_originatingCountry=${sysDefault.countryRef}&_destinationCountry=${countryRef}`
+      parameters: `_deliveryMode=${deliveryModeId}&_sourceCurrency=${sysDefault.currencyRef}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_targetAmount=${targetAmount}&_originatingCountry=${sysDefault.countryRef}&_destinationCountry=${countryRef}`
     })
 
     const data = getRates.record
 
     const change = await getRequest({
       extension: RemittanceBankInterface.exchange.get,
-      parameters: `_sendingAgent=${'AE01BH'}&_settlementCurrency=${payingCurrency}&_receivingAgent=${agentCode}&_payoutCurrency=${
-        sysDefault?.currencyRef
-      }&_destinationCountry=${countryRef}&_lcAmount=${srcAmount}&_fcAmount=${targetAmount}`
+      parameters: `_settlementCurrency=${sysDefault.currencyRef}&_receivingAgent=${agentCode}&_payoutCurrency=${targetCurrency}&_destinationCountry=${countryRef}&_lcAmount=${srcAmount}&_fcAmount=${targetAmount}`
     })
 
     const result = change?.record
@@ -115,6 +113,7 @@ const ProductsWindow = ({
                   receivingCountry: countryRef,
                   deliveryModeId: params.data?.deliveryModeId,
                   defaultAgentCode,
+                  targetCurrency: targetCurrency,
                   payingCurrency: params.data?.payingCurrency,
                   agentCode: params.data?.agentCode,
                   sysDefault,
