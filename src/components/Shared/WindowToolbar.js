@@ -54,7 +54,7 @@ const WindowToolbar = ({
         parameters: `_resourceId=${resourceId}`
       })
 
-      let firstStore = reportLayoutRes?.list?.map(item => ({
+      const firstStore = reportLayoutRes?.list?.map(item => ({
         id: item.id,
         api_url: item.api,
         reportClass: item.instanceName,
@@ -74,11 +74,12 @@ const WindowToolbar = ({
 
       const filteringItems = reportLayoutFilteringObject?.list
 
-      firstStore = firstStore.filter(
-        item => !filteringItems.some(filterItem => filterItem.id === item.id && filterItem.isInactive)
-      )
+      const firstStore2 =
+        firstStore?.filter(
+          item => !filteringItems.some(filterItem => filterItem.id === item.id && filterItem.isInactive)
+        ) || []
 
-      const combinedStore = [...firstStore, ...secondStore]
+      const combinedStore = firstStore ? [...firstStore2, ...secondStore] : [...secondStore]
 
       setReportStore(combinedStore)
 
