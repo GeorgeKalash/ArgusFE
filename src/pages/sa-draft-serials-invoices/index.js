@@ -12,6 +12,8 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import DraftForm from './forms/DraftForm'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const DraftSerialsInvoices = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -23,7 +25,7 @@ const DraftSerialsInvoices = () => {
     filterBy,
     refetch,
     clearFilter,
-    labels: labels,
+    labels,
     access,
     paginationParameters,
     invalidate
@@ -105,17 +107,22 @@ const DraftSerialsInvoices = () => {
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    const status = '0'
     if (filters.qry)
       return await getRequest({
         extension: SaleRepository.DraftInvoice.snapshot,
-        parameters: `_filter=${filters.qry}&_status=${status}`
+        parameters: `_filter=${filters.qry}&_status=0`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.DraftSerialsIn,
+    action: openForm,
+    hasDT: false
+  })
+
   const add = async () => {
-    openForm()
+    await proxyAction()
   }
 
   const editDSI = obj => {

@@ -3,7 +3,7 @@ import ConfirmationDialog from '../ConfirmationDialog'
 const ImportConfirmation = ({ window, onConfirm, fullScreen, open, dialogText }) => {
   return (
     <ConfirmationDialog
-      open={open?.flag ? open?.flag : false}
+      open={open?.flag || false}
       DialogText={dialogText}
       okButtonAction={() => {
         if (typeof onConfirm === 'function') {

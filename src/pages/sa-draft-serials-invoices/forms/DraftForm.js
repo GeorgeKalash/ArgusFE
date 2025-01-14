@@ -35,7 +35,7 @@ import { getIPR, DIRTYFIELD_UNIT_PRICE } from 'src/utils/ItemPriceCalculator'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import { useError } from 'src/error'
 
-export default function DraftForm({ labels, access, recordId, currency, window }) {
+export default function DraftForm({ labels, access, recordId, currency }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -43,10 +43,10 @@ export default function DraftForm({ labels, access, recordId, currency, window }
 
   const [metalGridData, setMetalGridData] = useState([])
   const [itemGridData, setItemGridData] = useState([])
-  const [defaultsDataState, setDefaultsDataState] = useState(null)
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [taxDetailsStore, setTaxDetailsStore] = useState([])
   const [jumpToNextLine, setJumpToNextLine] = useState(false)
+  const [siteDisabled, setSiteDisabled] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
@@ -54,13 +54,15 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     enabled: !recordId
   })
 
-  const [initialValues] = useState({
+  const initialValues = {
     recordId: recordId || '',
     dtId: documentType?.dtId,
     reference: '',
     date: new Date(),
     plantId: null,
     clientId: null,
+    clientRef: '',
+    clientName: '',
     currencyId: parseInt(currency),
     spId: null,
     siteId: null,
@@ -104,7 +106,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
         volume: 0
       }
     ]
-  })
+  }
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.DraftInvoice.page
@@ -143,19 +145,14 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       copy.pcs = copy.serials.length
       delete copy.serials
       copy.date = formatDateToApi(copy.date)
-      copy.status = 1
 
       const updatedRows = formik.values.serials
         .filter(row => row.srlNo)
-        .map((copy, index) => {
-          const { taxDetails, ...rest } = copy
-
-          return {
-            ...rest,
-            seqNo: index + 1,
-            draftId: copy?.recordId || 0
-          }
-        })
+        .map(({ taxDetails, recordId, ...rest }, index) => ({
+          ...rest,
+          seqNo: index + 1,
+          draftId: recordId || 0
+        }))
 
       const DraftInvoicePack = {
         header: copy,
@@ -198,6 +195,15 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     })
   }
 
+  async function fillTaxStore() {
+    const taxDet = await getRequest({
+      extension: FinancialRepository.TaxDetailPack.qry,
+      parameters: `_taxId=0`
+    })
+
+    setTaxDetailsStore(taxDet?.list)
+  }
+
   useEffect(() => {
     getSysChecks()
   }, [SystemChecks.POS_JUMP_TO_NEXT_LINE])
@@ -208,10 +214,10 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       parameters: `_checkId=${SystemChecks.POS_JUMP_TO_NEXT_LINE}&_scopeId=1&_masterId=0`
     })
 
-    if (Jres?.record?.value) setJumpToNextLine(Jres?.record?.value)
+    setJumpToNextLine(Jres?.record?.value)
   }
 
-  function getItemPriceRow(newRow, dirtyField, iconClicked) {
+  function getItemPriceRow(newRow, dirtyField) {
     const itemPriceRow = getIPR({
       priceType: 3,
       basePrice: 0,
@@ -239,14 +245,11 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       taxDetails: parseFloat(newRow?.taxDetails)
     })
 
-    let commonData = {
+    return {
       unitPrice: parseFloat(itemPriceRow?.extendedPrice).toFixed(2),
       baseLaborPrice: parseFloat(itemPriceRow?.unitPrice).toFixed(2),
       vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
     }
-    let data = iconClicked ? { changes: commonData } : commonData
-
-    return data
   }
 
   const editMode = !!formik.values.recordId
@@ -288,6 +291,13 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       record: JSON.stringify(LastSerPack)
     })
 
+    if (
+      formik?.values?.serials?.length == 1 ||
+      (formik?.values?.serials?.length == 2 && !formik?.values?.serials[1].itemId)
+    ) {
+      setSiteDisabled(false)
+    }
+
     return true
   }
 
@@ -319,16 +329,16 @@ export default function DraftForm({ labels, access, recordId, currency, window }
   }
 
   async function saveHeader(lastLine) {
-    let header = formik?.values
-    header.pcs = 0
-    delete header.serials
-    header.date = formatDateToApi(header.date)
-    header.status = 1
-
     const DraftInvoicePack = {
-      header: header,
+      header: {
+        ...formik?.values,
+        pcs: 0,
+        date: formatDateToApi(formik.values.date)
+      },
       items: []
     }
+
+    delete DraftInvoicePack.header.serials
 
     const diRes = await postRequest({
       extension: SaleRepository.DraftInvoice.set2,
@@ -348,6 +358,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       const diHeader = await getDraftInv(diRes.recordId)
       const diItems = await getDraftInvItems(diRes.recordId)
       await fillForm(diHeader, diItems)
+      setSiteDisabled(true)
 
       return true
     } else {
@@ -409,7 +420,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
               }
             }
 
-            const { unitPrice, baseLaborPrice } = await getItemPriceRow(lineObj.changes, DIRTYFIELD_UNIT_PRICE)
+            const { unitPrice, baseLaborPrice } = getItemPriceRow(lineObj.changes, DIRTYFIELD_UNIT_PRICE)
 
             lineObj.changes.unitPrice = unitPrice
             lineObj.changes.baseLaborPrice = baseLaborPrice
@@ -521,32 +532,35 @@ export default function DraftForm({ labels, access, recordId, currency, window }
   ]
 
   async function onClose() {
-    const copy = { ...formik.values }
-    delete copy.items
-    copy.date = formatDateToApi(copy.date)
+    const { serials, ...restValues } = formik.values
 
-    const res = await postRequest({
+    await postRequest({
       extension: SaleRepository.DraftInvoice.close,
-      record: JSON.stringify(copy)
+      record: JSON.stringify({
+        ...restValues,
+        date: formatDateToApi(formik.values.date)
+      })
+    }).then(() => {
+      toast.success(platformLabels.Closed)
+      invalidate()
+      refetchForm(formik?.values?.recordId)
     })
-    toast.success(platformLabels.Closed)
-    invalidate()
-    await refetchForm(res.recordId)
   }
 
   async function onReopen() {
-    const copy = { ...formik.values }
-    delete copy.items
-    copy.date = formatDateToApi(copy.date)
+    const { serials, ...restValues } = formik.values
 
-    const res = await postRequest({
+    await postRequest({
       extension: SaleRepository.DraftInvoice.reopen,
-      record: JSON.stringify(copy)
+      record: JSON.stringify({
+        ...restValues,
+        date: formatDateToApi(formik.values.date)
+      })
+    }).then(() => {
+      toast.success(platformLabels.Reopened)
+      invalidate()
+      refetchForm(formik?.values?.recordId)
     })
-
-    toast.success(platformLabels.Reopened)
-    invalidate()
-    await refetchForm(res.recordId)
   }
 
   async function onWorkFlowClick() {
@@ -558,7 +572,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       },
       width: 950,
       height: 600,
-      title: platformLabels.workflow
+      title: labels.workflow
     })
   }
 
@@ -588,7 +602,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || formik.values.status == 3 || formik.values.deliveryStatus == 4 || !editMode
+      disabled: !isClosed || formik.values.status == 3 || !editMode
     },
     {
       key: 'WorkFlow',
@@ -600,13 +614,13 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       key: 'Import',
       condition: true,
       onClick: () => onImportClick(),
-      disabled: !editMode || formik.values.status != 1
+      disabled: !editMode || formik.values.status != 1 || isClosed
     }
   ]
 
   async function fillGrids() {
-    let diHeader = await getDraftInv(formik?.values?.recordId)
-    let diItems = await getDraftInvItems(formik?.values?.recordId)
+    const diHeader = await getDraftInv(formik?.values?.recordId)
+    const diItems = await getDraftInvItems(formik?.values?.recordId)
 
     const modifiedList = await Promise.all(
       diItems.list?.map(async (item, index) => {
@@ -626,6 +640,8 @@ export default function DraftForm({ labels, access, recordId, currency, window }
     )
 
     formik.setFieldValue('serials', modifiedList)
+
+    modifiedList && setSiteDisabled(true)
 
     assignStoreTaxDetails(modifiedList)
   }
@@ -658,6 +674,8 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       totalWeight: parseFloat(diHeader?.record?.totalWeight).toFixed(2),
       serials: modifiedList.length ? modifiedList : initialValues.serials
     })
+
+    modifiedList?.length && setSiteDisabled(true)
 
     assignStoreTaxDetails(modifiedList)
   }
@@ -709,12 +727,41 @@ export default function DraftForm({ labels, access, recordId, currency, window }
   }
 
   async function onChangeDtId(recordId) {
-    const dtd = await getDTD(recordId)
+    if (recordId) {
+      const dtd = await getDTD(recordId)
 
-    formik.setFieldValue('plantId', dtd?.record?.plantId ?? null)
-    formik.setFieldValue('spId', dtd?.record?.spId ?? userDefaultsDataState?.spId)
-    formik.setFieldValue('siteId', dtd?.record?.siteId ?? userDefaultsDataState?.siteId)
-    formik.setFieldValue('siteRef', dtd?.record?.siteId && (await getSiteRef(dtd?.record?.siteId)))
+      formik.setFieldValue('plantId', dtd?.record?.plantId || null)
+      formik.setFieldValue('spId', dtd?.record?.spId ?? userDefaultsDataState?.spId)
+      formik.setFieldValue('siteId', dtd?.record?.siteId ?? userDefaultsDataState?.siteId)
+      formik.setFieldValue('siteRef', dtd?.record?.siteId && (await getSiteRef(dtd?.record?.siteId)))
+    } else {
+      formik.setFieldValue('siteId', null)
+      formik.setFieldValue('siteRef', null)
+      formik.setFieldValue('spId', null)
+      formik.setFieldValue('plantId', null)
+    }
+  }
+
+  function calcTotals(serials) {
+    const { subtotal, vatAmount, totalWeight } = serials?.reduce(
+      (acc, row) => {
+        const subTot = parseFloat(row?.unitPrice) || 0
+        const vatAmountTot = parseFloat(row?.vatAmount) || 0
+        const totWeight = parseFloat(row?.weight) || 0
+
+        return {
+          subtotal: acc?.subtotal + subTot,
+          vatAmount: acc?.vatAmount + vatAmountTot,
+          totalWeight: acc?.totalWeight + totWeight
+        }
+      },
+      { subtotal: 0, vatAmount: 0, totalWeight: 0 }
+    )
+
+    formik.setFieldValue('subtotal', subtotal)
+    formik.setFieldValue('vatAmount', vatAmount)
+    formik.setFieldValue('weight', totalWeight)
+    formik.setFieldValue('amount', subtotal + vatAmount)
   }
 
   useEffect(() => {
@@ -755,6 +802,8 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       }, {})
 
       setItemGridData(Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo))
+
+      calcTotals(serials)
     }
   }, [formik?.values?.serials])
 
@@ -787,7 +836,6 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       myObject[obj.key] =
         obj.value === 'True' || obj.value === 'False' ? obj.value : obj.value ? parseInt(obj.value) : null
     })
-    setDefaultsDataState(myObject)
 
     return myObject
   }
@@ -803,6 +851,8 @@ export default function DraftForm({ labels, access, recordId, currency, window }
             message: labels.noSelectedplId
           })
 
+      fillTaxStore()
+
       if (formik?.values?.recordId) {
         await refetchForm(formik?.values?.recordId, myObject?.plId)
       } else {
@@ -815,30 +865,6 @@ export default function DraftForm({ labels, access, recordId, currency, window }
       }
     })()
   }, [])
-
-  useEffect(() => {
-    if (formik?.values?.serials) {
-      const { subtotal, vatAmount, totalWeight } = formik?.values?.serials?.reduce(
-        (acc, row) => {
-          const subTot = parseFloat(row?.unitPrice) || 0
-          const vatAmountTot = parseFloat(row?.vatAmount) || 0
-          const totWeight = parseFloat(row?.weight) || 0
-
-          return {
-            subtotal: acc?.subtotal + subTot,
-            vatAmount: acc?.vatAmount + vatAmountTot,
-            totalWeight: acc?.totalWeight + totWeight
-          }
-        },
-        { subtotal: 0, vatAmount: 0, totalWeight: 0 }
-      )
-
-      formik.setFieldValue('subtotal', subtotal)
-      formik.setFieldValue('vatAmount', vatAmount)
-      formik.setFieldValue('weight', totalWeight)
-      formik.setFieldValue('amount', subtotal + vatAmount)
-    }
-  }, [formik?.values?.serials])
 
   return (
     <FormShell
@@ -869,26 +895,16 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                       { key: 'name', value: 'Name' }
                     ]}
                     readOnly={editMode}
+                    required
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
-                      const recordId = newValue ? newValue.recordId : null
+                      formik.setFieldValue('dtId', newValue?.recordId)
+                      onChangeDtId(newValue?.recordId)
 
-                      await formik.setFieldValue('dtId', recordId)
-
-                      if (newValue) {
-                        formik.setFieldValue('dtId', newValue ? newValue.recordId : null)
-                        changeDT(newValue)
-                        onChangeDtId(recordId)
-                      } else {
-                        formik.setFieldValue('dtId', null)
-                        formik.setFieldValue('siteId', null)
-                        formik.setFieldValue('siteRef', null)
-                        formik.setFieldValue('spId', null)
-                        formik.setFieldValue('plantId', null)
-                      }
+                      newValue ?? changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />
@@ -897,21 +913,22 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
-                    readOnly={isClosed || editMode}
+                    readOnly={isClosed || siteDisabled}
                     label={labels.site}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
                     values={formik.values}
+                    required
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     displayFieldWidth={2}
                     onChange={(event, newValue) => {
                       if (!newValue?.isInactive) {
-                        formik.setFieldValue('siteId', newValue ? newValue.recordId : null)
-                        formik.setFieldValue('siteRef', newValue ? newValue.reference : null)
+                        formik.setFieldValue('siteId', newValue?.recordId)
+                        formik.setFieldValue('siteRef', newValue?.recordId)
                       } else {
                         formik.setFieldValue('siteId', null)
                         formik.setFieldValue('siteRef', null)
@@ -940,7 +957,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('currencyId', newValue?.recordId || null)
+                      formik.setFieldValue('currencyId', newValue?.recordId)
                     }}
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
@@ -972,35 +989,33 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('plantId', newValue ? newValue.recordId : null)
+                      formik.setFieldValue('plantId', newValue?.recordId)
                     }}
                     displayFieldWidth={2}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                   />
                 </Grid>
                 <Grid item xs={4}>
-                  {formik.values.clientId && (
-                    <ResourceComboBox
-                      endpointId={SaleRepository.Contact.contact}
-                      parameters={`_clientId=${formik.values.clientId}`}
-                      name='contactId'
-                      label={labels.contact}
-                      readOnly={isClosed}
-                      columnsInDropDown={[
-                        { key: 'reference', value: 'Reference' },
-                        { key: 'name', value: 'Name' }
-                      ]}
-                      values={formik.values}
-                      valueField='recordId'
-                      displayField={['reference', 'name']}
-                      maxAccess={maxAccess}
-                      onChange={(event, newValue) => {
-                        formik.setFieldValue('contactId', newValue ? newValue.recordId : null)
-                      }}
-                      displayFieldWidth={2}
-                      error={formik.touched.contactId && Boolean(formik.errors.contactId)}
-                    />
-                  )}
+                  <ResourceComboBox
+                    endpointId={formik?.values?.clientId && SaleRepository.Contact.contact}
+                    parameters={`_clientId=${formik.values.clientId}`}
+                    name='contactId'
+                    label={labels.contact}
+                    readOnly={isClosed}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('contactId', newValue ? newValue.recordId : null)
+                    }}
+                    displayFieldWidth={2}
+                    error={formik.touched.contactId && Boolean(formik.errors.contactId)}
+                  />
                 </Grid>
                 <Grid item xs={4}>
                   <CustomDatePicker
@@ -1020,6 +1035,7 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesPerson.qry}
                     name='spId'
+                    required
                     label={labels.salesPerson}
                     columnsInDropDown={[
                       { key: 'spRef', value: 'Reference' },
@@ -1085,10 +1101,12 @@ export default function DraftForm({ labels, access, recordId, currency, window }
                         onChange={async (event, newValue) => {
                           formik.setFieldValue('clientId', newValue?.recordId)
                           formik.setFieldValue('clientName', newValue?.name)
+                          formik.setFieldValue('clientRef', newValue?.reference)
                           formik.setFieldValue('accountId', newValue?.accountId)
                           formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                           formik.setFieldValue('taxId', newValue?.taxId)
                         }}
+                        errorCheck={'clientId'}
                       />
                     </Grid>
                     <Grid item sx={{ pt: 2 }}>

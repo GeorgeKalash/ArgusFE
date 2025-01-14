@@ -10,14 +10,12 @@ import { useContext, useState, useRef } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 import ImportConfirmation from './ImportConfirmation'
 import { useWindow } from 'src/windows'
-import { useError } from 'src/error'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) => {
-
   const { stack } = useWindow()
-  const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const imageInputRef = useRef(null)
   const [file, setFile] = useState(null)
@@ -77,33 +75,21 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
   }
 
   const importSerialsData = async () => {
-    try {
-      const transformedSerials = formik.values.serials?.replace(/\n/g, ',\r\n')
+    const transformedSerials = formik.values.serials?.replace(/\n/g, ',\r\n')
 
-      const SerialsPack = {
-        draftId: draftId,
-        serials: transformedSerials ? transformedSerials : parsedFileContent
-      }
-
-      try {
-        await postRequest({
-          extension: endPoint,
-          record: JSON.stringify(SerialsPack)
-        })
-
-        toast.success(platformLabels.Imported)
-        onCloseimport()
-        window.close()
-      } catch (exception) {}
-    } catch (error) {
-      formik.resetForm()
-      setFile(null)
-      setParsedFileContent([])
-      imageInputRef.current.value = null
-      stackError({
-        message: error?.message
-      })
+    const SerialsPack = {
+      draftId: draftId,
+      serials: transformedSerials ? transformedSerials : parsedFileContent
     }
+
+    await postRequest({
+      extension: endPoint,
+      record: JSON.stringify(SerialsPack)
+    })
+
+    toast.success(platformLabels.Imported)
+    onCloseimport()
+    window.close()
   }
 
   const actions = [
@@ -117,7 +103,7 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
 
   return (
     <VertLayout>
-      <Fixed>
+      <Grow>
         <Grid container spacing={2} sx={{ padding: 2 }}>
           <Grid item xs={12}>
             <Grid container spacing={2}>
@@ -127,7 +113,7 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
                   label={platformLabels.SelectCSV}
                   value={file?.name}
                   disabled={formik.values.serials || !!file?.name}
-                  readOnly={true}
+                  readOnly
                   maxAccess={maxAccess}
                 />
               </Grid>
@@ -189,7 +175,7 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
             />
           </Grid>
         </Grid>
-      </Fixed>
+      </Grow>
       <Fixed>
         <WindowToolbar smallBox={true} actions={actions} />
       </Fixed>
