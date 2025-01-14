@@ -176,6 +176,7 @@ export const RemittanceOutwardsRepository = {
     qry: service + 'qryORS',
     page: service + 'pageORS',
     get: service + 'getORS',
+    get2: service + 'get2ORS',
     set: service + 'setORS',
     set2: service + 'set2ORS',
     del: service + 'delORS',
