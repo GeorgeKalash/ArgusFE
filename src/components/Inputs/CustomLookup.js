@@ -305,7 +305,7 @@ const CustomLookup = ({
                 },
                 '& .MuiInputLabel-root': {
                   fontSize: '0.90rem',
-                  top: isFocused || inputValue ? '0px' : '-3px'
+                  top: isFocused || firstValue ? '0px' : '-3px'
                 },
                 '& .MuiInputBase-input': {
                   fontSize: '0.90rem',
