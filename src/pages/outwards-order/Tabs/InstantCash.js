@@ -23,7 +23,8 @@ export default function InstantCash({
   deliveryModeId,
   payingAgent,
   payingCurrency,
-  outwardsData
+  outwardsData,
+  sysDefault
 }) {
   const { getRequest } = useContext(RequestsContext)
 
@@ -38,8 +39,8 @@ export default function InstantCash({
     initialValues: {
       deliveryModeId: deliveryModeId,
       payingAgent: payingAgent,
-      payingCurrency: payingCurrency,
-      currency: '',
+      sourceCurrency: sysDefault.currencyRef,
+      targetCurrency: payingCurrency,
       sourceAmount: outwardsData?.amount || 0,
       toCountryId: '',
       totalTransactionAmountPerAnnum: clientData.hiddenTrxAmount,
@@ -48,7 +49,7 @@ export default function InstantCash({
         relation: clientData.relation,
         otherRelation: clientData.otherRelation,
         employerName: clientData.employerName,
-        employerStatus: clientData.employerStatus
+        employerStatus: clientData?.employerStatus
       },
       beneficiary: {
         address: {
@@ -69,7 +70,8 @@ export default function InstantCash({
       payingAgent: yup.string().required(),
       sourceAmount: yup.string().required(),
       remitter: yup.object().shape({
-        employerName: yup.string().required()
+        employerName: yup.string().required(),
+        employerStatus: yup.string().required()
       }),
       beneficiary: yup.object().shape({
         bankDetails: yup.object().shape({
@@ -183,11 +185,13 @@ export default function InstantCash({
                 parameters={`_combo=4`}
                 name='remitter.employerStatus'
                 label={_labels.employerStatus}
-                valueField='recordId'
+                required
+                valueField='name'
                 displayField='name'
                 value={formik.values.remitter.employerStatus}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('remitter.employerStatus', newValue ? newValue.recordId : '')
+                  console.log(newValue?.name)
+                  formik.setFieldValue('remitter.employerStatus', newValue ? newValue?.name : '')
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.remitter?.employerStatus && Boolean(formik.errors.remitter?.employerStatus)}
@@ -204,7 +208,7 @@ export default function InstantCash({
                   _receivingCountry: formik.values.toCountryId,
                   _payingAgent: formik.values.payingAgent,
                   _deliveryMode: formik.values.deliveryModeId,
-                  _payoutCurrency: formik.values.payingCurrency
+                  _payoutCurrency: formik.values.targetCurrency
                 }}
                 required
                 valueField='name'

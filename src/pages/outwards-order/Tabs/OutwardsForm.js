@@ -77,6 +77,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     fl_familyName: '',
     expiryDate: null,
     professionId: '',
+    recordId: recordId,
     header: {
       countryName: '',
       countryRef: '',
@@ -188,9 +189,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           ...values.header,
           date: formatDateToApi(values.header?.date),
           valueDate: formatDateToApi(values.header?.valueDate),
-          defaultValueDate: formatDateToApi(values.header?.defaultValueDate),
-          vatAmount: vatAmount,
-          amount: amount
+          defaultValueDate: formatDateToApi(values.header?.defaultValueDate)
         },
         bankType: formik.values.bankType,
         ICRequest: formik.values.ICRequest?.deliveryModeId ? formik.values.ICRequest : null
@@ -204,7 +203,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       if (result.recordId) {
         toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
         formik.setFieldValue('header.recordId', result.recordId)
-
+        formik.setFieldValue('recordId', result.recordId)
         const res2 = await getOutwards(result.recordId)
         formik.setFieldValue('header.reference', res2.record.headerView.reference)
 
@@ -246,7 +245,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         refetchForm(res.recordId)
         await getDefaultVAT()
         const result = await getOutwards(res.recordId)
-        result.record.status === 4 && openRV()
+        result.record.headerView.status === 4 && openRV()
       }
     })
   }
@@ -254,10 +253,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   const onReopen = async () => {
     const copy = { ...formik.values }
     delete copy.instantCashDetails
-    copy.date = formatDateToApi(copy.date)
-    copy.valueDate = formatDateToApi(copy.valueDate)
-    copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
-    copy.expiryDate = formatDateToApi(copy.expiryDate)
+    copy.header.date = formatDateToApi(copy.date)
+    copy.header.valueDate = formatDateToApi(copy.valueDate)
+    copy.header.defaultValueDate = formatDateToApi(copy.defaultValueDate)
+    copy.header.expiryDate = formatDateToApi(copy.expiryDate)
 
     const res = await postRequest({
       extension: RemittanceOutwardsRepository.OutwardsOrder.reopen,
@@ -271,17 +270,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       refetchForm(res.recordId)
       await getDefaultVAT()
     }
-  }
-
-  const onPost = async () => {
-    await postRequest({
-      extension: RemittanceOutwardsRepository.OutwardsOrder.post,
-      record: JSON.stringify({ recordId: formik.values?.header.recordId })
-    })
-
-    toast.success(platformLabels.Posted)
-    invalidate()
-    window.close()
   }
 
   const vatAmount = (formik.values.header?.commission * formik.values.header.vatRate) / 100
@@ -325,6 +313,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       ...prevValues,
       bankType: data.headerView.interfaceId,
       products: prevValues.products,
+      recordId: data?.headerView.recordId,
       header: {
         ...data?.headerView,
         valueDate: formatDateFromApi(data?.headerView.valueDate),
@@ -465,17 +454,11 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       onClick: () => openRelevantWindow(formik.values),
       disabled: formik.values.dispersalType && formik.values.clientId ? false : true
     },
-
-    {
-      key: 'Post',
-      condition: true,
-      onClick: onPost,
-      disabled: isPosted
-    },
     {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      valuesPath: formik.values.header,
       disabled: !editMode
     },
     {
@@ -575,9 +558,9 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       props: {
         labels: RVLabels,
         maxAccess: RVAccess,
-        recordId: formik.values.receiptId || '',
+        recordId: formik.values.header.receiptId || '',
         cashAccountId: cashAccountId,
-        form: formik.values.receiptId ? null : formik
+        form: formik.values.header?.receiptId ? null : formik.values.header
       },
       width: 1200,
       height: 500,
@@ -618,6 +601,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
   function onInstantCashSubmit(obj) {
     formik.setFieldValue('ICRequest', obj)
+    formik.setFieldValue('header.amount', obj.sourceAmount)
   }
 
   function calculateValueDate(valueDays) {
@@ -772,10 +756,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }, [])
 
   useEffect(() => {
-    formik.setFieldValue(
-      'amount',
-      formik.values.lcAmount + (formik.values.commission + vatAmount - formik.values.tdAmount)
-    )
+    formik.setFieldValue('header.amount', amount)
+    formik.setFieldValue('header.vatAmount', vatAmount)
   }, [amount])
 
   return (
@@ -1035,7 +1017,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                     <CustomTextField
                       name='corRef'
                       label={labels.corRef}
-                      value={formik.values?.corRef}
+                      value={formik.values?.header.corRef}
                       readOnly
                       required={formik.values.header.corId}
                       maxAccess={maxAccess}
@@ -1045,7 +1027,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                     <CustomTextField
                       name='corName'
                       label={labels.corName}
-                      value={formik.values?.corName}
+                      value={formik.values?.header?.corName}
                       readOnly
                       required={formik.values.header.corId}
                       maxAccess={maxAccess}

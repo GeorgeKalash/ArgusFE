@@ -64,7 +64,7 @@ export default function SelectAgent({
                   formik.setFieldValue('deliveryModeId', newValue ? newValue.recordId : '')
                   formik.setFieldValue('agentCode', null)
                   formik.setFieldValue('agentName', '')
-                  formik.setFieldValue('payingCurrency')
+                  formik.setFieldValue('payingCurrency', '')
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.deliveryModeId && Boolean(formik.errors.deliveryModeId)}
@@ -90,7 +90,7 @@ export default function SelectAgent({
                 onChange={(event, newValue) => {
                   formik.setFieldValue('agentCode', newValue?.recordId || null)
                   formik.setFieldValue('agentName', newValue?.description)
-                  formik.setFieldValue('payingCurrency', newValue.payingCurrency)
+                  formik.setFieldValue('payingCurrency', newValue?.payingCurrency)
                 }}
                 readOnly={!formik.values.deliveryModeId}
                 maxAccess={maxAccess}

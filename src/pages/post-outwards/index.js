@@ -342,7 +342,6 @@ const Postoutwards = () => {
           <Table
             columns={rowColumns}
             gridData={{ list: data }}
-            setData={setData}
             rowId={['recordId']}
             pageSize={50}
             pagination={true}
