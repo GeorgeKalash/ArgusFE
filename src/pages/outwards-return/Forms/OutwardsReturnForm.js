@@ -130,7 +130,14 @@ export default function OutwardsReturnForm({
       dispersalName: yup.string().required(),
       vatAmount: yup.string().required(),
       settlementStatus: yup.number().required(),
-      lcAmount: yup.string().required(),
+      lcAmount: yup
+        .string()
+        .required()
+        .test(function (value) {
+          const { amount } = this.parent
+
+          return parseFloat(value) <= parseFloat(amount || 0)
+        }),
       exRate: yup.string().required(),
       commission: yup.string().required(),
       amount: yup.string().required()
@@ -661,15 +668,9 @@ export default function OutwardsReturnForm({
 
                         formik.setFieldValue('requestedBy', newValue?.key)
 
-                        if (newValue?.key === '1' || newValue?.key === '2') {
-                          const amount =
-                            originalLcAmount +
-                            (formik?.values?.commission || 0) +
-                            (formik?.values?.vatAmount || 0) -
-                            (formik?.values?.tdAmount || 0)
-
-                          formik.setFieldValue('lcAmount', amount)
-                          getExRateChangeStatus(formik?.values?.amount, amount)
+                        if (newValue?.key === '1') {
+                          formik.setFieldValue('lcAmount', formik?.values?.amount)
+                          getExRateChangeStatus(formik?.values?.amount, formik?.values?.amount)
                         } else if (newValue?.key === '3') {
                           formik.setFieldValue('lcAmount', originalLcAmount)
                           getExRateChangeStatus(formik?.values?.amount, originalLcAmount)
