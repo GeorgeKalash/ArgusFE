@@ -546,22 +546,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     value={formik.values.amount}
                     required
                     maxAccess={maxAccess}
-                    onBlur={async () => {
-                      if (!editMode) await getMultiCurrencyFormData(
-                        formik.values.currencyId,
-                        formatDateForGetApI(formik.values.date),
-                        RateDivision.FINANCIALS,
-                        formik.values.amount
-                      );
-                    }}
                     onChange={(e) => formik.setFieldValue("amount", e.target.value)}
                     onClear={async () => {
-                      await getMultiCurrencyFormData(
-                        formik.values.currencyId,
-                        formatDateForGetApI(formik.values.date),
-                        RateDivision.FINANCIALS,
-                        0
-                      )
                       formik.setFieldValue('amount', 0)
                     }}
                     error={formik.touched.amount && Boolean(formik.errors.amount)}

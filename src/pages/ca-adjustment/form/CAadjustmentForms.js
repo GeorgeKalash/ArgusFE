@@ -430,22 +430,8 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 readOnly={formik.values.status == '3'}
                 required
                 maxAccess={maxAccess}
-                onBlur={async () => {
-                  if (!editMode) await getMultiCurrencyFormData(
-                    formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
-                    RateDivision.FINANCIALS,
-                    formik.values.amount
-                  );
-                }}
                 onChange={(e) => formik.setFieldValue("amount", e.target.value)}
                 onClear={async () => {
-                  await getMultiCurrencyFormData(
-                    formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
-                    RateDivision.FINANCIALS,
-                    0
-                  )
                   formik.setFieldValue('amount', 0)
                 }}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
