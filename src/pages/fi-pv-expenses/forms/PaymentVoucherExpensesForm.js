@@ -525,13 +525,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
   }, [])
 
   async function openMCRForm(data) {
-    await getMultiCurrencyFormData(
-      formik.values.currencyId,
-      formatDateForGetApI(formik.values.date),
-      RateDivision.FINANCIALS,
-      Number(formik.values.amount)
-    )
-
     stack({
       Component: MultiCurrencyRateForm,
       props: {
