@@ -223,7 +223,7 @@ const BenificiaryCashForm = ({
           cobId: RTBEN?.record?.cobId,
           cellPhone: RTBEN?.record?.cellPhone,
           birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
-          currencyId: RTBEN?.record.currencyId,
+          currencyId: RTBEN?.record?.currencyId,
           addressLine1: RTBEN?.record?.addressLine1,
           addressLine2: RTBEN?.record?.addressLine2,
           clientRef: RTBEN?.record?.clientRef,
