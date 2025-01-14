@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -13,6 +13,7 @@ import { useWindow } from 'src/windows'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CustomButton from '../Inputs/CustomButton'
 
 const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) => {
   const { stack } = useWindow()
@@ -105,53 +106,28 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
     <VertLayout>
       <Grow>
         <Grid container spacing={2} sx={{ padding: 2 }}>
-          <Grid item xs={12}>
-            <Grid container spacing={2}>
-              <Grid item xs={7}>
-                <CustomTextField
-                  name='name'
-                  label={platformLabels.SelectCSV}
-                  value={file?.name}
-                  disabled={formik.values.serials || !!file?.name}
-                  readOnly
-                  maxAccess={maxAccess}
-                />
-              </Grid>
-              <Grid item xs={5}>
-                <Button
-                  sx={{ ml: 6, minWidth: '90px !important' }}
-                  variant='contained'
-                  size='small'
-                  disabled={!!file?.name || formik.values.serials}
-                  onClick={() => {
-                    imageInputRef.current.click()
-                  }}
-                >
-                  {platformLabels.Browse}...
-                </Button>
-                <input
-                  type='file'
-                  accept='.csv'
-                  ref={imageInputRef}
-                  style={{ display: 'none' }}
-                  onChange={handleFileChange}
-                />
-                <Button
-                  onClick={clearFile}
-                  sx={{
-                    backgroundColor: '#f44336',
-                    '&:hover': {
-                      backgroundColor: '#f44336',
-                      opacity: 0.8
-                    },
-                    ml: 2
-                  }}
-                  variant='contained'
-                >
-                  <img src='/images/buttonsIcons/clear.png' alt={platformLabels.Clear} />
-                </Button>
-              </Grid>
-            </Grid>
+          <Grid item xs={7}>
+            <CustomTextField
+              name='name'
+              label={platformLabels.SelectCSV}
+              value={file?.name}
+              disabled={formik.values.serials || !!file?.name}
+              readOnly
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <CustomButton
+              onClick={() => {
+                imageInputRef.current.click()
+              }}
+              label={`${platformLabels.Browse}...`}
+              color='primary'
+              disabled={!!file?.name || formik.values.serials}
+            />
+          </Grid>
+          <Grid item xs={2}>
+            <CustomButton image='clear.png' onClick={clearFile} label={platformLabels.Clear} color='#f44336' />
           </Grid>
           <Grid item xs={12}>
             {formik.values.serialCount > 0 && (
@@ -179,6 +155,7 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
       <Fixed>
         <WindowToolbar smallBox={true} actions={actions} />
       </Fixed>
+      <input type='file' accept='.csv' ref={imageInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
     </VertLayout>
   )
 }
