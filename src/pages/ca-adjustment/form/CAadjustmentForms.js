@@ -76,10 +76,8 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     onSubmit: async obj => {
       const recordId = obj.recordId
       if (!recordId) {
-        obj.baseAmount = obj.amount
         obj.status = 1
         obj.rateCalcMethod = 1
-        obj.exRate = 1
       }
 
       const response = await postRequest({
@@ -91,7 +89,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
         toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
-          baseAmount: obj.amount,
+          baseAmount: !formik.values.baseAmount ? obj.amount : formik.values.baseAmount,
 
           recordId: response.recordId
         })
@@ -432,22 +430,8 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 readOnly={formik.values.status == '3'}
                 required
                 maxAccess={maxAccess}
-                onBlur={async e => {
-                  await getMultiCurrencyFormData(
-                    formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
-                    RateDivision.FINANCIALS,
-                    Number(e.target.value.replace(/,/g, ''))
-                  )
-                  formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
-                }}
+                onChange={(e) => formik.setFieldValue("amount", e.target.value)}
                 onClear={async () => {
-                  await getMultiCurrencyFormData(
-                    formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
-                    RateDivision.FINANCIALS,
-                    0
-                  )
                   formik.setFieldValue('amount', 0)
                 }}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}

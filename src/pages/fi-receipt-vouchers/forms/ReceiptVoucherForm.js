@@ -100,11 +100,33 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', response.recordId)
       } else toast.success(platformLabels.Edited)
+      await getData(response.recordId)
       invalidate()
     }
   })
 
-  function openMCRForm(data) {
+  async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
+    if (currencyId && date && rateType) {
+      const res = await getRequest({
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
+      })
+
+      const updatedRateRow = getRate({
+        amount: amount === 0 ? 0 : amount ?? formik.values.amount,
+        exRate: res.record?.exRate,
+        baseAmount: 0,
+        rateCalcMethod: res.record?.rateCalcMethod,
+        dirtyField: DIRTYFIELD_RATE
+      })
+
+      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('exRate', res.record?.exRate)
+      formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
+    }
+  }
+
+  async function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
       props: {
@@ -184,13 +206,13 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   useEffect(() => {
     if (formik.values.recordId) getCashAccount()
     ;(async function () {
-      getData()
+      await getData(formik.values.recordId)
       getUserDefaultsData()
       getDefaultsData()
     })()
   }, [])
 
-  async function getData() {
+  async function getData(recordId) {
     if (recordId) {
       const res = await getRequest({
         extension: FinancialRepository.ReceiptVouchers.get,
@@ -201,26 +223,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     }
   }
 
-  async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
-    if (currencyId && date && rateType) {
-      const res = await getRequest({
-        extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
-      })
 
-      const updatedRateRow = getRate({
-        amount: amount === 0 ? 0 : amount ?? formik.values.amount,
-        exRate: res.record?.exRate,
-        baseAmount: 0,
-        rateCalcMethod: res.record?.rateCalcMethod,
-        dirtyField: DIRTYFIELD_RATE
-      })
-
-      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-      formik.setFieldValue('exRate', res.record?.exRate)
-      formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
-    }
-  }
 
   const onCancel = async () => {
     const obj = formik.values
@@ -231,7 +234,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     })
 
     if (res?.recordId) {
-      getData()
+      await getData(res?.recordId)
       toast.success(platformLabels.Cancelled)
       invalidate()
     }
@@ -246,7 +249,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     if (res) {
       toast.success(platformLabels.Unposted)
       invalidate()
-      getData()
+      await getData(formik.values.recordId)
     }
   }
 
@@ -259,7 +262,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     if (res) {
       toast.success(platformLabels.Posted)
       invalidate()
-      getData()
+      await getData(formik.values.recordId)
     }
   }
 
@@ -555,22 +558,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
                 maxLength={'10'}
                 decimalScale={2}
-                onBlur={async e => {
-                  await getMultiCurrencyFormData(
-                    formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
-                    RateDivision.FINANCIALS,
-                    Number(e.target.value.replace(/,/g, ''))
-                  )
-                  formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
-                }}
+                onChange={e => formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))}
                 onClear={async () => {
-                  await getMultiCurrencyFormData(
-                    formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
-                    RateDivision.FINANCIALS,
-                    0
-                  )
                   formik.setFieldValue('amount', 0)
                 }}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}

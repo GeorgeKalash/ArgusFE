@@ -769,22 +769,8 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                 value={amountSum}
                 readOnly
                 maxAccess={maxAccess}
-                onBlur={async e => {
-                  await getMultiCurrencyFormData(
-                    formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
-                    RateDivision.FINANCIALS,
-                    Number(e.target.value.replace(/,/g, ''))
-                  )
-                  formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
-                }}
+                onChange={e => formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))}
                 onClear={async () => {
-                  await getMultiCurrencyFormData(
-                    formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
-                    RateDivision.FINANCIALS,
-                    0
-                  )
                   formik.setFieldValue('amount', 0)
                 }}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
@@ -806,9 +792,12 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                 form={formik}
                 required
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : null)
-                  formik.setFieldValue('cashAccountRef', newValue ? newValue.reference : null)
-                  formik.setFieldValue('cashAccounName', newValue ? newValue.name : null)
+                  formik.setValues({
+                    ...formik.values,
+                    cashAccountId: newValue?.recordId || '',
+                    cashAccountRef: newValue?.reference || '',
+                    cashAccountName: newValue?.name || ''
+                  })
                 }}
                 errorCheck={'cashAccountId'}
                 maxAccess={maxAccess}

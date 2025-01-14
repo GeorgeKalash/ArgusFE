@@ -83,10 +83,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     }),
     onSubmit: async obj => {
       if (!obj.recordId) {
-        obj.baseAmount = obj.amount
         obj.status = 1
         obj.rateCalcMethod = 1
-        obj.exRate = 1
       }
 
       const response = await postRequest({
@@ -98,7 +96,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
-          baseAmount: obj.amount,
+          baseAmount: !formik.values.baseAmount ? obj.amount : formik.values.baseAmount,
 
           recordId: response.recordId
         })
@@ -152,7 +150,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     }
 
     formik.setFieldValue('amount', calculatedAmount)
-    formik.setFieldValue('baseAmount', calculatedAmount)
+    if (!formik.values.baseAmount) formik.setFieldValue('baseAmount', calculatedAmount)
   }, [formik.values.isSubjectToVAT, initialVatPct, formik.values.subtotal])
 
   async function getDefaultsData() {
@@ -548,22 +546,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     value={formik.values.amount}
                     required
                     maxAccess={maxAccess}
-                    onBlur={async e => {
-                      await getMultiCurrencyFormData(
-                        formik.values.currencyId,
-                        formatDateForGetApI(formik.values.date),
-                        RateDivision.FINANCIALS,
-                        Number(e.target.value.replace(/,/g, ''))
-                      )
-                      formik.setFieldValue('amount', Number(e.target.value.replace(/,/g, '')))
-                    }}
+                    onChange={(e) => formik.setFieldValue("amount", e.target.value)}
                     onClear={async () => {
-                      await getMultiCurrencyFormData(
-                        formik.values.currencyId,
-                        formatDateForGetApI(formik.values.date),
-                        RateDivision.FINANCIALS,
-                        0
-                      )
                       formik.setFieldValue('amount', 0)
                     }}
                     error={formik.touched.amount && Boolean(formik.errors.amount)}
