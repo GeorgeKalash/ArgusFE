@@ -33,7 +33,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     enabled: !recordId
   })
 
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const [baseMetalId, setBaseMetalId] = useState(null)
+  const [g22, setG22] = useState({})
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -57,6 +59,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     initialValues: {
       accountId: null,
       accountName: '',
+      totalG22: null,
+      totalLabor: null,
+      totalQty: null,
       accountRef: '',
       batchId: null,
       collectorId: null,
@@ -147,15 +152,27 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           parameters: `_recordId=${recordId}&_functionId=${functionId}`
         })
 
-        const modifiedList = res.list?.map((item, index) => ({
+        const modifiedList = res?.list?.map((item, index) => ({
           ...item,
           purity: item.purity && item.purity <= 1 ? item.purity * 1000 : item.purity,
+          g22Value: (item.qty * item.purity) / (g22.purity * 1000) || null,
 
           id: index + 1
         }))
 
         formik.setValues({ ...res2.record, items: modifiedList })
       }
+
+      const getDataResult = () => {
+        const myObject = {}
+
+        const filteredList = defaultsData?.list?.filter(obj => {
+          return obj.key === 'baseSalesMetalId'
+        })
+        filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+        setBaseMetalId(myObject.baseSalesMetalId)
+      }
+      getDataResult()
     })()
   }, [])
 
@@ -183,14 +200,44 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     return array
   }
 
+  console.log(baseMetalId, 'baseMetalId')
+
   useEffect(() => {
     getRequest({
       extension: InventoryRepository.Scrap.qry,
       parameters: '_metalId=0'
     }).then(res => {
       setAllMetals(res.list)
+      const matchedItem = res?.list.find(item => item.metalId === baseMetalId)
+      console.log(matchedItem, 'G22matchedItem')
+
+      if (matchedItem) {
+        setG22(matchedItem)
+      }
     })
-  }, [])
+  }, [baseMetalId])
+  console.log(g22, 'G222')
+
+  useEffect(() => {
+    if (formik && formik.values && Array.isArray(formik.values.items)) {
+      const items = formik.values.items
+
+      const parseNumber = value => {
+        const number = parseFloat(value)
+
+        return isNaN(number) ? 0 : number
+      }
+
+      const totalQty = items.reduce((sum, item) => sum + parseNumber(item.qty), 0)
+      const totalLabor = items.reduce((sum, item) => sum + parseNumber(item.totalCredit), 0)
+
+      formik.setValues(prevValues => ({
+        ...prevValues,
+        totalLabor,
+        totalQty
+      }))
+    }
+  }, [formik.values.items])
 
   const columns = [
     {
@@ -265,7 +312,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       component: 'numberfield',
       name: 'purity',
       label: labels.purity,
-      props: { readOnly: false },
+      props: { readOnly: true },
       defaultValue: 0,
       onChange: ({ row: { update, newRow } }) => {
         const baseSalesMetalValue = (newRow.qty * newRow.purity) / (App.currentMetalPurity.getValue() * 1000)
@@ -288,23 +335,38 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           ? newRow.qty * newRow.creditAmount
           : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
         update({ totalCredit })
+        if (g22 && Object.keys(g22).length > 0) {
+          const g22Value = (newRow.qty * newRow.purity) / (g22.purity * 1000)
+          update({ g22Value: g22Value })
+        }
       }
     },
     {
       component: 'numberfield',
       name: 'creditAmount',
-      label: labels.creditAmount,
+      label: 'labor',
       props: { allowNegative: false, readOnly: true }
     },
     {
       component: 'numberfield',
       name: 'totalCredit',
-      label: labels.totalCredit,
+      label: 'totalLabor',
       props: { allowNegative: false, readOnly: true }
     }
   ]
-
-  console.log(formik.values, 'aaaaaaaaaaa')
+  if (g22.sku) {
+    const qtyIndex = columns.findIndex(col => col.name === 'qty')
+    if (qtyIndex !== -1) {
+      columns.splice(qtyIndex + 1, 0, {
+        component: 'numberfield',
+        label: g22.sku,
+        name: 'g22Value',
+        props: {
+          readOnly: true
+        }
+      })
+    }
+  }
 
   return (
     <FormShell
@@ -482,6 +544,19 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
             />
           </Grow>
         </Grow>
+        <Fixed>
+          <Grid container spacing={4}>
+            <Grid item xs={2}>
+              <CustomTextField label='totalQty' value={formik.values.totalQty} readOnly />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomTextField label='totalLabor' value={formik.values.totalLabor} readOnly />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomTextField label='totalG22' value={formik.values.totalG22} readOnly />
+            </Grid>
+          </Grid>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )
