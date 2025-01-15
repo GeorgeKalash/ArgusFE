@@ -41,12 +41,9 @@ export default function DraftForm({ labels, access, recordId, currency }) {
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
 
-  const [metalGridData, setMetalGridData] = useState([])
-  const [itemGridData, setItemGridData] = useState([])
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [taxDetailsStore, setTaxDetailsStore] = useState([])
   const [jumpToNextLine, setJumpToNextLine] = useState(false)
-  const [siteDisabled, setSiteDisabled] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
@@ -54,67 +51,73 @@ export default function DraftForm({ labels, access, recordId, currency }) {
     enabled: !recordId
   })
 
-  const initialValues = {
-    recordId: recordId || '',
-    dtId: documentType?.dtId,
-    reference: '',
-    date: new Date(),
-    plantId: null,
-    clientId: null,
-    clientRef: '',
-    clientName: '',
-    currencyId: parseInt(currency),
-    spId: null,
-    siteId: null,
-    description: '',
-    status: 1,
-    wip: 1,
-    isVattable: false,
-    taxId: null,
-    subtotal: 0,
-    amount: 0,
-    vatAmount: 0,
-    plId: null,
-    ptId: null,
-    weight: 0,
-    disSkuLookup: false,
-    autoSrlNo: true,
-    search: '',
-    serials: [
-      {
-        id: 1,
-        draftId: recordId || 0,
-        srlNo: '',
-        metalId: '',
-        designId: '',
-        itemId: '',
-        sku: '',
-        itemName: '',
-        seqNo: '',
-        extendedPrice: 0,
-        baseLaborPrice: 0,
-        weight: 0,
-        metalRef: '',
-        designRef: '',
-        vatAmount: 0,
-        vatPct: 0,
-        unitPrice: 0,
-        taxId: null,
-        taxDetails: null,
-        taxDetailsButton: false,
-        priceType: 0,
-        volume: 0
-      }
-    ]
-  }
-
   const invalidate = useInvalidate({
     endpointId: SaleRepository.DraftInvoice.page
   })
 
+  useEffect(() => {
+    if (documentType?.dtId) {
+      formik.setFieldValue('dtId', documentType.dtId)
+    }
+  }, [documentType?.dtId])
+
   const { formik } = useForm({
     maxAccess,
-    initialValues,
+    initialValues: {
+      recordId: recordId || '',
+      dtId: documentType?.dtId,
+      reference: '',
+      date: new Date(),
+      plantId: null,
+      clientId: null,
+      clientRef: '',
+      clientName: '',
+      currencyId: parseInt(currency),
+      spId: null,
+      siteId: null,
+      description: '',
+      status: 1,
+      wip: 1,
+      isVattable: false,
+      taxId: null,
+      subtotal: 0,
+      amount: 0,
+      vatAmount: 0,
+      plId: null,
+      ptId: null,
+      weight: 0,
+      disSkuLookup: false,
+      autoSrlNo: true,
+      search: '',
+      serials: [
+        {
+          id: 1,
+          draftId: recordId || 0,
+          srlNo: '',
+          metalId: '',
+          designId: '',
+          itemId: '',
+          sku: '',
+          itemName: '',
+          seqNo: '',
+          extendedPrice: 0,
+          baseLaborPrice: 0,
+          weight: 0,
+          metalRef: '',
+          designRef: '',
+          vatAmount: 0,
+          vatPct: 0,
+          unitPrice: 0,
+          taxId: null,
+          taxDetails: null,
+          taxDetailsButton: false,
+          priceType: 0,
+          volume: 0
+        }
+      ],
+      metalGridData: [],
+      itemGridData: []
+    },
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -123,7 +126,6 @@ export default function DraftForm({ labels, access, recordId, currency }) {
       clientId: yup.string().required(),
       spId: yup.string().required(),
       siteId: yup.string().required(),
-      dtId: yup.string().required(),
       serials: yup.array().of(
         yup.object().shape({
           srlNo: yup.string().test({
@@ -159,15 +161,15 @@ export default function DraftForm({ labels, access, recordId, currency }) {
         items: updatedRows
       }
 
-      const diRes = await postRequest({
+      postRequest({
         extension: SaleRepository.DraftInvoice.set2,
         record: JSON.stringify(DraftInvoicePack)
+      }).then(async diRes => {
+        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+        toast.success(actionMessage)
+        await refetchForm(diRes.recordId)
+        invalidate()
       })
-
-      const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
-      await refetchForm(diRes.recordId)
-      invalidate()
     }
   })
 
@@ -281,6 +283,11 @@ export default function DraftForm({ labels, access, recordId, currency }) {
   const autoDelete = async row => {
     if (!row?.itemName) return true
 
+    //const updatedSerials = formik.values.serials.filter(item => item.srlNo !== row.srlNo)
+
+    formik.setFieldValue('search', '') // Update the Formik field
+    //await new Promise(resolve => setTimeout(resolve, 0))
+
     const LastSerPack = {
       draftId: formik?.values?.recordId,
       lineItem: row
@@ -291,12 +298,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
       record: JSON.stringify(LastSerPack)
     })
 
-    if (
-      formik?.values?.serials?.length == 1 ||
-      (formik?.values?.serials?.length == 2 && !formik?.values?.serials[1].itemId)
-    ) {
-      setSiteDisabled(false)
-    }
+    console.log('formik.values.serials', formik.values.serials)
 
     return true
   }
@@ -358,7 +360,6 @@ export default function DraftForm({ labels, access, recordId, currency }) {
       const diHeader = await getDraftInv(diRes.recordId)
       const diItems = await getDraftInvItems(diRes.recordId)
       await fillForm(diHeader, diItems)
-      setSiteDisabled(true)
 
       return true
     } else {
@@ -430,17 +431,17 @@ export default function DraftForm({ labels, access, recordId, currency }) {
                 (lineObj.changes.taxDetails = FilteredListByTaxId(taxDetailsStore, lineObj.changes.taxId))
             }
 
+            addRow(lineObj)
+
             const successSave = formik?.values?.recordId
               ? await autoSave(formik?.values?.recordId, lineObj.changes)
               : await saveHeader(lineObj.changes)
 
             if (!successSave) {
               update({
-                id: newRow?.id,
-                srlNo: ''
+                ...formik?.initialValues?.serials,
+                id: newRow?.id
               })
-            } else {
-              addRow(lineObj)
             }
           }
         }
@@ -641,8 +642,6 @@ export default function DraftForm({ labels, access, recordId, currency }) {
 
     formik.setFieldValue('serials', modifiedList)
 
-    modifiedList && setSiteDisabled(true)
-
     assignStoreTaxDetails(modifiedList)
   }
 
@@ -672,10 +671,8 @@ export default function DraftForm({ labels, access, recordId, currency }) {
       vatAmount: parseFloat(diHeader?.record?.vatAmount).toFixed(2),
       subtotal: parseFloat(diHeader?.record?.subtotal).toFixed(2),
       totalWeight: parseFloat(diHeader?.record?.totalWeight).toFixed(2),
-      serials: modifiedList.length ? modifiedList : initialValues.serials
+      serials: modifiedList.length ? modifiedList : formik?.initialValues?.serials
     })
-
-    modifiedList?.length && setSiteDisabled(true)
 
     assignStoreTaxDetails(modifiedList)
   }
@@ -695,11 +692,12 @@ export default function DraftForm({ labels, access, recordId, currency }) {
     ? formik.values.serials.filter(
         item =>
           item.srlNo?.toString()?.includes(formik.values.search.toLowerCase()) ||
-          item.weight?.toString()?.includes(formik.values.search.toLowerCase()) ||
-          item.sku?.toLowerCase().includes(formik.values.search.toLowerCase()) ||
-          item.itemName?.toLowerCase().includes(formik.values.search.toLowerCase())
+          item.weight?.toString()?.includes(formik.values.search.toLowerCase())
       )
     : formik.values.serials
+
+  console.log('search', formik?.values?.search)
+  console.log('filteredData', filteredData)
 
   const handleSearchChange = event => {
     const { value } = event.target
@@ -707,12 +705,10 @@ export default function DraftForm({ labels, access, recordId, currency }) {
   }
 
   function getDTD(dtId) {
-    const res = getRequest({
+    return getRequest({
       extension: SaleRepository.DocumentTypeDefault.get,
       parameters: `_dtId=${dtId}`
     })
-
-    return res
   }
 
   async function getSiteRef(siteId) {
@@ -730,38 +726,16 @@ export default function DraftForm({ labels, access, recordId, currency }) {
     if (recordId) {
       const dtd = await getDTD(recordId)
 
-      formik.setFieldValue('plantId', dtd?.record?.plantId || null)
-      formik.setFieldValue('spId', dtd?.record?.spId ?? userDefaultsDataState?.spId)
-      formik.setFieldValue('siteId', dtd?.record?.siteId ?? userDefaultsDataState?.siteId)
-      formik.setFieldValue('siteRef', dtd?.record?.siteId && (await getSiteRef(dtd?.record?.siteId)))
+      formik.setFieldValue('plantId', dtd?.record?.plantId)
+      formik.setFieldValue('spId', dtd?.record?.spId || userDefaultsDataState?.spId)
+      formik.setFieldValue('siteId', dtd?.record?.siteId || userDefaultsDataState?.siteId)
+      formik.setFieldValue('siteRef', await getSiteRef(dtd?.record?.siteId))
     } else {
       formik.setFieldValue('siteId', null)
       formik.setFieldValue('siteRef', null)
       formik.setFieldValue('spId', null)
       formik.setFieldValue('plantId', null)
     }
-  }
-
-  function calcTotals(serials) {
-    const { subtotal, vatAmount, totalWeight } = serials?.reduce(
-      (acc, row) => {
-        const subTot = parseFloat(row?.unitPrice) || 0
-        const vatAmountTot = parseFloat(row?.vatAmount) || 0
-        const totWeight = parseFloat(row?.weight) || 0
-
-        return {
-          subtotal: acc?.subtotal + subTot,
-          vatAmount: acc?.vatAmount + vatAmountTot,
-          totalWeight: acc?.totalWeight + totWeight
-        }
-      },
-      { subtotal: 0, vatAmount: 0, totalWeight: 0 }
-    )
-
-    formik.setFieldValue('subtotal', subtotal)
-    formik.setFieldValue('vatAmount', vatAmount)
-    formik.setFieldValue('weight', totalWeight)
-    formik.setFieldValue('amount', subtotal + vatAmount)
   }
 
   useEffect(() => {
@@ -784,7 +758,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
         metalMap[metalId].totalWeight = parseFloat(metalMap[metalId].totalWeight.toFixed(2))
       })
 
-      setMetalGridData(Object.values(metalMap))
+      formik.setFieldValue('metalGridData', Object.values(metalMap))
 
       var seqNo = 0
 
@@ -801,11 +775,34 @@ export default function DraftForm({ labels, access, recordId, currency }) {
         return acc
       }, {})
 
-      setItemGridData(Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo))
-
-      calcTotals(serials)
+      formik.setFieldValue(
+        'itemGridData',
+        Object.values(itemMap).sort((a, b) => a.seqNo - b.seqNo)
+      )
     }
   }, [formik?.values?.serials])
+
+  const { subtotal, vatAmount, totalWeight } = formik?.values?.serials?.reduce(
+    (acc, row) => {
+      const subTot = parseFloat(row?.unitPrice) || 0
+      const vatAmountTot = parseFloat(row?.vatAmount) || 0
+      const totWeight = parseFloat(row?.weight) || 0
+
+      return {
+        subtotal: acc?.subtotal + subTot,
+        vatAmount: acc?.vatAmount + vatAmountTot,
+        totalWeight: acc?.totalWeight + totWeight
+      }
+    },
+    { subtotal: 0, vatAmount: 0, totalWeight: 0 }
+  )
+
+  useEffect(() => {
+    formik.setFieldValue('subtotal', subtotal)
+    formik.setFieldValue('vatAmount', vatAmount)
+    formik.setFieldValue('weight', totalWeight)
+    formik.setFieldValue('amount', subtotal + vatAmount)
+  }, [totalWeight, subtotal, vatAmount])
 
   async function getUserDefaultsData() {
     const myObject = {}
@@ -857,11 +854,6 @@ export default function DraftForm({ labels, access, recordId, currency }) {
         await refetchForm(formik?.values?.recordId, myObject?.plId)
       } else {
         formik.setFieldValue('currencyId', parseInt(myObject?.currencyId))
-
-        if (documentType?.dtId) {
-          formik.setFieldValue('dtId', documentType.dtId)
-          getDTD(documentType?.dtId)
-        }
       }
     })()
   }, [])
@@ -901,7 +893,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
                 onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
                   onChangeDtId(newValue?.recordId)
-                  newValue ?? changeDT(newValue)
+                  changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
@@ -910,7 +902,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'
-                readOnly={isClosed || siteDisabled}
+                readOnly={isClosed || formik?.values?.serials?.some(serial => serial.srlNo)}
                 label={labels.site}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -921,7 +913,6 @@ export default function DraftForm({ labels, access, recordId, currency }) {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                displayFieldWidth={2}
                 onChange={(event, newValue) => {
                   if (!newValue?.isInactive) {
                     formik.setFieldValue('siteId', newValue?.recordId)
@@ -975,7 +966,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
                 label={labels.plant}
-                readOnly={isClosed || editMode}
+                readOnly
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -987,7 +978,6 @@ export default function DraftForm({ labels, access, recordId, currency }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId)
                 }}
-                displayFieldWidth={2}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
@@ -1009,7 +999,6 @@ export default function DraftForm({ labels, access, recordId, currency }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('contactId', newValue ? newValue.recordId : null)
                 }}
-                displayFieldWidth={2}
                 error={formik.touched.contactId && Boolean(formik.errors.contactId)}
               />
             </Grid>
@@ -1041,7 +1030,6 @@ export default function DraftForm({ labels, access, recordId, currency }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                displayFieldWidth={1.5}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('spId', newValue ? newValue.recordId : null)
                 }}
@@ -1157,7 +1145,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
               <Grid container>
                 <Grid item xs={12} height={125} sx={{ display: 'flex', flex: 1 }}>
                   <Table
-                    gridData={{ count: 1, list: metalGridData }}
+                    gridData={{ count: 1, list: formik?.values?.metalGridData }}
                     maxAccess={access}
                     columns={[
                       { field: 'metal', headerName: labels.metal, flex: 1 },
@@ -1177,7 +1165,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
                       { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
                       { field: 'weight', headerName: labels.weight, type: 'number', flex: 1 }
                     ]}
-                    gridData={{ count: 1, list: itemGridData }}
+                    gridData={{ count: 1, list: formik?.values?.itemGridData }}
                     rowId={['sku']}
                     maxAccess={access}
                     pagination={false}
@@ -1195,7 +1183,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
                     name='subTotal'
                     maxAccess={maxAccess}
                     label={labels.subtotal}
-                    value={formik?.values?.subtotal}
+                    value={subtotal}
                     readOnly
                   />
                 </Grid>
@@ -1204,7 +1192,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
                     name='vatAmount'
                     maxAccess={maxAccess}
                     label={labels.vat}
-                    value={formik?.values?.vatAmount}
+                    value={vatAmount}
                     readOnly
                   />
                 </Grid>
@@ -1227,7 +1215,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
                     name='totalWeight'
                     maxAccess={maxAccess}
                     label={labels.totalWeight}
-                    value={formik?.values?.weight}
+                    value={totalWeight}
                     readOnly
                   />
                 </Grid>
