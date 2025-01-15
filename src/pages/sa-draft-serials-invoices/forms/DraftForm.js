@@ -44,6 +44,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [taxDetailsStore, setTaxDetailsStore] = useState([])
   const [jumpToNextLine, setJumpToNextLine] = useState(false)
+  const [gridserials, setGridserials] = useState([])
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
@@ -283,11 +284,6 @@ export default function DraftForm({ labels, access, recordId, currency }) {
   const autoDelete = async row => {
     if (!row?.itemName) return true
 
-    //const updatedSerials = formik.values.serials.filter(item => item.srlNo !== row.srlNo)
-
-    formik.setFieldValue('search', '') // Update the Formik field
-    //await new Promise(resolve => setTimeout(resolve, 0))
-
     const LastSerPack = {
       draftId: formik?.values?.recordId,
       lineItem: row
@@ -297,8 +293,6 @@ export default function DraftForm({ labels, access, recordId, currency }) {
       extension: SaleRepository.DraftInvoiceSerial.del,
       record: JSON.stringify(LastSerPack)
     })
-
-    console.log('formik.values.serials', formik.values.serials)
 
     return true
   }
@@ -688,16 +682,13 @@ export default function DraftForm({ labels, access, recordId, currency }) {
     return res?.list
   }
 
-  const filteredData = formik.values.search
-    ? formik.values.serials.filter(
-        item =>
-          item.srlNo?.toString()?.includes(formik.values.search.toLowerCase()) ||
-          item.weight?.toString()?.includes(formik.values.search.toLowerCase())
-      )
-    : formik.values.serials
+  const filteredData = formik.values.search ? gridserials : formik.values.serials
 
-  console.log('search', formik?.values?.search)
-  console.log('filteredData', filteredData)
+  useEffect(() => {
+    setGridserials(
+      formik.values.serials.filter(item => item.srlNo?.toString()?.includes(formik.values.search.toLowerCase()))
+    )
+  }, [formik?.values?.search])
 
   const handleSearchChange = event => {
     const { value } = event.target
@@ -1126,8 +1117,15 @@ export default function DraftForm({ labels, access, recordId, currency }) {
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => {
-              formik.setFieldValue('serials', value)
+            onChange={(value, action, row) => {
+              let result = value
+              if (action == 'delete') {
+                if (formik?.values?.search) {
+                  setGridserials(result)
+                }
+                result = formik?.values?.serials?.filter(item => item?.id !== row?.id)
+              }
+              formik.setFieldValue('serials', result)
             }}
             value={filteredData || []}
             error={formik.errors.serials}
@@ -1136,6 +1134,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
             maxAccess={maxAccess}
             disabled={isClosed || !formik.values.clientId}
             allowDelete={!isClosed}
+            allowAddNewLine={!formik?.values?.search}
             autoDelete={autoDelete}
           />
         </Grow>
