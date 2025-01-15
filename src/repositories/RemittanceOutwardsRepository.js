@@ -184,5 +184,12 @@ export const RemittanceOutwardsRepository = {
     close: service + 'closeORS',
     reopen: service + 'reopenORS',
     snapshot: service + 'snapshotORS'
-  }
+  },
+  OutwardReturnReason: {
+    page: service + 'pageOWRR',
+    qry: service + 'qryOWRR',
+    get: service + 'getOWRR',
+    set: service + 'setOWRR',
+    del: service + 'delOWRR',
+  },
 }
