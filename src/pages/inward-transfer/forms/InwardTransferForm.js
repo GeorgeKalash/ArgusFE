@@ -1003,46 +1003,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                 readOnly={editMode}
               />
             </Grid>
-            <Grid item xs={4}>
-              <CustomNumberField
-                name='commission'
-                label={labels.commission}
-                value={formik.values.commission}
-                maxAccess={maxAccess}
-                readOnly
-                onChange={e => {
-                  formik.setFieldValue('commission', e.target.value || 0)
 
-                  // formik.values.amount && calculateAmounts(e.target.value)
-                }}
-                onClear={() => formik.setFieldValue('commission', '')}
-                error={formik.touched.commission && Boolean(formik.errors.commission)}
-                maxLength={12}
-                decimalScale={2}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <ResourceComboBox
-                datasetId={DataSets.FEE_PAYER}
-                name='feePayer'
-                label={labels.feePayer}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                readOnly
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <CustomNumberField
-                name='taxAmount'
-                label={labels.taxAmount}
-                value={formik.values.taxAmount}
-                maxAccess={maxAccess}
-                readOnly
-                maxLength={12}
-                decimalScale={2}
-              />
-            </Grid>
             <Grid item xs={4}>
               <CustomNumberField
                 name='netAmount'

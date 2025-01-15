@@ -1066,34 +1066,6 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
               </Grid>
               <Grid item xs={4}>
                 <CustomNumberField
-                  name='taxAmount'
-                  label={labels.vatAmount}
-                  value={formik.values.taxAmount}
-                  maxAccess={maxAccess}
-                  readOnly={formik.values.inwardId || isClosed}
-                  onChange={e => formik.setFieldValue('taxAmount', e.target.value)}
-                  onClear={() => formik.setFieldValue('taxAmount', '')}
-                  error={formik.touched.taxAmount && Boolean(formik.errors.taxAmount)}
-                  maxLength={15}
-                  decimalScale={2}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <CustomNumberField
-                  name='charges'
-                  label={labels.charges}
-                  value={formik.values.charges}
-                  maxAccess={maxAccess}
-                  readOnly
-                  onChange={e => {
-                    formik.setFieldValue('charges', e.target.value)
-                  }}
-                  onClear={() => formik.setFieldValue('charges', '')}
-                  error={formik.touched.charges && Boolean(formik.errors.charges)}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <CustomNumberField
                   name='netAmount'
                   label={labels.netAmount}
                   value={formik?.values?.netAmount}
