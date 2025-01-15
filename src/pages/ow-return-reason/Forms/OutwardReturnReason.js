@@ -40,7 +40,9 @@ export default function OutwardReturnReasonForm({ labels, maxAccess, recordId })
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
-      name: yup.string().required()
+      name: yup.string().required(),
+      feesStatus: yup.string().required(),
+      rateStatus: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -134,10 +136,11 @@ export default function OutwardReturnReasonForm({ labels, maxAccess, recordId })
                 name='feesStatus'
                 label={labels.feesStatus}
                 valueField='key'
+                required
                 displayField='value'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('feesStatus', newValue ? newValue.key : '')
+                  formik.setFieldValue('feesStatus', newValue?.key || '')
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.feesStatus && Boolean(formik.errors.feesStatus)}
@@ -150,10 +153,11 @@ export default function OutwardReturnReasonForm({ labels, maxAccess, recordId })
                 name='rateStatus'
                 label={labels.rateStatus}
                 valueField='key'
+                required
                 displayField='value'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('rateStatus', newValue ? newValue.key : '')
+                  formik.setFieldValue('rateStatus', newValue?.key || '')
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.rateStatus && Boolean(formik.errors.rateStatus)}
