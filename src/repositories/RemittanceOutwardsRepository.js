@@ -187,7 +187,6 @@ export const RemittanceOutwardsRepository = {
   },
   OutwardReturnReason: {
     page: service + 'pageOWRR',
-    qry: service + 'qryOWRR',
     get: service + 'getOWRR',
     set: service + 'setOWRR',
     del: service + 'delOWRR',
