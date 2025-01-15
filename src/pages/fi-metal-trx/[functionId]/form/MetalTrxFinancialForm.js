@@ -25,6 +25,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { LabelSharp } from '@mui/icons-material'
 
 export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, date }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -44,12 +45,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   })
 
   const getEndpoint = functionId => {
-    switch (functionId) {
+    const id = Number(functionId)
+    switch (id) {
       case SystemFunction.MetalReceiptVoucher:
         return FinancialRepository.MetalReceiptVoucher.set2R
       case SystemFunction.MetalPaymentVoucher:
         return FinancialRepository.MetalReceiptVoucher.set2P
-
       default:
         return null
     }
@@ -71,7 +72,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       description: '',
       dtId: null,
       dtName: '',
-      functionId: null,
+      functionId: functionId,
       functionName: '',
       isVerified: null,
       plantId: null,
@@ -84,7 +85,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       siteId: null,
       siteName: '',
       siteRef: '',
-      status: null,
+      status: 1,
       statusName: '',
       items: [
         {
@@ -98,29 +99,42 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           metalRef: '',
           purity: null,
           qty: null,
-          seqNo: null,
+          seqNo: 1,
           sku: '',
           stdPurity: null,
           totalCredit: null,
           trackBy: null,
-          trxId: null
+          trxId: recordId || 0
         }
       ]
     },
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
+    validationSchema: yup.object({
+      items: yup
+        .array()
+        .of(
+          yup.object().shape({
+            metalId: yup.string().required(),
+            qty: yup.number().required().typeError().positive(),
+            purity: yup.number().required().typeError().positive(),
+            sku: yup.string().required()
+          })
+        )
+        .required(' ')
+    }),
 
     onSubmit: async obj => {
       const { items, ...header } = obj
 
       const payload = {
         header,
-        items: items.map(({ id, itemName, metalRef, ...rest }) => rest)
+        items: items.map(({ id, seqNo, itemName, metalRef, ...rest }) => rest)
       }
 
       const response = await postRequest({
-        extension: getEndpoint(parseInt(formik.values.functionId)),
+        extension: getEndpoint(formik.values.functionId),
         record: JSON.stringify(payload)
       })
 
@@ -139,6 +153,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   })
   const editMode = !!formik.values.recordId || !!recordId
 
+  console.log(formik.values.items, 'FunctionIIIIIIIIIIIIIIII')
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -155,10 +171,14 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         const modifiedList = res?.list?.map((item, index) => ({
           ...item,
           purity: item.purity && item.purity <= 1 ? item.purity * 1000 : item.purity,
-          g22Value: (item.qty * item.purity) / (g22.purity * 1000) || null,
+          g22Value: g22.purity ? Math.round(((item.qty * item.purity) / g22.purity) * 100) / 100 : null,
 
-          id: index + 1
+          id: index + 1,
+          seqNo: index + 1
         }))
+        if (modifiedList?.length > 0) {
+          formik.setValues({ items: modifiedList })
+        }
 
         formik.setValues({ ...res2.record, items: modifiedList })
       }
@@ -174,7 +194,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       }
       getDataResult()
     })()
-  }, [])
+  }, [g22])
 
   const getResourceId = functionId => {
     switch (functionId) {
@@ -200,23 +220,25 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     return array
   }
 
-  console.log(baseMetalId, 'baseMetalId')
-
   useEffect(() => {
     getRequest({
       extension: InventoryRepository.Scrap.qry,
       parameters: '_metalId=0'
     }).then(res => {
       setAllMetals(res.list)
-      const matchedItem = res?.list.find(item => item.metalId === baseMetalId)
-      console.log(matchedItem, 'G22matchedItem')
-
-      if (matchedItem) {
-        setG22(matchedItem)
-      }
     })
+  }, [])
+
+  useEffect(() => {
+    if (baseMetalId) {
+      getRequest({
+        extension: InventoryRepository.Metals.get,
+        parameters: `_recordId=${baseMetalId}`
+      }).then(res => {
+        setG22(res.record)
+      })
+    }
   }, [baseMetalId])
-  console.log(g22, 'G222')
 
   useEffect(() => {
     if (formik && formik.values && Array.isArray(formik.values.items)) {
@@ -230,11 +252,13 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
       const totalQty = items.reduce((sum, item) => sum + parseNumber(item.qty), 0)
       const totalLabor = items.reduce((sum, item) => sum + parseNumber(item.totalCredit), 0)
+      const totalG22 = items.reduce((sum, item) => sum + parseNumber(item.g22Value), 0)
 
       formik.setValues(prevValues => ({
         ...prevValues,
+        totalQty,
         totalLabor,
-        totalQty
+        totalG22
       }))
     }
   }, [formik.values.items])
@@ -284,11 +308,20 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         return { ...props, store: getFilteredMetal(filteredCreditCard?.current) }
       },
       onChange: ({ row: { update, newRow } }) => {
-        if (newRow.purity) {
-          const totalCredit = newRow.purity
-            ? newRow.qty * newRow.creditAmount
-            : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
-          update({ purity: newRow.purity * 1000, totalCredit })
+        let purityValue = newRow.purity
+
+        if (!purityValue && newRow.stdPurity) {
+          purityValue = newRow.stdPurity
+        }
+
+        if (purityValue) {
+          const totalCredit = newRow.qty * newRow.creditAmount * (purityValue / newRow.stdPurity)
+
+          if (purityValue === newRow.stdPurity) {
+            update({ purity: purityValue, totalCredit })
+          } else {
+            update({ purity: purityValue * 1000, totalCredit })
+          }
         }
       }
     },
@@ -336,7 +369,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
         update({ totalCredit })
         if (g22 && Object.keys(g22).length > 0) {
-          const g22Value = (newRow.qty * newRow.purity) / (g22.purity * 1000)
+          const g22Value = Math.round(((newRow.qty * newRow.purity) / (g22.purity * 1000)) * 100) / 100
           update({ g22Value: g22Value })
         }
       }
@@ -354,14 +387,15 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       props: { allowNegative: false, readOnly: true }
     }
   ]
-  if (g22.sku) {
+  if (g22.reference) {
     const qtyIndex = columns.findIndex(col => col.name === 'qty')
     if (qtyIndex !== -1) {
       columns.splice(qtyIndex + 1, 0, {
         component: 'numberfield',
-        label: g22.sku,
+        label: g22.reference,
         name: 'g22Value',
         props: {
+          decimalScale: 2,
           readOnly: true
         }
       })
@@ -373,6 +407,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       resourceId={getResourceId(parseInt(formik.values.functionId))}
       form={formik}
       maxAccess={maxAccess}
+      previewReport={editMode}
       editMode={editMode}
       functionId={formik.values.functionId}
     >
@@ -384,15 +419,19 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
                 name='dtId'
-                readOnly={editMode}
+                required
                 label={labels.doctype}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                readOnly={editMode}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  changeDT(newValue)
-                  formik && formik.setFieldValue('items.dtId', newValue?.recordId)
+                  formik.setFieldValue('dtId', newValue?.recordId || '')
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
@@ -420,7 +459,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
               />
             </Grid>
             <Grid item xs={3}>
-              <CustomTextField readOnly={true} name='plantName' value={formik.values.plantName} />
+              <CustomTextField
+                readOnly={true}
+                name='plantName'
+                label={labels.plantName}
+                value={formik.values.plantName}
+              />
             </Grid>
             <Grid item xs={3}>
               <ResourceComboBox
@@ -479,7 +523,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
               />
             </Grid>
             <Grid item xs={3}>
-              <CustomTextField readOnly={true} name='siteName' value={formik.values.siteName} />
+              <CustomTextField readOnly={true} name='siteName' value={formik.values.siteName} label={labels.siteName} />
             </Grid>
             <Grid item xs={3}>
               <ResourceComboBox
@@ -510,14 +554,13 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
-                readOnly={editMode}
-                label={labels.accountReference}
+                label={labels.accountRef}
                 valueField='reference'
-                displayField='reference'
+                displayField='name'
                 valueShow='accountRef'
-                form={formik}
+                secondValueShow='accountName'
                 secondDisplayField={false}
-                filter={{ type: formik.values.accountType }}
+                form={formik}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
                   formik.setFieldValue('accountRef', newValue?.reference || '')
@@ -528,7 +571,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
               />
             </Grid>
             <Grid item xs={3}>
-              <CustomTextField name='accountName' value={formik.values.accountName} readOnly={true} />
+              <CustomTextField
+                name='accountName'
+                value={formik.values.accountName}
+                readOnly={true}
+                label={labels.accountName}
+              />
             </Grid>
           </Grid>
         </Fixed>
@@ -538,22 +586,73 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
               onChange={value => formik.setFieldValue('items', value)}
               value={formik.values.items}
               error={formik.errors.items}
+              allowDelete
               name='items'
-              maxAccess={maxAccess}
               columns={columns}
+              maxAccess={maxAccess}
             />
           </Grow>
         </Grow>
         <Fixed>
-          <Grid container spacing={4}>
-            <Grid item xs={2}>
-              <CustomTextField label='totalQty' value={formik.values.totalQty} readOnly />
+          <Grid container justifyContent='space-between'>
+            <Grid item xs={5}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    neverPopulate
+                    endpointId={FinancialRepository.DescriptionTemplate.qry}
+                    name='templateId'
+                    label={labels.descriptionTemplate}
+                    valueField='recordId'
+                    displayField='name'
+                    onChange={(event, newValue) => {
+                      let description = formik.values.description
+
+                      if (newValue?.name) formik.setFieldValue('description', description + newValue?.name + '\n')
+                    }}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='description'
+                    type='text'
+                    label={labels.description}
+                    value={formik.values.description}
+                    rows={3}
+                    maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('description', e.target.value)}
+                    onClear={() => formik.setFieldValue('description', '')}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={2}>
-              <CustomTextField label='totalLabor' value={formik.values.totalLabor} readOnly />
-            </Grid>
-            <Grid item xs={2}>
-              <CustomTextField label='totalG22' value={formik.values.totalG22} readOnly />
+
+            <Grid item xs={5}>
+              <Grid container spacing={2}>
+                <Grid item xs={7}>
+                  <CustomNumberField label={labels.totalQty} value={formik.values.totalQty} decimalScale={2} readOnly />
+                </Grid>
+
+                <Grid item xs={7}>
+                  <CustomNumberField
+                    label={labels.totalLabor}
+                    value={formik.values.totalLabor}
+                    decimalScale={2}
+                    readOnly
+                  />
+                </Grid>
+                {g22?.reference && (
+                  <Grid item xs={7}>
+                    <CustomNumberField
+                      label={`${labels.total} ${g22.reference}`}
+                      value={formik.values.totalG22}
+                      decimalScale={2}
+                      readOnly
+                    />
+                  </Grid>
+                )}
+              </Grid>
             </Grid>
           </Grid>
         </Fixed>
