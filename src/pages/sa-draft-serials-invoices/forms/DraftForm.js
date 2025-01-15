@@ -35,14 +35,13 @@ import { getIPR, DIRTYFIELD_UNIT_PRICE } from 'src/utils/ItemPriceCalculator'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import { useError } from 'src/error'
 
-export default function DraftForm({ labels, access, recordId, currency }) {
+export default function DraftForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
 
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
-  const [taxDetailsStore, setTaxDetailsStore] = useState([])
   const [jumpToNextLine, setJumpToNextLine] = useState(false)
   const [gridserials, setGridserials] = useState([])
 
@@ -73,7 +72,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
       clientId: null,
       clientRef: '',
       clientName: '',
-      currencyId: parseInt(currency),
+      currencyId: null,
       spId: null,
       siteId: null,
       description: '',
@@ -117,7 +116,8 @@ export default function DraftForm({ labels, access, recordId, currency }) {
         }
       ],
       metalGridData: [],
-      itemGridData: []
+      itemGridData: [],
+      taxDetailsStore: []
     },
     enableReinitialize: false,
     validateOnChange: true,
@@ -204,7 +204,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
       parameters: `_taxId=0`
     })
 
-    setTaxDetailsStore(taxDet?.list)
+    formik.setFieldValue('taxDetailsStore', taxDet?.list)
   }
 
   useEffect(() => {
@@ -265,7 +265,7 @@ export default function DraftForm({ labels, access, recordId, currency }) {
           return {
             ...serial,
             extendedPrice: serial.unitPrice,
-            taxDetails: FilteredListByTaxId(taxDetailsStore, serial.taxId)
+            taxDetails: FilteredListByTaxId(formik?.values?.taxDetailsStore, serial.taxId)
           }
         }
 
@@ -409,7 +409,10 @@ export default function DraftForm({ labels, access, recordId, currency }) {
 
                 ...(res?.record?.taxId && {
                   taxId: formik.values?.taxId || res?.record?.taxId,
-                  taxDetails: await FilteredListByTaxId(taxDetailsStore, formik.values?.taxId || res?.record?.taxId),
+                  taxDetails: await FilteredListByTaxId(
+                    formik?.values?.taxDetailsStore,
+                    formik.values?.taxId || res?.record?.taxId
+                  ),
                   taxDetailsButton: true
                 })
               }
@@ -422,7 +425,10 @@ export default function DraftForm({ labels, access, recordId, currency }) {
 
             if (lineObj.changes.taxId != null) {
               ;(lineObj.changes.extendedPrice = unitPrice),
-                (lineObj.changes.taxDetails = FilteredListByTaxId(taxDetailsStore, lineObj.changes.taxId))
+                (lineObj.changes.taxDetails = FilteredListByTaxId(
+                  formik?.values?.taxDetailsStore,
+                  lineObj.changes.taxId
+                ))
             }
 
             addRow(lineObj)
