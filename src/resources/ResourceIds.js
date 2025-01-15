@@ -341,5 +341,7 @@ export const ResourceIds = {
   FoWorkCenters: 47101,
   RetailInvoice: 54201,
   RetailInvoiceReturn: 54301,
-  RetailPurchase: 54302
+  RetailPurchase: 54302,
+  OutwardReturnReason: 36135,
+  DraftSerialsInvoices: 51312
 }

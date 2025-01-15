@@ -198,19 +198,14 @@ export default function OutwardReturnSettlementForm({ labels, access, recordId, 
     const finalRecordId = _recordId || recordId || formik.values.recordId
     if (finalRecordId) {
       const res = await getRequest({
-        extension: RemittanceOutwardsRepository.OutwardReturnSettlement.get,
+        extension: RemittanceOutwardsRepository.OutwardReturnSettlement.get2,
         parameters: `_recordId=${finalRecordId}`
       })
 
-      const result = await getRequest({
-        extension: RemittanceOutwardsRepository.OutwardsCash.qry,
-        parameters: `_receiptId=${finalRecordId}`
-      })
-
       formik.setValues({
-        ...res.record,
-        date: formatDateFromApi(res?.record?.date),
-        items: result.list.map((amount, index) => ({
+        ...res.record.header,
+        date: formatDateFromApi(res?.record?.header.date),
+        items: res.record.items.map((amount, index) => ({
           id: index + 1,
           ...amount
         }))
