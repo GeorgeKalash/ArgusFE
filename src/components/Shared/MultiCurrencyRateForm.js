@@ -67,16 +67,15 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
             ...formik.values,
             exRate: formik.values.exRate,
             baseAmount: formik.values.baseAmount,
-            amount: formik.values.amount,
-          };
-          onOk(updatedValues);
+            amount: formik.values.amount
+          }
+          onOk(updatedValues)
           window.close()
         }
       },
-      disabled: false,
-    },
-  ];
-  
+      disabled: false
+    }
+  ]
 
   return (
     <FormShell
@@ -129,14 +128,28 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
                 name='exRate'
                 value={formik?.values?.exRate}
                 label={labels.rate}
-                readOnly={formik?.values?.amount === 0}
-                onClear={() => formik.setFieldValue('exRate', '')}
+                readOnly={formik?.values?.amount == 0}
+                onClear={() => {
+                  formik.setFieldValue('baseAmount', '')
+                  formik.setFieldValue('exRate', '')
+                }}
                 decimalScale={7}
                 onChange={e => {
+                  const inputValue = e.target.value
+
+                  if (!inputValue) {
+                    formik.setFieldValue('exRate', '')
+                    formik.setFieldValue('baseAmount', '')
+
+                    return
+                  }
+
+                  formik.setFieldValue('exRate', inputValue)
+
                   const updatedRateRow = getRate({
                     amount: data?.amount || 0,
-                    exRate: e.target.value,
-                    baseAmount: parseFloat(formik?.values?.baseAmount).toFixed(2),
+                    exRate: inputValue,
+                    baseAmount: parseFloat(formik?.values?.baseAmount || 0).toFixed(2),
                     rateCalcMethod: formik?.values?.rateCalcMethod,
                     dirtyField: DIRTYFIELD_RATE
                   })
@@ -157,10 +170,20 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
                 name='baseAmount'
                 value={formik?.values?.baseAmount}
                 label={labels.baseAmount}
-                readOnly={formik?.values?.amount === 0}
-                onClear={() => formik.setFieldValue('baseAmount', '')}
+                readOnly={formik?.values?.amount == 0}
+                onClear={() => {
+                  formik.setFieldValue('baseAmount', '')
+                  formik.setFieldValue('exRate', '')
+                }}
                 onChange={e => {
                   const inputValue = e.target.value
+                  if (!inputValue) {
+                    formik.setFieldValue('baseAmount', '')
+                    formik.setFieldValue('exRate', '')
+
+                    return
+                  }
+
                   formik.setFieldValue('baseAmount', inputValue)
 
                   const updatedRateRow = getRate({
