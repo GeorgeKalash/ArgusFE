@@ -182,14 +182,19 @@ export const FinancialRepository = {
   },
 
   MetalReceiptVoucher: {
-    qry: service + 'qryMTX',
-    snapshot: service + 'snapshotMTX',
-    set2R: service + 'set2MRV',
-    set2P: service + 'set2MPV',
-    get: service + 'qryMTI',
-    get2: service + 'getMTX',
+    set2: service + 'set2MRV',
+    get: service + 'qryMTI'
+  },
+  MetalPaymentVoucher: {
+    set2: service + 'set2MPV'
+  },
+  MetalTrx: {
+    get: service + 'getMTX',
     del: service + 'delMTX',
     post: service + 'postMTX ',
-    unpost: service + 'unpostMTX'
+    unpost: service + 'unpostMTX',
+    qry: service + 'qryMTX',
+    page: service + 'pageMTX',
+    snapshot: service + 'snapshotMTX'
   }
 }

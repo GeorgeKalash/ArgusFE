@@ -29,7 +29,7 @@ const MetalTrxFinancial = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.MetalReceiptVoucher.qry,
+      extension: FinancialRepository.MetalTrx.page,
       parameters: `_startAt=${_startAt}&_params=${
         params || ''
       }&_pageSize=${_pageSize}&_sortBy=reference&_functionId=${functionId}`
@@ -60,7 +60,7 @@ const MetalTrxFinancial = () => {
     access,
     invalidate
   } = useResourceQuery({
-    endpointId: FinancialRepository.MetalReceiptVoucher.qry,
+    endpointId: FinancialRepository.MetalTrx.page,
     datasetId: ResourceIds.MetalReceiptVoucher,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
@@ -72,7 +72,7 @@ const MetalTrxFinancial = () => {
   async function fetchWithSearch({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FinancialRepository.MetalReceiptVoucher.snapshot,
+        extension: FinancialRepository.MetalTrx.snapshot,
         parameters: `_filter=${filters.qry}&_functionId=${functionId}`
       })
     } else {
@@ -178,7 +178,7 @@ const MetalTrxFinancial = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: FinancialRepository.MetalReceiptVoucher.del,
+        extension: FinancialRepository.MetalTrx.del,
         record: JSON.stringify(obj)
       })
       invalidate()
