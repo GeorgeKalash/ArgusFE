@@ -272,7 +272,7 @@ export default function SaleTransactionForm({
     }
   })
 
-  async function openMCRForm(data) {
+  function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
       props: {

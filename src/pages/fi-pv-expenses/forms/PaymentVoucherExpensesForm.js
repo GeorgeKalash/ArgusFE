@@ -524,7 +524,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     })()
   }, [])
 
-  async function openMCRForm(data) {
+  function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
       props: {

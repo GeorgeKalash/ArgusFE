@@ -128,7 +128,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     return myObject
   }
 
-  async function openMCRForm(data) {
+  function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
       props: {
