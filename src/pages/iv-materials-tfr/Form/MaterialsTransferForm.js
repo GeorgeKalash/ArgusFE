@@ -249,20 +249,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     else return 0
   }
 
-  function calcUnitCost(rec, totalCost) {
-    if (rec.priceType === 1) {
-      rec.unitCost = totalCost / rec.qty
-    } else if (rec.priceType === 2) {
-      rec.unitCost = totalCost / (rec.qty * rec.volume)
-    } else if (rec.priceType === 3) {
-      rec.unitCost = totalCost / (rec.qty * rec.weight)
-    } else {
-      rec.unitCost = 0
-    }
-
-    return rec.unitCost
-  }
-
   async function getDTD(dtId) {
     const res = await getRequest({
       extension: InventoryRepository.DocumentTypeDefaults.get,
@@ -463,34 +449,16 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       label: labels.unitCost,
       name: 'unitCost',
       props: {
-        readOnly: isClosed
+        readOnly: true
       },
-      async onChange({ row: { update, newRow } }) {
-        if (newRow) {
-          const totalCost = calcTotalCost(newRow)
-
-          update({
-            totalCost
-          })
-        }
-      }
     },
     {
       component: 'numberfield',
       label: labels.totalCost,
       name: 'totalCost',
       props: {
-        readOnly: isClosed
+        readOnly: true
       },
-      async onChange({ row: { update, newRow } }) {
-        if (newRow?.totalCost) {
-          const unitCost = calcUnitCost(newRow, newRow.totalCost)
-
-          update({
-            unitCost: unitCost.toFixed(2)
-          })
-        }
-      }
     }
   ]
 
