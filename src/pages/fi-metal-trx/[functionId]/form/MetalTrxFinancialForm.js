@@ -519,6 +519,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
+                required
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || '')
                   changeDT(newValue)
@@ -595,7 +596,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'
                 label={labels.site}
-                defaultIndex={0}
                 values={formik.values}
                 valueField='recordId'
                 displayField='reference'
@@ -634,6 +634,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
             <Grid item xs={4}>
               <CustomDatePicker
                 name='date'
+                required
                 label={labels.date}
                 value={formik.values.date}
                 onChange={formik.setFieldValue}
@@ -650,6 +651,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 displayField='name'
                 valueShow='accountRef'
                 secondValueShow='accountName'
+                required
                 secondDisplayField={false}
                 form={formik}
                 onChange={(event, newValue) => {
