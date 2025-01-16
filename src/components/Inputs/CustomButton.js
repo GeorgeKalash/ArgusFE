@@ -34,7 +34,8 @@ const CustomButton = ({ onClick, label, image, color, border, disabled, tooltipT
           border: border,
           width: 'auto',
           height: '33px',
-          objectFit: 'contain',
+          wordWrap: 'break-word',
+          lineHeight: 1.5,
           ...style
         }}
         disabled={disabled}

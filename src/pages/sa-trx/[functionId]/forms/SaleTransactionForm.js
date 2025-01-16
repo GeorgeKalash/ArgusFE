@@ -54,6 +54,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import NormalDialog from 'src/components/Shared/NormalDialog'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import TaxDetails from 'src/components/Shared/TaxDetails'
 
 export default function SaleTransactionForm({
   labels,
@@ -177,7 +178,8 @@ export default function SaleTransactionForm({
           taxId: null,
           taxDetails: null,
           notes: '',
-          saTrx: true
+          saTrx: true,
+          taxDetailsButton: false
         }
       ],
       serials: [],
@@ -358,7 +360,8 @@ export default function SaleTransactionForm({
       mdValue: 0,
       taxId: rowTax,
       minPrice,
-      taxDetails: rowTaxDetails
+      taxDetails: rowTaxDetails,
+      taxDetailsButton: true
     })
 
     formik.setFieldValue(
@@ -559,9 +562,26 @@ export default function SaleTransactionForm({
       }
     },
     {
-      component: 'numberfield',
+      component: 'button',
+      name: 'taxDetailsButton',
+      defaultValue: true,
+      props: {
+        imgSrc: '/images/buttonsIcons/tax-icon.png'
+      },
       label: labels.tax,
-      name: 'taxDetails'
+      onClick: (e, row) => {
+        if (row?.taxId) {
+          stack({
+            Component: TaxDetails,
+            props: {
+              taxId: row?.taxId,
+              obj: row
+            },
+            width: 1000,
+            title: platformLabels.TaxDetails
+          })
+        }
+      }
     },
     {
       component: 'numberfield',
