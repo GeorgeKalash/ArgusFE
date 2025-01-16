@@ -376,7 +376,6 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                       onChange={async (event, newValue) => {
                         if (!newValue?.recordId) clearForm()
                         const order = await getOutwardOrder(newValue?.owoId)
-                        console.log('check data in ', order?.record?.recordId)
                         await fillOutwardData({
                           outwardId: newValue?.owoId,
                           owRef: order?.record?.reference,

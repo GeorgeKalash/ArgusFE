@@ -722,6 +722,262 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
               </Grid>
             </Grid>
           </FieldSet>
+          <FieldSet title={labels.inwardReceiverDetails}>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                values={formik.values}
+                datasetId={DataSets.Category}
+                name='inw_receiver_category'
+                label={labels.category}
+                valueField='key'
+                displayField='value'
+                required
+                maxAccess={maxAccess}
+                readOnly={true}
+                error={formik.touched.inw_receiver_category && Boolean(formik.errors.inw_receiver_category)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='inw_receiver_firstName'
+                label={labels.firstName}
+                value={formik?.values?.inw_receiver_firstName}
+                maxAccess={maxAccess}
+                readOnly={true}
+                required
+                error={formik.touched.inw_receiver_firstName && Boolean(formik.errors.inw_receiver_firstName)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='inw_receiver_middleName'
+                label={labels.middleName}
+                value={formik?.values?.inw_receiver_middleName}
+                maxAccess={maxAccess}
+                readOnly={true}
+                error={formik.touched.inw_receiver_middleName && Boolean(formik.errors.inw_receiver_middleName)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='inw_receiver_lastName'
+                label={labels.lastName}
+                value={formik?.values?.inw_receiver_lastName}
+                maxAccess={maxAccess}
+                readOnly={true}
+                required
+                error={formik.touched.inw_receiver_lastName && Boolean(formik.errors.inw_receiver_lastName)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='inw_receiver_phone'
+                label={labels.phone}
+                value={formik.values.inw_receiver_phone}
+                readOnly={true}
+                phone={true}
+                error={formik.touched.inw_receiver_phone && Boolean(formik.errors.inw_receiver_phone)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='inw_receiver_fl_firstName'
+                label={labels.fl_firstName}
+                value={formik?.values?.inw_receiver_fl_firstName}
+                maxAccess={maxAccess}
+                readOnly={true}
+                error={formik.touched.inw_receiver_fl_firstName && Boolean(formik.errors.inw_receiver_fl_firstName)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='inw_receiver_fl_middleName'
+                label={labels.fl_middleName}
+                value={formik?.values?.inw_receiver_fl_middleName}
+                maxAccess={maxAccess}
+                readOnly={true}
+                maxLength='20'
+                error={formik.touched.inw_receiver_fl_middleName && Boolean(formik.errors.inw_receiver_fl_middleName)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='inw_receiver_fl_lastName'
+                label={labels.fl_lastName}
+                value={formik?.values?.inw_receiver_fl_lastName}
+                maxAccess={maxAccess}
+                readOnly={true}
+                error={formik.touched.inw_receiver_fl_lastName && Boolean(formik.errors.inw_receiver_fl_lastName)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                values={formik.values}
+                endpointId={SystemRepository.Country.qry}
+                name='inw_receiver_nationalityId'
+                label={labels.nationality}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                error={formik.touched.inw_receiver_nationalityId && Boolean(formik.errors.inw_receiver_nationalityId)}
+                maxAccess={maxAccess}
+                readOnly={true}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                values={formik.values}
+                datasetId={DataSets.RT_Dispersal_Type}
+                name='inw_dispersalMode'
+                label={labels.dispersalMode}
+                valueField='key'
+                displayField='value'
+                readOnly={true}
+                maxAccess={maxAccess}
+                required
+                error={formik.touched.inw_dispersalMode && Boolean(formik.errors.inw_dispersalMode)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                endpointId={formik.values.countryId && CashBankRepository.CbBank.qry2}
+                parameters={`_countryId=${formik.values.countryId}`}
+                name='inw_receiver_bank'
+                label={labels.bank}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                required={formik.values.dispersalMode == 2}
+                values={formik.values}
+                error={formik.touched.inw_receiver_bank && Boolean(formik.errors.inw_receiver_bank)}
+                readOnly={true}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                endpointId={formik.values.inw_receiver_bank && CashBankRepository.BankBranches.qry2}
+                parameters={`_bankId=${formik.values.inw_receiver_bank}`}
+                name='inw_receiver_bankBranch'
+                label={labels.bankBranch}
+                valueField='recordId'
+                displayField='name'
+                maxAccess={maxAccess}
+                values={formik.values}
+                required={formik.values.dispersalMode == 2}
+                error={formik.touched.inw_receiver_bankBranch && Boolean(formik.errors.inw_receiver_bankBranch)}
+                readOnly={true}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField
+                name='inw_receiver_riskCategory'
+                label={labels.riskCategory}
+                value={formik.values.inw_receiver_riskCategory}
+                maxAccess={maxAccess}
+                readOnly={true}
+                error={formik.touched.inw_receiver_riskCategory && Boolean(formik.errors.inw_receiver_riskCategory)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                values={formik.values}
+                endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
+                name='inw_receiver_idtId'
+                label={labels.idtId}
+                valueField='recordId'
+                displayField={['name']}
+                error={formik.touched.inw_receiver_idtId && Boolean(formik.errors.inw_receiver_idtId)}
+                maxAccess={maxAccess}
+                readOnly={true}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomDatePicker
+                name='inw_receiver_idIssueDate'
+                label={labels.idIssueDate}
+                value={formik?.values?.inw_receiver_idIssueDate}
+                editMode={editMode}
+                maxAccess={maxAccess}
+                readOnly={true}
+                error={formik.touched.inw_receiver_idIssueDate && Boolean(formik.errors.inw_receiver_idIssueDate)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomDatePicker
+                name='inw_receiver_idExpiryDate'
+                label={labels.idExpiryDate}
+                value={formik?.values?.inw_receiver_idExpiryDate}
+                editMode={editMode}
+                maxAccess={maxAccess}
+                readOnly={editMode}
+                error={formik.touched.inw_receiver_idExpiryDate && Boolean(formik.errors.inw_receiver_idExpiryDate)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='inw_receiver_idIssuePlace'
+                label={labels.idIssuePlace}
+                value={formik?.values?.inw_receiver_idIssuePlace}
+                maxAccess={maxAccess}
+                readOnly={true}
+                error={formik.touched.inw_receiver_idIssuePlace && Boolean(formik.errors.inw_receiver_idIssuePlace)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='inw_receiver_idNo'
+                label={labels.idNo}
+                value={formik?.values?.inw_receiver_idNo}
+                maxAccess={maxAccess}
+                readOnly={editMode}
+                error={formik.touched.inw_receiver_idNo && Boolean(formik.errors.inw_receiver_idNo)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='inw_receiver_accountNo'
+                label={labels.accountNo}
+                value={formik?.values?.inw_receiver_accountNo}
+                maxAccess={maxAccess}
+                readOnly={true}
+                required={formik.values.inw_dispersalMode == 2}
+                error={formik.touched.inw_receiver_accountNo && Boolean(formik.errors.inw_receiver_accountNo)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='inw_receiver_isResident'
+                    checked={formik.values.inw_receiver_isResident}
+                    maxAccess={maxAccess}
+                    disabled={true}
+                  />
+                }
+                label={labels.isResident}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextArea
+                name='inw_receiver_address1'
+                label={labels.address1}
+                value={formik.values.inw_receiver_address1}
+                maxAccess={maxAccess}
+                readOnly={true}
+                error={formik.touched.inw_receiver_address1 && Boolean(formik.errors.inw_receiver_address1)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextArea
+                name='inw_receiver_address2'
+                label={labels.address2}
+                value={formik.values.inw_receiver_address2}
+                maxAccess={maxAccess}
+                readOnly={true}
+                error={formik.touched.inw_receiver_address2 && Boolean(formik.errors.inw_receiver_address2)}
+              />
+            </Grid>
+          </FieldSet>
           <FieldSet title={labels.receiverDetails}>
             <Grid item xs={4}>
               <ResourceLookup

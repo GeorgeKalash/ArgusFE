@@ -34,7 +34,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot
@@ -93,8 +93,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     receiver_accountNo: '',
     receiver_address1: '',
     receiver_address2: '',
-    receiver_bank: '',
-    receiver_bankBranch: '',
+    receiver_bankId: '',
+    receiver_bankBranchId: '',
     dispersalMode: '',
     sourceOfIncome: '',
     countryId: '',
@@ -116,8 +116,9 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     validate: values => {
       const errors = {}
       if (values.dispersalMode == 2) {
-        if (!values.receiver_bank) errors.receiver_bank = 'Receiver bank is required'
-        if (!values.receiver_bankBranch) errors.receiver_bankBranch = 'Receiver bank branch is required'
+        if (!values.receiver_bankId) errors.receiver_bankId = 'Receiver bank is required'
+        if (!values.receiver_bankBranchId) errors.receiver_bankBranchId = 'Receiver bank branch is required'
+        if (!values.receiver_accountNo) errors.receiver_accountNo = 'Receiver accountNo  is required'
       }
 
       return errors
@@ -163,7 +164,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
   })
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
-  const isPosted = formik.values.status === 3
 
   async function getInwards(recordId) {
     try {
@@ -190,32 +190,20 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
   }
 
   async function getDefaultVAT() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=vatPct`
-      })
-      formik.setFieldValue('vatPct', parseInt(res?.record?.value))
-    } catch (error) {}
+    const defaultVat = defaultsData?.list?.find(({ key }) => key === 'vatPct')
+
+    formik.setFieldValue('vatPct', parseInt(defaultVat.value))
   }
 
   async function getDefaultCurrency() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=baseCurrencyId`
-      })
-      formik.setFieldValue('currencyId', parseInt(res?.record?.value))
-    } catch (error) {}
+    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')
+
+    formik.setFieldValue('currencyId', parseInt(defaultCurrency.value))
   }
   async function getDefaultCountry() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=countryId`
-      })
-      formik.setFieldValue('countryId', parseInt(res?.record?.value))
-    } catch (error) {}
+    const defaultCountry = defaultsData?.list?.find(({ key }) => key === 'countryId')
+
+    formik.setFieldValue('countryId', parseInt(defaultCountry.value))
   }
 
   const actions = [
@@ -776,8 +764,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                 onChange={(event, newValue) => {
                   formik.setFieldValue('dispersalMode', newValue?.key)
                   if (newValue?.key != 2 || !newValue?.key) {
-                    formik.setFieldValue('receiver_bank', null)
-                    formik.setFieldValue('receiver_bankBranch', null)
+                    formik.setFieldValue('receiver_bankId', null)
+                    formik.setFieldValue('receiver_bankBranchId', null)
                   }
                 }}
                 error={formik.touched.dispersalMode && Boolean(formik.errors.dispersalMode)}
@@ -787,7 +775,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
               <ResourceComboBox
                 endpointId={formik.values.countryId && CashBankRepository.CbBank.qry2}
                 parameters={`_countryId=${formik.values.countryId}`}
-                name='receiver_bank'
+                name='receiver_bankId'
                 label={labels.receiver_bank}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -799,20 +787,20 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                 required={formik.values.dispersalMode == 2}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('receiver_bank', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('receiver_bankId', newValue ? newValue.recordId : '')
                   if (!newValue?.record) {
-                    formik.setFieldValue('receiver_bankBranch', null)
+                    formik.setFieldValue('receiver_bankBranchId', null)
                   }
                 }}
-                error={formik.touched.receiver_bank && Boolean(formik.errors.receiver_bank)}
+                error={formik.touched.receiver_bankId && Boolean(formik.errors.receiver_bankId)}
                 readOnly={(editMode || formik.values.countryId) && formik.values.dispersalMode != 2}
               />
             </Grid>
             <Grid item xs={3}>
               <ResourceComboBox
-                endpointId={formik.values.receiver_bank && CashBankRepository.BankBranches.qry2}
-                parameters={`_bankId=${formik.values.receiver_bank}`}
-                name='receiver_bankBranch'
+                endpointId={formik.values.receiver_bankId && CashBankRepository.BankBranches.qry2}
+                parameters={`_bankId=${formik.values.receiver_bankId}`}
+                name='receiver_bankBranchId'
                 label={labels.receiver_bankBranch}
                 valueField='recordId'
                 displayField='name'
@@ -820,9 +808,9 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                 values={formik.values}
                 required={formik.values.dispersalMode == 2}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('receiver_bankBranch', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('receiver_bankBranchId', newValue ? newValue.recordId : '')
                 }}
-                error={formik.touched.receiver_bankBranch && Boolean(formik.errors.receiver_bankBranch)}
+                error={formik.touched.receiver_bankBranchId && Boolean(formik.errors.receiver_bankBranchId)}
                 readOnly={(editMode || formik.values.countryId) && formik.values.dispersalMode != 2}
               />
             </Grid>
@@ -916,6 +904,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                 maxAccess={maxAccess}
                 readOnly={editMode}
                 maxLength='30'
+                required={formik.values.dispersalMode == 2}
                 error={formik.touched.receiver_accountNo && Boolean(formik.errors.receiver_accountNo)}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('receiver_accountNo', '')}
