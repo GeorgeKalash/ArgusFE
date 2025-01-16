@@ -1,12 +1,12 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from 'src/lib/date-helper'
-import { Grid } from '@mui/material'
+import { Button, Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -54,6 +54,9 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import NormalDialog from 'src/components/Shared/NormalDialog'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
+import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 
 export default function SaleTransactionForm({
@@ -88,6 +91,11 @@ export default function SaleTransactionForm({
     endpointId: SaleRepository.SalesTransaction.qry
   })
 
+  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
+    endpointId: MultiCurrencyRepository.Currency.get,
+    datasetId: ResourceIds.MultiCurrencyRate
+  })
+
   const { formik } = useForm({
     maxAccess,
     initialValues: {
@@ -104,6 +112,7 @@ export default function SaleTransactionForm({
         clientName: '',
         clientRef: '',
         currencyId: null,
+        currencyName: '',
         szId: null,
         spId: null,
         siteId: null,
@@ -126,7 +135,7 @@ export default function SaleTransactionForm({
         rateCalcMethod: 1,
         tdType: DIRTYFIELD_TDPCT,
         tdPct: 0,
-        baseAmount: 0,
+        baseAmount: null,
         volume: 0,
         weight: 0,
         qty: 0,
@@ -263,6 +272,26 @@ export default function SaleTransactionForm({
     }
   })
 
+  function openMCRForm(data) {
+    stack({
+      Component: MultiCurrencyRateForm,
+      props: {
+        labels: _labels,
+        maxAccess: MRCMaxAccess,
+        data: data,
+        onOk: childFormikValues => {
+          formik.setFieldValue('header', {
+            ...formik.values.header,
+            ...childFormikValues
+          })
+        }
+      },
+      width: 500,
+      height: 500,
+      title: _labels.MultiCurrencyRate
+    })
+  }
+
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
@@ -368,6 +397,31 @@ export default function SaleTransactionForm({
       'header.mdAmount',
       formik.values.header.currentDiscount ? formik.values.header.currentDiscount : 0
     )
+  }
+
+  async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
+    if (currencyId && date && rateType) {
+      const res = await getRequest({
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
+      })
+
+      const updatedRateRow = getRate({
+        amount: amount === 0 ? 0 : amount ?? formik.values.header.amount,
+        exRate: res.record?.exRate,
+        baseAmount: 0,
+        rateCalcMethod: res.record?.rateCalcMethod,
+        dirtyField: DIRTYFIELD_RATE
+      })
+
+      formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('header.exRate', res.record?.exRate)
+      formik.setFieldValue('header.rateCalcMethod', res.record?.rateCalcMethod)
+      formik.setFieldValue('header.rateCalcMethodName', res.record?.rateCalcMethodName)
+      formik.setFieldValue('header.rateTypeName', res.record?.rateTypeName)
+      formik.setFieldValue('header.exchangeId', res.record?.exchangeId)
+      formik.setFieldValue('header.exchangeName', res.record?.exchangeName)
+    }
   }
 
   const columns = [
@@ -1334,7 +1388,7 @@ export default function SaleTransactionForm({
     formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
     formik.setFieldValue('header.volume', parseFloat(totalVolume).toFixed(2))
     formik.setFieldValue('header.amount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('header.baseAmount', parseFloat(amount).toFixed(2))
+    formik.setFieldValue('header.baseAmount', parseFloat(formik.values.header.baseAmount).toFixed(2))
     formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
@@ -1428,7 +1482,7 @@ export default function SaleTransactionForm({
   }
 
   const setDefaultFields = () => {
-    formik.setFieldValue('header.currencyId', defaultsDataState.currencyId)
+    if (!editMode) formik.setFieldValue('header.currencyId', defaultsDataState.currencyId)
     formik.setFieldValue('header.plantId', userDefaultsDataState.plantId)
     formik.setFieldValue('header.spId', userDefaultsDataState.spId)
     formik.setFieldValue('header.siteId', userDefaultsDataState.siteId)
@@ -1565,7 +1619,14 @@ export default function SaleTransactionForm({
                     label={labels.date}
                     readOnly={isPosted}
                     value={formik?.values?.header?.date}
-                    onChange={formik.setFieldValue}
+                    onChange={async (e, newValue) => {
+                      formik.setFieldValue('header.date', newValue.date)
+                      await getMultiCurrencyFormData(
+                        formik.values.header.currencyId,
+                        formatDateForGetApI(formik.values.header.date),
+                        RateDivision.FINANCIALS
+                      )
+                    }}
                     editMode={editMode}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('header.date', '')}
@@ -1698,25 +1759,45 @@ export default function SaleTransactionForm({
               />
             </Grid>
             <Grid item xs={2}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Currency.qry}
-                name='currencyId'
-                label={labels.currency}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                readOnly={isPosted}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                required
-                values={formik.values.header}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('header.currencyId', newValue?.recordId || null)
-                }}
-                error={formik.touched?.header?.currencyId && Boolean(formik.errors?.header?.currencyId)}
-              />
+              <Grid container spacing={1} alignItems='center'>
+                <Grid item xs={8}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Currency.qry}
+                    name='currencyId'
+                    label={labels.currency}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    readOnly={isPosted}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    required
+                    values={formik.values.header}
+                    maxAccess={maxAccess}
+                    onChange={async (event, newValue) => {
+                      await getMultiCurrencyFormData(
+                        newValue?.recordId,
+                        formatDateForGetApI(formik.values.header?.date),
+                        RateDivision.FINANCIALS
+                      )
+                      formik.setFieldValue('header.currencyId', newValue?.recordId || null)
+                      formik.setFieldValue('header.currencyName', newValue?.name)
+                    }}
+                    error={formik.touched?.header?.currencyId && Boolean(formik.errors?.header?.currencyId)}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <Button
+                    variant='contained'
+                    size='small'
+                    onClick={() => openMCRForm(formik.values.header)}
+                    disabled={formik.values.header.currencyId === defaultsDataState?.currencyId}
+                  >
+                    <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
+                  </Button>
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
