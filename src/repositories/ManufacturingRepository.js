@@ -147,5 +147,12 @@ export const ManufacturingRepository = {
     set: service + 'setRMC',
     del: service + 'delRMC',
     page: service + 'pageRMC'
+  },
+  Worksheet: {
+    snapshot: service + 'snapshotWST',
+    get: service + 'getWST',
+    set: service + 'setWST',
+    del: service + 'delWST',
+    page: service + 'pageWST'
   }
 }

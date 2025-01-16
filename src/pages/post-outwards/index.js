@@ -5,7 +5,6 @@ import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutward
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
 import { Grid } from '@mui/material'
-import * as yup from 'yup'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -161,6 +160,7 @@ const Postoutwards = () => {
     formik.values.fromAmount,
     formik.values.toAmount
   ])
+
   function calcFc() {
     const totalFc =
       formik.values.countryId && formik.values.currencyId
@@ -225,7 +225,6 @@ const Postoutwards = () => {
                     error={formik.touched.countryId && Boolean(formik.errors.countryId)}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <ResourceComboBox
                     endpointId={RemittanceOutwardsRepository.AssignedCurrency.assigned}
@@ -249,7 +248,6 @@ const Postoutwards = () => {
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <ResourceComboBox
                     endpointId={RemittanceOutwardsRepository.AssignedDispersalType.assigned}
@@ -268,7 +266,6 @@ const Postoutwards = () => {
                     }}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <ResourceLookup
                     endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
@@ -288,7 +285,6 @@ const Postoutwards = () => {
                     }}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <CustomNumberField
                     name='fromAmount'
@@ -299,7 +295,6 @@ const Postoutwards = () => {
                     decimalScale={2}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <CustomNumberField
                     name='toAmount'
@@ -310,7 +305,6 @@ const Postoutwards = () => {
                     decimalScale={2}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <CustomDatePicker
                     name='fromDate'
@@ -322,7 +316,6 @@ const Postoutwards = () => {
                     error={false}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <CustomDatePicker
                     name='toDate'
@@ -342,7 +335,6 @@ const Postoutwards = () => {
           <Table
             columns={rowColumns}
             gridData={{ list: data }}
-            setData={setData}
             rowId={['recordId']}
             pageSize={50}
             pagination={true}

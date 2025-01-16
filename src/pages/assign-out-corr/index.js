@@ -317,7 +317,6 @@ const OutwardsCorrespondent = () => {
           <Table
             columns={rowColumns}
             gridData={data}
-            setData={setData}
             rowId={['recordId']}
             isLoading={false}
             refetch={refetch}
