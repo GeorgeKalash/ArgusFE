@@ -140,6 +140,7 @@ const InventoryOpeningQtys = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['year', 'itemId', 'siteId']}
