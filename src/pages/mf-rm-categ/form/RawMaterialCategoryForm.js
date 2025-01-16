@@ -12,6 +12,7 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function RawMaterialCategoryForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -96,18 +97,12 @@ export default function RawMaterialCategoryForm({ labels, maxAccess, recordId })
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isMetal'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isMetal}
-                    onChange={e => {
-                      formik.setFieldValue('isMetal', e.target.checked)
-                    }}
-                  />
-                }
+              <CustomCheckBox
+                name='isMetal'
+                value={formik.values?.isMetal}
+                onChange={event => formik.setFieldValue('isMetal', event.target.checked)}
                 label={labels.isMetal}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

@@ -16,6 +16,7 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function LaborsForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -207,16 +208,12 @@ export default function LaborsForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={6}>
               <Grid item sx={{ pb: '10px' }} xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='canSignIn'
-                      maxAccess={maxAccess}
-                      checked={formik.values?.canSignIn}
-                      onChange={formik.handleChange}
-                    />
-                  }
+                <CustomCheckBox
+                  name='canSignIn'
+                  value={formik.values?.canSignIn}
+                  onChange={event => formik.setFieldValue('canSignIn', event.target.checked)}
                   label={labels.canSignIn}
+                  maxAccess={maxAccess}
                 />
               </Grid>
               <Grid item sx={{ pb: '10px' }} xs={12}>

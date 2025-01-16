@@ -22,6 +22,7 @@ import dayjs from 'dayjs'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomTimePicker from 'src/components/Inputs/CustomTimePicker'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -293,42 +294,30 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
               />
             </Grid>
             <Grid item xs={6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='applyTaxIVC'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.applyTaxIVC}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='applyTaxIVC'
+                value={formik.values?.applyTaxIVC}
+                onChange={event => formik.setFieldValue('applyTaxIVC', event.target.checked)}
                 label={labels.tOi}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='nextDayExtend'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.nextDayExtend}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='nextDayExtend'
+                value={formik.values?.nextDayExtend}
+                onChange={event => formik.setFieldValue('nextDayExtend', event.target.checked)}
                 label={labels.nDe}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='applyTaxPUR'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.applyTaxPUR}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='applyTaxPUR'
+                value={formik.values?.applyTaxPUR}
+                onChange={event => formik.setFieldValue('applyTaxPUR', event.target.checked)}
                 label={labels.tOp}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -343,16 +332,12 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
               />
             </Grid>
             <Grid item xs={6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='applyTaxRET'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.applyTaxRET}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='applyTaxRET'
+                value={formik.values?.applyTaxRET}
+                onChange={event => formik.setFieldValue('applyTaxRET', event.target.checked)}
                 label={labels.tOr}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -374,31 +359,23 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
               />
             </Grid>
             <Grid item xs={6.01}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isInactive'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isInactive}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values?.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                 label={labels.isInactive}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6.01}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='onlineStore'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.onlineStore}
-                    onChange={formik.handleChange}
-                    disabled={!!formik.values.siteId}
-                    readOnly={!!formik.values.siteId}
-                  />
-                }
+              <CustomCheckBox
+                name='onlineStore'
+                value={formik.values?.onlineStore}
+                onChange={event => formik.setFieldValue('onlineStore', event.target.checked)}
                 label={labels.onlineStore}
+                disabled={!!formik.values.siteId}
+                readOnly={!!formik.values.siteId}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
