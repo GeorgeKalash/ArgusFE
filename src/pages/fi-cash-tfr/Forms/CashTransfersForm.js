@@ -41,7 +41,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
 
   const initialValues = {
     recordId: null,
-    currencyId: null,
+    currencyId: parseInt(getDefaultsData()?.currencyId),
     currencyRef: '',
     currencyName: '',
     exRate: 1,
@@ -245,10 +245,6 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
     })
   }
 
-  useEffect(() => {
-    if (!editMode) formik.setFieldValue('currencyId', parseInt(getDefaultsData()?.currencyId))
-  }, [])
-
   const actions = [
     {
       key: 'RecordRemarks',
@@ -433,9 +429,9 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
               valueShow='fromCARef'
               secondValueShow='fromCAName'
               onChange={(event, newValue) => {
-                formik.setFieldValue('fromCashAccountId', newValue ? newValue.recordId : null)
-                formik.setFieldValue('fromCARef', newValue ? newValue.reference : null)
-                formik.setFieldValue('fromCAName', newValue ? newValue.name : null)
+                formik.setFieldValue('fromCashAccountId', newValue?.recordId || null)
+                formik.setFieldValue('fromCARef', newValue?.reference || null)
+                formik.setFieldValue('fromCAName', newValue?.name || null)
               }}
               error={formik.touched.fromCashAccountId && Boolean(formik.errors.fromCashAccountId)}
               maxAccess={maxAccess}
@@ -457,9 +453,9 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
               valueShow='toCARef'
               secondValueShow='toCAName'
               onChange={(event, newValue) => {
-                formik.setFieldValue('toCashAccountId', newValue ? newValue.recordId : null)
-                formik.setFieldValue('toCARef', newValue ? newValue.reference : null)
-                formik.setFieldValue('toCAName', newValue ? newValue.name : null)
+                formik.setFieldValue('toCashAccountId', newValue?.recordId || null)
+                formik.setFieldValue('toCARef', newValue?.reference || null)
+                formik.setFieldValue('toCAName', newValue?.name || null)
               }}
               error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
               maxAccess={maxAccess}
