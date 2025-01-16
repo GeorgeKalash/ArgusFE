@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -88,6 +88,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', response.recordId)
       } else toast.success(platformLabels.Edited)
+      await getData(response.recordId)
       invalidate()
     }
   })
@@ -152,13 +153,13 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   useEffect(() => {
     if (formik.values.recordId) getCashAccount()
     ;(async function () {
-      getData()
+      await getData(formik.values.recordId)
       getUserDefaultsData()
       getDefaultsData()
     })()
   }, [])
 
-  async function getData() {
+  async function getData(recordId) {
     if (recordId) {
       const res = await getRequest({
         extension: FinancialRepository.ReceiptVouchers.get,
@@ -178,7 +179,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     })
 
     if (res?.recordId) {
-      getData()
+      await getData(res?.recordId)
       toast.success(platformLabels.Cancelled)
       invalidate()
     }
@@ -193,7 +194,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     if (res) {
       toast.success(platformLabels.Unposted)
       invalidate()
-      getData()
+      await getData(formik.values.recordId)
     }
   }
 
@@ -206,7 +207,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     if (res) {
       toast.success(platformLabels.Posted)
       invalidate()
-      getData()
+      await getData(formik.values.recordId)
     }
   }
 

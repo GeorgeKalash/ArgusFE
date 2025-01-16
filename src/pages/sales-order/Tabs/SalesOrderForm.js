@@ -44,6 +44,7 @@ import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import TaxDetails from 'src/components/Shared/TaxDetails'
 
 export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -138,6 +139,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         applyVat: false,
         taxId: '',
         taxDetails: null,
+        taxDetailsButton: false,
         notes: ''
       }
     ]
@@ -302,7 +304,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           mdType: 1,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
-          saTrx: true
+          saTrx: true,
+          taxDetailsButton: true
         })
 
         formik.setFieldValue('mdAmount', formik.values.currentDiscount ? formik.values.currentDiscount : 0)
@@ -422,9 +425,26 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       }
     },
     {
-      component: 'numberfield',
+      component: 'button',
+      name: 'taxDetailsButton',
+      defaultValue: true,
+      props: {
+        imgSrc: '/images/buttonsIcons/tax-icon.png'
+      },
       label: labels.tax,
-      name: 'tax'
+      onClick: (e, row) => {
+        if (row?.taxId) {
+          stack({
+            Component: TaxDetails,
+            props: {
+              taxId: row?.taxId,
+              obj: row
+            },
+            width: 1000,
+            title: platformLabels.TaxDetails
+          })
+        }
+      }
     },
     {
       component: 'numberfield',
@@ -690,7 +710,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     if (!addressId) return null
 
     const res = await getRequest({
-      extension: SystemRepository.FormattedAddress.get,
+      extension: SystemRepository.Address.format,
       parameters: `_addressId=${addressId}`
     })
 
@@ -1395,7 +1415,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
                 name='szId'
                 label={labels.saleZone}
-                columnsInDropDown={[{ key: 'name', value: 'Name' }]}
                 valueField='recordId'
                 displayField='name'
                 readOnly={isClosed}

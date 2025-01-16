@@ -287,7 +287,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     displayField='value'
                     displayFieldWidth={1}
                     required
-                    maxAccess={!editMode && maxAccess}
+                    maxAccess={maxAccess}
                     onChange={(e, newValue) => {
                       formik.setFieldValue('priceType', newValue?.key || null)
                     }}
@@ -299,7 +299,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     name='sku'
                     label={labels.reference}
                     value={formik.values.sku}
-                    maxAccess={maxAccess}
+                    maxAccess={access}
                     readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('sku', '')}

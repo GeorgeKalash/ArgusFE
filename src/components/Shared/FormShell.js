@@ -192,7 +192,7 @@ export default function FormShell({
                     recordId: form.values?.recordId,
                     functionId: functionId,
                     itemId: 0,
-                    clientId: form?.values?.header?.clientId
+                    clientId: form?.values?.header?.clientId || 0
                   },
                   width: 1200,
                   title: platformLabels.SalesTransactions
@@ -410,7 +410,7 @@ export default function FormShell({
           flexDirection: 'column',
           overflow: 'auto',
           '.MuiBox-root': {
-            paddingTop: isParentWindow ? '5px !important' : '0px !important',
+            paddingTop: isParentWindow ? '7px !important' : '0px !important',
             px: '0px !important',
             pb: '0px !important'
           }

@@ -38,7 +38,7 @@ export const ResourceLookup = ({
           if (filter) {
             res.list = res.list.filter(item => {
               return Object.keys(filter).every(key => {
-                return parseInt(item[key]) == parseInt(filter[key])
+                return parseInt(item[key]) == parseInt(filter[key]) || item[key] == filter[key]
               })
             })
           }
@@ -79,7 +79,7 @@ export const ResourceLookup = ({
     if (fieldPath.length > 1) {
       const [parent, child] = fieldPath
 
-      return form.touched?.[parent]?.[child] && Boolean(form.errors?.[parent]?.[child])
+      return (form.touched?.[parent]?.[child] || true) && Boolean(form.errors?.[parent]?.[child])
     }
 
     return form.touched?.[errorCheck] && Boolean(form.errors?.[errorCheck])

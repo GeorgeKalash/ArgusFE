@@ -20,11 +20,11 @@ import { useForm } from 'src/hooks/form'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import { HIDDEN } from 'src/services/api/maxAccess'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
+import { Fixed } from './Layouts/Fixed'
 
 const BenificiaryCashForm = ({
   viewBtns = true,
@@ -224,7 +224,7 @@ const BenificiaryCashForm = ({
           cobId: RTBEN?.record?.cobId,
           cellPhone: RTBEN?.record?.cellPhone,
           birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
-          currencyId: RTBEN?.record.currencyId,
+          currencyId: RTBEN?.record?.currencyId,
           addressLine1: RTBEN?.record?.addressLine1,
           addressLine2: RTBEN?.record?.addressLine2,
           clientRef: RTBEN?.record?.clientRef,
@@ -396,7 +396,7 @@ const BenificiaryCashForm = ({
       isSaved={viewBtns}
     >
       <VertLayout>
-        <Grow>
+        <Fixed>
           <Grid container spacing={2}>
             <FormGrid item hideonempty xs={6}>
               <ResourceLookup
@@ -813,7 +813,7 @@ const BenificiaryCashForm = ({
               />
             </FormGrid>
           </Grid>
-        </Grow>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )
