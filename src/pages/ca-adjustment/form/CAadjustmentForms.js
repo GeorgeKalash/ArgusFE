@@ -1,10 +1,10 @@
-import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { Button, Grid } from '@mui/material'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -14,7 +14,7 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateForGetApI, formatDateFromApi } from 'src/lib/date-helper'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -22,6 +22,10 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useWindow } from 'src/windows'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
+import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
+import { RateDivision } from 'src/resources/RateDivision'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -29,7 +33,8 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     access: access,
     enabled: !recordId
   })
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const [defaultsDataState, setDefaultsDataState] = useState(null)
 
   const { stack } = useWindow()
 
@@ -48,6 +53,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       plantId: '',
       date: new Date(),
       currencyId: '',
+      currencyName: '',
       status: 1,
       cashAccountId: '',
       amount: '',
@@ -70,10 +76,8 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     onSubmit: async obj => {
       const recordId = obj.recordId
       if (!recordId) {
-        obj.baseAmount = obj.amount
         obj.status = 1
         obj.rateCalcMethod = 1
-        obj.exRate = 1
       }
 
       const response = await postRequest({
@@ -85,7 +89,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
         toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
-          baseAmount: obj.amount,
+          baseAmount: !formik.values.baseAmount ? obj.amount : formik.values.baseAmount,
 
           recordId: response.recordId
         })
@@ -106,6 +110,65 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   })
   const editMode = !!formik.values.recordId || !!recordId
 
+  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
+    endpointId: MultiCurrencyRepository.Currency.get,
+    datasetId: ResourceIds.MultiCurrencyRate
+  })
+
+  async function getDefaultsData() {
+    const myObject = {}
+
+    const filteredList = defaultsData?.list?.filter(obj => {
+      return obj.key === 'currencyId'
+    })
+
+    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+    setDefaultsDataState(myObject)
+
+    return myObject
+  }
+
+  function openMCRForm(data) {
+    stack({
+      Component: MultiCurrencyRateForm,
+      props: {
+        labels: _labels,
+        maxAccess: MRCMaxAccess,
+        data,
+        onOk: childFormikValues => {
+          formik.setValues(prevValues => ({
+            ...prevValues,
+            ...childFormikValues
+          }))
+        }
+      },
+      width: 500,
+      height: 500,
+      title: _labels.MultiCurrencyRate
+    })
+  }
+
+  async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
+    if (currencyId && date && rateType) {
+      const res = await getRequest({
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
+      })
+
+      const updatedRateRow = getRate({
+        amount: amount === 0 ? 0 : amount ?? formik.values.amount,
+        exRate: res.record?.exRate,
+        baseAmount: 0,
+        rateCalcMethod: res.record?.rateCalcMethod,
+        dirtyField: DIRTYFIELD_RATE
+      })
+
+      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('exRate', res.record?.exRate)
+      formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
+    }
+  }
+
   useEffect(() => {
     ;(async function () {
       try {
@@ -117,10 +180,10 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
 
           formik.setValues({
             ...res.record,
-
             date: formatDateFromApi(res.record.date)
           })
         }
+        await getDefaultsData()
       } catch (exception) {}
     })()
   }, [])
@@ -192,6 +255,10 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       disabled: !editMode
     }
   ]
+
+  useEffect(() => {
+    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
+  }, [defaultsDataState])
 
   return (
     <FormShell
@@ -269,7 +336,14 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 label={labels.date}
                 readOnly={formik.values.status == '3'}
                 value={formik.values.date}
-                onChange={formik.setFieldValue}
+                onChange={async (e, newValue) => {
+                  formik.setFieldValue('date', newValue.date)
+                  await getMultiCurrencyFormData(
+                    formik.values.currencyId,
+                    formatDateForGetApI(formik.values.date),
+                    RateDivision.FINANCIALS
+                  )
+                }}
                 required
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
@@ -277,25 +351,45 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Currency.qry}
-                name='currencyId'
-                label={labels.currency}
-                readOnly={formik.values.status == '3'}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId || null)
-                }}
-                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-              />
+              <Grid container spacing={1} alignItems='center'>
+                <Grid item xs={8}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Currency.qry}
+                    name='currencyId'
+                    label={labels.currency}
+                    readOnly={formik.values.status == '3'}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={async (event, newValue) => {
+                      await getMultiCurrencyFormData(
+                        newValue?.recordId,
+                        formatDateForGetApI(formik.values.date),
+                        RateDivision.FINANCIALS
+                      )
+                      formik.setFieldValue('currencyId', newValue?.recordId || null)
+                      formik.setFieldValue('currencyName', newValue?.name)
+                    }}
+                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <Button
+                    variant='contained'
+                    size='small'
+                    onClick={() => openMCRForm(formik.values)}
+                    disabled={formik.values.currencyId === defaultsDataState?.currencyId}
+                  >
+                    <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
+                  </Button>
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
@@ -336,8 +430,22 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 readOnly={formik.values.status == '3'}
                 required
                 maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('amount', e.target.value)}
-                onClear={() => formik.setFieldValue('amount', '')}
+                thousandSeparator={false}
+                onChange={async e => {
+                  formik.setFieldValue('amount', e.target.value)
+
+                  const updatedRateRow = getRate({
+                    amount: formik.values.amount ?? 0,
+                    exRate: formik.values?.exRate,
+                    baseAmount: 0,
+                    rateCalcMethod: formik.values?.rateCalcMethod,
+                    dirtyField: DIRTYFIELD_RATE
+                  })
+                  formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                }}
+                onClear={async () => {
+                  formik.setFieldValue('amount', 0)
+                }}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
                 maxLength={10}
               />

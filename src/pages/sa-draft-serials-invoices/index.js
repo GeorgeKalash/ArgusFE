@@ -9,18 +9,16 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import DraftForm from './forms/DraftForm'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import SalesOrderForm from './Tabs/SalesOrderForm'
-import { useError } from 'src/error'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
-const SalesOrder = () => {
+const DraftSerialsInvoices = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const { stack: stackError } = useError()
 
   const {
     query: { data },
@@ -33,8 +31,8 @@ const SalesOrder = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesOrder.page,
-    datasetId: ResourceIds.SalesOrder,
+    endpointId: SaleRepository.DraftInvoice.page,
+    datasetId: ResourceIds.DraftSerialsInvoices,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -47,15 +45,15 @@ const SalesOrder = () => {
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
-      flex: 1
-    },
-    {
       field: 'date',
       headerName: labels.date,
       flex: 1,
       type: 'date'
+    },
+    {
+      field: 'clientRef',
+      headerName: labels.clientRef,
+      flex: 1
     },
     {
       field: 'clientName',
@@ -63,35 +61,26 @@ const SalesOrder = () => {
       flex: 1
     },
     {
-      field: 'spRef',
-      headerName: labels.salesPerson,
-      flex: 1
-    },
-    {
-      field: 'szName',
-      headerName: labels.saleZone,
-      flex: 1
-    },
-    {
-      field: 'volume',
-      headerName: labels.volume,
-      flex: 1,
-      type: 'number'
-    },
-    {
       field: 'amount',
-      headerName: labels.net,
+      headerName: labels.amount,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'dsName',
-      headerName: labels.deliveryStatus,
-      flex: 1
+      field: 'pcs',
+      headerName: labels.pcs,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'rsName',
-      headerName: labels.releaseStatus,
+      field: 'weight',
+      headerName: labels.totalWeight,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'description',
+      headerName: labels.description,
       flex: 1
     },
     {
@@ -100,13 +89,8 @@ const SalesOrder = () => {
       flex: 1
     },
     {
-      field: 'printStatusName',
-      headerName: labels.printStatus,
-      flex: 1
-    },
-    {
-      field: 'description',
-      headerName: labels.description,
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     }
   ]
@@ -115,8 +99,8 @@ const SalesOrder = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: SaleRepository.SalesOrder.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+      extension: SaleRepository.DraftInvoice.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -125,58 +109,43 @@ const SalesOrder = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
       return await getRequest({
-        extension: SaleRepository.SalesOrder.snapshot,
-        parameters: `_filter=${filters.qry}`
+        extension: SaleRepository.DraftInvoice.snapshot,
+        parameters: `_filter=${filters.qry}&_status=0`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
-  async function getDefaultSalesCurrency() {
-    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
-
-    return parseInt(defaultCurrency?.value)
-  }
-
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.SalesOrder,
-    action: async () => {
-      const currency = await getDefaultSalesCurrency()
-      currency
-        ? openForm()
-        : stackError({
-            message: labels.noSelectedCurrency
-          })
-    },
+    functionId: SystemFunction.DraftSerialsIn,
+    action: openForm,
     hasDT: false
   })
 
   const add = async () => {
-    proxyAction()
+    await proxyAction()
   }
 
-  const editSO = obj => {
-    openForm(obj?.recordId)
+  const editDSI = obj => {
+    openForm(obj.recordId)
   }
 
   async function openForm(recordId) {
-    const currency = await getDefaultSalesCurrency()
     stack({
-      Component: SalesOrderForm,
+      Component: DraftForm,
       props: {
         labels,
         access,
-        currency,
         recordId
       },
       width: 1300,
-      height: 730,
-      title: labels.salesOrder
+      height: 750,
+      title: labels.draftSerInv
     })
   }
 
-  const delSO = async obj => {
+  const delDSI = async obj => {
     await postRequest({
-      extension: SaleRepository.SalesOrder.del,
+      extension: SaleRepository.DraftInvoice.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -211,18 +180,17 @@ const SalesOrder = () => {
           onApply={onApply}
           onSearch={onSearch}
           onClear={onClear}
-          reportName={'SAORD'}
+          reportName={'SADFT'}
         />
       </Fixed>
       <Grow>
         <Table
-          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={editSO}
+          onEdit={editDSI}
           refetch={refetch}
-          onDelete={delSO}
+          onDelete={delDSI}
           deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
@@ -235,4 +203,4 @@ const SalesOrder = () => {
   )
 }
 
-export default SalesOrder
+export default DraftSerialsInvoices
