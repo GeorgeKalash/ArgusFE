@@ -186,8 +186,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         record: JSON.stringify(resultObject)
       })
 
-      console.log(resultObject)
-
       if (!values.recordId) {
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', res.recordId)
@@ -462,8 +460,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     }
   ]
 
-  console.log(formik)
-
   async function getData(recordId) {
     const res = await getRequest({
       extension: InventoryRepository.MaterialsTransfer.get,
@@ -677,8 +673,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         const res = await getData(recordId)
         const resNotification = await getNotificationData(recordId)
         const res3 = await getDataGrid(recordId)
-
-        console.log(res3)
 
         const updatedTransfers = res3.list.map(item => {
           const filteredMeasurements = measurements.filter(x => x.msId === item?.msId)
