@@ -1,5 +1,5 @@
 import { Button, Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -30,7 +30,6 @@ import { useWindow } from 'src/windows'
 export default function CashTransfersForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
-  const [defaultsDataState, setDefaultsDataState] = useState(null)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
 
@@ -130,7 +129,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
     datasetId: ResourceIds.MultiCurrencyRate
   })
 
-  async function getDefaultsData() {
+  function getDefaultsData() {
     const myObject = {}
 
     const filteredList = defaultsData?.list?.filter(obj => {
@@ -138,7 +137,6 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
     })
 
     filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setDefaultsDataState(myObject)
 
     return myObject
   }
@@ -234,7 +232,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
       if (recordId) {
         refetchForm(recordId)
       }
-      await getDefaultsData()
+      getDefaultsData()
     })()
   }, [])
 
@@ -248,8 +246,8 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
   }
 
   useEffect(() => {
-    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
-  }, [defaultsDataState])
+    if (!editMode) formik.setFieldValue('currencyId', parseInt(getDefaultsData()?.currencyId))
+  }, [])
 
   const actions = [
     {
@@ -412,7 +410,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
                   variant='contained'
                   size='small'
                   onClick={() => openMCRForm(formik.values)}
-                  disabled={formik.values.currencyId === defaultsDataState?.currencyId}
+                  disabled={formik.values.currencyId === getDefaultsData()?.currencyId}
                 >
                   <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                 </Button>
