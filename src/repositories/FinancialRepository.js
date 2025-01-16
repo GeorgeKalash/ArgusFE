@@ -187,6 +187,9 @@ export const FinancialRepository = {
     set2R: service + 'set2MRV',
     set2P: service + 'set2MPV',
     get: service + 'qryMTI',
-    get2: service + 'getMTX'
+    get2: service + 'getMTX',
+    del: service + 'delMTX',
+    post: service + 'postMTX ',
+    unpost: service + 'unpostMTX'
   }
 }
