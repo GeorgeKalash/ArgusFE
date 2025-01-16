@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -53,7 +53,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
-  const [filteredMu, setFilteredMU] = useState([])
+  const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
@@ -64,8 +64,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     enabled: !recordId
   })
 
-  const [initialValues, setInitialData] = useState({
-    recordId: recordId || null,
+  const initialValues = {
+    recordId: recordId,
     dtId: documentType?.dtId,
     reference: '',
     date: new Date(),
@@ -143,7 +143,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         notes: ''
       }
     ]
-  })
+  }
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.SalesOrder.page
@@ -152,7 +152,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
@@ -219,6 +219,17 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
 
+  async function getFilteredMU(itemId) {
+    if (!itemId) return
+
+    const currentItemId = formik.values.items?.find(
+      item => parseInt(item.itemId) === itemId
+    )?.msId
+
+    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    filteredMeasurements.current = arrayMU
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -282,7 +293,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         }
 
         const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-        setFilteredMU(filteredMeasurements)
+        getFilteredMU(newRow?.itemId)
 
         update({
           volume: parseFloat(itemPhysProp?.volume) || 0,
@@ -345,7 +356,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       label: labels.measurementUnit,
       name: 'muRef',
       props: {
-        store: filteredMu,
+        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -355,10 +366,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
         update({
           baseQty: newRow?.qty * filteredItems?.qty
         })
+      },
+      propsReducer({ row, props }) {
+        return { ...props, store: filteredMeasurements?.current }
       }
     },
     {
@@ -500,26 +514,30 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   ]
 
   async function handleIconClick(id, updateRow) {
-    let currentMdType
-    let currenctMdAmount = parseFloat(formik.values.items[id - 1].mdAmount)
-    const maxClientAmountDiscount = formik.values.items[id - 1].unitPrice * (formik.values?.maxDiscount / 100)
+    const index = formik.values.items.findIndex(item => item.id === id)
 
-    if (formik.values.items[id - 1].mdType == 2) {
+    if (index === -1) return
+
+    let currentMdType
+    let currenctMdAmount = parseFloat(formik.values.items[index].mdAmount)
+    const maxClientAmountDiscount = formik.values.items[index].unitPrice * (formik.values?.maxDiscount / 100)
+
+    if (formik.values.items[index].mdType == 2) {
       if (currenctMdAmount < 0 || currenctMdAmount > 100) currenctMdAmount = 0
-      formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 1)
-      formik.setFieldValue(`items[${id - 1}].mdType`, 1)
+      formik.setFieldValue(`items[${index}].mdAmountPct`, 1)
+      formik.setFieldValue(`items[${index}].mdType`, 1)
       currentMdType = 1
-      formik.setFieldValue(`items[${id - 1}].mdAmount`, parseFloat(currenctMdAmount).toFixed(2))
+      formik.setFieldValue(`items[${index}].mdAmount`, parseFloat(currenctMdAmount).toFixed(2))
     } else {
       if (currenctMdAmount < 0 || currenctMdAmount > maxClientAmountDiscount) currenctMdAmount = 0
-      formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 2)
-      formik.setFieldValue(`items[${id - 1}].mdType`, 2)
+      formik.setFieldValue(`items[${index}].mdAmountPct`, 2)
+      formik.setFieldValue(`items[${index}].mdType`, 2)
       currentMdType = 2
-      formik.setFieldValue(`items[${id - 1}].mdAmount`, parseFloat(currenctMdAmount).toFixed(2))
+      formik.setFieldValue(`items[${index}].mdAmount`, parseFloat(currenctMdAmount).toFixed(2))
     }
 
     const newRow = {
-      ...formik.values.items[id - 1],
+      ...formik.values.items[index],
       mdAmount: currenctMdAmount,
       mdType: currentMdType
     }
@@ -707,7 +725,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }
 
   async function getAddress(addressId) {
-    if (!addressId) return null
+    if (!addressId) return
 
     const res = await getRequest({
       extension: SystemRepository.Address.format,
@@ -779,7 +797,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         message: labels.noCurrency
       })
 
-      return -1
+      return
     }
 
     const res = await getRequest({
@@ -789,6 +807,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
     return res?.record
   }
+
+
 
   const handleButtonClick = () => {
     setReCal(true)
@@ -1038,7 +1058,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }
 
   async function getSiteRef(siteId) {
-    if (!siteId) return null
+    if (!siteId) return
 
     const res = await getRequest({
       extension: InventoryRepository.Site.get,
@@ -1293,7 +1313,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     name='billAddress'
                     label={labels.billTo}
                     value={formik.values.billAddress}
-                    rows={3.5}
+                    rows={2.5}
                     maxLength='100'
                     readOnly={isClosed}
                     maxAccess={maxAccess}
@@ -1308,7 +1328,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     name='shipAddress'
                     label={labels.shipTo}
                     value={formik.values.shipAddress}
-                    rows={3.5}
+                    rows={2.5}
                     maxLength='100'
                     readOnly
                     disabled={formik.values.exWorks}
@@ -1449,6 +1469,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
               action === 'delete' && setReCal(true)
+            }}
+            onSelectionChange={(row, update, field) => {
+              if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
             value={formik.values.items}
             error={formik.errors.items}
