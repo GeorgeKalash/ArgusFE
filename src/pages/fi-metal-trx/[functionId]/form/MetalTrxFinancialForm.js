@@ -82,7 +82,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       collectorId: null,
       contactId: null,
       creditAmount: null,
-      date: '',
+      date: new Date(),
       description: '',
       dtId: documentType?.dtId,
       dtName: '',
@@ -126,6 +126,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
+      date: yup.string().required(),
+      plantId: yup.string().required(),
+      siteId: yup.string().required(),
+      accountId: yup.string().required(),
       items: yup
         .array()
         .of(
@@ -634,7 +638,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 value={formik.values.date}
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('date', '')}
-                error={false}
+                error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
             <Grid item xs={2}>
