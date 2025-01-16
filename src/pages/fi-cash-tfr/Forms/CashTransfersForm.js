@@ -27,7 +27,7 @@ import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { useWindow } from 'src/windows'
 
-export default function CashTransfersForm({ labels, maxAccess: access, recordId, plantId }) {
+export default function CashTransfersForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack: stackError } = useError()
@@ -63,7 +63,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId,
     date: new Date(),
     status: 1,
     releaseStatus: 1,
-    plantId: parseInt(plantId),
+    plantId: null,
     printStatus: null
   }
 

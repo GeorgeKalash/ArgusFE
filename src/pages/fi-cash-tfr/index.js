@@ -121,37 +121,18 @@ const FiCashTransfers = () => {
     openForm(obj?.recordId)
   }
 
-  async function getPlantId() {
-    const myObject = {};
-    
-    const foundItem = userDefaultsData?.list?.find(obj => obj.key === 'plantId');
-    
-    if (foundItem) {
-      myObject[foundItem.key] = foundItem.value ? parseInt(foundItem.value) : null;
-    }
-  
-    return myObject.plantId;
-  }
-
-  function openWindow(plantId, recordId) {
+  function openForm(recordId) {
     stack({
       Component: CashTransfersForm,
       props: {
         labels: _labels,
         recordId,
-        plantId,
         maxAccess: access
       },
       width: 1000,
       height: 680,
       title: _labels.Transfers
     })
-  }
-
-  async function openForm(recordId) {
-    const plantId = await getPlantId()
-
-    openWindow(plantId, recordId)
   }
 
   const del = async obj => {
