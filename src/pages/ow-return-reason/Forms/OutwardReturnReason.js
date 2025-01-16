@@ -144,7 +144,6 @@ export default function OutwardReturnReasonForm({ labels, maxAccess, recordId })
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.feesStatus && Boolean(formik.errors.feesStatus)}
-                readOnly={editMode}
               />
             </Grid>
             <Grid item xs={12}>
@@ -161,7 +160,6 @@ export default function OutwardReturnReasonForm({ labels, maxAccess, recordId })
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.rateStatus && Boolean(formik.errors.rateStatus)}
-                readOnly={editMode}
               />
             </Grid>
           </Grid>
