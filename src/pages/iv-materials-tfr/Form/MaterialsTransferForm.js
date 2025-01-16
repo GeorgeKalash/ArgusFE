@@ -161,7 +161,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         return {
           ...transferDetail,
           seqNo: index + 1,
-          transferId: formik.values.recordId || 0
+          transferId: formik.values.recordId || 0,
+          unitCost: parseFloat(transferDetail.unitCost),
+          totalCost: parseFloat(transferDetail.totalCost)
         }
       })
       if (values.fromSiteId === values.toSiteId) {
@@ -183,6 +185,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         extension: InventoryRepository.MaterialsTransfer.set2,
         record: JSON.stringify(resultObject)
       })
+
+      console.log(resultObject)
 
       if (!values.recordId) {
         toast.success(platformLabels.Added)
@@ -490,6 +494,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     }
   ]
 
+  console.log(formik)
+
   async function getData(recordId) {
     const res = await getRequest({
       extension: InventoryRepository.MaterialsTransfer.get,
@@ -703,6 +709,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         const res = await getData(recordId)
         const resNotification = await getNotificationData(recordId)
         const res3 = await getDataGrid(recordId)
+
+        console.log(res3)
 
         const updatedTransfers = res3.list.map(item => {
           const filteredMeasurements = measurements.filter(x => x.msId === item?.msId)
