@@ -113,7 +113,6 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
           width: customWidth || 140,
           height: customHeight || 140,
           objectFit: 'contain',
-          marginRight: 16,
           border: error && '2px solid #F44336'
         }}
         onClick={handleClick}
