@@ -46,7 +46,7 @@ const FiCashTransfers = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     filterBy,
     clearFilter,
     paginationParameters,
@@ -74,44 +74,44 @@ const FiCashTransfers = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'fromCAName',
-      headerName: _labels.from,
+      headerName: labels.from,
       flex: 1
     },
 
     {
       field: 'toCAName',
-      headerName: _labels.to,
+      headerName: labels.to,
       flex: 1
     },
     {
       field: 'amount',
-      headerName: _labels.amount,
+      headerName: labels.amount,
       flex: 1,
       type: 'number'
     },
     {
       field: 'dtName',
-      headerName: _labels.docType,
+      headerName: labels.docType,
       flex: 1
     },
     {
       field: 'notes',
-      headerName: _labels.notes,
+      headerName: labels.notes,
       flex: 1
     },
     {
       field: 'statusName',
-      headerName: _labels.status,
+      headerName: labels.status,
       flex: 1
     },
     {
       field: 'date',
-      headerName: _labels.date,
+      headerName: labels.date,
       flex: 1,
       type: 'date'
     }
@@ -125,13 +125,13 @@ const FiCashTransfers = () => {
     stack({
       Component: CashTransfersForm,
       props: {
-        labels: _labels,
+        labels,
         recordId,
         maxAccess: access
       },
       width: 1000,
       height: 680,
-      title: _labels.Transfers
+      title: labels.Transfers
     })
   }
 
@@ -169,7 +169,7 @@ const FiCashTransfers = () => {
         <RPBGridToolbar
           onSearch={onSearch}
           onClear={onClear}
-          labels={_labels}
+          labels={labels}
           onAdd={add}
           maxAccess={access}
           onApply={onApply}
