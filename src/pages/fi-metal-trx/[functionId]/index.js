@@ -53,7 +53,7 @@ const MetalTrxFinancial = () => {
   const {
     query: { data },
     refetch,
-    labels: _labels,
+    labels,
     filterBy,
     clearFilter,
     paginationParameters,
@@ -83,55 +83,55 @@ const MetalTrxFinancial = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'dtName',
-      headerName: _labels.docType,
+      headerName: labels.docType,
       flex: 1
     },
     {
       field: 'date',
-      headerName: _labels.date,
+      headerName: labels.date,
       flex: 1,
       type: 'date'
     },
 
     {
       field: 'plantName',
-      headerName: _labels.plant,
+      headerName: labels.plant,
       flex: 1
     },
     {
       field: 'siteRef',
-      headerName: _labels.siteRef,
+      headerName: labels.siteRef,
       flex: 1
     },
     {
       field: 'accountRef',
-      headerName: _labels.accountRef,
+      headerName: labels.accountRef,
       flex: 1
     },
     {
       field: 'accountName',
-      headerName: _labels.accountRef,
+      headerName: labels.accountRef,
       flex: 1
     },
     {
       field: 'qty',
-      headerName: _labels.qty,
+      headerName: labels.qty,
       flex: 1
     },
     {
       field: 'creditAmount',
-      headerName: _labels.creditAmount,
+      headerName: labels.creditAmount,
       flex: 1
     },
 
     {
       field: 'statusName',
-      headerName: _labels.status,
+      headerName: labels.status,
       flex: 1
     }
   ]
@@ -142,9 +142,9 @@ const MetalTrxFinancial = () => {
 
   const getcorrectLabel = functionId => {
     if (functionId === SystemFunction.MetalReceiptVoucher) {
-      return _labels.metalReceipt
+      return labels.metalReceipt
     } else if (functionId === SystemFunction.MetalPaymentVoucher) {
-      return _labels.metalPayment
+      return labels.metalPayment
     } else {
       return null
     }
@@ -154,11 +154,11 @@ const MetalTrxFinancial = () => {
     stack({
       Component: MetalTrxFinancialForm,
       props: {
-        labels: _labels,
+        labels,
         recordId: recordId,
         date,
         access,
-        functionId: functionId
+        functionId
       },
       width: 900,
       height: 670,

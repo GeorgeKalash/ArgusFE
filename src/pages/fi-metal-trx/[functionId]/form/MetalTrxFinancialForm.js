@@ -25,6 +25,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { getStorageData } from 'src/storage/storage'
 
 export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, window }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -32,6 +33,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     access: access,
     enabled: !recordId
   })
+  const userData = getStorageData('userData')
+
+  const _userId = userData.userId
 
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const [baseMetalId, setBaseMetalId] = useState(null)
@@ -90,6 +94,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       reference: '',
       releaseStatus: null,
       siteId: null,
+      statusName: '',
+      plantName: '',
+      siteRef: '',
+      siteName: '',
 
       status: 1,
       items: [
@@ -172,15 +180,33 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           ...obj,
           recordId: response.recordId
         })
-        getData(response.recordId, functionId)
       } else {
         toast.success(platformLabels.Edited)
       }
-
+      getData(response.recordId, functionId)
       invalidate()
     }
   })
 
+  const onPost = async () => {
+    const { items, ...restValues } = formik.values
+
+    const header = JSON.stringify({
+      ...restValues,
+      qty: totalQty || null,
+      creditAmount: totalLabor || null,
+      recordId: formik.values.recordId
+    })
+
+    const res = await postRequest({
+      extension: FinancialRepository.MetalTrx.post,
+      record: header
+    })
+
+    toast.success(platformLabels.Posted)
+    window.close()
+    invalidate()
+  }
   const editMode = !!formik.values?.recordId || !!recordId
 
   useEffect(() => {
@@ -207,6 +233,33 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         }
 
         formik.setValues({ ...res2, items: modifiedList || formik.values.items })
+      } else if (!recordId) {
+        const res3 = await getRequest({
+          extension: SystemRepository.UserDefaults.get,
+          parameters: `_userId=${_userId}&_key=plantId`
+        })
+
+        if (res3.record.value) {
+          const pltValue = await getRequest({
+            extension: SystemRepository.Plant.get,
+            parameters: `_recordId=${parseInt(res3.record.value)}`
+          })
+          formik.setFieldValue('plantId', parseInt(res3.record?.value))
+          formik.setFieldValue('plantName', pltValue.record?.name)
+        }
+
+        const res4 = await getRequest({
+          extension: SystemRepository.UserDefaults.get,
+          parameters: `_userId=${_userId}&_key=siteId`
+        })
+        if (res4.record.value) {
+          const siteValue = await getRequest({
+            extension: InventoryRepository.Site.get,
+            parameters: `_recordId=${parseInt(res4.record.value)}`
+          })
+          formik.setFieldValue('siteId', parseInt(res4.record?.value))
+          formik.setFieldValue('siteName', siteValue.record?.name)
+        }
       }
 
       const getDataResult = () => {
@@ -221,6 +274,20 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       getDataResult()
     })()
   }, [metal])
+  useEffect(() => {
+    ;(async function () {
+      if (formik.values.dtId) {
+        const res = await getRequest({
+          extension: FinancialRepository.FIDocTypeDefaults.get,
+          parameters: `_dtId=${formik.values.dtId}`
+        })
+        formik.setFieldValue('siteId', res.record?.siteId || null)
+        formik.setFieldValue('plantId', res.record?.plantId || null)
+        formik.setFieldValue('siteName', res.record?.siteName || '')
+        formik.setFieldValue('plantName', res.record?.plantName || '')
+      }
+    })()
+  }, [formik.values.dtId])
 
   const getResourceId = functionId => {
     switch (functionId) {
@@ -413,19 +480,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         }
       })
     }
-  }
-
-  const onPost = async () => {
-    const { items, ...restValues } = formik.values
-
-    const res = await postRequest({
-      extension: FinancialRepository.MetalTrx.post,
-      record: JSON.stringify(restValues)
-    })
-
-    toast.success(platformLabels.Posted)
-    window.close()
-    invalidate()
   }
 
   const onUnpost = async () => {
