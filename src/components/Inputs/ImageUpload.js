@@ -6,12 +6,14 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomButton from './CustomButton'
 import { ControlContext } from 'src/providers/ControlContext'
+
 const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidth, customHeight }, ref) => {
   const hiddenInputRef = useRef()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [image, setImage] = useState()
   const [initialValues, setInitialData] = useState({})
+
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
@@ -30,9 +32,11 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
     })
     setInitialData(result?.record)
   }
+
   const handleClick = () => {
     hiddenInputRef.current.click()
   }
+
   const handleInputImageChange = event => {
     const file = event?.target?.files[0]
     if (file) {
@@ -40,6 +44,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
       const year = dateObject.getFullYear()
       const month = dateObject.getMonth() + 1
       const day = dateObject.getDate()
+
       let data = {
         resourceId: resourceId,
         recordId: uniqueRecord,
@@ -54,6 +59,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
       const fileSizeInKB = Math.round(file.size / 1024)
       if (parseInt(fileSizeInKB) > 500) {
         alert('Allowed PNG or JPEG. Max size of 500KB.')
+
         return
       }
       data = { ...data, file } //binary
@@ -65,13 +71,16 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
       reader.readAsDataURL(file)
     }
   }
+
   const handleInputImageReset = () => {
     formik.setValues({})
     setImage('')
   }
+
   const submit = () => {
     if (formik.values?.file) {
       const obj = { ...formik.values, recordId: ref.current.value || recordId }
+
       return postRequest({
         extension: SystemRepository.Attachment.set,
         record: JSON.stringify(obj),
@@ -92,6 +101,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
   useImperativeHandle(ref, () => ({
     submit
   }))
+
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
       <img
@@ -121,4 +131,5 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
     </Box>
   )
 })
+
 export default ImageUpload
