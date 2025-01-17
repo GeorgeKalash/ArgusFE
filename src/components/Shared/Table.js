@@ -138,7 +138,7 @@ const Table = ({
       if (page) {
         const start = (page - 1) * pageSize
         const end = page * pageSize
-        const slicedGridData = props?.gridData?.list.slice(start, end)
+        const slicedGridData = props?.gridData?.list?.slice(start, end)
         setGridData({
           ...props.gridData,
           list: slicedGridData
