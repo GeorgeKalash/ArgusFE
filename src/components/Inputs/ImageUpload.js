@@ -4,10 +4,13 @@ import { useRef } from 'react'
 import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import CustomButton from './CustomButton'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => {
   const hiddenInputRef = useRef()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [image, setImage] = useState()
   const [initialValues, setInitialData] = useState({})
 
@@ -88,11 +91,9 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
         extension: SystemRepository.Attachment.set,
         record: JSON.stringify(obj),
         file: formik.values?.file
+      }).then(res => {
+        return res
       })
-        .then(res => {
-          return res
-        })
-        .catch(e => {})
     } else if (!image && initialValues?.url && !formik.values?.url) {
       return postRequest({
         extension: SystemRepository.Attachment.del,
@@ -132,27 +133,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
           onChange={handleInputImageChange}
           accept='image/png, image/jpeg, image/jpg'
         />
-        <Box
-          onClick={handleInputImageReset}
-          variant='contained'
-          sx={{
-            mr: 1,
-            backgroundColor: '#f44336',
-            '&:hover': {
-              opacity: 0.8
-            },
-            width: 40,
-            height: 30,
-            objectFit: 'contain',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '20%',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
-          }}
-        >
-          <img src={`/images/buttonsIcons/clear.png`} alt={'clear'} />
-        </Box>
+        <CustomButton onClick={handleInputImageReset} label={platformLabels.Clear} color='#f44336' image='clear.png' />
       </Box>
     </Box>
   )

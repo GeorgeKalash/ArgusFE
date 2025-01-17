@@ -12,6 +12,8 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import WorksheetWindow from './window/WorksheetWindow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const MfWorksheet = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -73,22 +75,22 @@ const MfWorksheet = () => {
       type: 'date'
     },
     {
-      field: 'jobOrder',
+      field: 'jobRef',
       headerName: _labels.jobOrder,
       flex: 1
     },
     {
-      field: 'workCenter',
+      field: 'wcRef',
       headerName: _labels.workCenter,
       flex: 1
     },
     {
-      field: 'labor',
+      field: 'laborName',
       headerName: _labels.labor,
       flex: 1
     },
     {
-      field: 'prices',
+      field: 'pcs',
       headerName: _labels.prices,
       flex: 1
     },
@@ -98,12 +100,12 @@ const MfWorksheet = () => {
       flex: 1
     },
     {
-      field: 'endQty',
+      field: 'eopQty',
       headerName: _labels.endQty,
       flex: 1
     },
     {
-      field: 'pgItem',
+      field: 'pgItemName',
       headerName: _labels.pgItem,
       flex: 1
     },
@@ -113,6 +115,12 @@ const MfWorksheet = () => {
       flex: 1
     }
   ]
+
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.Worksheet,
+    action: openForm,
+    hasDT: false
+  })
 
   function openForm(obj) {
     stack({
@@ -134,7 +142,7 @@ const MfWorksheet = () => {
   }
 
   const add = () => {
-    openForm()
+    proxyAction()
   }
 
   const del = async obj => {
