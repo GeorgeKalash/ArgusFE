@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -43,6 +43,7 @@ import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 
 export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
@@ -52,7 +53,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
-  const [filteredMu, setFilteredMU] = useState([])
+  const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
@@ -218,6 +219,17 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
 
+  async function getFilteredMU(itemId) {
+    if (!itemId) return
+
+    const currentItemId = formik.values.items?.find(
+      item => parseInt(item.itemId) === itemId
+    )?.msId
+
+    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    filteredMeasurements.current = arrayMU
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -281,7 +293,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         }
 
         const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-        setFilteredMU(filteredMeasurements)
+        getFilteredMU(newRow?.itemId)
 
         update({
           volume: parseFloat(itemPhysProp?.volume) || 0,
@@ -344,7 +356,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       label: labels.measurementUnit,
       name: 'muRef',
       props: {
-        store: filteredMu,
+        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -354,10 +366,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
         update({
           baseQty: newRow?.qty * filteredItems?.qty
         })
+      },
+      propsReducer({ row, props }) {
+        return { ...props, store: filteredMeasurements?.current }
       }
     },
     {
@@ -792,6 +807,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
     return res?.record
   }
+
+
 
   const handleButtonClick = () => {
     setReCal(true)
@@ -1360,16 +1377,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
               />
             </Grid>
             <Grid item xs={1}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isVattable'
-                    checked={formik.values?.isVattable}
-                    disabled={formik.values.items[0]?.itemId}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='isVattable'
+                value={formik.values?.isVattable}
+                onChange={event => formik.setFieldValue('isVattable', event.target.checked)}
                 label={labels.VAT}
+                disabled={formik.values.items[0]?.itemId}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={2}>
@@ -1433,22 +1447,19 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
               />
             </Grid>
             <Grid item xs={2}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='exWorks'
-                    disabled={isClosed}
-                    checked={formik.values?.exWorks}
-                    onChange={event => {
-                      const { name, checked } = event.target
-                      formik.setFieldValue(name, checked)
-                      if (checked) {
-                        formik.setFieldValue('shipAddress', '')
-                      }
-                    }}
-                  />
-                }
+              <CustomCheckBox
+                name='exWorks'
+                value={formik.values?.exWorks}
+                onChange={event => {
+                  const { name, checked } = event.target
+                  formik.setFieldValue(name, checked)
+                  if (checked) {
+                    formik.setFieldValue('shipAddress', '')
+                  }
+                }}
                 label={labels.exWorks}
+                maxAccess={maxAccess}
+                disabled={isClosed}
               />
             </Grid>
           </Grid>
@@ -1458,6 +1469,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
               action === 'delete' && setReCal(true)
+            }}
+            onSelectionChange={(row, update, field) => {
+              if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
             value={formik.values.items}
             error={formik.errors.items}
@@ -1487,9 +1501,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={<Checkbox name='overdraft' checked={formik.values?.overdraft} readOnly />}
+                  <CustomCheckBox
+                    name='overdraft'
+                    value={formik.values?.overdraft}
+                    onChange={event => formik.setFieldValue('overdraft', event.target.checked)}
+                    readOnly
                     label={labels.overdraft}
+                    maxAccess={access}
                   />
                 </Grid>
               </Grid>

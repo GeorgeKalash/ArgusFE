@@ -15,6 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -294,25 +295,21 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isMetal'
-                    checked={formik.values.isMetal}
-                    onChange={event => {
-                      if (!event.target.checked) {
-                        formik.setFieldValue('metalId', '')
-                        formik.setFieldValue('metalColorId', '')
-                        formik.setFieldValue('metalPurity', '')
-                        formik.setFieldValue('weight', 0)
-                        formik.setFieldValue('density', 0)
-                      }
-                      formik.setFieldValue('isMetal', event.target.checked)
-                    }}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='isMetal'
+                value={formik.values?.isMetal}
+                onChange={event => {
+                  if (!event.target.checked) {
+                    formik.setFieldValue('metalId', '')
+                    formik.setFieldValue('metalColorId', '')
+                    formik.setFieldValue('metalPurity', '')
+                    formik.setFieldValue('weight', 0)
+                    formik.setFieldValue('density', 0)
+                  }
+                  formik.setFieldValue('isMetal', event.target.checked)
+                }}
                 label={labels.isMetal}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

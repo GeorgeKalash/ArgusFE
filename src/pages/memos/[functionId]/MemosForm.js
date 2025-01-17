@@ -21,6 +21,7 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { useWindow } from 'src/windows'
@@ -526,17 +527,13 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='isSubjectToVAT'
-                        readOnly={postedOrCanceled}
-                        maxAccess={maxAccess}
-                        checked={formik.values?.isSubjectToVAT}
-                        onChange={!postedOrCanceled ? formik.handleChange : ''}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='isSubjectToVAT'
+                    value={formik.values?.isSubjectToVAT}
+                    onChange={event => !postedOrCanceled && formik.setFieldValue('isSubjectToVAT', event.target.checked) }
                     label={labels.vat}
+                    maxAccess={maxAccess}
+                    readOnly={postedOrCanceled}
                   />
                 </Grid>
                 <Grid item xs={12}>

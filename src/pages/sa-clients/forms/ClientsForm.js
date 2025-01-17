@@ -22,6 +22,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useRefBehavior } from 'src/hooks/useReferenceProxy'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -314,22 +315,18 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isSubjectToVAT'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isSubjectToVAT}
-                    onChange={event => {
-                      formik.setFieldValue('isSubjectToVAT', event.target.checked)
-                      if (!event.target.checked) {
-                        formik.setFieldValue('vatNumber', '')
-                        formik.setFieldValue('taxId', '')
-                      }
-                    }}
-                  />
-                }
+              <CustomCheckBox
+                name='isSubjectToVAT'
+                value={formik.values?.isSubjectToVAT}
+                onChange={event => {
+                  formik.setFieldValue('isSubjectToVAT', event.target.checked)
+                  if (!event.target.checked) {
+                    formik.setFieldValue('vatNumber', '')
+                    formik.setFieldValue('taxId', '')
+                  }
+                }}
                 label={labels.vat}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -385,18 +382,12 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isInactive'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isInactive}
-                    onChange={event => {
-                      formik.setFieldValue('isInactive', event.target.checked)
-                    }}
-                  />
-                }
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values?.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                 label={labels.inactive}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
