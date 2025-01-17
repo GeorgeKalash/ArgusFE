@@ -43,6 +43,7 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
     validateOnChange: false,
     validationSchema: yup.object({
       baseAmount: yup.number().required(),
+      costTypeId: yup.number().required(),
       reference: yup.string().test('is-reference-required', 'reference is required', function (value) {
         if (formik.values.functionId) {
           return !!value
@@ -97,6 +98,7 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
                   { key: 'reference', value: 'plant Ref' },
                   { key: 'name', value: 'Name' }
                 ]}
+                required
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
@@ -154,17 +156,9 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
                 label={labels.currency}
                 valueField='recordId'
                 displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
-                  { key: 'flName', value: 'FL Name' }
-                ]}
+                readOnly
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId || null)
-                }}
-                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -203,9 +197,7 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
                 label={labels.amount}
                 value={formik.values.amount}
                 maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('amount', e.target.value)}
-                onClear={() => formik.setFieldValue('amount', '')}
-                error={formik.touched.amount && Boolean(formik.errors.amount)}
+                readOnly
                 maxLength={10}
                 decimalScale={2}
               />
