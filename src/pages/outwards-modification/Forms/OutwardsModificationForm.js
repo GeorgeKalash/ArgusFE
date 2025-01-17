@@ -52,7 +52,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       reference: '',
       date: new Date(),
       outwardsDate: null,
-      outwardId: '',
+      owoId: '',
       owRef: '',
       ttNo: '',
       productName: '',
@@ -76,6 +76,8 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       releaseStatus: '',
       status: '',
       otpVerified: false,
+      owtId: '',
+      owtRef: '',
       plantId: '',
       seqNo: '',
       modificationType: '',
@@ -161,7 +163,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
 
     const res = await getRequest({
       extension: RemittanceOutwardsRepository.OutwardsOrder.get2,
-      parameters: `_recordId=${data?.owoId || data?.outwardId}`
+      parameters: `_recordId=${data?.owoId}`
     })
 
     const { headerView, ttNo } = res.record
@@ -266,8 +268,9 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
         setValidSubmit(false)
 
         const data = {
-          outwardId: formik.values.outwardId,
+          owoId: formik.values.owoId,
           modificationType: formik.values.modificationType,
+          owtId: formik.values.owtId,
           beneficiaryCashPack: dispersalMode === DISPERSAL_MODE_CASH ? formik.values.beneficiaryData : null,
           beneficiaryBankPack: dispersalMode === DISPERSAL_MODE_BANK ? formik.values.beneficiaryData : null
         }
@@ -348,7 +351,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                         if (!newValue?.recordId) clearForm()
                         else
                           fillOutwardData({
-                            outwardId: newValue?.recordId,
+                            owoId: newValue?.recordId,
                             owRef: newValue?.reference,
                             oldBeneficiaryId: newValue?.beneficiaryId,
                             oldBeneficiarySeqNo: newValue?.beneficiarySeqNo,
@@ -377,7 +380,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                         if (!newValue?.recordId) clearForm()
                         const order = await getOutwardOrder(newValue?.owoId)
                         await fillOutwardData({
-                          outwardId: newValue?.owoId,
+                          owoId: newValue?.owoId,
                           owRef: order?.record?.reference,
                           owtId: newValue?.recordId,
                           owtRef: newValue?.reference,
