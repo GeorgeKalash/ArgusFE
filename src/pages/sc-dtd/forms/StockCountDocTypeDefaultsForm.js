@@ -14,6 +14,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SCRepository } from 'src/repositories/SCRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -51,7 +52,7 @@ export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess, r
       } catch (error) {}
     }
   })
-  
+
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
@@ -100,16 +101,12 @@ export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess, r
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    maxAccess={maxAccess}
-                    name='disableSKULookup'
-                    checked={formik.values?.disableSKULookup}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='disableSKULookup'
+                value={formik.values?.disableSKULookup}
+                onChange={event => formik.setFieldValue('disableSKULookup', event.target.checked)}
                 label={labels.disableSKULookup}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

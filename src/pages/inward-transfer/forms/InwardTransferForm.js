@@ -29,6 +29,7 @@ import * as yup from 'yup'
 import { ControlContext } from 'src/providers/ControlContext'
 import AuditForm from './AuditForm'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function InwardTransferForm({ labels, recordId, access, plantId, userId, dtId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -911,17 +912,13 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
               />
             </Grid>
             <Grid item xs={3}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='receiver_isResident'
-                    checked={formik.values.receiver_isResident}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                    disabled={editMode}
-                  />
-                }
+              <CustomCheckBox
+                name='receiver_isResident'
+                value={formik.values?.receiver_isResident}
+                onChange={event => formik.setFieldValue('receiver_isResident', event.target.checked)}
                 label={labels.receiver_isResident}
+                maxAccess={maxAccess}
+                disabled={editMode}
               />
             </Grid>
             <Grid item xs={3}>
