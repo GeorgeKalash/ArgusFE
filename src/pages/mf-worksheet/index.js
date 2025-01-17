@@ -131,7 +131,7 @@ const MfWorksheet = () => {
         maxAccess: access
       },
       width: 1200,
-      height: 670,
+      height: 780,
       title: _labels.Worksheet,
       nextToTitle: obj?.sku
     })

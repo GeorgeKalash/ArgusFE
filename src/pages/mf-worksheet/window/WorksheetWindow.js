@@ -16,7 +16,7 @@ const WorksheetWindow = ({ recordId, labels, maxAccess }) => {
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={670} index={0} value={activeTab}>
+      <CustomTabPanel index={0} value={activeTab}>
         <WorksheetForm labels={labels} setStore={setStore} store={store} editMode={editMode} maxAccess={maxAccess} />
       </CustomTabPanel>
       {/* <CustomTabPanel index={1} value={activeTab}>

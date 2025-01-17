@@ -7,7 +7,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomButton from './CustomButton'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => {
+const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidth, customHeight }, ref) => {
   const hiddenInputRef = useRef()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -117,10 +117,9 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
         }`}
         alt=''
         style={{
-          width: 140,
-          height: 140,
+          width: customWidth || 140,
+          height: customHeight || 140,
           objectFit: 'contain',
-          marginRight: 16,
           border: error && '2px solid #f44336'
         }}
         onClick={handleClick}

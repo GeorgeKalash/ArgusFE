@@ -154,6 +154,7 @@ export const ManufacturingRepository = {
     set: service + 'setWST',
     del: service + 'delWST',
     page: service + 'pageWST',
-    summary: service + 'summaryWST'
+    summary: service + 'summaryWST',
+    post: service + 'postWST'
   }
 }
