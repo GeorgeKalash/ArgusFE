@@ -56,7 +56,7 @@ const InvoicesItemsTab = ({ store, labels, access }) => {
     <VertLayout>
       <Grow>
         <Table
-          name='dstributionTable'
+          name='invoicesItemsTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

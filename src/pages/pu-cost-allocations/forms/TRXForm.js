@@ -292,7 +292,6 @@ export default function TRXForm({ labels, access, setStore, store }) {
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
-                required
                 rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
@@ -321,7 +320,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
                 editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
-                readOnly={isPosted || isClosed}
+                readOnly={isClosed}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
@@ -334,7 +333,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
                 rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
-                readOnly={isPosted || isClosed}
+                readOnly={isClosed}
                 onClear={() => formik.setFieldValue('notes', '')}
                 error={formik.touched.notes && Boolean(formik.errors.notes)}
               />

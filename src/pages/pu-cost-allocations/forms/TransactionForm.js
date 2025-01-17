@@ -5,7 +5,6 @@ import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
@@ -43,10 +42,13 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
-      reference: yup.number().when('functionId', {
-        is: functionId => functionId != null && functionId !== '',
-        then: yup.number().required(),
-        otherwise: yup.number().nullable()
+      baseAmount: yup.number().required(),
+      reference: yup.string().test('is-reference-required', 'reference is required', function (value) {
+        if (formik.values.functionId) {
+          return !!value
+        }
+
+        return true
       })
     }),
     onSubmit: async obj => {
@@ -110,6 +112,7 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
                 label={labels.baseAmount}
                 value={formik.values.baseAmount}
                 required
+                readOnly={formik.values.functionId}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('baseAmount', e.target.value)}
                 onClear={() => formik.setFieldValue('baseAmount', '')}
@@ -135,6 +138,9 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
                         currencyId: null,
                         baseAmount: '',
                         amount: '',
+                        accountId: null,
+                        accountName: '',
+                        accountRef: '',
                         functionId: ''
                       })
                 }}
@@ -178,12 +184,16 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
                 onChange={(event, newValue) => {
                   formik.setValues({
                     ...formik.values,
+                    accountId: newValue?.accountId || null,
+                    accountName: newValue?.accountName || '',
+                    accountRef: newValue?.accountRef || '',
                     reference: newValue?.reference || '',
                     currencyId: newValue?.currencyId || null,
                     baseAmount: newValue?.baseAmount || null,
                     amount: newValue?.amount || null
                   })
                 }}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
                 maxAccess={maxAccess}
               />
             </Grid>

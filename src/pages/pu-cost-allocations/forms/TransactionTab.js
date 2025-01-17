@@ -19,9 +19,7 @@ const TransactionTab = ({ store, labels, access }) => {
   const { platformLabels } = useContext(ControlContext)
   const { recordId, isClosed } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [baseAmounts, setBaseAmounts] = useState(0)
   const { stack } = useWindow()
-  const [maxSeqNo, setMaxSeqNo] = useState(0)
 
   const {
     query: { data },
@@ -108,22 +106,8 @@ const TransactionTab = ({ store, labels, access }) => {
     openForm()
   }
 
-  useEffect(() => {
-    if (data) {
-      let totalBaseAmounts = 0
-      let maxSeq = 0
-
-      data.list = data.list.map(item => {
-        totalBaseAmounts += item.baseAmount
-        maxSeq = Math.max(maxSeq, item.seqNo)
-
-        return item
-      })
-
-      setBaseAmounts(totalBaseAmounts)
-      setMaxSeqNo(maxSeq + 1)
-    }
-  }, [data])
+  const baseAmounts = data ? data.list.reduce((acc, item) => acc + item.baseAmount, 0) : 0
+  const maxSeqNo = data ? data.list.reduce((acc, item) => Math.max(acc, item.seqNo), 0) + 1 : 0
 
   return (
     <VertLayout>

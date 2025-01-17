@@ -60,7 +60,7 @@ const DistributionTab = ({ store, labels, access }) => {
     <VertLayout>
       <Grow>
         <Table
-          name='dstributionTable'
+          name='distributionTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
