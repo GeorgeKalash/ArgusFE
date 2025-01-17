@@ -35,6 +35,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { SystemChecks } from 'src/resources/SystemChecks'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import MoreDetails from './MoreDetails'
 
@@ -916,16 +917,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   />
                 </Grid>
                 <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='isResident'
-                        checked={formik.values?.isResident}
-                        onChange={formik.handleChange}
-                        disabled={editMode && !allowEdit}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='isResident'
+                    value={formik.values?.isResident}
+                    onChange={event => formik.setFieldValue('isResident', event.target.checked)}
                     label={labels.isResident}
+                    maxAccess={maxAccess}
+                    disabled={editMode && !allowEdit}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -1401,58 +1399,46 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   <FieldSet>
                     <Grid container spacing={2}>
                       <Grid item xs={3}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              name='otpVerified'
-                              disabled={true}
-                              readOnly={editMode && true}
-                              checked={formik.values?.otpVerified}
-                              onChange={formik.handleChange}
-                            />
-                          }
+                        <CustomCheckBox
+                          name='otpVerified'
+                          value={formik.values?.otpVerified}
+                          onChange={event => formik.setFieldValue('otpVerified', event.target.checked)}
                           label={labels?.OTPVerified}
+                          maxAccess={maxAccess}
+                          disabled={true}
+                          readOnly={editMode && true}
                         />
                       </Grid>
                       <Grid item xs={3}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              name='govCellVerified'
-                              disabled={editMode && !allowEdit}
-                              checked={formik.values?.govCellVerified}
-                              onChange={formik.handleChange}
-                            />
-                          }
+                        <CustomCheckBox
+                          name='govCellVerified'
+                          value={formik.values?.govCellVerified}
+                          onChange={event => formik.setFieldValue('govCellVerified', event.target.checked)}
                           label={labels?.govCellVerified}
+                          maxAccess={maxAccess}
+                          disabled={editMode && !allowEdit}
                         />
                       </Grid>
                       <Grid item xs={3}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              disabled={
-                                formik.values.gender === '2' && !editMode ? false : editMode && allowEdit ? false : true
-                              }
-                              name='coveredFace'
-                              checked={formik.values.coveredFace}
-                              onChange={formik.handleChange}
-                            />
-                          }
+                        <CustomCheckBox
+                          name='coveredFace'
+                          value={formik.values?.coveredFace}
+                          onChange={event => formik.setFieldValue('coveredFace', event.target.checked)}
                           label={labels?.coveredFace}
+                          maxAccess={maxAccess}
+                          disabled={
+                            formik.values.gender === '2' && !editMode ? false : editMode && allowEdit ? false : true
+                          }
                         />
                       </Grid>
                       <Grid item xs={3}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              name='isEmployee'
-                              disabled={editMode && !allowEdit && true}
-                              checked={formik.values?.isEmployee}
-                              onChange={formik.handleChange}
-                            />
-                          }
+                        <CustomCheckBox
+                          name='isEmployee'
+                          value={formik.values?.isEmployee}
+                          onChange={event => formik.setFieldValue('isEmployee', event.target.checked)}
                           label={labels?.isEmployed}
+                          maxAccess={maxAccess}
+                          disabled={editMode && !allowEdit && true}
                         />
                       </Grid>
                     </Grid>
@@ -1777,31 +1763,25 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   <FieldSet title={labels.diplomat}>
                     <Grid container spacing={2}>
                       <Grid item xs={6}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              name='isDiplomat'
-                              checked={formik.values?.isDiplomat}
-                              disabled={(formik.values?.isDiplomatReadOnly || (editMode && !allowEdit)) && true}
-                              onChange={formik.handleChange}
-                            />
-                          }
+                        <CustomCheckBox
+                          name='isDiplomat'
+                          value={formik.values?.isDiplomat}
+                          onChange={event => formik.setFieldValue('isDiplomat', event.target.checked)}
                           label={labels?.isDiplomat}
+                          maxAccess={maxAccess}
+                          disabled={(formik.values?.isDiplomatReadOnly || (editMode && !allowEdit)) && true}
                         />
                       </Grid>
                       <Grid item xs={6}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              name='isRelativeDiplomat'
-                              checked={formik.values?.isRelativeDiplomat}
-                              disabled={editMode && !allowEdit}
-                              onChange={e => {
-                                formik.handleChange(e), formik.setFieldValue('relativeDiplomatInfo', '')
-                              }}
-                            />
-                          }
+                        <CustomCheckBox
+                          name='isRelativeDiplomat'
+                          value={formik.values?.isRelativeDiplomat}
+                          onChange={e => {
+                            formik.handleChange(e), formik.setFieldValue('relativeDiplomatInfo', '')
+                          }}
                           label={labels?.isDiplomatRelative}
+                          maxAccess={maxAccess}
+                          disabled={editMode && !allowEdit}
                         />
                       </Grid>
                       <Grid item xs={12}>

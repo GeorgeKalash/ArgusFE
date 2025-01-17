@@ -20,6 +20,7 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { useWindow } from 'src/windows'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
+import CustomCheckBox from '../Inputs/CustomCheckBox'
 
 export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -180,17 +181,13 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='otp'
-                    checked={formik.values?.otp}
-                    disabled={true}
-                    onChange={formik.handleChange}
-                    maxAccess={access}
-                  />
-                }
+              <CustomCheckBox
+                name='otp'
+                value={formik.values?.otp}
+                onChange={event => formik.setFieldValue('otp', event.target.checked)}
                 label={_labels.otp}
+                maxAccess={access}
+                disabled={true}
               />
             </Grid>
           </Grid>

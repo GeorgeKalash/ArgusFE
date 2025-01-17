@@ -433,6 +433,12 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Ok',
+    label: platformLabels.OK,
+    color: '#231f20',
+    main: false
+  },
+  {
     key: 'ItemPromotion',
     label: platformLabels.ItemPromotion,
     color: '#231f43',

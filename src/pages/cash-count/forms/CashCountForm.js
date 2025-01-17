@@ -27,6 +27,7 @@ import WorkFlow from 'src/components/Shared/WorkFlow'
 import GenerateTransferForm from './GenerateTransferForm'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function CashCountForm({ labels, maxAccess: access, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -475,20 +476,16 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='forceNoteCount'
-                    checked={formik.values?.forceNoteCount}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                    disabled={
-                      formik.values.items &&
-                      (formik.values?.items[0]?.currencyId || formik.values?.items[0]?.currencyId)
-                    }
-                  />
-                }
+              <CustomCheckBox
+                name='forceNoteCount'
+                value={formik.values?.forceNoteCount}
+                onChange={event => formik.setFieldValue('forceNoteCount', event.target.checked)}
                 label={labels.forceNotesCount}
+                maxAccess={maxAccess}
+                disabled={
+                  formik.values.items &&
+                  (formik.values?.items[0]?.currencyId || formik.values?.items[0]?.currencyId)
+                }
               />
             </Grid>
           </Grid>
