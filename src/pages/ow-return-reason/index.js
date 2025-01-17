@@ -3,24 +3,26 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import GroupLegalDocumentForm from './forms/GroupLegalDocumentForm'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import OutwardReturnReasonForm from './Forms/OutwardReturnReason'
 
-const GroupLegalDocument = () => {
+const OutwardReturnReason = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: BusinessPartnerRepository.GroupLegalDocument.page,
+      extension: RemittanceOutwardsRepository.OutwardReturnReason.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -29,87 +31,99 @@ const GroupLegalDocument = () => {
 
   const {
     query: { data },
+    labels: _labels,
     paginationParameters,
     refetch,
-    labels: _labels,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: BusinessPartnerRepository.GroupLegalDocument.page,
-    datasetId: ResourceIds.GroupLegalDocument
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: BusinessPartnerRepository.GroupLegalDocument.page
+    endpointId: RemittanceOutwardsRepository.OutwardReturnReason.page,
+    datasetId: ResourceIds.OutwardReturnReason
   })
 
   const columns = [
     {
-      field: 'groupName',
-      headerName: _labels.group,
+      field: 'reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
-      field: 'incName',
-      headerName: _labels.categoryId,
+      field: 'name',
+      headerName: _labels.name,
       flex: 1
     },
     {
-      field: 'required',
-      headerName: _labels.required,
+      field: 'correspondant',
+      headerName: _labels.correspondant,
       flex: 1,
       type: 'checkbox'
     },
     {
-      field: 'mandatory',
-      headerName: _labels.mandatory,
+      field: 'client',
+      headerName: _labels.client,
       flex: 1,
       type: 'checkbox'
+    },
+    {
+      field: 'company',
+      headerName: _labels.company,
+      flex: 1,
+      type: 'checkbox'
+    },
+    {
+      field: 'feesStatusName',
+      headerName: _labels.feesStatus,
+      flex: 1
+    },
+    {
+      field: 'rateStatusName',
+      headerName: _labels.rateStatus,
+      flex: 1
     }
   ]
-
-  const edit = obj => {
-    openForm(obj)
-  }
 
   const add = () => {
     openForm()
   }
 
-  function openForm(record) {
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
     stack({
-      Component: GroupLegalDocumentForm,
+      Component: OutwardReturnReasonForm,
       props: {
         labels: _labels,
-        record,
-        maxAccess: access,
-        recordId: record ? record.groupId * 10000 + record.incId : null
+        recordId,
+        maxAccess: access
       },
       width: 600,
-      height: 370,
-      title: _labels.groupLegalDocument
+      height: 500,
+      title: _labels.OutwardReturnReason
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: BusinessPartnerRepository.GroupLegalDocument.del,
+      extension: RemittanceOutwardsRepository.OutwardReturnReason.del,
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />{' '}
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
           gridData={data}
-          rowId={['groupId', 'incId']}
+          rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
@@ -124,7 +138,4 @@ const GroupLegalDocument = () => {
   )
 }
 
-export default GroupLegalDocument
-
-BusinessPartnerRepository.CategoryID.qry
-BusinessPartnerRepository.Group.qry
+export default OutwardReturnReason

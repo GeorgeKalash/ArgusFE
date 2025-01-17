@@ -13,6 +13,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -228,29 +229,21 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
           />
         </Grid>
         <Grid item xs={12}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                name='isDiplomat'
-                checked={formik.values?.isDiplomat}
-                onChange={formik.handleChange}
-                maxAccess={maxAccess}
-              />
-            }
+          <CustomCheckBox
+            name='isDiplomat'
+            value={formik.values?.isDiplomat}
+            onChange={event => formik.setFieldValue('isDiplomat', event.target.checked)}
             label={labels.isDiplomat}
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                name='isResident'
-                checked={formik.values?.isResident}
-                onChange={formik.handleChange}
-                maxAccess={maxAccess}
-              />
-            }
+          <CustomCheckBox
+            name='isResident'
+            value={formik.values?.isResident}
+            onChange={event => formik.setFieldValue('isResident', event.target.checked)}
             label={labels.isResident}
+            maxAccess={maxAccess}
           />
         </Grid>
       </Grid>
