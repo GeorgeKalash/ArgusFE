@@ -211,7 +211,7 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
                 displayField='name'
                 valueShow='accountRef'
                 secondValueShow='accountName'
-                readOnly={editMode}
+                readOnly={formik.values.reference}
                 form={formik}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
