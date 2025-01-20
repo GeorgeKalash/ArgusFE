@@ -18,6 +18,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useInvalidate } from 'src/hooks/resource'
 import { useBarcodeFieldBehaviours } from 'src/hooks/useBarcodeFieldBehaviours'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function BarcodesForm({ labels, access, store, recordId, msId, barcode }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -234,16 +235,12 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isInactive'
-                    maxAccess={access}
-                    checked={formik.values?.isInactive}
-                    onChange={event => formik.setFieldValue('isInactive', event.target.checked ? true : false)}
-                  />
-                }
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values?.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                 label={labels?.isInactive}
+                maxAccess={access}
               />
             </Grid>
           </Grid>

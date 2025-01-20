@@ -14,6 +14,8 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 export default function InstantCash({
   onSubmit,
@@ -115,136 +117,138 @@ export default function InstantCash({
       height={480}
       maxAccess={maxAccess}
     >
-      <Grid container>
-        {/* Second Column */}
-        <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2, height: '50%' }}>
-          <Grid hideonempty xs={12}>
-            <CustomNumberField
-              name='sourceAmount'
-              onChange={formik.handleChange}
-              label={_labels.sourceAmount}
-              value={formik.values.sourceAmount}
-              error={formik.touched.sourceAmount && Boolean(formik.errors.sourceAmount)}
-              maxAccess={maxAccess}
-              required
-              readOnly
-              onClear={() => formik.setFieldValue('sourceAmount', '')}
-            />
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item container xs={12} sx={{ px: 2, pt: 2 }}>
+              <Grid hideonempty xs={6}>
+                <CustomNumberField
+                  name='sourceAmount'
+                  onChange={formik.handleChange}
+                  label={_labels.sourceAmount}
+                  value={formik.values.sourceAmount}
+                  error={formik.touched.sourceAmount && Boolean(formik.errors.sourceAmount)}
+                  maxAccess={maxAccess}
+                  required
+                  readOnly
+                  onClear={() => formik.setFieldValue('sourceAmount', '')}
+                />
+              </Grid>
+              {/* <Grid hideonempty xs={12}>
+                <CustomNumberField
+                  name='transactionsPerAnnum'
+                  onChange={formik.handleChange}
+                  label={_labels.trxCountPerYear}
+                  readOnly
+                  value={formik.values.transactionsPerAnnum}
+                  error={formik.touched.transactionsPerAnnum && Boolean(formik.errors.transactionsPerAnnum)}
+                />
+              </Grid>
+              <Grid hideonempty xs={12}>
+                <CustomNumberField
+                  name='totalTransactionAmountPerAnnum'
+                  onChange={formik.handleChange}
+                  readOnly
+                  label={_labels.trxAmountPerYear}
+                  value={formik.values.totalTransactionAmountPerAnnum}
+                  error={
+                    formik.touched.totalTransactionAmountPerAnnum &&
+                    Boolean(formik.errors.totalTransactionAmountPerAnnum)
+                  }
+                />
+              </Grid> */}
+            </Grid>
+            <Grid item xs={6}>
+              <FieldSet title='Remitter'>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='otherRelation'
+                    onChange={event => formik.setFieldValue('remitter.otherRelation', event.target.value)}
+                    label={_labels.otherRelation}
+                    value={formik.values.remitter.otherRelation}
+                    error={formik.touched.remitter?.otherRelation && Boolean(formik.errors.remitter?.otherRelation)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='remitter.employerName'
+                    required
+                    readOnly
+                    onChange={event => formik.setFieldValue('remitter.employerName', event.target.value)}
+                    label={_labels.employerName}
+                    onClear={() => formik.setFieldValue('remitter.employerName', '')}
+                    value={formik.values.remitter.employerName}
+                    error={formik.touched.remitter?.employerName && Boolean(formik.errors.remitter?.employerName)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={RemittanceBankInterface.Combos.qry}
+                    parameters={`_combo=4`}
+                    name='remitter.employerStatus'
+                    label={_labels.employerStatus}
+                    required
+                    valueField='name'
+                    displayField='name'
+                    value={formik.values.remitter.employerStatus}
+                    onChange={(event, newValue) => {
+                      console.log(newValue?.name)
+                      formik.setFieldValue('remitter.employerStatus', newValue ? newValue?.name : '')
+                    }}
+                    maxAccess={maxAccess}
+                    error={formik.touched.remitter?.employerStatus && Boolean(formik.errors.remitter?.employerStatus)}
+                  />
+                </Grid>
+              </FieldSet>
+            </Grid>
+            <Grid item xs={6} sx={{ height: '50%' }}>
+              <FieldSet title='Beneficiary'>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={RemittanceBankInterface.Bank.snapshot}
+                    parameters={{
+                      _receivingCountry: formik.values.toCountryId,
+                      _payingAgent: formik.values.payingAgent,
+                      _deliveryMode: formik.values.deliveryModeId,
+                      _payoutCurrency: formik.values.targetCurrency
+                    }}
+                    required
+                    valueField='name'
+                    displayField='bankName'
+                    name='beneficiary.bankDetails.bankName'
+                    label={_labels.bank}
+                    form={formik}
+                    firstValue={formik.values.beneficiary.bankDetails.bankName}
+                    readOnly={!(formik.values.deliveryModeId && formik.values.payingAgent)}
+                    maxAccess={maxAccess}
+                    secondDisplayField={false}
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('beneficiary.bankDetails.bankName', newValue?.name)
+                      formik.setFieldValue('beneficiary.bankDetails.bankCode', newValue?.recordId)
+                      formik.setFieldValue('beneficiary.bankDetails.bankAddress1', newValue?.address1)
+                    }}
+                    error={
+                      formik.touched.beneficiary?.bankDetails?.bankName &&
+                      Boolean(formik.errors.beneficiary?.bankDetails?.bankName)
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    numberField={true}
+                    name='beneficiary.postCode'
+                    onChange={event => formik.setFieldValue('beneficiary.address.postCode', event.target.value)}
+                    label={_labels.postalCode}
+                    value={formik.values.beneficiary.address.postCode}
+                    error={formik.touched.postCode && Boolean(formik.errors.postCode)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </FieldSet>
+            </Grid>
           </Grid>
-          <Grid hideonempty xs={12}>
-            <CustomNumberField
-              name='transactionsPerAnnum'
-              onChange={formik.handleChange}
-              label={_labels.trxCountPerYear}
-              readOnly
-              value={formik.values.transactionsPerAnnum}
-              error={formik.touched.transactionsPerAnnum && Boolean(formik.errors.transactionsPerAnnum)}
-            />
-          </Grid>
-          <Grid hideonempty xs={12}>
-            <CustomNumberField
-              name='totalTransactionAmountPerAnnum'
-              onChange={formik.handleChange}
-              readOnly
-              label={_labels.trxAmountPerYear}
-              value={formik.values.totalTransactionAmountPerAnnum}
-              error={
-                formik.touched.totalTransactionAmountPerAnnum && Boolean(formik.errors.totalTransactionAmountPerAnnum)
-              }
-            />
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid container sx={{ pt: 2 }}>
-        <Grid container rowGap={2} xs={6} spacing={2} sx={{ pt: 5 }}>
-          <FieldSet title='Remitter'>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='otherRelation'
-                onChange={event => formik.setFieldValue('remitter.otherRelation', event.target.value)}
-                label={_labels.otherRelation}
-                value={formik.values.remitter.otherRelation}
-                error={formik.touched.remitter?.otherRelation && Boolean(formik.errors.remitter?.otherRelation)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='remitter.employerName'
-                required
-                readOnly
-                onChange={event => formik.setFieldValue('remitter.employerName', event.target.value)}
-                label={_labels.employerName}
-                onClear={() => formik.setFieldValue('remitter.employerName', '')}
-                value={formik.values.remitter.employerName}
-                error={formik.touched.remitter?.employerName && Boolean(formik.errors.remitter?.employerName)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={RemittanceBankInterface.Combos.qry}
-                parameters={`_combo=4`}
-                name='remitter.employerStatus'
-                label={_labels.employerStatus}
-                required
-                valueField='name'
-                displayField='name'
-                value={formik.values.remitter.employerStatus}
-                onChange={(event, newValue) => {
-                  console.log(newValue?.name)
-                  formik.setFieldValue('remitter.employerStatus', newValue ? newValue?.name : '')
-                }}
-                maxAccess={maxAccess}
-                error={formik.touched.remitter?.employerStatus && Boolean(formik.errors.remitter?.employerStatus)}
-              />
-            </Grid>
-          </FieldSet>
-        </Grid>
-        <Grid container rowGap={2} xs={6} spacing={2} sx={{ pt: 5, height: '50%' }}>
-          <FieldSet title='Beneficiary'>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={RemittanceBankInterface.Bank.snapshot}
-                parameters={{
-                  _receivingCountry: formik.values.toCountryId,
-                  _payingAgent: formik.values.payingAgent,
-                  _deliveryMode: formik.values.deliveryModeId,
-                  _payoutCurrency: formik.values.targetCurrency
-                }}
-                required
-                valueField='name'
-                displayField='bankName'
-                name='beneficiary.bankDetails.bankName'
-                label={_labels.bank}
-                form={formik}
-                firstValue={formik.values.beneficiary.bankDetails.bankName}
-                readOnly={!(formik.values.deliveryModeId && formik.values.payingAgent)}
-                maxAccess={maxAccess}
-                secondDisplayField={false}
-                onChange={async (event, newValue) => {
-                  formik.setFieldValue('beneficiary.bankDetails.bankName', newValue?.name)
-                  formik.setFieldValue('beneficiary.bankDetails.bankCode', newValue?.recordId)
-                  formik.setFieldValue('beneficiary.bankDetails.bankAddress1', newValue?.address1)
-                }}
-                error={
-                  formik.touched.beneficiary?.bankDetails?.bankName &&
-                  Boolean(formik.errors.beneficiary?.bankDetails?.bankName)
-                }
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                numberField={true}
-                name='beneficiary.postCode'
-                onChange={event => formik.setFieldValue('beneficiary.address.postCode', event.target.value)}
-                label={_labels.postalCode}
-                value={formik.values.beneficiary.address.postCode}
-                error={formik.touched.postCode && Boolean(formik.errors.postCode)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-          </FieldSet>
-        </Grid>
-      </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

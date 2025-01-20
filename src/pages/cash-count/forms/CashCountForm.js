@@ -27,6 +27,7 @@ import WorkFlow from 'src/components/Shared/WorkFlow'
 import GenerateTransferForm from './GenerateTransferForm'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function CashCountForm({ labels, maxAccess: access, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -41,39 +42,38 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
 
     const _userId = userData.userId
     const parameters = `_userId=${_userId}&_functionId=${SystemFunction.CashCountTransaction}`
-    try {
-      const { record } = await getRequest({
-        extension: SystemRepository.UserFunction.get,
-        parameters: parameters
-      })
 
-      if (record) {
-        formik.setFieldValue('dtId', record.dtId)
-      }
+    const { record } = await getRequest({
+      extension: SystemRepository.UserFunction.get,
+      parameters: parameters
+    })
 
-      const { record: cashAccountRecord } = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${_userId}&_key=cashAccountId`
-      })
-      const cashAccountId = cashAccountRecord?.value
-      if (cashAccountId) {
-        const { record: cashAccountResult } = await getRequest({
-          extension: CashBankRepository.CbBankAccounts.get,
-          parameters: `_recordId=${cashAccountId}`
-        })
-        formik.setFieldValue('cashAccountId', cashAccountId)
-        formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
-        formik.setFieldValue('cashAccountName', cashAccountResult.name)
-      }
+    if (record) {
+      formik.setFieldValue('dtId', record.dtId)
+    }
 
-      const { record: plantRecord } = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${_userId}&_key=plantId`
+    const { record: cashAccountRecord } = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${_userId}&_key=cashAccountId`
+    })
+    const cashAccountId = cashAccountRecord?.value
+    if (cashAccountId) {
+      const { record: cashAccountResult } = await getRequest({
+        extension: CashBankRepository.CbBankAccounts.get,
+        parameters: `_recordId=${cashAccountId}`
       })
-      if (plantRecord) {
-        formik.setFieldValue('plantId', parseInt(plantRecord.value))
-      }
-    } catch (error) {}
+      formik.setFieldValue('cashAccountId', cashAccountId)
+      formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
+      formik.setFieldValue('cashAccountName', cashAccountResult.name)
+    }
+
+    const { record: plantRecord } = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${_userId}&_key=plantId`
+    })
+    if (plantRecord) {
+      formik.setFieldValue('plantId', parseInt(plantRecord.value))
+    }
   }
 
   const invalidate = useInvalidate({
@@ -123,58 +123,56 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      cashAccountRef: yup.string().required(' '),
-      plantId: yup.string().required(' '),
+      cashAccountRef: yup.string().required(),
+      plantId: yup.string().required(),
       items: yup
         .array()
         .of(
           yup.object().shape({
-            currencyId: yup.string().required(' '),
-            counted: yup.string().required(' ')
+            currencyId: yup.string().required(),
+            counted: yup.string().required()
           })
         )
-        .required(' ')
+        .required()
     }),
     onSubmit: async obj => {
-      try {
-        const payload = {
-          header: {
-            recordId: obj.recordId,
-            dtId: obj.dtId,
-            plantId: obj.plantId,
-            shiftId: obj.shiftId,
-            currencyId: obj.currencyId,
-            cashAccountId: obj.cashAccountId,
-            forceNoteCount: obj.forceNoteCount,
-            reference: obj.reference,
-            date: formatDateToApi(new Date()),
-            startTime: obj.startTime,
-            endTime: obj.endTime,
-            status: obj.status,
-            wip: obj.wip,
-            releaseStatus: obj.releaseStatus
-          },
-          items: obj.items.map(({ id, flag, enabled, cashCountId, currencyNotes, ...rest }, index) => ({
-            seqNo: index + 1,
-            cashCountId: cashCountId || 0,
-            currencyNotes: currencyNotes || [],
-            ...rest
-          }))
-        }
+      const payload = {
+        header: {
+          recordId: obj.recordId,
+          dtId: obj.dtId,
+          plantId: obj.plantId,
+          shiftId: obj.shiftId,
+          currencyId: obj.currencyId,
+          cashAccountId: obj.cashAccountId,
+          forceNoteCount: obj.forceNoteCount,
+          reference: obj.reference,
+          date: formatDateToApi(new Date()),
+          startTime: obj.startTime,
+          endTime: obj.endTime,
+          status: obj.status,
+          wip: obj.wip,
+          releaseStatus: obj.releaseStatus
+        },
+        items: obj.items.map(({ id, flag, enabled, cashCountId, currencyNotes, ...rest }, index) => ({
+          seqNo: index + 1,
+          cashCountId: cashCountId || 0,
+          currencyNotes: currencyNotes || [],
+          ...rest
+        }))
+      }
 
-        const response = await postRequest({
-          extension: CashCountRepository.CashCountTransaction.set2,
-          record: JSON.stringify(payload)
-        })
-        const _recordId = response.recordId
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          getData(_recordId)
-        } else toast.success(platformLabels.Edited)
-        setEditMode(true)
+      const response = await postRequest({
+        extension: CashCountRepository.CashCountTransaction.set2,
+        record: JSON.stringify(payload)
+      })
+      const _recordId = response.recordId
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        getData(_recordId)
+      } else toast.success(platformLabels.Edited)
+      setEditMode(true)
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
 
@@ -188,41 +186,39 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
   }, [recordId])
 
   const getData = async recordId => {
-    try {
-      if (recordId) {
-        const {
-          record: { header, items }
-        } = await getRequest({
-          extension: CashCountRepository.CashCountTransaction.get2,
-          parameters: `_recordId=${recordId}`
-        })
-        setIsClosed(header.wip === 2 ? true : false)
-        setIsPosted(header.status === 3 ? true : false)
-        formik.setValues({
-          recordId: header.recordId,
-          plantId: header.plantId,
-          reference: header.reference,
-          cashAccountId: header.cashAccountId,
-          cashAccountRef: header.cashAccountRef,
-          cashAccountName: header.cashAccountName,
-          forceNoteCount: header.forceNoteCount,
-          wip: header.wip,
-          status: header.status,
-          releaseStatus: header.releaseStatus,
-          date: formatDateFromApi(header.date),
-          startTime: header.startTime && getTimeInTimeZone(header.startTime),
-          endTime: header.endTime && getTimeInTimeZone(header.endTime),
-          items: items.map(({ seqNo, variation, ...rest }, index) => ({
-            id: seqNo,
-            seqNo,
-            enabled: true,
-            variation,
-            flag: variation === 0 ? true : false,
-            ...rest
-          }))
-        })
-      }
-    } catch (exception) {}
+    if (recordId) {
+      const {
+        record: { header, items }
+      } = await getRequest({
+        extension: CashCountRepository.CashCountTransaction.get2,
+        parameters: `_recordId=${recordId}`
+      })
+      setIsClosed(header.wip === 2 ? true : false)
+      setIsPosted(header.status === 3 ? true : false)
+      formik.setValues({
+        recordId: header.recordId,
+        plantId: header.plantId,
+        reference: header.reference,
+        cashAccountId: header.cashAccountId,
+        cashAccountRef: header.cashAccountRef,
+        cashAccountName: header.cashAccountName,
+        forceNoteCount: header.forceNoteCount,
+        wip: header.wip,
+        status: header.status,
+        releaseStatus: header.releaseStatus,
+        date: formatDateFromApi(header.date),
+        startTime: header.startTime && getTimeInTimeZone(header.startTime),
+        endTime: header.endTime && getTimeInTimeZone(header.endTime),
+        items: items.map(({ seqNo, variation, ...rest }, index) => ({
+          id: seqNo,
+          seqNo,
+          enabled: true,
+          variation,
+          flag: variation === 0 ? true : false,
+          ...rest
+        }))
+      })
+    }
   }
 
   async function onReopen() {
@@ -471,23 +467,25 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField name='endTime' label={labels.endTime} value={formik.values.endTime} readOnly={true} maxAccess={maxAccess}/>
+              <CustomTextField
+                name='endTime'
+                label={labels.endTime}
+                value={formik.values.endTime}
+                readOnly={true}
+                maxAccess={maxAccess}
+              />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='forceNoteCount'
-                    checked={formik.values?.forceNoteCount}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                    disabled={
-                      formik.values.items &&
-                      (formik.values?.items[0]?.currencyId || formik.values?.items[0]?.currencyId)
-                    }
-                  />
-                }
+              <CustomCheckBox
+                name='forceNoteCount'
+                value={formik.values?.forceNoteCount}
+                onChange={event => formik.setFieldValue('forceNoteCount', event.target.checked)}
                 label={labels.forceNotesCount}
+                maxAccess={maxAccess}
+                disabled={
+                  formik.values.items &&
+                  (formik.values?.items[0]?.currencyId || formik.values?.items[0]?.currencyId)
+                }
               />
             </Grid>
           </Grid>

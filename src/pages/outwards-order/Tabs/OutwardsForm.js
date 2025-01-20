@@ -40,6 +40,7 @@ import BeneficiaryListWindow from '../Windows/BeneficiaryListWindow'
 import { getStorageData } from 'src/storage/storage'
 import ReceiptVoucherForm from 'src/pages/rt-receipt-vouchers/forms/ReceiptVoucherForm'
 import CustomSwitch from 'src/components/Inputs/CustomSwitch'
+import CustomButton from 'src/components/Inputs/CustomButton'
 
 export default function OutwardsForm({ labels, access, recordId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -126,7 +127,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       valueDate: new Date(),
       defaultValueDate: new Date(),
       vatAmount: null,
-      tdAmount: null,
+      tdAmount: 0,
       defaultCommission: 12,
       amount: 0,
       taxPercent: null,
@@ -535,8 +536,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
             employerStatus: remitter?.employerStatus
           }
         },
-        width: 1000,
-        height: 650,
+        width: 740,
+        height: 320,
         title: labels.instantCash
       })
     } else if (formik.values.bankType === 2) {
@@ -993,13 +994,9 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   </Grid>
 
                   <Grid item xs={12}>
-                    <Button
-                      sx={{
-                        backgroundColor: '#908c8c',
-                        color: '#000000',
-                        height: '33px',
-                        objectFit: 'contain'
-                      }}
+                    <CustomButton
+                      label={'product'}
+                      color='#000000'
                       disabled={
                         !(
                           plantId &&
@@ -1009,9 +1006,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                         )
                       }
                       onClick={() => openProductWindow()}
-                    >
-                      Product
-                    </Button>
+                    />
                   </Grid>
                   <Grid item xs={6}>
                     <CustomTextField
@@ -1050,7 +1045,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       name='exRate2'
                       decimalScale={5}
                       label={labels.exRateDivide}
-                      value={formik.values?.exRate ? 1 / formik.values.header.exRate : ''}
+                      value={formik.values.header?.exRate ? 1 / formik.values.header.exRate : ''}
                       required
                       readOnly
                       maxAccess={maxAccess}
@@ -1085,7 +1080,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       value={formik.values.header.tdAmount}
                       maxAccess={maxAccess}
                       onChange={e => {
-                        formik.setFieldValue('header.tdAmount', e.target.value)
+                        formik.setFieldValue('header.tdAmount', e.target.value || 0)
                       }}
                       required
                       readOnly={editMode}
@@ -1388,23 +1383,13 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                     errorCheck={'header.beneficiaryId'}
                   />
                 </Grid>
-                <Grid item xs={2}>
-                  <Button
-                    sx={{
-                      backgroundColor: '#908c8c',
-                      color: '#000000',
-                      '&:disabled': {
-                        backgroundColor: '#eaeaea',
-                        color: '#000000'
-                      },
-                      height: '33px',
-                      objectFit: 'contain'
-                    }}
-                    disabled={!formik.values.header.beneficiaryId}
+                <Grid item xs={3}>
+                  <CustomButton
                     onClick={() => openBankWindow()}
-                  >
-                    Bank API
-                  </Button>
+                    label={'Bank API'}
+                    color='#000000'
+                    disabled={!formik.values.header.beneficiaryId}
+                  />
                 </Grid>
               </Grid>
             </Grid>

@@ -15,6 +15,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import * as yup from 'yup'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const SystemParamsForm = ({ _labels, access }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -373,16 +374,12 @@ const SystemParamsForm = ({ _labels, access }) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='GLFYCDOECheck'
-                    maxAccess={access}
-                    checked={formik.values?.GLFYCDOECheck}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='GLFYCDOECheck'
+                value={formik.values?.GLFYCDOECheck}
+                onChange={event => formik.setFieldValue('GLFYCDOECheck', event.target.checked)}
                 label={_labels.check}
+                maxAccess={access}
               />
             </Grid>
           </Grid>

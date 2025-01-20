@@ -139,12 +139,14 @@ const ProductsWindow = ({
     {
       field: 'originAmount',
       headerName: labels.originAmount,
-      flex: 1
+      flex: 1,
+      type: { field: 'number', decimal: 2 }
     },
     {
       field: 'baseAmount',
       headerName: labels.BaseAmount,
-      flex: 1
+      flex: 1,
+      type: { field: 'number', decimal: 2 }
     }
   ]
 
@@ -154,7 +156,9 @@ const ProductsWindow = ({
         setGridData({
           list: products.map(item => ({
             ...item,
-            checked: item.productId === productId ? true : false
+            checked: item.productId === productId ? true : false,
+            originAmount: item.interfaceId !== 0 ? 0 : item.originAmount,
+            baseAmount: item.interfaceId !== 0 ? 0 : item.baseAmount
           }))
         })
       } catch (error) {}
