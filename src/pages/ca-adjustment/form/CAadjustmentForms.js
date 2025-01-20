@@ -180,7 +180,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
           date: formatDateFromApi(res.record.date)
         })
       }
-      await getDefaultsData()
     })()
   }, [])
 

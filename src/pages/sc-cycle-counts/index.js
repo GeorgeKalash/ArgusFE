@@ -25,14 +25,13 @@ const CycleCounts = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    try {
-      const response = await getRequest({
-        extension: SCRepository.StockCount.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
-      })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    const response = await getRequest({
+      extension: SCRepository.StockCount.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
+    })
+
+    return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithFilter({ filters, pagination }) {
