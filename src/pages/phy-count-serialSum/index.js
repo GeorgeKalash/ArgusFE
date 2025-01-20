@@ -49,7 +49,7 @@ const PhysicalCountSerial = () => {
       search: ''
     },
     maxAccess,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true
   })
 
@@ -342,7 +342,7 @@ const PhysicalCountSerial = () => {
             columns={columns}
             gridData={filtered ?? { list: [] }}
             rowId={['recordId']}
-            setData={setData}
+            //setData={setData}
             isLoading={false}
             paginationType='api'
             pagination={false}
