@@ -7,6 +7,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { DateTimePicker } from '@mui/x-date-pickers'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomDateTimePicker = ({
   name,
@@ -147,7 +148,7 @@ const CustomDateTimePicker = ({
                     </IconButton>
                   )}
                   <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
-                    <EventIcon />
+                    <EventIcon sx={{ border: '0px', fontSize: 17 }} />
                   </IconButton>
                 </InputAdornment>
               )
