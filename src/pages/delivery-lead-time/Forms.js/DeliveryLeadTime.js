@@ -36,8 +36,7 @@ export default function DeliveryLeadTimeForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       szId: yup.number().required(),
-      leadTimeInDays: yup.number().required().min(1).max(99),
-      smsTemplateId: yup.number().required()
+      leadTimeInDays: yup.number().required().min(1).max(99)
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -90,7 +89,7 @@ export default function DeliveryLeadTimeForm({ labels, maxAccess, recordId }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('szId', newValue ? newValue.recordId : null)
+                  formik.setFieldValue('szId', newValue?.recordId)
                 }}
                 error={formik.touched.szId && Boolean(formik.errors.szId)}
               />
@@ -118,7 +117,7 @@ export default function DeliveryLeadTimeForm({ labels, maxAccess, recordId }) {
                 valueField='recordId'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('smsTemplateId', newValue ? newValue?.recordId : '')
+                  formik.setFieldValue('smsTemplateId', newValue?.recordId)
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.smsTemplateId && Boolean(formik.errors.smsTemplateId)}
