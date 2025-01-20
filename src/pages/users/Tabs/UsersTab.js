@@ -88,13 +88,30 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
     }),
     onSubmit: async obj => {
       if (!storeRecordId) {
-        const data = { ...obj, password: encryptePWD(obj.password) }
-        await postRequest({
-          extension: AccountRepository.setID,
-          record: JSON.stringify(data)
-        })
+        const copy = { ...obj }
+        const encryptedPassword = encryptePWD(copy.password)
+        copy.password = copy.confirmPassword = encryptedPassword
 
-        postUS(data)
+        const user = getStorageData('userData')
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/setID`,
+          {
+            record: JSON.stringify({
+              accountId: user.accountId,
+              spId: user.spId,
+              userName: copy.username,
+              password: copy.password,
+              userId: copy.recordId
+            })
+          },
+          {
+            headers: {
+              authorization: `Bearer ${user.accessToken}`,
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+        )
+        postUS(copy)
       } else postUS(obj)
     }
   })

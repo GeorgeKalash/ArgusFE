@@ -295,8 +295,8 @@ export default function JobOrderForm({ labels, access, setStore, recordId, windo
 
   return (
     <FormShell
-      resourceId={ResourceIds.SalesOrder}
-      functionId={SystemFunction.SalesOrder}
+      resourceId={ResourceIds.MFJobOrders}
+      functionId={SystemFunction.JobOrder}
       form={formik}
       maxAccess={maxAccess}
       previewReport={editMode}
@@ -663,7 +663,7 @@ export default function JobOrderForm({ labels, access, setStore, recordId, windo
                   resourceId={ResourceIds.Barcodes}
                   seqNo={0}
                   recordId={formik.values.recordId}
-                  customWidth={320}
+                  customWidth={300}
                   customHeight={180}
                 />
               </Grid>

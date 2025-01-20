@@ -23,11 +23,15 @@ export function DataGrid({
   disabled = false,
   allowDelete = true,
   allowAddNewLine = true,
+  deleteHideCondition = '',
   onSelectionChange,
   rowSelectionModel,
+  autoDelete,
   bg
 }) {
   const gridApiRef = useRef(null)
+
+  let lastCellStopped = useRef()
 
   const isDup = useRef(null)
 
@@ -152,7 +156,12 @@ export function DataGrid({
     }
   }
 
-  function deleteRow(params) {
+  async function deleteRow(params) {
+    if (typeof autoDelete === 'function') {
+      if (!(await autoDelete(params.data))) {
+        return
+      }
+    }
     const newRows = value.filter(({ id }) => id !== params.data.id)
     gridApiRef.current.applyTransaction({ remove: [params.data] })
     if (newRows?.length < 1) setReady(true)
@@ -161,6 +170,7 @@ export function DataGrid({
   }
 
   function openDelete(params) {
+    lastCellStopped.current = ''
     stack({
       Component: DeleteDialog,
       props: {
@@ -517,6 +527,8 @@ export function DataGrid({
   }
 
   const ActionCellRenderer = params => {
+    if (deleteHideCondition.includes(params.data.status)) return
+
     return (
       <Box
         sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}
@@ -671,6 +683,9 @@ export function DataGrid({
   }
 
   const onCellEditingStopped = params => {
+    const cellId = `${params.node.id}-${params.column.colId}`
+    if (lastCellStopped.current == cellId) return
+    lastCellStopped.current = cellId
     const { data, colDef } = params
     if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
@@ -678,7 +693,6 @@ export function DataGrid({
 
         return
       }
-
       process(params, data, setData)
     }
   }

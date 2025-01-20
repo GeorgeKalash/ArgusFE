@@ -41,14 +41,16 @@ export const ManufacturingRepository = {
     page: service + 'pageOPR',
     set: service + 'setOPR',
     get: service + 'getOPR',
-    del: service + 'delOPR'
+    del: service + 'delOPR',
+    qry: service + 'qryOPR'
   },
   Labor: {
     page: service + 'pageLBR',
     qry: service + 'qryLBR',
     set: service + 'setLBR',
     get: service + 'getLBR',
-    del: service + 'delLBR'
+    del: service + 'delLBR',
+    snapshot: service + 'snapshotLBR'
   },
   Machine: {
     page: service + 'pageMAC',
@@ -156,6 +158,17 @@ export const ManufacturingRepository = {
     qry: service + 'qryJRO',
     get: service + 'getJRO',
     set: service + 'setJRO',
+    set2: service + 'set2JRO',
     del: service + 'delJRO'
+  },
+  Worksheet: {
+    snapshot: service + 'snapshotWST',
+    get: service + 'getWST',
+    set: service + 'setWST',
+    del: service + 'delWST',
+    page: service + 'pageWST',
+    summary: service + 'summaryWST',
+    post: service + 'postWST',
+    qry2: service + 'qryWST2'
   }
 }
