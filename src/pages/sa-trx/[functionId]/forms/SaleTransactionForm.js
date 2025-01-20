@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from 'src/lib/date-helper'
 import { Button, Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -87,110 +87,6 @@ export default function SaleTransactionForm({
     enabled: !recordId
   })
 
-  const initialValues = {
-    recordId: recordId || null,
-    header: {
-      dgId: functionId,
-      recordId: null,
-      dtId: documentType?.dtId,
-      reference: '',
-      date: new Date(),
-      dueDate: new Date(),
-      plantId: null,
-      clientId: null,
-      clientName: '',
-      clientRef: '',
-      currencyId: null,
-      currencyName: '',
-      szId: null,
-      spId: null,
-      siteId: null,
-      description: '',
-      status: 1,
-      isVattable: false,
-      taxId: null,
-      subtotal: 0,
-      miscAmount: 0,
-      amount: 0,
-      vatAmount: 0,
-      tdAmount: 0,
-      plId: null,
-      ptId: null,
-      billAddressId: null,
-      billAddress: '',
-      maxDiscount: '',
-      currentDiscount: '',
-      exRate: 1,
-      rateCalcMethod: 1,
-      tdType: DIRTYFIELD_TDPCT,
-      tdPct: 0,
-      baseAmount: 0,
-      volume: 0,
-      weight: 0,
-      qty: 0,
-      isVerified: false,
-      contactId: null,
-      commitItems: false,
-      postMetalToFinancials: false,
-      metalPrice: 0,
-      KGmetalPrice: 0,
-      balance: 0,
-      accountId: 0
-    },
-    items: [
-      {
-        id: 1,
-        orderId: recordId || 0,
-        barcode: '',
-        itemId: '',
-        sku: '',
-        itemName: '',
-        seqNo: 1,
-        siteId: '',
-        muId: null,
-        qty: 0,
-        volume: 0,
-        weight: 0,
-        isMetal: false,
-        metalId: null,
-        metalPurity: 0,
-        msId: 0,
-        muRef: '',
-        muQty: 0,
-        minPrice: 0,
-        baseQty: 0,
-        mdType: MDTYPE_PCT,
-        basePrice: 0,
-        baseLaborPrice: 0,
-        TotPricePerG: 0,
-        mdValue: 0,
-        unitPrice: 0,
-        unitCost: 0,
-        overheadId: '',
-        vatAmount: 0,
-        mdAmount: 0,
-        upo: 0,
-        extendedPrice: 0,
-        priceType: 0,
-        applyVat: false,
-        taxId: null,
-        taxDetails: null,
-        notes: '',
-        saTrx: true
-      }
-    ],
-    serials: [],
-    lots: [],
-    taxes: []
-  }
-
-  const invalidate = useInvalidate({
-    endpointId: SaleRepository.SalesTransaction.qry
-  })
-
-  const { formik } = useForm({
-    maxAccess,
-    initialValues,
   const invalidate = useInvalidate({
     endpointId: SaleRepository.SalesTransaction.qry
   })
@@ -960,7 +856,6 @@ export default function SaleTransactionForm({
 
     const modifiedList = await Promise.all(
       saTrxItems?.map(async (item, index) => {
-
         const taxDetailsResponse = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
 
         const updatedSaTrxTaxes =
@@ -1173,7 +1068,9 @@ export default function SaleTransactionForm({
   async function getItemConvertPrice(itemId) {
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
-      parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}&_muId=${0}`
+      parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${
+        formik.values.header.currencyId
+      }&_plId=${formik.values.header.plId}&_muId=${0}`
     })
 
     return res?.record
@@ -1282,9 +1179,7 @@ export default function SaleTransactionForm({
   async function getFilteredMU(itemId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.items?.find(
-      item => parseInt(item.itemId) === itemId
-    )?.msId
+    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
 
     const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
     filteredMeasurements.current = arrayMU
