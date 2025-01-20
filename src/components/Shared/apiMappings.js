@@ -115,7 +115,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: '40%'
   },
   [ResourceIds.DocumentTypes]: {

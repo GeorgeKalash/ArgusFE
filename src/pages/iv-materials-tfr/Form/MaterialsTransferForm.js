@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -34,9 +34,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
+  const filteredMeasurements = useRef([])
 
   const [measurements, setMeasurements] = useState([])
-  const [filteredMu, setFilteredMU] = useState([])
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.MaterialTransfer,
@@ -280,7 +280,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
       return {
         totalQty: acc?.totalQty + qtyValue,
-        totalCost: (Math.round((acc?.totalCost + totalCostValue) * 100) / 100).toFixed(2),
+        totalCost: (Math.round((parseFloat(acc?.totalCost) + totalCostValue) * 100) / 100).toFixed(2),
         totalWeight: acc?.totalWeight + weightValue
       }
     },
@@ -301,6 +301,17 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     })
 
     return res?.record
+  }
+
+  async function getFilteredMU(itemId) {
+    if (!itemId) return
+
+    const currentItemId = formik.values.transfers?.find(
+      transfer => parseInt(transfer.itemId) === itemId
+    )?.msId
+
+    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    filteredMeasurements.current = arrayMU
   }
 
   const columns = [
@@ -344,9 +355,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
           const totalCost = calcTotalCost(newRow)
           const itemInfo = await getItem(newRow.itemId)
+          getFilteredMU(newRow?.itemId)
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-          setFilteredMU(filteredMeasurements)
-
           update({
             weight,
             unitCost,
@@ -407,7 +417,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       label: labels.muId,
       name: 'muRef',
       props: {
-        store: filteredMu,
+        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         readOnly: isClosed,
@@ -418,13 +428,16 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
         const qtyInBase = newRow?.qty * filteredItems?.muQty ?? 0
 
         update({
           qtyInBase,
           muQty: newRow?.muQty
         })
+      },
+      propsReducer({ row, props }) {
+        return { ...props, store: filteredMeasurements?.current }
       }
     },
     {
@@ -705,9 +718,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         const res3 = await getDataGrid(recordId)
 
         const updatedTransfers = res3.list.map(item => {
-          const filteredMeasurements = measurements.filter(x => x.msId === item?.msId)
-          setFilteredMU(filteredMeasurements)
-
           return {
             ...item,
             id: item.seqNo,
@@ -744,8 +754,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
     invalidate()
   }
-
-  console.log(formik)
 
   return (
     <FormShell
@@ -952,6 +960,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
               })
 
               formik?.setFieldValue('transfers', data)
+            }}
+            onSelectionChange={(row, update, field) => {
+              if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
             name='transfers'
             maxAccess={maxAccess}

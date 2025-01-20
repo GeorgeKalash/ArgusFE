@@ -47,15 +47,18 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
         '& .MuiMultiSectionDigitalClock-root': {
           width: '200px'
         },
+        '& .css-n4sunj-MuiAutocomplete-listbox': {
+          maxHeight: '43vh'
+        },
         '& .MuiMenuItem-root': {
           paddingRight: '10px'
         },
         ...(isDateTimePicker && {
           '& .MuiDateCalendar-root': {
-            height: 300 
+            height: 300
           },
-          '& .MuiMultiSectionDigitalClock-root': { 
-            height: '300px' 
+          '& .MuiMultiSectionDigitalClock-root': {
+            height: '300px'
           }
         })
       }}

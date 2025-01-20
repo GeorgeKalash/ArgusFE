@@ -1,5 +1,6 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
+import { startOfYear, endOfYear } from 'date-fns'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -19,7 +20,7 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 import Typography from '@mui/material/Typography'
 
-export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
+export default function FiscalYearForm({ labels, maxAccess, setStore, store, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -32,8 +33,8 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
     initialValues: {
       recordId: null,
       fiscalYear: '',
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: null,
+      endDate: null,
       periods: '',
       status: ''
     },
@@ -74,6 +75,8 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
       } else toast.success(platformLabels.Edited)
 
       invalidate()
+
+      window.close()
     }
   })
 
@@ -99,6 +102,19 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
       } catch (exception) {}
     })()
   }, [])
+
+  useEffect(() => {
+    if (formik.values.fiscalYear) {
+      const year = parseInt(formik.values.fiscalYear)
+      if (year) {
+        formik.setFieldValue('startDate', startOfYear(new Date(year, 0, 1)))
+        formik.setFieldValue('endDate', endOfYear(new Date(year, 11, 31)))
+      }
+    } else {
+      formik.setFieldValue('startDate', null)
+      formik.setFieldValue('endDate', null)
+    }
+  }, [formik.values.fiscalYear])
 
   return (
     <FormShell resourceId={ResourceIds.FiscalYears} form={formik} maxAccess={maxAccess} editMode={editMode}>

@@ -35,7 +35,9 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { SystemChecks } from 'src/resources/SystemChecks'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomButton from 'src/components/Inputs/CustomButton'
+import MoreDetails from './MoreDetails'
 
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
@@ -219,7 +221,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     getRequest({
       extension: RTCLRepository.CtClientIndividual.get2,
       parameters: parameters
-    }).then(res => {
+    }).then(async res => {
       const obj = res?.record
 
       obj?.workAddressView && setAddress(obj?.workAddressView)
@@ -337,7 +339,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
       setIdScanner(obj.clientMaster?.idScanMode)
       setEditMode(true)
-
       if (
         requestImage === true &&
         obj.clientRemittance?.clientId &&
@@ -347,18 +348,17 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         (obj.clientMaster?.idScanMode == 1 || obj.clientMaster?.idScanMode == 2)
       ) {
         setLoading(true)
+
         const parameters = `_number=${obj.clientIDView?.idNo}&_clientId=${obj.clientRemittance?.clientId}&_idType=${obj.clientIDView?.idtId}&_idScanMode=${obj.clientMaster?.idScanMode}`
-        getRequest({
+
+        const res = await getRequest({
           extension: CurrencyTradingSettingsRepository.PreviewImageID.get,
           parameters: parameters
         })
-          .then(res => {
-            setImageUrl(res?.record?.imageContent ?? null)
-            setLoading(false)
-          })
-          .catch(() => {
-            setLoading(false)
-          })
+
+        setImageUrl(res?.record?.imageContent ?? null)
+
+        setLoading(false)
       }
     })
   }
@@ -385,6 +385,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     stack({
       Component: ConfirmationDialog,
       props: {
+        height: 200,
         fullScreen: false,
         okButtonAction: handleFetchMobileOwner,
         DialogText: platformLabels.PhoneVerificationConfirmation
@@ -524,12 +525,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       clientId: obj.clientId || 0,
       firstName: obj.firstName,
       lastName: obj.lastName,
-      middleName: obj.middleName,
-      familyName: obj.familyName,
+      middleName: obj.familyName ? obj.middleName + '' + obj.familyName : obj.middleName,
+      familyName: null,
       fl_firstName: obj.fl_firstName,
       fl_lastName: obj.fl_lastName,
-      fl_middleName: obj.fl_middleName,
-      fl_familyName: obj.fl_familyName,
+      fl_middleName: obj.fl_familyName ? obj.fl_middleName + ' ' + obj.fl_familyName : obj.fl_middleName,
+      fl_familyName: null,
       birthDate: formatDateToApi(obj.birthDate),
       isResident: obj.isResident,
       sponsorName: obj.sponsorName,
@@ -622,7 +623,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         clientRemittance: obj4,
         clientMaster: obj1, //CTCL
         address: obj5,
-        workAddress: obj6.name && obj6.countryId && obj6.cityId && obj6.phone && obj6.street1 ? obj6 : null
+        workAddress: obj6 ? obj6 : null
       }
 
       await postRequest({
@@ -766,24 +767,51 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     setNewProf(!newProf)
   }
 
-  const handleClickDigitalId = confirmWindow => {
+  const handleClickDigitalId = async confirmWindow => {
+    setLoading(true)
+
     const parameters = `_number=${formik.values.idNo}&_idType=${formik.values.idtId}`
-    getRequest({
+
+    const res = await getRequest({
       extension: CurrencyTradingSettingsRepository.Absher.get,
       parameters
-    }).then(res => {
-      formik.setFieldValue('idScanMode', 2)
-      setImageUrl(res.record.imageContent)
-      confirmWindow.close()
     })
+
+    const result = res?.record
+
+    if (result) {
+      formik.setFieldValue('idScanMode', 2)
+
+      setImageUrl(result?.imageContent)
+
+      confirmWindow.close()
+    } else {
+      formik.setFieldValue('idScanMode', null)
+
+      setImageUrl(null)
+    }
+
+    setLoading(false)
   }
 
-  const handleClickScanner = confirmWindow => {
-    getRequestFullEndPoint({ endPoint: process.env.NEXT_PUBLIC_SCANNER_URL }).then(response => {
+  const handleClickScanner = async confirmWindow => {
+    setLoading(true)
+
+    const response = await getRequestFullEndPoint({ endPoint: process.env.NEXT_PUBLIC_SCANNER_URL })
+
+    if (response?.imageContent) {
       formik.setFieldValue('idScanMode', 1)
+
       setImageUrl(response?.imageContent)
+
       confirmWindow.close()
-    })
+    } else {
+      formik.setFieldValue('idScanMode', null)
+
+      setImageUrl(null)
+    }
+
+    setLoading(false)
   }
 
   const digitalIdConfirmation = mode => {
@@ -841,6 +869,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     !formik.values.govCellVerified &&
     !systemChecks?.some(item => item.checkId === SystemChecks.CT_DISABLE_MOBILE_VERIFICATION)
 
+  function onAddressSubmit(values) {
+    setAddress({
+      ...values
+    })
+  }
+
   return (
     <FormShell
       actions={actions}
@@ -848,6 +882,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
+      previewReport={editMode}
       disabledSubmit={editMode && !allowEdit && true}
     >
       <VertLayout>
@@ -882,16 +917,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   />
                 </Grid>
                 <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='isResident'
-                        checked={formik.values?.isResident}
-                        onChange={formik.handleChange}
-                        disabled={editMode && !allowEdit}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='isResident'
+                    value={formik.values?.isResident}
+                    onChange={event => formik.setFieldValue('isResident', event.target.checked)}
                     label={labels.isResident}
+                    maxAccess={maxAccess}
+                    disabled={editMode && !allowEdit}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -1134,7 +1166,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       </Grid>
                       <Grid item xs={12}>
                         <Grid container spacing={2}>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='firstName'
                               label={labels.first}
@@ -1152,7 +1184,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='middleName'
                               label={labels.middle}
@@ -1166,7 +1198,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='lastName'
                               label={labels.last}
@@ -1184,7 +1216,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          {/* <Grid item xs={3}>
                             <CustomTextField
                               name='familyName'
                               label={labels.family}
@@ -1197,12 +1229,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               error={formik.touched.familyName && Boolean(formik.errors.familyName)}
                               maxAccess={maxAccess}
                             />
-                          </Grid>
+                          </Grid> */}
                         </Grid>
                       </Grid>
                       <Grid item xs={12}>
                         <Grid container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
                               label={labels.fl_first}
@@ -1218,7 +1250,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_middleName'
                               label={labels.fl_middle}
@@ -1232,7 +1264,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_lastName'
                               label={labels.fl_last}
@@ -1247,7 +1279,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          {/* <Grid item xs={3}>
                             <CustomTextField
                               name='fl_familyName'
                               label={labels.fl_family}
@@ -1260,7 +1292,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
                               maxAccess={maxAccess}
                             />
-                          </Grid>
+                          </Grid> */}
                         </Grid>
                       </Grid>
                       <Grid item xs={4}>
@@ -1358,6 +1390,55 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           onClear={() => formik.setFieldValue('sponsorName', '')}
                           error={formik.touched.sponsorName && Boolean(formik.errors.sponsorName)}
                           maxAccess={maxAccess}
+                        />
+                      </Grid>
+                    </Grid>
+                  </FieldSet>
+                </Grid>
+                <Grid item xs={12}>
+                  <FieldSet>
+                    <Grid container spacing={2}>
+                      <Grid item xs={3}>
+                        <CustomCheckBox
+                          name='otpVerified'
+                          value={formik.values?.otpVerified}
+                          onChange={event => formik.setFieldValue('otpVerified', event.target.checked)}
+                          label={labels?.OTPVerified}
+                          maxAccess={maxAccess}
+                          disabled={true}
+                          readOnly={editMode && true}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <CustomCheckBox
+                          name='govCellVerified'
+                          value={formik.values?.govCellVerified}
+                          onChange={event => formik.setFieldValue('govCellVerified', event.target.checked)}
+                          label={labels?.govCellVerified}
+                          maxAccess={maxAccess}
+                          disabled={editMode && !allowEdit}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <CustomCheckBox
+                          name='coveredFace'
+                          value={formik.values?.coveredFace}
+                          onChange={event => formik.setFieldValue('coveredFace', event.target.checked)}
+                          label={labels?.coveredFace}
+                          maxAccess={maxAccess}
+                          disabled={
+                            formik.values.gender === '2' && !editMode ? false : editMode && allowEdit ? false : true
+                          }
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <CustomCheckBox
+                          name='isEmployee'
+                          value={formik.values?.isEmployee}
+                          onChange={event => formik.setFieldValue('isEmployee', event.target.checked)}
+                          label={labels?.isEmployed}
+                          maxAccess={maxAccess}
+                          disabled={editMode && !allowEdit && true}
                         />
                       </Grid>
                     </Grid>
@@ -1629,16 +1710,18 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                 </Grid>
                 <Grid item xs={12}>
                   <Grid container spacing={2}>
-                    <Grid item xs={3}>
+                    <Grid item xs={5}>
                       <CustomButton
                         onClick={() =>
                           stack({
                             Component: AddressFormShell,
                             props: {
                               readOnly: editMode && !allowEdit,
+                              allowPost: true,
                               optional: true,
                               labels: labels,
                               setAddress: setAddress,
+                              onSubmit: onAddressSubmit,
                               address: address,
                               maxAccess: maxAccess,
                               isCleared: false
@@ -1652,121 +1735,72 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         color='primary'
                       />
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={4}>
                       <CustomButton
-                        onClick={() => handleClickDigitalId(confirmWindow)}
-                        label={labels.digitalId}
+                        onClick={() =>
+                          stack({
+                            Component: MoreDetails,
+                            props: {
+                              readOnly: editMode && !allowEdit,
+                              labels: labels,
+                              clientFormik: formik,
+                              maxAccess: maxAccess,
+                              editMode: editMode,
+                              allowEdit
+                            },
+                            width: 500,
+                            height: 400,
+                            title: labels.moreDetails
+                          })
+                        }
+                        label={labels.moreDetails}
                         color='primary'
-                        disabled={loading || (editMode && !allowEdit)}
                       />
                     </Grid>
                   </Grid>
                 </Grid>
                 <Grid item xs={12}>
                   <FieldSet title={labels.diplomat}>
-                    <Grid item xs={6}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name='isDiplomat'
-                            checked={formik.values?.isDiplomat}
-                            disabled={(formik.values?.isDiplomatReadOnly || (editMode && !allowEdit)) && true}
-                            onChange={formik.handleChange}
-                          />
-                        }
-                        label={labels?.isDiplomat}
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name='isRelativeDiplomat'
-                            checked={formik.values?.isRelativeDiplomat}
-                            disabled={editMode && !allowEdit}
-                            onChange={e => {
-                              formik.handleChange(e), formik.setFieldValue('relativeDiplomatInfo', '')
-                            }}
-                          />
-                        }
-                        label={labels?.isDiplomatRelative}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <CustomTextField
-                        name='relativeDiplomatInfo'
-                        label={labels.relativeDiplomatInfo}
-                        onBlur={formik.handleBlur}
-                        value={formik.values?.relativeDiplomatInfo}
-                        readOnly={editMode || (!formik.values?.isRelativeDiplomat && true)}
-                        onChange={formik.handleChange}
-                        maxLength='10'
-                        required={formik.values.isRelativeDiplomat ? true : false}
-                        onClear={() => formik.setFieldValue('relativeDiplomatInfo', '')}
-                        error={formik.touched.relativeDiplomatInfo && Boolean(formik.errors.relativeDiplomatInfo)}
-                        maxAccess={maxAccess}
-                      />
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <CustomCheckBox
+                          name='isDiplomat'
+                          value={formik.values?.isDiplomat}
+                          onChange={event => formik.setFieldValue('isDiplomat', event.target.checked)}
+                          label={labels?.isDiplomat}
+                          maxAccess={maxAccess}
+                          disabled={(formik.values?.isDiplomatReadOnly || (editMode && !allowEdit)) && true}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <CustomCheckBox
+                          name='isRelativeDiplomat'
+                          value={formik.values?.isRelativeDiplomat}
+                          onChange={e => {
+                            formik.handleChange(e), formik.setFieldValue('relativeDiplomatInfo', '')
+                          }}
+                          label={labels?.isDiplomatRelative}
+                          maxAccess={maxAccess}
+                          disabled={editMode && !allowEdit}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <CustomTextField
+                          name='relativeDiplomatInfo'
+                          label={labels.relativeDiplomatInfo}
+                          onBlur={formik.handleBlur}
+                          value={formik.values?.relativeDiplomatInfo}
+                          readOnly={editMode || (!formik.values?.isRelativeDiplomat && true)}
+                          onChange={formik.handleChange}
+                          maxLength='10'
+                          required={formik.values.isRelativeDiplomat ? true : false}
+                          onClear={() => formik.setFieldValue('relativeDiplomatInfo', '')}
+                          error={formik.touched.relativeDiplomatInfo && Boolean(formik.errors.relativeDiplomatInfo)}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
                     </Grid>
                   </FieldSet>
-                </Grid>
-                <Grid item xs={12}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={3}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name='otpVerified'
-                            disabled={true}
-                            readOnly={editMode && true}
-                            checked={formik.values?.otpVerified}
-                            onChange={formik.handleChange}
-                          />
-                        }
-                        label={labels?.OTPVerified}
-                      />
-                    </Grid>
-                    <Grid item xs={3}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name='govCellVerified'
-                            disabled={editMode && !allowEdit}
-                            checked={formik.values?.govCellVerified}
-                            onChange={formik.handleChange}
-                          />
-                        }
-                        label={labels?.govCellVerified}
-                      />
-                    </Grid>
-                    <Grid item xs={3}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            disabled={
-                              formik.values.gender === '2' && !editMode ? false : editMode && allowEdit ? false : true
-                            }
-                            name='coveredFace'
-                            checked={formik.values.coveredFace}
-                            onChange={formik.handleChange}
-                          />
-                        }
-                        label={labels?.coveredFace}
-                      />
-                    </Grid>
-                    <Grid item xs={3}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name='isEmployee'
-                            disabled={editMode && !allowEdit && true}
-                            checked={formik.values?.isEmployee}
-                            onChange={formik.handleChange}
-                          />
-                        }
-                        label={labels?.isEmployed}
-                      />
-                    </Grid>
-                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
