@@ -1,5 +1,6 @@
 import { useState, useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
+import * as yup from 'yup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
@@ -36,13 +37,22 @@ const GenerateOutboundTransportation = () => {
 
   const { formik } = useForm({
     initialValues: {
-      truckId: '',
-      vehicleId: '',
-      szId: '',
-      capacity: '',
-      balance: ''
+      truckId: null,
+      vehicleId: null,
+      szId: null,
+      capacity: null,
+      balance: null,
+      volume: null
     },
-    access,
+    validationSchema: yup.object({
+      capacity: yup.number(),
+      volume: yup.number().test(function (value) {
+        const { capacity } = this.parent
+
+        return value <= capacity
+      })
+    }),
+    maxAccess: access,
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async obj => {
@@ -159,7 +169,7 @@ const GenerateOutboundTransportation = () => {
     formik.setFieldValue('volume', totalVolume)
     formik.setFieldValue('amount', totalAmount)
 
-    formik.setFieldValue('balance', totalVolume - formik.values.capacity)
+    formik.setFieldValue('balance', formik.values.capacity - totalVolume)
   }, [deliveryOrders])
 
   const columnsOrders = [
@@ -299,7 +309,13 @@ const GenerateOutboundTransportation = () => {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField name='volume' label={labels.volume} value={formik.values.volume} readOnly />
+              <CustomNumberField
+                name='volume'
+                label={labels.volume}
+                value={formik.values.volume}
+                readOnly
+                error={formik.touched.volume && Boolean(formik.errors.volume)}
+              />
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
