@@ -22,7 +22,7 @@ const DeliveryLeadTime = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: DeliveryRepository.DeliveryLeadTime.qry,
+      extension: DeliveryRepository.DeliveryLeadTime.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -38,7 +38,7 @@ const DeliveryLeadTime = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DeliveryRepository.DeliveryLeadTime.qry,
+    endpointId: DeliveryRepository.DeliveryLeadTime.page,
     datasetId: ResourceIds.DeliveryLeadTimes
   })
 

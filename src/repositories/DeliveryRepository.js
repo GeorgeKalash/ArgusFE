@@ -66,8 +66,8 @@ export const DeliveryRepository = {
   },
   DeliveryLeadTime: {
     get: service + 'getLDT',
+    page: service + 'pageLDT',
     set: service + 'setLDT',
-    del: service + 'delLDT',
-    qry: service + 'qryLDT'
+    del: service + 'delLDT'
   }
 }

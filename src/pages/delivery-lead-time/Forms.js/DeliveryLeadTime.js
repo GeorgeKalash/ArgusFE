@@ -21,7 +21,7 @@ export default function DeliveryLeadTimeForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: DeliveryRepository.DeliveryLeadTime.qry
+    endpointId: DeliveryRepository.DeliveryLeadTime.page
   })
 
   const { formik } = useForm({
