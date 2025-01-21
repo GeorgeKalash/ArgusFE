@@ -51,11 +51,9 @@ const TransactionLog = props => {
     getRequest({
       extension: SystemRepository.TransactionLog.qry,
       parameters: parameters
+    }).then(res => {
+      setGridData(res)
     })
-      .then(res => {
-        setGridData(res)
-      })
-      .catch(error => {})
   }
 
   const showInfo = obj => {
@@ -65,12 +63,10 @@ const TransactionLog = props => {
     getRequest({
       extension: SystemRepository.TransactionLog.get,
       parameters: parameters
+    }).then(res => {
+      if (JSON.parse(res.record.data).header) setInfo(JSON.parse(res.record.data)?.header)
+      else setInfo(JSON.parse(res.record.data))
     })
-      .then(res => {
-        if (JSON.parse(res.record.data).header) setInfo(JSON.parse(res.record.data)?.header)
-        else setInfo(JSON.parse(res.record.data))
-      })
-      .catch(error => {})
   }
 
   const formatTime = dateString => {

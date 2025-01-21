@@ -23,6 +23,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import { HIDDEN } from 'src/services/api/maxAccess'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import CustomCheckBox from '../Inputs/CustomCheckBox'
 import { Fixed } from './Layouts/Fixed'
 
 const BenificiaryCashForm = ({
@@ -750,10 +751,13 @@ const BenificiaryCashForm = ({
             </FormGrid>
             {!hiddenIsInActive.current && (
               <FormGrid item hideonempty xs={6}>
-                <FormControlLabel
-                  control={<Checkbox name='isInactive' disabled={true} checked={formik.values?.isInactive} />}
+                <CustomCheckBox
+                  name='isInactive'
+                  value={formik.values.isInactive}
+                  onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                   label={_labels.isInactive}
                   maxAccess={maxAccess}
+                  disabled={true}
                 />
               </FormGrid>
             )}
@@ -775,10 +779,13 @@ const BenificiaryCashForm = ({
             </FormGrid>
             {!hiddenIsBlocked.current && (
               <FormGrid item hideonempty xs={6}>
-                <FormControlLabel
-                  control={<Checkbox name='isBlocked' disabled={true} checked={formik.values?.isBlocked} />}
+                <CustomCheckBox
+                  name='isBlocked'
+                  value={formik.values?.isBlocked}
+                  onChange={event => formik.setFieldValue('isBlocked', event.target.checked)}
                   label={_labels.isBlocked}
                   maxAccess={maxAccess}
+                  disabled={true}
                 />
               </FormGrid>
             )}
