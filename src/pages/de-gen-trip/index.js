@@ -57,11 +57,23 @@ const GenerateOutboundTransportation = () => {
         record: JSON.stringify(data)
       })
 
-      await openForm(res.recordId)
-
-      toast.success(platformLabels.Generated)
+      if (res.recordId) {
+        await openForm(res.recordId)
+        resetForm()
+        toast.success(platformLabels.Generated)
+      }
     }
   })
+
+  const resetForm = () => {
+    formik.setValues({
+      ...formik.values,
+      volume: null,
+      amount: null,
+      balance: null
+    })
+    setDeliveryOrders({ list: [] })
+  }
 
   async function openForm(recordId) {
     stack({
@@ -98,7 +110,7 @@ const GenerateOutboundTransportation = () => {
     } else {
       setData(prev => {
         const itemToAdd = deliveryOrders.list.find(item => item.recordId === row.recordId)
-        if (!itemToAdd || itemToAdd.szId !== formik.values.szId) return prev 
+        if (!itemToAdd || itemToAdd.szId !== formik.values.szId) return prev
 
         return {
           ...prev,
@@ -152,7 +164,7 @@ const GenerateOutboundTransportation = () => {
 
   const columnsOrders = [
     {
-      width: 100,
+      width: 50,
       cellRenderer: row => (
         <CustomCheckBox
           name='checked'
@@ -164,46 +176,46 @@ const GenerateOutboundTransportation = () => {
     {
       field: 'date',
       headerName: labels.date,
-      flex: 1,
-      type: 'date'
+      type: 'date',
+      width: 130
     },
     {
       field: 'reference',
       headerName: labels.reference,
-      flex: 1
+      width: 130
     },
     {
       field: 'spName',
       headerName: labels.salesPerson,
-      flex: 1
+      width: 200
     },
     {
       field: 'clientName',
       headerName: labels.client,
-      flex: 1
+      width: 280
     },
     {
       field: 'amount',
       headerName: labels.amount,
-      flex: 1,
-      type: 'number'
+      type: 'number',
+      width: 130
     },
     {
       field: 'volume',
       headerName: labels.volume,
-      flex: 1,
-      type: 'number'
+      type: 'number',
+      width: 130
     },
     {
       field: 'notes',
       headerName: labels.notes,
-      flex: 1
+      width: 350
     }
   ]
 
   const columnsDeliveryOrders = [
     {
-      width: 100,
+      width: 50,
       cellRenderer: row => (
         <CustomCheckBox name='checked' value={true} onChange={e => onRowCheckboxChange(row.data, e.target.checked)} />
       )
@@ -211,45 +223,45 @@ const GenerateOutboundTransportation = () => {
     {
       field: 'date',
       headerName: labels.date,
-      flex: 1,
-      type: 'date'
+      type: 'date',
+      width: 130
     },
     {
       field: 'reference',
       headerName: labels.reference,
-      flex: 1
-    },
-    {
-      field: 'szName',
-      headerName: labels.zone,
-      flex: 1
+      width: 130
     },
     {
       field: 'spName',
       headerName: labels.salesPerson,
-      flex: 1
+      width: 200
+    },
+    {
+      field: 'szName',
+      headerName: labels.zone,
+      width: 200
     },
     {
       field: 'clientName',
       headerName: labels.client,
-      flex: 1
+      width: 280
     },
     {
       field: 'amount',
       headerName: labels.amount,
-      flex: 1,
-      type: 'number'
+      type: 'number',
+      width: 130
     },
     {
       field: 'volume',
       headerName: labels.volume,
-      flex: 1,
-      type: 'number'
+      type: 'number',
+      width: 130
     },
     {
       field: 'notes',
       headerName: labels.notes,
-      flex: 1
+      width: 176
     }
   ]
 
@@ -287,12 +299,7 @@ const GenerateOutboundTransportation = () => {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField
-                name='volume'
-                label={labels.volume}
-                value={formik.values.volume}
-                readOnly
-              />
+              <CustomNumberField name='volume' label={labels.volume} value={formik.values.volume} readOnly />
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
@@ -311,12 +318,7 @@ const GenerateOutboundTransportation = () => {
             </Grid>
 
             <Grid item xs={6}>
-              <CustomNumberField
-                name='capacity'
-                label={labels.capacity}
-                value={formik.values.capacity}
-                readOnly
-              />
+              <CustomNumberField name='capacity' label={labels.capacity} value={formik.values.capacity} readOnly />
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
@@ -339,12 +341,7 @@ const GenerateOutboundTransportation = () => {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField
-                name='balance'
-                label={labels.balance}
-                value={formik.values.balance}
-                readOnly
-              />
+              <CustomNumberField name='balance' label={labels.balance} value={formik.values.balance} readOnly />
             </Grid>
             <Grid item xs={6}>
               <Button
@@ -369,12 +366,7 @@ const GenerateOutboundTransportation = () => {
               </Button>
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField
-                name='amount'
-                label={labels.amount}
-                value={formik.values.amount}
-                readOnly
-              />
+              <CustomNumberField name='amount' label={labels.amount} value={formik.values.amount} readOnly />
             </Grid>
           </Grid>
         </Fixed>
