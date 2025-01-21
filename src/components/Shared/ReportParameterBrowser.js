@@ -40,33 +40,33 @@ const formatDateFrom = value => {
   return timestamp
 }
 
-const convertDateToCompactFormat = (input) => {
-  let date;
+const convertDateToCompactFormat = input => {
+  let date
 
   if (typeof input === 'number' || (typeof input === 'string' && !isNaN(input))) {
-    date = new Date(Number(input));
+    date = new Date(Number(input))
   } else if (input instanceof Date) {
-    date = input;
+    date = input
   }
 
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hour = String(date.getHours()).padStart(2, '0');
-  const minute = String(date.getMinutes()).padStart(2, '0');
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hour = String(date.getHours()).padStart(2, '0')
+  const minute = String(date.getMinutes()).padStart(2, '0')
 
-  return `${year}${month}${day}${hour}${minute}`;
-};
+  return `${year}${month}${day}${hour}${minute}`
+}
 
-const convertCompactFormatToDate = (compactDate) => {
-  const year = parseInt(compactDate.slice(0, 4), 10);
-  const month = parseInt(compactDate.slice(4, 6), 10) - 1;
-  const day = parseInt(compactDate.slice(6, 8), 10);
-  const hour = parseInt(compactDate.slice(8, 10), 10);
-  const minute = parseInt(compactDate.slice(10, 12), 10);
+const convertCompactFormatToDate = compactDate => {
+  const year = parseInt(compactDate.slice(0, 4), 10)
+  const month = parseInt(compactDate.slice(4, 6), 10) - 1
+  const day = parseInt(compactDate.slice(6, 8), 10)
+  const hour = parseInt(compactDate.slice(8, 10), 10)
+  const minute = parseInt(compactDate.slice(10, 12), 10)
 
-  return new Date(year, month, day, hour, minute);
-};
+  return new Date(year, month, day, hour, minute)
+}
 
 const GetLookup = ({ field, formik }) => {
   const apiDetails = field.apiDetails
@@ -285,7 +285,6 @@ const GetDateTimePicker = ({ field, formik, rpbParams }) => {
   )
 }
 
-
 const GetTextField = ({ field, formik }) => {
   return (
     <Grid item xs={12} key={field.id}>
@@ -324,11 +323,9 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     getRequest({
       extension: SystemRepository.ParameterDefinition,
       parameters: parameters
+    }).then(res => {
+      setParameters(res.list)
     })
-      .then(res => {
-        setParameters(res.list)
-      })
-      .catch(e => {})
   }
 
   const fetchData = async field => {
@@ -371,11 +368,12 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
         acc[id] = {
           ...param,
           defaultValue: item?.defaultValue,
-          value: param?.controlType === 4
-          ? formatDateTo(param?.value) 
-          : param?.controlType === 7
-          ? convertDateToCompactFormat(param?.value)
-          : param?.value
+          value:
+            param?.controlType === 4
+              ? formatDateTo(param?.value)
+              : param?.controlType === 7
+              ? convertDateToCompactFormat(param?.value)
+              : param?.value
         }
 
         return acc
@@ -417,11 +415,12 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
       acc[item?.fieldId] = {
         ...item,
         defaultValue: item?.defaultValue,
-        value: item?.controlType === 4
-          ? formatDateFrom(item.value) 
-          : item?.controlType === 7
-          ? convertCompactFormatToDate(item?.value)
-          : item.value
+        value:
+          item?.controlType === 4
+            ? formatDateFrom(item.value)
+            : item?.controlType === 7
+            ? convertCompactFormatToDate(item?.value)
+            : item.value
       }
 
       return acc

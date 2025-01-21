@@ -180,7 +180,6 @@ export const FinancialRepository = {
   AgingLeg: {
     qry: service + 'qryAGL'
   },
-
   MetalReceiptVoucher: {
     set2: service + 'set2MRV',
     get: service + 'qryMTI'
@@ -196,5 +195,8 @@ export const FinancialRepository = {
     qry: service + 'qryMTX',
     page: service + 'pageMTX',
     snapshot: service + 'snapshotMTX'
+  },
+  AgingDoc: {
+    snapshot: service + 'snapshotAGD'
   }
 }

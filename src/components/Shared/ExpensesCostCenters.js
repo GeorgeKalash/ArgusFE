@@ -27,18 +27,16 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
       ]
     },
     onSubmit: async obj => {
-      try {
-        const costCenters = obj.costCenters.map((costCenter, index) => ({
-          ...costCenter,
-          id:  index + 1,
-          ccSeqNo: index + 1,
-          seqNo:  row.id,
-          pvId: recordId
-        }))
+      const costCenters = obj.costCenters.map((costCenter, index) => ({
+        ...costCenter,
+        id: index + 1,
+        ccSeqNo: index + 1,
+        seqNo: row.id,
+        pvId: recordId
+      }))
 
-        updateRow({ changes: { costCenters } })
-        window.close()
-      } catch (error) {}
+      updateRow({ changes: { costCenters } })
+      window.close()
     }
   })
 
@@ -90,7 +88,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
 
   const balance = row.amount - totalAmount
 
-  const canSubmit = balance > 0 || balance < 0;
+  const canSubmit = balance > 0 || balance < 0
 
   return (
     <FormShell
