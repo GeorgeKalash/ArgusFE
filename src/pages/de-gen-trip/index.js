@@ -185,12 +185,14 @@ const GenerateOutboundTransportation = () => {
     {
       field: 'amount',
       headerName: labels.amount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'volume',
       headerName: labels.volume,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'notes',
@@ -235,12 +237,14 @@ const GenerateOutboundTransportation = () => {
     {
       field: 'amount',
       headerName: labels.amount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'volume',
       headerName: labels.volume,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'notes',
@@ -287,9 +291,7 @@ const GenerateOutboundTransportation = () => {
                 name='volume'
                 label={labels.volume}
                 value={formik.values.volume}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('volume', '')}
-                error={formik.touched.volume && Boolean(formik.errors.volume)}
+                readOnly
               />
             </Grid>
             <Grid item xs={6}>
@@ -314,7 +316,6 @@ const GenerateOutboundTransportation = () => {
                 label={labels.capacity}
                 value={formik.values.capacity}
                 readOnly
-                error={formik.touched.capacity && Boolean(formik.errors.capacity)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -343,7 +344,6 @@ const GenerateOutboundTransportation = () => {
                 label={labels.balance}
                 value={formik.values.balance}
                 readOnly
-                error={formik.touched.balance && Boolean(formik.errors.balance)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -374,7 +374,6 @@ const GenerateOutboundTransportation = () => {
                 label={labels.amount}
                 value={formik.values.amount}
                 readOnly
-                error={formik.touched.amount && Boolean(formik.errors.amount)}
               />
             </Grid>
           </Grid>
