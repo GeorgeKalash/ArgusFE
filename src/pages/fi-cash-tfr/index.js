@@ -130,7 +130,7 @@ const FiCashTransfers = () => {
         maxAccess: access
       },
       width: 1000,
-      height: 680,
+      height: 600,
       title: labels.Transfers
     })
   }
