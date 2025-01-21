@@ -26,7 +26,7 @@ const IvMaterialsTransfer = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: IVReplenishementRepository.MaterialReplenishment.qry,
+      extension: IVReplenishementRepository.MaterialReplenishment.page,
       parameters: `_filter=&_size=30&_startAt=${_startAt}&_sortBy=recordId desc&_pageSize=${_pageSize}&_params=${
         params || ''
       }`
@@ -34,7 +34,7 @@ const IvMaterialsTransfer = () => {
 
     response.list = response?.list?.map(item => ({
       ...item,
-      isVerified: item?.isVerified === null ? false : item?.isVerified
+      isVerified: !!item?.isVerified
     }))
 
     return { ...response, _startAt: _startAt }
@@ -62,7 +62,7 @@ const IvMaterialsTransfer = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: IVReplenishementRepository.MaterialReplenishment.qry,
+    endpointId: IVReplenishementRepository.MaterialReplenishment.page,
     datasetId: ResourceIds.MaterialReplenishment,
     filter: {
       filterFn: fetchWithFilter

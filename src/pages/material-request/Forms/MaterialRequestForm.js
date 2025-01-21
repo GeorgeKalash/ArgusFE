@@ -28,7 +28,7 @@ import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRep
 
 export default function MaterialRequestForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -66,7 +66,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
         sku: '',
         itemName: null,
         itemId: null,
-        qty: null,
+        qty: 0,
         notes: '',
         onHandSite: null,
         onHandGlobal: null,
@@ -82,7 +82,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
   }
 
   const invalidate = useInvalidate({
-    endpointId: IVReplenishementRepository.MaterialReplenishment.qry
+    endpointId: IVReplenishementRepository.MaterialReplenishment.page
   })
 
   async function getDefaultFromSiteId() {
@@ -95,7 +95,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     } else {
       const defaultFromSiteId = defaultsData?.list?.find(({ key }) => key === 'de_siteId')
 
-      if (defaultFromSiteId?.value) formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value || ''))
+      if (defaultFromSiteId?.value) formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value))
     }
   }
 
@@ -147,8 +147,6 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
         extension: IVReplenishementRepository.MaterialReplenishment.set2,
         record: JSON.stringify(resultObject)
       })
-
-      console.log(values.recordId)
 
       if (!values.recordId) {
         toast.success(platformLabels.Added)
@@ -206,7 +204,6 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
 
       return null
     } else if (res.count > 0 && res.list[0].siteId != 0) {
-      console.log(res.list[0].onhand)
       formik.setFieldValue('onHandSite', res.list[0].onhand)
 
       return res.list[0].onhand
@@ -227,8 +224,8 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
         valueField: 'recordId',
         displayField: 'sku',
         mandatory: true,
-        readOnly: isClosed,
-        displayFieldWidth: 4,
+        readOnly: isClosed || isCancelled,
+        displayFieldWidth: 3,
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'msId', to: 'msId' },
@@ -282,7 +279,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
         store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
-        readOnly: isClosed,
+        readOnly: isClosed || isCancelled,
         mapping: [
           { from: 'reference', to: 'muRef' },
           { from: 'qty', to: 'muQty' },
@@ -307,7 +304,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       label: labels.qty,
       name: 'qty',
       props: {
-        readOnly: isClosed
+        readOnly: isClosed || isCancelled
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
@@ -436,7 +433,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
-      disabled: !isClosed
+      disabled: !isClosed || !isCancelled
     },
     {
       key: 'Close',
@@ -532,7 +529,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       previewBtnClicked={previewBtnClicked}
       actions={actions}
       functionId={SystemFunction.MaterialRequest}
-      disabledSubmit={isClosed}
+      disabledSubmit={isClosed || isCancelled}
     >
       <VertLayout>
         <Grow>
@@ -546,7 +543,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     valueField='recordId'
                     displayField='name'
                     values={formik?.values}
@@ -563,7 +560,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
                     name='reference'
                     label={labels.reference}
                     value={formik?.values?.reference}
-                    readOnly={isClosed || editMode}
+                    readOnly={isClosed || isCancelled || editMode}
                     maxAccess={!editMode && maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
@@ -578,7 +575,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
                     required
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('date', '')}
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     error={formik.touched.date && Boolean(formik.errors.date)}
                     maxAccess={maxAccess}
                   />
@@ -588,8 +585,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
                     endpointId={companyStructureRepository.DepartmentFilters.qry}
                     parameters={`_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`}
                     name='departmentId'
-                    readOnly={editMode}
-                    required
+                    readOnly={isClosed || isCancelled}
                     label={labels.department}
                     values={formik.values}
                     displayField='name'
@@ -608,8 +604,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
-                    readOnly={editMode}
-                    required
+                    readOnly={isClosed || isCancelled}
                     refresh={editMode}
                     label={labels.site}
                     values={formik.values}
@@ -625,7 +620,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='fromSiteId'
-                    readOnly={isClosed || formik?.values?.items?.some(transfer => transfer.sku)}
+                    readOnly={isClosed || isCancelled || formik?.values?.items?.some(transfer => transfer.sku)}
                     label={labels.fromSite}
                     values={formik.values}
                     displayField={['reference', 'name']}
@@ -647,7 +642,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
                     name='notes'
                     label={labels.notes}
                     value={formik?.values?.notes}
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     maxLength='200'
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
@@ -679,7 +674,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
             value={formik?.values?.items}
             error={formik?.errors?.items}
             columns={columns}
-            allowDelete={!isClosed}
+            allowDelete={!isClosed || !isCancelled}
           />
         </Grow>
       </VertLayout>

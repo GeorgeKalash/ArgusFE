@@ -21,7 +21,7 @@ export const IVReplenishementRepository = {
     generate: service + 'generateTFR'
   },
   MaterialReplenishment: {
-    qry: service + 'qryREQ',
+    page: service + 'pageREQ',
     del: service + 'delREQ',
     get: service + 'getREQ',
     set2: service + 'set2REQ',
