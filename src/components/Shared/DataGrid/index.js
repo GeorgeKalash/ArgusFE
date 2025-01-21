@@ -527,7 +527,13 @@ export function DataGrid({
   }
 
   const ActionCellRenderer = params => {
-    if (deleteHideCondition.includes(params.data.status)) return
+    if (deleteHideCondition) {
+      const shouldHide = Object.entries(deleteHideCondition).some(([key, value]) =>
+        Array.isArray(value) ? value.includes(params.data[key]) : params.data[key] === value
+      )
+
+      if (shouldHide) return null
+    }
 
     return (
       <Box

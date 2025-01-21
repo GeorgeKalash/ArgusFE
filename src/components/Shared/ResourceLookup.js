@@ -45,7 +45,6 @@ export const ResourceLookup = ({
           setStore(res.list)
           setRenderOption(true)
         })
-        .catch(error => {})
         .finally(() => {
           setIsLoading(false)
           setRenderOption(true)

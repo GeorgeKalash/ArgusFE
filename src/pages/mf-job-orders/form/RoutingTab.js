@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -15,6 +15,7 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const operationStore = useRef([])
+  const [allWorkCenters, setWorkCenters] = useState([])
   const editMode = !!recordId
 
   const { formik } = useForm({
@@ -42,8 +43,9 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
         yup.object({
           seqNo: yup.string().required(),
           name: yup.string().required(),
-          operationId: yup.string().required(),
-          workCenterId: yup.string().required()
+          operationName: yup.string().required(),
+          workCenterRef: yup.string().required(),
+          workCenterName: yup.string().required()
         })
       )
     }),
@@ -68,9 +70,8 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
       component: 'numberfield',
       label: labels.seqNo,
       name: 'seqNo',
-      flex: 2,
       propsReducer({ row, props }) {
-        return { ...props, readOnly: row.status == 1 || row.status == 4 }
+        return { ...props, readOnly: [1, 2, 3, 4].includes(row.status) }
       }
     },
     {
@@ -79,14 +80,14 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
       name: 'name',
       flex: 2,
       propsReducer({ row, props }) {
-        return { ...props, readOnly: row.status == 1 }
+        return { ...props, readOnly: [1, 2, 3, 4].includes(row.status) }
       }
     },
     {
       component: 'resourcelookup',
       label: labels.wcRef,
       name: 'workCenterRef',
-      flex: 3,
+      flex: 2,
       props: {
         endpointId: ManufacturingRepository.WorkCenter.snapshot,
         displayField: 'reference',
@@ -104,7 +105,14 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.workCenterId) {
-          update({ workCenterId: '', workCenterRef: '', workCenterName: '' })
+          update({
+            workCenterId: '',
+            workCenterRef: '',
+            workCenterName: '',
+            operationId: '',
+            operationRef: '',
+            operationName: ''
+          })
 
           return
         }
@@ -116,14 +124,14 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
         await fillOperation(newRow?.workCenterId)
       },
       propsReducer({ row, props }) {
-        return { ...props, readOnly: row.status == 1 || row.status == 4 }
+        return { ...props, readOnly: [1, 2, 3, 4].includes(row.status) }
       }
     },
     {
       component: 'textfield',
       label: labels.wcName,
       name: 'workCenterName',
-      flex: 3,
+      flex: 2,
       props: {
         readOnly: true
       }
@@ -132,9 +140,9 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
       component: 'resourcecombobox',
       label: labels.operation,
       name: 'operationName',
-      flex: 3,
+      flex: 2,
       props: {
-        store: operationStore,
+        store: operationStore?.current,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -149,7 +157,11 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
         displayFieldWidth: 2
       },
       propsReducer({ row, props }) {
-        return { ...props, store: operationStore.current, readOnly: row.status == 1 || row.status == 4 }
+        return {
+          ...props,
+          store: operationStore.current,
+          readOnly: [1, 2, 3, 4].includes(row.status)
+        }
       }
     },
     {
@@ -164,8 +176,8 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
     {
       component: 'numberfield',
       label: labels.qtyIn,
-      name: 'qtyIn',
       flex: 2,
+      name: 'qtyIn',
       props: {
         readOnly: true
       }
@@ -173,6 +185,7 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
     {
       component: 'numberfield',
       label: labels.pcsIn,
+      flex: 2,
       name: 'pcsIn',
       props: {
         readOnly: true
@@ -181,6 +194,7 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
     {
       component: 'numberfield',
       label: labels.qty,
+      flex: 2,
       name: 'qty',
       props: {
         readOnly: true
@@ -189,6 +203,7 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
     {
       component: 'numberfield',
       label: labels.pcs,
+      flex: 2,
       name: 'pcs',
       props: {
         readOnly: true
@@ -218,22 +233,23 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
   }
 
   async function fillOperation(wcId) {
-    if (!wcId) {
-      operationStore.current = []
+    operationStore.current = []
+    const currentWc = allWorkCenters?.find(wc => parseInt(wc.workCenterId) === wcId)
+    if (currentWc) operationStore.current = [currentWc]
+  }
 
-      return
-    }
-
+  async function fetchAllWorkCenters() {
     const res = await getRequest({
       extension: ManufacturingRepository.Operation.qry,
-      parameters: `_workCenterId=${wcId}&_startAt=0&_pageSize=100&`
+      parameters: `_workCenterId=${0}&_startAt=0&_pageSize=1000&`
     })
-    operationStore.current = res?.list || []
+    setWorkCenters(res?.list)
   }
 
   useEffect(() => {
     ;(async function () {
       await fetchGridData()
+      await fetchAllWorkCenters()
     })()
   }, [])
 
@@ -259,9 +275,9 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
             columns={columns}
             name='routings'
             maxAccess={maxAccess}
-            deleteHideCondition={[1, 4]}
+            deleteHideCondition={{ status: [1, 2, 3, 4] }}
             onSelectionChange={(row, update, field) => {
-              if (field == 'workCenterRef') fillOperation(row?.workCenterId)
+              if (field == 'operationName') fillOperation(row?.workCenterId)
             }}
           />
         </Grow>
