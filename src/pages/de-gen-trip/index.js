@@ -1,0 +1,427 @@
+import { useState, useContext, useEffect } from 'react'
+import toast from 'react-hot-toast'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import Table from 'src/components/Shared/Table'
+import { useResourceQuery } from 'src/hooks/resource'
+import { Grid, Button } from '@mui/material'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { useForm } from 'src/hooks/form'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import FormShell from 'src/components/Shared/FormShell'
+import { ControlContext } from 'src/providers/ControlContext'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import OutboundTranspForm from '../outbound-transportation/forms/OutboundTranspForm'
+import { useWindow } from 'src/windows'
+
+const GenerateOutboundTransportation = () => {
+  const [data, setData] = useState([])
+  const [deliveryOrders, setDeliveryOrders] = useState({ list: [] })
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+
+  const { labels, access } = useResourceQuery({
+    datasetId: ResourceIds.GenerateTrip
+  })
+
+  const { labels: _labels, access: maxAccess } = useResourceQuery({
+    datasetId: ResourceIds.Trip
+  })
+
+  const { formik } = useForm({
+    initialValues: {
+      truckId: '',
+      vehicleId: '',
+      szId: '',
+      capacity: '',
+      balance: ''
+    },
+    access,
+    enableReinitialize: true,
+    validateOnChange: true,
+    onSubmit: async obj => {
+      const data = {
+        vehicleId: obj.vehicleId,
+        driverId: obj.driverId,
+        tripOrderIDs: deliveryOrders.list.map(order => order.recordId)
+      }
+
+      const res = await postRequest({
+        extension: DeliveryRepository.Trip.generate,
+        record: JSON.stringify(data)
+      })
+
+      await openForm(res.recordId)
+
+      toast.success(platformLabels.Generated)
+    }
+  })
+
+  async function openForm(recordId) {
+    stack({
+      Component: OutboundTranspForm,
+      props: {
+        labels: _labels,
+        recordId,
+        maxAccess
+      },
+      width: 1300,
+      height: 700,
+      title: _labels.outboundTransp
+    })
+  }
+
+  const onRowCheckboxChange = (row, checked) => {
+    if (checked) {
+      setDeliveryOrders(prev => {
+        const itemToAdd = data.list.find(item => item.recordId === row.recordId)
+        if (!itemToAdd) return prev
+
+        return {
+          ...prev,
+          list: [...(prev?.list || []), itemToAdd],
+          count: (prev?.list?.length || 0) + 1
+        }
+      })
+
+      setData(prev => ({
+        ...prev,
+        list: prev?.list?.filter(item => item.recordId !== row.recordId) || [],
+        count: (prev?.list?.length || 0) - 1
+      }))
+    } else {
+      setData(prev => {
+        const itemToAdd = deliveryOrders.list.find(item => item.recordId === row.recordId)
+        if (!itemToAdd || itemToAdd.szId !== formik.values.szId) return prev // Check saleZone match
+
+        return {
+          ...prev,
+          list: [...(prev?.list || []), itemToAdd],
+          count: (prev?.list?.length || 0) + 1
+        }
+      })
+
+      setDeliveryOrders(prev => ({
+        ...prev,
+        list: prev?.list?.filter(item => item.recordId !== row.recordId) || [],
+        count: (prev?.list?.length || 0) - 1
+      }))
+    }
+  }
+
+  const onPreview = async () => {
+    const orders = await getRequest({
+      extension: DeliveryRepository.GenerateTrip.undelivered,
+      parameters: `_szId=${formik.values.szId}`
+    })
+
+    if (!orders || !orders.list) {
+      return
+    }
+
+    const filteredOrders = {
+      ...orders,
+      list:
+        orders.list.filter(
+          order => !deliveryOrders?.list?.some(deliveredOrder => deliveredOrder.recordId === order.recordId)
+        ) || []
+    }
+
+    setData({
+      ...filteredOrders,
+      list: filteredOrders.list,
+      count: filteredOrders.list.length
+    })
+  }
+
+  useEffect(() => {
+    const totalVolume = deliveryOrders?.list?.reduce((sum, order) => sum + (order.volume || 0), 0) || 0
+    const totalAmount = deliveryOrders?.list?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0
+
+    formik.setFieldValue('volume', totalVolume)
+    formik.setFieldValue('amount', totalAmount)
+
+    formik.setFieldValue('balance', totalVolume - formik.values.capacity)
+  }, [deliveryOrders])
+
+  const columnsOrders = [
+    {
+      width: 100,
+      cellRenderer: row => (
+        <CustomCheckBox
+          name='checked'
+          value={deliveryOrders.list.some(item => item.recordId === row.data.recordId)}
+          onChange={e => onRowCheckboxChange(row.data, e.target.value)}
+        />
+      )
+    },
+    {
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
+      field: 'spName',
+      headerName: labels.salesPerson,
+      flex: 1
+    },
+    {
+      field: 'clientName',
+      headerName: labels.client,
+      flex: 1
+    },
+    {
+      field: 'amount',
+      headerName: labels.amount,
+      flex: 1
+    },
+    {
+      field: 'volume',
+      headerName: labels.volume,
+      flex: 1
+    },
+    {
+      field: 'notes',
+      headerName: labels.notes,
+      flex: 1
+    }
+  ]
+
+  const columnsDeliveryOrders = [
+    {
+      width: 100,
+      cellRenderer: row => (
+        <CustomCheckBox name='checked' value={true} onChange={e => onRowCheckboxChange(row.data, e.target.checked)} />
+      )
+    },
+    {
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
+      field: 'szName',
+      headerName: labels.zone,
+      flex: 1
+    },
+    {
+      field: 'spName',
+      headerName: labels.salesPerson,
+      flex: 1
+    },
+    {
+      field: 'clientName',
+      headerName: labels.client,
+      flex: 1
+    },
+    {
+      field: 'amount',
+      headerName: labels.amount,
+      flex: 1
+    },
+    {
+      field: 'volume',
+      headerName: labels.volume,
+      flex: 1
+    },
+    {
+      field: 'notes',
+      headerName: labels.notes,
+      flex: 1
+    }
+  ]
+
+  return (
+    <FormShell
+      resourceId={ResourceIds.GenerateTrip}
+      form={formik}
+      maxAccess={access}
+      isCleared={false}
+      isSaved={false}
+      isSavedClear={false}
+      infoVisible={false}
+    >
+      <VertLayout>
+        <Fixed>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={DeliveryRepository.Vehicle.qry}
+                name='vehicleId'
+                label={labels.truck}
+                valueField='recordId'
+                displayField={['plateNo', 'name']}
+                columnsInDropDown={[
+                  { key: 'plateNo', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('vehicleId', newValue?.recordId)
+                  formik.setFieldValue('capacity', newValue?.capacityVolume)
+                }}
+                error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
+                maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomNumberField
+                name='volume'
+                label={labels.volume}
+                value={formik.values.volume}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('volume', '')}
+                error={formik.touched.volume && Boolean(formik.errors.volume)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={DeliveryRepository.Driver.qry}
+                name='driverId'
+                label={labels.driver}
+                valueField='recordId'
+                displayField={'name'}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('driverId', newValue ? newValue.recordId : '')
+                }}
+                error={formik.touched.driverId && Boolean(formik.errors.driverId)}
+                maxAccess={access}
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <CustomNumberField
+                name='capacity'
+                label={labels.capacity}
+                value={formik.values.capacity}
+                readOnly
+                error={formik.touched.capacity && Boolean(formik.errors.capacity)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={SaleRepository.SalesZone.qry}
+                parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
+                name='szId'
+                label={labels.saleZone}
+                valueField='recordId'
+                displayField={['szRef', 'name']}
+                columnsInDropDown={[
+                  { key: 'szRef', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('szId', newValue ? newValue.recordId : '')
+                }}
+                error={formik.touched.szId && Boolean(formik.errors.szId)}
+                maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomNumberField
+                name='balance'
+                label={labels.balance}
+                value={formik.values.balance}
+                readOnly
+                error={formik.touched.balance && Boolean(formik.errors.balance)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <Button
+                onClick={() => onPreview()}
+                variant='contained'
+                disabled={!formik.values.vehicleId || !formik.values.szId}
+                sx={{
+                  mt: 1,
+                  mr: 1,
+                  backgroundColor: '#231f20',
+                  '&:hover': {
+                    backgroundColor: '#231f20',
+                    opacity: 0.8
+                  },
+                  width: '65px !important',
+                  height: '40px',
+                  objectFit: 'contain',
+                  minWidth: '30px !important'
+                }}
+              >
+                {platformLabels.Preview}
+              </Button>
+            </Grid>
+            <Grid item xs={6}>
+              <CustomNumberField
+                name='amount'
+                label={labels.amount}
+                value={formik.values.amount}
+                readOnly
+                error={formik.touched.amount && Boolean(formik.errors.amount)}
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
+        <Grow>
+          <Table
+            columns={columnsOrders}
+            gridData={data}
+            rowId={['recordId']}
+            isLoading={false}
+            pagination={false}
+            maxAccess={access}
+          />
+        </Grow>
+        <Grow>
+          <Table
+            columns={columnsDeliveryOrders}
+            gridData={deliveryOrders}
+            rowId={['recordId']}
+            isLoading={false}
+            pagination={false}
+            maxAccess={access}
+          />
+        </Grow>
+        <Grid item mt={2} display={'flex'} justifyContent={'flex-end'}>
+          <Button
+            onClick={() => formik.handleSubmit()}
+            variant='contained'
+            sx={{
+              mr: 1,
+              backgroundColor: '#231f20',
+              '&:hover': {
+                backgroundColor: '#231f20',
+                opacity: 0.8
+              },
+              width: '85px !important',
+              height: '40px',
+              objectFit: 'contain',
+              minWidth: '30px !important'
+            }}
+          >
+            {platformLabels.Generate}
+          </Button>
+        </Grid>
+      </VertLayout>
+    </FormShell>
+  )
+}
+
+export default GenerateOutboundTransportation
