@@ -75,14 +75,18 @@ const CtDefaults = ({ _labels, access }) => {
     defaultsData.list.forEach(obj => {
       if (arrayAllow.includes(obj.key)) {
         const parsedValue = obj.value ? parseInt(obj.value, 10) : null
-        myObject[obj.key] = parsedValue
-        formik.setFieldValue(obj.key, parsedValue)
+        if (formik.values[obj.key] !== parsedValue) {
+          myObject[obj.key] = parsedValue
+          formik.setFieldValue(obj.key, parsedValue)
+        }
       }
 
       if (['ct_default_civ_clientName', 'ct_default_civ_clientRef'].includes(obj.key)) {
         const value = obj.value || null
-        myObject[obj.key] = value
-        formik.setFieldValue(obj.key, value)
+        if (formik.values[obj.key] !== value) {
+          myObject[obj.key] = value
+          formik.setFieldValue(obj.key, value)
+        }
       }
     })
     ;['ct-nra-individual', 'ct-nra-corporate'].forEach(key => {
