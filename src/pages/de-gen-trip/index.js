@@ -98,7 +98,7 @@ const GenerateOutboundTransportation = () => {
     } else {
       setData(prev => {
         const itemToAdd = deliveryOrders.list.find(item => item.recordId === row.recordId)
-        if (!itemToAdd || itemToAdd.szId !== formik.values.szId) return prev // Check saleZone match
+        if (!itemToAdd || itemToAdd.szId !== formik.values.szId) return prev 
 
         return {
           ...prev,
