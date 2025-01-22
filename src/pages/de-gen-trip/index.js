@@ -221,7 +221,7 @@ const GenerateOutboundTransportation = () => {
     {
       field: 'notes',
       headerName: labels.notes,
-      width: 350
+      flex: 1
     }
   ]
 
@@ -273,7 +273,7 @@ const GenerateOutboundTransportation = () => {
     {
       field: 'notes',
       headerName: labels.notes,
-      width: 170
+      flex: 1
     }
   ]
 
