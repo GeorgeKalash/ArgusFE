@@ -19,6 +19,7 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import OutboundTranspForm from '../outbound-transportation/forms/OutboundTranspForm'
 import { useWindow } from 'src/windows'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
 
 const GenerateOutboundTransportation = () => {
   const [data, setData] = useState([])
@@ -47,11 +48,6 @@ const GenerateOutboundTransportation = () => {
     validationSchema: yup.object({
       driverId: yup.number().required(),
       vehicleId: yup.number().required(),
-      volume: yup.number().test(function (value) {
-        const { capacity } = this.parent
-
-        return parseInt(value) <= parseInt(capacity)
-      })
     }),
     maxAccess: access,
     enableReinitialize: true,
@@ -139,10 +135,10 @@ const GenerateOutboundTransportation = () => {
     }
   }
 
-  const onPreview = async () => {
+  const onPreview = async (szId) => {
     const orders = await getRequest({
       extension: DeliveryRepository.GenerateTrip.undelivered,
-      parameters: `_szId=${formik.values.szId}`
+      parameters: `_szId=${szId || 0}`
     })
 
     if (!orders || !orders.list) {
@@ -174,6 +170,22 @@ const GenerateOutboundTransportation = () => {
     formik.setFieldValue('balance', formik.values.capacity - totalVolume)
   }, [deliveryOrders])
 
+  const Confirmation = (row, value) => {
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: platformLabels.DeleteConf,
+        okButtonAction: () => onRowCheckboxChange(row, value),
+        fullScreen: false,
+        close: true,
+        height: 200,
+      },
+      width: 400,
+      height: 150,
+      title: platformLabels.Confirmation
+    })
+  }
+
   const columnsOrders = [
     {
       width: 50,
@@ -183,53 +195,6 @@ const GenerateOutboundTransportation = () => {
           value={deliveryOrders.list.some(item => item.recordId === row.data.recordId)}
           onChange={e => onRowCheckboxChange(row.data, e.target.value)}
         />
-      )
-    },
-    {
-      field: 'date',
-      headerName: labels.date,
-      type: 'date',
-      width: 130
-    },
-    {
-      field: 'reference',
-      headerName: labels.reference,
-      width: 130
-    },
-    {
-      field: 'spName',
-      headerName: labels.salesPerson,
-      width: 200
-    },
-    {
-      field: 'clientName',
-      headerName: labels.client,
-      width: 280
-    },
-    {
-      field: 'amount',
-      headerName: labels.amount,
-      type: 'number',
-      width: 130
-    },
-    {
-      field: 'volume',
-      headerName: labels.volume,
-      type: 'number',
-      width: 130
-    },
-    {
-      field: 'notes',
-      headerName: labels.notes,
-      flex: 1
-    }
-  ]
-
-  const columnsDeliveryOrders = [
-    {
-      width: 50,
-      cellRenderer: row => (
-        <CustomCheckBox name='checked' value={true} onChange={e => onRowCheckboxChange(row.data, e.target.checked)} />
       )
     },
     {
@@ -276,6 +241,62 @@ const GenerateOutboundTransportation = () => {
       flex: 1
     }
   ]
+
+  const columnsDeliveryOrders = [
+    {
+      width: 50,
+      cellRenderer: row => (
+        <CustomCheckBox name='checked' value={true} onChange={e => Confirmation(row.data, e.target.checked)} />
+      )
+    },
+    {
+      field: 'date',
+      headerName: labels.date,
+      type: 'date',
+      width: 130
+    },
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      width: 130
+    },
+    {
+      field: 'spName',
+      headerName: labels.salesPerson,
+      width: 200
+    },
+    {
+      field: 'szName',
+      headerName: labels.zone,
+      width: 200
+    },
+    {
+      field: 'clientName',
+      headerName: labels.client,
+      width: 280
+    },
+    {
+      field: 'amount',
+      headerName: labels.amount,
+      type: 'number',
+      width: 130
+    },
+    {
+      field: 'volume',
+      headerName: labels.volume,
+      type: 'number',
+      width: 130
+    },
+    {
+      field: 'notes',
+      headerName: labels.notes,
+      flex: 1
+    }
+  ]
+
+  useEffect(() => {
+    if (formik.values.vehicleId || formik.values?.szId) onPreview(formik.values?.szId)
+  }, [formik.values.szId])
 
   return (
     <FormShell
@@ -355,6 +376,7 @@ const GenerateOutboundTransportation = () => {
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('szId', newValue ? newValue.recordId : '')
+                  if (formik.values.vehicleId) onPreview(newValue?.recordId)
                 }}
                 error={formik.touched.szId && Boolean(formik.errors.szId)}
                 maxAccess={access}
@@ -363,28 +385,7 @@ const GenerateOutboundTransportation = () => {
             <Grid item xs={6}>
               <CustomNumberField name='balance' label={labels.balance} value={formik.values.balance} readOnly />
             </Grid>
-            <Grid item xs={6}>
-              <Button
-                onClick={() => onPreview()}
-                variant='contained'
-                disabled={!formik.values.vehicleId || !formik.values.szId}
-                sx={{
-                  mt: 1,
-                  mr: 1,
-                  backgroundColor: '#231f20',
-                  '&:hover': {
-                    backgroundColor: '#231f20',
-                    opacity: 0.8
-                  },
-                  width: '65px !important',
-                  height: '40px',
-                  objectFit: 'contain',
-                  minWidth: '30px !important'
-                }}
-              >
-                {platformLabels.Preview}
-              </Button>
-            </Grid>
+            <Grid item xs={6}></Grid>
             <Grid item xs={6}>
               <CustomNumberField name='amount' label={labels.amount} value={formik.values.amount} readOnly />
             </Grid>
