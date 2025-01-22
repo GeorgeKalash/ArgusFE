@@ -701,6 +701,21 @@ export default function DraftForm({ labels, access, recordId }) {
     formik.setFieldValue('search', value)
   }
 
+  const handleGridChange = (value, action, row) => {
+    if (action === 'delete') {
+      let updatedSerials = formik.values.serials
+
+      if (formik.values.search) {
+        setGridserials(value)
+      }
+
+      updatedSerials = updatedSerials.filter(item => item.id !== row.id)
+      formik.setFieldValue('serials', updatedSerials)
+    } else {
+      formik.setFieldValue('serials', value)
+    }
+  }
+
   function getDTD(dtId) {
     return getRequest({
       extension: SaleRepository.DocumentTypeDefault.get,
@@ -766,7 +781,7 @@ export default function DraftForm({ labels, access, recordId }) {
             acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, seqNo: seqNo }
           }
           acc[itemId].pcs += 1
-          acc[itemId].weight += parseFloat(weight || 0)
+          acc[itemId].weight = parseFloat((acc[itemId].weight + parseFloat(weight || 0)).toFixed(2))
         }
 
         return acc
@@ -1123,16 +1138,7 @@ export default function DraftForm({ labels, access, recordId }) {
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={(value, action, row) => {
-              let result = value
-              if (action == 'delete') {
-                if (formik?.values?.search) {
-                  setGridserials(result)
-                }
-                result = formik?.values?.serials?.filter(item => item?.id !== row?.id)
-              }
-              formik.setFieldValue('serials', result)
-            }}
+            onChange={(value, action, row) => handleGridChange(value, action, row)}
             value={filteredData || []}
             error={formik.errors.serials}
             columns={serialsColumns}
