@@ -131,6 +131,40 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     enabled: !!!recordId
   })
 
+  console.log(formikSettings.initialValuePayment, 'formikSettings.initialValuePayment')
+
+  async function fetchInfoByKey({ key }) {
+    const res = await getRequest({
+      extension: RTCLRepository.CtClientIndividual.get3,
+      parameters: `_key=${key}`
+    })
+    setIDInfoAutoFilled(false)
+
+    formik.setFieldValue('idNo', res.record.clientIDView.idNo)
+    formik.setFieldValue('firstName', res.record.clientIndividual.firstName)
+    formik.setFieldValue('clientId', res.record.clientId)
+    formik.setFieldValue('middleName', res.record.clientIndividual.middleName)
+    formik.setFieldValue('lastName', res.record.clientIndividual.lastName)
+    formik.setFieldValue('familyName', res.record.clientIndividual.familyName)
+    formik.setFieldValue('fl_firstName', res.record.clientIndividual.fl_firstName)
+    formik.setFieldValue('fl_lastName', res.record.clientIndividual.fl_lastName)
+    formik.setFieldValue('fl_middleName', res.record.clientIndividual.fl_middleName)
+    formik.setFieldValue('fl_familyName', res.record.clientIndividual.fl_familyName)
+    formik.setFieldValue('birthDate', formatDateFromApi(res.record.clientIndividual.birthDate))
+    formik.setFieldValue('resident', res.record.clientIndividual.isResident)
+    formik.setFieldValue('professionId', res.record.clientMaster.professionId)
+    formik.setFieldValue('sponsorName', res.record.clientIndividual.sponsorName)
+    formik.setFieldValue('id_type', res.record.clientIDView.idtId)
+    formik.setFieldValue('nationalityId', res.record.clientMaster.nationalityId)
+    formik.setFieldValue('nationalityType', res.record.clientIDView.idCountryId === 195 ? 1 : 2)
+    formik.setFieldValue('cellPhone', res.record.clientMaster.cellPhone)
+    formik.setFieldValue('expiryDate', formatDateFromApi(res.record.clientIDView.idExpiryDate))
+
+    setIDInfoAutoFilled(true)
+
+    return res.record
+  }
+
   const { formik } = useForm({
     maxAccess,
     initialValues,
@@ -146,9 +180,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       lastName: yup.string().required(),
       expiryDate: yup.string().required(),
       nationalityId: yup.string().required(),
-      cellPhone: yup.string().required(),
-      professionId: yup.string().required(),
       nationalityType: yup.number().required(),
+      professionId: yup.string().required(),
       operations: yup
         .array()
         .of(
@@ -309,7 +342,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             oldReference: null,
             otp: false,
             createdDate: formatDateToApi(values.date),
-            expiryDate: null,
+            expiryDate: values.expiryDate,
             professionId: values.professionId
           },
           clientIndividual: {
@@ -652,39 +685,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
       setInfoAutoFilled(true)
     }
-  }
-
-  async function fetchInfoByKey({ key }) {
-    await getRequest({
-      extension: RTCLRepository.CtClientIndividual.get3,
-      parameters: `_key=${key}`
-    }).then(res => {
-      setIDInfoAutoFilled(false)
-
-      formik.setFieldValue('idNo', res.record.clientIDView.idNo)
-      formik.setFieldValue('firstName', res.record.clientIndividual.firstName)
-      formik.setFieldValue('clientId', res.record.clientId)
-      formik.setFieldValue('middleName', res.record.clientIndividual.middleName)
-      formik.setFieldValue('lastName', res.record.clientIndividual.lastName)
-      formik.setFieldValue('familyName', res.record.clientIndividual.familyName)
-      formik.setFieldValue('fl_firstName', res.record.clientIndividual.fl_firstName)
-      formik.setFieldValue('fl_lastName', res.record.clientIndividual.fl_lastName)
-      formik.setFieldValue('fl_middleName', res.record.clientIndividual.fl_middleName)
-      formik.setFieldValue('fl_familyName', res.record.clientIndividual.fl_familyName)
-      formik.setFieldValue('birthDate', formatDateFromApi(res.record.clientIndividual.birthDate))
-      formik.setFieldValue('resident', res.record.clientIndividual.isResident)
-      formik.setFieldValue('professionId', res.record.clientMaster.professionId)
-      formik.setFieldValue('sponsorName', res.record.clientIndividual.sponsorName)
-      formik.setFieldValue('id_type', res.record.clientIDView.idtId)
-      formik.setFieldValue('nationalityId', res.record.clientMaster.nationalityId)
-      formik.setFieldValue('nationalityType', res.record.clientMaster.nationalityType)
-      formik.setFieldValue('cellPhone', res.record.clientMaster.cellPhone)
-      formik.setFieldValue('expiryDate', formatDateFromApi(res.record.clientIDView.idExpiryDate))
-
-      setIDInfoAutoFilled(true)
-
-      return res.record
-    })
   }
 
   function viewAuthOTP() {
