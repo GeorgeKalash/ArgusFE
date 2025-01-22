@@ -47,7 +47,7 @@ const GenerateOutboundTransportation = () => {
     },
     validationSchema: yup.object({
       driverId: yup.number().required(),
-      vehicleId: yup.number().required(),
+      vehicleId: yup.number().required()
     }),
     maxAccess: access,
     enableReinitialize: true,
@@ -135,7 +135,7 @@ const GenerateOutboundTransportation = () => {
     }
   }
 
-  const onPreview = async (szId) => {
+  const onPreview = async szId => {
     const orders = await getRequest({
       extension: DeliveryRepository.GenerateTrip.undelivered,
       parameters: `_szId=${szId || 0}`
@@ -174,11 +174,10 @@ const GenerateOutboundTransportation = () => {
     stack({
       Component: ConfirmationDialog,
       props: {
-        DialogText: platformLabels.DeleteConf,
+        DialogText: platformLabels.UncheckConf,
         okButtonAction: () => onRowCheckboxChange(row, value),
         fullScreen: false,
-        close: true,
-        height: 200,
+        close: true
       },
       width: 400,
       height: 150,
@@ -311,7 +310,7 @@ const GenerateOutboundTransportation = () => {
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={6}>
+            <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={DeliveryRepository.Vehicle.qry}
                 name='vehicleId'
@@ -332,16 +331,7 @@ const GenerateOutboundTransportation = () => {
                 maxAccess={access}
               />
             </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='volume'
-                label={labels.volume}
-                value={formik.values.volume}
-                readOnly
-                error={formik.touched.volume && Boolean(formik.errors.volume)}
-              />
-            </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={DeliveryRepository.Driver.qry}
                 name='driverId'
@@ -357,8 +347,16 @@ const GenerateOutboundTransportation = () => {
                 maxAccess={access}
               />
             </Grid>
-
-            <Grid item xs={6}>
+            <Grid item xs={3}>
+              <CustomNumberField
+                name='volume'
+                label={labels.volume}
+                value={formik.values.volume}
+                readOnly
+                error={formik.touched.volume && Boolean(formik.errors.volume)}
+              />
+            </Grid>
+            <Grid item xs={3}>
               <CustomNumberField name='capacity' label={labels.capacity} value={formik.values.capacity} readOnly />
             </Grid>
             <Grid item xs={6}>
@@ -382,13 +380,13 @@ const GenerateOutboundTransportation = () => {
                 maxAccess={access}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={3}>
               <CustomNumberField name='balance' label={labels.balance} value={formik.values.balance} readOnly />
             </Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={6}>
+            <Grid item xs={3}>
               <CustomNumberField name='amount' label={labels.amount} value={formik.values.amount} readOnly />
             </Grid>
+            
           </Grid>
         </Fixed>
         <Grow>
