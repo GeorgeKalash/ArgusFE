@@ -122,7 +122,7 @@ const SAClients = () => {
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             <IconButton size='small' onClick={() => openPreview(row.data.recordId, row.data.addressId)}>
-              <img src='/images/password/forgotPWD1.png' alt={'preview'} />
+              <img src='/images/buttonsIcons/preview-black.png' alt={'preview'} />
             </IconButton>
           </Box>
         )
