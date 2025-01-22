@@ -4,6 +4,7 @@ import { useState } from 'react'
 import JobOrderForm from '../form/JobOrderForm'
 import RoutingTab from '../form/RoutingTab'
 import WorksheetTab from '../form/WorksheetTab'
+import OverheadTab from '../form/OverheadTab'
 
 const JobOrderWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -31,7 +32,7 @@ const JobOrderWindow = ({ recordId, labels, maxAccess }) => {
         <WorksheetTab recordId={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab}>
-        <JobOrderForm recordId={store} labels={labels} maxAccess={maxAccess} />
+        <OverheadTab recordId={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
     </>
   )

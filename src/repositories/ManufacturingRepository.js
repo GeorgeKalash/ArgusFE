@@ -170,5 +170,9 @@ export const ManufacturingRepository = {
     summary: service + 'summaryWST',
     post: service + 'postWST',
     qry2: service + 'qryWST2'
+  },
+  JobOverhead: {
+    qry: service + 'qryJOH',
+    set2: service + 'set2JOH'
   }
 }
