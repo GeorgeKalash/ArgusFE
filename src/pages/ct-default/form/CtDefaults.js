@@ -39,7 +39,7 @@ const CtDefaults = ({ _labels, access }) => {
   ]
   useEffect(() => {
     getDataResult()
-  }, [access])
+  }, [])
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -64,8 +64,22 @@ const CtDefaults = ({ _labels, access }) => {
       ct_default_civ_clientRef: null,
       ct_default_civ_clientName: null
     },
-    onSubmit: async values => {
-      await postRtDefault(values)
+    onSubmit: async obj => {
+      var data = []
+      Object.entries(obj).forEach(([key, value], i) => {
+        if (arrayAllow.includes(key)) {
+          const newObj = { key: key, value: value }
+          data.push(newObj)
+        }
+      })
+
+      await postRequest({
+        extension: CurrencyTradingSettingsRepository.Defaults.set2,
+        record: JSON.stringify({ sysDefaults: data })
+      }).then(() => {
+        toast.success(platformLabels.Updated)
+        updateDefaults(data)
+      })
     }
   })
 
@@ -99,7 +113,7 @@ const CtDefaults = ({ _labels, access }) => {
   const getNumberRange = (nraId, key) => {
     getRequest({
       extension: SystemRepository.NumberRange.get,
-      parameters: `_filter=` + '&_recordId=' + nraId
+      parameters: `_filter=&_recordId=${nraId}`
     }).then(res => {
       if (key === 'ct-nra-individual') {
         formik.setFieldValue('ct-nra-individual', res.record.recordId)
@@ -111,24 +125,6 @@ const CtDefaults = ({ _labels, access }) => {
         formik.setFieldValue('ct-nra-corporate-ref', res.record.reference)
         formik.setFieldValue('ct-nra-corporate-description', res.record.description)
       }
-    })
-  }
-
-  const postRtDefault = async obj => {
-    var data = []
-    Object.entries(obj).forEach(([key, value], i) => {
-      if (arrayAllow.includes(key)) {
-        const newObj = { key: key, value: value }
-        data.push(newObj)
-      }
-    })
-
-    await postRequest({
-      extension: CurrencyTradingSettingsRepository.Defaults.set2,
-      record: JSON.stringify({ sysDefaults: data })
-    }).then(res => {
-      toast.success(platformLabels.Updated)
-      updateDefaults(data)
     })
   }
 
