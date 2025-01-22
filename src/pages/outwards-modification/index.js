@@ -94,7 +94,7 @@ const OutwardsModification = () => {
         access
       },
       width: 1200,
-      height: 670,
+      height: 650,
       title: _labels.outwardsModification
     })
   }

@@ -26,6 +26,7 @@ import { useWindow } from 'src/windows'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import FieldSet from 'src/components/Shared/FieldSet'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function OutwardsReturnForm({
   labels,
@@ -130,7 +131,14 @@ export default function OutwardsReturnForm({
       dispersalName: yup.string().required(),
       vatAmount: yup.string().required(),
       settlementStatus: yup.number().required(),
-      lcAmount: yup.string().required(),
+      lcAmount: yup
+        .string()
+        .required()
+        .test(function (value) {
+          const { amount } = this.parent
+
+          return parseFloat(value) <= parseFloat(amount || 0)
+        }),
       exRate: yup.string().required(),
       commission: yup.string().required(),
       amount: yup.string().required()
@@ -615,17 +623,13 @@ export default function OutwardsReturnForm({
                     />
                   </Grid>
                   <Grid item xs={6}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          name='otpVerified'
-                          checked={formik.values?.otpVerified}
-                          disabled={true}
-                          onChange={formik.handleChange}
-                          maxAccess={access}
-                        />
-                      }
+                    <CustomCheckBox
+                      name='otpVerified'
+                      value={formik.values?.otpVerified}
+                      onChange={event => formik.setFieldValue('otpVerified', event.target.checked)}
                       label={labels.otpVerified}
+                      disabled={true}
+                      maxAccess={access}
                     />
                   </Grid>
                   <Grid item xs={6}>
@@ -661,15 +665,9 @@ export default function OutwardsReturnForm({
 
                         formik.setFieldValue('requestedBy', newValue?.key)
 
-                        if (newValue?.key === '1' || newValue?.key === '2') {
-                          const amount =
-                            originalLcAmount +
-                            (formik?.values?.commission || 0) +
-                            (formik?.values?.vatAmount || 0) -
-                            (formik?.values?.tdAmount || 0)
-
-                          formik.setFieldValue('lcAmount', amount)
-                          getExRateChangeStatus(formik?.values?.amount, amount)
+                        if (newValue?.key === '1') {
+                          formik.setFieldValue('lcAmount', formik?.values?.amount)
+                          getExRateChangeStatus(formik?.values?.amount, formik?.values?.amount)
                         } else if (newValue?.key === '3') {
                           formik.setFieldValue('lcAmount', originalLcAmount)
                           getExRateChangeStatus(formik?.values?.amount, originalLcAmount)
