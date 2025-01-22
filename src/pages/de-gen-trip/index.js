@@ -37,19 +37,20 @@ const GenerateOutboundTransportation = () => {
 
   const { formik } = useForm({
     initialValues: {
-      truckId: null,
       vehicleId: null,
+      driverId: null,
       szId: null,
-      capacity: null,
+      capacity: 0,
       balance: null,
-      volume: null
+      volume: 0
     },
     validationSchema: yup.object({
-      capacity: yup.number(),
+      driverId: yup.number().required(),
+      vehicleId: yup.number().required(),
       volume: yup.number().test(function (value) {
         const { capacity } = this.parent
 
-        return value <= capacity
+        return parseInt(value) <= parseInt(capacity)
       })
     }),
     maxAccess: access,
@@ -78,7 +79,8 @@ const GenerateOutboundTransportation = () => {
   const resetForm = () => {
     formik.setValues({
       ...formik.values,
-      volume: null,
+      volume: 0,
+      capacity: 0,
       amount: null,
       balance: null
     })
@@ -304,6 +306,7 @@ const GenerateOutboundTransportation = () => {
                   formik.setFieldValue('vehicleId', newValue?.recordId)
                   formik.setFieldValue('capacity', newValue?.capacityVolume)
                 }}
+                required
                 error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
                 maxAccess={access}
               />
@@ -328,6 +331,7 @@ const GenerateOutboundTransportation = () => {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('driverId', newValue ? newValue.recordId : '')
                 }}
+                required
                 error={formik.touched.driverId && Boolean(formik.errors.driverId)}
                 maxAccess={access}
               />
