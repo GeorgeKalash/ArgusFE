@@ -273,7 +273,7 @@ const GenerateOutboundTransportation = () => {
     {
       field: 'notes',
       headerName: labels.notes,
-      width: 176
+      width: 170
     }
   ]
 
