@@ -32,7 +32,7 @@ export default function PreviewForm({ labels, maxAccess, clientId }) {
 
     const addressId = resAddress.list.find(address => address.clientId === clientId)
 
-    if (!addressId?.addressId) return null
+    if (!addressId?.addressId) return
 
     const address = await getRequest({
       extension: SystemRepository.Address.format,
@@ -58,8 +58,8 @@ export default function PreviewForm({ labels, maxAccess, clientId }) {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={2} sx={{ p: 2 }}>
-          <Grid item xs={4}>
+        <Grid container spacing={2} sx={{ p: 3 }}>
+          <Grid item xs={4} spacing={2}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <CustomNumberField
@@ -99,7 +99,7 @@ export default function PreviewForm({ labels, maxAccess, clientId }) {
             </Grid>
           </Grid>
 
-          <Grid item xs={4}>
+          <Grid item xs={4} spacing={2}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <CustomDatePicker
@@ -138,7 +138,7 @@ export default function PreviewForm({ labels, maxAccess, clientId }) {
             </Grid>
           </Grid>
 
-          <Grid item xs={4}>
+          <Grid item xs={4} spacing={2}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <CustomTextArea
