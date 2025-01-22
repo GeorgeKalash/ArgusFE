@@ -37,13 +37,12 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, editMode }) => {
         .array()
         .of(
           yup.object().shape({
-            amount: yup.string().required(' '),
-            taxBase: yup.string().required(' '),
-
-            taxCodeId: yup.string().required(' ')
+            amount: yup.string().required(),
+            taxBase: yup.string().required(),
+            taxCodeId: yup.string().required()
           })
         )
-        .required(' ')
+        .required()
     }),
 
     onSubmit: async values => {
@@ -54,7 +53,6 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const postHistory = async obj => {
     const items = obj?.TaxDetail.map((item, index) => ({
       ...item,
-
       taxId: recordId,
       seqNo: index + 1
     }))
@@ -67,43 +65,37 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, editMode }) => {
     await postRequest({
       extension: FinancialRepository.TaxDetailPack.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      toast.success('Record Edited Successfully')
+      setStore(prevStore => ({
+        ...prevStore,
+        TaxDetail: items
+      }))
     })
-      .then(res => {
-        toast.success('Record Edited Successfully')
-        setStore(prevStore => ({
-          ...prevStore,
-          TaxDetail: items
-        }))
-      })
-      .catch(error => {})
   }
 
   useEffect(() => {
-    const defaultParams = `_taxId=${recordId}`
-    var parameters = defaultParams
     if (recordId) {
       getRequest({
         extension: FinancialRepository.TaxDetailPack.qry,
         parameters: `_taxId=${recordId}`
+      }).then(res => {
+        if (res?.list?.length > 0) {
+          const items = res.list.map((item, index) => ({
+            ...item,
+            id: index + 1,
+            taxCodeId: item.taxCodeId,
+            taxBase: item.taxBase,
+            amount: item.amount,
+            taxCodeName: item.taxCodeName
+          }))
+          formik.setValues({ TaxDetail: items })
+          setStore(prevStore => ({
+            ...prevStore,
+            TaxDetail: items
+          }))
+        }
       })
-        .then(res => {
-          if (res?.list?.length > 0) {
-            const items = res.list.map((item, index) => ({
-              ...item,
-              id: index + 1,
-              taxCodeId: item.taxCodeId,
-              taxBase: item.taxBase,
-              amount: item.amount,
-              taxCodeName: item.taxCodeName
-            }))
-            formik.setValues({ TaxDetail: items })
-            setStore(prevStore => ({
-              ...prevStore,
-              TaxDetail: items
-            }))
-          }
-        })
-        .catch(error => {})
     }
   }, [])
 

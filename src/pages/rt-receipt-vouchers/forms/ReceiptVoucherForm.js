@@ -331,6 +331,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       maxAccess={maxAccess}
       editMode={editMode}
       disabledSubmit={isPosted || isClosed}
+      previewReport={editMode}
     >
       <VertLayout>
         <Fixed>
