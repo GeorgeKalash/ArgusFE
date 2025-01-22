@@ -2,7 +2,8 @@ const service = 'EP.asmx/'
 
 export const EmployeeRepository = {
   Employee: {
-    snapshot: service + 'snapshotEM'
+    snapshot: service + 'snapshotEM',
+    get: service + 'getEM1'
   },
   CertificateFilters: {
     qry: service + 'qryCL'

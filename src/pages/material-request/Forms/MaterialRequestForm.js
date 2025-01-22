@@ -25,6 +25,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useError } from 'src/error'
 import { companyStructureRepository } from 'src/repositories/companyStructureRepository'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 
 export default function MaterialRequestForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -96,6 +97,23 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       const defaultFromSiteId = defaultsData?.list?.find(({ key }) => key === 'de_siteId')
 
       if (defaultFromSiteId?.value) formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value))
+    }
+  }
+  const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
+  
+  const getDepartmentId = async () => {
+    const res = await getRequest({
+      extension: SystemRepository.Users.get,
+      parameters: `_recordId=${userId}`
+    })
+
+    if (res?.record?.employeeId) {
+      const res2 = await getRequest({
+        extension: EmployeeRepository.Employee.get,
+        parameters: `_recordId=${res?.record?.employeeId}`
+      })
+
+      formik.setFieldValue('departmentId', res2.record.departmentId)
     }
   }
 
@@ -487,7 +505,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       getDefaultFromSiteId()
-
+      await getDepartmentId()
       if (documentType?.dtId) {
         formik.setFieldValue('dtId', documentType.dtId)
       }
