@@ -43,7 +43,6 @@ export default function DraftForm({ labels, access, recordId }) {
 
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [jumpToNextLine, setJumpToNextLine] = useState(false)
-  const [gridserials, setGridserials] = useState([])
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
@@ -652,7 +651,7 @@ export default function DraftForm({ labels, access, recordId }) {
 
         return {
           ...item,
-          id: index + 1,
+          id: item.seqNo,
           baseLaborPrice: parseFloat(item.baseLaborPrice).toFixed(2),
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
@@ -688,13 +687,9 @@ export default function DraftForm({ labels, access, recordId }) {
     return res?.list
   }
 
-  const filteredData = formik.values.search ? gridserials : formik.values.serials
-
-  useEffect(() => {
-    setGridserials(
-      formik.values.serials.filter(item => item.srlNo?.toString()?.includes(formik.values.search.toLowerCase()))
-    )
-  }, [formik?.values?.search])
+  const filteredData = formik.values.search
+    ? formik.values.serials.filter(item => item.srlNo?.toString()?.includes(formik.values.search.toLowerCase()))
+    : formik.values.serials
 
   const handleSearchChange = event => {
     const { value } = event.target
@@ -704,10 +699,6 @@ export default function DraftForm({ labels, access, recordId }) {
   const handleGridChange = (value, action, row) => {
     if (action === 'delete') {
       let updatedSerials = formik.values.serials
-
-      if (formik.values.search) {
-        setGridserials(value)
-      }
 
       updatedSerials = updatedSerials.filter(item => item.id !== row.id)
       formik.setFieldValue('serials', updatedSerials)
