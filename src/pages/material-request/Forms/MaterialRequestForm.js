@@ -26,10 +26,11 @@ import { useError } from 'src/error'
 import { companyStructureRepository } from 'src/repositories/companyStructureRepository'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 export default function MaterialRequestForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -69,7 +70,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
         itemId: null,
         qty: 0,
         notes: '',
-        onHandSite: null,
+        onHandSite: 0,
         onHandGlobal: null,
         deliveredQty: null,
         deliveryStatus: '',
@@ -87,11 +88,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
   })
 
   async function getDefaultFromSiteId() {
-    if (editMode) {
-      return
-    }
-
-    if (documentType?.dtId) {
+    if (editMode || documentType?.dtId) {
       return
     } else {
       const defaultFromSiteId = defaultsData?.list?.find(({ key }) => key === 'de_siteId')
@@ -100,7 +97,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     }
   }
   const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
-  
+
   const getDepartmentId = async () => {
     const res = await getRequest({
       extension: SystemRepository.Users.get,
@@ -109,7 +106,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
 
     if (res?.record?.employeeId) {
       const res2 = await getRequest({
-        extension: EmployeeRepository.Employee.get,
+        extension: EmployeeRepository.Employee.get1,
         parameters: `_recordId=${res?.record?.employeeId}`
       })
 
@@ -137,15 +134,14 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
         .required()
     }),
     onSubmit: async values => {
-      const copy = { ...values }
-      delete copy.items
-      copy.date = !!copy.date ? formatDateToApi(copy.date) : null
+      const header = { ...values, date: formatDateToApi(values?.date) || null }
+      delete header.items
 
-      const updatedRows = formik?.values?.items.map((transferDetail, index) => {
+      const updatedRows = values?.items.map((transferDetail, index) => {
         return {
           ...transferDetail,
           seqNo: index + 1,
-          requestId: formik.values.recordId || 0
+          requestId: values.recordId || 0
         }
       })
       if (values.fromSiteId === values.siteId) {
@@ -157,7 +153,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       }
 
       const resultObject = {
-        header: copy,
+        header,
         items: updatedRows
       }
 
@@ -217,18 +213,16 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       parameters: `_siteId=${formik.values.fromSiteId || 0}&_itemId=${itemId}&_startAt=0&_pageSize=1000`
     })
 
-    if (res.count == 0) {
+    const hasAvailableStock = res?.count > 0
+    const siteHasStock = hasAvailableStock && res.list[0].siteId !== 0
+    if (!hasAvailableStock || !siteHasStock) {
       formik.setFieldValue('onHandSite', null)
 
       return null
-    } else if (res.count > 0 && res.list[0].siteId != 0) {
+    } else {
       formik.setFieldValue('onHandSite', res.list[0].onhand)
 
       return res.list[0].onhand
-    } else {
-      formik.setFieldValue('onHandSite', null)
-
-      return null
     }
   }
 
@@ -360,20 +354,6 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     return res
   }
 
-  async function refetchForm(recordId) {
-    const res = await getData(recordId)
-    const res2 = await getDataGrid(recordId)
-
-    formik.setValues({
-      ...res.record,
-      recordId,
-      items: res2?.list?.map(item => ({
-        ...item,
-        id: item.seqNo
-      }))
-    })
-  }
-
   const onClose = async recId => {
     await postRequest({
       extension: IVReplenishementRepository.MaterialReplenishment.close,
@@ -393,13 +373,12 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
   }
 
   const onReopen = async recId => {
-    const copy = { ...formik.values }
-    delete copy.items
-    copy.date = !!copy.date ? formatDateToApi(copy.date) : null
+    const header = { ...values, date: formatDateToApi(values?.date) || null }
+    delete header.items
 
     await postRequest({
       extension: IVReplenishementRepository.MaterialReplenishment.reopen,
-      record: JSON.stringify(copy)
+      record: JSON.stringify(header)
     })
 
     toast.success(platformLabels.Reopened)
@@ -414,13 +393,12 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
   }
 
   const onCancel = async recId => {
-    const copy = { ...formik.values }
-    delete copy.items
-    copy.date = !!copy.date ? formatDateToApi(copy.date) : null
+    const header = { ...values, date: formatDateToApi(values?.date) || null }
+    delete header.items
 
     await postRequest({
       extension: IVReplenishementRepository.MaterialReplenishment.cancel,
-      record: JSON.stringify(copy)
+      record: JSON.stringify(header)
     })
 
     toast.success(platformLabels.Cancelled)
@@ -526,17 +504,6 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     })()
   }, [recordId, measurements])
 
-  async function previewBtnClicked() {
-    const data = { printStatus: 2, recordId: formik.values.recordId }
-
-    await postRequest({
-      extension: IVReplenishementRepository.MaterialReplenishment.print,
-      record: JSON.stringify(data)
-    })
-
-    invalidate()
-  }
-
   return (
     <FormShell
       resourceId={ResourceIds.MaterialReplenishment}
@@ -544,20 +511,19 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       maxAccess={maxAccess}
       editMode={editMode}
       previewReport={editMode}
-      previewBtnClicked={previewBtnClicked}
       actions={actions}
       functionId={SystemFunction.MaterialRequest}
       disabledSubmit={isClosed || isCancelled}
     >
       <VertLayout>
-        <Grow>
+        <Fixed>
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <Grid container spacing={2} direction='column'>
-                <Grid item>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_dgId=${SystemFunction.MaterialRequest}&_startAt=${0}&_pageSize=${50}`}
+                    parameters={`_dgId=${SystemFunction.MaterialRequest}&_startAt=0&_pageSize=50`}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
@@ -566,39 +532,39 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
                     displayField='name'
                     values={formik?.values}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId || '')
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
-                <Grid item>
+                <Grid item xs={12}>
                   <CustomTextField
                     name='reference'
                     label={labels.reference}
                     value={formik?.values?.reference}
-                    readOnly={isClosed || isCancelled || editMode}
+                    readOnly={editMode}
                     maxAccess={!editMode && maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
                   />
                 </Grid>
-                <Grid item>
+                <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
                     label={labels.date}
                     value={formik?.values?.date}
                     required
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('date', '')}
+                    onClear={() => formik.setFieldValue('date', null)}
                     readOnly={isClosed || isCancelled}
                     error={formik.touched.date && Boolean(formik.errors.date)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
-                <Grid item>
+                <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={companyStructureRepository.DepartmentFilters.qry}
                     parameters={`_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`}
@@ -609,7 +575,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
                     displayField='name'
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('departmentId', newValue?.recordId)
+                      formik.setFieldValue('departmentId', newValue?.recordId || null)
                     }}
                     error={formik.touched.departmentId && Boolean(formik.errors.departmentId)}
                   />
@@ -617,8 +583,8 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
               </Grid>
             </Grid>
             <Grid item xs={6}>
-              <Grid container spacing={2} direction='column'>
-                <Grid item>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
@@ -629,12 +595,12 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
                     displayField='name'
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId)
+                      formik.setFieldValue('siteId', newValue?.recordId || null)
                     }}
                     error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                   />
                 </Grid>
-                <Grid item>
+                <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='fromSiteId'
@@ -650,12 +616,12 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
                     required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('fromSiteId', newValue?.recordId || '')
+                      formik.setFieldValue('fromSiteId', newValue?.recordId || null)
                     }}
                     error={formik.touched.fromSiteId && Boolean(formik.errors.fromSiteId)}
                   />
                 </Grid>
-                <Grid item>
+                <Grid item xs={12}>
                   <CustomTextArea
                     name='notes'
                     label={labels.notes}
@@ -671,7 +637,8 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
               </Grid>
             </Grid>
           </Grid>
-
+        </Fixed>
+        <Grow>
           <DataGrid
             onChange={value => {
               const data = value?.map(item => {
