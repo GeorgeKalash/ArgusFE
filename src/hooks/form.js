@@ -107,7 +107,7 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
 
     const timeout = setTimeout(() => {
       formik.validateForm(formik.values)
-    }, 400)
+    }, 200)
 
     setDebounceTimeout(timeout)
 
