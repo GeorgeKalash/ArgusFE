@@ -298,7 +298,6 @@ const GenerateOutboundTransportation = () => {
       maxAccess={access}
       isCleared={false}
       isSaved={false}
-      isSavedClear={false}
       infoVisible={false}
     >
       <VertLayout>
