@@ -13,8 +13,9 @@ import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function OverheadTab({ labels, maxAccess, recordId }) {
+export default function SizesTab({ labels, maxAccess, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const editMode = !!recordId
@@ -24,64 +25,68 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     initialValues: {
       jobId: recordId,
-      items: [
+      jobItemSizes: [
         {
           id: 1,
           jobId: recordId,
-          overheadId: '',
-          seqNo: '',
-          amount: 0,
-          units: 0,
-          unitCost: 0
+          sizeId: '',
+          expectedQty: 0,
+          expectedPcs: 0,
+          qty: 0,
+          pcs: 0
         }
       ]
     },
     validationSchema: yup.object({
-      items: yup.array().of(
+      jobItemSizes: yup.array().of(
         yup.object({
-          overheadRef: yup.string().required(),
-          overheadName: yup.string().required(),
-          units: yup.number().min(1)
+          sizeRef: yup.string().required(),
+          sizeName: yup.string().required()
         })
       )
     }),
     onSubmit: async obj => {
-      const modifiedItems = obj.values.items.map((details, index) => {
+      const modifiedItems = obj.values.jobItemSizes.map(details => {
         return {
           ...details,
-          seqNo: index + 1,
           jobId: recordId
         }
       })
-      const payload = { jobId: recordId, data: modifiedItems }
       await postRequest({
-        extension: ManufacturingRepository.JobOverhead.set2,
-        record: JSON.stringify(payload)
+        extension: ManufacturingRepository.JobItemSize.set2,
+        record: JSON.stringify({ jobId: recordId, data: modifiedItems })
       })
       toast.success(platformLabels.Edited)
     }
   })
 
-  const totAmount = formik.values.items.reduce((amountSum, row) => {
-    const amountValue = parseFloat(row?.amount?.toString().replace(/,/g, '')) || 0
+  const calculateTotal = fieldName => {
+    formik.values.jobItemSizes.reduce((sum, row) => {
+      console.log(row?.[fieldName], 'row')
+      const value = parseFloat(row?.[fieldName]) || 0
+      console.log(value, 'row2', sum)
 
-    return amountSum + amountValue
-  }, 0)
+      return sum + value
+    }, 0)
+  }
+  const totExpectedPcs = calculateTotal('expectedPcs')
+  const totExpectedQty = calculateTotal('expectedQty')
+  const totPcs = calculateTotal('pcs')
+  const totQty = calculateTotal('qty')
 
   const columns = [
     {
       component: 'resourcelookup',
-      label: labels.overheadRef,
-      name: 'overheadRef',
+      label: labels.sizeRef,
+      name: 'sizeRef',
       props: {
-        endpointId: ManufacturingRepository.Overhead.snapshot,
+        endpointId: InventoryRepository.ItemSizes.snapshot,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
-          { from: 'recordId', to: 'overheadId' },
-          { from: 'reference', to: 'overheadRef' },
-          { from: 'name', to: 'overheadName' },
-          { from: 'unitCost', to: 'unitCost' }
+          { from: 'recordId', to: 'sizeId' },
+          { from: 'reference', to: 'sizeRef' },
+          { from: 'name', to: 'sizeName' }
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
@@ -91,69 +96,49 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
       },
       async onChange({ row: { update, newRow } }) {
         update({
-          overheadId: newRow?.overheadId,
-          overheadRef: newRow?.overheadRef,
-          overheadName: newRow?.overheadName,
-          unitCost: newRow?.unitCost || 0
+          sizeId: newRow?.sizeId,
+          sizeRef: newRow?.sizeRef,
+          sizeName: newRow?.sizeName
         })
       }
     },
     {
       component: 'textfield',
-      label: labels.overheadName,
-      name: 'overheadName',
+      label: labels.sizeName,
+      name: 'sizeName',
       props: {
         readOnly: true
       }
     },
     {
       component: 'numberfield',
-      label: labels.units,
-      name: 'units',
-      defaultValue: 0,
-      async onChange({ row: { update, newRow } }) {
-        update({ amount: newRow?.units * newRow?.unitCost || 0 })
-      }
+      label: labels.expectedPcs,
+      name: 'expectedPcs',
+      defaultValue: 0
     },
     {
       component: 'numberfield',
-      label: labels.unitCost,
-      name: 'unitCost',
-      defaultValue: 0,
-      props: {
-        readOnly: true
-      }
+      label: labels.expectedQty,
+      name: 'expectedQty',
+      defaultValue: 0
     },
     {
       component: 'numberfield',
-      label: labels.amount,
-      name: 'amount',
-      defaultValue: 0,
-      props: {
-        readOnly: true
-      }
+      label: labels.qty,
+      name: 'qty',
+      defaultValue: 0
+    },
+    {
+      component: 'numberfield',
+      label: labels.pcs,
+      name: 'pcs',
+      defaultValue: 0
     }
   ]
-
-  const actions = [
-    {
-      key: 'GenerateJob',
-      condition: true,
-      onClick: generateOVH
-    }
-  ]
-  async function generateOVH() {
-    await postRequest({
-      extension: ManufacturingRepository.JobOverhead.generate,
-      record: JSON.stringify({ jobId: recordId })
-    })
-    toast.success(platformLabels.Generated)
-    await fetchGridData()
-  }
 
   async function fetchGridData() {
     const res = await getRequest({
-      extension: ManufacturingRepository.JobOverhead.qry,
+      extension: ManufacturingRepository.JobItemSize.qry,
       parameters: `_jobId=${recordId}`
     })
 
@@ -168,7 +153,7 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
 
     formik.setValues({
       jobId: recordId,
-      items: updateItemsList
+      jobItemSizes: updateItemsList
     })
   }
 
@@ -186,26 +171,35 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
       editMode={editMode}
       isInfo={false}
       isSavedClear={false}
-      actions={actions}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>
           <DataGrid
             onChange={(value, action) => {
-              formik.setFieldValue('items', value)
+              formik.setFieldValue('jobItemSizes', value)
               action === 'delete'
             }}
-            value={formik.values.items}
-            error={formik.errors.items}
+            value={formik.values.jobItemSizes}
+            error={formik.errors.jobItemSizes}
             columns={columns}
-            name='items'
+            name='jobItemSizes'
             maxAccess={maxAccess}
           />
         </Grow>
         <Fixed>
-          <Grid container>
-            <Grid item xs={2}>
-              <CustomNumberField name='totalAmount' label={labels.totAmount} value={totAmount} readOnly />
+          <Grid container spacing={2}>
+            <Grid item xs={3}>
+              <CustomNumberField name='totExpectedPcs' label={labels.totExpectedPcs} value={totExpectedPcs} readOnly />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField name='totExpectedQty' label={labels.totExpectedQty} value={totExpectedQty} readOnly />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField name='totPcs' label={labels.totPcs} value={totPcs} readOnly />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField name='totQty' label={labels.totQty} value={totQty} readOnly />
             </Grid>
           </Grid>
         </Fixed>

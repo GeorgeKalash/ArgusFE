@@ -345,6 +345,8 @@ export const ResourceIds = {
   RetailInvoice: 54201,
   RetailInvoiceReturn: 54301,
   RetailPurchase: 54302,
+  CashTransfers: 33302,
   OutwardReturnReason: 36135,
+  DeliveryLeadTimes: 52101,
   DraftSerialsInvoices: 51312
 }

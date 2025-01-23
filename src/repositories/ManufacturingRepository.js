@@ -173,6 +173,14 @@ export const ManufacturingRepository = {
   },
   JobOverhead: {
     qry: service + 'qryJOH',
-    set2: service + 'set2JOH'
+    set2: service + 'set2JOH',
+    generate: service + 'generateJOH'
+  },
+  JobMaterial: {
+    qry: service + 'qryJMA'
+  },
+  JobItemSize: {
+    qry: service + 'qryJSZ',
+    set2: service + 'set2JSZ'
   }
 }

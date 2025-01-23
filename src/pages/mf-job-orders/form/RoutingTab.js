@@ -25,6 +25,7 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
       jobId: recordId,
       routings: [
         {
+          id: 1,
           jobId: recordId,
           seqNo: '',
           name: '',

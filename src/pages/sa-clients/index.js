@@ -12,6 +12,8 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { Box, IconButton } from '@mui/material'
+import PreviewForm from './forms/PreviewForm'
 
 const SAClients = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -20,7 +22,7 @@ const SAClients = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels: labels,
     filterBy,
     clearFilter,
     paginationParameters,
@@ -63,57 +65,85 @@ const SAClients = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'flName',
-      headerName: _labels.foreignLanguage,
+      headerName: labels.foreignLanguage,
       flex: 1
     },
     ,
     {
       field: 'cgName',
-      headerName: _labels.cGroup,
+      headerName: labels.cGroup,
       flex: 1
     },
     {
       field: 'ptName',
-      headerName: _labels.paymentTerm,
+      headerName: labels.paymentTerm,
       flex: 1
     },
     {
       field: 'currencyName',
-      headerName: _labels.currency,
+      headerName: labels.currency,
       flex: 1
     },
     {
       field: 'plName',
-      headerName: _labels.priceLevel,
+      headerName: labels.priceLevel,
       flex: 1
     },
     {
       field: 'spName',
-      headerName: _labels.salesPerson,
+      headerName: labels.salesPerson,
       flex: 1
     },
     {
       field: 'szName',
-      headerName: _labels.saleZone,
+      headerName: labels.saleZone,
       flex: 1
     },
     {
       field: 'acquisitionDate',
-      headerName: _labels.acquisitionDate,
+      headerName: labels.acquisitionDate,
       flex: 1,
       type: 'date'
+    },
+    {
+      flex: 0.5,
+      headerName: '',
+      cellRenderer: row => {
+        return (
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+            <IconButton size='small' onClick={() => openPreview(row.data.recordId, row.data.addressId)}>
+              <img src='/images/buttonsIcons/preview-black.png' alt={'preview'} />
+            </IconButton>
+          </Box>
+        )
+      }
     }
   ]
+
+  const openPreview = (clientId, addressId) => {
+    stack({
+      Component: PreviewForm,
+      props: {
+        labels: labels,
+        maxAccess: access,
+        clientId,
+        addressId
+      },
+      width: 800,
+      height: 400,
+      title: labels.preview
+    })
+  }
 
   const Delete = async obj => {
     await postRequest({
@@ -132,13 +162,13 @@ const SAClients = () => {
     stack({
       Component: ClientsWindow,
       props: {
-        labels: _labels,
+        labels: labels,
         recordId: recordId ? recordId : null,
         maxAccess: access
       },
       width: 700,
       height: 700,
-      title: _labels.clients
+      title: labels.clients
     })
   }
 
