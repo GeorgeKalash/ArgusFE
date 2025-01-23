@@ -160,15 +160,9 @@ const GenerateOutboundTransportation = () => {
     })
   }
 
-  useEffect(() => {
-    const totalVolume = deliveryOrders?.list?.reduce((sum, order) => sum + (order.volume || 0), 0) || 0
-    const totalAmount = deliveryOrders?.list?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0
-
-    formik.setFieldValue('volume', totalVolume)
-    formik.setFieldValue('amount', totalAmount)
-
-    formik.setFieldValue('balance', formik.values.capacity - totalVolume)
-  }, [deliveryOrders])
+  const totalVolume = deliveryOrders?.list?.reduce((sum, order) => sum + (order.volume || 0), 0) || 0
+  const totalAmount = deliveryOrders?.list?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0
+  const balance = formik.values.capacity - totalVolume
 
   const Confirmation = (row, value) => {
     stack({
@@ -340,7 +334,7 @@ const GenerateOutboundTransportation = () => {
                 displayField={'name'}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('driverId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('driverId', newValue?.recordId || null)
                 }}
                 required
                 error={formik.touched.driverId && Boolean(formik.errors.driverId)}
@@ -351,7 +345,7 @@ const GenerateOutboundTransportation = () => {
               <CustomNumberField
                 name='volume'
                 label={labels.volume}
-                value={formik.values.volume}
+                value={totalVolume}
                 readOnly
                 error={formik.touched.volume && Boolean(formik.errors.volume)}
               />
@@ -381,12 +375,11 @@ const GenerateOutboundTransportation = () => {
               />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='balance' label={labels.balance} value={formik.values.balance} readOnly />
+              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='amount' label={labels.amount} value={formik.values.amount} readOnly />
+              <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly />
             </Grid>
-            
           </Grid>
         </Fixed>
         <Grow>
