@@ -65,22 +65,19 @@ const GenerateOutboundTransportation = () => {
 
       if (res.recordId) {
         await openForm(res.recordId)
-        resetForm()
+        formik.setValues({
+          ...formik.values,
+          volume: 0,
+          capacity: 0,
+          amount: null,
+          balance: null
+        })
+        setDeliveryOrders({ list: [] })
         toast.success(platformLabels.Generated)
       }
     }
   })
 
-  const resetForm = () => {
-    formik.setValues({
-      ...formik.values,
-      volume: 0,
-      capacity: 0,
-      amount: null,
-      balance: null
-    })
-    setDeliveryOrders({ list: [] })
-  }
 
   async function openForm(recordId) {
     stack({
@@ -151,7 +148,7 @@ const GenerateOutboundTransportation = () => {
       parameters: `_szId=${szId || 0}`
     })
 
-    if (!orders || !orders.list) {
+    if (!orders?.list) {
       return
     }
 
@@ -310,8 +307,8 @@ const GenerateOutboundTransportation = () => {
                 ]}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('vehicleId', newValue?.recordId)
-                  formik.setFieldValue('capacity', newValue?.capacityVolume)
+                  formik.setFieldValue('vehicleId', newValue?.recordId || null)
+                  formik.setFieldValue('capacity', newValue?.capacityVolume || null)
                 }}
                 required
                 error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
@@ -340,7 +337,6 @@ const GenerateOutboundTransportation = () => {
                 label={labels.volume}
                 value={totalVolume}
                 readOnly
-                error={formik.touched.volume && Boolean(formik.errors.volume)}
               />
             </Grid>
             <Grid item xs={3}>
@@ -361,7 +357,7 @@ const GenerateOutboundTransportation = () => {
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('szId', newValue?.recordId || null)
-                  if (formik.values.vehicleId) onPreview(newValue?.recordId)
+                  formik.values.vehicleId && onPreview(newValue?.recordId)
                 }}
                 error={formik.touched.szId && Boolean(formik.errors.szId)}
                 maxAccess={access}
