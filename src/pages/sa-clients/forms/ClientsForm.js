@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { useContext, useEffect } from 'react'
@@ -75,7 +75,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
   const postAccount = async obj => {
     await postRequest({
       extension: SaleRepository.Client.set,
-      record: JSON.stringify({ ...obj, acquisitionDate: formatDateToApi(obj?.acquisitionDate) })
+      record: JSON.stringify({ ...obj, acquisitionDate: obj?.acquisitionDate ? formatDateToApi(obj?.acquisitionDate) : null })
     }).then(res => {
       if (!obj.recordId) {
         setStore(prevStore => ({
@@ -131,7 +131,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
 
       formik.setValues({
         ...res.record,
-        acquisitionDate: formatDateFromApi(res.record.acquisitionDate)
+        acquisitionDate: formatDateFromApi(res?.record?.acquisitionDate)
       })
     }
   }
