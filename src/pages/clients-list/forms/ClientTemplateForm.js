@@ -989,7 +989,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           required
                           onChange={e => {
                             setIsValidatePhoneClicked(false)
-                            formik.setFieldTouched('idNo', true)
                             formik.handleChange(e)
                           }}
                           onCopy={handleCopy}
@@ -1518,8 +1517,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           required
                           phone={true}
                           onChange={(value, countryData) => {
-                            formik.setFieldTouched('cellPhone', true)
-
                             setIsValidatePhoneClicked(false)
 
                             formik.setFieldValue('cellPhone', value)
@@ -1555,9 +1552,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           maxLength='15'
                           autoComplete='off'
                           phone={true}
-                          onChange={(value, countryCode) => {
-                            formik.setFieldTouched('cellPhoneRepeat', true)
-
+                          onChange={value => {
                             setIsValidatePhoneClicked(false)
 
                             formik.setFieldValue('cellPhoneRepeat', value)
