@@ -203,6 +203,26 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     }
   }
 
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: CashBankRepository.CAadjustment.unpost,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res?.recordId) {
+      toast.success(platformLabels.Unposted)
+      invalidate()
+
+      const getRes = await getRequest({
+        extension: CashBankRepository.CAadjustment.get,
+        parameters: `_recordId=${formik.values.recordId}`
+      })
+
+      getRes.record.date = formatDateFromApi(getRes.record.date)
+      formik.setValues(getRes.record)
+    }
+  }
+
   const onWorkFlowClick = async () => {
     stack({
       Component: WorkFlow,
@@ -214,6 +234,8 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       title: 'Workflow'
     })
   }
+
+  const isPosted = formik.values.status === 3
 
   const actions = [
     {
@@ -228,12 +250,18 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       onClick: 'onClickGL',
       disabled: !editMode
     },
-
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || formik.values.status !== 1
+      disabled: !editMode
     },
     {
       key: 'WorkFlow',
