@@ -16,7 +16,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import OutboundTranspForm from '../outbound-transportation/forms/OutboundTranspForm'
 import { useWindow } from 'src/windows'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
@@ -97,7 +96,7 @@ const GenerateOutboundTransportation = () => {
     })
   }
 
-  const onRowCheckboxChange = (row, checked) => {
+  const onSelectCheckBox = (row, checked) => {
     if (checked) {
       setDeliveryOrders(prev => {
         const itemToAdd = data.list.find(item => item.recordId === row.recordId)
@@ -133,7 +132,18 @@ const GenerateOutboundTransportation = () => {
         count: (prev?.list?.length || 0) - 1
       }))
     }
-  }
+  } 
+
+  const onRowCheckboxChange = (data, checked) => {  
+    if (Array.isArray(data)) {
+      data.forEach((row) => {
+        onSelectCheckBox(row, checked)
+      });
+    } else {
+      onSelectCheckBox(data, checked)
+    }
+  };
+  
 
   const onPreview = async szId => {
     const orders = await getRequest({
@@ -181,16 +191,6 @@ const GenerateOutboundTransportation = () => {
 
   const columnsOrders = [
     {
-      width: 50,
-      cellRenderer: row => (
-        <CustomCheckBox
-          name='checked'
-          value={deliveryOrders.list.some(item => item.recordId === row.data.recordId)}
-          onChange={e => onRowCheckboxChange(row.data, e.target.value)}
-        />
-      )
-    },
-    {
       field: 'date',
       headerName: labels.date,
       type: 'date',
@@ -236,12 +236,6 @@ const GenerateOutboundTransportation = () => {
   ]
 
   const columnsDeliveryOrders = [
-    {
-      width: 50,
-      cellRenderer: row => (
-        <CustomCheckBox name='checked' value={true} onChange={e => Confirmation(row.data, e.target.checked)} />
-      )
-    },
     {
       field: 'date',
       headerName: labels.date,
@@ -389,6 +383,8 @@ const GenerateOutboundTransportation = () => {
             isLoading={false}
             pagination={false}
             maxAccess={access}
+            showCheckboxColumn={true}
+            handleCheckboxChange={onRowCheckboxChange}
           />
         </Grow>
         <Grow>
@@ -399,6 +395,9 @@ const GenerateOutboundTransportation = () => {
             isLoading={false}
             pagination={false}
             maxAccess={access}
+            showCheckboxColumn={true}
+            handleCheckboxChange={Confirmation}
+            showSelectAll={false}
           />
         </Grow>
         <Grid item mt={2} display={'flex'} justifyContent={'flex-end'}>
