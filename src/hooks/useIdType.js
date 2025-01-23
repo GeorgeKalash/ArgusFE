@@ -11,11 +11,9 @@ export default function useIdType() {
     getRequest({
       extension: CurrencyTradingSettingsRepository.IdTypes.qry,
       parameters: parameters
+    }).then(res => {
+      setStore(res.list)
     })
-      .then(res => {
-        setStore(res.list)
-      })
-      .catch(error => {})
   }
 
   useEffect(() => {

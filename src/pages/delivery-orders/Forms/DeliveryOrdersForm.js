@@ -29,6 +29,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function DeliveriesOrdersForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -200,7 +201,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     if (!addressId) return null
 
     const res = await getRequest({
-      extension: SystemRepository.FormattedAddress.get,
+      extension: SystemRepository.Address.format,
       parameters: `_addressId=${addressId}`
     })
 
@@ -535,6 +536,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     }}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                     required
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={4}>
@@ -589,6 +591,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     onChange={(event, newValue) => {
                       formik.setFieldValue('driverId', newValue ? newValue?.recordId : '')
                     }}
+                    maxAccess={maxAccess}
                     error={formik.touched.driverId && Boolean(formik.errors.driverId)}
                   />
                 </Grid>
@@ -634,6 +637,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     valueField='recordId'
                     readOnly={isPosted || isCancelled}
                     displayField='name'
+                    maxAccess={maxAccess}
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('vehicleId', newValue ? newValue?.recordId : '')
@@ -642,18 +646,14 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                   />
                 </Grid>
                 <Grid item xs={8}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='exWorks'
-                        readOnly
-                        disabled={true}
-                        checked={formik.values?.exWorks}
-                        onChange={formik.handleChange}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='exWorks'
+                    value={formik.values?.exWorks}
+                    onChange={event => formik.setFieldValue('exWorks', event.target.checked)}
                     label={labels.exWorks}
+                    maxAccess={maxAccess}
+                    readOnly
+                    disabled={true}
                   />
                 </Grid>
                 <Grid item xs={4}>
@@ -666,6 +666,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('szId', newValue ? newValue.recordId : null)
                     }}
@@ -725,6 +726,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
             value={formik?.values?.orders}
             error={formik?.errors?.orders}
             columns={columns}
+            maxAccess={maxAccess}
+            name='orders'
             allowDelete={!isPosted && !isCancelled}
             allowAddNewLine={!isPosted && !isCancelled}
           />

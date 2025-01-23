@@ -7,19 +7,17 @@ import { AuthContext } from 'src/providers/AuthContext'
 const WorkFlow = ({ functionId, recordId }) => {
   const { getRequest } = useContext(RequestsContext)
   const { languageId } = useContext(AuthContext)
-  const pageName = functionId
   const id = recordId + '-' + functionId
 
   const getWorkFlowData = async () => {
     var parameters = `_functionId=${functionId}&_recordId=${recordId}`
-    try {
-      const result = await getRequest({
-        extension: SaleRepository.WorkFlow.graph,
-        parameters: parameters
-      })
 
-      return result?.record
-    } catch (error) {}
+    const result = await getRequest({
+      extension: SaleRepository.WorkFlow.graph,
+      parameters: parameters
+    })
+
+    return result?.record
   }
 
   const getDeptsJson = graph => {
@@ -30,12 +28,10 @@ const WorkFlow = ({ functionId, recordId }) => {
     let parentId = -1
     let childId = -1
 
-    // Iterate over objects
     graph.objects.forEach(item => {
       result.push({ functionName: item.functionName, reference: item.reference, date: item.date })
     })
 
-    // Iterate over workflow
     graph.workflow.forEach(item => {
       graph.objects.forEach(item2 => {
         let functionLines = item2.functionName.split(' ')

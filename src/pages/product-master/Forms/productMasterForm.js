@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { DataSets } from 'src/resources/DataSets'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
@@ -18,6 +18,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useForm } from 'src/hooks/form'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, maxAccess: access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -29,30 +30,28 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     enabled: !pId
   })
 
-  const [initialValues, setData] = useState({
-    recordId: null,
-    name: null,
-    reference: null,
-    corId: null,
-    corName: null,
-    corRef: null,
-    languages: null,
-    valueDays: null,
-    commissionBase: null,
-    accessLevel: null,
-    interfaceId: null,
-    posMsg: null,
-    posMsgIsActive: false,
-    isInactive: false
-  })
-
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.ProductMaster.qry
   })
 
   const { formik } = useForm({
     maxAccess,
-    initialValues,
+    initialValues: {
+      recordId: null,
+      name: null,
+      reference: null,
+      corId: null,
+      corName: null,
+      corRef: null,
+      languages: null,
+      valueDays: null,
+      commissionBase: null,
+      accessLevel: null,
+      interfaceId: null,
+      posMsg: null,
+      posMsgIsActive: false,
+      isInactive: false
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -71,24 +70,22 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     await postRequest({
       extension: RemittanceSettingsRepository.ProductMaster.set,
       record: JSON.stringify(obj)
+    }).then(res => {
+      if (!recordId) {
+        formik.setFieldValue('recordId', res.recordId)
+
+        toast.success(platformLabels.Added)
+        setEditMode(true)
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: res.recordId
+        }))
+      } else {
+        toast.success(platformLabels.Edited)
+      }
+
+      invalidate()
     })
-      .then(res => {
-        if (!recordId) {
-          formik.setFieldValue('recordId', res.recordId)
-
-          toast.success(platformLabels.Added)
-          setEditMode(true)
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: res.recordId
-          }))
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-
-        invalidate()
-      })
-      .catch(error => {})
   }
 
   useEffect(() => {
@@ -102,11 +99,9 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     getRequest({
       extension: SystemRepository.Default.get,
       parameters: parameters
+    }).then(res => {
+      res?.record?.value && changeDT({ nraId: res.record.value })
     })
-      .then(res => {
-        res?.record?.value && changeDT({ nraId: res.record.value })
-      })
-      .catch(error => {})
   }
 
   const getProductMasterById = pId => {
@@ -115,12 +110,10 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     getRequest({
       extension: RemittanceSettingsRepository.ProductMaster.get,
       parameters: parameters
+    }).then(res => {
+      formik.setValues(res.record)
+      setEditMode(true)
     })
-      .then(res => {
-        formik.setValues(res.record)
-        setEditMode(true)
-      })
-      .catch(error => {})
   }
 
   return (
@@ -265,25 +258,24 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='posMsgIsActive'
-                      checked={formik.values?.posMsgIsActive}
-                      onChange={formik.handleChange}
-                    />
-                  }
+                <CustomCheckBox
+                  name='posMsgIsActive'
+                  value={formik.values?.posMsgIsActive}
+                  onChange={event => formik.setFieldValue('posMsgIsActive', event.target.checked)}
                   label={labels.activateCounterMessage}
+                  maxAccess={maxAccess}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox name='isInactive' checked={formik.values?.isInactive} onChange={formik.handleChange} />
-                  }
-                  label={labels.isInactive}
-                />
-              </Grid>
+            </Grid>
+            <Grid item xs={6}></Grid>
+            <Grid item xs={6} sx={{ px: 2 }}>
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values?.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
+                label={labels.isInactive}
+                maxAccess={maxAccess}
+              />
             </Grid>
           </Grid>
         </Grow>

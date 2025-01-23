@@ -77,6 +77,35 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     })
   }
 
+  const getRequestFullEndPoint = async body => {
+    const disableLoading = body.disableLoading || false
+    !disableLoading && !loading && setLoading(true)
+
+    const throwError = body.throwError || false
+
+    return new Promise(async (resolve, reject) => {
+      axios({
+        method: 'GET',
+        url: body.endPoint,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+        .then(response => {
+          if (!disableLoading) debouncedCloseLoading()
+          resolve(response.data)
+        })
+        .catch(error => {
+          debouncedCloseLoading()
+          showError({
+            message: error,
+            height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+          })
+          if (throwError) reject(error)
+        })
+    })
+  }
+
   const getMicroRequest = async body => {
     const disableLoading = body.disableLoading || false
     !disableLoading && !loading && setLoading(true)
@@ -154,14 +183,19 @@ const RequestsProvider = ({ showLoading = false, children }) => {
           if (!disableLoading) {
             debouncedCloseLoading()
           }
+          if (body?.noHandleError) return resolve(response.data)
           resolve(response.data)
         })
         .catch(error => {
+          if (body?.noHandleError) {
+            return resolve(error.response.data)
+          }
           debouncedCloseLoading()
           showError({
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
+
           if (throwError) reject(error)
         })
     })
@@ -255,7 +289,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     getRequest,
     postRequest,
     getIdentityRequest,
-    getMicroRequest
+    getMicroRequest,
+    getRequestFullEndPoint
   }
 
   return (

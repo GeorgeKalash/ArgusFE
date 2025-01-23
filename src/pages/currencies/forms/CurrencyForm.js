@@ -15,6 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function CurrencyForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -193,29 +194,21 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
             <Grid item xs={6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    maxAccess={maxAccess}
-                    name='sale'
-                    checked={formik.values?.sale}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='sale'
+                value={formik.values?.sale}
+                onChange={event => formik.setFieldValue('sale', event.target.checked)}
                 label={labels.sales}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    maxAccess={maxAccess}
-                    name='purchase'
-                    checked={formik.values?.purchase}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='purchase'
+                value={formik.values?.purchase}
+                onChange={event => formik.setFieldValue('purchase', event.target.checked)}
                 label={labels.purchase}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

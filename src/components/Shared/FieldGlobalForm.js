@@ -41,36 +41,34 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
       ...row
     },
     onSubmit: async obj => {
-      try {
-        const updatedRows = formik.values.gridRows
-          .filter(obj => obj.accessLevel != null && obj.accessLevel !== '')
-          .map(control => ({
-            resourceId: row.resourceId,
-            sgId: row.sgId,
-            ...control
-          }))
-
-        const resultObject = {
+      const updatedRows = formik.values.gridRows
+        .filter(obj => obj.accessLevel != null && obj.accessLevel !== '')
+        .map(control => ({
           resourceId: row.resourceId,
           sgId: row.sgId,
-          controls: updatedRows
-        }
-        if (resourceId == ResourceIds.SecurityGroup) {
-          await postRequest({
-            extension: AccessControlRepository.SGControlAccess.set2,
-            record: JSON.stringify(resultObject)
-          })
-        }
-        if (resourceId == ResourceIds.GlobalAuthorization) {
-          await postRequest({
-            extension: AccessControlRepository.GlobalControlAuthorizationPack.set2,
-            record: JSON.stringify(resultObject)
-          })
-        }
-        toast.success('Record Edited Successfully')
-        invalidate()
-        window.close()
-      } catch (error) {}
+          ...control
+        }))
+
+      const resultObject = {
+        resourceId: row.resourceId,
+        sgId: row.sgId,
+        controls: updatedRows
+      }
+      if (resourceId == ResourceIds.SecurityGroup) {
+        await postRequest({
+          extension: AccessControlRepository.SGControlAccess.set2,
+          record: JSON.stringify(resultObject)
+        })
+      }
+      if (resourceId == ResourceIds.GlobalAuthorization) {
+        await postRequest({
+          extension: AccessControlRepository.GlobalControlAuthorizationPack.set2,
+          record: JSON.stringify(resultObject)
+        })
+      }
+      toast.success('Record Edited Successfully')
+      invalidate()
+      window.close()
     }
   })
 
@@ -109,62 +107,60 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (row.resourceId) {
-          let accessLevelRes = []
-          setIsLoading(true)
-          getAccessLevel()
+      if (row.resourceId) {
+        let accessLevelRes = []
+        setIsLoading(true)
+        getAccessLevel()
 
-          const res = await getRequest({
-            extension: SystemRepository.ResourceControl.qry,
-            parameters: `_resourceId=${row.resourceId}`
-          })
+        const res = await getRequest({
+          extension: SystemRepository.ResourceControl.qry,
+          parameters: `_resourceId=${row.resourceId}`
+        })
 
-          if (resourceId == ResourceIds.SecurityGroup) {
-            accessLevelRes = await getRequest({
-              extension: AccessControlRepository.SGControlAccess.qry,
-              parameters: `_sgId=${row.sgId}&_resourceId=${row.resourceId}`
-            })
-          }
-          if (resourceId == ResourceIds.GlobalAuthorization) {
-            accessLevelRes = await getRequest({
-              extension: AccessControlRepository.GlobalControlAuthorizationView.qry,
-              parameters: `_resourceId=${row.resourceId}`
-            })
-          }
-
-          let finalList = []
-
-          if (res.list) {
-            finalList = res.list.map(controlDetail => {
-              const control = {
-                controlId: controlDetail.id,
-                name: controlDetail.name,
-                accessLevel: null,
-                accessLevelName: null
-              }
-
-              const matching = accessLevelRes.list.find(acessL => control.controlId === acessL.controlId)
-
-              if (matching) {
-                control.accessLevel = matching.accessLevel
-                control.accessLevelName = matching.accessLevelName
-              }
-
-              return control
-            })
-          }
-
-          formik.setValues({
-            ...formik.values,
-            gridRows: finalList.map((control, index) => ({
-              id: index + 1,
-              ...control
-            }))
+        if (resourceId == ResourceIds.SecurityGroup) {
+          accessLevelRes = await getRequest({
+            extension: AccessControlRepository.SGControlAccess.qry,
+            parameters: `_sgId=${row.sgId}&_resourceId=${row.resourceId}`
           })
         }
-        setIsLoading(false)
-      } catch (error) {}
+        if (resourceId == ResourceIds.GlobalAuthorization) {
+          accessLevelRes = await getRequest({
+            extension: AccessControlRepository.GlobalControlAuthorizationView.qry,
+            parameters: `_resourceId=${row.resourceId}`
+          })
+        }
+
+        let finalList = []
+
+        if (res.list) {
+          finalList = res.list.map(controlDetail => {
+            const control = {
+              controlId: controlDetail.id,
+              name: controlDetail.name,
+              accessLevel: null,
+              accessLevelName: null
+            }
+
+            const matching = accessLevelRes.list.find(acessL => control.controlId === acessL.controlId)
+
+            if (matching) {
+              control.accessLevel = matching.accessLevel
+              control.accessLevelName = matching.accessLevelName
+            }
+
+            return control
+          })
+        }
+
+        formik.setValues({
+          ...formik.values,
+          gridRows: finalList.map((control, index) => ({
+            id: index + 1,
+            ...control
+          }))
+        })
+      }
+      setIsLoading(false)
     })()
   }, [])
 

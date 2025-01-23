@@ -3,8 +3,7 @@ import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
 import SearchIcon from '@mui/icons-material/Search'
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
-import { TrxType } from 'src/resources/AccessLevels'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomTextField = ({
   type = 'text', //any valid HTML5 input type
@@ -33,18 +32,12 @@ const CustomTextField = ({
 }) => {
   const name = props.name
 
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
-
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
-
-  const required = props.required || accessLevel === MANDATORY
+  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
 
   const inputRef = useRef(null)
+
   const [focus, setFocus] = useState(!hasBorder)
+  const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
     if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && value?.length < 1) {
@@ -102,6 +95,8 @@ const CustomTextField = ({
       size={size}
       fullWidth={fullWidth}
       autoFocus={focus}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
       inputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
@@ -120,16 +115,16 @@ const CustomTextField = ({
       onInput={handleInput}
       onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
       InputProps={{
-        endAdornment: (
+        endAdornment: !_readOnly && (
           <InputAdornment position='end'>
             {search && (
               <IconButton tabIndex={-1} edge='start' onClick={() => onSearch(value)} aria-label='search input'>
-                <SearchIcon sx={{ border: '0px', fontSize: 20 }} />
+                <SearchIcon sx={{ border: '0px', fontSize: 17 }} />
               </IconButton>
             )}
             {!clearable && !readOnly && (value || value === 0) && (
               <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
               </IconButton>
             )}
           </InputAdornment>
@@ -138,12 +133,21 @@ const CustomTextField = ({
       sx={{
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
-            border: !hasBorder && 'none'
+            border: !hasBorder && 'none',
+            borderColor: '#959d9e',
+            borderRadius: '6px'
           },
-          height: `${props.height}px !important`
+          height: `33px !important`
+        },
+        '& .MuiInputLabel-root': {
+          fontSize: '0.90rem',
+          top: isFocused || value ? '0px' : '-3px'
+        },
+        '& .MuiInputBase-input': {
+          fontSize: '0.90rem'
         }
       }}
-      required={required}
+      required={_required}
       {...props}
     />
   )

@@ -1,4 +1,4 @@
-import { Grid, FormControlLabel, Checkbox, Button } from '@mui/material'
+import { Grid, Button, CircularProgress } from '@mui/material'
 import { useEffect, useState, useContext } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import * as yup from 'yup'
@@ -32,15 +32,19 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import MoreDetails from './MoreDetails'
 import { useForm } from 'src/hooks/form'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { SystemChecks } from 'src/resources/SystemChecks'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import CustomButton from 'src/components/Inputs/CustomButton'
+import MoreDetails from './MoreDetails'
+import CustomPhoneNumber from 'src/components/Inputs/CustomPhoneNumber'
+import { isValidPhoneNumber } from 'libphonenumber-js'
 
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequestFullEndPoint, getRequest, postRequest } = useContext(RequestsContext)
   const { systemChecks, defaultsData } = useContext(ControlContext)
-
   const [showAsPassword, setShowAsPassword] = useState(!!recordId)
   const [showAsPasswordPhone, setShowAsPasswordPhone] = useState(!!recordId)
   const [showAsPasswordPhoneRepeat, setShowAsPasswordPhoneRepeat] = useState(!!recordId)
@@ -53,6 +57,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const [nationalities, setNationalities] = useState({})
   const [isValidatePhoneClicked, setIsValidatePhoneClicked] = useState(false)
   const [imageUrl, setImageUrl] = useState(null)
+  const [loading, setLoading] = useState(null)
+  const [idScanner, setIdScanner] = useState(null)
 
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
@@ -96,7 +102,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     bldgNo: '',
     poBox: '',
 
-    //end address
     //clientIndividual
     birthDate: null,
     firstName: '',
@@ -110,8 +115,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     isResident: false,
     incomeSourceId: '',
 
-    // end clientIndividual
-
     //clientMaster
     masterRecordId: '',
     addressId: '',
@@ -122,6 +125,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     cellPhoneEncrypt: '',
     cellPhoneRepeatEncrypt: '',
     cellPhoneRepeat: '',
+    country: '',
     createdDate: null,
     isDiplomatReadOnly: false,
     flName: '',
@@ -145,8 +149,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     addressId: '',
     batchId: '',
     civilStatus: '',
-
-    // clientId: "",
     coveredFace: false,
     date: null,
     dtId: '',
@@ -163,8 +165,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     salaryRange: '',
     smsLanguage: '',
     sponsorName: '',
-
-    // status: "",
     whatsAppNo: '',
     wip: '',
     workAddressId: '',
@@ -196,7 +196,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     if (idType) {
       formik.setFieldValue('idtId', idType.recordId)
       formik.setFieldValue('idtName', idType.name)
-      formik.setFieldValue('isResident', idType.isResident)
+      formik.setFieldValue('isResident', idType.isResident || false)
     }
   }
 
@@ -214,17 +214,17 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
   useEffect(() => {
     if (recordId) {
-      getClient(recordId)
+      getClient(recordId, true)
     }
   }, [])
 
-  async function getClient(recordId) {
+  function getClient(recordId, requestImage = false) {
     const defaultParams = `_clientId=${recordId}`
     var parameters = defaultParams
-    await getRequest({
+    getRequest({
       extension: RTCLRepository.CtClientIndividual.get2,
       parameters: parameters
-    }).then(res => {
+    }).then(async res => {
       const obj = res?.record
 
       obj?.workAddressView && setAddress(obj?.workAddressView)
@@ -283,8 +283,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         incomeSourceId: obj.clientIndividual?.incomeSourceId,
         sponsorName: obj.clientIndividual?.sponsorName,
 
-        // end clientIndividual
-
         //clientMaster
         addressId: obj.clientMaster.addressId,
         category: obj.clientMaster?.category,
@@ -342,21 +340,28 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         cltRemReference: obj.clientRemittance?.reference
       })
 
+      setIdScanner(obj.clientMaster?.idScanMode)
       setEditMode(true)
-
       if (
+        requestImage === true &&
         obj.clientRemittance?.clientId &&
         obj.clientIDView?.idNo &&
         obj.clientIDView?.idtId &&
-        obj.clientMaster?.idScanMode
+        obj.clientMaster?.idScanMode &&
+        (obj.clientMaster?.idScanMode == 1 || obj.clientMaster?.idScanMode == 2)
       ) {
+        setLoading(true)
+
         const parameters = `_number=${obj.clientIDView?.idNo}&_clientId=${obj.clientRemittance?.clientId}&_idType=${obj.clientIDView?.idtId}&_idScanMode=${obj.clientMaster?.idScanMode}`
-        getRequest({
+
+        const res = await getRequest({
           extension: CurrencyTradingSettingsRepository.PreviewImageID.get,
           parameters: parameters
-        }).then(res => {
-          setImageUrl(res.record.imageContent ?? null)
         })
+
+        setImageUrl(res?.record?.imageContent ?? null)
+
+        setLoading(false)
       }
     })
   }
@@ -383,6 +388,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     stack({
       Component: ConfirmationDialog,
       props: {
+        height: 200,
         fullScreen: false,
         okButtonAction: handleFetchMobileOwner,
         DialogText: platformLabels.PhoneVerificationConfirmation
@@ -447,11 +453,31 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       lastName: yup.string().required(),
       nationalityId: yup.string().required(),
       professionId: yup.string().required(),
-      cellPhone: yup.string().required(),
+      cellPhone: yup
+        .string()
+        .required('Phone number is required')
+        .test('isValidPhoneNumber', 'Invalid phone number', function (value) {
+          const { country } = this.options.context
+
+          if (country) {
+            return isValidPhoneNumber(value, country)
+          }
+
+          return true
+        }),
       cellPhoneRepeat: yup
         .string()
-        .required('Repeat Password is required')
-        .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
+        .required('Phone number is required')
+        .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match')
+        .test('isValidPhoneNumber', 'Invalid phone number', function (value) {
+          const { country } = this.options.context
+
+          if (country) {
+            return isValidPhoneNumber(value, country)
+          }
+
+          return true
+        }),
       smsLanguage: yup.string().required(),
       incomeSourceId: yup.string().required(),
       gender: yup.string().required(),
@@ -465,6 +491,14 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const isClosed = !(editMode && formik.values.status === -1 && !formik.values.otpVerified && formik.values.wip !== 2)
 
   const wip = formik.values.wip === 2
+
+  async function saveImage(obj) {
+    if (imageUrl)
+      return await postRequest({
+        extension: CurrencyTradingSettingsRepository.ScannerImage.set,
+        record: JSON.stringify({ base64Image: imageUrl, clientId: obj.clientId, numberID: obj.numberID })
+      })
+  }
 
   const postRtDefault = async obj => {
     const date = new Date()
@@ -514,12 +548,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       clientId: obj.clientId || 0,
       firstName: obj.firstName,
       lastName: obj.lastName,
-      middleName: obj.middleName,
-      familyName: obj.familyName,
+      middleName: obj.familyName ? obj.middleName + '' + obj.familyName : obj.middleName,
+      familyName: null,
       fl_firstName: obj.fl_firstName,
       fl_lastName: obj.fl_lastName,
-      fl_middleName: obj.fl_middleName,
-      fl_familyName: obj.fl_familyName,
+      fl_middleName: obj.fl_familyName ? obj.fl_middleName + ' ' + obj.fl_familyName : obj.fl_middleName,
+      fl_familyName: null,
       birthDate: formatDateToApi(obj.birthDate),
       isResident: obj.isResident,
       sponsorName: obj.sponsorName,
@@ -612,7 +646,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         clientRemittance: obj4,
         clientMaster: obj1, //CTCL
         address: obj5,
-        workAddress: obj6.name && obj6.countryId && obj6.cityId && obj6.phone && obj6.street1 ? obj6 : null
+        workAddress: obj6 ? obj6 : null
       }
 
       await postRequest({
@@ -620,6 +654,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         record: JSON.stringify(updateData)
       }).then(res => {
         if (res) {
+          if (imageUrl && obj?.idScanMode == 1 && idScanner !== obj?.idScanMode)
+            saveImage({ clientId: obj.clientId, numberID: obj.idNo })
+
           toast.success(platformLabels.Edited)
           otpForm()
           getClient(obj.recordId)
@@ -641,6 +678,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         record: JSON.stringify(data)
       }).then(res => {
         if (res) {
+          if (imageUrl && obj?.idScanMode == 1) saveImage({ clientId: res.recordId, numberID: obj.idNo })
+
           toast.success(platformLabels.Submit)
           setOtpShow(true)
           getClient(res.recordId)
@@ -652,8 +691,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
   useEffect(() => {
     if (formik.values.idtId) {
-      const res = idTypes.list.filter(item => item.recordId === formik.values.idtId)?.[0]
-      if (res['type'] && (res['type'] === 1 || res['type'] === 2)) {
+      const res = idTypes.list?.filter(item => item.recordId === formik.values.idtId)?.[0]
+      if (res && res['type'] && (res['type'] === 1 || res['type'] === 2)) {
         getCountry()
       }
     }
@@ -675,21 +714,20 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
   const onClose = async () => {
     const values = formik.values
-    try {
-      const data = {
-        recordId: values?.remittanceRecordId
-      }
 
-      const res = await postRequest({
-        extension: RTCLRepository.CtClientIndividual.close,
-        record: JSON.stringify(data)
-      })
-      if (res.recordId) {
-        toast.success(platformLabels.Closed)
-        invalidate()
-        getClient(res.recordId)
-      }
-    } catch {}
+    const data = {
+      recordId: values?.remittanceRecordId
+    }
+
+    const res = await postRequest({
+      extension: RTCLRepository.CtClientIndividual.close,
+      record: JSON.stringify(data)
+    })
+    if (res.recordId) {
+      toast.success(platformLabels.Closed)
+      invalidate()
+      getClient(res.recordId)
+    }
   }
 
   const actions = [
@@ -752,28 +790,59 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     setNewProf(!newProf)
   }
 
-  const handleClickDigitalId = confirmWindow => {
-    formik.setFieldValue('idScanMode', 2)
+  const handleClickDigitalId = async confirmWindow => {
+    setLoading(true)
+
     const parameters = `_number=${formik.values.idNo}&_idType=${formik.values.idtId}`
-    getRequest({
+
+    const res = await getRequest({
       extension: CurrencyTradingSettingsRepository.Absher.get,
       parameters
-    }).then(res => {
-      setImageUrl(res.record.imageContent)
-      confirmWindow.close()
     })
+
+    const result = res?.record
+
+    if (result) {
+      formik.setFieldValue('idScanMode', 2)
+
+      setImageUrl(result?.imageContent)
+
+      confirmWindow.close()
+    } else {
+      formik.setFieldValue('idScanMode', null)
+
+      setImageUrl(null)
+    }
+
+    setLoading(false)
   }
 
-  const handleClickScanner = () => {
-    formik.setFieldValue('idScanMode', 1)
+  const handleClickScanner = async confirmWindow => {
+    setLoading(true)
+
+    const response = await getRequestFullEndPoint({ endPoint: process.env.NEXT_PUBLIC_SCANNER_URL })
+
+    if (response?.imageContent) {
+      formik.setFieldValue('idScanMode', 1)
+
+      setImageUrl(response?.imageContent)
+
+      confirmWindow.close()
+    } else {
+      formik.setFieldValue('idScanMode', null)
+
+      setImageUrl(null)
+    }
+
+    setLoading(false)
   }
 
-  const digitalIdConfirmation = () => {
+  const digitalIdConfirmation = mode => {
     stack({
       Component: ConfirmationDialog,
       props: {
-        DialogText: platformLabels.AbsherConfirmation,
-        okButtonAction: handleClickDigitalId,
+        DialogText: mode === 2 ? platformLabels.AbsherConfirmation : platformLabels.scannerConfirmation,
+        okButtonAction: mode === 2 ? handleClickDigitalId : handleClickScanner,
         fullScreen: false
       },
       width: 450,
@@ -821,7 +890,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     (isCellPhoneTouched || isIdNoTouched) &&
     !isValidatePhoneClicked &&
     !formik.values.govCellVerified &&
-    !systemChecks?.some(item => item.checkId === 3504)
+    !systemChecks?.some(item => item.checkId === SystemChecks.CT_DISABLE_MOBILE_VERIFICATION)
+
+  function onAddressSubmit(values) {
+    setAddress({
+      ...values
+    })
+  }
 
   return (
     <FormShell
@@ -830,6 +905,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
+      previewReport={editMode}
       disabledSubmit={editMode && !allowEdit && true}
     >
       <VertLayout>
@@ -864,16 +940,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   />
                 </Grid>
                 <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='isResident'
-                        checked={formik.values?.isResident}
-                        onChange={formik.handleChange}
-                        disabled={editMode && !allowEdit}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='isResident'
+                    value={formik.values?.isResident}
+                    onChange={event => formik.setFieldValue('isResident', event.target.checked)}
                     label={labels.isResident}
+                    maxAccess={maxAccess}
+                    disabled={editMode && !allowEdit}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -901,6 +974,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       formik.setFieldValue('birthDate', value)
                     }}
                     onClear={() => formik.setFieldValue('birthDate', '')}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -965,6 +1039,15 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       <Grid item xs={2}>
                         <Button
                           variant='contained'
+                          sx={{
+                            '&:hover': {
+                              opacity: 0.8
+                            },
+                            width: 'auto',
+                            height: '33px',
+                            objectFit: 'contain',
+                            minWidth: 'auto'
+                          }}
                           onClick={() =>
                             stack({
                               Component: Confirmation,
@@ -976,14 +1059,15 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               },
                               title: labels.fetch,
                               width: 400,
-                              height: 350
+                              height: 400
                             })
                           }
                           disabled={
                             !formik?.values?.idtId ||
                             !formik?.values?.birthDate ||
                             !formik.values.idNo ||
-                            (editMode && new Date(formik.values?.expiryDate) >= new Date())
+                            (editMode && new Date(formik.values?.expiryDate) >= new Date()) ||
+                            (editMode && !allowEdit)
                               ? true
                               : false
                           }
@@ -1029,6 +1113,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           readOnly={editMode && !allowEdit && true}
                           disabledDate={!editMode && '>'}
                           onClear={() => formik.setFieldValue('issueDate', '')}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
                       <Grid item xs={4}>
@@ -1104,7 +1189,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       </Grid>
                       <Grid item xs={12}>
                         <Grid container spacing={2}>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='firstName'
                               label={labels.first}
@@ -1122,7 +1207,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='middleName'
                               label={labels.middle}
@@ -1136,7 +1221,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='lastName'
                               label={labels.last}
@@ -1154,7 +1239,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          {/* <Grid item xs={3}>
                             <CustomTextField
                               name='familyName'
                               label={labels.family}
@@ -1167,12 +1252,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               error={formik.touched.familyName && Boolean(formik.errors.familyName)}
                               maxAccess={maxAccess}
                             />
-                          </Grid>
+                          </Grid> */}
                         </Grid>
                       </Grid>
                       <Grid item xs={12}>
                         <Grid container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
                               label={labels.fl_first}
@@ -1188,7 +1273,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_middleName'
                               label={labels.fl_middle}
@@ -1202,7 +1287,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_lastName'
                               label={labels.fl_last}
@@ -1217,7 +1302,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          {/* <Grid item xs={3}>
                             <CustomTextField
                               name='fl_familyName'
                               label={labels.fl_family}
@@ -1230,7 +1315,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
                               maxAccess={maxAccess}
                             />
-                          </Grid>
+                          </Grid> */}
                         </Grid>
                       </Grid>
                       <Grid item xs={4}>
@@ -1334,21 +1419,71 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   </FieldSet>
                 </Grid>
                 <Grid item xs={12}>
-                  <Grid container spacing={2}>
-                    <Grid item xs='auto'>
-                      <Button variant='contained' color='primary' onClick={handleClickScanner}>
-                        {labels.scanner}
-                      </Button>
+                  <FieldSet>
+                    <Grid container spacing={2}>
+                      <Grid item xs={3}>
+                        <CustomCheckBox
+                          name='otpVerified'
+                          value={formik.values?.otpVerified}
+                          onChange={event => formik.setFieldValue('otpVerified', event.target.checked)}
+                          label={labels?.OTPVerified}
+                          maxAccess={maxAccess}
+                          disabled={true}
+                          readOnly={editMode && true}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <CustomCheckBox
+                          name='govCellVerified'
+                          value={formik.values?.govCellVerified}
+                          onChange={event => formik.setFieldValue('govCellVerified', event.target.checked)}
+                          label={labels?.govCellVerified}
+                          maxAccess={maxAccess}
+                          disabled={editMode && !allowEdit}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <CustomCheckBox
+                          name='coveredFace'
+                          value={formik.values?.coveredFace}
+                          onChange={event => formik.setFieldValue('coveredFace', event.target.checked)}
+                          label={labels?.coveredFace}
+                          maxAccess={maxAccess}
+                          disabled={
+                            formik.values.gender === '2' && !editMode ? false : editMode && allowEdit ? false : true
+                          }
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <CustomCheckBox
+                          name='isEmployee'
+                          value={formik.values?.isEmployee}
+                          onChange={event => formik.setFieldValue('isEmployee', event.target.checked)}
+                          label={labels?.isEmployed}
+                          maxAccess={maxAccess}
+                          disabled={editMode && !allowEdit && true}
+                        />
+                      </Grid>
                     </Grid>
-                    <Grid item xs='auto'>
-                      <Button
-                        variant='contained'
+                  </FieldSet>
+                </Grid>
+                <Grid item xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={3}>
+                      <CustomButton
+                        onClick={() => digitalIdConfirmation(1)}
+                        label={labels.scanner}
                         color='primary'
-                        onClick={digitalIdConfirmation}
-                        disabled={!formik.values.idNo || !formik.values.idtId}
-                      >
-                        {labels.digitalId}
-                      </Button>
+                        disabled={loading || (editMode && !allowEdit)}
+                      />
+                    </Grid>
+                    <Grid item xs={3}>
+                      <CustomButton
+                        onClick={() => digitalIdConfirmation(2)}
+                        label={labels.digitalId}
+                        color='primary'
+                        disabled={!formik.values.idNo || !formik.values.idtId || loading || (editMode && !allowEdit)}
+                      />
                     </Grid>
                   </Grid>
                 </Grid>
@@ -1357,8 +1492,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     <img
                       src={`data:image/png;base64,${imageUrl}`}
                       alt='Id image'
-                      style={{ objectFit: 'cover', width: '100%', height: '95%' }}
+                      style={{ width: '100%', height: '95%' }}
                     />
+                  </Grid>
+                )}
+                {loading && !imageUrl && (
+                  <Grid item xs={12} textAlign={'center'} paddingTop={5}>
+                    <CircularProgress />
                   </Grid>
                 )}
               </Grid>
@@ -1367,215 +1507,222 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
               <Grid container xs={12} spacing={2}>
                 <Grid item xs={12}>
                   <FieldSet title={labels.customerInformation}>
-                    <Grid item xs={5}>
-                      <CustomTextField
-                        name='cellPhone'
-                        type={showAsPasswordPhone && formik.values?.cellPhone ? 'password' : 'text'}
-                        label={labels.cellPhone}
-                        value={formik.values?.cellPhone}
-                        readOnly={editMode && !allowEdit && true}
-                        required
-                        phone={true}
-                        onChange={e => {
-                          formik.setFieldTouched('cellPhone', true)
-                          setIsValidatePhoneClicked(false)
-                          formik.handleChange(e)
-                          formik.values?.cellPhoneRepeat === e.target.value &&
-                            formik.setFieldValue('whatsAppNo', e.target.value)
-                        }}
-                        maxLength='15'
-                        autoComplete='off'
-                        onCopy={handleCopy}
-                        onPaste={handleCopy}
-                        onBlur={e => {
-                          setShowAsPasswordPhone(true), formik.handleBlur(e)
-                        }}
-                        onFocus={e => {
-                          setShowAsPasswordPhone(false)
-                        }}
-                        onClear={() => formik.setFieldValue('cellPhone', '')}
-                        error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
-                        helperText={formik.touched.cellPhone && formik.errors.cellPhone}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-                    <Grid item xs={5}>
-                      <CustomTextField
-                        name='cellPhoneRepeat'
-                        type={showAsPasswordPhoneRepeat && formik.values?.cellPhoneRepeat ? 'password' : 'text'}
-                        label={labels.confirmCell}
-                        value={formik.values?.cellPhoneRepeat}
-                        required
-                        readOnly={editMode && !allowEdit && true}
-                        maxLength='15'
-                        autoComplete='off'
-                        phone={true}
-                        onChange={e => {
-                          formik.setFieldTouched('cellPhoneRepeat', true)
-                          setIsValidatePhoneClicked(false)
-                          formik.handleChange(e)
-                          formik.values?.cellPhone === e.target.value &&
-                            formik.setFieldValue('whatsAppNo', e.target.value)
-                        }}
-                        onBlur={e => {
-                          setShowAsPasswordPhoneRepeat(true), formik.handleBlur(e)
-                        }}
-                        onFocus={e => {
-                          setShowAsPasswordPhoneRepeat(false)
-                        }}
-                        onCopy={handleCopy}
-                        onPaste={handleCopy}
-                        onClear={() => formik.setFieldValue('cellPhoneRepeat', '')}
-                        error={formik.touched.cellPhoneRepeat && Boolean(formik.errors.cellPhoneRepeat)}
-                        helperText={formik.touched.cellPhoneRepeat && formik.errors.cellPhoneRepeat}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-                    <Grid item xs={2}>
-                      <Button
-                        variant='contained'
-                        color='primary'
-                        onClick={handleConfirmFetchMobileOwner}
-                        disabled={
-                          !formik.values.idNo ||
-                          !formik.values.cellPhone ||
-                          systemChecks?.some(item => item.checkId === 3504)
-                        }
-                      >
-                        {labels.fetch}
-                      </Button>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <ResourceComboBox
-                        endpointId={SystemRepository.Country.qry}
-                        name='cobId'
-                        label={labels.cob}
-                        valueField='recordId'
-                        displayField={['reference', 'name', 'flName']}
-                        columnsInDropDown={[
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' },
-                          { key: 'flName', value: 'Foreign Language Name' }
-                        ]}
-                        readOnly={editMode && !allowEdit && true}
-                        displayFieldWidth={1.5}
-                        values={formik.values}
-                        onChange={(event, newValue) => {
-                          if (newValue) {
-                            formik.setFieldValue('cobId', newValue?.recordId)
-                          } else {
-                            formik.setFieldValue('cobId', '')
+                    <Grid container spacing={2}>
+                      <Grid item xs={5}>
+                        <CustomPhoneNumber
+                          name='cellPhone'
+                          type={showAsPasswordPhone && formik.values?.cellPhone ? 'password' : 'text'}
+                          label={labels.cellPhone}
+                          value={formik.values?.cellPhone}
+                          readOnly={editMode && !allowEdit && true}
+                          required
+                          phone={true}
+                          onChange={(value, countryData) => {
+                            formik.setFieldTouched('cellPhone', true)
+
+                            setIsValidatePhoneClicked(false)
+
+                            formik.setFieldValue('cellPhone', value)
+
+                            formik.setFieldValue('country', countryData?.countryCode)
+
+                            formik.values?.cellPhoneRepeat === value && formik.setFieldValue('whatsAppNo', value)
+                          }}
+                          maxLength='15'
+                          autoComplete='off'
+                          onCopy={handleCopy}
+                          onPaste={handleCopy}
+                          onBlur={e => {
+                            setShowAsPasswordPhone(true), formik.handleBlur(e)
+                          }}
+                          onFocus={e => {
+                            setShowAsPasswordPhone(false)
+                          }}
+                          onClear={() => formik.setFieldValue('cellPhone', '')}
+                          error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
+                          helperText={formik.touched.cellPhone && formik.errors.cellPhone}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
+                      <Grid item xs={5}>
+                        <CustomPhoneNumber
+                          name='cellPhoneRepeat'
+                          type={showAsPasswordPhoneRepeat && formik.values?.cellPhoneRepeat ? 'password' : 'text'}
+                          label={labels.confirmCell}
+                          value={formik.values?.cellPhoneRepeat}
+                          required
+                          readOnly={editMode && !allowEdit && true}
+                          maxLength='15'
+                          autoComplete='off'
+                          phone={true}
+                          onChange={(value, countryCode) => {
+                            formik.setFieldTouched('cellPhoneRepeat', true)
+
+                            setIsValidatePhoneClicked(false)
+
+                            formik.setFieldValue('cellPhoneRepeat', value)
+
+                            formik.values?.cellPhone === value && formik.setFieldValue('whatsAppNo', value)
+                          }}
+                          onBlur={e => {
+                            setShowAsPasswordPhoneRepeat(true), formik.handleBlur(e)
+                          }}
+                          onFocus={e => {
+                            setShowAsPasswordPhoneRepeat(false)
+                          }}
+                          onCopy={handleCopy}
+                          onPaste={handleCopy}
+                          onClear={() => formik.setFieldValue('cellPhoneRepeat', '')}
+                          error={formik.touched.cellPhoneRepeat && Boolean(formik.errors.cellPhoneRepeat)}
+                          helperText={formik.touched.cellPhoneRepeat && formik.errors.cellPhoneRepeat}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
+                      <Grid item xs={2}>
+                        <CustomButton
+                          onClick={handleConfirmFetchMobileOwner}
+                          label={labels.fetch}
+                          color='primary'
+                          disabled={
+                            !formik.values.idNo ||
+                            !formik.values.cellPhone ||
+                            systemChecks?.some(item => item.checkId === SystemChecks.CT_DISABLE_MOBILE_VERIFICATION) ||
+                            (editMode && !allowEdit)
                           }
-                        }}
-                        error={formik.touched.cobId && Boolean(formik.errors.cobId)}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-                    <Grid item xs={4}>
-                      <ResourceComboBox
-                        endpointId={RemittanceSettingsRepository.SourceOfIncome.qry}
-                        name='incomeSourceId'
-                        label={labels.incomeSource}
-                        valueField='recordId'
-                        readOnly={editMode && !allowEdit && true}
-                        displayField={['reference', 'name', 'flName']}
-                        columnsInDropDown={[
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' },
-                          { key: 'flName', value: 'Foreign Language Name' }
-                        ]}
-                        displayFieldWidth={1.5}
-                        values={formik.values}
-                        required
-                        onChange={(event, newValue) => {
-                          if (newValue) {
-                            formik.setFieldValue('incomeSourceId', newValue?.recordId)
-                          } else {
-                            formik.setFieldValue('incomeSourceId', '')
-                          }
-                        }}
-                        error={formik.touched.incomeSourceId && Boolean(formik.errors.incomeSourceId)}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-                    <Grid item xs={4}>
-                      <ResourceComboBox
-                        endpointId={RemittanceSettingsRepository.SalaryRange.qry}
-                        name='salaryRangeId'
-                        label={labels.salaryRange}
-                        valueField='recordId'
-                        displayField={['min', '->', 'max']}
-                        columnsInDropDown={[
-                          { key: 'min', value: 'min' },
-                          { key: 'max', value: 'max' }
-                        ]}
-                        readOnly={editMode && !allowEdit && true}
-                        values={formik.values}
-                        onChange={(event, newValue) => {
-                          if (newValue) {
-                            formik.setFieldValue('salaryRangeId', newValue?.recordId)
-                          } else {
-                            formik.setFieldValue('salaryRangeId', '')
-                          }
-                        }}
-                        error={formik.touched.salaryRangeId && Boolean(formik.errors.salaryRangeId)}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-                    <Grid item xs={4}>
-                      <ResourceComboBox
-                        datasetId={DataSets.LANGUAGE}
-                        name='smsLanguage'
-                        label={labels.smsLanguage}
-                        valueField='key'
-                        displayField='value'
-                        values={formik.values}
-                        required
-                        readOnly={editMode && !allowEdit && true}
-                        onChange={(event, newValue) => {
-                          if (newValue) {
-                            formik.setFieldValue('smsLanguage', newValue?.key)
-                          } else {
-                            formik.setFieldValue('smsLanguage', '')
-                          }
-                        }}
-                        error={formik.touched.smsLanguage && Boolean(formik.errors.smsLanguage)}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-                    <Grid item xs={4}>
-                      <CustomTextField
-                        name='whatsAppNo'
-                        label={labels.whatsapp}
-                        value={formik.values?.whatsAppNo}
-                        readOnly={editMode && !allowEdit && true}
-                        onChange={formik.handleChange}
-                        maxLength='15'
-                        phone={true}
-                        onClear={() => formik.setFieldValue('whatsAppNo', '')}
-                        error={formik.touched.whatsAppNo && Boolean(formik.errors.whatsAppNo)}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-                    <Grid item xs={4}>
-                      <ResourceComboBox
-                        name='status'
-                        label={labels.status}
-                        datasetId={DataSets.ACTIVE_STATUS}
-                        values={formik.values}
-                        valueField='key'
-                        displayField='value'
-                        onChange={(event, newValue) => {
-                          if (newValue) {
-                            formik.setFieldValue('status', newValue?.key)
-                          } else {
-                            formik.setFieldValue('status', newValue?.key)
-                          }
-                        }}
-                        readOnly={true}
-                        error={formik.touched.status && Boolean(formik.errors.status)}
-                        maxAccess={maxAccess}
-                      />
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <ResourceComboBox
+                          endpointId={SystemRepository.Country.qry}
+                          name='cobId'
+                          label={labels.cob}
+                          valueField='recordId'
+                          displayField={['reference', 'name', 'flName']}
+                          columnsInDropDown={[
+                            { key: 'reference', value: 'Reference' },
+                            { key: 'name', value: 'Name' },
+                            { key: 'flName', value: 'Foreign Language Name' }
+                          ]}
+                          readOnly={editMode && !allowEdit && true}
+                          displayFieldWidth={1.5}
+                          values={formik.values}
+                          onChange={(event, newValue) => {
+                            if (newValue) {
+                              formik.setFieldValue('cobId', newValue?.recordId)
+                            } else {
+                              formik.setFieldValue('cobId', '')
+                            }
+                          }}
+                          error={formik.touched.cobId && Boolean(formik.errors.cobId)}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <ResourceComboBox
+                          endpointId={RemittanceSettingsRepository.SourceOfIncome.qry}
+                          name='incomeSourceId'
+                          label={labels.incomeSource}
+                          valueField='recordId'
+                          readOnly={editMode && !allowEdit && true}
+                          displayField={['reference', 'name', 'flName']}
+                          columnsInDropDown={[
+                            { key: 'reference', value: 'Reference' },
+                            { key: 'name', value: 'Name' },
+                            { key: 'flName', value: 'Foreign Language Name' }
+                          ]}
+                          displayFieldWidth={1.5}
+                          values={formik.values}
+                          required
+                          onChange={(event, newValue) => {
+                            if (newValue) {
+                              formik.setFieldValue('incomeSourceId', newValue?.recordId)
+                            } else {
+                              formik.setFieldValue('incomeSourceId', '')
+                            }
+                          }}
+                          error={formik.touched.incomeSourceId && Boolean(formik.errors.incomeSourceId)}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <ResourceComboBox
+                          endpointId={RemittanceSettingsRepository.SalaryRange.qry}
+                          name='salaryRangeId'
+                          label={labels.salaryRange}
+                          valueField='recordId'
+                          displayField={['min', '->', 'max']}
+                          columnsInDropDown={[
+                            { key: 'min', value: 'min' },
+                            { key: 'max', value: 'max' }
+                          ]}
+                          readOnly={editMode && !allowEdit && true}
+                          values={formik.values}
+                          onChange={(event, newValue) => {
+                            if (newValue) {
+                              formik.setFieldValue('salaryRangeId', newValue?.recordId)
+                            } else {
+                              formik.setFieldValue('salaryRangeId', '')
+                            }
+                          }}
+                          error={formik.touched.salaryRangeId && Boolean(formik.errors.salaryRangeId)}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <ResourceComboBox
+                          datasetId={DataSets.LANGUAGE}
+                          name='smsLanguage'
+                          label={labels.smsLanguage}
+                          valueField='key'
+                          displayField='value'
+                          values={formik.values}
+                          required
+                          readOnly={editMode && !allowEdit && true}
+                          onChange={(event, newValue) => {
+                            if (newValue) {
+                              formik.setFieldValue('smsLanguage', newValue?.key)
+                            } else {
+                              formik.setFieldValue('smsLanguage', '')
+                            }
+                          }}
+                          error={formik.touched.smsLanguage && Boolean(formik.errors.smsLanguage)}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <CustomTextField
+                          name='whatsAppNo'
+                          label={labels.whatsapp}
+                          value={formik.values?.whatsAppNo}
+                          readOnly={editMode && !allowEdit && true}
+                          onChange={formik.handleChange}
+                          maxLength='15'
+                          phone={true}
+                          onClear={() => formik.setFieldValue('whatsAppNo', '')}
+                          error={formik.touched.whatsAppNo && Boolean(formik.errors.whatsAppNo)}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <ResourceComboBox
+                          name='status'
+                          label={labels.status}
+                          datasetId={DataSets.ACTIVE_STATUS}
+                          values={formik.values}
+                          valueField='key'
+                          displayField='value'
+                          onChange={(event, newValue) => {
+                            if (newValue) {
+                              formik.setFieldValue('status', newValue?.key)
+                            } else {
+                              formik.setFieldValue('status', newValue?.key)
+                            }
+                          }}
+                          readOnly={true}
+                          error={formik.touched.status && Boolean(formik.errors.status)}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
                     </Grid>
                   </FieldSet>
                 </Grid>
@@ -1591,34 +1738,34 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   </FieldSet>
                 </Grid>
                 <Grid item xs={12}>
-                  <Grid container spacing={2} xs={12}>
-                    <Grid item>
-                      <Button
-                        variant='contained'
+                  <Grid container spacing={2}>
+                    <Grid item xs={5}>
+                      <CustomButton
                         onClick={() =>
                           stack({
                             Component: AddressFormShell,
                             props: {
                               readOnly: editMode && !allowEdit,
+                              allowPost: true,
                               optional: true,
                               labels: labels,
                               setAddress: setAddress,
+                              onSubmit: onAddressSubmit,
                               address: address,
                               maxAccess: maxAccess,
                               isCleared: false
                             },
                             width: 800,
-                            height: 400,
+                            height: 350,
                             title: labels.workAddress
                           })
                         }
-                      >
-                        {labels.workAddress}
-                      </Button>
+                        label={labels.workAddress}
+                        color='primary'
+                      />
                     </Grid>
-                    <Grid item>
-                      <Button
-                        variant='contained'
+                    <Grid item xs={4}>
+                      <CustomButton
                         onClick={() =>
                           stack({
                             Component: MoreDetails,
@@ -1635,117 +1782,54 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                             title: labels.moreDetails
                           })
                         }
-                      >
-                        {labels.moreDetails}
-                      </Button>
+                        label={labels.moreDetails}
+                        color='primary'
+                      />
                     </Grid>
                   </Grid>
                 </Grid>
                 <Grid item xs={12}>
                   <FieldSet title={labels.diplomat}>
-                    <Grid item xs={6}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name='isDiplomat'
-                            checked={formik.values?.isDiplomat}
-                            disabled={(formik.values?.isDiplomatReadOnly || (editMode && !allowEdit)) && true}
-                            onChange={formik.handleChange}
-                          />
-                        }
-                        label={labels?.isDiplomat}
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name='isRelativeDiplomat'
-                            checked={formik.values?.isRelativeDiplomat}
-                            disabled={editMode && !allowEdit}
-                            onChange={e => {
-                              formik.handleChange(e), formik.setFieldValue('relativeDiplomatInfo', '')
-                            }}
-                          />
-                        }
-                        label={labels?.isDiplomatRelative}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <CustomTextField
-                        name='relativeDiplomatInfo'
-                        label={labels.relativeDiplomatInfo}
-                        onBlur={formik.handleBlur}
-                        value={formik.values?.relativeDiplomatInfo}
-                        readOnly={editMode || (!formik.values?.isRelativeDiplomat && true)}
-                        onChange={formik.handleChange}
-                        maxLength='10'
-                        required={formik.values.isRelativeDiplomat ? true : false}
-                        onClear={() => formik.setFieldValue('relativeDiplomatInfo', '')}
-                        error={formik.touched.relativeDiplomatInfo && Boolean(formik.errors.relativeDiplomatInfo)}
-                        maxAccess={maxAccess}
-                      />
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <CustomCheckBox
+                          name='isDiplomat'
+                          value={formik.values?.isDiplomat}
+                          onChange={event => formik.setFieldValue('isDiplomat', event.target.checked)}
+                          label={labels?.isDiplomat}
+                          maxAccess={maxAccess}
+                          disabled={(formik.values?.isDiplomatReadOnly || (editMode && !allowEdit)) && true}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <CustomCheckBox
+                          name='isRelativeDiplomat'
+                          value={formik.values?.isRelativeDiplomat}
+                          onChange={e => {
+                            formik.handleChange(e), formik.setFieldValue('relativeDiplomatInfo', '')
+                          }}
+                          label={labels?.isDiplomatRelative}
+                          maxAccess={maxAccess}
+                          disabled={editMode && !allowEdit}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <CustomTextField
+                          name='relativeDiplomatInfo'
+                          label={labels.relativeDiplomatInfo}
+                          onBlur={formik.handleBlur}
+                          value={formik.values?.relativeDiplomatInfo}
+                          readOnly={editMode || (!formik.values?.isRelativeDiplomat && true)}
+                          onChange={formik.handleChange}
+                          maxLength='10'
+                          required={formik.values.isRelativeDiplomat ? true : false}
+                          onClear={() => formik.setFieldValue('relativeDiplomatInfo', '')}
+                          error={formik.touched.relativeDiplomatInfo && Boolean(formik.errors.relativeDiplomatInfo)}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
                     </Grid>
                   </FieldSet>
-                </Grid>
-                <Grid item xs={12}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={3}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name='otpVerified'
-                            disabled={true}
-                            readOnly={editMode && true}
-                            checked={formik.values?.otpVerified}
-                            onChange={formik.handleChange}
-                          />
-                        }
-                        label={labels?.OTPVerified}
-                      />
-                    </Grid>
-                    <Grid item xs={3}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name='govCellVerified'
-                            disabled={editMode && !allowEdit}
-                            checked={formik.values?.govCellVerified}
-                            onChange={formik.handleChange}
-                          />
-                        }
-                        label={labels?.govCellVerified}
-                      />
-                    </Grid>
-                    <Grid item xs={3}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            disabled={
-                              formik.values.gender === '2' && !editMode ? false : editMode && allowEdit ? false : true
-                            }
-                            name='coveredFace'
-                            checked={formik.values.coveredFace}
-                            onChange={formik.handleChange}
-                          />
-                        }
-                        label={labels?.coveredFace}
-                      />
-                    </Grid>
-                    <Grid item xs={3}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name='isEmployee'
-                            disabled={editMode && !allowEdit && true}
-                            checked={formik.values?.isEmployee}
-                            onChange={formik.handleChange}
-                          />
-                        }
-                        label={labels?.isEmployed}
-                      />
-                    </Grid>
-                  </Grid>
                 </Grid>
               </Grid>
             </Grid>

@@ -181,7 +181,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       flex: 1
     }
   ]
-  const isStatusNotOne = formik.values.status !== 1
+  const isPosted = formik.values.status === 3
 
   const actions = [
     {
@@ -190,11 +190,18 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       onClick: 'onClickGL',
       disabled: !editMode
     },
+
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      disabled: true
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || isStatusNotOne
+      disabled: !editMode
     },
     {
       key: 'PR',
@@ -213,8 +220,6 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       maxAccess={maxAccess}
       functionId={SystemFunction.AssetsDepreciation}
       previewReport={true}
-      disabledSubmit={isStatusNotOne}
-      isCleared={!isStatusNotOne}
     >
       <VertLayout>
         <Fixed>
