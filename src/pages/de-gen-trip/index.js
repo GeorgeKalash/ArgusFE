@@ -367,7 +367,7 @@ const GenerateOutboundTransportation = () => {
                 ]}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('szId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('szId', newValue?.recordId || null)
                   if (formik.values.vehicleId) onPreview(newValue?.recordId)
                 }}
                 error={formik.touched.szId && Boolean(formik.errors.szId)}
