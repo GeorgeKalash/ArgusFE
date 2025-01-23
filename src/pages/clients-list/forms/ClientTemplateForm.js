@@ -1,4 +1,4 @@
-import { Grid, FormControlLabel, Checkbox, Button, CircularProgress } from '@mui/material'
+import { Grid, Button, CircularProgress } from '@mui/material'
 import { useEffect, useState, useContext } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import * as yup from 'yup'
@@ -38,6 +38,8 @@ import { SystemChecks } from 'src/resources/SystemChecks'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import MoreDetails from './MoreDetails'
+import CustomPhoneNumber from 'src/components/Inputs/CustomPhoneNumber'
+import { isValidPhoneNumber } from 'libphonenumber-js'
 
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
@@ -123,6 +125,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     cellPhoneEncrypt: '',
     cellPhoneRepeatEncrypt: '',
     cellPhoneRepeat: '',
+    country: '',
     createdDate: null,
     isDiplomatReadOnly: false,
     flName: '',
@@ -450,11 +453,31 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       lastName: yup.string().required(),
       nationalityId: yup.string().required(),
       professionId: yup.string().required(),
-      cellPhone: yup.string().required(),
+      cellPhone: yup
+        .string()
+        .required('Phone number is required')
+        .test('isValidPhoneNumber', 'Invalid phone number', function (value) {
+          const { country } = this.options.context
+
+          if (country) {
+            return isValidPhoneNumber(value, country)
+          }
+
+          return true
+        }),
       cellPhoneRepeat: yup
         .string()
-        .required('Repeat Password is required')
-        .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
+        .required('Phone number is required')
+        .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match')
+        .test('isValidPhoneNumber', 'Invalid phone number', function (value) {
+          const { country } = this.options.context
+
+          if (country) {
+            return isValidPhoneNumber(value, country)
+          }
+
+          return true
+        }),
       smsLanguage: yup.string().required(),
       incomeSourceId: yup.string().required(),
       gender: yup.string().required(),
@@ -1486,7 +1509,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   <FieldSet title={labels.customerInformation}>
                     <Grid container spacing={2}>
                       <Grid item xs={5}>
-                        <CustomTextField
+                        <CustomPhoneNumber
                           name='cellPhone'
                           type={showAsPasswordPhone && formik.values?.cellPhone ? 'password' : 'text'}
                           label={labels.cellPhone}
@@ -1494,12 +1517,16 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           readOnly={editMode && !allowEdit && true}
                           required
                           phone={true}
-                          onChange={e => {
+                          onChange={(value, countryData) => {
                             formik.setFieldTouched('cellPhone', true)
+
                             setIsValidatePhoneClicked(false)
-                            formik.handleChange(e)
-                            formik.values?.cellPhoneRepeat === e.target.value &&
-                              formik.setFieldValue('whatsAppNo', e.target.value)
+
+                            formik.setFieldValue('cellPhone', value)
+
+                            formik.setFieldValue('country', countryData?.countryCode)
+
+                            formik.values?.cellPhoneRepeat === value && formik.setFieldValue('whatsAppNo', value)
                           }}
                           maxLength='15'
                           autoComplete='off'
@@ -1518,7 +1545,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         />
                       </Grid>
                       <Grid item xs={5}>
-                        <CustomTextField
+                        <CustomPhoneNumber
                           name='cellPhoneRepeat'
                           type={showAsPasswordPhoneRepeat && formik.values?.cellPhoneRepeat ? 'password' : 'text'}
                           label={labels.confirmCell}
@@ -1528,12 +1555,14 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           maxLength='15'
                           autoComplete='off'
                           phone={true}
-                          onChange={e => {
+                          onChange={(value, countryCode) => {
                             formik.setFieldTouched('cellPhoneRepeat', true)
+
                             setIsValidatePhoneClicked(false)
-                            formik.handleChange(e)
-                            formik.values?.cellPhone === e.target.value &&
-                              formik.setFieldValue('whatsAppNo', e.target.value)
+
+                            formik.setFieldValue('cellPhoneRepeat', value)
+
+                            formik.values?.cellPhone === value && formik.setFieldValue('whatsAppNo', value)
                           }}
                           onBlur={e => {
                             setShowAsPasswordPhoneRepeat(true), formik.handleBlur(e)
