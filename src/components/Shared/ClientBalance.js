@@ -30,31 +30,28 @@ export const ClientBalance = ({ recordId }) => {
     validateOnChange: true
   })
 
-
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: RTCLRepository.ClientBalance.get,
-            parameters: `_clientId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: RTCLRepository.ClientBalance.get,
+          parameters: `_clientId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 
   return (
-    <FormShell 
-        resourceId={ResourceIds.ClientBalance} 
-        form={formik} 
-        maxAccess={access} 
-        isSavedClear={false}
-        isCleared={false}
-        isSaved={false}
-        isInfo={false}
+    <FormShell
+      resourceId={ResourceIds.ClientBalance}
+      form={formik}
+      maxAccess={access}
+      isSavedClear={false}
+      isCleared={false}
+      isSaved={false}
+      isInfo={false}
     >
       <VertLayout>
         <Grow>

@@ -65,13 +65,11 @@ const ValueFormList = ({ labels, store, maxAccess }) => {
     getRequest({
       extension: DocumentReleaseRepository.CharacteristicsValues.qry,
       parameters: parameters
+    }).then(res => {
+      setValueGridData(res)
+      const maxSeq = Math.max(...res.list.map(item => item.seqNo), 0)
+      setMaxSeqNo(maxSeq)
     })
-      .then(res => {
-        setValueGridData(res)
-        const maxSeq = Math.max(...res.list.map(item => item.seqNo), 0)
-        setMaxSeqNo(maxSeq)
-      })
-      .catch(error => {})
   }
 
   useEffect(() => {

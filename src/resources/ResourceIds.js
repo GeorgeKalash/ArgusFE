@@ -336,14 +336,20 @@ export const ResourceIds = {
   ItemPromotion: 50606,
   CreditCard: 33104,
   CACostTypes: 53101,
+  MetalReceiptVoucher: 31315,
+  MetalPaymentVoucher: 31316,
+  PuCostAllocation: 53301,
+  SystemAttachments: 20203,
   MultiCurrencyRate: 32601,
   POSDocTypeDefault: 54105,
-  FoWorkCenters: 47101,
   RetailInvoice: 54201,
   RetailInvoiceReturn: 54301,
   RetailPurchase: 54302,
+  CashTransfers: 33302,
   OutwardReturnReason: 36135,
   DraftSerialsInvoices: 51312,
   DraftSerialsReturnDTD: 51113,
-  DraftSerialsInvoiceDTD: 51112
+  DraftSerialsInvoiceDTD: 51112,
+  DeliveryLeadTimes: 52101,
+  DraftSerialsInvoices: 51312
 }
