@@ -25,7 +25,7 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
       rateCalcMethod: data?.rateCalcMethod,
       rateCalcMethodName: data?.rateCalcMethodName,
       rateTypeId: data?.rateTypeId,
-      exRate: data?.exRate || 0,
+      exRate: data?.exRate || null,
       amount: data?.amount || 0,
       baseAmount: data?.baseAmount,
       rateTypeName: data?.rateTypeName
@@ -65,7 +65,7 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
         if (onOk) {
           const updatedValues = {
             ...formik.values,
-            exRate: formik.values.exRate ?? 0,
+            exRate: formik.values.exRate,
             baseAmount: formik.values.baseAmount,
             amount: formik.values.amount
           }
@@ -131,14 +131,14 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
                 readOnly={formik?.values?.amount == 0}
                 onClear={() => {
                   formik.setFieldValue('baseAmount', '')
-                  formik.setFieldValue('exRate', 0)
+                  formik.setFieldValue('exRate', '')
                 }}
                 decimalScale={7}
                 onChange={e => {
                   const inputValue = e.target.value
 
                   if (!inputValue) {
-                    formik.setFieldValue('exRate', 0)
+                    formik.setFieldValue('exRate', '')
                     formik.setFieldValue('baseAmount', '')
 
                     return
