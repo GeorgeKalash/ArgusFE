@@ -183,7 +183,7 @@ export default function InstantCash({
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={RemittanceBankInterface.Combos.qry}
+                    endpointId={RemittanceBankInterface.Combos.qryCBX}
                     parameters={`_combo=4`}
                     name='remitter.employerStatus'
                     label={_labels.employerStatus}

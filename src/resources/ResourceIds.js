@@ -131,6 +131,7 @@ export const ResourceIds = {
   CashCountTransaction: 37301,
   ExchangeRates: 32103,
   CbBankAccounts: 33105,
+  Terrapay : 36307,
   CashNote: 37101,
   OutwardsModification: 36308,
   POSUsers: 54104,
