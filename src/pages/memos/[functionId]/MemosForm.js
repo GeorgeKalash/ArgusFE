@@ -62,7 +62,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       baseAmount: '',
       functionId: functionId,
       vatPct: '',
-      exRate: '',
+      exRate: 0,
       rateCalcMethod: '',
       subtotal: '',
       notes: '',
@@ -250,14 +250,14 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
       const updatedRateRow = getRate({
         amount: amount === 0 ? 0 : amount ?? formik.values.amount,
-        exRate: res.record?.exRate,
+        exRate: res.record?.exRate ?? 0,
         baseAmount: 0,
         rateCalcMethod: res.record?.rateCalcMethod,
         dirtyField: DIRTYFIELD_RATE
       })
 
       formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-      formik.setFieldValue('exRate', res.record?.exRate)
+      formik.setFieldValue('exRate', res.record?.exRate ?? 0)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
   }
@@ -549,7 +549,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
                       const updatedRateRow = getRate({
                         amount: formik.values.amount ?? 0,
-                        exRate: formik.values?.exRate,
+                        exRate: formik.values?.exRate ?? 0,
                         baseAmount: 0,
                         rateCalcMethod: formik.values?.rateCalcMethod,
                         dirtyField: DIRTYFIELD_RATE
