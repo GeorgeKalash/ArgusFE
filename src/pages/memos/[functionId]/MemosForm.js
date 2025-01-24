@@ -549,7 +549,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
                       const updatedRateRow = getRate({
                         amount: e.target.value ?? 0,
-                        exRate: formik.values?.exRate ?? 0,
+                        exRate: formik.values?.exRate,
                         baseAmount: 0,
                         rateCalcMethod: formik.values?.rateCalcMethod,
                         dirtyField: DIRTYFIELD_RATE
