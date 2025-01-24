@@ -62,7 +62,7 @@ const Damages = () => {
     },
     {
       field: 'notes',
-      headerName: labels.description,
+      headerName: labels.remarks,
       flex: 1
     }
   ]
