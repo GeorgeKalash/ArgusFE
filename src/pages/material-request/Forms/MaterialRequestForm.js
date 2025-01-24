@@ -43,46 +43,6 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     enabled: !recordId
   })
 
-  const initialValues = {
-    recordId: null,
-    functionId: SystemFunction.MaterialRequest,
-    reference: '',
-    dtId: documentType?.dtId,
-    siteId: null,
-    siteName: '',
-    date: new Date(),
-    fromSiteId: '',
-    departmentId: null,
-    departmentName: '',
-    statusName: '',
-    rsName: '',
-    wipName: '',
-    notes: '',
-    status: 1,
-    wip: 1,
-    items: [
-      {
-        id: 1,
-        requestId: recordId || 0,
-        seqNo: 1,
-        sku: '',
-        itemName: null,
-        itemId: null,
-        qty: 0,
-        notes: '',
-        onHandSite: 0,
-        onHandGlobal: null,
-        deliveredQty: null,
-        deliveryStatus: '',
-        muId: null,
-        muQty: '',
-        muRef: '',
-        muName: '',
-        msId: null
-      }
-    ]
-  }
-
   const invalidate = useInvalidate({
     endpointId: IVReplenishementRepository.MaterialReplenishment.page
   })
@@ -115,7 +75,45 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
   }
 
   const { formik } = useForm({
-    initialValues,
+    initialValues: {
+      recordId: null,
+      functionId: SystemFunction.MaterialRequest,
+      reference: '',
+      dtId: documentType?.dtId,
+      siteId: null,
+      siteName: '',
+      date: new Date(),
+      fromSiteId: '',
+      departmentId: null,
+      departmentName: '',
+      statusName: '',
+      rsName: '',
+      wipName: '',
+      notes: '',
+      status: 1,
+      wip: 1,
+      items: [
+        {
+          id: 1,
+          requestId: recordId || 0,
+          seqNo: 1,
+          sku: '',
+          itemName: null,
+          itemId: null,
+          qty: null,
+          notes: '',
+          onHandSite: 0,
+          onHandGlobal: null,
+          deliveredQty: null,
+          deliveryStatus: '',
+          muId: null,
+          muQty: '',
+          muRef: '',
+          muName: '',
+          msId: null
+        }
+      ]
+    },
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
@@ -127,7 +125,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
         .of(
           yup.object().shape({
             sku: yup.string().required(),
-            qty: yup.string().required(),
+            qty: yup.string().required().min(1),
             msId: yup.string().required()
           })
         )
@@ -216,7 +214,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     const hasAvailableStock = res?.count > 0
     const siteHasStock = hasAvailableStock && res.list[0].siteId !== 0
     if (!hasAvailableStock || !siteHasStock) {
-      formik.setFieldValue('onHandSite', null)
+      formik.setFieldValue('onHandSite', 0)
 
       return null
     } else {
@@ -265,7 +263,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
           const itemInfo = await getItem(newRow.itemId)
           getFilteredMU(newRow?.itemId)
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-          const onHandSite = await setOnHandSite(newRow?.itemId)
+          const onHandSite = await setOnHandSite(newRow?.itemId) ?? 0
           update({
             msId: itemInfo?.msId,
             onHandSite: onHandSite,
@@ -294,7 +292,6 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
         readOnly: isClosed || isCancelled,
         mapping: [
           { from: 'reference', to: 'muRef' },
-          { from: 'qty', to: 'muQty' },
           { from: 'recordId', to: 'muId' }
         ]
       },
@@ -316,7 +313,8 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       label: labels.qty,
       name: 'qty',
       props: {
-        readOnly: isClosed || isCancelled
+        readOnly: isClosed || isCancelled,
+        mandatory: true
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
