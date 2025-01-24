@@ -146,7 +146,7 @@ const FiPaymentVouchers = () => {
     return getRequest({
       extension: SystemRepository.UserDefaults.get,
       parameters: parameters
-    }).then(res => res.record.value)
+    }).then(res => res?.record?.value)
   }
 
   function openOutWardsWindow(plantId, recordId) {
