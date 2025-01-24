@@ -224,9 +224,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         extension: RemittanceOutwardsRepository.OutwardsCash.qry,
         parameters: `_receiptId=${finalRecordId}`
       })
-
       formik.setValues({
-        recordId: res.record.recordId,
+        recordId: _recordId,
         header: {
           ...res.record,
           date: formatDateFromApi(res?.record?.date)
@@ -336,6 +335,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       maxAccess={maxAccess}
       editMode={editMode}
       disabledSubmit={isPosted || isClosed}
+      previewReport={editMode}
     >
       <VertLayout>
         <Fixed>
