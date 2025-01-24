@@ -51,7 +51,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const [formikSettings, setFormik] = useState({})
 
   const resetAutoFilled = () => {
@@ -90,7 +90,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       }
     ],
     amount: formikSettings.initialValuePayment || [],
-    date: new Date(),
+    date: '',
     clientId: null,
     clientName: null,
     clientType: '1',
@@ -105,7 +105,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     birthDate: null,
     resident: false,
     professionId: null,
-    sponsorName: null,
+    sponsorName: '',
     idNo: null,
     id_type: null,
     expiryDate: null,
@@ -131,8 +131,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     enabled: !!!recordId
   })
 
-  console.log(formikSettings.initialValuePayment, 'formikSettings.initialValuePayment')
-
   async function fetchInfoByKey({ key }) {
     const res = await getRequest({
       extension: RTCLRepository.CtClientIndividual.get3,
@@ -140,35 +138,41 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     })
     setIDInfoAutoFilled(false)
 
-    formik.setFieldValue('idNo', res.record.clientIDView.idNo)
-    formik.setFieldValue('firstName', res.record.clientIndividual.firstName)
-    formik.setFieldValue('clientId', res.record.clientId)
-    formik.setFieldValue('middleName', res.record.clientIndividual.middleName)
-    formik.setFieldValue('lastName', res.record.clientIndividual.lastName)
-    formik.setFieldValue('familyName', res.record.clientIndividual.familyName)
-    formik.setFieldValue('fl_firstName', res.record.clientIndividual.fl_firstName)
-    formik.setFieldValue('fl_lastName', res.record.clientIndividual.fl_lastName)
-    formik.setFieldValue('fl_middleName', res.record.clientIndividual.fl_middleName)
-    formik.setFieldValue('fl_familyName', res.record.clientIndividual.fl_familyName)
-    formik.setFieldValue('birthDate', formatDateFromApi(res.record.clientIndividual.birthDate))
-    formik.setFieldValue('resident', res.record.clientIndividual.isResident)
-    formik.setFieldValue('professionId', res.record.clientMaster.professionId)
-    formik.setFieldValue('sponsorName', res.record.clientIndividual.sponsorName)
-    formik.setFieldValue('id_type', res.record.clientIDView.idtId)
-    formik.setFieldValue('nationalityId', res.record.clientMaster.nationalityId)
-    formik.setFieldValue('nationalityType', res.record.clientIDView.idCountryId === 195 ? 1 : 2)
-    formik.setFieldValue('cellPhone', res.record.clientMaster.cellPhone)
-    formik.setFieldValue('expiryDate', formatDateFromApi(res.record.clientIDView.idExpiryDate))
+    formik.setFieldValue('idNo', res?.record?.clientIDView.idNo)
+    formik.setFieldValue('firstName', res?.record?.clientIndividual.firstName)
+    formik.setFieldValue('clientId', res?.record?.clientId)
+    formik.setFieldValue('middleName', res?.record?.clientIndividual.middleName)
+    formik.setFieldValue('lastName', res?.record?.clientIndividual.lastName)
+    formik.setFieldValue('familyName', res?.record?.clientIndividual.familyName)
+    formik.setFieldValue('fl_firstName', res?.record?.clientIndividual.fl_firstName)
+    formik.setFieldValue('fl_lastName', res?.record?.clientIndividual.fl_lastName)
+    formik.setFieldValue('fl_middleName', res?.record?.clientIndividual.fl_middleName)
+    formik.setFieldValue('fl_familyName', res?.record?.clientIndividual.fl_familyName)
+    formik.setFieldValue('birthDate', formatDateFromApi(res?.record?.clientIndividual.birthDate))
+    formik.setFieldValue('resident', res?.record?.clientIndividual.isResident)
+    formik.setFieldValue('professionId', res?.record?.clientMaster.professionId)
+    formik.setFieldValue('sponsorName', res?.record?.clientIndividual.sponsorName)
+    formik.setFieldValue('id_type', res?.record?.clientIDView.idtId)
+    formik.setFieldValue('nationalityId', res?.record?.clientMaster.nationalityId)
+    formik.setFieldValue('nationalityType', res?.record?.clientIDView.idCountryId === 195 ? 1 : 2)
+    formik.setFieldValue('cellPhone', res?.record?.clientMaster.cellPhone)
+    formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView.idExpiryDate))
 
     setIDInfoAutoFilled(true)
 
     return res.record
   }
 
+  const getValueFromDefaultsData = key => {
+    const defaultValue = defaultsData.list.find(item => item.key === key)
+
+    return defaultValue ? defaultValue.value : null
+  }
+
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
@@ -180,8 +184,9 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       lastName: yup.string().required(),
       expiryDate: yup.string().required(),
       nationalityId: yup.string().required(),
-      nationalityType: yup.number().required(),
+      cellPhone: yup.string().required(),
       professionId: yup.string().required(),
+      nationalityType: yup.number().required(),
       operations: yup
         .array()
         .of(
@@ -415,7 +420,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         toast.success(actionMessage)
         formik.setFieldValue('recordId', response.recordId)
         const receivedClient = await getData(response.recordId)
-        if ((total > baseAmount.value || totalBaseAmount > baseAmount.value) && !recordId)
+        if ((total > minOtpAmount.value || totalBaseAmount > minOtpAmount.value) && !recordId)
           viewOTP(response.recordId, receivedClient)
         invalidate()
       }
@@ -506,6 +511,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     ;(async function () {
       setOperationType(formik.values.functionId)
       if (recordId) await getData(recordId)
+      if (!recordId) formik.setFieldValue('date', new Date())
     })()
   }, [])
 
@@ -995,11 +1001,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           valueField='recordId'
                           displayField='name'
                           onChange={(event, newValue) => {
-                            if (newValue) {
-                              formik.setFieldValue('id_type', newValue?.key)
-                            } else {
-                              formik.setFieldValue('id_type', '')
-                            }
+                            formik.setFieldValue('id_type', newValue?.key || null)
                           }}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                           values={formik.values}
@@ -1528,7 +1530,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             <Grid item xs={12}>
               <FieldSet title='Amount'>
                 <Grid container spacing={2}>
-                  <Grid item xs={9}>
+                  <Grid item xs={9} key={formik.values.amount?.length}>
                     <PaymentGrid
                       height={175}
                       onChange={value => formik.setFieldValue('amount', value)}
