@@ -420,7 +420,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         toast.success(actionMessage)
         formik.setFieldValue('recordId', response.recordId)
         const receivedClient = await getData(response.recordId)
-        if ((total > minOtpAmount.value || totalBaseAmount > minOtpAmount.value) && !recordId)
+        if ((total > baseAmount.value || totalBaseAmount > baseAmount.value) && !recordId)
           viewOTP(response.recordId, receivedClient)
         invalidate()
       }
