@@ -109,5 +109,14 @@ export const CashBankRepository = {
   },
   CreditCardFees: {
     qry: service + 'qryCCS'
+  },
+  CashTransfers: {
+    qry: service + 'qryTFR',
+    del: service + 'delTFR',
+    get: service + 'getTFR',
+    set: service + 'setTFR',
+    snapshot: service + 'snapshotTFR',
+    unpost: service + 'unpostTFR',
+    post: service + 'postTFR'
   }
 }

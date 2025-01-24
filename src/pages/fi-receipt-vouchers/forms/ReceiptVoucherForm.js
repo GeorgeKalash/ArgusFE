@@ -80,7 +80,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       rateCalcMethod: 1,
       contactId: null,
       collectorId: null,
-      isVerified: true,
+      isVerified: false,
       template: 1,
       sourceReference: ''
     },
