@@ -10,7 +10,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import DraftForm from './forms/DraftForm'
+import DamageForm from './forms/DamageForm'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
@@ -51,46 +51,18 @@ const Damages = () => {
       type: 'date'
     },
     {
-      field: 'clientRef',
-      headerName: labels.clientRef,
-      flex: 1
-    },
-    {
-      field: 'clientName',
-      headerName: labels.client,
-      flex: 1
-    },
-    {
-      field: 'amount',
-      headerName: labels.amount,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'pcs',
-      headerName: labels.pcs,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'weight',
-      headerName: labels.totalWeight,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'description',
-      headerName: labels.description,
-      flex: 1
-    },
-    {
-      field: 'wipName',
-      headerName: labels.wip,
+      field: 'jobRef',
+      headerName: labels.jobRef,
       flex: 1
     },
     {
       field: 'statusName',
       headerName: labels.status,
+      flex: 1
+    },
+    {
+      field: 'notes',
+      headerName: labels.description,
       flex: 1
     }
   ]
@@ -99,8 +71,8 @@ const Damages = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: SaleRepository.DraftInvoice.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
+      extension: ManufacturingRepository.Damage.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_jobId=0&filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -109,14 +81,14 @@ const Damages = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
       return await getRequest({
-        extension: SaleRepository.DraftInvoice.snapshot,
-        parameters: `_filter=${filters.qry}&_status=0`
+        extension: ManufacturingRepository.Damage.snapshot,
+        parameters: `_filter=${filters.qry}&_jobId=0`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.DraftSerialsIn,
+    functionId: SystemFunction.Damage,
     action: openForm,
     hasDT: false
   })
@@ -125,13 +97,13 @@ const Damages = () => {
     await proxyAction()
   }
 
-  const editDSI = obj => {
+  const edit = obj => {
     openForm(obj.recordId)
   }
 
   async function openForm(recordId) {
     stack({
-      Component: DraftForm,
+      Component: DamageForm,
       props: {
         labels,
         access,
@@ -139,13 +111,13 @@ const Damages = () => {
       },
       width: 1300,
       height: 750,
-      title: labels.draftSerInv
+      title: labels.damage
     })
   }
 
-  const delDSI = async obj => {
+  const del = async obj => {
     await postRequest({
-      extension: SaleRepository.DraftInvoice.del,
+      extension: ManufacturingRepository.Damage.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -180,7 +152,7 @@ const Damages = () => {
           onApply={onApply}
           onSearch={onSearch}
           onClear={onClear}
-          reportName={'SADFT'}
+          reportName={'MFDMG'}
         />
       </Fixed>
       <Grow>
@@ -188,9 +160,9 @@ const Damages = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={editDSI}
+          onEdit={edit}
           refetch={refetch}
-          onDelete={delDSI}
+          onDelete={del}
           deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
