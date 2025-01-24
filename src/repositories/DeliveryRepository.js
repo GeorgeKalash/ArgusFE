@@ -63,5 +63,11 @@ export const DeliveryRepository = {
   },
   MW: {
     qry: service + 'qryMW2'
+  },
+  DeliveryLeadTime: {
+    get: service + 'getLDT',
+    page: service + 'pageLDT',
+    set: service + 'setLDT',
+    del: service + 'delLDT'
   }
 }
