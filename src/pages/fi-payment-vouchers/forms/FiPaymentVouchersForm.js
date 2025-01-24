@@ -560,7 +560,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                   formik.setFieldValue('amount', e.target.value)
 
                   const updatedRateRow = getRate({
-                    amount: formik.values.amount ?? 0,
+                    amount: e.target.value ?? 0,
                     exRate: formik.values?.exRate,
                     baseAmount: 0,
                     rateCalcMethod: formik.values?.rateCalcMethod,
