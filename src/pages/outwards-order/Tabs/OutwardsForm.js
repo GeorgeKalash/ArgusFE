@@ -150,13 +150,90 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     bankType: '',
     products: [{}],
     ICRequest: [{}],
+
     tokenNo: '',
     vatRate: null,
     giftCode: '',
     details: '',
     hiddenTrxAmount: '',
     hiddenTrxCount: '',
-    agentCode: 'AE01BH'
+    agentCode: 'AE01BH',
+    terraPayDetails: {
+      quotation: {
+        requestDate: new Date(),
+        debitorMSIDSN: '', //HERE
+        creditorMSIDSN: '', //  ben phone number
+        creditorBankAccount: '', // ben.bankaccount is IBAN
+        creditorReceivingCountry: '',
+        requestAmount: '', //HERE
+        requestCurrency: '', // SEND CURRENCY REF is the receiving (rreceiver)
+        sendingCurrency: '', // SEND CURRENCY REF is the receiving (rreceiver)
+        receivingCurrency: '' // SEND CURRENCY REF is the receiving (rreceiver)
+      },
+      transaction: {
+        amount: '', //HERE
+        currency: '', //SAME AS SENDING CURRRENCY
+        type: 'inttransfer', //FAWZI TO CHECK
+        descriptionText: '',
+        requestDate: new Date(),
+        requestingOrganisationTransactionReference: '',
+        debitorMSIDSN: '', //HERE
+        creditorBankAccount: '', // ben.bankaccount is IBAN
+        creditorSortCode: '0001', // Fawzi To check
+        creditorBankSubCode: '',
+        creditorAccounttype: 'Savings',
+        senderKyc: {
+          nationality: '',
+          dateOfBirth: new Date(),
+          gender: '',
+          idDocument: [],
+          postalAddress: {
+            addressLine1: '',
+            addressLine2: '',
+            addressLine3: '',
+            city: '',
+            stateProvince: '',
+            postalCode: '',
+            country: ''
+          },
+          subjectName: {
+            title: '',
+            firstName: '',
+            middleName: '',
+            lastName: '',
+            fullName: ''
+          }
+        },
+        recipientKyc: {
+          nationality: '',
+          dateOfBirth: new Date(),
+          idDocument: [],
+          postalAddress: {
+            addressLine1: '',
+            addressLine2: '',
+            addressLine3: '',
+            city: '',
+            stateProvince: '',
+            postalCode: '',
+            country: ''
+          },
+          subjectName: {
+            title: '',
+            firstName: '',
+            middleName: '',
+            lastName: '',
+            fullName: ''
+          }
+        },
+        internationalTransferInformation: {
+          quoteId: '',
+          receivingCountry: '',
+          remittancePurpose: '',
+          sourceOfFunds: '',
+          relationshipSender: ''
+        }
+      }
+    }
   }
 
   const { formik } = useForm({
@@ -543,12 +620,92 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     } else if (formik.values.bankType === 2) {
       stack({
         Component: TerraPay,
-        props: {},
+        props: {
+          onSubmit: onTerraPaySubmit,
+          terraPay: formik.values.terraPayDetails,
+          outwardsData: {
+            countryId: formik.values.header.countryId,
+            countryRef: formik.values.header.countryRef,
+            amount: amount,
+            currencyId: formik.values.header.currencyId,
+            currencyRef: formik.values.header.currencyRef
+          },
+          beneficiary: {
+            beneficiaryName: formik.values.header.beneficiaryName,
+            beneficiaryCellPhone: formik.values.terraPayDetails.quotation.creditorMSIDSN,
+            beneficiaryIBAN: formik.values.beneficiaryIBAN
+          }
+        },
         width: 700,
         height: 500,
         title: labels.terraPay
       })
     }
+  }
+
+  function onTerraPaySubmit(obj) {
+    formik.setFieldValue('terraPayDetails', obj)
+  }
+
+  function terraPayFill(formFields) {
+    console.log('inFunct')
+    console.log(formik.values.terraPayDetails)
+    formik.setFieldValue('terraPayDetails.quotation.debitorMSIDSN', formFields.cellPhone)
+    formik.setFieldValue('terraPayDetails.quotation.requestAmount', formFields.amount)
+    formik.setFieldValue('terraPayDetails.transaction.amount', formFields.amount)
+    formik.setFieldValue('terraPayDetails.transaction.debitorMSIDSN', formFields.cellPhone)
+
+    console.log('dateee', formik.values.terraPayDetails.quotation.requestDate)
+    console.log(!/^\/Date\(/.test(formik.values.terraPayDetails.quotation.requestDate))
+    if (
+      formik.values.terraPayDetails.quotation.requestDate &&
+      !/^\/Date\(/.test(formik.values.terraPayDetails.quotation.requestDate)
+    ) {
+      //CONDITION IS ENOUGH ON ONE DATE TO CHECK IF FORMATTED BEFORE
+      formik.values.terraPayDetails.quotation.requestDate &&
+        formik.setFieldValue(
+          'terraPayDetails.quotation.requestDate',
+          formatDateToApi(formik.values.terraPayDetails.quotation.requestDate)
+        )
+      formik.values.terraPayDetails.transaction.requestDate &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.requestDate',
+          formatDateToApi(formik.values.terraPayDetails.transaction.requestDate)
+        )
+      formik.values.terraPayDetails.transaction.senderKyc.dateOfBirth &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.senderKyc.dateOfBirth',
+          formatDateToApi(formik.values.terraPayDetails.transaction.senderKyc.dateOfBirth)
+        )
+      formik.values.terraPayDetails.transaction.senderKyc.idDocument.issueDate &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.senderKyc.idDocument.issueDate',
+          formatDateToApi(formik.values.terraPayDetails.transaction.senderKyc.idDocument.issueDate)
+        )
+      formik.values.terraPayDetails.transaction.senderKyc.idDocument.expiryDate &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.senderKyc.idDocument.expiryDate',
+          formatDateToApi(formik.values.terraPayDetails.transaction.senderKyc.idDocument.expiryDate)
+        )
+      formik.values.terraPayDetails.transaction.recipientKyc.dateOfBirth &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.recipientKyc.dateOfBirth',
+          formatDateToApi(formik.values.terraPayDetails.transaction.recipientKyc.dateOfBirth)
+        )
+      formik.values.terraPayDetails.transaction.recipientKyc.idDocument.issueDate &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.recipientKyc.idDocument.issueDate',
+          formatDateToApi(formik.values.terraPayDetails.transaction.recipientKyc.idDocument.issueDate)
+        )
+      formik.values.terraPayDetails.transaction.recipientKyc.idDocument.expiryDate &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.recipientKyc.idDocument.expiryDate',
+          formatDateToApi(formik.values.terraPayDetails.transaction.recipientKyc.idDocument.expiryDate)
+        )
+    }
+
+    console.log('last')
+    console.log(formik.values.terraPayDetails)
   }
 
   async function openRV() {
@@ -1379,6 +1536,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       formik.setFieldValue('header.beneficiaryId', newValue?.beneficiaryId)
                       formik.setFieldValue('header.beneficiaryName', newValue?.name)
                       formik.setFieldValue('header.beneficiarySeqNo', newValue?.seqNo)
+                      formik.setFieldValue('terraPayDetails.quotation.creditorMSIDSN', newValue?.cellPhone)
+                      formik.setFieldValue('beneficiaryIBAN', newValue?.IBAN)
                     }}
                     errorCheck={'header.beneficiaryId'}
                   />

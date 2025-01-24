@@ -52,7 +52,7 @@ export default function SelectAgent({
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={RemittanceBankInterface.Combos.qry}
+                endpointId={RemittanceBankInterface.Combos.qryCBX}
                 parameters={`_combo=1`}
                 name='deliveryModeId'
                 label={labels.deliveryMode}
