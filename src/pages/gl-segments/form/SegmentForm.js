@@ -54,6 +54,7 @@ export default function SegmentForm({ labels, obj, maxAccess, formikSegmentId, f
       }
 
       invalidate()
+      fetchGridData()
     }
   })
 
