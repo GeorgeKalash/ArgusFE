@@ -206,8 +206,8 @@ export default function SaleTransactionForm({
           .string()
           .nullable()
           .test('', function (value) {
-            const { dtId } = this.parent
-            if (dtId == null) {
+            const { dtId, commitItems } = this.parent
+            if (dtId && commitItems) {
               return !!value
             }
 
@@ -844,7 +844,7 @@ export default function SaleTransactionForm({
     }
   ]
 
-  async function fillForm(saTrxPack) {
+  async function fillForm(saTrxPack, dtInfo) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
     const saTrxTaxes = saTrxPack?.taxes
@@ -892,7 +892,8 @@ export default function SaleTransactionForm({
         currentDiscount:
           saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
         KGmetalPrice: saTrxHeader?.metalPrice * 1000,
-        subtotal: saTrxHeader?.subtotal.toFixed(2)
+        subtotal: saTrxHeader?.subtotal.toFixed(2),
+        commitItems: dtInfo?.record?.commitItems
       },
       items: modifiedList,
       taxes: [...saTrxTaxes]
@@ -1448,7 +1449,8 @@ export default function SaleTransactionForm({
     ;(async function () {
       if (recordId && measurements) {
         const transactionPack = await getSalesTransactionPack(recordId)
-        await fillForm(transactionPack)
+        const dtInfo = await getDTD(transactionPack.header.dtId)
+        await fillForm(transactionPack, dtInfo)
       }
     })()
   }, [recordId, measurements])
@@ -1681,11 +1683,7 @@ export default function SaleTransactionForm({
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     displayFieldWidth={2}
-                    readOnly={
-                      formik?.values?.header.dtId ||
-                      (formik?.values?.header.dtId && formik?.values?.header.commitItems == false) ||
-                      isPosted
-                    }
+                    readOnly={isPosted || formik?.values?.header?.dtId ? !formik?.values?.header?.commitItems : false}
                     required={
                       !formik?.values?.header.dtId ||
                       (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
