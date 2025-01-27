@@ -17,7 +17,6 @@ const TransactionLog = props => {
   const { recordId, resourceId } = props
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-
   const { getLabels, getAccess } = useContext(ControlContext)
   const [transactionType, setTransactionType] = useState(0)
   const [gridData, setGridData] = useState({})
@@ -51,26 +50,21 @@ const TransactionLog = props => {
     getRequest({
       extension: SystemRepository.TransactionLog.qry,
       parameters: parameters
+    }).then(res => {
+      setGridData(res)
     })
-      .then(res => {
-        setGridData(res)
-      })
-      .catch(error => {})
   }
 
   const showInfo = obj => {
-    console.log(obj, 'obj')
     var parameters = `_recordId=${obj.recordId}`
     setInfo([])
     getRequest({
       extension: SystemRepository.TransactionLog.get,
       parameters: parameters
+    }).then(res => {
+      if (JSON.parse(res.record.data).header) setInfo(JSON.parse(res.record.data)?.header)
+      else setInfo(JSON.parse(res.record.data))
     })
-      .then(res => {
-        if (JSON.parse(res.record.data).header) setInfo(JSON.parse(res.record.data)?.header)
-        else setInfo(JSON.parse(res.record.data))
-      })
-      .catch(error => {})
   }
 
   const formatTime = dateString => {
@@ -88,7 +82,8 @@ const TransactionLog = props => {
       field: 'eventDt',
       headerName: _labels.eventDate,
       flex: 1,
-      type: 'date'
+      type: 'dateTime',
+      dateFormat: 'HH:mm:ss'
     },
     {
       field: 'userName',
