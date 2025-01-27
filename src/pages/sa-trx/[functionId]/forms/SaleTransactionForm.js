@@ -827,9 +827,10 @@ export default function SaleTransactionForm({
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode
+      disabled: !isPosted
     },
     {
+      key: 'Unlocked',
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
@@ -890,7 +891,8 @@ export default function SaleTransactionForm({
         billAddress: billAdd,
         currentDiscount:
           saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
-        KGmetalPrice: saTrxHeader?.metalPrice * 1000
+        KGmetalPrice: saTrxHeader?.metalPrice * 1000,
+        subtotal: saTrxHeader?.subtotal.toFixed(2)
       },
       items: modifiedList,
       taxes: [...saTrxTaxes]
@@ -1198,7 +1200,7 @@ export default function SaleTransactionForm({
 
   const subTotal = getSubtotal(parsedItemsArray)
 
-  const miscValue = formik.values.miscAmount == 0 ? 0 : parseFloat(formik.values.header.miscAmount)
+  const miscValue = formik.values.miscAmount == 0 ? 0 : parseFloat(formik.values.header.miscAmount) || 0
 
   const _footerSummary = getFooterTotals(parsedItemsArray, {
     totalQty: 0,
@@ -1216,7 +1218,7 @@ export default function SaleTransactionForm({
   const amount = reCal ? _footerSummary?.net : formik.values?.header.amount || 0
   const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.header.volume || 0
   const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.header.weight || 0
-  const subtotal = reCal ? subTotal : formik.values?.header.subtotal || 0
+  const subtotal = reCal ? subTotal.toFixed(2) : formik.values?.header.subtotal || 0
   const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.header.vatAmount || 0
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
@@ -1329,6 +1331,7 @@ export default function SaleTransactionForm({
         labels,
         bill: true,
         form: formik.values.header,
+        checkedAddressId: formik.values?.header?.billAddressId,
         handleAddressValues: setAddressValues
       },
       width: 950,
@@ -1524,7 +1527,7 @@ export default function SaleTransactionForm({
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={9}>
+            <Grid item xs={9} container direction='column' gap={2}>
               <Grid container spacing={2}>
                 <Grid item xs={3}>
                   <ResourceComboBox
@@ -1610,6 +1613,8 @@ export default function SaleTransactionForm({
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                   />
                 </Grid>
+              </Grid>
+              <Grid container spacing={2}>
                 <Grid item xs={3}>
                   <CustomTextField
                     name='reference'
