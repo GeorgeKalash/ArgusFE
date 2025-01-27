@@ -51,6 +51,7 @@ const TransactionLog = props => {
       extension: SystemRepository.TransactionLog.qry,
       parameters: parameters
     }).then(res => {
+      console.log(res, 'res')
       setGridData(res)
     })
   }
@@ -84,6 +85,12 @@ const TransactionLog = props => {
       flex: 1,
       type: 'dateTime',
       dateFormat: 'HH:mm:ss'
+    },
+    {
+      field: 'userId',
+      headerName: _labels.userId,
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'userName',
