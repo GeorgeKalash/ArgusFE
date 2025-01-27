@@ -109,8 +109,8 @@ const Damages = () => {
         access,
         recordId
       },
-      width: 1300,
-      height: 750,
+      width: 850,
+      height: 680,
       title: labels.damage
     })
   }

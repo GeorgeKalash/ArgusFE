@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -25,6 +25,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 export default function DraftForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [max, setMax] = useState(50)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Damage,
@@ -63,15 +64,18 @@ export default function DraftForm({ labels, access, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.string().required(),
-      jobId: yup.string().required()
+      jobId: yup.string().required(),
+      date: yup.string().required(),
+      pcs: yup
+        .number()
+        .min(0)
+        .max(max, 'Must be less than or equal to' + max)
+        .nullable(true)
     }),
     onSubmit: async obj => {
-      const copy = { ...obj }
-      copy.date = formatDateToApi(copy.date)
-
       postRequest({
         extension: ManufacturingRepository.Damage.set,
-        record: JSON.stringify(copy)
+        record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date) })
       }).then(async res => {
         const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
         toast.success(actionMessage)
@@ -82,12 +86,24 @@ export default function DraftForm({ labels, access, recordId }) {
   })
 
   async function refetchForm(damageId) {
-    const res = await getRequest({
+    await getRequest({
       extension: ManufacturingRepository.Damage.get,
       parameters: `_recordId=${damageId}`
-    }).then(res => {
-      res.record.date = formatDateFromApi(res?.record?.date)
-      formik.setValues(res.record)
+    }).then(async res => {
+      await getRequest({
+        extension: ManufacturingRepository.MFJobOrder.get,
+        parameters: `_recordId=${res.record.jobId}`
+      }).then(jobRes => {
+        formik.setValues({
+          ...res?.record,
+          date: formatDateFromApi(res?.record?.date),
+          sku: jobRes?.record?.sku,
+          itemName: jobRes?.record?.itemName,
+          designName: jobRes?.record?.designName,
+          designRef: jobRes?.record?.designRef
+        })
+        setMax(jobRes?.record?.pcs)
+      })
     })
   }
 
@@ -98,18 +114,18 @@ export default function DraftForm({ labels, access, recordId }) {
     await postRequest({
       extension: ManufacturingRepository.Damage.post,
       record: JSON.stringify(formik.values)
-    }).then(async res => {
-      toast.success(platformLabels.Posted)
-      invalidate()
-
-      await refetchForm(formik.values.recordId)
     })
+
+    toast.success(platformLabels.Posted)
+    invalidate()
+
+    await refetchForm(formik.values.recordId)
   }
 
   const actions = [
     {
-      key: 'Unlocked',
-      condition: !isPosted,
+      key: 'Post',
+      condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted
     }
@@ -139,7 +155,7 @@ export default function DraftForm({ labels, access, recordId }) {
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
-            <Grid item xs={4}>
+            <Grid item xs={5}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Damage}`}
@@ -162,7 +178,8 @@ export default function DraftForm({ labels, access, recordId }) {
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={5}></Grid>
+            <Grid item xs={5}>
               <CustomTextField
                 name='reference'
                 label={labels.reference}
@@ -174,13 +191,14 @@ export default function DraftForm({ labels, access, recordId }) {
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={5}></Grid>
+            <Grid item xs={5}>
               <ResourceLookup
                 endpointId={ManufacturingRepository.MFJobOrder.snapshot}
-                //filter={{ isInactive: false }}
+                filter={{ status: 4 }}
                 valueField='reference'
                 displayField='reference'
-                //secondFieldLabel={labels.name}
+                secondDisplayField={false}
                 name='jobId'
                 label={labels.jobOrder}
                 form={formik}
@@ -188,7 +206,6 @@ export default function DraftForm({ labels, access, recordId }) {
                 readOnly={isPosted}
                 displayFieldWidth={2}
                 valueShow='jobRef'
-                //secondValueShow='jobName'
                 maxAccess={maxAccess}
                 editMode={editMode}
                 columnsInDropDown={[
@@ -200,17 +217,19 @@ export default function DraftForm({ labels, access, recordId }) {
                   formik.setFieldValue('jobId', newValue?.recordId)
                   formik.setFieldValue('jobRef', newValue?.reference)
                   formik.setFieldValue('sku', newValue?.sku)
+                  formik.setFieldValue('designRef', newValue?.designRef)
                   formik.setFieldValue('designName', newValue?.designName)
                   formik.setFieldValue('itemName', newValue?.itemName)
                   formik.setFieldValue('wcName', newValue?.wcName)
                   formik.setFieldValue('workCenterId', newValue?.workCenterId)
                   formik.setFieldValue('plantId', newValue?.plantId)
+                  setMax(newValue?.pcs)
                 }}
-                //setmax DPcs
                 errorCheck={'jobId'}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={5}></Grid>
+            <Grid item xs={5}>
               <CustomTextField
                 name='sku'
                 label={labels.item}
@@ -220,7 +239,7 @@ export default function DraftForm({ labels, access, recordId }) {
                 onChange={formik.handleChange}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={5}>
               <CustomTextField
                 name='itemName'
                 value={formik?.values?.itemName}
@@ -229,7 +248,7 @@ export default function DraftForm({ labels, access, recordId }) {
                 onChange={formik.handleChange}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={5}>
               <CustomTextField
                 name='designRef'
                 label={labels.designRef}
@@ -239,7 +258,7 @@ export default function DraftForm({ labels, access, recordId }) {
                 onChange={formik.handleChange}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={5}>
               <CustomTextField
                 name='designName'
                 value={formik?.values?.designName}
@@ -248,12 +267,13 @@ export default function DraftForm({ labels, access, recordId }) {
                 onChange={formik.handleChange}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={5}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
+                required
+                readOnly={isPosted}
                 label={labels.plant}
-                readOnly
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -262,14 +282,16 @@ export default function DraftForm({ labels, access, recordId }) {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={newValue => {
                   formik.setFieldValue('plantId', newValue?.recordId)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-            <Grid item xs={4}></Grid>
-            <Grid item xs={4}>
+            <Grid item xs={10}></Grid>
+            <Grid item xs={10}></Grid>
+            <Grid item xs={10}></Grid>
+            <Grid item xs={5}>
               <CustomDatePicker
                 name='date'
                 required
@@ -283,7 +305,8 @@ export default function DraftForm({ labels, access, recordId }) {
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={5}></Grid>
+            <Grid item xs={5}>
               <CustomTextField
                 name='wcName'
                 label={labels.workCenter}
@@ -293,24 +316,27 @@ export default function DraftForm({ labels, access, recordId }) {
                 onChange={formik.handleChange}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={5}></Grid>
+            <Grid item xs={5}>
               <CustomNumberField
                 name='pcs'
+                readOnly={isPosted}
                 label={labels.damagedPcs}
                 value={formik.values?.pcs}
-                required
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('pcs', '')}
                 maxAccess={maxAccess}
                 error={formik.touched.pcs && Boolean(formik.errors.pcs)}
+                helperText={formik.touched.pcs && formik.errors.pcs}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={5}></Grid>
+            <Grid item xs={7}>
               <CustomTextArea
                 name='notes'
                 label={labels.remarks}
                 value={formik.values.notes}
-                rows={2}
+                rows={4}
                 editMode={editMode}
                 readOnly={isPosted}
                 maxAccess={maxAccess}
