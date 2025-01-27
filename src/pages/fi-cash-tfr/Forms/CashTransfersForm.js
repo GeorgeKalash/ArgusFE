@@ -273,17 +273,6 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
     }
   ]
 
-  async function previewBtnClicked() {
-    const data = { printStatus: 2, recordId: formik.values.recordId }
-
-    await postRequest({
-      extension: CashBankRepository.CashTransfers.print,
-      record: JSON.stringify(data)
-    })
-
-    invalidate()
-  }
-
   return (
     <FormShell
       resourceId={ResourceIds.CashTransfers}
@@ -291,7 +280,6 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
       maxAccess={maxAccess}
       editMode={editMode}
       previewReport={editMode}
-      previewBtnClicked={previewBtnClicked}
       actions={actions}
       functionId={SystemFunction.CashTransfers}
       disabledSubmit={isPosted}

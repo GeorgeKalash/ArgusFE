@@ -7,7 +7,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomButton from './CustomButton'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidth, customHeight }, ref) => {
+const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidth, customHeight, rerender }, ref) => {
   const hiddenInputRef = useRef()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -24,7 +24,8 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
     if (uniqueRecord) {
       getData()
     }
-  }, [])
+  }, [uniqueRecord, rerender])
+
   async function getData() {
     const result = await getRequest({
       extension: SystemRepository.Attachment.get,

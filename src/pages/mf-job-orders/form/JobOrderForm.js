@@ -28,7 +28,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
-export default function JobOrderForm({ labels, access, setStore, recordId, window }) {
+export default function JobOrderForm({ labels, access, setStore, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -105,8 +105,15 @@ export default function JobOrderForm({ labels, access, setStore, recordId, windo
         })
       })
 
+      if (imageUploadRef.current) {
+        imageUploadRef.current.value = parseInt(res.recordId)
+
+        await imageUploadRef.current.submit()
+      }
+
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
       toast.success(actionMessage)
+      setStore(res?.recordId)
       await refetchForm(res.recordId)
       invalidate()
     }
@@ -660,11 +667,12 @@ export default function JobOrderForm({ labels, access, setStore, recordId, windo
               <Grid item>
                 <ImageUpload
                   ref={imageUploadRef}
-                  resourceId={ResourceIds.Barcodes}
+                  resourceId={ResourceIds.Design}
                   seqNo={0}
                   recordId={formik.values.recordId}
                   customWidth={300}
                   customHeight={180}
+                  rerender={formik.values.designId}
                 />
               </Grid>
 

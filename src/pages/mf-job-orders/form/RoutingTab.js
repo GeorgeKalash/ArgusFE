@@ -218,14 +218,17 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
       parameters: `_jobId=${recordId}&_workcenterId=0&_status=0`
     })
 
-    const updateRoutingList = await Promise.all(
-      res?.list?.map(async (item, index) => {
-        return {
-          ...item,
-          id: index + 1
-        }
-      })
-    )
+    const updateRoutingList =
+      res?.list?.length != 0
+        ? await Promise.all(
+            res?.list?.map(async (item, index) => {
+              return {
+                ...item,
+                id: index + 1
+              }
+            })
+          )
+        : [{ id: 1 }]
 
     formik.setValues({
       jobId: recordId,
@@ -249,10 +252,12 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      await fetchGridData()
-      await fetchAllWorkCenters()
+      if (recordId) {
+        await fetchGridData()
+        await fetchAllWorkCenters()
+      }
     })()
-  }, [])
+  }, [recordId])
 
   return (
     <FormShell

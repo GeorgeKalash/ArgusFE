@@ -157,14 +157,17 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
       parameters: `_jobId=${recordId}`
     })
 
-    const updateItemsList = await Promise.all(
-      res?.list?.map(async (item, index) => {
-        return {
-          ...item,
-          id: index + 1
-        }
-      })
-    )
+    const updateItemsList =
+      res?.list?.length != 0
+        ? await Promise.all(
+            res?.list?.map(async (item, index) => {
+              return {
+                ...item,
+                id: index + 1
+              }
+            })
+          )
+        : [{ id: 1 }]
 
     formik.setValues({
       jobId: recordId,
@@ -174,9 +177,9 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      await fetchGridData()
+      if (recordId) await fetchGridData()
     })()
-  }, [])
+  }, [recordId])
 
   return (
     <FormShell

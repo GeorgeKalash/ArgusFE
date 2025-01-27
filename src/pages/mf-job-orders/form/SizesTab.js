@@ -46,7 +46,7 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
       )
     }),
     onSubmit: async obj => {
-      const modifiedItems = obj.values.jobItemSizes.map(details => {
+      const modifiedItems = obj.jobItemSizes.map(details => {
         return {
           ...details,
           jobId: recordId
@@ -54,17 +54,15 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
       })
       await postRequest({
         extension: ManufacturingRepository.JobItemSize.set2,
-        record: JSON.stringify({ jobId: recordId, data: modifiedItems })
+        record: JSON.stringify({ jobId: recordId, jobItemSizes: modifiedItems })
       })
       toast.success(platformLabels.Edited)
     }
   })
 
   const calculateTotal = fieldName => {
-    formik.values.jobItemSizes.reduce((sum, row) => {
-      console.log(row?.[fieldName], 'row')
+    return formik.values.jobItemSizes.reduce((sum, row) => {
       const value = parseFloat(row?.[fieldName]) || 0
-      console.log(value, 'row2', sum)
 
       return sum + value
     }, 0)
@@ -124,14 +122,14 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
     },
     {
       component: 'numberfield',
-      label: labels.qty,
-      name: 'qty',
+      label: labels.pcs,
+      name: 'pcs',
       defaultValue: 0
     },
     {
       component: 'numberfield',
-      label: labels.pcs,
-      name: 'pcs',
+      label: labels.qty,
+      name: 'qty',
       defaultValue: 0
     }
   ]
@@ -142,14 +140,17 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
       parameters: `_jobId=${recordId}`
     })
 
-    const updateItemsList = await Promise.all(
-      res?.list?.map(async (item, index) => {
-        return {
-          ...item,
-          id: index + 1
-        }
-      })
-    )
+    const updateItemsList =
+      res?.list?.length != 0
+        ? await Promise.all(
+            res.list.map(async (item, index) => {
+              return {
+                ...item,
+                id: index + 1
+              }
+            })
+          )
+        : [{ id: 1 }]
 
     formik.setValues({
       jobId: recordId,
@@ -159,9 +160,9 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      await fetchGridData()
+      if (recordId) await fetchGridData()
     })()
-  }, [])
+  }, [recordId])
 
   return (
     <FormShell
