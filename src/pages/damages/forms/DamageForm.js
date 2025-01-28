@@ -22,7 +22,7 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function DraftForm({ labels, access, recordId }) {
+export default function DamageForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [max, setMax] = useState(50)
@@ -56,9 +56,7 @@ export default function DraftForm({ labels, access, recordId }) {
       jobId: null,
       seqNo: 0,
       pcs: 0,
-      statusName: '',
-      workCenterId: null,
-      wcName: ''
+      workCenterId: null
     },
     enableReinitialize: false,
     validateOnChange: true,
@@ -92,7 +90,7 @@ export default function DraftForm({ labels, access, recordId }) {
     }).then(async res => {
       await getRequest({
         extension: ManufacturingRepository.MFJobOrder.get,
-        parameters: `_recordId=${res.record.jobId}`
+        parameters: `_recordId=${res?.record?.jobId}`
       }).then(jobRes => {
         formik.setValues({
           ...res?.record,
@@ -139,6 +137,7 @@ export default function DraftForm({ labels, access, recordId }) {
     })()
   }, [])
 
+  console.log('max', maxAccess)
   return (
     <FormShell
       resourceId={ResourceIds.Damages}
@@ -203,7 +202,7 @@ export default function DraftForm({ labels, access, recordId }) {
                 label={labels.jobOrder}
                 form={formik}
                 required
-                readOnly={isPosted}
+                readOnly={editMode}
                 displayFieldWidth={2}
                 valueShow='jobRef'
                 maxAccess={maxAccess}
@@ -282,7 +281,7 @@ export default function DraftForm({ labels, access, recordId }) {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                onChange={newValue => {
+                onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
@@ -299,7 +298,7 @@ export default function DraftForm({ labels, access, recordId }) {
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 editMode={editMode}
-                readOnly={isPosted}
+                readOnly={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -320,7 +319,7 @@ export default function DraftForm({ labels, access, recordId }) {
             <Grid item xs={5}>
               <CustomNumberField
                 name='pcs'
-                readOnly={isPosted}
+                readOnly={editMode}
                 label={labels.damagedPcs}
                 value={formik.values?.pcs}
                 onChange={formik.handleChange}

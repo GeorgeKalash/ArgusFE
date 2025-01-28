@@ -149,7 +149,6 @@ export const ManufacturingRepository = {
     page: service + 'pageRMC'
   },
   Damage: {
-    qry: service + 'qryDMG',
     get: service + 'getDMG',
     set: service + 'setDMG',
     del: service + 'delDMG',
