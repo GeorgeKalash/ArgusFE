@@ -116,7 +116,6 @@ export const CashBankRepository = {
     get: service + 'getTFR',
     set: service + 'setTFR',
     snapshot: service + 'snapshotTFR',
-    print: service + 'printTFR',
     unpost: service + 'unpostTFR',
     post: service + 'postTFR'
   }

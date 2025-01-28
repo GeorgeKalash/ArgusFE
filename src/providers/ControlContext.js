@@ -34,6 +34,27 @@ const ControlProvider = ({ children }) => {
     }
   }, [userData, user?.userId])
 
+  const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')?.value
+
+  useEffect(() => {
+    ;(async function () {
+      if (countryId) {
+        const res = await getRequest({
+          extension: SystemRepository.Country.get,
+          parameters: `_recordId=${countryId}`
+        })
+
+        const newItem = { key: 'countryRef', value: res?.record?.reference }
+
+        setDefaultsData(prevState => ({
+          ...prevState,
+          list: [...prevState.list, newItem],
+          count: prevState.list.length + 1
+        }))
+      }
+    })()
+  }, [countryId])
+
   const getDefaults = callback => {
     var parameters = `_filter=`
     getRequest({
