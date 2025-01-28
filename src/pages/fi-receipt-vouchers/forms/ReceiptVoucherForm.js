@@ -177,7 +177,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
   const setDefaultFields = () => {
     formik.setFieldValue('plantId', userDefaultsDataState.plantId)
-    if (userDefaultsDataState?.cashAccountId) formik.setFieldValue('cashAccountId', userDefaultsDataState?.cashAccountId)
+    if (userDefaultsDataState?.cashAccountId)
+      formik.setFieldValue('cashAccountId', userDefaultsDataState?.cashAccountId)
   }
 
   useEffect(() => {
@@ -205,8 +206,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
   useEffect(() => {
     ;(async function () {
-      if (formik.values.recordId) await getCashAccount()
-      await getData(formik.values.recordId)
+      if (recordId) {
+        await getCashAccount()
+        await getData(recordId)
+      }
       if (!editMode) {
         getUserDefaultsData()
         getDefaultsData()
