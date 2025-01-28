@@ -69,6 +69,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   })
 
   const fetchGridData = classId => {
+    setData({ list: [] })
     classId = classId || ResourceIds.Plants
 
     const plantRequestPromise = getRequest({
@@ -102,12 +103,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
       parameters: `_resourceId=${classId}&_userId=${storeRecordId}`
     })
 
-    let rar = {
-      recordId: null,
-      name: null,
-      hasAccess: false,
-      classId: null
-    }
+    let rar
 
     Promise.all([cashAccountRequestPromise, plantRequestPromise, salesPersonRequestPromise, rowAccessUserPromise]).then(
       ([cashAccountRequest, plantRequest, salesPersonRequest, rowAccessUser]) => {
@@ -144,7 +140,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
             }
           })
         }
-        if (classId !== 'undefined' && rar) {
+        if (classId && rar) {
           for (let i = 0; i < rar.length; i++) {
             rowAccessUser.list.forEach(storedItem => {
               if (storedItem.recordId.toString() == rar[i].recordId) {
@@ -154,10 +150,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
             })
           }
 
-          let resultObject = { list: rar }
-          setData(resultObject)
-        } else {
-          setData({ list: [] })
+          setData({ list: rar })
         }
       }
     )
@@ -227,8 +220,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
         <Grow>
           <Table
             columns={rowColumns}
-            gridData={filteredData ? filteredData : { list: [] }}
-            setData={setData}
+            gridData={filteredData}
             rowId={['recordId']}
             isLoading={false}
             maxAccess={maxAccess}
