@@ -211,8 +211,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
           ...res.record,
           date: formatDateFromApi(res.record.date)
         })
-
-        console.log(res)
       }
       getDefaultsData()
     })()
@@ -352,7 +350,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 name='date'
                 label={labels.date}
                 value={formik.values?.date}
-                required={true}
+                required
                 onChange={async (e, newValue) => {
                   formik.setFieldValue('date', newValue)
                   await getMultiCurrencyFormData(
