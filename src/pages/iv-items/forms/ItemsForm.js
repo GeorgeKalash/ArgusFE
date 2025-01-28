@@ -18,6 +18,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 import { MasterSource } from 'src/resources/MasterSource'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial }) {
   const { platformLabels } = useContext(ControlContext)
@@ -510,7 +511,21 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     maxAccess={maxAccess}
                   />
                 </Grid>
-
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    datasetId={DataSets.PRODUCTION_LEVEL}
+                    name='productionLevel'
+                    label={labels.productionLevel}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                        formik.setFieldValue('productionLevel',  newValue?.key || '')
+                    }}
+                    maxAccess={maxAccess}
+                    error={formik.touched.productionLevel && Boolean(formik.errors.productionLevel)}
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
                     name='unitPrice'
