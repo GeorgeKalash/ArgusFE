@@ -51,7 +51,6 @@ const TransactionLog = props => {
       extension: SystemRepository.TransactionLog.qry,
       parameters: parameters
     }).then(res => {
-      console.log(res, 'res')
       setGridData(res)
     })
   }
