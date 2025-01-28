@@ -371,7 +371,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
   }
 
   const onReopen = async recId => {
-    const header = { ...values, date: formatDateToApi(values?.date) || null }
+    const header = { ...formik.values, date: formatDateToApi(formik.values?.date) || null }
     delete header.items
 
     await postRequest({
@@ -391,7 +391,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
   }
 
   const onCancel = async recId => {
-    const header = { ...values, date: formatDateToApi(values?.date) || null }
+    const header = { ...formik.values, date: formatDateToApi(formik.values?.date) || null }
     delete header.items
 
     await postRequest({
@@ -433,13 +433,13 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       key: 'Close',
       condition: !isClosed,
       onClick: () => onClose(formik.values.recordId),
-      disabled: isClosed || !editMode || isCancelled
+      disabled: !editMode || isCancelled
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: () => onReopen(formik.values.recordId),
-      disabled: !isClosed || !editMode || isCancelled
+      disabled: !editMode || isCancelled
     },
     {
       key: 'WorkFlow',
