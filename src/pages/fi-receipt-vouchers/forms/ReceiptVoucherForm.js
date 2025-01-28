@@ -209,8 +209,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       if (recordId) {
         await getCashAccount()
         await getData(recordId)
-      }
-      if (!editMode) {
+      } else {
         getUserDefaultsData()
         getDefaultsData()
       }
