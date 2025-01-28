@@ -1662,7 +1662,7 @@ export default function SaleTransactionForm({
                 onChange={(event, newValue) => {
                   fillClientData(newValue)
                 }}
-                secondFieldName={'header.clientName'}
+                secondField={['header.clientName', true]}
                 onSecondValueChange={(name, value) => {
                   formik.setFieldValue('header.clientName', value)
                 }}
@@ -1670,7 +1670,7 @@ export default function SaleTransactionForm({
                 maxAccess={maxAccess}
                 required
                 autoSelectFistValue={!formik.values.clientId}
-                readOnly={formik.values.items.length > 0 && formik.values.items[0].sku !== ''}
+                readOnly={formik.values.items.length > 0 && formik.values.items[0].sku}
                 displayFieldWidth={3}
                 editMode={editMode}
               />
