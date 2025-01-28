@@ -96,7 +96,7 @@ const Segments = () => {
   }
 
   function openForm(obj) {
-    if (formik.values.segmentId === null) {
+    if (formik.values.segmentId === null || formik.values.segmentId === undefined) {
       stackError({ message: _labels.chooseSegmentError })
     } else {
       stack({
