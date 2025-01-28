@@ -612,7 +612,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
           />
         </Grow>
         <Fixed>
-          <Grid container rowGap={1} xs={10} spacing={2}>
+          <Grid container rowGap={1} xs={10} spacing={2} pt={2}>
             <Grid item xs={5}>
               <CustomTextField
                 name='totalVolume'

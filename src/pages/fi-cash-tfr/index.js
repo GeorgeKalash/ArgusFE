@@ -9,32 +9,26 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import FiPaymentVouchersForm from './forms/FiPaymentVouchersForm'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { useError } from 'src/error'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import CashTransfersForm from './Forms/CashTransfersForm'
 
-const FiPaymentVouchers = () => {
+const FiCashTransfers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
-  const { stack: stackError } = useError()
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.PaymentVouchers.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&filter=`
+      extension: CashBankRepository.CashTransfers.qry,
+      parameters: `_filter=&_size=30&_startAt=${_startAt}&_sortBy=reference desc&_pageSize=${_pageSize}&_params=${
+        params || ''
+      }`
     })
-
-    if (response && response?.list) {
-      response.list = response?.list?.map(item => ({
-        ...item,
-        isVerified: item?.isVerified === null ? false : item?.isVerified
-      }))
-    }
 
     return { ...response, _startAt: _startAt }
   }
@@ -42,7 +36,7 @@ const FiPaymentVouchers = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FinancialRepository.PaymentVouchers.snapshot,
+        extension: CashBankRepository.CashTransfers.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     } else {
@@ -52,7 +46,7 @@ const FiPaymentVouchers = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     filterBy,
     clearFilter,
     paginationParameters,
@@ -61,117 +55,89 @@ const FiPaymentVouchers = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.PaymentVouchers.page,
-    datasetId: ResourceIds.PaymentVouchers,
+    endpointId: CashBankRepository.CashTransfers.qry,
+    datasetId: ResourceIds.CashTransfers,
     filter: {
       filterFn: fetchWithFilter
     }
   })
 
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.CashTransfers,
+    action: openForm
+  })
+
+  const add = async () => {
+    await proxyAction()
+  }
+
   const columns = [
     {
-      field: 'date',
-      headerName: _labels.date,
-      flex: 1,
-      type: 'date'
-    },
-    {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
-      field: 'accountTypeName',
-      headerName: _labels.accountType,
+      field: 'fromCAName',
+      headerName: labels.from,
       flex: 1
     },
+
     {
-      field: 'accountRef',
-      headerName: _labels.account,
-      flex: 1
-    },
-    {
-      field: 'accountName',
-      headerName: _labels.accountName,
-      flex: 1
-    },
-    {
-      field: 'cashAccountName',
-      headerName: _labels.cashAccount,
+      field: 'toCAName',
+      headerName: labels.to,
       flex: 1
     },
     {
       field: 'amount',
-      headerName: _labels.amount,
+      headerName: labels.amount,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'currencyRef',
-      headerName: _labels.currency,
+      field: 'dtName',
+      headerName: labels.docType,
       flex: 1
     },
     {
       field: 'notes',
-      headerName: _labels.notes,
+      headerName: labels.notes,
       flex: 1
     },
     {
       field: 'statusName',
-      headerName: _labels.status,
+      headerName: labels.status,
       flex: 1
     },
     {
-      field: 'isVerified',
-      headerName: _labels.isVerified,
-      type: 'checkbox'
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
     }
   ]
-
-  const add = () => {
-    openForm()
-  }
 
   const edit = obj => {
     openForm(obj?.recordId)
   }
 
-  const getPlantId = async () => {
-    const userData = window.sessionStorage.getItem('userData')
-      ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null
-
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
-
-    return getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: parameters
-    }).then(res => res?.record?.value)
-  }
-
-  function openOutWardsWindow(plantId, recordId) {
+  function openForm(recordId) {
     stack({
-      Component: FiPaymentVouchersForm,
+      Component: CashTransfersForm,
       props: {
-        labels: _labels,
-        recordId: recordId,
-        plantId: plantId,
+        labels,
+        recordId,
         maxAccess: access
       },
-      width: 950,
-      height: 700,
-      title: _labels.paymentVoucher
+      width: 1000,
+      height: 570,
+      title: labels.Transfers
     })
-  }
-
-  async function openForm(recordId) {
-    const plantId = await getPlantId()
-    openOutWardsWindow(plantId, recordId)
   }
 
   const del = async obj => {
     await postRequest({
-      extension: FinancialRepository.PaymentVouchers.del,
+      extension: CashBankRepository.CashTransfers.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -203,16 +169,15 @@ const FiPaymentVouchers = () => {
         <RPBGridToolbar
           onSearch={onSearch}
           onClear={onClear}
-          labels={_labels}
+          labels={labels}
           onAdd={add}
           maxAccess={access}
           onApply={onApply}
-          reportName={'FIPV'}
+          reportName={'CATFR'}
         />
       </Fixed>
       <Grow>
         <Table
-          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
@@ -225,9 +190,9 @@ const FiPaymentVouchers = () => {
           refetch={refetch}
           maxAccess={access}
         />
-      </Grow>{' '}
+      </Grow>
     </VertLayout>
   )
 }
 
-export default FiPaymentVouchers
+export default FiCashTransfers

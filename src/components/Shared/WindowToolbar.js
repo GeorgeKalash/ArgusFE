@@ -69,7 +69,7 @@ const WindowToolbar = ({
         reportClass: item.reportName,
         parameters: item.parameters,
         layoutName: item.caption,
-        assembly: 'ArgusRPT.dll'
+        assembly: item.assembly
       }))
 
       const filteringItems = reportLayoutFilteringObject?.list
