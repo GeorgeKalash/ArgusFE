@@ -207,8 +207,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     ;(async function () {
       if (formik.values.recordId) await getCashAccount()
       await getData(formik.values.recordId)
-      getUserDefaultsData()
-      getDefaultsData()
+      if (!editMode) {
+        getUserDefaultsData()
+        getDefaultsData()
+      }
     })()
   }, [])
 
