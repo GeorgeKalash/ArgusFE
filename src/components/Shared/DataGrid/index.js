@@ -605,7 +605,9 @@ export function DataGrid({
       if (
         gridContainerRef.current &&
         !gridContainerRef.current.contains(event.target) &&
-        gridApiRef.current?.getEditingCells()?.length > 0
+        gridApiRef.current?.getEditingCells()?.length > 0 &&
+        !event.target.classList.contains('MuiBox-root') &&
+        !event.target.classList.contains('MuiAutocomplete-option')
       ) {
         gridApiRef.current?.stopEditing()
       } else {
