@@ -68,8 +68,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       categoryName: '',
       defSaleMUId: '',
       pgId: '',
+      productionLevel:'',
       isInactive: false,
-      rmItem: false
     },
     maxAccess,
     enableReinitialize: true,
@@ -160,7 +160,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           parameters: `_recordId=${res?.record?.categoryId}`
         })
 
-        res.record.rmItem = res.record.rmItem || false
         res.record.isInactive = res.record.isInactive || false
 
         setFormikInitial(res.record)
@@ -508,16 +507,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onChange={event => formik.setFieldValue('kitItem', event.target.checked)}
                     label={labels.kitItem}
                     disabled={editMode}
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-
-                <Grid item xs={4}>
-                  <CustomCheckBox
-                    name='rmItem'
-                    value={formik.values?.rmItem}
-                    onChange={event => formik.setFieldValue('rmItem', event.target.checked)}
-                    label={labels.rmItem}
                     maxAccess={maxAccess}
                   />
                 </Grid>
