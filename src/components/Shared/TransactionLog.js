@@ -81,7 +81,7 @@ const TransactionLog = props => {
     {
       field: 'eventDt',
       headerName: _labels.eventDate,
-      flex: 1,
+      flex: 2,
       type: 'dateTime',
       dateFormat: 'HH:mm:ss'
     },
@@ -94,7 +94,7 @@ const TransactionLog = props => {
     {
       field: 'userName',
       headerName: _labels.username,
-      flex: 1
+      flex: 2
     },
     {
       field: 'ttName',
