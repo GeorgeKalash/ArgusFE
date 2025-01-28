@@ -30,10 +30,10 @@ const PhysicalCountItemDe = () => {
   const [controllerStore, setControllerStore] = useState([])
   const [filteredItems, setFilteredItems] = useState([])
   const [editMode, setEditMode] = useState(false)
-  const [disSkuLookup, setDisSkuLookup] = useState('') //better to put them in formik not states if possible
-  const [jumpToNextLine, setJumpToNextLine] = useState(false) //better to put them in formik not states if possible
-  const [showDefaultQty, setShowDefaultQty] = useState(false) //better to put them in formik not states if possible
-  const [disableItemDuplicate, setDisableItemDuplicate] = useState(false) //better to put them in formik not states if possible
+  const [disSkuLookup, setDisSkuLookup] = useState('')
+  const [jumpToNextLine, setJumpToNextLine] = useState(false)
+  const [showDefaultQty, setShowDefaultQty] = useState(false)
+  const [disableItemDuplicate, setDisableItemDuplicate] = useState(false)
 
   const { labels: _labels, maxAccess: maxAccess } = useResourceQuery({
     datasetId: ResourceIds.IVPhysicalCountItemDetails
@@ -83,23 +83,16 @@ const PhysicalCountItemDe = () => {
             sku: yup.string().test({
               name: 'sku-first-row-check',
               test(value, context) {
-                const { parent } = context
-                if (parent?.id == 1 && value) return true
-                if (parent?.id == 1 && !value) return true
-                if (parent?.id > 1 && !value) return false
+                const { parent, options } = context
+                const allRows = options?.context?.rows
+                const currentRowIndex = allRows?.findIndex(row => row.id === parent.id)
+                const isLastRow = currentRowIndex === allRows?.length - 1
 
-                return value
-              }
-            }),
-            itemName: yup.string().test({
-              name: 'itemName-first-row-check',
-              test(value, context) {
-                const { parent } = context
-                if (parent?.id == 1 && value) return true
-                if (parent?.id == 1 && !value) return true
-                if (parent?.id > 1 && !value) return false
+                if (isLastRow) {
+                  return true
+                }
 
-                return value
+                return !!value
               }
             })
           })
@@ -107,13 +100,15 @@ const PhysicalCountItemDe = () => {
         .required()
     }),
     onSubmit: async obj => {
-      const items = obj?.rows?.map((item, index) => ({
-        ...item,
-        seqNo: index + 1,
-        siteId: obj.siteId,
-        stockCountId: obj.stockCountId,
-        controllerId: obj.controllerId
-      }))
+      const items = obj?.rows
+        ?.filter(item => item.sku && item.sku !== '')
+        .map((item, index) => ({
+          ...item,
+          seqNo: index + 1,
+          siteId: obj.siteId,
+          stockCountId: obj.stockCountId,
+          controllerId: obj.controllerId
+        }))
 
       const StockCountItemDetailPack = {
         siteId: obj.siteId,
@@ -505,10 +500,6 @@ const PhysicalCountItemDe = () => {
     return weightSum + weightValue
   }, 0)
 
-  const emptyRows = formik.values.rows.filter(row => row.id !== 1 && !row.sku && !row.itemName && !row.qty)
-
-  const errors = []
-
   return (
     <FormShell
       form={formik}
@@ -622,7 +613,10 @@ const PhysicalCountItemDe = () => {
             disabled={formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}
             allowDelete={formik.values?.SCStatus != 3 && formik.values?.SCWIP != 2 && formik.values?.status != 3}
             allowAddNewLine={
-              formik.values.controllerId && formik.values?.SCStatus != 3 && formik.values?.EndofSiteStatus != 3
+              formik.values.controllerId &&
+              formik.values?.SCStatus != 3 &&
+              formik.values?.EndofSiteStatus != 3 &&
+              !!(!formik?.values?.rows?.length || formik.values?.rows?.[formik.values?.rows?.length - 1]?.sku)
             }
             maxAccess={maxAccess}
             name='rows'
