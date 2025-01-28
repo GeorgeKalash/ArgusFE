@@ -177,7 +177,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
   const setDefaultFields = () => {
     formik.setFieldValue('plantId', userDefaultsDataState.plantId)
-    formik.setFieldValue('cashAccountId', userDefaultsDataState?.cashAccountId || null)
+    if (userDefaultsDataState?.cashAccountId)
+      formik.setFieldValue('cashAccountId', userDefaultsDataState?.cashAccountId)
   }
 
   useEffect(() => {
@@ -204,11 +205,14 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   }
 
   useEffect(() => {
-    if (formik.values.recordId) getCashAccount()
     ;(async function () {
-      await getData(formik.values.recordId)
-      getUserDefaultsData()
-      getDefaultsData()
+      if (recordId) {
+        await getCashAccount()
+        await getData(recordId)
+      } else {
+        getUserDefaultsData()
+        getDefaultsData()
+      }
     })()
   }, [])
 
@@ -451,7 +455,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 required
                 values={formik.values}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('cashAccountId', newValue?.recordId)
                   formik.setFieldValue('cashAccountRef', newValue?.reference || '')
                   formik.setFieldValue('cashAccountName', newValue ? newValue.name : '')
                   formik.setFieldValue('paymentMethod', newValue?.key || null)
