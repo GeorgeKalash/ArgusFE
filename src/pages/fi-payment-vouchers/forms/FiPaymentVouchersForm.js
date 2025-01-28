@@ -211,8 +211,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
           ...res.record,
           date: formatDateFromApi(res.record.date)
         })
-
-        console.log(res)
       }
       getDefaultsData()
     })()
@@ -352,12 +350,12 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 name='date'
                 label={labels.date}
                 value={formik.values?.date}
-                required={true}
+                required
                 onChange={async (e, newValue) => {
-                  formik.setFieldValue('date', newValue.date)
+                  formik.setFieldValue('date', newValue)
                   await getMultiCurrencyFormData(
-                    formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
+                    formik?.values?.currencyId,
+                    formatDateForGetApI(formik?.values?.date),
                     RateDivision.FINANCIALS
                   )
                 }}
@@ -562,7 +560,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                   formik.setFieldValue('amount', e.target.value)
 
                   const updatedRateRow = getRate({
-                    amount: formik.values.amount ?? 0,
+                    amount: e.target.value ?? 0,
                     exRate: formik.values?.exRate,
                     baseAmount: 0,
                     rateCalcMethod: formik.values?.rateCalcMethod,
