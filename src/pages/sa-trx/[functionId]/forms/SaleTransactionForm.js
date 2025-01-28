@@ -1662,7 +1662,7 @@ export default function SaleTransactionForm({
                 onChange={(event, newValue) => {
                   fillClientData(newValue)
                 }}
-                secondField={['header.clientName', true]}
+                secondField={{ name: 'header.clientName', editable: true }}
                 onSecondValueChange={(name, value) => {
                   formik.setFieldValue('header.clientName', value)
                 }}
