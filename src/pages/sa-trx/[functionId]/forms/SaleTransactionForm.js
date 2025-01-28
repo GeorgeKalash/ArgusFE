@@ -1398,7 +1398,16 @@ export default function SaleTransactionForm({
     formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
     formik.setFieldValue('header.volume', parseFloat(totalVolume).toFixed(2))
     formik.setFieldValue('header.amount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('header.baseAmount', parseFloat(formik.values.header.baseAmount).toFixed(2))
+
+    const updatedRateRow = getRate({
+      amount: amount ?? 0,
+      exRate: formik.values?.header?.exRate,
+      baseAmount: 0,
+      rateCalcMethod: formik.values?.header?.rateCalcMethod,
+      dirtyField: DIRTYFIELD_RATE
+    })
+
+    formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
     formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
@@ -1630,10 +1639,10 @@ export default function SaleTransactionForm({
                     readOnly={isPosted}
                     value={formik?.values?.header?.date}
                     onChange={async (e, newValue) => {
-                      formik.setFieldValue('header.date', newValue.date)
+                      formik.setFieldValue('header.date', newValue)
                       await getMultiCurrencyFormData(
                         formik.values.header.currencyId,
-                        formatDateForGetApI(formik.values.header.date),
+                        formatDateForGetApI(newValue),
                         RateDivision.FINANCIALS
                       )
                     }}
@@ -1979,7 +1988,19 @@ export default function SaleTransactionForm({
                     value={formik.values.header.miscAmount}
                     decimalScale={2}
                     readOnly={isPosted}
-                    onChange={e => formik.setFieldValue('header.miscAmount', e.target.value)}
+                    onChange={e => {
+                      formik.setFieldValue('header.miscAmount', e.target.value)
+
+                      const updatedRateRow = getRate({
+                        amount: e.target.value ?? 0,
+                        exRate: formik.values?.exRate,
+                        baseAmount: 0,
+                        rateCalcMethod: formik.values?.rateCalcMethod,
+                        dirtyField: DIRTYFIELD_RATE
+                      })
+                      formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                      
+                    }}
                     onBlur={async () => {
                       setReCal(true)
                     }}
