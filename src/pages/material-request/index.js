@@ -9,32 +9,31 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import FiPaymentVouchersForm from './forms/FiPaymentVouchersForm'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { useError } from 'src/error'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
+import MaterialRequestForm from './Forms/MaterialRequestForm'
 
-const FiPaymentVouchers = () => {
+const IvMaterialsTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack: stackError } = useError()
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.PaymentVouchers.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&filter=`
+      extension: IVReplenishementRepository.MaterialReplenishment.page,
+      parameters: `_filter=&_size=30&_startAt=${_startAt}&_sortBy=recordId desc&_pageSize=${_pageSize}&_params=${
+        params || ''
+      }`
     })
 
-    if (response && response?.list) {
-      response.list = response?.list?.map(item => ({
-        ...item,
-        isVerified: item?.isVerified === null ? false : item?.isVerified
-      }))
-    }
+    response.list = response?.list?.map(item => ({
+      ...item,
+      isVerified: !!item?.isVerified
+    }))
 
     return { ...response, _startAt: _startAt }
   }
@@ -42,7 +41,7 @@ const FiPaymentVouchers = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FinancialRepository.PaymentVouchers.snapshot,
+        extension: IVReplenishementRepository.MaterialReplenishment.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     } else {
@@ -61,14 +60,28 @@ const FiPaymentVouchers = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.PaymentVouchers.page,
-    datasetId: ResourceIds.PaymentVouchers,
+    endpointId: IVReplenishementRepository.MaterialReplenishment.page,
+    datasetId: ResourceIds.MaterialReplenishment,
     filter: {
       filterFn: fetchWithFilter
     }
   })
 
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.MaterialRequest,
+    action: openForm
+  })
+
+  const add = async () => {
+    await proxyAction()
+  }
+
   const columns = [
+    {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
     {
       field: 'date',
       headerName: _labels.date,
@@ -76,39 +89,18 @@ const FiPaymentVouchers = () => {
       type: 'date'
     },
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'departmentName',
+      headerName: _labels.department,
       flex: 1
     },
     {
-      field: 'accountTypeName',
-      headerName: _labels.accountType,
+      field: 'siteName',
+      headerName: _labels.site,
       flex: 1
     },
     {
-      field: 'accountRef',
-      headerName: _labels.account,
-      flex: 1
-    },
-    {
-      field: 'accountName',
-      headerName: _labels.accountName,
-      flex: 1
-    },
-    {
-      field: 'cashAccountName',
-      headerName: _labels.cashAccount,
-      flex: 1
-    },
-    {
-      field: 'amount',
-      headerName: _labels.amount,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'currencyRef',
-      headerName: _labels.currency,
+      field: 'fromSiteName',
+      headerName: _labels.fromSite,
       flex: 1
     },
     {
@@ -122,56 +114,38 @@ const FiPaymentVouchers = () => {
       flex: 1
     },
     {
-      field: 'isVerified',
-      headerName: _labels.isVerified,
-      type: 'checkbox'
-    }
+      field: 'rsName',
+      headerName: _labels.releaseStatus,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: _labels.wip,
+      flex: 1
+    },
   ]
-
-  const add = () => {
-    openForm()
-  }
 
   const edit = obj => {
     openForm(obj?.recordId)
   }
 
-  const getPlantId = async () => {
-    const userData = window.sessionStorage.getItem('userData')
-      ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null
-
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
-
-    return getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: parameters
-    }).then(res => res?.record?.value)
-  }
-
-  function openOutWardsWindow(plantId, recordId) {
+  function openForm(recordId) {
     stack({
-      Component: FiPaymentVouchersForm,
+      Component: MaterialRequestForm,
       props: {
         labels: _labels,
-        recordId: recordId,
-        plantId: plantId,
+        recordId,
         maxAccess: access
       },
-      width: 950,
-      height: 700,
-      title: _labels.paymentVoucher
+      width: 1000,
+      height: 680,
+      title: _labels.MaterialRequest
     })
-  }
-
-  async function openForm(recordId) {
-    const plantId = await getPlantId()
-    openOutWardsWindow(plantId, recordId)
   }
 
   const del = async obj => {
     await postRequest({
-      extension: FinancialRepository.PaymentVouchers.del,
+      extension: IVReplenishementRepository.MaterialReplenishment.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -207,7 +181,7 @@ const FiPaymentVouchers = () => {
           onAdd={add}
           maxAccess={access}
           onApply={onApply}
-          reportName={'FIPV'}
+          reportName={'IRREQ'}
         />
       </Fixed>
       <Grow>
@@ -225,9 +199,9 @@ const FiPaymentVouchers = () => {
           refetch={refetch}
           maxAccess={access}
         />
-      </Grow>{' '}
+      </Grow>
     </VertLayout>
   )
 }
 
-export default FiPaymentVouchers
+export default IvMaterialsTransfer

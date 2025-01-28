@@ -40,6 +40,7 @@ const Table = ({
   setData,
   checkboxFlex = '',
   handleCheckboxChange = '',
+  showSelectAll = true,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -75,7 +76,7 @@ const Table = ({
       if (col.type === 'dateTime') {
         return {
           ...col,
-          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field]),
+          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field], col?.dateFormat),
           sortable: !disableSorting
         }
       }
@@ -396,9 +397,10 @@ const Table = ({
     })
 
     setChecked(e.target.checked)
+    const data = allNodes.map(rowNode => rowNode.data)
 
     if (handleCheckboxChange) {
-      handleCheckboxChange()
+      handleCheckboxChange(data, e.target.checked)
     }
 
     if (typeof setData === 'function') onSelectionChanged
@@ -457,7 +459,7 @@ const Table = ({
           }
 
           if (handleCheckboxChange) {
-            handleCheckboxChange()
+            handleCheckboxChange(params.data, e.target.checked)
           }
         }}
       />
@@ -547,7 +549,8 @@ const Table = ({
             width: 100,
             cellRenderer: checkboxCellRenderer,
             headerComponent: params =>
-              rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
+              rowSelection !== 'single' &&
+              showSelectAll && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
             suppressMenu: true
           }
         ]
