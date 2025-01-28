@@ -193,8 +193,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
     const header = JSON.stringify({
       ...restValues,
-      qty: totalQty || null,
-      creditAmount: totalLabor || null,
+      qty: totalQty,
+      creditAmount: totalLabor,
       recordId: formik.values.recordId
     })
 
@@ -239,7 +239,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           parameters: `_userId=${_userId}&_key=plantId`
         })
 
-        if (res3.record.value) {
+        if (res3?.record?.value) {
           const pltValue = await getRequest({
             extension: SystemRepository.Plant.get,
             parameters: `_recordId=${parseInt(res3.record.value)}`
@@ -252,7 +252,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           extension: SystemRepository.UserDefaults.get,
           parameters: `_userId=${_userId}&_key=siteId`
         })
-        if (res4.record.value) {
+        if (res4?.record?.value) {
           const siteValue = await getRequest({
             extension: InventoryRepository.Site.get,
             parameters: `_recordId=${parseInt(res4.record.value)}`
