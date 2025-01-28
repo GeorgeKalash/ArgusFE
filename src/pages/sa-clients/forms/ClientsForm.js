@@ -62,22 +62,19 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
       isInactive: false
     },
     maxAccess: maxAccess,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
       cgId: yup.string().required()
     }),
     onSubmit: async values => {
-      await postAccount(values)
-    }
-  })
+      const res = await postRequest({
+        extension: SaleRepository.Client.set,
+        record: JSON.stringify(values)
+      })
 
-  const postAccount = async obj => {
-    await postRequest({
-      extension: SaleRepository.Client.set,
-      record: JSON.stringify({ ...obj, acquisitionDate: obj?.acquisitionDate ? formatDateToApi(obj?.acquisitionDate) : null })
-    }).then(res => {
-      if (!obj.recordId) {
+      if (!values.recordId) {
         setStore(prevStore => ({
           ...prevStore,
           recordId: res.recordId
@@ -85,7 +82,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
         formik.setFieldValue('recordId', res.recordId)
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
-      getData(res.recordId)
+      await getData(res.recordId)
       setStore(prevStore => ({
         ...prevStore,
         record: formik.values,
@@ -93,24 +90,8 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
       }))
 
       invalidate()
+    }
     })
-  }
-
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const defaultParams = `_recordId=${recordId}`
-        var parameters = defaultParams
-
-        const res = await getRequest({
-          extension: SaleRepository.Client.get,
-          parameters: parameters
-        })
-
-        formik.setValues({ ...res.record, acquisitionDate: formatDateFromApi(res?.record?.acquisitionDate) })
-      }
-    })()
-  }, [])
 
   useEffect(() => {
     ;(async function () {
@@ -124,15 +105,16 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
         extension: SaleRepository.Client.get,
         parameters: `_recordId=${recordId}`
       })
-      setStore(prevStore => ({
-        ...prevStore,
-        record: res.record
-      }))
 
       formik.setValues({
         ...res.record,
         acquisitionDate: formatDateFromApi(res?.record?.acquisitionDate)
       })
+      
+      setStore(prevStore => ({
+        ...prevStore,
+        record: res.record
+      }))
     }
   }
 
@@ -308,8 +290,9 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
               <CustomDatePicker
                 name='acquisitionDate'
                 label={labels.acquisitionDate}
-                value={formik.values?.acquisitionDate}
+                value={formik.values.acquisitionDate}
                 onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('acquisitionDate', '')}
                 error={formik.touched.acquisitionDate && Boolean(formik.errors.acquisitionDate)}
               />
