@@ -45,7 +45,7 @@ export default function DraftSerialsInvoiceForm({ labels, maxAccess, recordId, f
         record: JSON.stringify(obj)
       })
 
-      if (!formik.values.recordId) {
+      if (!recordId) {
         formik.setFieldValue('recordId', formik.values.dtId)
 
         toast.success(platformLabels.Added)

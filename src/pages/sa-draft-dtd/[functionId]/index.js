@@ -10,7 +10,6 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { useRouter } from 'next/router'
-import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemFunction } from 'src/resources/SystemFunction'
@@ -38,7 +37,7 @@ const DraftSerialsInvoice = () => {
 
   const getResourceId = functionId => {
     switch (functionId) {
-      case SystemFunction.DraftSerialsInvoice:
+      case SystemFunction.DraftSerialsIn:
         return ResourceIds.DraftSerialsInvoiceDTD
       case SystemFunction.DraftInvoiceReturn:
         return ResourceIds.DraftSerialsReturnDTD
@@ -64,7 +63,7 @@ const DraftSerialsInvoice = () => {
   })
 
   const getCorrectLabel = functionId => {
-    if (functionId === SystemFunction.DraftSerialsInvoice) {
+    if (functionId === SystemFunction.DraftSerialsIn) {
       return labels.saDraft
     } else if (functionId === SystemFunction.DraftInvoiceReturn) {
       return labels.saDraftReturn
@@ -119,13 +118,8 @@ const DraftSerialsInvoice = () => {
     })
   }
 
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: functionId,
-    action: openForm
-  })
-
   const add = async () => {
-    await proxyAction()
+    openForm()
   }
 
   const del = async obj => {
