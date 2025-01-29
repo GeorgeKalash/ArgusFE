@@ -205,14 +205,16 @@ const GenerateOutboundTransportation = () => {
     {
       field: 'szName',
       headerName: labels.zone,
-      width: 200
+      width: 150,
+      wrapText: true,
+      autoHeight: true,
     },
     {
       field: 'clientName',
       headerName: labels.client,
       wrapText: true,
       autoHeight: true,
-      width: 150
+      width: 130
     },
     {
       field: 'amount',
