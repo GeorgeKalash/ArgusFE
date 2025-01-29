@@ -66,8 +66,7 @@ export default function DraftSerialsInvoiceForm({ labels, maxAccess, recordId, f
 
         formik.setValues({
           ...res.record,
-          recordId: res.record.dtId,
-          disableSKULookup: Boolean(res.record.disableSKULookup)
+          recordId: res.record.dtId
         })
       }
     })()
