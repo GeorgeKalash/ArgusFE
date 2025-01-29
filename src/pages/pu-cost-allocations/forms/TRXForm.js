@@ -80,6 +80,8 @@ export default function TRXForm({ labels, access, setStore, store }) {
             isPosted: res?.status == 3
           }))
           formik.setFieldValue('recordId', res.recordId)
+          fetchData(res.recordId)
+
           toast.success(platformLabels.Added)
         } else {
           toast.success(platformLabels.Edited)
@@ -106,7 +108,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
     fetchDataAndSetPlant()
   }, [])
 
-  async function fetchData() {
+  async function fetchData(recordId) {
     await getRequest({
       extension: CostAllocationRepository.PuCostAllocations.get,
       parameters: `_recordId=${recordId}`
