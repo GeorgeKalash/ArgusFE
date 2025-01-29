@@ -1675,7 +1675,6 @@ export default function SaleTransactionForm({
                 autoSelectFistValue={!formik.values.clientId}
                 readOnly={formik.values.items.length > 0 && formik.values.items[0].sku}
                 displayFieldWidth={3}
-                editMode={editMode}
               />
             </Grid>
             <Grid item xs={1}>
