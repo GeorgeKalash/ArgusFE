@@ -109,8 +109,7 @@ const DraftSerialsInvoice = () => {
         labels: labels,
         recordId: record?.dtId,
         maxAccess: access,
-        functionId,
-        getResourceId
+        functionId
       },
       width: 500,
       height: 380,

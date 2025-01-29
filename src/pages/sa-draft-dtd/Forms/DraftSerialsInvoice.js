@@ -16,7 +16,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function DraftSerialsInvoiceForm({ labels, maxAccess, recordId, functionId, getResourceId }) {
+export default function DraftSerialsInvoiceForm({ labels, maxAccess, recordId, functionId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
