@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react'
+import { useState, useContext } from 'react'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -15,11 +15,9 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import OutboundTranspForm from '../outbound-transportation/forms/OutboundTranspForm'
 import { useWindow } from 'src/windows'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
-import FieldSet from 'src/components/Shared/FieldSet'
 
 const GenerateOutboundTransportation = () => {
   const [data, setData] = useState([])
@@ -40,8 +38,6 @@ const GenerateOutboundTransportation = () => {
 
   const getPlantId = async () => {
     const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')
-
-    console.log(userDefaultsData)
 
     return defaultPlant?.value ? parseInt(defaultPlant.value) : null
   }
@@ -92,7 +88,6 @@ const GenerateOutboundTransportation = () => {
     }
   })
 
-
   async function openForm(recordId) {
     stack({
       Component: OutboundTranspForm,
@@ -109,8 +104,8 @@ const GenerateOutboundTransportation = () => {
 
   const onSelectCheckBox = (row, checked) => {
     if (checked) {
-      setTotalAmountFromChecked((prev) => prev + row.amount)
-      setTotalVolumeFromChecked((prev) => prev + row.volume)
+      setTotalAmountFromChecked(prev => prev + row.amount)
+      setTotalVolumeFromChecked(prev => prev + row.volume)
     } else {
       setData(prev => {
         const itemToAdd = deliveryOrders.list.find(item => item.recordId === row.recordId)
@@ -134,55 +129,19 @@ const GenerateOutboundTransportation = () => {
   const [totalVolumeFromChecked, setTotalVolumeFromChecked] = useState(0)
   const [totalAmountFromChecked, setTotalAmountFromChecked] = useState(0)
 
-  const onRowCheckboxChange = (data, checked) => {  
+  const onRowCheckboxChange = (data, checked) => {
     if (Array.isArray(data)) {
-      data.forEach((row) => {
+      data.forEach(row => {
         onSelectCheckBox(row, checked)
-      });
+      })
     } else {
       onSelectCheckBox(data, checked)
     }
-  };
-  
-
-  const onPreview = async szId => {
-    const orders = await getRequest({
-      extension: DeliveryRepository.GenerateTrip.undelivered,
-      parameters: `_szId=${szId || 0}`
-    })
-
-    if (!orders?.list) {
-      return
-    }
-
-    const filteredOrders = {
-      ...orders,
-      list:
-        orders.list.filter(
-          order => !deliveryOrders?.list?.some(deliveredOrder => deliveredOrder.recordId === order.recordId)
-        ) || []
-    }
-
-    setData({
-      ...filteredOrders,
-      list: filteredOrders.list,
-      count: filteredOrders.list.length
-    })
   }
 
   const totalVolume = deliveryOrders?.list?.reduce((sum, order) => sum + (order.volume || 0), 0) || 0
   const totalAmount = deliveryOrders?.list?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0
   const balance = formik.values.capacity - totalVolume
-
-  // useEffect(() => {
-  //   const checkedOrders = data?.list?.filter(order => order.checked)
-
-  //   const volume = checkedOrders?.reduce((sum, order) => sum + (order.volume || 0), 0) || 0
-  //   const amount = checkedOrders?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0
-
-  //   setTotalVolumeFromChecked(volume)
-  //   setTotalAmountFromChecked(amount)
-  // }, [data?.list])
 
   const Confirmation = (row, value) => {
     stack({
@@ -201,13 +160,17 @@ const GenerateOutboundTransportation = () => {
 
   const columnsZones = [
     {
-      field: 'name',
-      headerName: labels.name,
-      flex: 1
+      field: 'szRef',
+      headerName: labels.ref,
+      wrapText: true,
+      autoHeight: true,
+      width: 70
     },
     {
-      field: 'szRef',
-      headerName: labels.salesZoneRef,
+      field: 'name',
+      headerName: labels.name,
+      wrapText: true,
+      autoHeight: true,
       flex: 1
     }
   ]
@@ -237,7 +200,9 @@ const GenerateOutboundTransportation = () => {
     {
       field: 'clientName',
       headerName: labels.client,
-      width: 280
+      wrapText: true,
+      autoHeight: true,
+      width: 150
     },
     {
       field: 'amount',
@@ -283,7 +248,9 @@ const GenerateOutboundTransportation = () => {
     {
       field: 'clientName',
       headerName: labels.client,
-      width: 280
+      wrapText: true,
+      autoHeight: true,
+      width: 150
     },
     {
       field: 'amount',
@@ -335,8 +302,6 @@ const GenerateOutboundTransportation = () => {
     })
   }
 
-  console.log(selectedSaleZones)
-
   const onUndelivered = async szIds => {
     const items = await getRequest({
       extension: DeliveryRepository.GenerateTrip.undelivered2,
@@ -354,6 +319,23 @@ const GenerateOutboundTransportation = () => {
     })
   }
 
+  const onAdd = () => {
+    const selectedRows = data.list.filter(item => item.checked)
+    setTotalVolumeFromChecked(0)
+    setTotalAmountFromChecked(0)
+    setDeliveryOrders(prev => ({
+      ...prev,
+      list: [...(prev?.list || []), ...selectedRows],
+      count: (prev?.list?.length || 0) + selectedRows.length
+    }))
+
+    setData(prev => ({
+      ...prev,
+      list: prev?.list?.filter(item => !item.checked) || [],
+      count: (prev?.list?.length || 0) - selectedRows.length
+    }))
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.GenerateTrip}
@@ -364,7 +346,7 @@ const GenerateOutboundTransportation = () => {
       infoVisible={false}
     >
       <Grid container sx={{ flex: 1 }}>
-        <Grid item xs={3.5} sx={{ display: 'flex', flex: 1, marginRight: 1 }}>
+        <Grid item xs={2.5} sx={{ display: 'flex', flex: 1, marginRight: 1 }}>
           <VertLayout>
             <Fixed>
               <Grid item xs={8}>
@@ -420,7 +402,7 @@ const GenerateOutboundTransportation = () => {
             </Grid>
           </VertLayout>
         </Grid>
-        <Grid item xs={8.4} sx={{ display: 'flex', flex: 1, marginLeft: 1 }}>
+        <Grid item xs={9.4} sx={{ display: 'flex', flex: 1, marginLeft: 1 }}>
           <VertLayout>
             <Fixed>
               <Grid container spacing={2}>
@@ -511,22 +493,7 @@ const GenerateOutboundTransportation = () => {
             <Grid container pt={2} spacing={2}>
               <Grid item xs={3}>
                 <Button
-                  onClick={() => {
-                    const selectedRows = data.list.filter(item => item.checked)
-                    setTotalVolumeFromChecked(0)
-                    setTotalAmountFromChecked(0)
-                    setDeliveryOrders(prev => ({
-                      ...prev,
-                      list: [...(prev?.list || []), ...selectedRows],
-                      count: (prev?.list?.length || 0) + selectedRows.length
-                    }))
-
-                    setData(prev => ({
-                      ...prev,
-                      list: prev?.list?.filter(item => !item.checked) || [],
-                      count: (prev?.list?.length || 0) - selectedRows.length
-                    }))
-                  }}
+                  onClick={onAdd}
                   variant='contained'
                   sx={{
                     backgroundColor: '#231f20',
@@ -543,16 +510,17 @@ const GenerateOutboundTransportation = () => {
                   {platformLabels.Add}
                 </Button>
               </Grid>
-              <Grid item xs={3}></Grid>
-              <Grid item xs={6}>
+              <Grid item xs={5}></Grid>
+              <Grid item xs={3}>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <CustomNumberField name='volume' label={labels.volume} value={totalVolumeFromChecked} readOnly />
-                  </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={5}>
                     <CustomNumberField name='amount' label={labels.amount} value={totalAmountFromChecked} readOnly />
                   </Grid>
+                  <Grid item xs={5}>
+                    <CustomNumberField name='volume' label={labels.volume} value={totalVolumeFromChecked} readOnly />
+                  </Grid>
                 </Grid>
+                <Grid item xs={2}></Grid>
               </Grid>
             </Grid>
 
@@ -570,14 +538,14 @@ const GenerateOutboundTransportation = () => {
               />
             </Grow>
             <Grid container pt={2} spacing={2}>
-              <Grid item xs={6}></Grid>
-              <Grid item xs={6}>
+              <Grid item xs={8}></Grid>
+              <Grid item xs={3}>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly />
-                  </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={5}>
                     <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly />
+                  </Grid>
+                  <Grid item xs={5}>
+                    <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly />
                   </Grid>
                 </Grid>
               </Grid>
