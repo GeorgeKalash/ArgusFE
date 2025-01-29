@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -18,18 +18,17 @@ const SalesZone = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const [dataTree, setDataTree] = useState([])
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    try {
-      const response = await getRequest({
-        extension: SaleRepository.SalesZone.page,
-        parameters: `_pageSize=${_pageSize}&_startAt=${_startAt}&_filter=&_sortField=`
-      })
+    const response = await getRequest({
+      extension: SaleRepository.SalesZone.page,
+      parameters: `_pageSize=${_pageSize}&_startAt=${_startAt}&_filter=&_sortField=`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -44,6 +43,17 @@ const SalesZone = () => {
     endpointId: SaleRepository.SalesZone.page,
     datasetId: ResourceIds.SalesZone
   })
+
+  useEffect(() => {
+    const fetchTreeData = async () => {
+      const response = await getRequest({
+        extension: SaleRepository.SalesZone.page,
+        parameters: `_pageSize=1000&_startAt=0&_filter=&_sortField=`
+      })
+      setDataTree(response)
+    }
+    fetchTreeData()
+  }, [])
 
   const columns = [
     {
@@ -74,14 +84,12 @@ const SalesZone = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SaleRepository.SalesZone.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: SaleRepository.SalesZone.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
@@ -102,7 +110,7 @@ const SalesZone = () => {
     stack({
       Component: Tree,
       props: {
-        data: data
+        data: dataTree
       },
       width: 500,
       height: 400,
