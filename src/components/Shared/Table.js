@@ -74,7 +74,7 @@ const Table = ({
       if (col.type === 'dateTime') {
         return {
           ...col,
-          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field]),
+          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field], col?.dateFormat),
           sortable: !disableSorting
         }
       }
@@ -384,7 +384,7 @@ const Table = ({
     })
 
     setChecked(e.target.checked)
-    const data = allNodes.map((rowNode) => rowNode.data);
+    const data = allNodes.map(rowNode => rowNode.data)
 
     if (handleCheckboxChange) {
       handleCheckboxChange(data, e.target.checked)
@@ -536,7 +536,8 @@ const Table = ({
             width: 100,
             cellRenderer: checkboxCellRenderer,
             headerComponent: params =>
-              rowSelection !== 'single' && showSelectAll && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
+              rowSelection !== 'single' &&
+              showSelectAll && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
             suppressMenu: true
           }
         ]

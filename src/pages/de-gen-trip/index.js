@@ -92,6 +92,7 @@ const GenerateOutboundTransportation = () => {
     }
   })
 
+
   async function openForm(recordId) {
     stack({
       Component: OutboundTranspForm,
