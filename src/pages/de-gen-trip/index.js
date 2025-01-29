@@ -20,7 +20,7 @@ import { useWindow } from 'src/windows'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 
 const GenerateOutboundTransportation = () => {
-  const [data, setData] = useState([])
+  const [data, setData] = useState({ list: [] })
   const [deliveryOrders, setDeliveryOrders] = useState({ list: [] })
   const [salesZones, setSalesZones] = useState({ list: [] })
   const [selectedSaleZones, setSelectedSaleZones] = useState('')
@@ -107,10 +107,13 @@ const GenerateOutboundTransportation = () => {
       setTotalAmountFromChecked(prev => prev + row.amount)
       setTotalVolumeFromChecked(prev => prev + row.volume)
     } else {
+      const selectedIds = selectedSaleZones ? selectedSaleZones.split(',') : []
+  
       setData(prev => {
-        const itemToAdd = deliveryOrders.list.find(item => item.recordId === row.recordId)
-        if (!itemToAdd || itemToAdd.szId !== formik.values.szId) return prev
-
+        const itemToAdd = deliveryOrders.list.find(item => item.recordId == row.recordId)
+        
+        if (!itemToAdd || !selectedIds.includes(String(itemToAdd.szId))) return prev
+  
         return {
           ...prev,
           list: [...(prev?.list || []), itemToAdd],
@@ -121,7 +124,7 @@ const GenerateOutboundTransportation = () => {
       setDeliveryOrders(prev => ({
         ...prev,
         list: prev?.list?.filter(item => item.recordId !== row.recordId) || [],
-        count: (prev?.list?.length || 0) - 1
+        count: Math.max((prev?.list?.length || 0) - 1, 0)
       }))
     }
   }
@@ -333,13 +336,31 @@ const GenerateOutboundTransportation = () => {
       return
     }
 
-    setData({
-      ...items,
-      list: items.list,
-      count: items.list.length
-    })
-  }
+    if (data?.list?.length > 0) {
+      setData(prev => {
+        const existingDeliveryOrderIds = new Set(deliveryOrders.list.map(item => item.recordId))
+    
+        const newItems = items.list.filter(item => 
+          !existingDeliveryOrderIds.has(item.recordId)
+        );
+    
+        return {
+          ...prev,
+          list: newItems, 
+          count: prev.list.length + newItems.length
+        }
+      })
+    } else {
+      setData({
+        ...items,
+        list: items.list,
+        count: items.list.length
+      })
 
+    }
+    
+  };
+  
   const onAdd = () => {
     const selectedRows = data?.list?.filter(item => item.checked)
     setTotalVolumeFromChecked(0)
@@ -522,13 +543,13 @@ const GenerateOutboundTransportation = () => {
                       backgroundColor: '#231f20',
                       opacity: 0.8
                     },
-                    width: '85px !important',
+                    width: '30px !important',
                     height: '40px',
                     objectFit: 'contain',
                     minWidth: '30px !important'
                   }}
                 >
-                  {platformLabels.Add}
+                  <img src='/images/buttonsIcons/import.png' alt={platformLabels.Import} />
                 </Button>
               </Grid>
               <Grid item xs={5}></Grid>
