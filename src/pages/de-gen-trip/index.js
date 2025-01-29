@@ -152,6 +152,16 @@ const GenerateOutboundTransportation = () => {
         fullScreen: false,
         close: true
       },
+      onClose: () => {
+        const updatedData = deliveryOrders.list.map(item =>
+          item.recordId == row.recordId ? { ...item, checked: true } : item
+        )
+
+        setDeliveryOrders(prev => ({
+          ...prev,
+          list: updatedData,
+        }))
+      },
       width: 400,
       height: 150,
       title: platformLabels.Confirmation
@@ -292,13 +302,16 @@ const GenerateOutboundTransportation = () => {
     const { recordId } = row
 
     setSelectedSaleZones(prev => {
-      const ids = prev ? prev.split(',') : []
-
+      const ids = prev ? prev.split(',') : [];
+  
+      let updatedIds;
       if (checked) {
-        return [...ids, recordId].join(',')
+        updatedIds = [...new Set([...ids, recordId])]; 
       } else {
-        return ids.filter(id => id !== recordId).join(',')
+        updatedIds = ids.filter((id) => id != recordId)
       }
+  
+      return updatedIds.join(',')
     })
   }
 
@@ -320,7 +333,7 @@ const GenerateOutboundTransportation = () => {
   }
 
   const onAdd = () => {
-    const selectedRows = data.list.filter(item => item.checked)
+    const selectedRows = data?.list?.filter(item => item.checked)
     setTotalVolumeFromChecked(0)
     setTotalAmountFromChecked(0)
     setDeliveryOrders(prev => ({
