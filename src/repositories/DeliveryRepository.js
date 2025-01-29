@@ -66,6 +66,10 @@ export const DeliveryRepository = {
     qry: service + 'qryMW2'
   },
   GenerateTrip: {
-    undelivered: service + 'undeliveredSO'
-  }
+    undelivered: service + 'undeliveredSO',
+    root: service + 'rootSZ',
+    firstLevel: service + 'firstLevelSZ',
+    undelivered2: service + 'undeliveredSO2',
+  },
+
 }
