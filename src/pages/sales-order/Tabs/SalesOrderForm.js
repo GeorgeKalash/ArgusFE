@@ -156,10 +156,49 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       currencyId: yup.string().required(),
       clientId: yup.string().required(),
       items: yup.array().of(
-        yup.object({
-          sku: yup.string().required(),
-          itemName: yup.string().required(),
-          qty: yup.number().required()
+        yup.object().shape({
+          sku: yup.string().test(function (value) {
+            const row = this.parent
+            const isAnyFieldFilled = row.qty || row.sku || row.itemName
+
+            if (this.options.from[1]?.value?.items?.length === 1) {
+              if (isAnyFieldFilled) {
+                return !!value
+              }
+
+              return true
+            }
+
+            return !!value
+          }),
+          qty: yup.string().test(function (value) {
+            const row = this.parent
+            const isAnyFieldFilled = row.qty || row.sku || row.itemName
+
+            if (this.options.from[1]?.value?.items?.length === 1) {
+              if (isAnyFieldFilled) {
+                return !!value
+              }
+
+              return true
+            }
+
+            return !!value
+          }),
+          itemName: yup.string().test(function (value) {
+            const row = this.parent
+            const isAnyFieldFilled = row.qty || row.sku || row.itemName
+
+            if (this.options.from[1]?.value?.items?.length === 1) {
+              if (isAnyFieldFilled) {
+                return !!value
+              }
+
+              return true
+            }
+
+            return !!value
+          })
         })
       )
     }),
@@ -185,16 +224,18 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         copy.shipToAddressId = addressRes.recordId
       }
 
-      const updatedRows = formik.values.items.map((itemDetails, index) => {
-        const { physicalProperty, ...rest } = itemDetails
+      const updatedRows = formik.values.items
+        .filter(item => item.sku && item.qty && item.itemName)
+        .map((itemDetails, index) => {
+          const { physicalProperty, ...rest } = itemDetails
 
-        return {
-          ...rest,
-          seqNo: index + 1,
-          siteId: obj.siteId,
-          applyVat: obj.isVattable
-        }
-      })
+          return {
+            ...rest,
+            seqNo: index + 1,
+            siteId: obj.siteId,
+            applyVat: obj.isVattable
+          }
+        })
 
       const itemsGridData = {
         header: copy,
@@ -636,23 +677,26 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
 
-    const modifiedList = await Promise.all(
-      soItems.list?.map(async (item, index) => {
-        const taxDetailsResponse = soHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
+    const modifiedList =
+      soItems?.list.length != 0
+        ? await Promise.all(
+            soItems.list?.map(async (item, index) => {
+              const taxDetailsResponse = soHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
 
-        return {
-          ...item,
-          id: index + 1,
-          basePrice: parseFloat(item.basePrice).toFixed(5),
-          unitPrice: parseFloat(item.unitPrice).toFixed(3),
-          upo: parseFloat(item.upo).toFixed(2),
-          vatAmount: parseFloat(item.vatAmount).toFixed(2),
-          extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-          saTrx: true,
-          taxDetails: taxDetailsResponse
-        }
-      })
-    )
+              return {
+                ...item,
+                id: index + 1,
+                basePrice: parseFloat(item.basePrice).toFixed(5),
+                unitPrice: parseFloat(item.unitPrice).toFixed(3),
+                upo: parseFloat(item.upo).toFixed(2),
+                vatAmount: parseFloat(item.vatAmount).toFixed(2),
+                extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+                saTrx: true,
+                taxDetails: taxDetailsResponse
+              }
+            })
+          )
+        : [{ id: 1 }]
 
     formik.setValues({
       ...soHeader.record,
@@ -1521,7 +1565,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     handleButtonClick={handleButtonClick}
                     ShowDiscountIcons={true}
                     onChange={e => {
-                      let discount = Number(e.target.value)
+                      let discount = Number(e.target.value.replace(/,/g, ''))
                       if (formik.values.tdType == 1) {
                         if (discount < 0 || subtotal < discount) {
                           discount = 0
@@ -1535,9 +1579,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     }}
                     onBlur={async e => {
                       setReCal(true)
-                      let discountAmount = Number(e.target.value)
-                      let tdPct = Number(e.target.value)
-                      let tdAmount = Number(e.target.value)
+                      let discountAmount = Number(e.target.value.replace(/,/g, ''))
+                      let tdPct = Number(e.target.value.replace(/,/g, ''))
+                      let tdAmount = Number(e.target.value.replace(/,/g, ''))
                       if (formik.values.tdType == 1) {
                         tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
                         formik.setFieldValue('tdPct', tdPct)
