@@ -222,6 +222,8 @@ export const InventoryRepository = {
     qry: service + 'qryOC'
   },
   Transaction: {
+    snapshot: service + 'snapshotTRX',
+    page: service + 'pageTRX',
     qry2: service + 'qry2TRX',
     qry3: service + 'qry3TRX'
   },
