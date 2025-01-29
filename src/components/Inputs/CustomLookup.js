@@ -14,8 +14,7 @@ const CustomLookup = ({
   secondValue,
   secondDisplayField = true,
   columnsInDropDown,
-  onSecondValueChange,
-  secondField = { name: '', editable: false },
+  secondField = { name: '', editable: false, onChange: () => {} },
   store = [],
   setStore,
   onKeyUp,
@@ -329,15 +328,15 @@ const CustomLookup = ({
             value={secondValue ? secondValue : ''}
             required={_required}
             onChange={e => {
-              if (onSecondValueChange && secondField?.name) {
-                onSecondValueChange(secondField?.name, e.target.value)
+              if (secondField?.onChange && secondField?.name) {
+                secondField?.onChange(secondField?.name, e.target.value)
               }
             }}
             InputProps={{
               inputProps: {
                 tabIndex: _readOnly || secondField?.editable === '' ? -1 : 0 // Prevent focus on the input field
               },
-              readOnly: !!secondField?.editable ? false : _readOnly
+              readOnly: !secondField?.editable && _readOnly
             }}
             error={error}
             helperText={helperText}
