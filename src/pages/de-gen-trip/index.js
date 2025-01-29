@@ -190,7 +190,7 @@ const GenerateOutboundTransportation = () => {
       field: 'date',
       headerName: labels.date,
       type: 'date',
-      width: 130
+      width: 120
     },
     {
       field: 'reference',
@@ -200,12 +200,14 @@ const GenerateOutboundTransportation = () => {
     {
       field: 'spName',
       headerName: labels.salesPerson,
-      width: 200
+      width: 130,
+      wrapText: true,
+      autoHeight: true,
     },
     {
       field: 'szName',
       headerName: labels.zone,
-      width: 150,
+      width: 120,
       wrapText: true,
       autoHeight: true,
     },
@@ -250,19 +252,23 @@ const GenerateOutboundTransportation = () => {
     {
       field: 'spName',
       headerName: labels.salesPerson,
-      width: 200
+      width: 130,
+      wrapText: true,
+      autoHeight: true,
     },
     {
       field: 'szName',
       headerName: labels.zone,
-      width: 200
+      width: 120,
+      wrapText: true,
+      autoHeight: true,
     },
     {
       field: 'clientName',
       headerName: labels.client,
       wrapText: true,
       autoHeight: true,
-      width: 150
+      width: 130
     },
     {
       field: 'amount',
