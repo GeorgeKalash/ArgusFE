@@ -228,7 +228,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       }
 
       const updatedRows = formik.values.items
-        .filter(item => item.sku && item.qty && item.itemName)
+        .filter(item => item.sku)
         .map((itemDetails, index) => {
           const { physicalProperty, ...rest } = itemDetails
 
