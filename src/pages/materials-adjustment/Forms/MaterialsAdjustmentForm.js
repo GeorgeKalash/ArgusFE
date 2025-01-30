@@ -113,8 +113,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
       toast.success(actionMessage)
       invalidate()
-      const payload = await refetchForm(res?.recordId)
-      await handlePost(payload)
+      refetchForm(res?.recordId)
     }
   })
 
@@ -127,17 +126,13 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     return qtySum + qtyValue
   }, 0)
 
-  async function handlePost(payload) {
+  async function onPost() {
     await postRequest({
       extension: InventoryRepository.MaterialsAdjustment.post,
-      record: JSON.stringify(
-        payload?.recordId
-          ? payload
-          : {
-              ...formik.values,
-              date: formatDateToApi(formik.values.date)
-            }
-      )
+      record: JSON.stringify({
+        ...formik.values,
+        date: formatDateToApi(formik.values.date)
+      })
     })
     window.close()
     invalidate()
@@ -152,7 +147,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       })
     })
     toast.success(platformLabels.Unposted)
-    await refetchForm(res?.recordId)
+    refetchForm(res?.recordId)
     invalidate()
   }
 
@@ -223,11 +218,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   }
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        await refetchForm(recordId)
-      }
-    })()
+    if (recordId) refetchForm(recordId)
   }, [])
 
   useEffect(() => {
@@ -251,7 +242,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     {
       key: 'Unlocked',
       condition: !isPosted,
-      onClick: handlePost,
+      onClick: onPost,
       disabled: !editMode
     }
   ]

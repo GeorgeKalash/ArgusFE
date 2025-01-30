@@ -46,7 +46,7 @@ const TransactionInquiries = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.Transaction.page,
-    datasetId: ResourceIds.TransactionInquiries,
+    datasetId: ResourceIds.IvTrxInquiry,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -71,9 +71,9 @@ const TransactionInquiries = () => {
       flex: 1
     },
     {
-      field: 'name',
+      field: 'itemName',
       headerName: _labels.name,
-      flex: 1
+      flex: 2
     },
     {
       field: 'siteName',
@@ -83,7 +83,8 @@ const TransactionInquiries = () => {
     {
       field: 'qty',
       headerName: _labels.qty,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'amount',
