@@ -147,5 +147,13 @@ export const ManufacturingRepository = {
     set: service + 'setRMC',
     del: service + 'delRMC',
     page: service + 'pageRMC'
+  },
+  Damage: {
+    get: service + 'getDMG',
+    set: service + 'setDMG',
+    del: service + 'delDMG',
+    page: service + 'pageDMG',
+    snapshot: service + 'snapshotDMG',
+    post: service + 'postDMG'
   }
 }

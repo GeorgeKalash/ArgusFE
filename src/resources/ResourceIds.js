@@ -351,5 +351,6 @@ export const ResourceIds = {
   OutwardReturnReason: 36135,
   DeliveryLeadTimes: 52101,
   DraftSerialsInvoices: 51312,
+  Damages: 42314,
   OutboundAssignDriver: 52313
 }
