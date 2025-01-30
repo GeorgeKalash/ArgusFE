@@ -350,5 +350,6 @@ export const ResourceIds = {
   CashTransfers: 33302,
   OutwardReturnReason: 36135,
   DeliveryLeadTimes: 52101,
-  DraftSerialsInvoices: 51312
+  DraftSerialsInvoices: 51312,
+  OutboundAssignDriver: 52313
 }

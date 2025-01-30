@@ -45,7 +45,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       if (userKeys.includes(key)) {
         acc[key] = value ? parseInt(value) : null
       }
-      
+
       return acc
     }, {})
 
@@ -80,15 +80,17 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       capacityVolume: null,
       wip: 1,
       wipName: '',
-      orders: [{
-        id: 1,
-        soRef: null,
-        soId: null,
-        soDate: null,
-        clientName: null,
-        soVolume: null,
-        soWipStatusName: null
-      }]
+      orders: [
+        {
+          id: 1,
+          soRef: null,
+          soId: null,
+          soDate: null,
+          clientName: null,
+          soVolume: null,
+          soWipStatusName: null
+        }
+      ]
     },
     maxAccess,
     enableReinitialize: false,
@@ -96,8 +98,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     validationSchema: yup.object({
       departureTime: yup.string().required(),
       plantId: yup.number().required(),
-      vehicleId: yup.string().required(),
-      driverId: yup.string().required()
+      vehicleId: yup.string().required()
     }),
     onSubmit: async obj => {
       const copy = { ...obj }
@@ -319,7 +320,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     }
   ]
 
-
   const columns = [
     {
       component: 'resourcelookup',
@@ -510,7 +510,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                       formik.setFieldValue('driverId', newValue ? newValue?.recordId : '')
                     }}
                     error={formik.touched.driverId && Boolean(formik.errors.driverId)}
-                    required
                   />
                 </Grid>
               </Grid>

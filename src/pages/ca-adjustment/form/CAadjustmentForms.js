@@ -106,7 +106,8 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     }
   })
   const editMode = !!formik.values.recordId || !!recordId
-
+  const isPosted = formik.values.status === 3
+  
   const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
     endpointId: MultiCurrencyRepository.Currency.get,
     datasetId: ResourceIds.MultiCurrencyRate
@@ -202,6 +203,26 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     }
   }
 
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: CashBankRepository.CAadjustment.unpost,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res?.recordId) {
+      toast.success(platformLabels.Unposted)
+      invalidate()
+
+      const getRes = await getRequest({
+        extension: CashBankRepository.CAadjustment.get,
+        parameters: `_recordId=${formik.values.recordId}`
+      })
+
+      getRes.record.date = formatDateFromApi(getRes.record.date)
+      formik.setValues(getRes.record)
+    }
+  }
+
   const onWorkFlowClick = async () => {
     stack({
       Component: WorkFlow,
@@ -227,12 +248,18 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       onClick: 'onClickGL',
       disabled: !editMode
     },
-
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || formik.values.status !== 1
+      disabled: !editMode
     },
     {
       key: 'WorkFlow',
@@ -257,7 +284,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       actions={actions}
       functionId={functionId}
       previewReport={editMode}
-      disabledSubmit={formik.values.status !== 1}
+      disabledSubmit={isPosted}
     >
       <VertLayout>
         <Grow>
@@ -302,7 +329,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
                 label={labels.plant}
-                readOnly={formik.values.status == '3'}
+                readOnly={isPosted}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -322,7 +349,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
               <CustomDatePicker
                 name='date'
                 label={labels.date}
-                readOnly={formik.values.status == '3'}
+                readOnly={isPosted}
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
                   formik.setFieldValue('date', newValue)
@@ -345,7 +372,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                     endpointId={SystemRepository.Currency.qry}
                     name='currencyId'
                     label={labels.currency}
-                    readOnly={formik.values.status == '3'}
+                    readOnly={isPosted}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
@@ -385,7 +412,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 parameters={{
                   _type: 2
                 }}
-                readOnly={formik.values.status == '3'}
+                readOnly={isPosted}
                 valueField='reference'
                 displayField='name'
                 name='cashAccountId'
@@ -415,7 +442,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 type='text'
                 label={labels.amount}
                 value={formik.values.amount}
-                readOnly={formik.values.status == '3'}
+                readOnly={isPosted}
                 required
                 maxAccess={maxAccess}
                 thousandSeparator={false}
@@ -442,7 +469,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
               <CustomTextArea
                 name='notes'
                 label={labels.notes}
-                readOnly={formik.values.status == '3'}
+                readOnly={isPosted}
                 value={formik.values.notes}
                 maxLength='100'
                 rows={2}
