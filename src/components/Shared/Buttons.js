@@ -438,5 +438,19 @@ export const getButtons = platformLabels => [
     color: '#231f43',
     image: 'popup-window.png',
     main: false
+  },
+  {
+    key: 'DefaultBilling',
+    label: platformLabels.DefaultBilling,
+    color: '#231f20',
+    image: 'generate.png',
+    main: false
+  },
+  {
+    key: 'DefaultShipping',
+    label: platformLabels.DefaultShipping,
+    color: '#231f20',
+    image: 'shipment.png',
+    main: false
   }
 ]
