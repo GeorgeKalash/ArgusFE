@@ -135,7 +135,7 @@ export default function SaleTransactionForm({
         rateCalcMethod: 1,
         tdType: DIRTYFIELD_TDPCT,
         tdPct: 0,
-        baseAmount: null,
+        baseAmount: 0,
         volume: 0,
         weight: 0,
         qty: 0,
@@ -206,8 +206,8 @@ export default function SaleTransactionForm({
           .string()
           .nullable()
           .test('', function (value) {
-            const { dtId } = this.parent
-            if (dtId == null) {
+            const { dtId, commitItems } = this.parent
+            if (dtId && commitItems) {
               return !!value
             }
 
@@ -827,9 +827,10 @@ export default function SaleTransactionForm({
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode
+      disabled: !isPosted
     },
     {
+      key: 'Unlocked',
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
@@ -843,7 +844,7 @@ export default function SaleTransactionForm({
     }
   ]
 
-  async function fillForm(saTrxPack) {
+  async function fillForm(saTrxPack, dtInfo) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
     const saTrxTaxes = saTrxPack?.taxes
@@ -890,7 +891,9 @@ export default function SaleTransactionForm({
         billAddress: billAdd,
         currentDiscount:
           saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
-        KGmetalPrice: saTrxHeader?.metalPrice * 1000
+        KGmetalPrice: saTrxHeader?.metalPrice * 1000,
+        subtotal: saTrxHeader?.subtotal.toFixed(2),
+        commitItems: dtInfo?.record?.commitItems
       },
       items: modifiedList,
       taxes: [...saTrxTaxes]
@@ -1153,7 +1156,7 @@ export default function SaleTransactionForm({
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
       tdPct: formik?.values?.header?.tdPct,
-      taxDetails: formik.values.header.isVattable ? newRow.taxDetails : null
+      taxDetails: formik.values.header?.isVattable ? newRow.taxDetails : null
     })
 
     let commonData = {
@@ -1198,7 +1201,7 @@ export default function SaleTransactionForm({
 
   const subTotal = getSubtotal(parsedItemsArray)
 
-  const miscValue = formik.values.miscAmount == 0 ? 0 : parseFloat(formik.values.header.miscAmount)
+  const miscValue = formik.values.miscAmount == 0 ? 0 : parseFloat(formik.values.header.miscAmount) || 0
 
   const _footerSummary = getFooterTotals(parsedItemsArray, {
     totalQty: 0,
@@ -1216,7 +1219,7 @@ export default function SaleTransactionForm({
   const amount = reCal ? _footerSummary?.net : formik.values?.header.amount || 0
   const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.header.volume || 0
   const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.header.weight || 0
-  const subtotal = reCal ? subTotal : formik.values?.header.subtotal || 0
+  const subtotal = reCal ? subTotal.toFixed(2) : formik.values?.header.subtotal || 0
   const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.header.vatAmount || 0
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
@@ -1250,7 +1253,7 @@ export default function SaleTransactionForm({
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
         tdPct: parseFloat(tdPct),
-        taxDetails: item.taxDetails
+        taxDetails: formik.values.header?.isVattable ? item.taxDetails : null
       })
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
     })
@@ -1329,6 +1332,7 @@ export default function SaleTransactionForm({
         labels,
         bill: true,
         form: formik.values.header,
+        checkedAddressId: formik.values?.header?.billAddressId,
         handleAddressValues: setAddressValues
       },
       width: 950,
@@ -1398,7 +1402,16 @@ export default function SaleTransactionForm({
     formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
     formik.setFieldValue('header.volume', parseFloat(totalVolume).toFixed(2))
     formik.setFieldValue('header.amount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('header.baseAmount', parseFloat(formik.values.header.baseAmount).toFixed(2))
+
+    const updatedRateRow = getRate({
+      amount: amount ?? 0,
+      exRate: formik.values?.header?.exRate,
+      baseAmount: 0,
+      rateCalcMethod: formik.values?.header?.rateCalcMethod,
+      dirtyField: DIRTYFIELD_RATE
+    })
+
+    formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
     formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
@@ -1445,7 +1458,8 @@ export default function SaleTransactionForm({
     ;(async function () {
       if (recordId && measurements) {
         const transactionPack = await getSalesTransactionPack(recordId)
-        await fillForm(transactionPack)
+        const dtInfo = await getDTD(transactionPack.header.dtId)
+        await fillForm(transactionPack, dtInfo)
       }
     })()
   }, [recordId, measurements])
@@ -1524,7 +1538,7 @@ export default function SaleTransactionForm({
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={9}>
+            <Grid item xs={9} container direction='column' gap={2}>
               <Grid container spacing={2}>
                 <Grid item xs={3}>
                   <ResourceComboBox
@@ -1610,6 +1624,8 @@ export default function SaleTransactionForm({
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                   />
                 </Grid>
+              </Grid>
+              <Grid container spacing={2}>
                 <Grid item xs={3}>
                   <CustomTextField
                     name='reference'
@@ -1630,10 +1646,10 @@ export default function SaleTransactionForm({
                     readOnly={isPosted}
                     value={formik?.values?.header?.date}
                     onChange={async (e, newValue) => {
-                      formik.setFieldValue('header.date', newValue.date)
+                      formik.setFieldValue('header.date', newValue)
                       await getMultiCurrencyFormData(
                         formik.values.header.currencyId,
-                        formatDateForGetApI(formik.values.header.date),
+                        formatDateForGetApI(newValue),
                         RateDivision.FINANCIALS
                       )
                     }}
@@ -1676,11 +1692,7 @@ export default function SaleTransactionForm({
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     displayFieldWidth={2}
-                    readOnly={
-                      formik?.values?.header.dtId ||
-                      (formik?.values?.header.dtId && formik?.values?.header.commitItems == false) ||
-                      isPosted
-                    }
+                    readOnly={isPosted || formik?.values?.header?.dtId ? !formik?.values?.header?.commitItems : false}
                     required={
                       !formik?.values?.header.dtId ||
                       (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
@@ -1979,7 +1991,19 @@ export default function SaleTransactionForm({
                     value={formik.values.header.miscAmount}
                     decimalScale={2}
                     readOnly={isPosted}
-                    onChange={e => formik.setFieldValue('header.miscAmount', e.target.value)}
+                    onChange={e => {
+                      formik.setFieldValue('header.miscAmount', e.target.value)
+
+                      const updatedRateRow = getRate({
+                        amount: e.target.value ?? 0,
+                        exRate: formik.values?.exRate,
+                        baseAmount: 0,
+                        rateCalcMethod: formik.values?.rateCalcMethod,
+                        dirtyField: DIRTYFIELD_RATE
+                      })
+                      formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                      
+                    }}
                     onBlur={async () => {
                       setReCal(true)
                     }}

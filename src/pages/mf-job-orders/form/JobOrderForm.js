@@ -122,6 +122,7 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
   const editMode = !!formik.values.recordId
   const isCancelled = formik.values.status == -1
   const isReleased = formik.values.status == 4
+  const isPosted = formik.values.status == 3
 
   async function onCancel() {
     // const copy = { ...formik.values }
@@ -136,6 +137,8 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
     // invalidate()
     // await refetchForm(res.recordId)
   }
+  async function onPost() {}
+  async function unPost() {}
 
   async function onWorkFlowClick() {
     stack({
@@ -151,6 +154,19 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
   }
 
   const actions = [
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: unPost,
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode
+    },
     {
       key: 'RecordRemarks',
       condition: true,

@@ -177,7 +177,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
   const setDefaultFields = () => {
     formik.setFieldValue('plantId', userDefaultsDataState.plantId)
-    formik.setFieldValue('cashAccountId', userDefaultsDataState?.cashAccountId || null)
+    if (userDefaultsDataState?.cashAccountId)
+      formik.setFieldValue('cashAccountId', userDefaultsDataState?.cashAccountId)
   }
 
   useEffect(() => {
@@ -204,11 +205,14 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   }
 
   useEffect(() => {
-    if (formik.values.recordId) getCashAccount()
     ;(async function () {
-      await getData(formik.values.recordId)
-      getUserDefaultsData()
-      getDefaultsData()
+      if (recordId) {
+        await getCashAccount()
+        await getData(recordId)
+      } else {
+        getUserDefaultsData()
+        getDefaultsData()
+      }
     })()
   }, [])
 
@@ -354,7 +358,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 name='date'
                 label={labels.date}
                 onChange={async (e, newValue) => {
-                  formik.setFieldValue('date', newValue.date)
+                  formik.setFieldValue('date', newValue)
                   await getMultiCurrencyFormData(
                     formik.values.currencyId,
                     formatDateForGetApI(formik.values.date),
@@ -451,7 +455,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 required
                 values={formik.values}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('cashAccountId', newValue?.recordId)
                   formik.setFieldValue('cashAccountRef', newValue?.reference || '')
                   formik.setFieldValue('cashAccountName', newValue ? newValue.name : '')
                   formik.setFieldValue('paymentMethod', newValue?.key || null)
@@ -539,7 +543,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     variant='contained'
                     size='small'
                     onClick={() => openMCRForm(formik.values)}
-                    disabled={formik.values.currencyId === defaultsDataState?.currencyId}
+                    disabled={!formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId}
                   >
                     <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                   </Button>
@@ -561,7 +565,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   formik.setFieldValue('amount', e.target.value)
 
                   const updatedRateRow = getRate({
-                    amount: formik.values.amount ?? 0,
+                    amount: e.target.value ?? 0,
                     exRate: formik.values?.exRate,
                     baseAmount: 0,
                     rateCalcMethod: formik.values?.rateCalcMethod,

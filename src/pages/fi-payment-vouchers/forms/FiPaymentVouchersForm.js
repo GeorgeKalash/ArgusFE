@@ -354,8 +354,8 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 onChange={async (e, newValue) => {
                   formik.setFieldValue('date', newValue)
                   await getMultiCurrencyFormData(
-                    formik?.values?.currencyId,
-                    formatDateForGetApI(formik?.values?.date),
+                    formik.values.currencyId,
+                    formatDateForGetApI(newValue),
                     RateDivision.FINANCIALS
                   )
                 }}
@@ -518,7 +518,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                     variant='contained'
                     size='small'
                     onClick={() => openMCRForm(formik.values)}
-                    disabled={formik.values.currencyId === defaultsDataState?.currencyId}
+                    disabled={!formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId}
                   >
                     <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                   </Button>
