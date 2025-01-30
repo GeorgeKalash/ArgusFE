@@ -52,7 +52,6 @@ const GenerateOutboundTransportation = () => {
       volume: 0
     },
     validationSchema: yup.object({
-      driverId: yup.number().required(),
       vehicleId: yup.number().required()
     }),
     maxAccess: access,
@@ -108,12 +107,12 @@ const GenerateOutboundTransportation = () => {
       setTotalVolumeFromChecked(prev => prev + row.volume)
     } else {
       const selectedIds = selectedSaleZones ? selectedSaleZones.split(',') : []
-  
+
       setData(prev => {
         const itemToAdd = deliveryOrders.list.find(item => item.recordId == row.recordId)
-        
+
         if (!itemToAdd || !selectedIds.includes(String(itemToAdd.szId))) return prev
-  
+
         return {
           ...prev,
           list: [...(prev?.list || []), itemToAdd],
@@ -162,7 +161,7 @@ const GenerateOutboundTransportation = () => {
 
         setDeliveryOrders(prev => ({
           ...prev,
-          list: updatedData,
+          list: updatedData
         }))
       },
       width: 400,
@@ -172,13 +171,6 @@ const GenerateOutboundTransportation = () => {
   }
 
   const columnsZones = [
-    {
-      field: 'szRef',
-      headerName: labels.ref,
-      wrapText: true,
-      autoHeight: true,
-      width: 70
-    },
     {
       field: 'name',
       headerName: labels.name,
@@ -205,14 +197,14 @@ const GenerateOutboundTransportation = () => {
       headerName: labels.salesPerson,
       width: 130,
       wrapText: true,
-      autoHeight: true,
+      autoHeight: true
     },
     {
       field: 'szName',
       headerName: labels.zone,
       width: 120,
       wrapText: true,
-      autoHeight: true,
+      autoHeight: true
     },
     {
       field: 'clientName',
@@ -257,14 +249,14 @@ const GenerateOutboundTransportation = () => {
       headerName: labels.salesPerson,
       width: 130,
       wrapText: true,
-      autoHeight: true,
+      autoHeight: true
     },
     {
       field: 'szName',
       headerName: labels.zone,
       width: 120,
       wrapText: true,
-      autoHeight: true,
+      autoHeight: true
     },
     {
       field: 'clientName',
@@ -313,15 +305,15 @@ const GenerateOutboundTransportation = () => {
     const { recordId } = row
 
     setSelectedSaleZones(prev => {
-      const ids = prev ? prev.split(',') : [];
-  
-      let updatedIds;
+      const ids = prev ? prev.split(',') : []
+
+      let updatedIds
       if (checked) {
-        updatedIds = [...new Set([...ids, recordId])]; 
+        updatedIds = [...new Set([...ids, recordId])]
       } else {
-        updatedIds = ids.filter((id) => id != recordId)
+        updatedIds = ids.filter(id => id != recordId)
       }
-  
+
       return updatedIds.join(',')
     })
   }
@@ -339,14 +331,12 @@ const GenerateOutboundTransportation = () => {
     if (data?.list?.length > 0) {
       setData(prev => {
         const existingDeliveryOrderIds = new Set(deliveryOrders.list.map(item => item.recordId))
-    
-        const newItems = items.list.filter(item => 
-          !existingDeliveryOrderIds.has(item.recordId)
-        );
-    
+
+        const newItems = items.list.filter(item => !existingDeliveryOrderIds.has(item.recordId))
+
         return {
           ...prev,
-          list: newItems, 
+          list: newItems,
           count: prev.list.length + newItems.length
         }
       })
@@ -356,11 +346,9 @@ const GenerateOutboundTransportation = () => {
         list: items.list,
         count: items.list.length
       })
-
     }
-    
-  };
-  
+  }
+
   const onAdd = () => {
     const selectedRows = data?.list?.filter(item => item.checked)
     setTotalVolumeFromChecked(0)
@@ -378,6 +366,14 @@ const GenerateOutboundTransportation = () => {
     }))
   }
 
+  const resetForm = () => {
+    setSelectedSaleZones('')
+    setData({ list: [] })
+    setSalesZones({ list: [] })
+    setDeliveryOrders({ list: [] })
+    formik.resetForm()
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.GenerateTrip}
@@ -391,22 +387,40 @@ const GenerateOutboundTransportation = () => {
         <Grid item xs={2.5} sx={{ display: 'flex', flex: 1, marginRight: 1 }}>
           <VertLayout>
             <Fixed>
-              <Grid item xs={8}>
-                <ResourceComboBox
-                  endpointId={DeliveryRepository.GenerateTrip.root}
-                  parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
-                  name='szId'
-                  label={labels.saleZone}
-                  valueField='recordId'
-                  displayField={'name'}
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('szId', newValue?.recordId || null)
-                    onSaleZoneChange(newValue?.recordId)
-                  }}
-                  error={formik.touched.szId && Boolean(formik.errors.szId)}
-                  maxAccess={access}
-                />
+              <Grid container spacing={2}>
+                <Grid item xs={8}>
+                  <ResourceComboBox
+                    endpointId={DeliveryRepository.GenerateTrip.root}
+                    parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
+                    name='szId'
+                    label={labels.saleZone}
+                    valueField='recordId'
+                    displayField={'name'}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('szId', newValue?.recordId || null)
+                      onSaleZoneChange(newValue?.recordId)
+                    }}
+                    readOnly={deliveryOrders.list.length > 0}
+                    error={formik.touched.szId && Boolean(formik.errors.szId)}
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <Button
+                    onClick={() => resetForm()}
+                    sx={{
+                      backgroundColor: '#f44336',
+                      '&:hover': {
+                        backgroundColor: '#f44336',
+                        opacity: 0.8
+                      }
+                    }}
+                    variant='contained'
+                  >
+                    <img src='/images/buttonsIcons/clear.png' alt={platformLabels.Clear} />
+                  </Button>
+                </Grid>
               </Grid>
             </Fixed>
 
@@ -472,7 +486,7 @@ const GenerateOutboundTransportation = () => {
                     />
                   </Grid>
                   <Grid item xs={6}>
-                    <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly />
+                    <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
                   </Grid>
                   <Grid item xs={6}>
                     <ResourceComboBox
@@ -485,7 +499,6 @@ const GenerateOutboundTransportation = () => {
                       onChange={(event, newValue) => {
                         formik.setFieldValue('driverId', newValue?.recordId || null)
                       }}
-                      required
                       error={formik.touched.driverId && Boolean(formik.errors.driverId)}
                       maxAccess={access}
                     />
@@ -496,6 +509,7 @@ const GenerateOutboundTransportation = () => {
                       label={labels.capacity}
                       value={formik.values.capacity}
                       readOnly
+                      align='right'
                     />
                   </Grid>
                 </Grid>
@@ -557,10 +571,22 @@ const GenerateOutboundTransportation = () => {
               <Grid item xs={3}>
                 <Grid container spacing={2}>
                   <Grid item xs={5}>
-                    <CustomNumberField name='amount' label={labels.amount} value={totalAmountFromChecked} readOnly />
+                    <CustomNumberField
+                      name='amount'
+                      label={labels.amount}
+                      value={totalAmountFromChecked}
+                      readOnly
+                      align='right'
+                    />
                   </Grid>
                   <Grid item xs={5}>
-                    <CustomNumberField name='volume' label={labels.volume} value={totalVolumeFromChecked} readOnly />
+                    <CustomNumberField
+                      name='volume'
+                      label={labels.volume}
+                      value={totalVolumeFromChecked}
+                      readOnly
+                      align='right'
+                    />
                   </Grid>
                 </Grid>
                 <Grid item xs={2}></Grid>
@@ -585,10 +611,10 @@ const GenerateOutboundTransportation = () => {
               <Grid item xs={3}>
                 <Grid container spacing={2}>
                   <Grid item xs={5}>
-                    <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly />
+                    <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly align='right' />
                   </Grid>
                   <Grid item xs={5}>
-                    <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly />
+                    <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly align='right' />
                   </Grid>
                 </Grid>
               </Grid>
