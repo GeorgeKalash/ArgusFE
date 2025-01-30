@@ -57,12 +57,14 @@ const GroupLegalDocument = () => {
     {
       field: 'required',
       headerName: _labels.required,
-      flex: 1
+      flex: 1,
+      type: 'checkbox'
     },
     {
       field: 'mandatory',
       headerName: _labels.mandatory,
-      flex: 1
+      flex: 1,
+      type: 'checkbox'
     }
   ]
 

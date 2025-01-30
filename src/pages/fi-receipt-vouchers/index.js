@@ -63,14 +63,13 @@ export default function CurrencyTrading() {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    try {
-      const response = await getRequest({
-        extension: FinancialRepository.ReceiptVouchers.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=recordId desc`
-      })
 
-      return { ...response, _startAt: _startAt }
-    } catch (e) {}
+    const response = await getRequest({
+      extension: FinancialRepository.ReceiptVouchers.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=recordId desc`
+    })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -87,14 +86,12 @@ export default function CurrencyTrading() {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: FinancialRepository.ReceiptVouchers.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success('Record Deleted Successfully')
-    } catch (e) {}
+    await postRequest({
+      extension: FinancialRepository.ReceiptVouchers.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
 
   const onApply = ({ search, rpbParams }) => {
@@ -174,6 +171,7 @@ export default function CurrencyTrading() {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           onEdit={edit}
           onDelete={del}

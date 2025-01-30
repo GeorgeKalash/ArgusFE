@@ -36,7 +36,6 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
       category: null,
       categoryName: null,
       groupId: null,
-      groupName: null,
       flName: '',
       defaultInc: '',
       defaultId: '',
@@ -49,11 +48,7 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
       birthPlace: '',
       nationalityId: null,
       legalStatusId: null,
-      isBlackListed: false,
-      groupName: null,
-      nationalityName: null,
-      nationalityRef: null,
-      legalStatus: null
+      isBlackListed: false
     },
     enableReinitialize: false,
     validateOnChange: true,
