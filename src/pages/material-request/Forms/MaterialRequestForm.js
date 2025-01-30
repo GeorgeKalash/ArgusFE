@@ -125,8 +125,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
         .of(
           yup.object().shape({
             sku: yup.string().required(),
-            qty: yup.string().required().min(1),
-            msId: yup.string().required()
+            qty: yup.string().required().min(1)
           })
         )
         .required()
@@ -352,6 +351,8 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     return res
   }
 
+  console.log(formik)
+
   const onClose = async recId => {
     await postRequest({
       extension: IVReplenishementRepository.MaterialReplenishment.close,
@@ -414,7 +415,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     stack({
       Component: WorkFlow,
       props: {
-        functionId: SystemFunction.MaterialTransfer,
+        functionId: SystemFunction.MaterialRequest,
         recordId: formik.values.recordId
       },
       width: 950,
@@ -427,7 +428,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
-      disabled: !isClosed || !isCancelled
+      disabled: !isClosed
     },
     {
       key: 'Close',
