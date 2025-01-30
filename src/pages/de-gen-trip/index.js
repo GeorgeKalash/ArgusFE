@@ -419,6 +419,7 @@ const GenerateOutboundTransportation = () => {
                 pagination={false}
                 maxAccess={access}
                 showCheckboxColumn={true}
+                showSelectAll={false}
                 handleCheckboxChange={onSaleZoneCheckbox}
               />
             </Grow>
