@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -46,7 +45,7 @@ const TransactionInquiries = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.Transaction.page,
-    datasetId: ResourceIds.TransactionInquiries,
+    datasetId: ResourceIds.InventoryTransaction,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -71,9 +70,9 @@ const TransactionInquiries = () => {
       flex: 1
     },
     {
-      field: 'name',
-      headerName: _labels.name,
-      flex: 1
+      field: 'itemName',
+      headerName: _labels.itemName,
+      flex: 2
     },
     {
       field: 'siteName',
@@ -83,7 +82,8 @@ const TransactionInquiries = () => {
     {
       field: 'qty',
       headerName: _labels.qty,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'amount',
