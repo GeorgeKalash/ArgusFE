@@ -18,12 +18,9 @@ import DraftSerialsInvoiceForm from '../Forms/DraftSerialsInvoice'
 const DraftSerialsInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  
+  const { stack } = useWindow()
   const router = useRouter()
   const { functionId } = router.query
-
-  const { stack } = useWindow()
-
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -55,13 +52,10 @@ const DraftSerialsInvoice = () => {
     refetch,
     paginationParameters
   } = useResourceQuery({
+    queryFn: fetchGridData,
     endpointId: SaleRepository.DocumentTypeDefault.page,
     datasetId: ResourceIds.DraftSerialsInvoiceDTD,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
-    filter: {
-      filterFn: fetchGridData,
-      default: { functionId }
-    }
   })
 
   const getCorrectLabel = functionId => {
