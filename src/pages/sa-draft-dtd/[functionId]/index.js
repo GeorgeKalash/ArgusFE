@@ -18,18 +18,19 @@ import DraftSerialsInvoiceForm from '../Forms/DraftSerialsInvoice'
 const DraftSerialsInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  
+  const router = useRouter()
+  const { functionId } = router.query
 
   const { stack } = useWindow()
 
-  const router = useRouter()
-  const { functionId } = router.query
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
       extension: SaleRepository.DocumentTypeDefault.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=${functionId}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -51,7 +52,8 @@ const DraftSerialsInvoice = () => {
     labels,
     access,
     invalidate,
-    refetch
+    refetch,
+    paginationParameters
   } = useResourceQuery({
     endpointId: SaleRepository.DocumentTypeDefault.page,
     datasetId: ResourceIds.DraftSerialsInvoiceDTD,
@@ -144,6 +146,7 @@ const DraftSerialsInvoice = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
+          paginationParameters={paginationParameters}
           refetch={refetch}
           paginationType='api'
           maxAccess={access}
