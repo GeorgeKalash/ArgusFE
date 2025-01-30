@@ -518,7 +518,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                     variant='contained'
                     size='small'
                     onClick={() => openMCRForm(formik.values)}
-                    disabled={formik.values.currencyId === defaultsDataState?.currencyId}
+                    disabled={!formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId}
                   >
                     <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                   </Button>

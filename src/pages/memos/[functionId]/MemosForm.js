@@ -477,7 +477,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                         variant='contained'
                         size='small'
                         onClick={() => openMCRForm(formik.values)}
-                        disabled={formik.values.currencyId === defaultsDataState?.currencyId}
+                        disabled={!formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId}
                       >
                         <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                       </Button>
@@ -497,7 +497,18 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     label={labels.subtotal}
                     value={formik.values.subtotal}
                     maxAccess={maxAccess}
-                    onChange={formik.handleChange}
+                    onChange={async e => {
+                      formik.setFieldValue('subtotal', e.target.value)
+
+                      const updatedRateRow = getRate({
+                        amount: e.target.value ?? 0,
+                        exRate: formik.values?.exRate,
+                        baseAmount: 0,
+                        rateCalcMethod: formik.values?.rateCalcMethod,
+                        dirtyField: DIRTYFIELD_RATE
+                      })
+                      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                    }}
                     onClear={() => formik.setFieldValue('subtotal', '')}
                     error={formik.touched.subtotal && Boolean(formik.errors.subtotal)}
                   />

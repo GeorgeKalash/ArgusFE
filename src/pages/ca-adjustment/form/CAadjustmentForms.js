@@ -372,7 +372,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                     variant='contained'
                     size='small'
                     onClick={() => openMCRForm(formik.values)}
-                    disabled={formik.values.currencyId === getDefaultsData()?.currencyId}
+                    disabled={!formik.values.currencyId || formik.values.currencyId === getDefaultsData()?.currencyId}
                   >
                     <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                   </Button>
