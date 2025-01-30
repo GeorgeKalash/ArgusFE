@@ -342,4 +342,5 @@ export const ResourceIds = {
   RetailInvoiceReturn: 54301,
   RetailPurchase: 54302,
   GenerateTrip: 52308,
+  OutboundAssignDriver: 52313
 }

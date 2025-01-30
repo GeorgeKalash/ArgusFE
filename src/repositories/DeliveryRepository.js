@@ -27,6 +27,8 @@ export const DeliveryRepository = {
     unpost: service + 'unpostTRP',
     close: service + 'closeTRP',
     generate: service + 'generateTRP',
+    assign: service + 'assignTRP',
+    unassign: service + 'unassignedTRP'
   },
   TripOrderPack2: {
     set2: service + 'set2TRO'
