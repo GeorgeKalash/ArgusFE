@@ -135,7 +135,7 @@ export default function SaleTransactionForm({
         rateCalcMethod: 1,
         tdType: DIRTYFIELD_TDPCT,
         tdPct: 0,
-        baseAmount: null,
+        baseAmount: 0,
         volume: 0,
         weight: 0,
         qty: 0,
@@ -1156,7 +1156,7 @@ export default function SaleTransactionForm({
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
       tdPct: formik?.values?.header?.tdPct,
-      taxDetails: formik.values.header.isVattable ? newRow.taxDetails : null
+      taxDetails: formik.values.header?.isVattable ? newRow.taxDetails : null
     })
 
     let commonData = {
@@ -1253,7 +1253,7 @@ export default function SaleTransactionForm({
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
         tdPct: parseFloat(tdPct),
-        taxDetails: item.taxDetails
+        taxDetails: formik.values.header?.isVattable ? item.taxDetails : null
       })
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
     })
