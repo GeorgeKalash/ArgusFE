@@ -1,5 +1,5 @@
 import { Button, Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -34,7 +34,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     enabled: !recordId
   })
   const { platformLabels, defaultsData } = useContext(ControlContext)
-  const [defaultsDataState, setDefaultsDataState] = useState(null)
 
   const { stack } = useWindow()
 
@@ -52,14 +51,14 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       dtId: documentType?.dtId,
       plantId: '',
       date: new Date(),
-      currencyId: '',
+      currencyId: parseInt(getDefaultsData()?.currencyId),
       currencyName: '',
       status: 1,
       cashAccountId: '',
       amount: '',
       baseAmount: '',
-      exRate: '',
-      rateCalcMethod: '',
+      exRate: 1,
+      rateCalcMethod: 1,
       functionId: functionId,
       notes: ''
     },
@@ -114,19 +113,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     datasetId: ResourceIds.MultiCurrencyRate
   })
 
-  async function getDefaultsData() {
-    const myObject = {}
-
-    const filteredList = defaultsData?.list?.filter(obj => {
-      return obj.key === 'currencyId'
-    })
-
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setDefaultsDataState(myObject)
-
-    return myObject
-  }
-
   function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
@@ -168,6 +154,18 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     }
   }
 
+  function getDefaultsData() {
+    const myObject = {}
+
+    const filteredList = defaultsData?.list?.filter(obj => {
+      return obj.key === 'currencyId'
+    })
+
+    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+
+    return myObject
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -181,6 +179,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
           date: formatDateFromApi(res.record.date)
         })
       }
+      if (!editMode) getDefaultsData()
     })()
   }, [])
 
@@ -276,10 +275,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     }
   ]
 
-  useEffect(() => {
-    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
-  }, [defaultsDataState])
-
   return (
     <FormShell
       resourceId={ResourceIds.IncreaseDecreaseAdj}
@@ -357,10 +352,10 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 readOnly={isPosted}
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
-                  formik.setFieldValue('date', newValue.date)
+                  formik.setFieldValue('date', newValue)
                   await getMultiCurrencyFormData(
                     formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
+                    formatDateForGetApI(newValue),
                     RateDivision.FINANCIALS
                   )
                 }}
@@ -404,7 +399,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                     variant='contained'
                     size='small'
                     onClick={() => openMCRForm(formik.values)}
-                    disabled={formik.values.currencyId === defaultsDataState?.currencyId}
+                    disabled={!formik.values.currencyId || formik.values.currencyId === getDefaultsData()?.currencyId}
                   >
                     <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                   </Button>
@@ -455,7 +450,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                   formik.setFieldValue('amount', e.target.value)
 
                   const updatedRateRow = getRate({
-                    amount: formik.values.amount ?? 0,
+                    amount: e.target.value ?? 0,
                     exRate: formik.values?.exRate,
                     baseAmount: 0,
                     rateCalcMethod: formik.values?.rateCalcMethod,
