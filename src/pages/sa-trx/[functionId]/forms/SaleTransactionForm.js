@@ -1644,7 +1644,7 @@ export default function SaleTransactionForm({
             <Grid item xs={3}>
               <ResourceLookup
                 endpointId={SaleRepository.Client.snapshot}
-                name='clientId'
+                name='header.clientId'
                 label={labels.client}
                 valueField='reference'
                 displayField='name'
@@ -1669,12 +1669,13 @@ export default function SaleTransactionForm({
                     formik.setFieldValue('header.clientName', value)
                   }
                 }}
-                errorCheck={'header.clientId'}
                 maxAccess={maxAccess}
                 required
                 autoSelectFistValue={!formik.values.clientId}
                 readOnly={formik.values.items.length > 0 && formik.values.items[0].sku}
                 displayFieldWidth={3}
+                editMode={editMode}
+                error={formik.touched?.header?.clientId && Boolean(formik.errors?.header?.clientId)}
               />
             </Grid>
             <Grid item xs={1}>
