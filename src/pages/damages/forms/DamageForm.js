@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -25,7 +25,6 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 export default function DamageForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [max, setMax] = useState(50)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Damage,
@@ -36,12 +35,6 @@ export default function DamageForm({ labels, access, recordId }) {
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.Damage.page
   })
-
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
-    }
-  }, [documentType?.dtId])
 
   const { formik } = useForm({
     maxAccess,
@@ -56,7 +49,8 @@ export default function DamageForm({ labels, access, recordId }) {
       jobId: null,
       seqNo: 0,
       pcs: 0,
-      workCenterId: null
+      workCenterId: null,
+      maxPcs: 50
     },
     enableReinitialize: false,
     validateOnChange: true,
@@ -64,11 +58,13 @@ export default function DamageForm({ labels, access, recordId }) {
       plantId: yup.string().required(),
       jobId: yup.string().required(),
       date: yup.string().required(),
-      pcs: yup
-        .number()
-        .min(0)
-        .max(max, 'Must be less than or equal to' + max)
-        .nullable(true)
+      pcs: yup.lazy((_, { parent }) =>
+        yup
+          .number()
+          .min(0)
+          .max(parent.maxPcs, ({ max }) => `Must be less than or equal to ${max}`)
+          .nullable(true)
+      )
     }),
     onSubmit: async obj => {
       postRequest({
@@ -98,9 +94,9 @@ export default function DamageForm({ labels, access, recordId }) {
           sku: jobRes?.record?.sku,
           itemName: jobRes?.record?.itemName,
           designName: jobRes?.record?.designName,
-          designRef: jobRes?.record?.designRef
+          designRef: jobRes?.record?.designRef,
+          maxPcs: jobRes.record.pcs
         })
-        setMax(jobRes?.record?.pcs)
       })
     })
   }
@@ -137,7 +133,6 @@ export default function DamageForm({ labels, access, recordId }) {
     })()
   }, [])
 
-  console.log('max', maxAccess)
   return (
     <FormShell
       resourceId={ResourceIds.Damages}
@@ -148,8 +143,8 @@ export default function DamageForm({ labels, access, recordId }) {
       isPosted={isPosted}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={isPosted && !editMode}
-      disabledSavedClear={isPosted && !editMode}
+      disabledSubmit={isPosted}
+      disabledSavedClear={isPosted}
     >
       <VertLayout>
         <Grow>
@@ -165,19 +160,18 @@ export default function DamageForm({ labels, access, recordId }) {
                   { key: 'name', value: 'Name' }
                 ]}
                 readOnly={editMode}
-                required
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={(event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
             </Grid>
-            <Grid item xs={5}></Grid>
+            <Grid item xs={7}></Grid>
             <Grid item xs={5}>
               <CustomTextField
                 name='reference'
@@ -190,7 +184,7 @@ export default function DamageForm({ labels, access, recordId }) {
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
-            <Grid item xs={5}></Grid>
+            <Grid item xs={7}></Grid>
             <Grid item xs={5}>
               <ResourceLookup
                 endpointId={ManufacturingRepository.MFJobOrder.snapshot}
@@ -212,22 +206,25 @@ export default function DamageForm({ labels, access, recordId }) {
                   { key: 'itemName', value: 'Item Name' },
                   { key: 'description', value: 'Description' }
                 ]}
-                onChange={async (event, newValue) => {
-                  formik.setFieldValue('jobId', newValue?.recordId)
-                  formik.setFieldValue('jobRef', newValue?.reference)
-                  formik.setFieldValue('sku', newValue?.sku)
-                  formik.setFieldValue('designRef', newValue?.designRef)
-                  formik.setFieldValue('designName', newValue?.designName)
-                  formik.setFieldValue('itemName', newValue?.itemName)
-                  formik.setFieldValue('wcName', newValue?.wcName)
-                  formik.setFieldValue('workCenterId', newValue?.workCenterId)
-                  formik.setFieldValue('plantId', newValue?.plantId)
-                  setMax(newValue?.pcs)
+                onChange={(event, newValue) => {
+                  formik.setValues({
+                    ...formik.values,
+                    jobId: newValue?.recordId || null,
+                    jobRef: newValue?.reference || '',
+                    sku: newValue?.sku || '',
+                    designRef: newValue?.designRef || '',
+                    designName: newValue?.designName || '',
+                    itemName: newValue?.itemName || '',
+                    wcName: newValue?.wcName || '',
+                    workCenterId: newValue?.workCenterId || null,
+                    plantId: newValue?.plantId || null,
+                    maxPcs: newValue?.pcs || 0
+                  })
                 }}
                 errorCheck={'jobId'}
               />
             </Grid>
-            <Grid item xs={5}></Grid>
+            <Grid item xs={7}></Grid>
             <Grid item xs={5}>
               <CustomTextField
                 name='sku'
@@ -235,17 +232,10 @@ export default function DamageForm({ labels, access, recordId }) {
                 value={formik?.values?.sku}
                 maxAccess={maxAccess}
                 readOnly
-                onChange={formik.handleChange}
               />
             </Grid>
             <Grid item xs={5}>
-              <CustomTextField
-                name='itemName'
-                value={formik?.values?.itemName}
-                maxAccess={maxAccess}
-                readOnly
-                onChange={formik.handleChange}
-              />
+              <CustomTextField name='itemName' value={formik?.values?.itemName} maxAccess={maxAccess} readOnly />
             </Grid>
             <Grid item xs={5}>
               <CustomTextField
@@ -254,17 +244,10 @@ export default function DamageForm({ labels, access, recordId }) {
                 value={formik?.values?.designRef}
                 maxAccess={maxAccess}
                 readOnly
-                onChange={formik.handleChange}
               />
             </Grid>
             <Grid item xs={5}>
-              <CustomTextField
-                name='designName'
-                value={formik?.values?.designName}
-                maxAccess={maxAccess}
-                readOnly
-                onChange={formik.handleChange}
-              />
+              <CustomTextField name='designName' value={formik?.values?.designName} maxAccess={maxAccess} readOnly />
             </Grid>
             <Grid item xs={5}>
               <ResourceComboBox
@@ -287,9 +270,9 @@ export default function DamageForm({ labels, access, recordId }) {
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-            <Grid item xs={10}></Grid>
-            <Grid item xs={10}></Grid>
-            <Grid item xs={10}></Grid>
+            <Grid item xs={12}></Grid>
+            <Grid item xs={12}></Grid>
+            <Grid item xs={12}></Grid>
             <Grid item xs={5}>
               <CustomDatePicker
                 name='date'
@@ -300,11 +283,11 @@ export default function DamageForm({ labels, access, recordId }) {
                 editMode={editMode}
                 readOnly={editMode}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
-            <Grid item xs={5}></Grid>
+            <Grid item xs={7}></Grid>
             <Grid item xs={5}>
               <CustomTextField
                 name='wcName'
@@ -312,10 +295,9 @@ export default function DamageForm({ labels, access, recordId }) {
                 value={formik?.values?.wcName}
                 maxAccess={maxAccess}
                 readOnly
-                onChange={formik.handleChange}
               />
             </Grid>
-            <Grid item xs={5}></Grid>
+            <Grid item xs={7}></Grid>
             <Grid item xs={5}>
               <CustomNumberField
                 name='pcs'
@@ -323,13 +305,13 @@ export default function DamageForm({ labels, access, recordId }) {
                 label={labels.damagedPcs}
                 value={formik.values?.pcs}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('pcs', '')}
+                onClear={() => formik.setFieldValue('pcs', 0)}
                 maxAccess={maxAccess}
                 error={formik.touched.pcs && Boolean(formik.errors.pcs)}
                 helperText={formik.touched.pcs && formik.errors.pcs}
               />
             </Grid>
-            <Grid item xs={5}></Grid>
+            <Grid item xs={7}></Grid>
             <Grid item xs={7}>
               <CustomTextArea
                 name='notes'

@@ -79,7 +79,7 @@ const Damages = () => {
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters.qry)
+    if (filters?.qry)
       return await getRequest({
         extension: ManufacturingRepository.Damage.snapshot,
         parameters: `_filter=${filters.qry}&_jobId=0`
@@ -157,6 +157,7 @@ const Damages = () => {
       </Fixed>
       <Grow>
         <Table
+          name='damageTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
