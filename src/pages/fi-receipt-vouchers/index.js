@@ -138,10 +138,11 @@ export default function CurrencyTrading() {
     {
       field: 'amount',
       headerName: labels.amount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'currency',
+      field: 'currencyName',
       headerName: labels.currency,
       flex: 1
     },
