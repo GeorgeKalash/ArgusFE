@@ -207,6 +207,7 @@ export default function SaleTransactionForm({
           .nullable()
           .test('', function (value) {
             const { dtId, commitItems } = this.parent
+            if (!dtId) return !!value
             if (dtId && commitItems) {
               return !!value
             }
@@ -271,6 +272,8 @@ export default function SaleTransactionForm({
       invalidate()
     }
   })
+
+  console.log(formik)
 
   function openMCRForm(data) {
     stack({
@@ -432,7 +435,7 @@ export default function SaleTransactionForm({
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.barcode) return
 
-        const ItemConvertPrice = await mdType(newRow)
+        const ItemConvertPrice = await getItemConvertPrice2(newRow)
         const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
         const itemInfo = await getItem(ItemConvertPrice?.itemId)
         await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
@@ -877,7 +880,7 @@ export default function SaleTransactionForm({
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           saTrx: true,
-          taxDetails: updatedSaTrxTaxes
+          taxDetails: updatedSaTrxTaxes.filter(tax => saTrxItems?.some(responseTax => responseTax.seqNo != tax.seqNo)) || null 
         }
       })
     )
@@ -1727,7 +1730,7 @@ export default function SaleTransactionForm({
             <Grid item xs={3}>
               <ResourceLookup
                 endpointId={SaleRepository.Client.snapshot}
-                name='clientId'
+                name='header.clientId'
                 label={labels.client}
                 valueField='reference'
                 displayField='name'
@@ -1745,16 +1748,20 @@ export default function SaleTransactionForm({
                 onChange={(event, newValue) => {
                   fillClientData(newValue)
                 }}
-                secondFieldName={'header.clientName'}
-                onSecondValueChange={(name, value) => {
-                  formik.setFieldValue('header.clientName', value)
+                secondField={{
+                  name: 'header.clientName',
+                  editable: true,
+                  onChange: (name, value) => {
+                    formik.setFieldValue('header.clientName', value)
+                  }
                 }}
-                errorCheck={'header.clientId'}
                 maxAccess={maxAccess}
                 required
-                readOnly={isPosted}
+                autoSelectFistValue={!formik.values.clientId}
+                readOnly={formik.values.items.length > 0 && formik.values.items[0].sku}
                 displayFieldWidth={3}
                 editMode={editMode}
+                error={formik.touched?.header?.clientId && Boolean(formik.errors?.header?.clientId)}
               />
             </Grid>
             <Grid item xs={1}>
