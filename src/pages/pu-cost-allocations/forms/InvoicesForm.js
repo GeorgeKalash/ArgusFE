@@ -58,7 +58,7 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
       }).then(res2 => {
         setStore(prevStore => ({
           ...prevStore,
-          invoicesItemsData: res2.record
+          invoicesItemsData: res2
         }))
       })
     }
