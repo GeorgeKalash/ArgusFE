@@ -38,6 +38,7 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
+      szRef: yup.string().required(),
       countryId: yup.string().required()
     }),
     onSubmit: async obj => {
@@ -45,7 +46,6 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
         extension: SaleRepository.SalesZone.set,
         record: JSON.stringify(obj)
       })
-
       if (!obj.recordId) {
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', response.recordId)
@@ -63,7 +63,6 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
           extension: SaleRepository.SalesZone.get,
           parameters: `_recordId=${recordId}`
         })
-
         formik.setValues(res.record)
       }
     })()
@@ -79,6 +78,7 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
                 name='szRef'
                 label={labels.reference}
                 value={formik.values.szRef}
+                required
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('szRef', '')}
