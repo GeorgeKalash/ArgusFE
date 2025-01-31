@@ -31,6 +31,7 @@ const CustomNumberField = ({
   allowNegative = true,
   arrow = false,
   displayCycleButton = false,
+  align = 'left',
   handleButtonClick,
   cycleButtonLabel = '',
   ...props
@@ -177,7 +178,8 @@ const CustomNumberField = ({
         },
         '& .MuiInputBase-input': {
           fontSize: '0.90rem',
-          color: 'black'
+          color: 'black',
+          textAlign: align
         },
         '& .MuiAutocomplete-clearIndicator': {
           pl: '0px !important',
