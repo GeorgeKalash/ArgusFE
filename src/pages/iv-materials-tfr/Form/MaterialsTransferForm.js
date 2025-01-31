@@ -161,7 +161,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         return {
           ...transferDetail,
           seqNo: index + 1,
-          transferId: formik.values.recordId || 0
+          transferId: formik.values.recordId || 0,
+          unitCost: parseFloat(transferDetail.unitCost),
+          totalCost: parseFloat(transferDetail.totalCost)
         }
       })
       if (values.fromSiteId === values.toSiteId) {
@@ -243,20 +245,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     else if (rec.priceType === 2) return (Math.round(rec.qty * rec.unitCost * rec.volume * 100) / 100).toFixed(2)
     else if (rec.priceType === 3) return (Math.round(rec.qty * rec.unitCost * rec.weight * 100) / 100).toFixed(2)
     else return 0
-  }
-
-  function calcUnitCost(rec, totalCost) {
-    if (rec.priceType === 1) {
-      rec.unitCost = totalCost / rec.qty
-    } else if (rec.priceType === 2) {
-      rec.unitCost = totalCost / (rec.qty * rec.volume)
-    } else if (rec.priceType === 3) {
-      rec.unitCost = totalCost / (rec.qty * rec.weight)
-    } else {
-      rec.unitCost = 0
-    }
-
-    return rec.unitCost
   }
 
   async function getDTD(dtId) {
@@ -472,34 +460,16 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       label: labels.unitCost,
       name: 'unitCost',
       props: {
-        readOnly: isClosed
+        readOnly: true
       },
-      async onChange({ row: { update, newRow } }) {
-        if (newRow) {
-          const totalCost = calcTotalCost(newRow)
-
-          update({
-            totalCost
-          })
-        }
-      }
     },
     {
       component: 'numberfield',
       label: labels.totalCost,
       name: 'totalCost',
       props: {
-        readOnly: isClosed
+        readOnly: true
       },
-      async onChange({ row: { update, newRow } }) {
-        if (newRow?.totalCost) {
-          const unitCost = calcUnitCost(newRow, newRow.totalCost)
-
-          update({
-            unitCost: unitCost.toFixed(2)
-          })
-        }
-      }
     }
   ]
 
