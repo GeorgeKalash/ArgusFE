@@ -27,21 +27,19 @@ export default function GenerateOpening({ _labels, access }) {
     validateOnChange: true,
 
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(' '),
-      tbendDate: yup.string().required(' '),
-      tbFiscalYear: yup.string().required(' ')
+      fiscalYear: yup.string().required(),
+      tbendDate: yup.string().required(),
+      tbFiscalYear: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const { recordId, ...rest } = obj
+      const { recordId, ...rest } = obj
 
-        const response = await postRequest({
-          extension: RGFinancialRepository.FiOpeningBalance.gen,
-          record: JSON.stringify({ ...obj, tbendDate: formatDateToApi(obj.tbendDate) })
-        })
+      await postRequest({
+        extension: RGFinancialRepository.FiOpeningBalance.gen,
+        record: JSON.stringify({ ...obj, tbendDate: formatDateToApi(obj.tbendDate) })
+      })
 
-        toast.success(platformLabels.Generated)
-      } catch (error) {}
+      toast.success(platformLabels.Generated)
     }
   })
 

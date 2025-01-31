@@ -29,27 +29,25 @@ export default function CostCenterForm({ labels, maxAccess, recordId, onSubmit }
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' ')
+      reference: yup.string().required(),
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: GeneralLedgerRepository.CostCenter.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: GeneralLedgerRepository.CostCenter.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-        invalidate()
-      } catch (error) {}
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
+        })
+      } else {
+        toast.success(platformLabels.Edited)
+      }
+      invalidate()
     }
   })
 
@@ -61,15 +59,13 @@ export default function CostCenterForm({ labels, maxAccess, recordId, onSubmit }
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: GeneralLedgerRepository.CostCenter.get,
-            parameters: `_recordId=${recordId}`
-          })
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: GeneralLedgerRepository.CostCenter.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [recordId])
 

@@ -46,10 +46,10 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' '),
-      dgName: yup.string().required(' '),
-      activeStatusName: yup.string().required(' ')
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      dgName: yup.string().required(),
+      activeStatusName: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -74,16 +74,14 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SystemRepository.DocumentType.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.DocumentType.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

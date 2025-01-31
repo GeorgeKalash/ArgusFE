@@ -46,10 +46,10 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fromFunctionId: yup.string().required(' '),
-      fromDTId: yup.string().required(' '),
-      toFunctionId: yup.string().required(' '),
-      dtId: yup.string().required(' ')
+      fromFunctionId: yup.string().required(),
+      fromDTId: yup.string().required(),
+      toFunctionId: yup.string().required(),
+      dtId: yup.string().required()
     }),
     onSubmit: async obj => {
       const fromFunctionId = formik.values.fromFunctionId
@@ -76,21 +76,19 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
   })
   useEffect(() => {
     ;(async function () {
-      try {
-        if (record && record.fromFunctionId && record.fromDTId && record.toFunctionId) {
-          setEditMode(true)
+      if (record && record.fromFunctionId && record.fromDTId && record.toFunctionId) {
+        setEditMode(true)
 
-          const res = await getRequest({
-            extension: SystemRepository.DocumentTypeMap.get,
-            parameters: `_fromFunctionId=${fromFunctionId}&_fromDTId=${fromDTId}&_toFunctionId=${toFunctionId}`
-          })
+        const res = await getRequest({
+          extension: SystemRepository.DocumentTypeMap.get,
+          parameters: `_fromFunctionId=${fromFunctionId}&_fromDTId=${fromDTId}&_toFunctionId=${toFunctionId}`
+        })
 
-          formik.setValues({
-            ...res.record,
-            recordId: String(res.record.fromFunctionId) + String(res.record.fromDTId) + String(res.record.toFunctionId)
-          })
-        }
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          recordId: String(res.record.fromFunctionId) + String(res.record.fromDTId) + String(res.record.toFunctionId)
+        })
+      }
     })()
   }, [])
 

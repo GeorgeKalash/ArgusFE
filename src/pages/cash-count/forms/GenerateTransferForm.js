@@ -29,25 +29,21 @@ export default function GenerateTransferForm({ cashCountId, fromPlantId, labels,
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      toPlantId: yup.string().required(' '),
-      toAccountId: yup.string().required(' ')
+      toPlantId: yup.string().required(),
+      toAccountId: yup.string().required()
     }),
     onSubmit: async obj => {
-      console.log(obj)
-
       const data = {
         cashCountId,
         fromPlantId,
         toPlantId: obj.toPlantId,
         toAccountId: obj.toAccountId
       }
-      try {
-        await postRequest({
-          extension: CashCountRepository.Generate.generate,
-          record: JSON.stringify(data)
-        })
-        toast.success(platformLabels.Generated)
-      } catch (error) {}
+      await postRequest({
+        extension: CashCountRepository.Generate.generate,
+        record: JSON.stringify(data)
+      })
+      toast.success(platformLabels.Generated)
     }
   })
 

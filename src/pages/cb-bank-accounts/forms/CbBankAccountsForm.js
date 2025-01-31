@@ -40,15 +40,13 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      accountNo: yup.string().required(' '),
-      currencyId: yup.string().required(' '),
-      activeStatus: yup.string().required(' '),
-      bankId: yup.string().required(' ')
+      name: yup.string().required(),
+      accountNo: yup.string().required(),
+      currencyId: yup.string().required(),
+      activeStatus: yup.string().required(),
+      bankId: yup.string().required()
     }),
     onSubmit: async obj => {
-      // const recordId = obj.recordId
-
       const response = await postRequest({
         extension: CashBankRepository.CbBankAccounts.set,
         record: JSON.stringify(obj)
@@ -66,15 +64,13 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
   })
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: CashBankRepository.CbBankAccounts.get,
-            parameters: `_recordId=${recordId}&_type=1`
-          })
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: CashBankRepository.CbBankAccounts.get,
+          parameters: `_recordId=${recordId}&_type=1`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

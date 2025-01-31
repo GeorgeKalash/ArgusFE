@@ -36,11 +36,11 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(' '),
-      accountId: yup.string().required(' '),
-      currencyId: yup.string().required(' '),
-      amount: yup.string().required(' '),
-      baseAmount: yup.string().required(' ')
+      fiscalYear: yup.string().required(),
+      accountId: yup.string().required(),
+      currencyId: yup.string().required(),
+      amount: yup.string().required(),
+      baseAmount: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -63,15 +63,13 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
   const editMode = !!formik.values.recordId
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: FinancialRepository.FiOpeningBalance.get,
-            parameters: `_recordId=${recordId}`
-          })
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.FiOpeningBalance.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

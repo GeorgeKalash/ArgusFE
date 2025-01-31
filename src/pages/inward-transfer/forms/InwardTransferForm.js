@@ -11,7 +11,6 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { useError } from 'src/error'
 import { useWindow } from 'src/windows'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
@@ -33,7 +32,6 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function InwardTransferForm({ labels, recordId, access, plantId, userId, dtId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels, defaultsData } = useContext(ControlContext)
 
@@ -138,29 +136,25 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       dispersalMode: yup.string().required()
     }),
     onSubmit: async () => {
-      try {
-        const copy = { ...formik.values }
-        copy.date = formatDateToApi(copy?.date)
-        copy.baseAmount = copy?.baseAmount === '' ? copy?.amount : copy?.baseAmount
-        copy.sender_idIssueDate = copy.sender_idIssueDate ? formatDateToApi(copy?.sender_idIssueDate) : null
-        copy.sender_idExpiryDate = copy.sender_idExpiryDate ? formatDateToApi(copy?.sender_idExpiryDate) : null
-        copy.receiver_idIssueDate = copy.receiver_idIssueDate ? formatDateToApi(copy?.receiver_idIssueDate) : null
-        copy.receiver_idExpiryDate = copy.receiver_idExpiryDate ? formatDateToApi(copy?.receiver_idExpiryDate) : null
-        copy.commission = 0
+      const copy = { ...formik.values }
+      copy.date = formatDateToApi(copy?.date)
+      copy.baseAmount = copy?.baseAmount === '' ? copy?.amount : copy?.baseAmount
+      copy.sender_idIssueDate = copy.sender_idIssueDate ? formatDateToApi(copy?.sender_idIssueDate) : null
+      copy.sender_idExpiryDate = copy.sender_idExpiryDate ? formatDateToApi(copy?.sender_idExpiryDate) : null
+      copy.receiver_idIssueDate = copy.receiver_idIssueDate ? formatDateToApi(copy?.receiver_idIssueDate) : null
+      copy.receiver_idExpiryDate = copy.receiver_idExpiryDate ? formatDateToApi(copy?.receiver_idExpiryDate) : null
+      copy.commission = 0
 
-        const res = await postRequest({
-          extension: RemittanceOutwardsRepository.InwardsTransfer.set,
-          record: JSON.stringify(copy)
-        })
+      const res = await postRequest({
+        extension: RemittanceOutwardsRepository.InwardsTransfer.set,
+        record: JSON.stringify(copy)
+      })
 
-        invalidate()
-        const res2 = await getInwards(res.recordId)
-        res2.record.date = formatDateFromApi(res2.record.date)
-        formik.setValues(res2.record)
-        toast.success(platformLabels.Added)
-      } catch (error) {
-        stackError(error)
-      }
+      invalidate()
+      const res2 = await getInwards(res.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
+      formik.setValues(res2.record)
+      toast.success(platformLabels.Added)
     }
   })
   const editMode = !!formik.values.recordId
@@ -176,18 +170,16 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
   }
 
   const onPost = async () => {
-    try {
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.InwardsTransfer.post,
-        record: JSON.stringify(formik.values)
-      })
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.InwardsTransfer.post,
+      record: JSON.stringify(formik.values)
+    })
 
-      toast.success(platformLabels.Posted)
-      invalidate()
-      const res2 = await getInwards(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      formik.setValues(res2.record)
-    } catch (exception) {}
+    toast.success(platformLabels.Posted)
+    invalidate()
+    const res2 = await getInwards(res.recordId)
+    res2.record.date = formatDateFromApi(res2.record.date)
+    formik.setValues(res2.record)
   }
 
   async function getDefaultVAT() {

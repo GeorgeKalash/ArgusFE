@@ -25,10 +25,10 @@ const IdFieldsForm = ({ store, setStore, labels, editMode, height, expanded, max
         .array()
         .of(
           yup.object().shape({
-            accessLevel: yup.string().required(' ')
+            accessLevel: yup.string().required()
           })
         )
-        .required(' ')
+        .required()
     }),
     initialValues: {
       IdField: [{ id: 1, idtId: idtId, accessLevel: null, accessLevel: null, accessLevelName: '', controlId: '' }]
@@ -50,11 +50,9 @@ const IdFieldsForm = ({ store, setStore, labels, editMode, height, expanded, max
     await postRequest({
       extension: CurrencyTradingSettingsRepository.IdFields.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      toast.success(platformLabels.Edited)
     })
-      .then(res => {
-        toast.success(platformLabels.Edited)
-      })
-      .catch(error => {})
   }
 
   const column = [
@@ -87,23 +85,21 @@ const IdFieldsForm = ({ store, setStore, labels, editMode, height, expanded, max
     getRequest({
       extension: CurrencyTradingSettingsRepository.IdFields.qry,
       parameters: `_idtId=${idtId}`
-    })
-      .then(res => {
-        if (res.list.length > 0) {
-          const IdField = res.list.map(({ accessLevel, ...rest }, index) => ({
-            id: index,
-            accessLevel: accessLevel.toString(),
-            ...rest
-          }))
-          formik.setValues({ IdField: IdField })
+    }).then(res => {
+      if (res.list.length > 0) {
+        const IdField = res.list.map(({ accessLevel, ...rest }, index) => ({
+          id: index,
+          accessLevel: accessLevel.toString(),
+          ...rest
+        }))
+        formik.setValues({ IdField: IdField })
 
-          setStore(prevStore => ({
-            ...prevStore,
-            IdField: IdField
-          }))
-        }
-      })
-      .catch(error => {})
+        setStore(prevStore => ({
+          ...prevStore,
+          IdField: IdField
+        }))
+      }
+    })
   }
 
   return (

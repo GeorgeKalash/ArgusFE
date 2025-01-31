@@ -25,11 +25,11 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
         .array()
         .of(
           yup.object().shape({
-            amount: yup.string().required(' '),
-            date: yup.string().required(' ')
+            amount: yup.string().required(),
+            date: yup.string().required()
           })
         )
-        .required(' ')
+        .required()
     }),
 
     initialValues: {
@@ -65,40 +65,34 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
     await postRequest({
       extension: FinancialRepository.TaxHistoryPack.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      toast.success('Record Edited Successfully')
+      setStore(prevStore => ({
+        ...prevStore,
+        TaxHistoryView: items
+      }))
     })
-      .then(res => {
-        toast.success('Record Edited Successfully')
-        setStore(prevStore => ({
-          ...prevStore,
-          TaxHistoryView: items
-        }))
-      })
-      .catch(error => {})
   }
   useEffect(() => {
-    const defaultParams = `_taxCodeId=${recordId}`
-    var parameters = defaultParams
     if (recordId) {
       getRequest({
         extension: FinancialRepository.TaxHistoryPack.qry,
         parameters: `_taxCodeId=${recordId}`
+      }).then(res => {
+        if (res?.list?.length > 0) {
+          const items = res.list.map((item, index) => ({
+            ...item,
+            id: index + 1,
+            date: formatDateFromApi(item.date),
+            amount: item.amount
+          }))
+          formik.setValues({ TaxHistoryView: items })
+          setStore(prevStore => ({
+            ...prevStore,
+            TaxHistoryView: items
+          }))
+        }
       })
-        .then(res => {
-          if (res?.list?.length > 0) {
-            const items = res.list.map((item, index) => ({
-              ...item,
-              id: index + 1,
-              date: formatDateFromApi(item.date),
-              amount: item.amount
-            }))
-            formik.setValues({ TaxHistoryView: items })
-            setStore(prevStore => ({
-              ...prevStore,
-              TaxHistoryView: items
-            }))
-          }
-        })
-        .catch(error => {})
     }
   }, [])
 
