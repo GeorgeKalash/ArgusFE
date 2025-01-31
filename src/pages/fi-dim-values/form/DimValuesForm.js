@@ -30,8 +30,8 @@ export default function DimValuesForm({ labels, maxAccess, id, dimValue }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      id: yup.string().required()
+      name: yup.string().required(' '),
+      id: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const id = formik.values.id
@@ -51,14 +51,16 @@ export default function DimValuesForm({ labels, maxAccess, id, dimValue }) {
 
   useEffect(() => {
     ;(async function () {
-      if (formik.values.dimension && id) {
-        const res = await getRequest({
-          extension: FinancialRepository.DimensionValue.get,
-          parameters: `_Id=${formik.values.id}&_dimension=${formik.values.dimension}`
-        })
+      try {
+        if (formik.values.dimension && id) {
+          const res = await getRequest({
+            extension: FinancialRepository.DimensionValue.get,
+            parameters: `_Id=${formik.values.id}&_dimension=${formik.values.dimension}`
+          })
 
-        formik.setValues(res.record)
-      }
+          formik.setValues(res.record)
+        }
+      } catch (exception) {}
     })()
   }, [])
 

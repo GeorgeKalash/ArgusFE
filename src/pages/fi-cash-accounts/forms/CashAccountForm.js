@@ -45,41 +45,45 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      reference: yup.string().required(),
-      activeStatus: yup.string().required()
+      name: yup.string().required(' '),
+      reference: yup.string().required(' '),
+      activeStatus: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-      obj.accountNo = obj.reference
+      try {
+        const recordId = obj.recordId
+        obj.accountNo = obj.reference
 
-      const response = await postRequest({
-        extension: CashBankRepository.CashBox.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+        const response = await postRequest({
+          extension: CashBankRepository.CashBox.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success(platformLabels.Edited)
-      invalidate()
+
+        if (!recordId) {
+          toast.success(platformLabels.Added)
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
+          })
+        } else toast.success(platformLabels.Edited)
+        invalidate()
+      } catch (error) {}
     }
   })
   const editMode = !!recordId || !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: CashBankRepository.CashAccount.get,
-          parameters: `_recordId=${recordId}`
-        })
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: CashBankRepository.CashAccount.get,
+            parameters: `_recordId=${recordId}`
+          })
 
-        formik.setValues(res.record)
-      }
+          formik.setValues(res.record)
+        }
+      } catch (exception) {}
     })()
   }, [])
 

@@ -32,8 +32,8 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(),
-      name: yup.string().required()
+      reference: yup.string().required(' '),
+      name: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -55,13 +55,15 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: CashBankRepository.CbCashGroup.get,
-          parameters: `_recordId=${recordId}`
-        })
-        formik.setValues(res.record)
-      }
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: CashBankRepository.CbCashGroup.get,
+            parameters: `_recordId=${recordId}`
+          })
+          formik.setValues(res.record)
+        }
+      } catch (e) {}
     })()
   }, [])
 

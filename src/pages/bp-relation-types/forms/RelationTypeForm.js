@@ -29,40 +29,44 @@ export default function RelationTypeForm({ labels, maxAccess, recordId }) {
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(),
-      name: yup.string().required()
+      reference: yup.string().required(' '),
+      name: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
+      try {
+        const recordId = obj.recordId
 
-      const response = await postRequest({
-        extension: BusinessPartnerRepository.RelationTypes.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+        const response = await postRequest({
+          extension: BusinessPartnerRepository.RelationTypes.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success(platformLabels.Edited)
-      setEditMode(true)
 
-      invalidate()
+        if (!recordId) {
+          toast.success(platformLabels.Added)
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
+          })
+        } else toast.success(platformLabels.Edited)
+        setEditMode(true)
+
+        invalidate()
+      } catch (error) {}
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: BusinessPartnerRepository.RelationTypes.get,
-          parameters: `_recordId=${recordId}`
-        })
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: BusinessPartnerRepository.RelationTypes.get,
+            parameters: `_recordId=${recordId}`
+          })
 
-        formik.setValues(res.record)
-      }
+          formik.setValues(res.record)
+        }
+      } catch (exception) {}
     })()
   }, [])
 

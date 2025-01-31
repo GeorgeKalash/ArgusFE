@@ -36,10 +36,10 @@ export default function InterfaceForm({ labels, recordId, maxAccess }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      reference: yup.string().required(),
-      path: yup.string().required(),
-      description: yup.string().required()
+      name: yup.string().required(' '),
+      reference: yup.string().required(' '),
+      path: yup.string().required(' '),
+      description: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -64,14 +64,16 @@ export default function InterfaceForm({ labels, recordId, maxAccess }) {
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: RemittanceSettingsRepository.Interface.get,
-          parameters: `_recordId=${recordId}`
-        })
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: RemittanceSettingsRepository.Interface.get,
+            parameters: `_recordId=${recordId}`
+          })
 
-        formik.setValues(res.record)
-      }
+          formik.setValues(res.record)
+        }
+      } catch (exception) {}
     })()
   }, [])
 

@@ -25,8 +25,8 @@ const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functi
     validateOnChange: true,
     initialValues,
     validationSchema: yup.object({
-      functionId: yup.string().required(),
-      strategyId: yup.string().required()
+      functionId: yup.string().required(' '),
+      strategyId: yup.string().required(' ')
     }),
     onSubmit: async values => {
       await postFunction(values)
@@ -39,13 +39,15 @@ const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functi
     await postRequest({
       extension: DocumentReleaseRepository.ClassFunction.set,
       record: JSON.stringify(obj)
-    }).then(res => {
-      getFunctionGridData(classId)
-      if (!editMode) {
-        toast.success('Record Added Successfully')
-      } else toast.success('Record Editted Successfully')
-      window.close()
     })
+      .then(res => {
+        getFunctionGridData(classId)
+        if (!editMode) {
+          toast.success('Record Added Successfully')
+        } else toast.success('Record Editted Successfully')
+        window.close()
+      })
+      .catch(error => {})
   }
 
   useEffect(() => {
@@ -59,6 +61,7 @@ const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functi
       extension: DocumentReleaseRepository.ClassFunction.get,
       parameters: parameters
     }).then(res => {
+      console.log(res.record)
       formik.setValues(res.record)
     })
   }

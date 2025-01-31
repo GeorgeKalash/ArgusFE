@@ -36,11 +36,11 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(),
-      cashAccountId: yup.string().required(),
-      currencyId: yup.string().required(),
-      amount: yup.number().required(),
-      baseAmount: yup.number().required()
+      fiscalYear: yup.string().required(' '),
+      cashAccountId: yup.string().required(' '),
+      currencyId: yup.string().required(' '),
+      amount: yup.number().required(' '),
+      baseAmount: yup.number().required(' ')
     }),
     onSubmit: async obj => {
       const currencyId = formik.values.currencyId
@@ -69,22 +69,24 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
 
   useEffect(() => {
     ;(async function () {
-      if (record && record.currencyId && record.fiscalYear && record.cashAccountId && recordId) {
-        const res = await getRequest({
-          extension: CashBankRepository.OpeningBalance.get,
-          parameters: `_fiscalYear=${record.fiscalYear}&_cashAccountId=${record.cashAccountId}&_currencyId=${record.currencyId}`
-        })
+      try {
+        if (record && record.currencyId && record.fiscalYear && record.cashAccountId && recordId) {
+          const res = await getRequest({
+            extension: CashBankRepository.OpeningBalance.get,
+            parameters: `_fiscalYear=${record.fiscalYear}&_cashAccountId=${record.cashAccountId}&_currencyId=${record.currencyId}`
+          })
 
-        formik.setValues({
-          ...res.record,
-          cashAccountId: formik.values.cashAccountId,
+          formik.setValues({
+            ...res.record,
+            cashAccountId: formik.values.cashAccountId,
 
-          recordId:
-            String(res.record.fiscalYear * 1000) +
-            String(res.record.cashAccountId * 100) +
-            String(res.record.currencyId * 10)
-        })
-      }
+            recordId:
+              String(res.record.fiscalYear * 1000) +
+              String(res.record.cashAccountId * 100) +
+              String(res.record.currencyId * 10)
+          })
+        }
+      } catch (exception) {}
     })()
   }, [])
 

@@ -1,9 +1,11 @@
 import { Box } from '@mui/material'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import { useEffect, useContext } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import toast from 'react-hot-toast'
+
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
+
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { SaleRepository } from 'src/repositories/SaleRepository'
@@ -15,6 +17,8 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 const BracketsTab = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedRecordIds }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
+  const [isLoading, setIsLoading] = useState(false)
+
   const invalidate = useInvalidate({
     endpointId: SaleRepository.CommissionScheduleBracket.qry
   })
@@ -25,8 +29,8 @@ const BracketsTab = ({ labels, maxAccess, recordId, setErrorMessage, setSelected
     validationSchema: yup.object({
       rows: yup.array().of(
         yup.object({
-          minAmount: yup.string().required(),
-          maxAmount: yup.string().required()
+          minAmount: yup.string().required('Minimum amount is required'),
+          maxAmount: yup.string().required('Maximum amount is required')
         })
       )
     }),
@@ -57,6 +61,8 @@ const BracketsTab = ({ labels, maxAccess, recordId, setErrorMessage, setSelected
         commissionScheduleId: recordId,
         items: updatedRows
       }
+
+      console.log('updated rows ', resultObject)
 
       const response = await postRequest({
         extension: SaleRepository.CommissionSchedule.set2,
@@ -98,29 +104,36 @@ const BracketsTab = ({ labels, maxAccess, recordId, setErrorMessage, setSelected
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: SaleRepository.CommissionScheduleBracket.qry,
-          parameters: `_commissionScheduleId=${recordId}`
-        })
+      try {
+        if (recordId) {
+          setIsLoading(true)
 
-        if (res.list.length > 0) {
-          formik.setValues({ recordId: recordId, rows: res.list })
-        } else {
-          formik.setValues({
-            recordId: recordId,
-            rows: [
-              {
-                commissionScheduleId: recordId || '',
-                seqNo: '',
-                minAmount: '',
-                maxAmount: '',
-                pct: ''
-              }
-            ]
+          const res = await getRequest({
+            extension: SaleRepository.CommissionScheduleBracket.qry,
+            parameters: `_commissionScheduleId=${recordId}`
           })
+
+          if (res.list.length > 0) {
+            formik.setValues({ recordId: recordId, rows: res.list })
+          } else {
+            formik.setValues({
+              recordId: recordId,
+              rows: [
+                {
+                  commissionScheduleId: recordId || '',
+                  seqNo: '',
+                  minAmount: '',
+                  maxAmount: '',
+                  pct: ''
+                }
+              ]
+            })
+          }
         }
+      } catch (error) {
+        setErrorMessage(error)
       }
+      setIsLoading(false)
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

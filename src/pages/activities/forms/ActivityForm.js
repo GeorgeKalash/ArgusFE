@@ -31,9 +31,9 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      reference: yup.string().required(),
-      industry: yup.string().required()
+      name: yup.string().required(' '),
+      reference: yup.string().required(' '),
+      industry: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -58,14 +58,16 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: CurrencyTradingSettingsRepository.Activity.get,
-          parameters: `_recordId=${recordId}`
-        })
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: CurrencyTradingSettingsRepository.Activity.get,
+            parameters: `_recordId=${recordId}`
+          })
 
-        formik.setValues(res.record)
-      }
+          formik.setValues(res.record)
+        }
+      } catch (exception) {}
     })()
   }, [])
 

@@ -55,8 +55,8 @@ export default function CountryForm({ labels, maxAccess, recordId, setStore }) {
         .transform((value, originalValue) => validateNumberField(value, originalValue))
         .min(0, 'Value must be greater than or equal to 0')
         .max(32767, 'Value must be less than or equal to 32,767'),
-      name: yup.string().required(),
-      reference: yup.string().required()
+      name: yup.string().required(' '),
+      reference: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       obj.ibanLength = getNumberWithoutCommas(obj.ibanLength)

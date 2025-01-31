@@ -34,8 +34,8 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      countryId: yup.string().required()
+      name: yup.string().required(' '),
+      countryId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -60,14 +60,16 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: RemittanceSettingsRepository.CorrespondentAgents.get,
-          parameters: `_recordId=${recordId}`
-        })
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: RemittanceSettingsRepository.CorrespondentAgents.get,
+            parameters: `_recordId=${recordId}`
+          })
 
-        formik.setValues(res.record)
-      }
+          formik.setValues(res.record)
+        }
+      } catch (exception) {}
     })()
   }, [])
 

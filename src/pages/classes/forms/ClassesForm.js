@@ -33,8 +33,8 @@ const ClassesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
     validateOnChange: true,
     initialValues,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      characteristicOperator: yup.string().required()
+      name: yup.string().required(' '),
+      characteristicOperator: yup.string().required(' ')
     }),
     onSubmit: async values => {
       await postClass(values)

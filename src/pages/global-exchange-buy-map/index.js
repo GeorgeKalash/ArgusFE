@@ -47,8 +47,8 @@ const GlobalExchangeBuyMap = () => {
         .array()
         .of(
           yup.object().shape({
-            countryId: yup.string().required(),
-            exchangeId: yup.string().required()
+            countryId: yup.string().required(''),
+            exchangeId: yup.string().required('')
           })
         )
         .required('Operations array is required')
@@ -91,9 +91,11 @@ const GlobalExchangeBuyMap = () => {
     await postRequest({
       extension: RemittanceSettingsRepository.CorrespondentExchangeBuyMap.set2,
       record: JSON.stringify(data)
-    }).then(res => {
-      if (res.statusId) toast.success(platformLabels.Updated)
     })
+      .then(res => {
+        if (res.statusId) toast.success(platformLabels.Updated)
+      })
+      .catch(error => {})
   }
 
   const getCurrenciesExchangeMaps = currencyId => {
@@ -115,17 +117,19 @@ const GlobalExchangeBuyMap = () => {
       getRequest({
         extension: RemittanceSettingsRepository.CorrespondentExchangeBuyMap.qry,
         parameters: parameters
-      }).then(res => {
-        if (res.list.length > 0) {
-          formik.setFieldValue(
-            'rows',
-            res.list.map(({ ...rest }, index) => ({
-              id: index + 1,
-              ...rest
-            }))
-          )
-        }
       })
+        .then(res => {
+          if (res.list.length > 0) {
+            formik.setFieldValue(
+              'rows',
+              res.list.map(({ ...rest }, index) => ({
+                id: index + 1,
+                ...rest
+              }))
+            )
+          }
+        })
+        .catch(error => {})
   }
 
   //columns

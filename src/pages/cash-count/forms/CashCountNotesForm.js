@@ -38,7 +38,7 @@ export default function CashCountNotesForm({
         .array()
         .of(
           yup.object().shape({
-            note: yup.string().required()
+            note: yup.string().required(' ')
           })
         )
         .required('Operations array is required')
@@ -79,49 +79,51 @@ export default function CashCountNotesForm({
   }, [recordId])
 
   const getGridData = async () => {
-    const parameters = `_currencyId=` + row.currencyId
+    try {
+      const parameters = `_currencyId=` + row.currencyId
 
-    const { list } = await getRequest({
-      extension: CashCountRepository.CcCashNotes.qry,
-      parameters: parameters
-    })
+      const { list } = await getRequest({
+        extension: CashCountRepository.CcCashNotes.qry,
+        parameters: parameters
+      })
 
-    const currencyNotes = row.currencyNotes?.map(({ id, qty, note, ...rest }, index) => ({
-      id: index + 1,
-      qty,
-      note,
-      subTotal: qty * note,
-      ...rest
-    }))
+      const currencyNotes = row.currencyNotes?.map(({ id, qty, note, ...rest }, index) => ({
+        id: index + 1,
+        qty,
+        note,
+        subTotal: qty * note,
+        ...rest
+      }))
 
-    const notes = list?.map(({ ...rest }, index) => ({
-      id: index + 1,
-      ...rest
-    }))
+      const notes = list?.map(({ ...rest }, index) => ({
+        id: index + 1,
+        ...rest
+      }))
 
-    const finalList = notes.map(x => {
-      const n = {
-        id: x.id,
-        note: x.note,
-        seqNo: null,
-        qty: '',
-        subTotal: 0
-      }
+      const finalList = notes.map(x => {
+        const n = {
+          id: x.id,
+          note: x.note,
+          seqNo: null,
+          qty: '',
+          subTotal: 0
+        }
 
-      const currencyNote = currencyNotes?.find(y => n.note === y.note)
+        const currencyNote = currencyNotes?.find(y => n.note === y.note)
 
-      if (currencyNote) {
-        n.qty = currencyNote.qty
-        n.qty1 = currencyNote.qty1 || ''
-        n.qty100 = currencyNote.qty100 || ''
-        n.qty1000 = currencyNote.qty1000 || ''
-        n.seqNo = currencyNote.seqNo
-        n.subTotal = currencyNote.subTotal
-      }
+        if (currencyNote) {
+          n.qty = currencyNote.qty
+          n.qty1 = currencyNote.qty1 || ''
+          n.qty100 = currencyNote.qty100 || ''
+          n.qty1000 = currencyNote.qty1000 || ''
+          n.seqNo = currencyNote.seqNo
+          n.subTotal = currencyNote.subTotal
+        }
 
-      return n
-    })
-    formik.setFieldValue('currencyNotes', finalList)
+        return n
+      })
+      formik.setFieldValue('currencyNotes', finalList)
+    } catch (error) {}
   }
 
   const total = formik.values?.currencyNotes?.reduce((acc, { subTotal }) => {

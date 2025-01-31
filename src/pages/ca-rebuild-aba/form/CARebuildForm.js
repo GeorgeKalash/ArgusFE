@@ -23,22 +23,24 @@ export default function CARebuildAccountBalance({ _labels, access }) {
     validateOnChange: true,
 
     validationSchema: yup.object({
-      fiscalYear: yup.string().required()
+      fiscalYear: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const { recordId, ...rest } = obj
+      try {
+        const { recordId, ...rest } = obj
 
-      const response = await postRequest({
-        extension: CashBankRepository.AccountBalance.rebuild,
-        record: JSON.stringify(rest)
-      })
+        const response = await postRequest({
+          extension: CashBankRepository.AccountBalance.rebuild,
+          record: JSON.stringify(rest)
+        })
 
-      toast.success('Record Success')
-      formik.setValues({
-        ...obj
-      })
+        toast.success('Record Success')
+        formik.setValues({
+          ...obj
+        })
 
-      invalidate()
+        invalidate()
+      } catch (error) {}
     }
   })
 

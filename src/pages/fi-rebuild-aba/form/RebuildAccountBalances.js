@@ -25,17 +25,19 @@ export default function RebuildAccountBalances({ _labels, access }) {
     validateOnChange: true,
 
     validationSchema: yup.object({
-      fiscalYear: yup.string().required()
+      fiscalYear: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const { recordId, ...rest } = obj
+      try {
+        const { recordId, ...rest } = obj
 
-      await postRequest({
-        extension: FinancialRepository.AccountCreditBalance.rebuild,
-        record: JSON.stringify(rest)
-      })
+        await postRequest({
+          extension: FinancialRepository.AccountCreditBalance.rebuild,
+          record: JSON.stringify(rest)
+        })
 
-      toast.success(platformLabels.rebuild)
+        toast.success(platformLabels.rebuild)
+      } catch (error) {}
     }
   })
 
