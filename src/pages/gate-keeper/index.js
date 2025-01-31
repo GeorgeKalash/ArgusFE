@@ -70,6 +70,11 @@ const GateKeeper = () => {
 
   const columns = [
     {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 2
+    },
+    {
       field: 'functionName',
       headerName: labels.function,
       flex: 2
