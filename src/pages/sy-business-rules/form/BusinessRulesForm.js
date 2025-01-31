@@ -13,6 +13,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataSets } from 'src/resources/DataSets'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function BusinessRulesForm({ labels, obj, window, maxAccess }) {
   const { platformLabels } = useContext(ControlContext)
@@ -179,16 +180,12 @@ export default function BusinessRulesForm({ labels, obj, window, maxAccess }) {
             </Grid>
 
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isActive'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isActive}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='isActive'
+                value={formik.values?.isActive}
+                onChange={event => formik.setFieldValue('isActive', event.target.checked)}
                 label={labels.isActive}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

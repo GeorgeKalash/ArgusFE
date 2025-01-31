@@ -1,6 +1,6 @@
 import { Grid, Typography } from '@mui/material'
 
-const FieldSet = ({ children, title, ...props }) => {
+const FieldSet = ({ children, title, form = false, ...props }) => {
   return (
     <Grid
       container
@@ -8,10 +8,10 @@ const FieldSet = ({ children, title, ...props }) => {
       xs={12}
       sx={{
         border: '1px solid #0111',
-        padding: '10px',
-        paddingTop: '20px',
+        padding: !form ? '10px' : '0px',
+        paddingTop: form ? '0px' : title ? '20px' : '10px',
         position: 'relative',
-        marginY: '10px',
+        marginY: title ? '10px' : '0px',
         marginLeft: '0px',
         borderColor: '#cdd3d4',
         ...props.sx

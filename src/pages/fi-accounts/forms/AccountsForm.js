@@ -16,6 +16,7 @@ import { MasterSource } from 'src/resources/MasterSource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -39,7 +40,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       BpRef: null,
       szId: null,
       spId: null,
-      inactive: false
+      isInactive: false
     },
     maxAccess: maxAccess,
     validateOnChange: true,
@@ -265,18 +266,12 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='inactive'
-                      maxAccess={maxAccess}
-                      checked={formik.values?.inactive}
-                      onChange={event => {
-                        formik.setFieldValue('inactive', event.target.checked)
-                      }}
-                    />
-                  }
+                <CustomCheckBox
+                  name='isInactive'
+                  value={formik.values?.isInactive}
+                  onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                   label={labels.inactive}
+                  maxAccess={maxAccess}
                 />
               </Grid>
             </Grid>

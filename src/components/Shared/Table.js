@@ -40,12 +40,14 @@ const Table = ({
   setData,
   checkboxFlex = '',
   handleCheckboxChange = '',
+  showSelectAll = true,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
   const api = props?.api ? props?.api : props?.paginationParameters || ''
   const refetch = props?.refetch
   const [gridData, setGridData] = useState({})
+  const [page, setPage] = useState(null)
   const [startAt, setStartAt] = useState(0)
   const { languageId } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
@@ -74,7 +76,7 @@ const Table = ({
       if (col.type === 'dateTime') {
         return {
           ...col,
-          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field]),
+          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field], col?.dateFormat),
           sortable: !disableSorting
         }
       }
@@ -130,12 +132,23 @@ const Table = ({
   useEffect(() => {
     const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
-    if (typeof setData === 'function') onSelectionChanged
-
-    props?.gridData &&
-      paginationType !== 'api' &&
-      pageSize &&
-      setGridData({ list: pageSize ? props?.gridData?.list?.slice(0, pageSize) : props?.gridData?.list })
+    if (typeof setData === 'function') {
+      onSelectionChanged()
+    }
+    if (props?.gridData && paginationType !== 'api' && pageSize) {
+      if (page) {
+        const start = (page - 1) * pageSize
+        const end = page * pageSize
+        const slicedGridData = props?.gridData?.list?.slice(start, end)
+        setGridData({
+          ...props.gridData,
+          list: slicedGridData
+        })
+        setStartAt(start)
+      } else {
+        setGridData({ list: pageSize ? props?.gridData?.list?.slice(0, pageSize) : props?.gridData?.list })
+      }
+    }
   }, [props?.gridData])
 
   const CustomPagination = () => {
@@ -264,7 +277,7 @@ const Table = ({
 
         if (gridData && gridData?.list) {
           const originalGridData = gridData && gridData.list
-          const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
+          setPage(Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1))
 
           var _gridData = gridData?.list
           const pageCount = Math.ceil(originalGridData?.length ? originalGridData?.length / pageSize : 1)
@@ -384,9 +397,10 @@ const Table = ({
     })
 
     setChecked(e.target.checked)
+    const data = allNodes.map(rowNode => rowNode.data)
 
     if (handleCheckboxChange) {
-      handleCheckboxChange()
+      handleCheckboxChange(data, e.target.checked)
     }
 
     if (typeof setData === 'function') onSelectionChanged
@@ -445,7 +459,7 @@ const Table = ({
           }
 
           if (handleCheckboxChange) {
-            handleCheckboxChange()
+            handleCheckboxChange(params.data, e.target.checked)
           }
         }}
       />
@@ -535,7 +549,8 @@ const Table = ({
             width: 100,
             cellRenderer: checkboxCellRenderer,
             headerComponent: params =>
-              rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
+              rowSelection !== 'single' &&
+              showSelectAll && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
             suppressMenu: true
           }
         ]

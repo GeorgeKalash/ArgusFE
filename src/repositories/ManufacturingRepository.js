@@ -147,5 +147,8 @@ export const ManufacturingRepository = {
     set: service + 'setRMC',
     del: service + 'delRMC',
     page: service + 'pageRMC'
+  },
+  ProductionSheetQueue: {
+    qry: service + 'qryPSQ',
   }
 }
