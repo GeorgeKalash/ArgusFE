@@ -65,7 +65,6 @@ export const ManufacturingRepository = {
   },
   LeanProductionPlanning: {
     preview: service + 'previewPQ',
-    preview2: service + 'previewPQ2',
     update: service + 'updatePQ',
     snapshot: service + 'snapshotPQ',
     del: service + 'delPQ',
@@ -149,6 +148,6 @@ export const ManufacturingRepository = {
     page: service + 'pageRMC'
   },
   ProductionSheetQueue: {
-    qry: service + 'qryPSQ',
+    qry: service + 'qryPSQ'
   }
 }
