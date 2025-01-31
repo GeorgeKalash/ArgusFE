@@ -109,11 +109,6 @@ const IvMaterialsTransfer = () => {
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: _labels.status,
-      flex: 1
-    },
-    {
       field: 'rsName',
       headerName: _labels.releaseStatus,
       flex: 1
