@@ -159,7 +159,7 @@ const FiPaymentVouchers = () => {
         maxAccess: access
       },
       width: 950,
-      height: 550,
+      height: 700,
       title: _labels.paymentVoucher
     })
   }
