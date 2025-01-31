@@ -1,5 +1,5 @@
 import { Button, Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -34,8 +34,6 @@ import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
-  const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
-  const [defaultsDataState, setDefaultsDataState] = useState(null)
   const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -53,6 +51,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     datasetId: ResourceIds.MultiCurrencyRate
   })
 
+  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
+
   const { formik } = useForm({
     maxAccess: maxAccess,
     enableReinitialize: false,
@@ -62,9 +64,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       reference: '',
       accountId: null,
       date: new Date(),
-      currencyId: null,
+      currencyId: currencyId,
       currencyName: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       sptId: null,
       dgId: '',
       amount: '',
@@ -74,8 +76,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       printStatus: '',
       status: 1,
       paymentMethod: '1',
-      cashAccountId: null,
-      plantId: null,
+      cashAccountId: cashAccountId,
+      plantId: plantId,
       exRate: 1.0,
       rateCalcMethod: 1,
       contactId: null,
@@ -104,6 +106,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       invalidate()
     }
   })
+
+  useEffect(() => {
+    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
+  }, [documentType?.dtId])
 
   async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
     if (currencyId && date && rateType) {
@@ -146,59 +152,17 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     })
   }
 
-  async function getUserDefaultsData() {
-    const myObject = {}
-
-    const filteredList = userDefaultsData?.list?.filter(obj => {
-      return obj.key === 'plantId' || obj.key === 'userId' || obj.key === 'cashAccountId'
-    })
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setUserDefaultsDataState(myObject)
-
-    return myObject
-  }
-
-  async function getDefaultsData() {
-    const myObject = {}
-
-    const filteredList = defaultsData?.list?.filter(obj => {
-      return obj.key === 'currencyId'
-    })
-
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setDefaultsDataState(myObject)
-
-    return myObject
-  }
-
-  useEffect(() => {
-    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
-  }, [defaultsDataState])
-
-  const setDefaultFields = () => {
-    formik.setFieldValue('plantId', userDefaultsDataState.plantId)
-    if (userDefaultsDataState?.cashAccountId)
-      formik.setFieldValue('cashAccountId', userDefaultsDataState?.cashAccountId)
-  }
-
-  useEffect(() => {
-    userDefaultsDataState && setDefaultFields()
-  }, [userDefaultsDataState])
-
   const editMode = !!formik.values.recordId
   const isCancelled = formik.values.status === -1
   const isPosted = formik.values.status === 3
-  const readOnly = formik.values.status !== 1
 
-  const getCashAccount = async () => {
-    const cashAccountId = formik.values.cashAccountId
+  const getCashAccount = async cashAccountId => {
     if (cashAccountId) {
       const { record: cashAccountResult } = await getRequest({
         extension: CashBankRepository.CbBankAccounts.get,
         parameters: `_recordId=${cashAccountId}`
       })
 
-      formik.setFieldValue('cashAccountId', cashAccountId)
       formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
       formik.setFieldValue('cashAccountName', cashAccountResult.name)
     }
@@ -207,11 +171,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        await getCashAccount()
         await getData(recordId)
       } else {
-        getUserDefaultsData()
-        getDefaultsData()
+        const cashAccountId = formik.values.cashAccountId
+        if (cashAccountId) getCashAccount(cashAccountId)
       }
     })()
   }, [])
@@ -222,7 +185,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         extension: FinancialRepository.ReceiptVouchers.get,
         parameters: `_recordId=${recordId}`
       })
-
       formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
     }
   }
@@ -365,7 +327,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     RateDivision.FINANCIALS
                   )
                 }}
-                readOnly={readOnly}
+                readOnly={editMode}
                 value={formik.values.date}
                 maxAccess={maxAccess}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -388,7 +350,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
-                readOnly={readOnly}
+                readOnly={editMode}
                 label={labels.plant}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -409,7 +371,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 endpointId={FinancialRepository.Account.snapshot}
                 required
                 name='accountId'
-                readOnly={readOnly}
+                readOnly={editMode}
                 label={labels.accountReference}
                 valueField='reference'
                 displayField='name'
@@ -430,16 +392,20 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={SaleRepository.SalesPerson.qry}
-                name='sptId'
+                name='spId'
                 readOnly={!formik.values.accountId}
                 label={labels.salePerson}
                 valueField='recordId'
-                displayField={'name'}
+                displayField={['spRef', 'name']}
+                columnsInDropDown={[
+                  { key: 'spRef', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('sptId', newValue?.recordId)
+                  formik.setFieldValue('spId', newValue?.recordId)
                 }}
-                error={formik.touched.sptId && Boolean(formik.errors.sptId)}
+                error={formik.touched.spId && Boolean(formik.errors.spId)}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -448,7 +414,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               <ResourceComboBox
                 datasetId={DataSets.PAYMENT_METHOD}
                 name='paymentMethod'
-                readOnly={readOnly}
+                readOnly={editMode}
                 label={labels.paymentMethod}
                 valueField='key'
                 displayField='value'
@@ -469,10 +435,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 endpointId={formik.values?.accountId && FinancialRepository.Contact.qry}
                 parameters={formik.values?.accountId && `_accountId=${formik.values?.accountId}`}
                 name='contactId'
-                readOnly={readOnly}
+                readOnly={editMode}
                 label={labels.contact}
                 valueField='recordId'
-                displayField={'name'}
+                displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -492,7 +458,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   _type: 0
                 }}
                 name='cashAccountRef'
-                readOnly={readOnly}
+                readOnly={editMode}
                 label={labels.cashAccount}
                 valueField='reference'
                 displayField='name'
@@ -515,11 +481,11 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   <ResourceComboBox
                     endpointId={SystemRepository.Currency.qry}
                     name='currencyId'
-                    readOnly={readOnly}
+                    readOnly={editMode}
                     required
                     label={labels.currency}
                     valueField='recordId'
-                    displayField={['name']}
+                    displayField={['reference', 'name']}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -543,7 +509,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     variant='contained'
                     size='small'
                     onClick={() => openMCRForm(formik.values)}
-                    disabled={!formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId}
+                    disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
                   >
                     <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                   </Button>
@@ -555,12 +521,11 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 name='amount'
                 required
                 label={labels.amount}
-                readOnly={readOnly}
+                readOnly={editMode}
                 value={formik.values.amount}
                 maxAccess={maxAccess}
                 maxLength={'10'}
                 decimalScale={2}
-                thousandSeparator={false}
                 onChange={async e => {
                   formik.setFieldValue('amount', e.target.value)
 
@@ -583,10 +548,14 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               <ResourceComboBox
                 endpointId={LogisticsRepository.LoCollector.qry}
                 name='collectorId'
-                readOnly={readOnly}
+                readOnly={editMode}
                 label={labels.collector}
                 valueField='recordId'
-                displayField='reference'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 values={formik.values}
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('collectorId', newValue?.recordId || '')
@@ -613,7 +582,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 endpointId={FinancialRepository.DescriptionTemplate.qry}
                 name='templateId'
                 label={labels.descriptionTemplate}
-                readOnly={readOnly}
+                readOnly={editMode}
                 valueField='recordId'
                 displayField='name'
                 onChange={(event, newValue) => {
@@ -631,7 +600,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 type='text'
                 label={labels.notes}
                 value={formik.values.notes}
-                readOnly={readOnly}
+                readOnly={editMode}
                 rows={3}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('notes', e.target.value)}
