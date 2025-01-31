@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
 import FormShell from 'src/components/Shared/FormShell'
@@ -10,16 +10,22 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import * as yup from 'yup'
 
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const [initialValues] = useState({ rows: [] })
-
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    initialValues,
+    validationSchema: yup.object({
+      rows: yup.array().of(
+        yup.object().shape({
+          /* templateId: yup.string().test({}) */
+        })
+      )
+    }),
+    initialValues: { rows: [] },
     onSubmit: async values => {
       await postSmsFunctionTemplates(values.rows)
     }
@@ -94,7 +100,7 @@ const SmsFunctionTemplate = () => {
     {
       component: 'resourcelookup',
       label: _labels.SmsTemplates,
-      name: 'template',
+      name: 'templateId',
       props: {
         endpointId: SystemRepository.SMSTemplate.snapshot,
         displayField: 'name',
