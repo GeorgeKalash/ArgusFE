@@ -7,7 +7,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import ClientsAddressForm from './ClientsAddressForm'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 
-const AddressTab = ({ store, maxAccess, labels, editMode, ...props }) => {
+const AddressTab = ({ store, maxAccess, labels, editMode, setStore, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([])
@@ -54,7 +54,8 @@ const AddressTab = ({ store, maxAccess, labels, editMode, ...props }) => {
         maxAccess,
         editMode,
         recordId: id,
-        clientId: recordId,
+        store,
+        setStore,
         getAddressGridData: getAddressGridData
       },
       width: 600,

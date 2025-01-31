@@ -17,6 +17,7 @@ export const AddressFormShell = ({
   onSubmit,
   isSavedClear = true,
   isCleared = true,
+  actions,
   ...props
 }) => {
   const [required, setRequired] = useState(!optional)
@@ -116,6 +117,7 @@ export const AddressFormShell = ({
       editMode={editMode}
       isSavedClear={isSavedClear}
       isCleared={isCleared}
+      actions={actions}
       {...props}
     >
       <VertLayout>
