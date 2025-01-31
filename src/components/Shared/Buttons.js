@@ -445,5 +445,12 @@ export const getButtons = platformLabels => [
     image: 'popup-window.png',
     main: false
   },
-  { key: 'Attachment', label: platformLabels.Attachment, color: '#9B1944', image: 'attachment.png', main: false }
+  { key: 'Attachment', label: platformLabels.Attachment, color: '#9B1944', image: 'attachment.png', main: false },
+  {
+    key: 'Production',
+    label: platformLabels.Production,
+    color: '#d3d3d3',
+    image: 'production.png',
+    main: false
+  }
 ]

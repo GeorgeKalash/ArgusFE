@@ -196,18 +196,18 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         dueDate: yup.string().required(),
         currencyId: yup.string().required(),
         vendorId: yup.string().required(),
-        siteId: yup
-          .number()
-          .test('', function (value) {
-            const { dtId } = this.parent
-            if (dtId == null) {
-              return !!value
-            }
+        siteId: yup.number().test('', function (value) {
+          const { dtId } = this.parent
+          if (dtId == null) {
+            return !!value
+          }
 
-            return true
-          })
+          return true
+        })
       }),
-      items: yup.array().of(
+      items: yup
+        .array()
+        .of(
           yup.object({
             sku: yup.string().required(),
             itemName: yup.string().required(),
@@ -270,9 +270,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   async function getFilteredMU(itemId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.items?.find(
-      item => parseInt(item.itemId) === itemId
-    )?.msId
+    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
 
     const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
     filteredMeasurements.current = arrayMU
@@ -1287,12 +1285,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 displayField={['reference', 'name']}
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={(_, newValue) => {
                   const recordId = newValue ? newValue.recordId : null
 
-                  await formik.setFieldValue('header.dtId', recordId)
-
                   if (newValue) {
+                    formik.setFieldValue('header.dtId', recordId)
                     onChangeDtId(recordId)
                   } else {
                     formik.setFieldValue('header.dtId', null)
@@ -1510,15 +1507,15 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 maxAccess={maxAccess}
               />
             </Grid>
+
             <Grid item xs={2.4}>
-              {metalPriceVisibility && (
-                <CustomNumberField
-                  name='KGmetalPrice'
-                  label={labels.metalPrice}
-                  value={formik.values.header.KGmetalPrice}
-                  readOnly
-                />
-              )}
+              <CustomNumberField
+                name='KGmetalPrice'
+                label={labels.metalPrice}
+                value={formik.values.header.KGmetalPrice}
+                readOnly
+                hidden={metalPriceVisibility}
+              />
             </Grid>
           </Grid>
         </Fixed>
