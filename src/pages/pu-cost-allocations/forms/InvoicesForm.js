@@ -12,7 +12,7 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const InvoicesForm = ({ store, maxAccess, labels, editMode }) => {
+const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const { recordId, isPosted, isClosed } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -51,6 +51,15 @@ const InvoicesForm = ({ store, maxAccess, labels, editMode }) => {
         record: JSON.stringify(data)
       }).then(res => {
         toast.success(platformLabels.Edited)
+      })
+      await getRequest({
+        extension: CostAllocationRepository.InvoicesItems.qry,
+        parameters: `_invoiceId=0&_caId=${recordId}`
+      }).then(res2 => {
+        setStore(prevStore => ({
+          ...prevStore,
+          invoicesItemsData: res2
+        }))
       })
     }
   })

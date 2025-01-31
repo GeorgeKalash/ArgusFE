@@ -76,10 +76,12 @@ export default function TRXForm({ labels, access, setStore, store }) {
         if (!recordId) {
           setStore(prevStore => ({
             ...prevStore,
-            recordId: res.recordId,
+            recordId: res?.recordId,
             isPosted: res?.status == 3
           }))
           formik.setFieldValue('recordId', res.recordId)
+          fetchData(res.recordId)
+
           toast.success(platformLabels.Added)
         } else {
           toast.success(platformLabels.Edited)
@@ -106,19 +108,19 @@ export default function TRXForm({ labels, access, setStore, store }) {
     fetchDataAndSetPlant()
   }, [])
 
-  async function fetchData() {
+  async function fetchData(recordId) {
     await getRequest({
       extension: CostAllocationRepository.PuCostAllocations.get,
       parameters: `_recordId=${recordId}`
     }).then(res => {
       setStore(prevStore => ({
         ...prevStore,
-        isPosted: res.record.status === 3,
-        isClosed: res.record.wip === 2
+        isPosted: res?.record?.status === 3,
+        isClosed: res?.record?.wip === 2
       }))
       formik.setValues({
         ...res.record,
-        date: formatDateFromApi(res.record.date)
+        date: formatDateFromApi(res?.record?.date)
       })
     })
   }
@@ -128,12 +130,11 @@ export default function TRXForm({ labels, access, setStore, store }) {
       ...formik.values,
       date: formatDateToApi(formik.values.date)
     }
-
     await postRequest({
       extension: CostAllocationRepository.PuCostAllocations.post,
       record: JSON.stringify(data)
-    }).then(async res => {
-      await fetchData(res.recordId)
+    }).then(async () => {
+      await fetchData(data.recordId)
       toast.success(platformLabels.Posted)
       invalidate()
     })

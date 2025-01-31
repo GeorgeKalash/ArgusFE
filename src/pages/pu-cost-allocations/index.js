@@ -68,7 +68,8 @@ const PuCostAllocations = () => {
     {
       field: 'baseAmount',
       headerName: labels.amount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'date',

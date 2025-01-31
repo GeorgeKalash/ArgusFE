@@ -8,7 +8,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 
 const InvoicesItemsTab = ({ store, labels, access }) => {
-  const { recordId } = store
+  const { recordId, invoicesItemsData } = store
   const { getRequest } = useContext(RequestsContext)
 
   const columns = [
@@ -58,7 +58,7 @@ const InvoicesItemsTab = ({ store, labels, access }) => {
         <Table
           name='invoicesItemsTable'
           columns={columns}
-          gridData={data}
+          gridData={data || invoicesItemsData}
           rowId={['recordId']}
           isLoading={false}
           maxAccess={access}
