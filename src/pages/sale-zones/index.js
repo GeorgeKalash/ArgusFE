@@ -45,14 +45,13 @@ const SalesZone = () => {
   })
 
   useEffect(() => {
-    const fetchTreeData = async () => {
+    ;(async () => {
       const response = await getRequest({
         extension: SaleRepository.SalesZone.page,
         parameters: `_pageSize=1000&_startAt=0&_filter=&_sortField=`
       })
       setDataTree(response)
-    }
-    fetchTreeData()
+    })()
   }, [])
 
   const columns = [

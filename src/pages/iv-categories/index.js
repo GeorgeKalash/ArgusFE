@@ -67,14 +67,13 @@ const Category = () => {
   }
 
   useEffect(() => {
-    const fetchTreeData = async () => {
+    ;(async () => {
       const response = await getRequest({
         extension: InventoryRepository.Category.page,
         parameters: `_pageSize=1000&_startAt=0&_name=`
       })
       setDataTree(response)
-    }
-    fetchTreeData()
+    })()
   }, [])
 
   const columns = [
