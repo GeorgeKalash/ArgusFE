@@ -207,6 +207,7 @@ export default function SaleTransactionForm({
           .nullable()
           .test('', function (value) {
             const { dtId, commitItems } = this.parent
+            if (!dtId) return !!value
             if (dtId && commitItems) {
               return !!value
             }
@@ -271,6 +272,8 @@ export default function SaleTransactionForm({
       invalidate()
     }
   })
+
+  console.log(formik)
 
   function openMCRForm(data) {
     stack({
