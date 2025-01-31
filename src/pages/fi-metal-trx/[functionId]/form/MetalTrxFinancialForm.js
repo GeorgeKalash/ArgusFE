@@ -193,8 +193,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
     const header = JSON.stringify({
       ...restValues,
-      qty: totalQty || null,
-      creditAmount: totalLabor || null,
+      qty: totalQty,
+      creditAmount: totalLabor,
       recordId: formik.values.recordId
     })
 
@@ -239,7 +239,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           parameters: `_userId=${_userId}&_key=plantId`
         })
 
-        if (res3.record.value) {
+        if (res3?.record?.value) {
           const pltValue = await getRequest({
             extension: SystemRepository.Plant.get,
             parameters: `_recordId=${parseInt(res3.record.value)}`
@@ -252,7 +252,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           extension: SystemRepository.UserDefaults.get,
           parameters: `_userId=${_userId}&_key=siteId`
         })
-        if (res4.record.value) {
+        if (res4?.record?.value) {
           const siteValue = await getRequest({
             extension: InventoryRepository.Site.get,
             parameters: `_recordId=${parseInt(res4.record.value)}`
@@ -346,7 +346,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const columns = [
     {
       component: 'resourcecombobox',
-      label: labels.metalId,
+      label: labels.metal,
       name: 'metalId',
       props: {
         endpointId: InventoryRepository.Metals.qry,
@@ -407,15 +407,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     },
     {
       component: 'textfield',
-      label: labels.name,
-      name: 'itemName',
-      props: {
-        readOnly: true
-      }
-    },
-    {
-      component: 'textfield',
-      label: labels.name,
+      label: labels.itemName,
       name: 'itemName',
       props: {
         readOnly: true
@@ -457,13 +449,13 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     {
       component: 'numberfield',
       name: 'creditAmount',
-      label: 'labor',
+      label: labels.labor,
       props: { allowNegative: false, readOnly: true }
     },
     {
       component: 'numberfield',
       name: 'totalCredit',
-      label: 'totalLabor',
+      label: labels.totalLabor,
       props: { allowNegative: false, readOnly: true }
     }
   ]
@@ -675,7 +667,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={5}>
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
@@ -685,23 +677,18 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 valueShow='accountRef'
                 secondValueShow='accountName'
                 required
-                secondDisplayField={false}
                 form={formik}
+                secondDisplayField={true}
+                firstValue={formik.values.accountRef}
+                secondValue={formik.values.accountName}
+                errorCheck={'accountId'}
+                maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <CustomTextField
-                name='accountName'
-                value={formik.values.accountName}
-                readOnly={true}
-                label={labels.accountName}
               />
             </Grid>
           </Grid>
