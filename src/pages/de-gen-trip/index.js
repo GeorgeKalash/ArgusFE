@@ -400,6 +400,8 @@ const GenerateOutboundTransportation = () => {
                     onChange={(event, newValue) => {
                       formik.setFieldValue('szId', newValue?.recordId || null)
                       onSaleZoneChange(newValue?.recordId)
+                      setData({ list: [] })
+                      setSelectedSaleZones('')
                     }}
                     readOnly={deliveryOrders.list.length > 0}
                     error={formik.touched.szId && Boolean(formik.errors.szId)}
