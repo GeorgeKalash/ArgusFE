@@ -10,7 +10,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import * as yup from 'yup'
 
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -18,13 +17,6 @@ const SmsFunctionTemplate = () => {
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
-      rows: yup.array().of(
-        yup.object().shape({
-          /* templateId: yup.string().test({}) */
-        })
-      )
-    }),
     initialValues: { rows: [] },
     onSubmit: async values => {
       await postSmsFunctionTemplates(values.rows)
