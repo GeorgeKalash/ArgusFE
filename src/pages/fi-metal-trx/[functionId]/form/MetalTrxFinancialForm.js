@@ -37,7 +37,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
   const _userId = userData.userId
 
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const [baseMetalId, setBaseMetalId] = useState(null)
   const [metal, setMetal] = useState({})
 
@@ -74,6 +74,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     }
   }
 
+  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+
   const { formik } = useForm({
     initialValues: {
       accountId: null,
@@ -87,18 +90,17 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       dtId: documentType?.dtId,
       functionId: functionId,
       isVerified: null,
-      plantId: null,
+      plantId: plantId,
       plantRef: '',
       qty: null,
       recordId: null,
       reference: '',
       releaseStatus: null,
-      siteId: null,
+      siteId: siteId,
       statusName: '',
       plantName: '',
       siteRef: '',
       siteName: '',
-
       status: 1,
       items: [
         {
@@ -198,7 +200,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       recordId: formik.values.recordId
     })
 
-    const res = await postRequest({
+    await postRequest({
       extension: FinancialRepository.MetalTrx.post,
       record: header
     })
@@ -233,33 +235,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         }
 
         formik.setValues({ ...res2, items: modifiedList || formik.values.items })
-      } else if (!recordId) {
-        const res3 = await getRequest({
-          extension: SystemRepository.UserDefaults.get,
-          parameters: `_userId=${_userId}&_key=plantId`
-        })
-
-        if (res3?.record?.value) {
-          const pltValue = await getRequest({
-            extension: SystemRepository.Plant.get,
-            parameters: `_recordId=${parseInt(res3.record.value)}`
-          })
-          formik.setFieldValue('plantId', parseInt(res3.record?.value))
-          formik.setFieldValue('plantName', pltValue.record?.name)
-        }
-
-        const res4 = await getRequest({
-          extension: SystemRepository.UserDefaults.get,
-          parameters: `_userId=${_userId}&_key=siteId`
-        })
-        if (res4?.record?.value) {
-          const siteValue = await getRequest({
-            extension: InventoryRepository.Site.get,
-            parameters: `_recordId=${parseInt(res4.record.value)}`
-          })
-          formik.setFieldValue('siteId', parseInt(res4.record?.value))
-          formik.setFieldValue('siteName', siteValue.record?.name)
-        }
       }
 
       const getDataResult = () => {
@@ -532,7 +507,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -553,37 +528,27 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 maxAccess={!editMode && maxAccess}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
+                readOnly={editMode}
                 label={labels.plant}
-                values={formik.values}
                 valueField='recordId'
-                displayField='reference'
+                displayField={['reference', 'name']}
                 columnsInDropDown={[
-                  { key: 'reference', value: 'Ref.' },
+                  { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                displayFieldWidth={3}
-                required
+                values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId || null)
-                  formik.setFieldValue('plantName', newValue?.name || '')
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-            <Grid item xs={3}>
-              <CustomTextField
-                readOnly={true}
-                name='plantName'
-                label={labels.plantName}
-                value={formik.values.plantName}
-              />
-            </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={formik.values?.accountId && FinancialRepository.Contact.qry}
                 parameters={formik.values?.accountId && `_accountId=${formik.values?.accountId}`}
@@ -616,32 +581,25 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'
                 label={labels.site}
-                values={formik.values}
-                valueField='recordId'
-                displayField='reference'
                 columnsInDropDown={[
-                  { key: 'reference', value: 'Ref.' },
+                  { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                displayFieldWidth={3}
-                required
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('siteId', newValue?.recordId || null)
-                  formik.setFieldValue('siteName', newValue?.name || '')
+                  formik && formik.setFieldValue('siteId', newValue?.recordId)
                 }}
-                error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
             </Grid>
-            <Grid item xs={3}>
-              <CustomTextField readOnly={true} name='siteName' value={formik.values.siteName} label={labels.siteName} />
-            </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={LogisticsRepository.LoCollector.qry}
                 name='collectorId'
@@ -667,7 +625,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
@@ -694,17 +652,15 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           </Grid>
         </Fixed>
         <Grow>
-          <Grow>
-            <DataGrid
-              onChange={value => formik.setFieldValue('items', value)}
-              value={formik.values.items}
-              error={formik.errors.items}
-              allowDelete
-              name='items'
-              columns={columns}
-              maxAccess={maxAccess}
-            />
-          </Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values.items}
+            error={formik.errors.items}
+            allowDelete
+            name='items'
+            columns={columns}
+            maxAccess={maxAccess}
+          />
         </Grow>
         <Fixed>
           <Grid container justifyContent='space-between'>
