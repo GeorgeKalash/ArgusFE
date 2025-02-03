@@ -111,6 +111,9 @@ const SmsFunctionTemplate = () => {
       component: 'resourcecombobox',
       label: _labels.securityGrp,
       name: 'sgId',
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row?.templateId }
+      },
       props: {
         endpointId: AccessControlRepository.SecurityGroup.qry,
         parameters: '_startAt=0&_pageSize=1000',
