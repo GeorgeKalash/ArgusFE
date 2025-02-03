@@ -4,9 +4,8 @@ import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import AddressForm from 'src/components/Shared/AddressForm'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import { StoreOutlined } from '@mui/icons-material'
 
-const ClientsAddressForm = ({ getAddressGridData, recordId, window, props, store, setStore }) => {
+const ClientsAddressForm = ({ getAddressGridData, addressId, window, props, store, setStore }) => {
   const [address, setAddress] = useState()
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -14,7 +13,7 @@ const ClientsAddressForm = ({ getAddressGridData, recordId, window, props, store
   const [isDefaultBill, setIsDefaultBill] = useState(store?.record?.billAddressId == recordId)
   const clientId = store.recordId
 
-  const onSubmit = obj => {
+  const onSubmit = async obj => {
     if (obj) {
       const data = {
         clientId: clientId,
@@ -22,17 +21,16 @@ const ClientsAddressForm = ({ getAddressGridData, recordId, window, props, store
         addressId: obj.recordId
       }
 
-      postRequest({
+      await postRequest({
         extension: SaleRepository.Address.set,
         record: JSON.stringify(data)
-      }).then(res => {
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-        window.close()
       })
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+      } else {
+        toast.success(platformLabels.Edited)
+      }
+      window.close()
     }
     getAddressGridData(clientId)
   }
@@ -43,13 +41,13 @@ const ClientsAddressForm = ({ getAddressGridData, recordId, window, props, store
       extension: SaleRepository.Client.set,
       record: JSON.stringify({
         ...latestRecord,
-        billAddressId: recordId
+        billAddressId: addressId
       })
     })
 
     setStore(prevStore => ({
       ...prevStore,
-      record: { ...latestRecord, billAddressId: recordId }
+      record: { ...latestRecord, billAddressId: addressId }
     }))
     setIsDefaultBill(true)
     toast.success(platformLabels.Updated)
@@ -61,13 +59,13 @@ const ClientsAddressForm = ({ getAddressGridData, recordId, window, props, store
       extension: SaleRepository.Client.set,
       record: JSON.stringify({
         ...latestRecord,
-        shipAddressId: recordId
+        shipAddressId: addressId
       })
     })
 
     setStore(prevStore => ({
       ...prevStore,
-      record: { ...latestRecord, shipAddressId: recordId }
+      record: { ...latestRecord, shipAddressId: addressId }
     }))
     setIsDefaultShip(true)
     toast.success(platformLabels.Updated)
@@ -87,17 +85,17 @@ const ClientsAddressForm = ({ getAddressGridData, recordId, window, props, store
       key: 'DefaultBilling',
       condition: true,
       onClick: setDefaultBilling,
-      disabled: !recordId || isDefaultBill
+      disabled: !addressId || isDefaultBill
     },
     {
       key: 'DefaultShipping',
       condition: true,
       onClick: setDefaultShipping,
-      disabled: !recordId || isDefaultShip
+      disabled: !addressId || isDefaultShip
     }
   ]
 
-  return <AddressForm {...{ ...props, address, setAddress, recordId: recordId, onSubmit, actions }} />
+  return <AddressForm {...{ ...props, address, setAddress, recordId: addressId, onSubmit, actions }} />
 }
 
 export default ClientsAddressForm

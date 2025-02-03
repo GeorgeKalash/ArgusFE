@@ -53,7 +53,7 @@ const AddressTab = ({ store, maxAccess, labels, editMode, setStore, ...props }) 
         _labels: labels,
         maxAccess,
         editMode,
-        recordId,
+        addressId: recordId,
         store,
         setStore,
         getAddressGridData
