@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -321,6 +321,8 @@ const GenerateOutboundTransportation = () => {
   }
 
   const onUndelivered = async szIds => {
+    console.log(szIds)
+
     const items = await getRequest({
       extension: DeliveryRepository.GenerateTrip.undelivered2,
       parameters: `_szIds=${szIds || 0}`
@@ -334,6 +336,7 @@ const GenerateOutboundTransportation = () => {
       setData(prev => {
         const existingDeliveryOrderIds = new Set(deliveryOrders.list.map(item => item.recordId))
 
+        console.log(existingDeliveryOrderIds)
         const newItems = items.list.filter(item => !existingDeliveryOrderIds.has(item.recordId))
 
         return {
@@ -377,16 +380,22 @@ const GenerateOutboundTransportation = () => {
   }
 
   const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('search', value)
+    const { value } = event.target;
+    if (formik.values.search !== value) {
+      formik.setFieldValue('search', value);
+    }
   }
+  
 
-  const filteredSalesZones = {
-    ...salesZones,
-    list: salesZones.list.filter(item =>
-      item.name.toString().toLowerCase().includes(formik?.values?.search?.toLowerCase())
-    )
-  }
+  const filteredSalesZones = useMemo(() => {
+    return {
+      ...salesZones,
+      list: salesZones.list.filter(item =>
+        item.name.toString().toLowerCase().includes(formik?.values?.search?.toLowerCase())
+      )
+    };
+  }, [salesZones, formik.values.search])
+  
 
   const filteredData = salesZones.list.length > 0 ? filteredSalesZones : salesZones
 
