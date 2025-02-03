@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from 'src/lib/date-helper'
 import { Grid, FormControlLabel, Checkbox, Stack } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -63,7 +63,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: DIRTYFIELD_TDPCT })
   const [measurements, setMeasurements] = useState([])
-  const [filteredMu, setFilteredMU] = useState([])
+  const filteredMeasurements = useRef([])
   const [initialPromotionType, setInitialPromotionType] = useState()
   const [metalPriceVisibility, setmetalPriceVisibility] = useState(false)
   const [defaultsDataState, setDefaultsDataState] = useState(null)
@@ -196,18 +196,18 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         dueDate: yup.string().required(),
         currencyId: yup.string().required(),
         vendorId: yup.string().required(),
-        siteId: yup
-          .number()
-          .test('', function (value) {
-            const { dtId } = this.parent
-            if (dtId == null) {
-              return !!value
-            }
+        siteId: yup.number().test('', function (value) {
+          const { dtId } = this.parent
+          if (dtId == null) {
+            return !!value
+          }
 
-            return true
-          })
+          return true
+        })
       }),
-      items: yup.array().of(
+      items: yup
+        .array()
+        .of(
           yup.object({
             sku: yup.string().required(),
             itemName: yup.string().required(),
@@ -265,6 +265,15 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         }
       })
     })
+  }
+
+  async function getFilteredMU(itemId) {
+    if (!itemId) return
+
+    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
+
+    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    filteredMeasurements.current = arrayMU
   }
 
   const columns = [
@@ -361,7 +370,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       label: labels.mu,
       name: 'muRef',
       props: {
-        store: filteredMu,
+        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -372,7 +381,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
-          const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
+          const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
           const qtyInBase = newRow?.qty * filteredItems?.muQty
 
           update({
@@ -380,6 +389,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             muQty: newRow?.muQty
           })
         }
+      },
+      propsReducer({ row, props }) {
+        return { ...props, store: filteredMeasurements?.current }
       }
     },
     {
@@ -669,9 +681,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
     const modifiedList = await Promise.all(
       puTrxItems?.map(async (item, index) => {
-        const filteredMeasurements = measurements.filter(x => x.msId === item?.msId)
-        setFilteredMU(filteredMeasurements)
-
         const taxDetailsResponse = []
 
         const updatedpuTrxTaxes =
@@ -865,7 +874,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
 
     const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-    setFilteredMU(filteredMeasurements)
 
     update({
       sku: itemInfo?.sku || '',
@@ -1277,12 +1285,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 displayField={['reference', 'name']}
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={(_, newValue) => {
                   const recordId = newValue ? newValue.recordId : null
 
-                  await formik.setFieldValue('header.dtId', recordId)
-
                   if (newValue) {
+                    formik.setFieldValue('header.dtId', recordId)
                     onChangeDtId(recordId)
                   } else {
                     formik.setFieldValue('header.dtId', null)
@@ -1500,15 +1507,15 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 maxAccess={maxAccess}
               />
             </Grid>
+
             <Grid item xs={2.4}>
-              {metalPriceVisibility && (
-                <CustomNumberField
-                  name='KGmetalPrice'
-                  label={labels.metalPrice}
-                  value={formik.values.header.KGmetalPrice}
-                  readOnly
-                />
-              )}
+              <CustomNumberField
+                name='KGmetalPrice'
+                label={labels.metalPrice}
+                value={formik.values.header.KGmetalPrice}
+                readOnly
+                hidden={metalPriceVisibility}
+              />
             </Grid>
           </Grid>
         </Fixed>
@@ -1518,6 +1525,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
               action === 'delete' && setReCal(true)
+            }}
+            onSelectionChange={(row, update, field) => {
+              if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
             value={formik?.values?.items}
             error={formik.errors.items}

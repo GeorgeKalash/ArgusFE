@@ -14,6 +14,7 @@ import { useForm } from 'src/hooks/form'
 import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
+import CustomCheckBox from '../Inputs/CustomCheckBox'
 
 const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refreshProf = () => {}, window }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
@@ -67,14 +68,12 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
       if (!res.errorId) {
         clientformik.setFieldValue('expiryDate', formatDateFromApi(res.idExpirationDate))
         clientformik.setFieldValue('firstName', res.fl_firstName)
-        clientformik.setFieldValue('middleName', res.fl_middleName)
-        clientformik.setFieldValue('familyName', res.fl_familyName)
+        clientformik.setFieldValue('middleName', `${res.fl_middleName || ''} ${res.fl_familyName || ''}`.trim())
         clientformik.setFieldValue('lastName', res.fl_lastName)
         clientformik.setFieldValue('flName', res.flName)
         clientformik.setFieldValue('fl_firstName', res.firstName)
-        clientformik.setFieldValue('fl_middleName', res.middleName)
+        clientformik.setFieldValue('fl_middleName', `${res.middleName || ''} ${res.familyName || ''}`.trim())
         clientformik.setFieldValue('fl_lastName', res.lastName)
-        clientformik.setFieldValue('fl_familyName', res.familyName)
         clientformik.setFieldValue('gender', res.gender === 'ذكر' ? '1' : '2')
         clientformik.setFieldValue('professionId', res.professionId)
         clientformik.setFieldValue('nationalityId', res.nationalityId)
@@ -177,17 +176,13 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
               />
             </Grid>
             <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='liveRequest'
-                    checked={formik.values?.liveRequest}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                    disabled={!systemChecks?.some(item => item.checkId === SystemChecks.CT_YAKEEN_INFORMATION)}
-                  />
-                }
+              <CustomCheckBox
+                name='liveRequest'
+                value={formik.values?.liveRequest}
+                onChange={event => formik.setFieldValue('liveRequest', event.target.checked)}
                 label={labels.yakeenLiveRequest}
+                maxAccess={maxAccess}
+                disabled={!systemChecks?.some(item => item.checkId === SystemChecks.CT_YAKEEN_INFORMATION)}
               />
             </Grid>
           </Grid>

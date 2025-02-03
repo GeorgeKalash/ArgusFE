@@ -86,7 +86,7 @@ const TabsProvider = ({ children }) => {
 
   const handleChange = (event, newValue) => {
     setCurrentTabIndex(newValue)
-    router.push(openTabs[newValue].route)
+    window.history.replaceState(null, '', openTabs[newValue].route)
   }
 
   const handleCloseAllTabs = () => {
@@ -252,10 +252,6 @@ const TabsProvider = ({ children }) => {
                 <Tab
                   key={activeTab?.id}
                   label={activeTab?.label}
-                  onClick={() => {
-                    setCurrentTabIndex(i)
-                    router.push(activeTab.route)
-                  }}
                   onContextMenu={event => OpenItems(event, i)}
                   icon={
                     activeTab.route === '/default/' ? null : (

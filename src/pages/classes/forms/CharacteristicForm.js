@@ -2,7 +2,7 @@ import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
@@ -17,16 +17,10 @@ const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, reco
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const [initialValues, setInitialData] = useState({
-    chId: null,
-    seqNo: null,
-    oper: null
-  })
-
   const formik = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
-    initialValues,
+    initialValues: { chId: null, seqNo: null, oper: null },
     validationSchema: yup.object({
       chId: yup.string().required(),
       seqNo: yup.string().required(),
@@ -43,13 +37,11 @@ const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, reco
     await postRequest({
       extension: DocumentReleaseRepository.ClassCharacteristics.set,
       record: JSON.stringify(obj)
+    }).then(res => {
+      toast.success(platformLabels.Added)
+      getCharacteristicGridData(classId)
+      window.close()
     })
-      .then(res => {
-        toast.success(platformLabels.Added)
-        getCharacteristicGridData(classId)
-        window.close()
-      })
-      .catch(error => {})
   }
 
   return (

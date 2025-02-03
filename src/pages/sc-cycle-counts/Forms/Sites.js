@@ -25,51 +25,45 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
       rows: []
     },
     onSubmit: async () => {
-      try {
-        const itemsList = formik.values.rows
-          .map((item, index) => ({
-            ...item,
-            id: index + 1,
-            status: item.status || 1
-          }))
-          .filter(item => item.isChecked); 
+      const itemsList = formik.values.rows
+        .map((item, index) => ({
+          ...item,
+          id: index + 1,
+          status: item.status || 1
+        }))
+        .filter(item => item.isChecked)
 
+      const data = {
+        stockCountId: recordId,
+        sites: itemsList
+      }
 
-        const data = {
-          stockCountId: recordId,
-          sites: itemsList
-        }
+      await postRequest({
+        extension: SCRepository.Sites.set2,
+        record: JSON.stringify(data)
+      })
 
-        await postRequest({
-          extension: SCRepository.Sites.set2,
-          record: JSON.stringify(data)
-        })
-
-        await fetchGridData(recordId)
-        setRefreshController(!refreshController);
-        toast.success(platformLabels.Updated)
-        formik.setFieldValue('search', '')
-      } catch (error) {}
+      await fetchGridData(recordId)
+      setRefreshController(!refreshController)
+      toast.success(platformLabels.Updated)
+      formik.setFieldValue('search', '')
     }
   })
 
   const fetchGridData = async recordId => {
-    try {
-      if (recordId) {
-        const response = await getRequest({
-          extension: SCRepository.Sites.qry,
-          parameters: `_stockCountId=${recordId}`
-        })
-  
-        const data = response.list.map((item, index) => ({
-          ...item,
-          id: index + 1
-        }))
-  
-        formik.setValues({ rows: data })
-      }
-      
-    } catch (error) {}
+    if (recordId) {
+      const response = await getRequest({
+        extension: SCRepository.Sites.qry,
+        parameters: `_stockCountId=${recordId}`
+      })
+
+      const data = response.list.map((item, index) => ({
+        ...item,
+        id: index + 1
+      }))
+
+      formik.setValues({ rows: data })
+    }
   }
 
   const filteredData = formik.values.search
@@ -88,7 +82,7 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
       flex: 1,
       props: {
         disabled: isPosted || isClosed
-      },
+      }
     },
     {
       component: 'textfield',
@@ -126,7 +120,7 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
         readOnly: false
       },
       propsReducer({ row, props }) {
-        return { ...props, readOnly: (row.statusName === 'Processed') || isPosted || isClosed }
+        return { ...props, readOnly: row.statusName === 'Processed' || isPosted || isClosed }
       }
     }
   ]
@@ -145,7 +139,7 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
 
     formik.setFieldValue('rows', updatedRows)
   }
-  
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {

@@ -252,5 +252,9 @@ export const InventoryRepository = {
   },
   DocumentTypeDefaults: {
     get: service + 'getDTD'
+  },
+  Serial: {
+    qry: service + 'qrySRL',
+    snapshot: service + 'snapshotSRL'
   }
 }

@@ -1,14 +1,11 @@
 import React, { useContext } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import 'ag-grid-community/styles/ag-grid.css'
-import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
 import { useState } from 'react'
 import { useEffect } from 'react'
-import 'ag-grid-community'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -29,6 +26,7 @@ import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 
 const Table = ({
+  name,
   paginationType = '',
   globalStatus = true,
   viewCheckButtons = false,
@@ -46,6 +44,7 @@ const Table = ({
   const api = props?.api ? props?.api : props?.paginationParameters || ''
   const refetch = props?.refetch
   const [gridData, setGridData] = useState({})
+  const [page, setPage] = useState(null)
   const [startAt, setStartAt] = useState(0)
   const { languageId } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
@@ -60,7 +59,7 @@ const Table = ({
       ({ field }) =>
         accessLevel({
           maxAccess: props?.maxAccess,
-          name: field
+          name: name ? `${name}.${field}` : field
         }) !== HIDDEN
     )
     .map(col => {
@@ -132,12 +131,23 @@ const Table = ({
   useEffect(() => {
     const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
-    if (typeof setData === 'function') onSelectionChanged
-
-    props?.gridData &&
-      paginationType !== 'api' &&
-      pageSize &&
-      setGridData({ list: pageSize ? props?.gridData?.list?.slice(0, pageSize) : props?.gridData?.list })
+    if (typeof setData === 'function') {
+      onSelectionChanged()
+    }
+    if (props?.gridData && paginationType !== 'api' && pageSize) {
+      if (page) {
+        const start = (page - 1) * pageSize
+        const end = page * pageSize
+        const slicedGridData = props?.gridData?.list?.slice(start, end)
+        setGridData({
+          ...props.gridData,
+          list: slicedGridData
+        })
+        setStartAt(start)
+      } else {
+        setGridData({ list: pageSize ? props?.gridData?.list?.slice(0, pageSize) : props?.gridData?.list })
+      }
+    }
   }, [props?.gridData])
 
   const CustomPagination = () => {
@@ -151,7 +161,7 @@ const Table = ({
             if (paginationType === 'api') {
               api({ _startAt: (newPage - 1) * pageSize, _pageSize: pageSize })
             } else {
-              var slicedGridData = props?.gridData?.list.slice((newPage - 2) * pageSize, newPage * pageSize)
+              var slicedGridData = props?.gridData?.list?.slice((newPage - 2) * pageSize, newPage * pageSize)
               setGridData({
                 ...props?.gridData?.list,
                 list: slicedGridData
@@ -266,7 +276,7 @@ const Table = ({
 
         if (gridData && gridData?.list) {
           const originalGridData = gridData && gridData.list
-          const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
+          setPage(Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1))
 
           var _gridData = gridData?.list
           const pageCount = Math.ceil(originalGridData?.length ? originalGridData?.length / pageSize : 1)

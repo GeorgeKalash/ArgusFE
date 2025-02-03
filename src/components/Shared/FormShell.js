@@ -22,6 +22,7 @@ import InventoryTransaction from './InventoryTransaction'
 import SalesTrxForm from './SalesTrxForm'
 import StrictUnpostConfirmation from './StrictUnpostConfirmation'
 import ClientSalesTransaction from './ClientSalesTransaction'
+import AttachmentList from './AttachmentList'
 
 export default function FormShell({
   form,
@@ -358,6 +359,21 @@ export default function FormShell({
                 })
               }
               break
+            case 'onClickAttachment':
+              action.onClick = () => {
+                stack({
+                  Component: AttachmentList,
+                  props: {
+                    recordId: form.values?.recordId,
+                    resourceId,
+                    functionId
+                  },
+                  width: 1000,
+                  height: 650,
+                  title: platformLabels.Attachment
+                })
+              }
+              break
             default:
               action.onClick = () => console.log(`Action with key ${action.key} has a string onClick handler.`)
               break
@@ -410,7 +426,7 @@ export default function FormShell({
           flexDirection: 'column',
           overflow: 'auto',
           '.MuiBox-root': {
-            paddingTop: isParentWindow ? '5px !important' : '0px !important',
+            paddingTop: isParentWindow ? '7px !important' : '0px !important',
             px: '0px !important',
             pb: '0px !important'
           }

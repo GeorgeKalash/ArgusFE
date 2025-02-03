@@ -121,14 +121,14 @@ const InwardSettlement = () => {
     } else {
       if (!plantId) {
         stackError({
-          message: platformLabels.defaultPlant
+          message: _labels.defaultPlant
         })
 
         return
       }
       if (!cashAccountId) {
         stackError({
-          message: platformLabels.defaultCashAcc
+          message: _labels.defaultCashAcc
         })
 
         return
