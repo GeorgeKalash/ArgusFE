@@ -9,8 +9,8 @@ const ClientsAddressForm = ({ getAddressGridData, addressId, window, props, stor
   const [address, setAddress] = useState()
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [isDefaultShip, setIsDefaultShip] = useState(store?.record?.shipAddressId == recordId)
-  const [isDefaultBill, setIsDefaultBill] = useState(store?.record?.billAddressId == recordId)
+  const [isDefaultShip, setIsDefaultShip] = useState(store?.record?.shipAddressId == addressId)
+  const [isDefaultBill, setIsDefaultBill] = useState(store?.record?.billAddressId == addressId)
   const clientId = store.recordId
 
   const onSubmit = async obj => {
