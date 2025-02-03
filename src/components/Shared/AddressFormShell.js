@@ -3,7 +3,7 @@ import FormShell from './FormShell'
 import AddressTab from './AddressTab'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from './Layouts/VertLayout'
-import { Grow } from './Layouts/Grow'
+import { Fixed } from './Layouts/Fixed'
 
 export const AddressFormShell = ({
   setAddress,
@@ -119,9 +119,9 @@ export const AddressFormShell = ({
       {...props}
     >
       <VertLayout>
-        <Grow>
+        <Fixed>
           <AddressTab addressValidation={formik} readOnly={readOnly} required={required} {...props} />
-        </Grow>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )
