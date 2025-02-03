@@ -447,7 +447,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       label: labels.unitCost,
       name: 'unitCost',
       props: {
-        readOnly: true
+        readOnly: true,
+        disabled: true
       },
     },
     {
