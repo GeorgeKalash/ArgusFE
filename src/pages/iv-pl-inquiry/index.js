@@ -112,8 +112,6 @@ const PriceListInquiries = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
-          pageSize={50}
           pagination={false}
           maxAccess={access}
         />
