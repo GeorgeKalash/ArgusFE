@@ -46,17 +46,17 @@ const AddressTab = ({ store, maxAccess, labels, editMode, setStore, ...props }) 
     openForm()
   }
 
-  function openForm(id) {
+  function openForm(recordId) {
     stack({
       Component: ClientsAddressForm,
       props: {
         _labels: labels,
         maxAccess,
         editMode,
-        recordId: id,
+        recordId,
         store,
         setStore,
-        getAddressGridData: getAddressGridData
+        getAddressGridData
       },
       width: 600,
       height: 500,

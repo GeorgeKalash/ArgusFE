@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import AddressForm from 'src/components/Shared/AddressForm'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { StoreOutlined } from '@mui/icons-material'
 
 const ClientsAddressForm = ({ getAddressGridData, recordId, window, props, store, setStore }) => {
   const [address, setAddress] = useState()
@@ -11,16 +12,17 @@ const ClientsAddressForm = ({ getAddressGridData, recordId, window, props, store
   const { platformLabels } = useContext(ControlContext)
   const [isDefaultShip, setIsDefaultShip] = useState(false)
   const [isDefaultBill, setIsDefaultBill] = useState(false)
+  const clientId = store.recordId
 
-  const onSubmit = async obj => {
+  const onSubmit = obj => {
     if (obj) {
       const data = {
-        clientId: store.recordId,
+        clientId: clientId,
         address: obj,
         addressId: obj.recordId
       }
 
-      await postRequest({
+      postRequest({
         extension: SaleRepository.Address.set,
         record: JSON.stringify(data)
       }).then(res => {
@@ -32,7 +34,7 @@ const ClientsAddressForm = ({ getAddressGridData, recordId, window, props, store
         window.close()
       })
     }
-    getAddressGridData(store.recordId)
+    getAddressGridData(clientId)
   }
 
   async function setDefaultBilling() {
@@ -74,7 +76,7 @@ const ClientsAddressForm = ({ getAddressGridData, recordId, window, props, store
   async function getLatestClientData() {
     const response = await getRequest({
       extension: SaleRepository.Client.get,
-      parameters: `_recordId=${store.recordId}`
+      parameters: `_recordId=${clientId}`
     })
 
     return response.record
