@@ -68,7 +68,6 @@ export const ManufacturingRepository = {
   },
   LeanProductionPlanning: {
     preview: service + 'previewPQ',
-    preview2: service + 'previewPQ2',
     update: service + 'updatePQ',
     snapshot: service + 'snapshotPQ',
     del: service + 'delPQ',
@@ -118,7 +117,9 @@ export const ManufacturingRepository = {
     set: service + 'setJOB',
     get: service + 'getJOB',
     del: service + 'delJOB',
-    snapshot: service + 'snapshotJOB'
+    snapshot: service + 'snapshotJOB',
+    cancel: service + 'cancelJOB',
+    post: service + 'postJOB'
   },
   ProductionSheet: {
     page: service + 'pagePST',
@@ -151,6 +152,9 @@ export const ManufacturingRepository = {
     del: service + 'delRMC',
     page: service + 'pageRMC'
   },
+  ProductionSheetQueue: {
+    qry: service + 'qryPSQ'
+  },
   JobCategory: {
     qry: service + 'qryJCA'
   },
@@ -182,5 +186,10 @@ export const ManufacturingRepository = {
   JobItemSize: {
     qry: service + 'qryJSZ',
     set2: service + 'set2JSZ'
+  },
+  MFSerial: {
+    qry: service + 'qrySRL',
+    set2: service + 'set2SRL',
+    generate: service + 'generateSRL'
   }
 }

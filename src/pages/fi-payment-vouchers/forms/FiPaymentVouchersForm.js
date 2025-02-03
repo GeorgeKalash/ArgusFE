@@ -54,7 +54,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       accountType: '',
       currencyId: null,
       currencyName: '',
-      paymentMethod: '',
+      paymentMethod: 0,
       date: new Date(),
       glId: null,
       amount: null,
@@ -83,7 +83,21 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       date: yup.string().required(),
       paymentMethod: yup.string().required(),
       cashAccountId: yup.string().required(),
-      amount: yup.string().required()
+      checkNo: yup
+        .string()
+        .test(
+          'check-no-required-if-payment-method-3',
+          'Check number is required when payment method is 3.',
+          function (value) {
+            const { paymentMethod } = this.parent
+            if (paymentMethod == 3) {
+              return value && value.trim() !== ''
+            }
+
+            return true
+          }
+        ),
+      amount: yup.number().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -325,7 +339,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -537,7 +551,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 readOnly={isPosted || isCancelled}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('paymentMethod', newValue?.key)
+                  formik.setFieldValue('paymentMethod', newValue?.key || null)
                   formik.setFieldValue('checkNo', '')
                   formik.setFieldValue('checkbookId', null)
                 }}

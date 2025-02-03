@@ -3,8 +3,6 @@ import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton } from '@mui/material'
 import components from './components'
 import { CacheDataProvider } from 'src/providers/CacheDataContext'
-import 'ag-grid-community/styles/ag-grid.css'
-import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { GridDeleteIcon } from '@mui/x-data-grid'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
@@ -614,7 +612,9 @@ export function DataGrid({
       if (
         gridContainerRef.current &&
         !gridContainerRef.current.contains(event.target) &&
-        gridApiRef.current?.getEditingCells()?.length > 0
+        gridApiRef.current?.getEditingCells()?.length > 0 &&
+        !event.target.classList.contains('MuiBox-root') &&
+        !event.target.classList.contains('MuiAutocomplete-option')
       ) {
         gridApiRef.current?.stopEditing()
       } else {
