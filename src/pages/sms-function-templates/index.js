@@ -10,9 +10,11 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -41,9 +43,9 @@ const SmsFunctionTemplate = () => {
         functionId: parseInt(x.functionId),
         templateId: null,
         functionName: x.sfName,
-        templateName: null,
+        templateName: '',
         sgId: null,
-        sgName: null
+        sgName: ''
       }
 
       const matchingTemplate = resSmsFunctionTemplate.list.find(y => n.functionId === y.functionId)
@@ -136,7 +138,7 @@ const SmsFunctionTemplate = () => {
       extension: SystemRepository.SMSFunctionTemplate.set,
       record: JSON.stringify(obj)
     })
-    toast.success('Record Updated Successfully')
+    toast.success(platformLabels.Updated)
   }
 
   return (
