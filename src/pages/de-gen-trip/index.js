@@ -321,8 +321,6 @@ const GenerateOutboundTransportation = () => {
   }
 
   const onUndelivered = async szIds => {
-    console.log(szIds)
-
     const items = await getRequest({
       extension: DeliveryRepository.GenerateTrip.undelivered2,
       parameters: `_szIds=${szIds || 0}`
@@ -332,26 +330,17 @@ const GenerateOutboundTransportation = () => {
       return
     }
 
-    if (data?.list?.length > 0) {
-      setData(prev => {
-        const existingDeliveryOrderIds = new Set(deliveryOrders.list.map(item => item.recordId))
+    setData(prev => {
+      const existingDeliveryOrderIds = new Set(deliveryOrders.list.map(item => item.recordId))
 
-        console.log(existingDeliveryOrderIds)
-        const newItems = items.list.filter(item => !existingDeliveryOrderIds.has(item.recordId))
+      const newItems = items.list.filter(item => !existingDeliveryOrderIds.has(item.recordId))
 
-        return {
-          ...prev,
-          list: newItems,
-          count: prev.list.length + newItems.length
-        }
-      })
-    } else {
-      setData({
-        ...items,
-        list: items.list,
-        count: items.list.length
-      })
-    }
+      return {
+        ...prev,
+        list: newItems,
+        count: prev.list.length + newItems.length
+      }
+    })
   }
 
   const onAdd = () => {
@@ -380,12 +369,11 @@ const GenerateOutboundTransportation = () => {
   }
 
   const handleSearchChange = event => {
-    const { value } = event.target;
+    const { value } = event.target
     if (formik.values.search !== value) {
-      formik.setFieldValue('search', value);
+      formik.setFieldValue('search', value)
     }
   }
-  
 
   const filteredSalesZones = useMemo(() => {
     return {
@@ -393,9 +381,8 @@ const GenerateOutboundTransportation = () => {
       list: salesZones.list.filter(item =>
         item.name.toString().toLowerCase().includes(formik?.values?.search?.toLowerCase())
       )
-    };
+    }
   }, [salesZones, formik.values.search])
-  
 
   const filteredData = salesZones.list.length > 0 ? filteredSalesZones : salesZones
 
