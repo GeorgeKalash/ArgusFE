@@ -18,6 +18,7 @@ import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import OutboundTranspForm from '../outbound-transportation/forms/OutboundTranspForm'
 import { useWindow } from 'src/windows'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 const GenerateOutboundTransportation = () => {
   const [data, setData] = useState({ list: [] })
@@ -44,6 +45,7 @@ const GenerateOutboundTransportation = () => {
 
   const { formik } = useForm({
     initialValues: {
+      search: '',
       vehicleId: null,
       driverId: null,
       szId: null,
@@ -374,6 +376,20 @@ const GenerateOutboundTransportation = () => {
     formik.resetForm()
   }
 
+  const handleSearchChange = event => {
+    const { value } = event.target
+    formik.setFieldValue('search', value)
+  }
+
+  const filteredSalesZones = {
+    ...salesZones,
+    list: salesZones.list.filter(item =>
+      item.name.toString().toLowerCase().includes(formik?.values?.search?.toLowerCase())
+    )
+  }
+
+  const filteredData = salesZones.list.length > 0 ? filteredSalesZones : salesZones
+
   return (
     <FormShell
       resourceId={ResourceIds.GenerateTrip}
@@ -425,11 +441,25 @@ const GenerateOutboundTransportation = () => {
                 </Grid>
               </Grid>
             </Fixed>
-
+            <Fixed>
+              <Grid item sx={{ mt: 2 }}></Grid>
+              <CustomTextField
+                name='search'
+                value={formik.values.search}
+                label={platformLabels.Search}
+                onClear={() => {
+                  formik.setFieldValue('search', '')
+                }}
+                size='small'
+                onChange={handleSearchChange}
+                onSearch={e => formik.setFieldValue('search', e)}
+                search={true}
+              />
+            </Fixed>
             <Grow>
               <Table
                 columns={columnsZones}
-                gridData={salesZones}
+                gridData={filteredData}
                 rowId={['recordId']}
                 isLoading={false}
                 pagination={false}
