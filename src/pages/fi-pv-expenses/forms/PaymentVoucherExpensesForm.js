@@ -613,7 +613,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                     variant='contained'
                     size='small'
                     onClick={() => openMCRForm(formik.values)}
-                    disabled={formik.values.currencyId === defaultsDataState?.currencyId}
+                    disabled={!formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId}
                   >
                     <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                   </Button>
@@ -658,10 +658,10 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                 value={formik.values?.date}
                 required={true}
                 onChange={async (e, newValue) => {
-                  formik.setFieldValue('date', newValue.date)
+                  formik.setFieldValue('date', newValue)
                   await getMultiCurrencyFormData(
                     formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
+                    formatDateForGetApI(newValue),
                     RateDivision.FINANCIALS
                   )
                 }}
@@ -774,7 +774,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                   formik.setFieldValue('amount', e.target.value)
 
                   const updatedRateRow = getRate({
-                    amount: formik.values.amount ?? 0,
+                    amount: e.target.value ?? 0,
                     exRate: formik.values?.exRate,
                     baseAmount: 0,
                     rateCalcMethod: formik.values?.rateCalcMethod,

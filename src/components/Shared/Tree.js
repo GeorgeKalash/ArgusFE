@@ -62,8 +62,7 @@ const StyledTreeItem = styled(TreeItem)(({ theme, depth }) => ({
   }
 }))
 
-function Tree({ data, expanded }) {
-  const componentRef = useRef()
+function Tree({ data }) {
   const printComponentRef = useRef()
 
   const handlePrint = useReactToPrint({
