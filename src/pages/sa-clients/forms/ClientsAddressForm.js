@@ -10,8 +10,8 @@ const ClientsAddressForm = ({ getAddressGridData, recordId, window, props, store
   const [address, setAddress] = useState()
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [isDefaultShip, setIsDefaultShip] = useState(false)
-  const [isDefaultBill, setIsDefaultBill] = useState(false)
+  const [isDefaultShip, setIsDefaultShip] = useState(store?.record?.shipAddressId == recordId)
+  const [isDefaultBill, setIsDefaultBill] = useState(store?.record?.billAddressId == recordId)
   const clientId = store.recordId
 
   const onSubmit = obj => {
@@ -87,13 +87,13 @@ const ClientsAddressForm = ({ getAddressGridData, recordId, window, props, store
       key: 'DefaultBilling',
       condition: true,
       onClick: setDefaultBilling,
-      disabled: !recordId || store.record.billAddressId == recordId || isDefaultBill
+      disabled: !recordId || isDefaultBill
     },
     {
       key: 'DefaultShipping',
       condition: true,
       onClick: setDefaultShipping,
-      disabled: !recordId || store.record.shipAddressId == recordId || isDefaultShip
+      disabled: !recordId || isDefaultShip
     }
   ]
 
