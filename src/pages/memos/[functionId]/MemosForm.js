@@ -555,21 +555,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     required
                     maxAccess={maxAccess}
                     thousandSeparator={false}
-                    onChange={async e => {
-                      formik.setFieldValue('amount', e.target.value)
-
-                      const updatedRateRow = getRate({
-                        amount: e.target.value ?? 0,
-                        exRate: formik.values?.exRate,
-                        baseAmount: 0,
-                        rateCalcMethod: formik.values?.rateCalcMethod,
-                        dirtyField: DIRTYFIELD_RATE
-                      })
-                      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-                    }}
-                    onClear={async () => {
-                      formik.setFieldValue('amount', 0)
-                    }}
+                    readOnly
                     error={formik.touched.amount && Boolean(formik.errors.amount)}
                     maxLength={10}
                   />
