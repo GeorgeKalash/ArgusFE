@@ -438,7 +438,6 @@ const GenerateOutboundTransportation = () => {
               </Grid>
             </Fixed>
             <Fixed>
-              <Grid item sx={{ mt: 2 }}></Grid>
               <CustomTextField
                 name='search'
                 value={formik.values.search}
@@ -490,7 +489,7 @@ const GenerateOutboundTransportation = () => {
         <Grid item xs={9.4} sx={{ display: 'flex', flex: 1, marginLeft: 1 }}>
           <VertLayout>
             <Fixed>
-              <Grid container spacing={2}>
+              <Grid container>
                 <Grid container xs={6} pl={2} spacing={2}>
                   <Grid item xs={6}>
                     <ResourceComboBox
