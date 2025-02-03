@@ -94,6 +94,8 @@ const Table = ({
         }
       }
       if (col.type === 'checkbox') {
+        console.log(col.headerName)
+
         return {
           ...col,
           width: 110,
@@ -430,6 +432,7 @@ const Table = ({
   const checkboxCellRenderer = params => {
     return (
       <Checkbox
+        sx={{ p: 1 }}
         checked={params.value}
         onChange={e => {
           const checked = e.target.checked
@@ -533,11 +536,11 @@ const Table = ({
             headerName: '',
             field: 'checked',
             flex: checkboxFlex,
-            width: 100,
+            width: 70,
             cellRenderer: checkboxCellRenderer,
             headerComponent: params =>
               rowSelection !== 'single' &&
-              showSelectAll && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
+              showSelectAll && <Checkbox checked={checked} onChange={e => selectAll(params, e)} sx={{ p: 1 }} />,
             suppressMenu: true
           }
         ]
