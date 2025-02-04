@@ -67,319 +67,317 @@ export default function FormShell({
     ? false
     : true
 
-  if (actions) {
-    actions.filter(Boolean).forEach(action => {
-      if (typeof action?.onClick !== 'function') {
-        switch (action?.onClick) {
-          case 'onRecordRemarks':
-            action.onClick = () => {
-              stack({
-                Component: ResourceRecordRemarks,
-                props: {
-                  recordId: form.values?.recordId,
-                  resourceId: resourceId
-                },
-                width: 800,
-                height: 500,
-                title: platformLabels.ResourceRecordRemarks
-              })
-            }
-            break
-          case 'onApproval':
-            action.onClick = () => {
-              stack({
-                Component: Approvals,
-                props: {
-                  recordId: form.values.remittanceRecordId ?? form.values.recordId,
-                  functionId: form.values.functionId ?? functionId
-                },
-                width: 1000,
-                height: 500,
-                title: platformLabels.Approvals
-              })
-            }
-            break
-          case 'transactionClicked':
-            action.onClick = () => {
-              stack({
-                Component: CashTransaction,
-                props: {
-                  recordId: form.values?.recordId,
-                  functionId: functionId
-                },
-                width: 1200,
-                height: 670,
-                title: platformLabels.CashTransaction
-              })
-            }
-            break
-          case 'onClientSalesTransaction':
-            action.onClick = () => {
-              stack({
-                Component: ClientSalesTransaction,
-                props: {
-                  functionId: functionId,
-                  clientId: form?.values?.header?.clientId
-                },
-                width: 600,
-                height: 450,
-                title: platformLabels.ClientSalesTransaction
-              })
-            }
+  actions?.filter(Boolean)?.forEach(action => {
+    if (typeof action?.onClick !== 'function') {
+      switch (action?.onClick) {
+        case 'onRecordRemarks':
+          action.onClick = () => {
+            stack({
+              Component: ResourceRecordRemarks,
+              props: {
+                recordId: form.values?.recordId,
+                resourceId: resourceId
+              },
+              width: 800,
+              height: 500,
+              title: platformLabels.ResourceRecordRemarks
+            })
+          }
+          break
+        case 'onApproval':
+          action.onClick = () => {
+            stack({
+              Component: Approvals,
+              props: {
+                recordId: form.values.remittanceRecordId ?? form.values.recordId,
+                functionId: form.values.functionId ?? functionId
+              },
+              width: 1000,
+              height: 500,
+              title: platformLabels.Approvals
+            })
+          }
+          break
+        case 'transactionClicked':
+          action.onClick = () => {
+            stack({
+              Component: CashTransaction,
+              props: {
+                recordId: form.values?.recordId,
+                functionId: functionId
+              },
+              width: 1200,
+              height: 670,
+              title: platformLabels.CashTransaction
+            })
+          }
+          break
+        case 'onClientSalesTransaction':
+          action.onClick = () => {
+            stack({
+              Component: ClientSalesTransaction,
+              props: {
+                functionId: functionId,
+                clientId: form?.values?.header?.clientId
+              },
+              width: 600,
+              height: 450,
+              title: platformLabels.ClientSalesTransaction
+            })
+          }
 
-            break
-          case 'onInventoryTransaction':
-            action.onClick = () => {
-              stack({
-                Component: InventoryTransaction,
-                props: {
-                  recordId: form.values.recordId,
-                  functionId: functionId
-                },
-                width: 700,
-                title: platformLabels.InventoryTransaction
-              })
-            }
+          break
+        case 'onInventoryTransaction':
+          action.onClick = () => {
+            stack({
+              Component: InventoryTransaction,
+              props: {
+                recordId: form.values.recordId,
+                functionId: functionId
+              },
+              width: 700,
+              title: platformLabels.InventoryTransaction
+            })
+          }
 
-            break
-          case 'onPost':
-            action.onClick = () => {
-              form.setFieldValue('isOnPostClicked', true)
-              form.handleSubmit()
-            }
-            break
-          case 'onTFR':
-            action.onClick = () => {
-              form.setFieldValue('isTFRClicked', true)
-              form.handleSubmit()
-            }
-            break
-          case 'onClickGL':
-            action.onClick = () => {
-              stack({
-                Component: GeneralLedger,
-                props: {
-                  values: form.values,
-                  recordId: form.values?.recordId,
-                  functionId: functionId,
-                  valuesPath: action.valuesPath
-                },
-                width: 1000,
-                height: 620,
-                title: platformLabels.GeneralLedger
-              })
-            }
-            break
-          case 'onClickIT':
-            action.onClick = () => {
-              stack({
-                Component: FinancialTransaction,
-                props: {
-                  formValues: form.values,
-                  functionId
-                },
-                width: 1000,
-                height: 620,
-                title: platformLabels.financialTransaction
-              })
-            }
-            break
-          case 'onClickSATRX':
-            action.onClick = () => {
-              stack({
-                Component: SalesTrxForm,
-                props: {
-                  recordId: form.values?.recordId,
-                  functionId: functionId,
-                  itemId: 0,
-                  clientId: form?.values?.header?.clientId || 0
-                },
-                width: 1200,
-                title: platformLabels.SalesTransactions
-              })
-            }
-            break
-          case 'onClickGIA':
-            action.onClick = () => {
-              stack({
-                Component: GlobalIntegrationGrid,
-                props: {
-                  masterId: form.values?.recordId,
-                  masterSource: action?.masterSource
-                },
-                width: 800,
-                height: 500,
-                title: platformLabels.IntegrationAccount
-              })
-            }
-            break
-          case 'onClickAC':
-            action.onClick = () => {
-              stack({
-                Component: AccountBalance,
-                width: 1000,
-                height: 620,
-                title: platformLabels.AccountBalance
-              })
-            }
-            break
-          case 'onClientRelation':
-            action.onClick = () => {
-              stack({
-                Component: ClientRelationList,
-                props: {
-                  recordId: form.values?.recordId ?? form.values.clientId,
-                  name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
-                  reference: form.values.reference,
-                  category: form.values.category
-                },
-                width: 900,
-                height: 600,
-                title: platformLabels.ClientRelation
-              })
-            }
-            break
-          case 'onClientBalance':
-            action.onClick = () => {
-              stack({
-                Component: ClientBalance,
-                props: {
-                  recordId: form.values?.recordId
-                },
-                width: 500,
-                height: 350,
-                title: platformLabels.ClientBalance
-              })
-            }
-            break
-          case 'onAddClientRelation':
-            action.onClick = () => {
-              stack({
-                Component: ClientRelationForm,
-                props: {
-                  clientId: form.values?.recordId ?? form.values.clientId,
-                  name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
-                  reference: form.values.reference,
-                  formValidation: form
-                },
-                width: 500,
-                height: 420,
-                title: platformLabels.addClientRelation
-              })
-            }
-            break
-          case 'onGenerateReport':
-            action.onClick = () => {
-              stack({
-                Component: PreviewReport,
-                props: {
-                  selectedReport: selectedReport,
-                  recordId: form.values?.recordId,
-                  functionId: form.values?.functionId,
-                  resourceId: resourceId,
-                  scId: form.values?.stockCountId,
-                  siteId: form.values?.siteId,
-                  controllerId: form.values?.controllerId,
-                  onSuccess: previewBtnClicked
-                },
-                width: 1150,
-                height: 700,
-                title: platformLabels.PreviewReport
-              })
-            }
-            break
-          case 'onClickAging':
-            action.onClick = () => {
-              stack({
-                Component: Aging,
-                props: {
-                  recordId: form.values?.recordId,
-                  functionId
-                },
-                width: 1000,
-                height: 620,
-                title: platformLabels.Aging
-              })
-            }
-            break
-          case 'onClickMetal':
-            action.onClick = () => {
-              stack({
-                Component: MetalSummary,
-                props: {
-                  filteredItems
-                },
-                width: 600,
-                height: 550,
-                title: platformLabels.Metals,
-                expandable: false
-              })
-            }
-            break
-          case 'onUnpostConfirmation':
-            action.onClick = () => {
-              stack({
-                Component: StrictUnpostConfirmation,
-                props: {
-                  onSuccess: action.onSuccess
-                },
-                width: 500,
-                height: 300,
-                expandable: false,
-                title: platformLabels.UnpostConfirmation
-              })
-            }
-            break
-          case 'onClickAging':
-            action.onClick = () => {
-              stack({
-                Component: Aging,
-                props: {
-                  recordId: form.values?.recordId,
-                  functionId
-                },
-                width: 1000,
-                height: 620,
-                title: platformLabels.Aging
-              })
-            }
-            break
-          case 'onClickMetal':
-            action.onClick = () => {
-              stack({
-                Component: MetalSummary,
-                props: {
-                  filteredItems
-                },
-                width: 600,
-                height: 550,
-                title: platformLabels.Metals,
-                expandable: false
-              })
-            }
-            break
-          case 'onClickAttachment':
-            action.onClick = () => {
-              stack({
-                Component: AttachmentList,
-                props: {
-                  recordId: form.values?.recordId,
-                  resourceId,
-                  functionId
-                },
-                width: 1000,
-                height: 650,
-                title: platformLabels.Attachment
-              })
-            }
-            break
-          default:
-            action.onClick = () => console.log(`Action with key ${action.key} has a string onClick handler.`)
-            break
-        }
+          break
+        case 'onPost':
+          action.onClick = () => {
+            form.setFieldValue('isOnPostClicked', true)
+            form.handleSubmit()
+          }
+          break
+        case 'onTFR':
+          action.onClick = () => {
+            form.setFieldValue('isTFRClicked', true)
+            form.handleSubmit()
+          }
+          break
+        case 'onClickGL':
+          action.onClick = () => {
+            stack({
+              Component: GeneralLedger,
+              props: {
+                values: form.values,
+                recordId: form.values?.recordId,
+                functionId: functionId,
+                valuesPath: action.valuesPath
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.GeneralLedger
+            })
+          }
+          break
+        case 'onClickIT':
+          action.onClick = () => {
+            stack({
+              Component: FinancialTransaction,
+              props: {
+                formValues: form.values,
+                functionId
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.financialTransaction
+            })
+          }
+          break
+        case 'onClickSATRX':
+          action.onClick = () => {
+            stack({
+              Component: SalesTrxForm,
+              props: {
+                recordId: form.values?.recordId,
+                functionId: functionId,
+                itemId: 0,
+                clientId: form?.values?.header?.clientId || 0
+              },
+              width: 1200,
+              title: platformLabels.SalesTransactions
+            })
+          }
+          break
+        case 'onClickGIA':
+          action.onClick = () => {
+            stack({
+              Component: GlobalIntegrationGrid,
+              props: {
+                masterId: form.values?.recordId,
+                masterSource: action?.masterSource
+              },
+              width: 800,
+              height: 500,
+              title: platformLabels.IntegrationAccount
+            })
+          }
+          break
+        case 'onClickAC':
+          action.onClick = () => {
+            stack({
+              Component: AccountBalance,
+              width: 1000,
+              height: 620,
+              title: platformLabels.AccountBalance
+            })
+          }
+          break
+        case 'onClientRelation':
+          action.onClick = () => {
+            stack({
+              Component: ClientRelationList,
+              props: {
+                recordId: form.values?.recordId ?? form.values.clientId,
+                name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
+                reference: form.values.reference,
+                category: form.values.category
+              },
+              width: 900,
+              height: 600,
+              title: platformLabels.ClientRelation
+            })
+          }
+          break
+        case 'onClientBalance':
+          action.onClick = () => {
+            stack({
+              Component: ClientBalance,
+              props: {
+                recordId: form.values?.recordId
+              },
+              width: 500,
+              height: 350,
+              title: platformLabels.ClientBalance
+            })
+          }
+          break
+        case 'onAddClientRelation':
+          action.onClick = () => {
+            stack({
+              Component: ClientRelationForm,
+              props: {
+                clientId: form.values?.recordId ?? form.values.clientId,
+                name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
+                reference: form.values.reference,
+                formValidation: form
+              },
+              width: 500,
+              height: 420,
+              title: platformLabels.addClientRelation
+            })
+          }
+          break
+        case 'onGenerateReport':
+          action.onClick = () => {
+            stack({
+              Component: PreviewReport,
+              props: {
+                selectedReport: selectedReport,
+                recordId: form.values?.recordId,
+                functionId: form.values?.functionId,
+                resourceId: resourceId,
+                scId: form.values?.stockCountId,
+                siteId: form.values?.siteId,
+                controllerId: form.values?.controllerId,
+                onSuccess: previewBtnClicked
+              },
+              width: 1150,
+              height: 700,
+              title: platformLabels.PreviewReport
+            })
+          }
+          break
+        case 'onClickAging':
+          action.onClick = () => {
+            stack({
+              Component: Aging,
+              props: {
+                recordId: form.values?.recordId,
+                functionId
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.Aging
+            })
+          }
+          break
+        case 'onClickMetal':
+          action.onClick = () => {
+            stack({
+              Component: MetalSummary,
+              props: {
+                filteredItems
+              },
+              width: 600,
+              height: 550,
+              title: platformLabels.Metals,
+              expandable: false
+            })
+          }
+          break
+        case 'onUnpostConfirmation':
+          action.onClick = () => {
+            stack({
+              Component: StrictUnpostConfirmation,
+              props: {
+                onSuccess: action.onSuccess
+              },
+              width: 500,
+              height: 300,
+              expandable: false,
+              title: platformLabels.UnpostConfirmation
+            })
+          }
+          break
+        case 'onClickAging':
+          action.onClick = () => {
+            stack({
+              Component: Aging,
+              props: {
+                recordId: form.values?.recordId,
+                functionId
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.Aging
+            })
+          }
+          break
+        case 'onClickMetal':
+          action.onClick = () => {
+            stack({
+              Component: MetalSummary,
+              props: {
+                filteredItems
+              },
+              width: 600,
+              height: 550,
+              title: platformLabels.Metals,
+              expandable: false
+            })
+          }
+          break
+        case 'onClickAttachment':
+          action.onClick = () => {
+            stack({
+              Component: AttachmentList,
+              props: {
+                recordId: form.values?.recordId,
+                resourceId,
+                functionId
+              },
+              width: 1000,
+              height: 650,
+              title: platformLabels.Attachment
+            })
+          }
+          break
+        default:
+          action.onClick = () => console.log(`Action with key ${action.key} has a string onClick handler.`)
+          break
       }
-    })
-  }
+    }
+  })
 
   function handleReset() {
     if (typeof form.values?.recordId === 'undefined') {
