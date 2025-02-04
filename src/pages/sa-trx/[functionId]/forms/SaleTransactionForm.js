@@ -275,8 +275,6 @@ export default function SaleTransactionForm({
     }
   })
 
-  console.log(formik)
-
   function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
