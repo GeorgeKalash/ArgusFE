@@ -1089,7 +1089,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         isSavedClear: false
       },
       width: 850,
-      height: 620,
+      height: 550,
       title: labels.address
     })
   }
