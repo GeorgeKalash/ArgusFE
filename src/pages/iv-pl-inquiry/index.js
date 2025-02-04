@@ -12,15 +12,6 @@ import { ReportIvGenerator } from 'src/repositories/ReportIvGeneratorRepository'
 const PriceListInquiries = () => {
   const { getRequest } = useContext(RequestsContext)
 
-  async function fetchGridData(options = {}) {
-    const response = await getRequest({
-      extension: ReportIvGenerator.Report451,
-      parameters: `_filter=`
-    })
-
-    return { ...response }
-  }
-
   async function fetchWithFilter({ filters }) {
     if (filters?.qry) {
       return await getRequest({
@@ -37,10 +28,8 @@ const PriceListInquiries = () => {
     labels: _labels,
     filterBy,
     clearFilter,
-    refetch,
     access
   } = useResourceQuery({
-    queryFn: fetchGridData,
     endpointId: ReportIvGenerator.Report451,
     datasetId: ResourceIds.PriceListInquiry,
     filter: {
