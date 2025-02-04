@@ -295,7 +295,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -517,6 +517,39 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               </Grid>
             </Grid>
             <Grid item xs={6}>
+              <CustomTextField
+                name='sourceReference'
+                label={labels.sourceReference}
+                value={formik.values.sourceReference}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('sourceReference', '')}
+                maxLength='20'
+                maxAccess={maxAccess}
+                error={formik.touched.sourceReference && Boolean(formik.errors.sourceReference)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={LogisticsRepository.LoCollector.qry}
+                name='collectorId'
+                readOnly={editMode}
+                label={labels.collector}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('collectorId', newValue?.recordId || '')
+                }}
+                error={formik.touched.collectorId && Boolean(formik.errors.collectorId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}></Grid>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='amount'
                 required
@@ -544,38 +577,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
               />
             </Grid>
-            <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={LogisticsRepository.LoCollector.qry}
-                name='collectorId'
-                readOnly={editMode}
-                label={labels.collector}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                onChange={async (event, newValue) => {
-                  formik.setFieldValue('collectorId', newValue?.recordId || '')
-                }}
-                error={formik.touched.collectorId && Boolean(formik.errors.collectorId)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='sourceReference'
-                label={labels.sourceReference}
-                value={formik.values.sourceReference}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('sourceReference', '')}
-                maxLength='20'
-                maxAccess={maxAccess}
-                error={formik.touched.sourceReference && Boolean(formik.errors.sourceReference)}
-              />
-            </Grid>
+            <Grid item xs={6}></Grid>
             <Grid item xs={6}>
               <ResourceComboBox
                 neverPopulate
