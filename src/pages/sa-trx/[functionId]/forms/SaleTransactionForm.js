@@ -1374,6 +1374,8 @@ export default function SaleTransactionForm({
   }, [address])
 
   function getDTD(dtId) {
+    if (!dtId) return
+
     const res = getRequest({
       extension: SaleRepository.DocumentTypeDefault.get,
       parameters: `_dtId=${dtId}`
