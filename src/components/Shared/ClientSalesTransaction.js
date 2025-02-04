@@ -12,8 +12,8 @@ const ClientSalesTransaction = ({ functionId, clientId }) => {
   const [data, setData] = useState([])
   async function fetchGridData() {
     const response = await getRequest({
-      extension: SaleRepository.SATrx.qry2,
-      parameters: `_functionId=${functionId}&_recordId=${0}&_clientId=${clientId}`
+      extension: SaleRepository.SATrx.page,
+      parameters: `_functionId=${functionId}&_recordId=${0}&_clientId=${clientId}&_startAt=0&_pageSize=30`
     })
     setData(response || [])
   }
@@ -23,7 +23,7 @@ const ClientSalesTransaction = ({ functionId, clientId }) => {
   }, [])
 
   const { labels: _labels, access } = useResourceQuery({
-    endpointId: SaleRepository.SATrx.qry2,
+    endpointId: SaleRepository.SATrx.page,
 
     filter: {
       filterFn: fetchGridData,
