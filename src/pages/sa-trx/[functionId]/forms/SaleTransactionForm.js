@@ -1685,7 +1685,7 @@ export default function SaleTransactionForm({
                 <Grid item xs={3}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
-                    name='header.siteId'
+                    name='siteId'
                     label={labels.site}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
