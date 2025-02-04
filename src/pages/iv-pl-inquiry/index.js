@@ -18,8 +18,6 @@ const PriceListInquiries = () => {
         extension: ReportIvGenerator.Report451,
         parameters: `_filter=${filters.qry}`
       })
-    } else {
-      return fetchGridData()
     }
   }
 
@@ -82,24 +80,26 @@ const PriceListInquiries = () => {
     }
   ]
 
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onSearch={onSearch} onClear={onClear} labels={_labels} maxAccess={access} inputSearch={true} />
+        <GridToolbar
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={_labels}
+          maxAccess={access}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
           name='table'
           columns={columns}
-          gridData={data}
+          gridData={data || { list: [] }}
           rowId={['recordId']}
           pagination={false}
           maxAccess={access}
