@@ -1696,7 +1696,7 @@ export default function SaleTransactionForm({
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     displayFieldWidth={2}
-                    readOnly={isPosted || formik?.values?.header?.dtId ? !formik?.values?.header?.commitItems : false}
+                    readOnly={isPosted || formik?.values?.header?.dtId && !formik?.values?.header?.commitItems}
                     required={
                       !formik?.values?.header.dtId ||
                       (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
@@ -1877,6 +1877,7 @@ export default function SaleTransactionForm({
             name='items'
             columns={columns}
             maxAccess={maxAccess}
+            allowDelete={!isPosted}
             disabled={isPosted || !formik.values.header.clientId || !formik.values.header.currencyId}
           />
         </Grow>
