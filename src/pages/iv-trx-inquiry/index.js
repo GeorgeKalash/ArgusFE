@@ -87,7 +87,7 @@ const TransactionInquiries = () => {
     },
     {
       field: 'amount',
-      headerName: _labels.shippingDate,
+      headerName: _labels.amount,
       flex: 1,
       type: 'number'
     },
