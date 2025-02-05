@@ -407,8 +407,8 @@ const GenerateOutboundTransportation = () => {
       isSaved={false}
       infoVisible={false}
     >
-      <Grid container sx={{ flex: 1 }}>
-        <Grid item xs={2.5} sx={{ display: 'flex', flex: 1, marginRight: 1 }}>
+      <Grid container sx={{ flex: 1, columnGap: 2 }}>
+        <Grid container xs={2.5} sx={{ display: 'flex', flex: 1 }}>
           <VertLayout>
             <Fixed>
               <Grid container spacing={2}>
@@ -500,11 +500,12 @@ const GenerateOutboundTransportation = () => {
             </Fixed>
           </VertLayout>
         </Grid>
-        <Grid item xs={9.4} sx={{ display: 'flex', flex: 1, marginLeft: 1 }}>
+
+        <Grid container sx={{ display: 'flex', flex: 1 }}>
           <VertLayout>
             <Fixed>
               <Grid container>
-                <Grid container xs={6} pl={2} spacing={2}>
+                <Grid container xs={6} spacing={2}>
                   <Grid item xs={6}>
                     <ResourceComboBox
                       endpointId={DeliveryRepository.Vehicle.qry}
@@ -588,52 +589,53 @@ const GenerateOutboundTransportation = () => {
                 handleCheckboxChange={onRowCheckboxChange}
               />
             </Grow>
-            <Grid container pt={2} spacing={2}>
-              <Grid item xs={3}>
-                <Button
-                  onClick={onAdd}
-                  variant='contained'
-                  sx={{
-                    backgroundColor: '#231f20',
-                    '&:hover': {
+            <Fixed>
+              <Grid container spacing={2}>
+                <Grid item xs={3}>
+                  <Button
+                    onClick={onAdd}
+                    variant='contained'
+                    sx={{
                       backgroundColor: '#231f20',
-                      opacity: 0.8
-                    },
-                    width: '30px !important',
-                    height: '40px',
-                    objectFit: 'contain',
-                    minWidth: '30px !important'
-                  }}
-                >
-                  <img src='/images/buttonsIcons/import.png' alt={platformLabels.Import} />
-                </Button>
-              </Grid>
-              <Grid item xs={5}></Grid>
-              <Grid item xs={3}>
-                <Grid container spacing={2}>
-                  <Grid item xs={5}>
-                    <CustomNumberField
-                      name='amount'
-                      label={labels.amount}
-                      value={totalAmountFromChecked}
-                      readOnly
-                      align='right'
-                    />
-                  </Grid>
-                  <Grid item xs={5}>
-                    <CustomNumberField
-                      name='volume'
-                      label={labels.volume}
-                      value={totalVolumeFromChecked}
-                      readOnly
-                      align='right'
-                    />
-                  </Grid>
+                      '&:hover': {
+                        backgroundColor: '#231f20',
+                        opacity: 0.8
+                      },
+                      width: '30px !important',
+                      height: '40px',
+                      objectFit: 'contain',
+                      minWidth: '30px !important'
+                    }}
+                  >
+                    <img src='/images/buttonsIcons/import.png' alt={platformLabels.Import} />
+                  </Button>
                 </Grid>
-                <Grid item xs={2}></Grid>
+                <Grid item xs={5}></Grid>
+                <Grid item xs={3}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={5}>
+                      <CustomNumberField
+                        name='amount'
+                        label={labels.amount}
+                        value={totalAmountFromChecked}
+                        readOnly
+                        align='right'
+                      />
+                    </Grid>
+                    <Grid item xs={5}>
+                      <CustomNumberField
+                        name='volume'
+                        label={labels.volume}
+                        value={totalVolumeFromChecked}
+                        readOnly
+                        align='right'
+                      />
+                    </Grid>
+                  </Grid>
+                  <Grid item xs={2}></Grid>
+                </Grid>
               </Grid>
-            </Grid>
-
+            </Fixed>
             <Grow>
               <Table
                 columns={columnsDeliveryOrders}
@@ -647,19 +649,33 @@ const GenerateOutboundTransportation = () => {
                 showSelectAll={false}
               />
             </Grow>
-            <Grid container pt={2} spacing={2}>
-              <Grid item xs={8}></Grid>
-              <Grid item xs={3}>
-                <Grid container spacing={2}>
-                  <Grid item xs={5}>
-                    <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly align='right' />
-                  </Grid>
-                  <Grid item xs={5}>
-                    <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly align='right' />
+            <Fixed>
+              <Grid container spacing={2}>
+                <Grid item xs={8}></Grid>
+                <Grid item xs={3}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={5}>
+                      <CustomNumberField
+                        name='amount'
+                        label={labels.amount}
+                        value={totalAmount}
+                        readOnly
+                        align='right'
+                      />
+                    </Grid>
+                    <Grid item xs={5}>
+                      <CustomNumberField
+                        name='volume'
+                        label={labels.volume}
+                        value={totalVolume}
+                        readOnly
+                        align='right'
+                      />
+                    </Grid>
                   </Grid>
                 </Grid>
               </Grid>
-            </Grid>
+            </Fixed>
           </VertLayout>
         </Grid>
       </Grid>
