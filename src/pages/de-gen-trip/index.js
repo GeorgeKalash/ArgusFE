@@ -105,8 +105,7 @@ const GenerateOutboundTransportation = () => {
 
   const onSelectCheckBox = (row, checked) => {
     if (checked) {
-      setTotalAmountFromChecked(prev => prev + row.amount)
-      setTotalVolumeFromChecked(prev => prev + row.volume)
+
     } else {
       const selectedIds = selectedSaleZones ? selectedSaleZones.split(',') : []
 
@@ -127,6 +126,11 @@ const GenerateOutboundTransportation = () => {
         list: prev?.list?.filter(item => item.recordId !== row.recordId) || [],
         count: Math.max((prev?.list?.length || 0) - 1, 0)
       }))
+
+      if (totalVolumeFromChecked && totalAmountFromChecked) {
+        setTotalAmountFromChecked(prev => prev - row.amount)
+        setTotalVolumeFromChecked(prev => prev - row.volume)
+      }
     }
   }
 
@@ -135,11 +139,24 @@ const GenerateOutboundTransportation = () => {
 
   const onRowCheckboxChange = (data, checked) => {
     if (Array.isArray(data)) {
+      if (checked) {
+        const newTotalAmount = data.reduce((sum, row) => sum + row.amount, 0);
+        const newTotalVolume = data.reduce((sum, row) => sum + row.volume, 0);
+  
+        setTotalVolumeFromChecked(newTotalVolume);
+        setTotalAmountFromChecked(newTotalAmount);
+      }
+  
       data.forEach(row => {
-        onSelectCheckBox(row, checked)
-      })
+        onSelectCheckBox(row, checked);
+      });
     } else {
-      onSelectCheckBox(data, checked)
+      if (checked) {
+        setTotalAmountFromChecked(prev => prev + data.amount);
+        setTotalVolumeFromChecked(prev => prev + data.volume);
+      }
+  
+      onSelectCheckBox(data, checked);
     }
   }
 
@@ -365,6 +382,8 @@ const GenerateOutboundTransportation = () => {
     setData({ list: [] })
     setSalesZones({ list: [] })
     setDeliveryOrders({ list: [] })
+    setTotalVolumeFromChecked(0)
+    setTotalAmountFromChecked(0)
     formik.resetForm()
   }
 
