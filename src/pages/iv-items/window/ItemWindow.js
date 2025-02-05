@@ -1,6 +1,6 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import ItemsForm from '../forms/ItemsForm.js'
 import PhysicalForm from '../forms/PhysicalForm.js'
 import VendorList from '../forms/VendorList.js'
@@ -11,7 +11,7 @@ import ItemProductionForm from '../forms/ItemProductionForm.js'
 import KitForm from '../forms/KitForm.js'
 import RetailForm from '../forms/RetailForm.js'
 
-const ItemWindow = ({ recordId, labels, sku, itemName, msId, maxAccess, setTitle }) => {
+const ItemWindow = ({ recordId, labels, msId, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [formikInitial, setFormikInitial] = useState([])
   const editMode = !!recordId
@@ -56,7 +56,7 @@ const ItemWindow = ({ recordId, labels, sku, itemName, msId, maxAccess, setTitle
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <BarcodeForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
+        <BarcodeForm labels={labels} setStore={setStore} store={store} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
         <SalesList labels={labels} maxAccess={maxAccess} store={store} formikInitial={formikInitial} />

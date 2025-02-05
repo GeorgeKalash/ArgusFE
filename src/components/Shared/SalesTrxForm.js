@@ -78,7 +78,9 @@ export default function SalesTrxForm({ functionId, recordId, itemId, clientId })
   async function fetchGridData() {
     const res = await getRequest({
       extension: SaleRepository.SATrx.qry,
-      parameters: `_functionId=${functionId}&_recordId=${recordId}&_itemId=${itemId}&_clientId=${clientId}`
+      parameters: `_functionId=${parseInt(functionId)}&_recordId=${parseInt(recordId)}&_itemId=${parseInt(
+        itemId
+      )}&_clientId=${parseInt(clientId)}`
     })
     res.list = res?.list?.map(item => ({
       ...item,

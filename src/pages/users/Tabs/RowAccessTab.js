@@ -13,11 +13,11 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import { POSRepository } from 'src/repositories/POSRepository'
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 
 const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const [data, setData] = useState([])
@@ -69,6 +69,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   })
 
   const fetchGridData = classId => {
+    setData({ list: [] })
     classId = classId || ResourceIds.Plants
 
     const plantRequestPromise = getRequest({
@@ -93,7 +94,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     const posRequestPromise =
       classId == ResourceIds.PointOfSale &&
       getRequest({
-        extension: POSRepository.PointOfSale.qry,
+        extension: PointofSaleRepository.PointOfSales.qry,
         parameters: '_filter='
       })
 
@@ -102,12 +103,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
       parameters: `_resourceId=${classId}&_userId=${storeRecordId}`
     })
 
-    let rar = {
-      recordId: null,
-      name: null,
-      hasAccess: false,
-      classId: null
-    }
+    let rar
 
     Promise.all([cashAccountRequestPromise, plantRequestPromise, salesPersonRequestPromise, rowAccessUserPromise]).then(
       ([cashAccountRequest, plantRequest, salesPersonRequest, rowAccessUser]) => {
@@ -144,7 +140,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
             }
           })
         }
-        if (classId !== 'undefined' && rar) {
+        if (classId && rar) {
           for (let i = 0; i < rar.length; i++) {
             rowAccessUser.list.forEach(storedItem => {
               if (storedItem.recordId.toString() == rar[i].recordId) {
@@ -154,10 +150,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
             })
           }
 
-          let resultObject = { list: rar }
-          setData(resultObject)
-        } else {
-          setData({ list: [] })
+          setData({ list: rar })
         }
       }
     )
@@ -227,8 +220,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
         <Grow>
           <Table
             columns={rowColumns}
-            gridData={filteredData ? filteredData : { list: [] }}
-            setData={setData}
+            gridData={filteredData}
             rowId={['recordId']}
             isLoading={false}
             maxAccess={maxAccess}

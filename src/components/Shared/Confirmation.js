@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import * as yup from 'yup'
 import FormShell from './FormShell'
@@ -12,12 +12,16 @@ import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { useError } from 'src/error'
+import { ControlContext } from 'src/providers/ControlContext'
+import { SystemChecks } from 'src/resources/SystemChecks'
+import CustomCheckBox from '../Inputs/CustomCheckBox'
 
 const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refreshProf = () => {}, window }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
   const [showAsPasswordRepeat, setShowAsPasswordRepeat] = useState(false)
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
+  const { systemChecks } = useContext(ControlContext)
 
   const handleCopy = event => {
     event.preventDefault()
@@ -30,7 +34,8 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
       idtId: clientformik.values?.idtId ? clientformik.values.idtId : clientformik.values?.id_type,
       birthDate: clientformik.values?.birthDate,
       idNo: clientformik.values?.idNo,
-      idNoRepeat: ''
+      idNoRepeat: '',
+      liveRequest: false
     },
 
     validationSchema: yup.object({
@@ -50,7 +55,9 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
   const postFetchDefault = obj => {
     const hijriDate = moment(formatDateForGetApI(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
 
-    const defaultParams = `_number=${obj.idNo}&_date=${hijriDate}&_idType=${obj.idtId}`
+    const defaultParams = `_number=${obj.idNo}&_date=${hijriDate}&_idType=${obj.idtId}&_liveRequest=${
+      formik.values.liveRequest ? 1 : 0
+    }`
     var parameters = defaultParams
     getRequest({
       extension: CurrencyTradingSettingsRepository.Yakeen.get,
@@ -61,14 +68,12 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
       if (!res.errorId) {
         clientformik.setFieldValue('expiryDate', formatDateFromApi(res.idExpirationDate))
         clientformik.setFieldValue('firstName', res.fl_firstName)
-        clientformik.setFieldValue('middleName', res.fl_middleName)
-        clientformik.setFieldValue('familyName', res.fl_familyName)
+        clientformik.setFieldValue('middleName', `${res.fl_middleName || ''} ${res.fl_familyName || ''}`.trim())
         clientformik.setFieldValue('lastName', res.fl_lastName)
         clientformik.setFieldValue('flName', res.flName)
         clientformik.setFieldValue('fl_firstName', res.firstName)
-        clientformik.setFieldValue('fl_middleName', res.middleName)
+        clientformik.setFieldValue('fl_middleName', `${res.middleName || ''} ${res.familyName || ''}`.trim())
         clientformik.setFieldValue('fl_lastName', res.lastName)
-        clientformik.setFieldValue('fl_familyName', res.familyName)
         clientformik.setFieldValue('gender', res.gender === 'ذكر' ? '1' : '2')
         clientformik.setFieldValue('professionId', res.professionId)
         clientformik.setFieldValue('nationalityId', res.nationalityId)
@@ -168,6 +173,16 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
                 }}
                 error={formik.touched.idNoRepeat && Boolean(formik.errors.idNoRepeat)}
                 helperText={formik.touched.idNoRepeat && formik.errors.idNoRepeat}
+              />
+            </Grid>
+            <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
+              <CustomCheckBox
+                name='liveRequest'
+                value={formik.values?.liveRequest}
+                onChange={event => formik.setFieldValue('liveRequest', event.target.checked)}
+                label={labels.yakeenLiveRequest}
+                maxAccess={maxAccess}
+                disabled={!systemChecks?.some(item => item.checkId === SystemChecks.CT_YAKEEN_INFORMATION)}
               />
             </Grid>
           </Grid>

@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -108,7 +108,7 @@ const DocumentTypes = () => {
         maxAccess: access
       },
       width: 700,
-      height: 600,
+      height: 500,
       title: _labels.DocumentType
     })
   }
@@ -126,13 +126,14 @@ const DocumentTypes = () => {
     <VertLayout>
       <Fixed>
         <GridToolbar
+          name='table'
           onAdd={add}
           maxAccess={access}
           onSearch={search}
           onSearchClear={clear}
           inputSearch={true}
           labels={_labels}
-        />{' '}
+        />
       </Fixed>
       <Grow>
         <Table

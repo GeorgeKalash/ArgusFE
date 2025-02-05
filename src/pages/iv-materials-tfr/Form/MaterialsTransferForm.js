@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -34,9 +34,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
+  const filteredMeasurements = useRef([])
 
   const [measurements, setMeasurements] = useState([])
-  const [filteredMu, setFilteredMU] = useState([])
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.MaterialTransfer,
@@ -88,7 +88,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         metalRef: '',
         totalCost: 0,
         priceType: null,
-        enabled: false
+        details: false
       }
     ]
   }
@@ -99,7 +99,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
   async function getDefaultFromSiteId() {
     if (editMode) {
-      return 
+      return
     }
 
     if (documentType?.dtId) {
@@ -109,10 +109,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     } else {
       const defaultFromSiteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
 
-      if (defaultFromSiteId?.value && !formik.values.fromSiteId) formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value || ''))
+      if (defaultFromSiteId?.value && !formik.values.fromSiteId)
+        formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value || ''))
     }
-
-    
   }
 
   async function handleNotificationSubmission(recordId, reference, formik, status) {
@@ -281,7 +280,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
       return {
         totalQty: acc?.totalQty + qtyValue,
-        totalCost: (Math.round((acc?.totalCost + totalCostValue) * 100) / 100).toFixed(2),
+        totalCost: (Math.round((parseFloat(acc?.totalCost) + totalCostValue) * 100) / 100).toFixed(2),
         totalWeight: acc?.totalWeight + weightValue
       }
     },
@@ -302,6 +301,17 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     })
 
     return res?.record
+  }
+
+  async function getFilteredMU(itemId) {
+    if (!itemId) return
+
+    const currentItemId = formik.values.transfers?.find(
+      transfer => parseInt(transfer.itemId) === itemId
+    )?.msId
+
+    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    filteredMeasurements.current = arrayMU
   }
 
   const columns = [
@@ -334,7 +344,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.itemId) {
           update({
-            enabled: false
+            details: false
           })
 
           return
@@ -345,14 +355,13 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
           const totalCost = calcTotalCost(newRow)
           const itemInfo = await getItem(newRow.itemId)
+          getFilteredMU(newRow?.itemId)
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-          setFilteredMU(filteredMeasurements)
-
           update({
             weight,
             unitCost,
             totalCost,
-            enabled: true,
+            details: true,
             msId: itemInfo?.msId,
             muRef: filteredMeasurements?.[0]?.reference,
             muId: filteredMeasurements?.[0]?.recordId,
@@ -364,7 +373,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     },
     {
       component: 'button',
-      name: 'enabled',
+      name: 'details',
       defaultValue: !!formik.values?.plId,
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png'
@@ -408,7 +417,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       label: labels.muId,
       name: 'muRef',
       props: {
-        store: filteredMu,
+        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         readOnly: isClosed,
@@ -419,13 +428,16 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
         const qtyInBase = newRow?.qty * filteredItems?.muQty ?? 0
 
         update({
           qtyInBase,
           muQty: newRow?.muQty
         })
+      },
+      propsReducer({ row, props }) {
+        return { ...props, store: filteredMeasurements?.current }
       }
     },
     {
@@ -690,11 +702,11 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       getDefaultFromSiteId()
-      
-    if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
-      getDTD(documentType?.dtId)
-    }
+
+      if (documentType?.dtId) {
+        formik.setFieldValue('dtId', documentType.dtId)
+        getDTD(documentType?.dtId)
+      }
     })()
   }, [])
 
@@ -706,9 +718,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         const res3 = await getDataGrid(recordId)
 
         const updatedTransfers = res3.list.map(item => {
-          const filteredMeasurements = measurements.filter(x => x.msId === item?.msId)
-          setFilteredMU(filteredMeasurements)
-
           return {
             ...item,
             id: item.seqNo,
@@ -734,7 +743,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       }
     })()
   }, [recordId, measurements, formik.values.toSiteId])
-
 
   async function previewBtnClicked() {
     const data = { printStatus: 2, recordId: formik.values.recordId }
@@ -934,7 +942,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                   maxAccess={maxAccess}
                   onClear={() => formik.setFieldValue('plantId', '')}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('plantId', newValue?.recordId)
+                    formik.setFieldValue('plantId', newValue?.recordId || null)
                   }}
                   error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                 />
@@ -946,14 +954,17 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
               const data = value?.map(transfer => {
                 return {
                   ...transfer,
-                  enabled: false,
+                  details: false,
                   qtyInBase: 0
                 }
               })
 
               formik?.setFieldValue('transfers', data)
             }}
-            name='items'
+            onSelectionChange={(row, update, field) => {
+              if (field == 'muRef') getFilteredMU(row?.itemId)
+            }}
+            name='transfers'
             maxAccess={maxAccess}
             value={formik?.values?.transfers}
             error={formik?.errors?.transfers}

@@ -11,7 +11,11 @@ export const CashBankRepository = {
     set: service + 'setCBX'
   },
   CreditCard: {
-    qry: service + 'qryCC'
+    qry: service + 'qryCC',
+    get: service + 'getCC',
+    set: service + 'setCC',
+    set2: service + 'set2CC',
+    del: service + 'delCC'
   },
   CashTransaction: {
     qry: service + 'qryTRX'
@@ -76,7 +80,8 @@ export const CashBankRepository = {
     get: service + 'getADJ',
     set: service + 'setADJ',
     del: service + 'delADJ',
-    post: service + 'postADJ'
+    post: service + 'postADJ',
+    unpost: service + 'unpostADJ'
   },
   CACheckbook: {
     qry: service + 'qryCBK',
@@ -102,5 +107,17 @@ export const CashBankRepository = {
     get: service + 'getDTD',
     set: service + 'setDTD',
     del: service + 'delDTD'
+  },
+  CreditCardFees: {
+    qry: service + 'qryCCS'
+  },
+  CashTransfers: {
+    qry: service + 'qryTFR',
+    del: service + 'delTFR',
+    get: service + 'getTFR',
+    set: service + 'setTFR',
+    snapshot: service + 'snapshotTFR',
+    unpost: service + 'unpostTFR',
+    post: service + 'postTFR'
   }
 }

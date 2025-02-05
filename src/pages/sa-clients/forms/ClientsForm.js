@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { useContext, useEffect } from 'react'
@@ -22,6 +22,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useRefBehavior } from 'src/hooks/useReferenceProxy'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -61,22 +62,19 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
       isInactive: false
     },
     maxAccess: maxAccess,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
       cgId: yup.string().required()
     }),
     onSubmit: async values => {
-      await postAccount(values)
-    }
-  })
+      const res = await postRequest({
+        extension: SaleRepository.Client.set,
+        record: JSON.stringify(values)
+      })
 
-  const postAccount = async obj => {
-    await postRequest({
-      extension: SaleRepository.Client.set,
-      record: JSON.stringify({ ...obj, acquisitionDate: formatDateToApi(obj?.acquisitionDate) })
-    }).then(res => {
-      if (!obj.recordId) {
+      if (!values.recordId) {
         setStore(prevStore => ({
           ...prevStore,
           recordId: res.recordId
@@ -84,7 +82,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
         formik.setFieldValue('recordId', res.recordId)
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
-      getData(res.recordId)
+      await getData(res.recordId)
       setStore(prevStore => ({
         ...prevStore,
         record: formik.values,
@@ -92,24 +90,8 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
       }))
 
       invalidate()
+    }
     })
-  }
-
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const defaultParams = `_recordId=${recordId}`
-        var parameters = defaultParams
-
-        const res = await getRequest({
-          extension: SaleRepository.Client.get,
-          parameters: parameters
-        })
-
-        formik.setValues({ ...res.record, acquisitionDate: formatDateFromApi(res?.record?.acquisitionDate) })
-      }
-    })()
-  }, [])
 
   useEffect(() => {
     ;(async function () {
@@ -123,15 +105,16 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
         extension: SaleRepository.Client.get,
         parameters: `_recordId=${recordId}`
       })
+
+      formik.setValues({
+        ...res.record,
+        acquisitionDate: formatDateFromApi(res?.record?.acquisitionDate)
+      })
+      
       setStore(prevStore => ({
         ...prevStore,
         record: res.record
       }))
-
-      formik.setValues({
-        ...res.record,
-        acquisitionDate: formatDateFromApi(res.record.acquisitionDate)
-      })
     }
   }
 
@@ -307,29 +290,26 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
               <CustomDatePicker
                 name='acquisitionDate'
                 label={labels.acquisitionDate}
-                value={formik.values?.acquisitionDate}
+                value={formik.values.acquisitionDate}
                 onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('acquisitionDate', '')}
                 error={formik.touched.acquisitionDate && Boolean(formik.errors.acquisitionDate)}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isSubjectToVAT'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isSubjectToVAT}
-                    onChange={event => {
-                      formik.setFieldValue('isSubjectToVAT', event.target.checked)
-                      if (!event.target.checked) {
-                        formik.setFieldValue('vatNumber', '')
-                        formik.setFieldValue('taxId', '')
-                      }
-                    }}
-                  />
-                }
+              <CustomCheckBox
+                name='isSubjectToVAT'
+                value={formik.values?.isSubjectToVAT}
+                onChange={event => {
+                  formik.setFieldValue('isSubjectToVAT', event.target.checked)
+                  if (!event.target.checked) {
+                    formik.setFieldValue('vatNumber', '')
+                    formik.setFieldValue('taxId', '')
+                  }
+                }}
                 label={labels.vat}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -385,18 +365,12 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isInactive'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isInactive}
-                    onChange={event => {
-                      formik.setFieldValue('isInactive', event.target.checked)
-                    }}
-                  />
-                }
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values?.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                 label={labels.inactive}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

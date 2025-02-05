@@ -106,7 +106,8 @@ const BPMasterData = () => {
         maxAccess: access,
         recordId: recordId ? recordId : null
       },
-      width: 1200,
+      width: 800,
+      height: 500,
       title: _labels.masterData
     })
   }
@@ -157,6 +158,7 @@ const BPMasterData = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

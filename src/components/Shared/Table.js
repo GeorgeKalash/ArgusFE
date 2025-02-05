@@ -1,14 +1,11 @@
 import React, { useContext } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import 'ag-grid-community/styles/ag-grid.css'
-import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
 import { useState } from 'react'
 import { useEffect } from 'react'
-import 'ag-grid-community'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -29,6 +26,7 @@ import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 
 const Table = ({
+  name,
   paginationType = '',
   globalStatus = true,
   viewCheckButtons = false,
@@ -39,12 +37,14 @@ const Table = ({
   setData,
   checkboxFlex = '',
   handleCheckboxChange = '',
+  showSelectAll = true,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
   const api = props?.api ? props?.api : props?.paginationParameters || ''
   const refetch = props?.refetch
   const [gridData, setGridData] = useState({})
+  const [page, setPage] = useState(null)
   const [startAt, setStartAt] = useState(0)
   const { languageId } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
@@ -59,7 +59,7 @@ const Table = ({
       ({ field }) =>
         accessLevel({
           maxAccess: props?.maxAccess,
-          name: field
+          name: name ? `${name}.${field}` : field
         }) !== HIDDEN
     )
     .map(col => {
@@ -67,13 +67,15 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => formatDateDefault(data?.[col.field]),
+          comparator: dateComparator,
           sortable: !disableSorting
         }
       }
       if (col.type === 'dateTime') {
         return {
           ...col,
-          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field]),
+          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field], col?.dateFormat),
+          comparator: dateComparator,
           sortable: !disableSorting
         }
       }
@@ -119,6 +121,36 @@ const Table = ({
       }
     })
 
+  function dateComparator(date1, date2) {
+    var date1Number = _dateTimeToNum(date1)
+    var date2Number = _dateTimeToNum(date2)
+    if (date1Number === null && date2Number === null) return 0
+    if (date1Number === null) return -1
+    if (date2Number === null) return 1
+
+    return date1Number - date2Number
+  }
+
+  function _dateTimeToNum(dateTime) {
+    if (!dateTime || dateTime.length < 10) return null
+    let [date, time = '00:00', meridian] = dateTime.split(/[\s:]+/)
+    let day = date.substring(0, 2)
+    let month = date.substring(3, 5)
+    let year = date.substring(6, 10)
+    let hours = 0
+    let minutes = 0
+    if (time.length === 2) {
+      hours = parseInt(time, 10)
+      minutes = parseInt(dateTime.substring(14, 16), 10) || 0
+      if (meridian === 'PM' && hours !== 12) hours += 12
+      else if (meridian === 'AM' && hours === 12) hours = 0
+    }
+
+    return (
+      parseInt(year, 10) * 100000000 + parseInt(month, 10) * 1000000 + parseInt(day, 10) * 10000 + hours * 100 + minutes
+    )
+  }
+
   const shouldRemoveColumn = column => {
     const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
 
@@ -129,12 +161,23 @@ const Table = ({
   useEffect(() => {
     const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
-    if (typeof setData === 'function') onSelectionChanged
-
-    props?.gridData &&
-      paginationType !== 'api' &&
-      pageSize &&
-      setGridData({ list: pageSize ? props?.gridData?.list?.slice(0, pageSize) : props?.gridData?.list })
+    if (typeof setData === 'function') {
+      onSelectionChanged()
+    }
+    if (props?.gridData && paginationType !== 'api' && pageSize) {
+      if (page) {
+        const start = (page - 1) * pageSize
+        const end = page * pageSize
+        const slicedGridData = props?.gridData?.list?.slice(start, end)
+        setGridData({
+          ...props.gridData,
+          list: slicedGridData
+        })
+        setStartAt(start)
+      } else {
+        setGridData({ list: pageSize ? props?.gridData?.list?.slice(0, pageSize) : props?.gridData?.list })
+      }
+    }
   }, [props?.gridData])
 
   const CustomPagination = () => {
@@ -148,7 +191,7 @@ const Table = ({
             if (paginationType === 'api') {
               api({ _startAt: (newPage - 1) * pageSize, _pageSize: pageSize })
             } else {
-              var slicedGridData = props?.gridData?.list.slice((newPage - 2) * pageSize, newPage * pageSize)
+              var slicedGridData = props?.gridData?.list?.slice((newPage - 2) * pageSize, newPage * pageSize)
               setGridData({
                 ...props?.gridData?.list,
                 list: slicedGridData
@@ -263,7 +306,7 @@ const Table = ({
 
         if (gridData && gridData?.list) {
           const originalGridData = gridData && gridData.list
-          const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
+          setPage(Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1))
 
           var _gridData = gridData?.list
           const pageCount = Math.ceil(originalGridData?.length ? originalGridData?.length / pageSize : 1)
@@ -383,9 +426,10 @@ const Table = ({
     })
 
     setChecked(e.target.checked)
+    const data = allNodes.map(rowNode => rowNode.data)
 
     if (handleCheckboxChange) {
-      handleCheckboxChange()
+      handleCheckboxChange(data, e.target.checked)
     }
 
     if (typeof setData === 'function') onSelectionChanged
@@ -444,7 +488,7 @@ const Table = ({
           }
 
           if (handleCheckboxChange) {
-            handleCheckboxChange()
+            handleCheckboxChange(params.data, e.target.checked)
           }
         }}
       />
@@ -452,7 +496,6 @@ const Table = ({
   }
 
   const onFirstDataRendered = async params => {
-    params.api.sizeColumnsToFit()
     await params.api.forEachNode(node => {
       if (rowSelection === 'single') {
         const checked = node.data?.checked || false
@@ -532,9 +575,11 @@ const Table = ({
             headerName: '',
             field: 'checked',
             flex: checkboxFlex,
+            width: 100,
             cellRenderer: checkboxCellRenderer,
             headerComponent: params =>
-              rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
+              rowSelection !== 'single' &&
+              showSelectAll && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
             suppressMenu: true
           }
         ]
