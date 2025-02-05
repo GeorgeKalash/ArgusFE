@@ -212,9 +212,10 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
       key: 'SerialsLots',
       condition: true,
       onClick: openSerials,
-      disabled: isCancelled || isPosted
+      disabled: !editMode || (!isReleased && formik.values.trackBy == 1)
     }
   ]
+  console.log('check condition ', !editMode, !isReleased, formik.values.trackBy == 1)
   function openSerials() {
     stack({
       Component: SerialsLots,
@@ -362,8 +363,8 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
       previewReport={editMode}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={isCancelled}
-      disabledSavedClear={isCancelled}
+      disabledSubmit={isCancelled || isPosted}
+      disabledSavedClear={isCancelled || isPosted}
     >
       <VertLayout>
         <Fixed>
@@ -466,7 +467,7 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
                       <ResourceLookup
                         endpointId={InventoryRepository.Item.snapshot}
                         name='itemId'
-                        readOnly={isCancelled || isReleased || isPosted}
+                        readOnly={isCancelled || isPosted}
                         label={labels.item}
                         valueField='recordId'
                         displayField='sku'
@@ -575,7 +576,7 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
                         value={formik.values.description}
                         rows={2.5}
                         maxLength='100'
-                        readOnly={isCancelled || isReleased || isPosted}
+                        readOnly={isCancelled || isPosted}
                         maxAccess={maxAccess}
                         onChange={e => formik.setFieldValue('description', e.target.value)}
                         onClear={() => formik.setFieldValue('description', '')}
