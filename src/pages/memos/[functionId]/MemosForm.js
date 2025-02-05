@@ -105,14 +105,12 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         toast.success(platformLabels.Edited)
       }
 
-      try {
-        const res = await getRequest({
-          extension: FinancialRepository.FiMemo.get,
-          parameters: `_recordId=${response.recordId}`
-        })
+      const res = await getRequest({
+        extension: FinancialRepository.FiMemo.get,
+        parameters: `_recordId=${response.recordId}`
+      })
 
-        formik.setFieldValue('reference', res.record.reference)
-      } catch (error) {}
+      formik.setFieldValue('reference', res.record.reference)
       invalidate()
     }
   })
@@ -125,15 +123,13 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
   useEffect(() => {
     ;(async function () {
-      try {
-        const res = await getRequest({
-          extension: SystemRepository.Defaults.qry,
-          parameters: `_filter=vatPct`
-        })
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.qry,
+        parameters: `_filter=vatPct`
+      })
 
-        const vatPctValue = res.list.find(item => item.key === 'vatPct')?.value || '0'
-        setInitialVatPct(vatPctValue)
-      } catch (exception) {}
+      const vatPctValue = res.list.find(item => item.key === 'vatPct')?.value || '0'
+      setInitialVatPct(vatPctValue)
     })()
   }, [])
   useEffect(() => {
@@ -151,7 +147,15 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     }
 
     formik.setFieldValue('amount', calculatedAmount)
-    if (!formik.values.baseAmount) formik.setFieldValue('baseAmount', calculatedAmount)
+
+    const updatedRateRow = getRate({
+      amount: calculatedAmount ?? 0,
+      exRate: formik.values?.exRate,
+      baseAmount: 0,
+      rateCalcMethod: formik.values?.rateCalcMethod,
+      dirtyField: DIRTYFIELD_RATE
+    })
+    formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
   }, [formik.values.isSubjectToVAT, initialVatPct, formik.values.subtotal])
 
   async function getDefaultsData() {
@@ -173,21 +177,19 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: FinancialRepository.FiMemo.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.FiMemo.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues({
-            ...res.record,
-            dueDate: formatDateFromApi(res.record.dueDate),
-            date: formatDateFromApi(res.record.date)
-          })
-        }
-        await getDefaultsData()
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          dueDate: formatDateFromApi(res.record.dueDate),
+          date: formatDateFromApi(res.record.date)
+        })
+      }
+      await getDefaultsData()
     })()
   }, [])
   useEffect(() => {
@@ -195,51 +197,70 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   }, [formik.values.notes])
 
   const onPost = async () => {
-    try {
-      const res = await postRequest({
-        extension: FinancialRepository.FiMemo.post,
-        record: JSON.stringify(formik.values)
+    const res = await postRequest({
+      extension: FinancialRepository.FiMemo.post,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res?.recordId) {
+      toast.success(platformLabels.Posted)
+      invalidate()
+
+      const getRes = await getRequest({
+        extension: FinancialRepository.FiMemo.get,
+        parameters: `_recordId=${formik.values.recordId}`
       })
 
-      if (res?.recordId) {
-        toast.success('Record Posted Successfully')
-        invalidate()
+      getRes.record.date = formatDateFromApi(getRes.record.date)
+      getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
+      formik.setValues(getRes.record)
+    }
+  }
 
-        const getRes = await getRequest({
-          extension: FinancialRepository.FiMemo.get,
-          parameters: `_recordId=${formik.values.recordId}`
-        })
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: FinancialRepository.FiMemo.unpost,
+      record: JSON.stringify(formik.values)
+    })
 
-        getRes.record.date = formatDateFromApi(getRes.record.date)
-        getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
-        formik.setValues(getRes.record)
-      }
-    } catch (error) {}
+    if (res?.recordId) {
+      toast.success(platformLabels.Unposted)
+      invalidate()
+
+      const getRes = await getRequest({
+        extension: FinancialRepository.FiMemo.get,
+        parameters: `_recordId=${formik.values.recordId}`
+      })
+
+      getRes.record.date = formatDateFromApi(getRes.record.date)
+      getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
+      formik.setValues(getRes.record)
+    }
   }
 
   const onCancel = async () => {
-    try {
-      const res = await postRequest({
-        extension: FinancialRepository.FiMemo.cancel,
-        record: JSON.stringify(formik.values)
+    const res = await postRequest({
+      extension: FinancialRepository.FiMemo.cancel,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res?.recordId) {
+      toast.success(platformLabels.Cancelled)
+      invalidate()
+
+      const getRes = await getRequest({
+        extension: FinancialRepository.FiMemo.get,
+        parameters: `_recordId=${formik.values.recordId}`
       })
+      getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
+      getRes.record.date = formatDateFromApi(getRes.record.date)
 
-      if (res?.recordId) {
-        toast.success('Record Canceled Successfully')
-        invalidate()
-
-        const getRes = await getRequest({
-          extension: FinancialRepository.FiMemo.get,
-          parameters: `_recordId=${formik.values.recordId}`
-        })
-        getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
-        getRes.record.date = formatDateFromApi(getRes.record.date)
-
-        formik.setValues(getRes.record)
-      }
-    } catch (error) {}
+      formik.setValues(getRes.record)
+    }
   }
   const postedOrCanceled = formik.values.status === -1 || formik.values.status === 3
+  const isPosted = formik.values.status === 3
+  const isCancelled = formik.values.status === -1
 
   async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
     if (currencyId && date && rateType) {
@@ -288,16 +309,23 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       disabled: !editMode
     },
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode || isCancelled
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || formik.values.status === -1 || formik.values.status === 3
+      disabled: !editMode || isCancelled
     },
     {
       key: 'Cancel',
       condition: true,
       onClick: onCancel,
-      disabled: !editMode || formik.values.status === -1 || formik.values.status === 3
+      disabled: !editMode || isCancelled || isPosted
     }
   ]
 
@@ -345,7 +373,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       actions={actions}
       functionId={formik.values.functionId}
       previewReport={editMode}
-      disabledSubmit={formik.values.status === -1 || formik.values.status === 3}
+      disabledSubmit={isCancelled || isPosted}
     >
       <VertLayout>
         <Grow>
@@ -391,7 +419,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
-                    readOnly={postedOrCanceled}
+                    readOnly={isPosted || isCancelled}
                     label={labels.date}
                     value={formik.values.date}
                     onChange={async (e, newValue) => {
@@ -411,7 +439,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='dueDate'
-                    readOnly={postedOrCanceled}
+                    readOnly={isPosted || isCancelled}
                     label={labels.dueDate}
                     value={formik.values.dueDate}
                     required
@@ -425,7 +453,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
                     name='plantId'
-                    readOnly={postedOrCanceled}
+                    readOnly={isPosted || isCancelled}
                     label={labels.plant}
                     valueField='recordId'
                     displayField={['reference', 'name']}
@@ -449,7 +477,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                       <ResourceComboBox
                         endpointId={SystemRepository.Currency.qry}
                         name='currencyId'
-                        readOnly={postedOrCanceled}
+                        readOnly={isPosted || isCancelled}
                         label={labels.currency}
                         valueField='recordId'
                         displayField={['reference', 'name']}
@@ -477,7 +505,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                         variant='contained'
                         size='small'
                         onClick={() => openMCRForm(formik.values)}
-                        disabled={!formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId}
+                        disabled={
+                          !formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId
+                        }
                       >
                         <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                       </Button>
@@ -492,7 +522,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='subtotal'
-                    readOnly={postedOrCanceled}
+                    readOnly={isPosted || isCancelled}
                     required
                     label={labels.subtotal}
                     value={formik.values.subtotal}
@@ -541,7 +571,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                   <CustomCheckBox
                     name='isSubjectToVAT'
                     value={formik.values?.isSubjectToVAT}
-                    onChange={event => !postedOrCanceled && formik.setFieldValue('isSubjectToVAT', event.target.checked) }
+                    onChange={event =>
+                      !(isPosted || isCancelled) && formik.setFieldValue('isSubjectToVAT', event.target.checked)
+                    }
                     label={labels.vat}
                     maxAccess={maxAccess}
                     readOnly={postedOrCanceled}
@@ -568,7 +600,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 parameters={{
                   _type: 2
                 }}
-                readOnly={postedOrCanceled}
+                readOnly={isPosted || isCancelled}
                 valueField='reference'
                 displayField='name'
                 name='accountId'
@@ -598,7 +630,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 name='templateId'
                 label={labels.descriptionTemplate}
                 valueField='recordId'
-                readOnly={postedOrCanceled}
+                readOnly={isPosted || isCancelled}
                 displayField='name'
                 values={formik.values}
                 onChange={(event, newValue) => {
@@ -616,7 +648,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
             <Grid item xs={6}>
               <CustomTextField
                 name='sourceReference'
-                readOnly={postedOrCanceled}
+                readOnly={isPosted || isCancelled}
                 maxLength='20'
                 label={labels.sourceReference}
                 value={formik.values.sourceReference}
@@ -630,7 +662,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 name='notes'
                 type='text'
                 label={labels.notes}
-                readOnly={postedOrCanceled}
+                readOnly={isPosted || isCancelled}
                 value={formik.values.notes}
                 rows={4}
                 maxAccess={maxAccess}
