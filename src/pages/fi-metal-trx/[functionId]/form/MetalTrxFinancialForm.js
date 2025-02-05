@@ -504,6 +504,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       previewReport={editMode}
       editMode={editMode}
       functionId={formik.values.functionId}
+      disabledSubmit={isPosted}
     >
       <VertLayout>
         <Fixed>
