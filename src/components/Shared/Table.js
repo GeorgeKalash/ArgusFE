@@ -94,8 +94,6 @@ const Table = ({
         }
       }
       if (col.type === 'checkbox') {
-        console.log(col.headerName)
-
         return {
           ...col,
           width: 110,
