@@ -46,7 +46,7 @@ const GenerateOutboundTransportation = () => {
       driverId: null,
       szId: null,
       capacity: 0,
-      balance: null,
+      balance: 0,
       volume: 0
     },
     validationSchema: yup.object({
@@ -74,8 +74,8 @@ const GenerateOutboundTransportation = () => {
           ...formik.values,
           volume: 0,
           capacity: 0,
-          amount: null,
-          balance: null
+          amount: 0,
+          balance: 0
         })
         setDeliveryOrders({ list: [] })
         toast.success(platformLabels.Generated)
