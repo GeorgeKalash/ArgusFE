@@ -121,14 +121,15 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     datasetId: ResourceIds.MultiCurrencyRate
   })
 
+  async function getDefaultVAT() {
+    const defaultVAT = defaultsData?.list?.find(({ key }) => key === 'vatPct')
+
+    return parseInt(defaultVAT?.value)
+  }
+
   useEffect(() => {
     ;(async function () {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.qry,
-        parameters: `_filter=vatPct`
-      })
-
-      const vatPctValue = res.list.find(item => item.key === 'vatPct')?.value || '0'
+      const vatPctValue = await getDefaultVAT()
       setInitialVatPct(vatPctValue)
     })()
   }, [])
