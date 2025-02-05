@@ -1527,10 +1527,6 @@ export default function SaleTransactionForm({
     invalidate()
   }
 
-  console.log(isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems), '||')
-  console.log(isPosted, 'isPosted')
-  console.log((!formik?.values?.header?.commitItems), 'commitItems')
-
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
