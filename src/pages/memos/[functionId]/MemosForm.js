@@ -127,6 +127,17 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     return parseInt(defaultVAT?.value)
   }
 
+  function setBaseAmount(amount) {
+    const updatedRateRow = getRate({
+      amount: amount ?? 0,
+      exRate: formik.values?.exRate,
+      baseAmount: 0,
+      rateCalcMethod: formik.values?.rateCalcMethod,
+      dirtyField: DIRTYFIELD_RATE
+    })
+    formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+  }
+
   useEffect(() => {
     ;(async function () {
       const vatPctValue = await getDefaultVAT()
@@ -148,15 +159,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     }
 
     formik.setFieldValue('amount', calculatedAmount)
-
-    const updatedRateRow = getRate({
-      amount: calculatedAmount ?? 0,
-      exRate: formik.values?.exRate,
-      baseAmount: 0,
-      rateCalcMethod: formik.values?.rateCalcMethod,
-      dirtyField: DIRTYFIELD_RATE
-    })
-    formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+    setBaseAmount(calculatedAmount)
+    
   }, [formik.values.isSubjectToVAT, initialVatPct, formik.values.subtotal])
 
   async function getDefaultsData() {
@@ -269,16 +273,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         extension: MultiCurrencyRepository.Currency.get,
         parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
       })
+      const amountValue = amount === 0 ? 0 : amount ?? formik.values.amount;
 
-      const updatedRateRow = getRate({
-        amount: amount === 0 ? 0 : amount ?? formik.values.amount,
-        exRate: res.record?.exRate ?? 1,
-        baseAmount: 0,
-        rateCalcMethod: res.record?.rateCalcMethod ?? 1,
-        dirtyField: DIRTYFIELD_RATE
-      })
-
-      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      setBaseAmount(amountValue)
       formik.setFieldValue('exRate', res.record?.exRate ?? 1)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod ?? 1)
     }
@@ -530,15 +527,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     maxAccess={maxAccess}
                     onChange={async e => {
                       formik.setFieldValue('subtotal', e.target.value)
-
-                      const updatedRateRow = getRate({
-                        amount: e.target.value ?? 0,
-                        exRate: formik.values?.exRate,
-                        baseAmount: 0,
-                        rateCalcMethod: formik.values?.rateCalcMethod,
-                        dirtyField: DIRTYFIELD_RATE
-                      })
-                      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                      setBaseAmount(e.target.value)
                     }}
                     onClear={() => formik.setFieldValue('subtotal', '')}
                     error={formik.touched.subtotal && Boolean(formik.errors.subtotal)}
