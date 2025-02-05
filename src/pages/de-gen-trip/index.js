@@ -37,7 +37,7 @@ const GenerateOutboundTransportation = () => {
     datasetId: ResourceIds.Trip
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value) || null
+  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
 
   const { formik } = useForm({
     initialValues: {
@@ -59,7 +59,7 @@ const GenerateOutboundTransportation = () => {
       const data = {
         vehicleId: obj.vehicleId,
         driverId: obj.driverId,
-        plantId,
+        plantId: plantId,
         tripOrderIDs: deliveryOrders.list.map(order => order.recordId)
       }
 
@@ -109,15 +109,13 @@ const GenerateOutboundTransportation = () => {
 
         return {
           ...prev,
-          list: [...(prev?.list || []), itemToAdd],
-          count: (prev?.list?.length || 0) + 1
+          list: [...(prev?.list || []), itemToAdd]
         }
       })
 
       setDeliveryOrders(prev => ({
         ...prev,
-        list: prev?.list?.filter(item => item.recordId !== row.recordId) || [],
-        count: Math.max((prev?.list?.length || 0) - 1, 0)
+        list: prev?.list?.filter(item => item.recordId !== row.recordId) || []
       }))
 
       if (totalVolumeFromChecked && totalAmountFromChecked) {
@@ -308,8 +306,7 @@ const GenerateOutboundTransportation = () => {
 
     setSalesZones({
       ...salesZones,
-      list: salesZones.list,
-      count: salesZones.list.length
+      list: salesZones.list
     })
   }
 
@@ -319,12 +316,7 @@ const GenerateOutboundTransportation = () => {
     setSelectedSaleZones(prev => {
       const ids = prev ? prev.split(',') : []
 
-      let updatedIds
-      if (checked) {
-        updatedIds = [...new Set([...ids, recordId])]
-      } else {
-        updatedIds = ids.filter(id => id != recordId)
-      }
+      const updatedIds = checked ? [...new Set([...ids, recordId])] : ids.filter(id => id != recordId)
 
       return updatedIds.join(',')
     })
@@ -347,8 +339,7 @@ const GenerateOutboundTransportation = () => {
 
       return {
         ...prev,
-        list: newItems,
-        count: prev.list.length + newItems.length
+        list: newItems
       }
     })
   }
@@ -359,14 +350,12 @@ const GenerateOutboundTransportation = () => {
     setTotalAmountFromChecked(0)
     setDeliveryOrders(prev => ({
       ...prev,
-      list: [...(prev?.list || []), ...selectedRows],
-      count: (prev?.list?.length || 0) + selectedRows.length
+      list: [...(prev?.list || []), ...selectedRows]
     }))
 
     setData(prev => ({
       ...prev,
-      list: prev?.list?.filter(item => !item.checked) || [],
-      count: (prev?.list?.length || 0) - selectedRows.length
+      list: prev?.list?.filter(item => !item.checked) || []
     }))
   }
 
