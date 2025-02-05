@@ -119,7 +119,8 @@ export const ManufacturingRepository = {
     del: service + 'delJOB',
     snapshot: service + 'snapshotJOB',
     cancel: service + 'cancelJOB',
-    post: service + 'postJOB'
+    post: service + 'postJOB',
+    start: service + 'startJOB'
   },
   ProductionSheet: {
     page: service + 'pagePST',
@@ -191,5 +192,9 @@ export const ManufacturingRepository = {
     qry: service + 'qrySRL',
     set2: service + 'set2SRL',
     generate: service + 'generateSRL'
+  },
+  SamplePack: {
+    qry: service + 'qrySPL',
+    set2: service + 'set2SPL'
   }
 }

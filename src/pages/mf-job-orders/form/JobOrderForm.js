@@ -28,6 +28,8 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import SerialsLots from './SerialsLots'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import Samples from './Samples'
 
 export default function JobOrderForm({ labels, access, setStore, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -125,6 +127,87 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
   const isReleased = formik.values.status == 4
   const isPosted = formik.values.status == 3
 
+  const actions = [
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: () => {},
+      disabled: true
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode || isPosted || isCancelled
+    },
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'Cancel',
+      condition: true,
+      onClick: () => {
+        confirmation(platformLabels.CancelConf, platformLabels.Confirmation, onCancel)
+      },
+      disabled: isCancelled || isPosted
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
+    },
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      disabled: !editMode
+    },
+    {
+      key: 'IV',
+      condition: true,
+      onClick: 'onInventoryTransaction',
+      disabled: !editMode || !isPosted
+    },
+    {
+      key: 'SerialsLots',
+      condition: true,
+      onClick: openSerials,
+      disabled: !editMode || (!isReleased && formik.values.trackBy == 1)
+    },
+    {
+      key: 'Start',
+      condition: true,
+      onClick: () => {
+        confirmation(platformLabels.StartRecord, platformLabels.Confirmation, onStart)
+      },
+      disabled: false
+    },
+    {
+      key: 'Sample',
+      condition: true,
+      onClick: openSample,
+      disabled: !editMode || !isReleased || !isPosted ? !(isReleased || isPosted) : false
+    }
+  ]
+
+  async function onStart() {
+    const res = await postRequest({
+      extension: ManufacturingRepository.MFJobOrder.start,
+      record: JSON.stringify({
+        ...formik.values,
+        date: formatDateToApi(formik.values.date),
+        deliveryDate: formik.values.deliveryDate ? formatDateToApi(formik.values.deliveryDate) : null
+      })
+    })
+    toast.success(platformLabels.Started)
+    invalidate()
+    await refetchForm(res.recordId)
+  }
   async function onCancel() {
     const res = await postRequest({
       extension: ManufacturingRepository.MFJobOrder.cancel,
@@ -134,7 +217,7 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
         deliveryDate: formik.values.deliveryDate ? formatDateToApi(formik.values.deliveryDate) : null
       })
     })
-    toast.success(platformLabels.Cancel)
+    toast.success(platformLabels.Cancelled)
     invalidate()
     await refetchForm(res.recordId)
   }
@@ -163,59 +246,6 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
       title: labels.workflow
     })
   }
-
-  const actions = [
-    {
-      key: 'Locked',
-      condition: isPosted,
-      onClick: 'onUnpostConfirmation',
-      onSuccess: () => {},
-      disabled: true
-    },
-    {
-      key: 'Unlocked',
-      condition: !isPosted,
-      onClick: onPost,
-      disabled: !editMode || isPosted || isCancelled
-    },
-    {
-      key: 'RecordRemarks',
-      condition: true,
-      onClick: 'onRecordRemarks',
-      disabled: !editMode
-    },
-    {
-      key: 'Cancel',
-      condition: true,
-      onClick: onCancel,
-      disabled: isCancelled || isPosted
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
-    },
-    {
-      key: 'GL',
-      condition: true,
-      onClick: 'onClickGL',
-      disabled: !editMode
-    },
-    {
-      key: 'IV',
-      condition: true,
-      onClick: 'onInventoryTransaction',
-      disabled: !editMode || !isPosted
-    },
-    {
-      key: 'SerialsLots',
-      condition: true,
-      onClick: openSerials,
-      disabled: !editMode || (!isReleased && formik.values.trackBy == 1)
-    }
-  ]
-  console.log('check condition ', !editMode, !isReleased, formik.values.trackBy == 1)
   function openSerials() {
     stack({
       Component: SerialsLots,
@@ -223,6 +253,31 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
       width: 500,
       height: 600,
       title: labels.seriallot
+    })
+  }
+  function openSample() {
+    stack({
+      Component: Samples,
+      props: { labels, maxAccess, recordId: formik.values.recordId, itemId: formik.values.itemId },
+      width: 500,
+      height: 600,
+      title: labels.samples
+    })
+  }
+  function confirmation(dialogText, titleText, event) {
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: dialogText,
+        okButtonAction: async () => {
+          await event()
+        },
+        fullScreen: false,
+        close: true
+      },
+      width: 400,
+      height: 150,
+      title: titleText
     })
   }
   async function refetchForm(recordId) {

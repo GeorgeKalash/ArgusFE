@@ -74,10 +74,24 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Sample',
+    label: platformLabels.Sample,
+    color: '#231f20',
+    image: 'sample.png',
+    main: false
+  },
+  {
     key: 'SerialsLots',
     label: platformLabels.SerialsLots,
     color: '#D3D3D3',
     image: 'serials-lots.png',
+    main: false
+  },
+  {
+    key: 'Start',
+    label: platformLabels.Start,
+    color: '#4eb558',
+    image: 'play.png',
     main: false
   },
   {

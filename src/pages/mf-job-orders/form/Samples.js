@@ -14,7 +14,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
+export default function Samples({ labels, maxAccess, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const editMode = !!recordId
@@ -24,93 +24,64 @@ export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
     validateOnChange: true,
     initialValues: {
       jobId: recordId,
-      serials: []
+      data: []
     },
-    validationSchema: yup.object({
-      serials: yup.array().of(
-        yup.object({
-          weight: yup.string().required()
-        })
-      )
-    }),
     onSubmit: async obj => {
-      const modifiedSerials = obj.serials.map((serials, index) => ({
-        ...serials,
-        seqNo: index + 1,
-        jobId: recordId
-      }))
+      const modifiedData = obj.data
+        .filter(data => data.itemWeight)
+        .map((data, index) => ({
+          ...data,
+          seqNo: index + 1,
+          jobId: recordId
+        }))
+
       await postRequest({
-        extension: ManufacturingRepository.MFSerial.set2,
-        record: JSON.stringify({ jobId: recordId, data: modifiedSerials })
+        extension: ManufacturingRepository.SamplePack.set2,
+        record: JSON.stringify({ jobId: recordId, data: modifiedData })
       })
       toast.success(platformLabels.Edited)
     }
   })
 
-  const totWeight = formik.values.serials.reduce((weightSum, row) => {
-    const weightValue = parseFloat(row?.weight?.toString().replace(/,/g, '')) || 0
+  const totWeight = formik.values.data.reduce((weightSum, row) => {
+    const weightValue = parseFloat(row?.itemWeight?.toString().replace(/,/g, '')) || 0
 
     return weightSum + weightValue
   }, 0)
 
+  const avgWeight = formik.values.data.length > 0 ? totWeight / formik.values.data.length : 0
+
   const columns = [
     {
-      component: 'textfield',
-      label: labels.srlNo,
-      name: 'srlNo',
-      props: {
-        readOnly: true
-      }
-    },
-    {
       component: 'numberfield',
-      label: labels.weight,
-      name: 'weight',
+      label: labels.itemWgt,
+      name: 'itemWeight',
       defaultValue: 0
     }
   ]
 
   async function fetchGridData() {
     const res = await getRequest({
-      extension: ManufacturingRepository.MFSerial.qry,
-      parameters: `_jobId=${recordId}`
+      extension: ManufacturingRepository.SamplePack.qry,
+      parameters: `_jobId=${recordId}&_filter=`
     })
 
-    const updateSerialsList =
+    const updateDataList =
       res?.list?.length != 0
         ? await Promise.all(
             res?.list?.map(async (item, index) => {
               return {
                 ...item,
                 id: index + 1,
-                weight: item?.weight || 0
+                itemWeight: item?.itemWeight || 0
               }
             })
           )
-        : []
-
+        : [{ id: 1, itemWeight: 0 }]
     formik.setValues({
       jobId: recordId,
-      serials: updateSerialsList
+      data: updateDataList
     })
-  }
-
-  const actions = [
-    {
-      key: 'GenerateSerialsLots',
-      condition: true,
-      onClick: generateSRL,
-      disabled: formik?.values?.serials[0]?.srlNo
-    }
-  ]
-
-  async function generateSRL() {
-    await postRequest({
-      extension: ManufacturingRepository.MFSerial.generate,
-      record: JSON.stringify({ jobId: recordId, itemId: itemId })
-    })
-    toast.success(platformLabels.Generated)
-    await fetchGridData()
   }
 
   useEffect(() => {
@@ -126,26 +97,25 @@ export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
       isInfo={false}
       isCleared={false}
       isSavedClear={false}
-      actions={actions}
     >
       <VertLayout>
         <Grow>
           <DataGrid
             onChange={(value, action) => {
-              formik.setFieldValue('serials', value)
+              formik.setFieldValue('data', value)
               action === 'delete'
             }}
-            value={formik.values?.serials}
-            error={formik.errors?.serials}
+            value={formik.values?.data}
+            error={formik.errors?.data}
             columns={columns}
-            name='serials'
+            name='data'
             maxAccess={maxAccess}
           />
         </Grow>
         <Fixed>
           <Grid container>
             <Grid item xs={4} sx={{ pt: 2 }}>
-              <CustomNumberField name='totalWeight' label={labels.totWeight} value={totWeight} readOnly />
+              <CustomNumberField name='avgWeight' label={labels.average} value={avgWeight} readOnly />
             </Grid>
           </Grid>
         </Fixed>
