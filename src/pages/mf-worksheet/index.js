@@ -50,6 +50,9 @@ const MfWorksheet = () => {
       filterFn: fetchWithFilter
     }
   })
+
+  const maxSeqNo = data ? data.list.reduce((max, item) => Math.max(max, item.maxSeqNo), 0) + 1 : 0
+
   async function fetchWithFilter({ filters, pagination = {} }) {
     const { _startAt = 0, _size = 50 } = pagination
     if (filters.page) {
@@ -128,12 +131,13 @@ const MfWorksheet = () => {
       props: {
         labels: _labels,
         recordId: obj?.recordId,
-        maxAccess: access
+        maxAccess: access,
+        seqNo: obj?.seqNo || maxSeqNo,
+        invalidate
       },
       width: 1200,
       height: 780,
-      title: _labels.Worksheet,
-      nextToTitle: obj?.sku
+      title: _labels.Worksheet
     })
   }
 

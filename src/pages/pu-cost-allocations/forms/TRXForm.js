@@ -319,7 +319,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
                 onChange={formik.setFieldValue}
                 editMode={editMode}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 readOnly={isClosed}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />

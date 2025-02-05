@@ -1,6 +1,7 @@
 const service = 'MF.asmx/'
 
 export const ManufacturingRepository = {
+  qryDMR2: service + 'qryDRM2',
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
     page: service + 'pageLBG',
@@ -39,15 +40,15 @@ export const ManufacturingRepository = {
     page: service + 'pageOPR',
     set: service + 'setOPR',
     get: service + 'getOPR',
-    del: service + 'delOPR',
-    qry: service + 'qryOPR'
+    del: service + 'delOPR'
   },
   Labor: {
     page: service + 'pageLBR',
     qry: service + 'qryLBR',
     set: service + 'setLBR',
     get: service + 'getLBR',
-    del: service + 'delLBR'
+    del: service + 'delLBR',
+    snapshot: service + 'snapshotLBR'
   },
   Machine: {
     page: service + 'pageMAC',
@@ -156,5 +157,12 @@ export const ManufacturingRepository = {
     page: service + 'pageWST',
     summary: service + 'summaryWST',
     post: service + 'postWST'
+  },
+  WorksheetMaterials: {
+    qry: service + 'qryIMA',
+    get: service + 'getIMA',
+    set: service + 'setIMA',
+    del: service + 'delIMA',
+    post: service + 'postIMA'
   }
 }
