@@ -37,11 +37,7 @@ const GenerateOutboundTransportation = () => {
     datasetId: ResourceIds.Trip
   })
 
-  const getPlantId = async () => {
-    const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')
-
-    return defaultPlant?.value ? parseInt(defaultPlant.value) : null
-  }
+  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value) || null;
 
   const { formik } = useForm({
     initialValues: {
@@ -60,8 +56,6 @@ const GenerateOutboundTransportation = () => {
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async obj => {
-      const plantId = await getPlantId()
-
       const data = {
         vehicleId: obj.vehicleId,
         driverId: obj.driverId,
