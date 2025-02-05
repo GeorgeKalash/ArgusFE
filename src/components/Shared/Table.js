@@ -430,7 +430,10 @@ const Table = ({
   const checkboxCellRenderer = params => {
     return (
       <Checkbox
-        sx={{ p: 1 }}
+        sx={{
+          width: '100%',
+          height: '100%'
+        }}
         checked={params.value}
         onChange={e => {
           const checked = e.target.checked
@@ -538,7 +541,16 @@ const Table = ({
             cellRenderer: checkboxCellRenderer,
             headerComponent: params =>
               rowSelection !== 'single' &&
-              showSelectAll && <Checkbox checked={checked} onChange={e => selectAll(params, e)} sx={{ p: 1 }} />,
+              showSelectAll && (
+                <Checkbox
+                  checked={checked}
+                  onChange={e => selectAll(params, e)}
+                  sx={{
+                    width: '100%',
+                    height: '100%'
+                  }}
+                />
+              ),
             suppressMenu: true
           }
         ]
