@@ -579,7 +579,7 @@ const GenerateOutboundTransportation = () => {
               />
             </Grow>
             <Fixed>
-              <Grid container spacing={2}>
+              <Grid container pt={2} justifyContent='space-between' spacing={2}>
                 <Grid item xs={3}>
                   <Button
                     onClick={onAdd}
@@ -599,10 +599,9 @@ const GenerateOutboundTransportation = () => {
                     <img src='/images/buttonsIcons/import.png' alt={platformLabels.Import} />
                   </Button>
                 </Grid>
-                <Grid item xs={5}></Grid>
-                <Grid item xs={3}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={5}>
+                <Grid item xs={6}>
+                  <Grid container spacing={2} justifyContent='flex-end'>
+                    <Grid item xs={3}>
                       <CustomNumberField
                         name='amount'
                         label={labels.amount}
@@ -611,7 +610,7 @@ const GenerateOutboundTransportation = () => {
                         align='right'
                       />
                     </Grid>
-                    <Grid item xs={5}>
+                    <Grid item xs={3}>
                       <CustomNumberField
                         name='volume'
                         label={labels.volume}
@@ -621,7 +620,6 @@ const GenerateOutboundTransportation = () => {
                       />
                     </Grid>
                   </Grid>
-                  <Grid item xs={2}></Grid>
                 </Grid>
               </Grid>
             </Fixed>
@@ -639,29 +637,12 @@ const GenerateOutboundTransportation = () => {
               />
             </Grow>
             <Fixed>
-              <Grid container spacing={2}>
-                <Grid item xs={8}></Grid>
-                <Grid item xs={3}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={5}>
-                      <CustomNumberField
-                        name='amount'
-                        label={labels.amount}
-                        value={totalAmount}
-                        readOnly
-                        align='right'
-                      />
-                    </Grid>
-                    <Grid item xs={5}>
-                      <CustomNumberField
-                        name='volume'
-                        label={labels.volume}
-                        value={totalVolume}
-                        readOnly
-                        align='right'
-                      />
-                    </Grid>
-                  </Grid>
+              <Grid container pt={2} spacing={2} justifyContent='flex-end'>
+                <Grid item xs={1.5}>
+                  <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly align='right' />
+                </Grid>
+                <Grid item xs={1.5}>
+                  <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly align='right' />
                 </Grid>
               </Grid>
             </Fixed>
