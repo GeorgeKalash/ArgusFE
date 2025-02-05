@@ -1527,6 +1527,10 @@ export default function SaleTransactionForm({
     invalidate()
   }
 
+  console.log(isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems), '||')
+  console.log(isPosted, 'isPosted')
+  console.log((!formik?.values?.header?.commitItems), 'commitItems')
+
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
@@ -1696,7 +1700,7 @@ export default function SaleTransactionForm({
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     displayFieldWidth={2}
-                    readOnly={isPosted || formik?.values?.header?.dtId && !formik?.values?.header?.commitItems}
+                    readOnly={isPosted || formik?.values?.header?.dtId && formik?.values?.header?.commitItems}
                     required={
                       !formik?.values?.header.dtId ||
                       (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
