@@ -96,9 +96,11 @@ const getImportData = (gridData, columns) => {
 
   if (missingFields.length > 0) {
     const uniqueMissingFields = [...new Set(missingFields)]
-    throw new Error(`${uniqueMissingFields.join(', ')} ${uniqueMissingFields.length > 1 ? 'are' : 'is'} mandatory field${
+    throw new Error(
+      `${uniqueMissingFields.join(', ')} ${uniqueMissingFields.length > 1 ? 'are' : 'is'} mandatory field${
         uniqueMissingFields.length > 1 ? 's' : ''
-    }.`)
+      }.`
+    )
   }
 
   const convertedData = gridData.list.map(row => {
@@ -115,12 +117,12 @@ const getImportData = (gridData, columns) => {
   return convertedData
 }
 
-const formatDateForImport = (dateString) => {
-  const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10));
-  const fullYear = year < 100 ? 2000 + year : year;
-  const date = new Date(Date.UTC(fullYear, month - 1, day, 0, 0, 0));
+const formatDateForImport = dateString => {
+  const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10))
+  const fullYear = year < 100 ? 2000 + year : year
+  const date = new Date(Date.UTC(fullYear, month - 1, day, 0, 0, 0))
 
-  return date.toISOString().split('.')[0] + 'Z';
+  return date.toISOString().split('.')[0] + 'Z'
 }
 
 const BatchImports = () => {
@@ -132,7 +134,7 @@ const BatchImports = () => {
   const [file, setFile] = useState(null)
   const imageInputRef = useRef(null)
 
-  const [importsConfiguration, setImportsConfiguration] = useState([]);
+  const [importsConfiguration, setImportsConfiguration] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { resourceId } = router.query
   const { platformLabels } = useContext(ControlContext)
@@ -151,21 +153,20 @@ const BatchImports = () => {
           })
 
           setImportsConfiguration(res)
-
         }
       } catch (exception) {}
     })()
   }, [])
 
-  const modifiedFields = importsConfiguration?.record?.fields?.map(({ name, dataType, ...rest }) => ({
-    field: name,
-    headerName: name,
-    type: (dataType === 2 || dataType === 3) ? 'number' : undefined,
-    flex: 1,
-    ...rest
-  })) || []
-  
-  const columns = [{ field: 'recordId', headerName: '', flex: 0.4 }, ...modifiedFields]
+  const modifiedFields =
+    importsConfiguration?.record?.fields?.map(({ name, dataType, ...rest }) => ({
+      field: name,
+      headerName: name,
+      type: dataType === 2 || dataType === 3 ? 'number' : undefined,
+      ...rest
+    })) || []
+
+  const columns = [{ field: 'recordId', headerName: '' }, ...modifiedFields]
   const objectName = importsConfiguration?.record?.objectName || ''
   const endPoint = importsConfiguration?.record?.endPoint || ''
 
@@ -198,13 +199,13 @@ const BatchImports = () => {
       const data = {
         [objectName]: convertedData
       }
-  
+
       try {
         const res = await postRequest({
           extension: endPoint,
           record: JSON.stringify(data)
         })
-  
+
         stack({
           Component: ThreadProgress,
           props: {
@@ -216,7 +217,7 @@ const BatchImports = () => {
           closable: false,
           title: platformLabels.Progress
         })
-  
+
         toast.success(platformLabels.Imported)
       } catch (exception) {}
     } catch (error) {
@@ -224,7 +225,6 @@ const BatchImports = () => {
         message: error?.message
       })
     }
-    
   }
 
   const actions = [

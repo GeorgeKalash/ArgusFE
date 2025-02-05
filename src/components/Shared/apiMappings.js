@@ -16,7 +16,6 @@ import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import { FixedAssetsRepository } from 'src/repositories/FixedAssetsRepository'
 import { SCRepository } from 'src/repositories/SCRepository'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
-import { POSRepository } from 'src/repositories/POSRepository'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { companyStructureRepository } from 'src/repositories/companyStructureRepository'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
@@ -25,6 +24,7 @@ import { LoanManagementRepository } from 'src/repositories/LoanManagementReposit
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
+import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 
 export const COMBOBOX = 1
 
@@ -115,7 +115,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: '40%'
   },
   [ResourceIds.DocumentTypes]: {
@@ -602,7 +602,7 @@ export const apiMappings = {
   },
   [ResourceIds.PointOfSale]: {
     type: COMBOBOX,
-    endpoint: POSRepository.PointOfSale.qry,
+    endpoint: PointofSaleRepository.PointOfSales.qry,
     valueField: 'recordId',
     displayField: 'reference'
   },

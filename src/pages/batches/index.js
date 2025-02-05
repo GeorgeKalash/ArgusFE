@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react'
-import { Grid, Box, Button } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -9,13 +9,11 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
-import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/DocumentTypes'
-import { defaultParams } from 'src/lib/defaults'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -24,14 +22,11 @@ import { ControlContext } from 'src/providers/ControlContext'
 const Batches = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  //stores
   const [gridData, setGridData] = useState([])
   const [integrationLogicStore, setIntegrationLogicStore] = useState([])
   const [sysFunctionsStore, setSysFunctionsStore] = useState([])
   const [activeStatusStore, setActiveStatusStore] = useState([])
   const [numberRangeStore, setNumberRangeStore] = useState([])
-
-  //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
@@ -97,11 +92,9 @@ const Batches = () => {
     getRequest({
       extension: SystemRepository.DocumentType.qry,
       parameters: parameters
+    }).then(res => {
+      setGridData({ ...res, _startAt })
     })
-      .then(res => {
-        setGridData({ ...res, _startAt })
-      })
-      .catch(error => {})
   }
 
   const fillIntegrationLogicStore = () => {
@@ -109,11 +102,9 @@ const Batches = () => {
     getRequest({
       extension: GeneralLedgerRepository.IntegrationLogic.qry,
       parameters: parameters
+    }).then(res => {
+      setIntegrationLogicStore(res.list)
     })
-      .then(res => {
-        setIntegrationLogicStore(res.list)
-      })
-      .catch(error => {})
   }
 
   const fillSysFunctionsStore = () => {
@@ -121,11 +112,9 @@ const Batches = () => {
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters
+    }).then(res => {
+      setSysFunctionsStore(res.list)
     })
-      .then(res => {
-        setSysFunctionsStore(res.list)
-      })
-      .catch(error => {})
   }
 
   const fillActiveStatusStore = () => {
@@ -133,11 +122,9 @@ const Batches = () => {
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters
+    }).then(res => {
+      setActiveStatusStore(res.list)
     })
-      .then(res => {
-        setActiveStatusStore(res.list)
-      })
-      .catch(error => {})
   }
 
   const lookupNumberRange = searchQry => {
@@ -145,11 +132,9 @@ const Batches = () => {
     getRequest({
       extension: SystemRepository.NumberRange.snapshot,
       parameters: parameters
+    }).then(res => {
+      setNumberRangeStore(res.list)
     })
-      .then(res => {
-        setNumberRangeStore(res.list)
-      })
-      .catch(error => {})
   }
 
   const postDocumentType = async obj => {
@@ -157,31 +142,23 @@ const Batches = () => {
     await postRequest({
       extension: SystemRepository.DocumentType.set,
       record: JSON.stringify(obj)
+    }).then(res => {
+      getGridData()
+      setWindowOpen(false)
+      if (!recordId) toast.success(platformLabels.Added)
+      else toast.success(platformLabels.Edited)
     })
-      .then(res => {
-        getGridData()
-        setWindowOpen(false)
-        if (!recordId) toast.success(platformLabels.Added)
-        else toast.success(platformLabels.Edited)
-      })
-      .catch(error => {
-        console.log({ error: error })
-      })
   }
 
   const delDocumentType = obj => {
     postRequest({
       extension: SystemRepository.DocumentType.del,
       record: JSON.stringify(obj)
+    }).then(res => {
+      console.log({ res })
+      getGridData()
+      toast.success(platformLabels.Deleted)
     })
-      .then(res => {
-        console.log({ res })
-        getGridData()
-        toast.success(platformLabels.Deleted)
-      })
-      .catch(error => {
-        console.log({ error: error })
-      })
   }
 
   const addDocumentType = () => {

@@ -89,8 +89,8 @@ function formatDateandTime(date, recFormat) {
   return formattedDate
 }
 
-function formatDateTimeDefault(date) {
-  return formatDateandTime(date, 'hh:mm a')
+function formatDateTimeDefault(date, format = 'hh:mm a') {
+  return formatDateandTime(date, format)
 }
 
 //Omar

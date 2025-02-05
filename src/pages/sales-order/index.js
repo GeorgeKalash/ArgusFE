@@ -27,7 +27,7 @@ const SalesOrder = () => {
     filterBy,
     refetch,
     clearFilter,
-    labels: labels,
+    labels,
     access,
     paginationParameters,
     invalidate
@@ -134,7 +134,7 @@ const SalesOrder = () => {
   async function getDefaultSalesCurrency() {
     const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
 
-    return defaultCurrency?.value ? parseInt(defaultCurrency.value) : null
+    return parseInt(defaultCurrency?.value)
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -155,7 +155,7 @@ const SalesOrder = () => {
   }
 
   const editSO = obj => {
-    openForm(obj.recordId)
+    openForm(obj?.recordId)
   }
 
   async function openForm(recordId) {
@@ -216,6 +216,7 @@ const SalesOrder = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

@@ -65,7 +65,6 @@ export const ManufacturingRepository = {
   },
   LeanProductionPlanning: {
     preview: service + 'previewPQ',
-    preview2: service + 'previewPQ2',
     update: service + 'updatePQ',
     snapshot: service + 'snapshotPQ',
     del: service + 'delPQ',
@@ -126,7 +125,7 @@ export const ManufacturingRepository = {
     del: service + 'delPST',
     post: service + 'postPST',
     unpost: service + 'unpostPST',
-    snapshot: service + 'snapshotPST',
+    snapshot: service + 'snapshotPST'
   },
   ProductionSheetItem: {
     qry: service + 'qryPSI',
@@ -140,5 +139,15 @@ export const ManufacturingRepository = {
     set: service + 'setDTD',
     del: service + 'delDTD',
     page: service + 'pageDTD'
+  },
+  RawMaterialCategory: {
+    qry: service + 'qryRMC',
+    get: service + 'getRMC',
+    set: service + 'setRMC',
+    del: service + 'delRMC',
+    page: service + 'pageRMC'
+  },
+  ProductionSheetQueue: {
+    qry: service + 'qryPSQ'
   }
 }

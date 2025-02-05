@@ -2,10 +2,9 @@ import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment, Paper }
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
-import { TrxType } from 'src/resources/AccessLevels'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomLookup = ({
   type = 'text',
@@ -15,8 +14,7 @@ const CustomLookup = ({
   secondValue,
   secondDisplayField = true,
   columnsInDropDown,
-  onSecondValueChange,
-  secondFieldName = '',
+  secondField = { name: '', editable: false, onChange: () => {} },
   store = [],
   setStore,
   onKeyUp,
@@ -45,17 +43,17 @@ const CustomLookup = ({
   onFocus = () => {},
   ...props
 }) => {
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
+
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
+  const [isFocused, setIsFocused] = useState(false)
 
   const valueHighlightedOption = useRef(null)
 
   const selectFirstValue = useRef(null)
 
   const autocompleteRef = useRef(null)
-
-  const clear = useRef(false)
 
   const [inputValue, setInputValue] = useState(firstValue || '')
 
@@ -79,14 +77,6 @@ const CustomLookup = ({
     }
   }, [firstValue])
 
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
-
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
-
-  const isRequired = required || accessLevel === MANDATORY
-
   return _hidden ? (
     <></>
   ) : (
@@ -94,6 +84,8 @@ const CustomLookup = ({
       <Grid item xs={secondDisplayField ? 6 : 12}>
         <Autocomplete
           ref={autocompleteRef}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           name={name}
           key={firstValue || null}
           value={firstValue}
@@ -138,7 +130,17 @@ const CustomLookup = ({
                       {columnsInDropDown.map(
                         (header, i) =>
                           columnsInDropDown.length > 1 && (
-                            <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
+                            <Box
+                              key={i}
+                              sx={{
+                                flex: 1,
+                                fontWeight: 'bold',
+                                width: header.width || 'auto',
+                                fontSize: '0.7rem',
+                                height: '15px',
+                                display: 'flex'
+                              }}
+                            >
                               {header.value.toUpperCase()}
                             </Box>
                           )
@@ -147,7 +149,16 @@ const CustomLookup = ({
                   )}
                   <li {...props}>
                     {columnsInDropDown.map((header, i) => (
-                      <Box key={i} sx={{ flex: 1 }}>
+                      <Box
+                        key={i}
+                        sx={{
+                          flex: 1,
+                          width: header.width || 'auto',
+                          fontSize: '0.88rem',
+                          height: '20px',
+                          display: 'flex'
+                        }}
+                      >
                         {option[header.key]}
                       </Box>
                     ))}
@@ -159,7 +170,11 @@ const CustomLookup = ({
                 <Box>
                   {props.id.endsWith('-0') && (
                     <li className={props.className}>
-                      {secondDisplayField && <Box sx={{ flex: 1, fontWeight: 'bold' }}>{valueField.toUpperCase()}</Box>}
+                      {secondDisplayField && (
+                        <Box sx={{ flex: 1, fontSize: '0.88rem', height: '20px', display: 'flex', fontWeight: 'bold' }}>
+                          {valueField.toUpperCase()}
+                        </Box>
+                      )}
                       {secondDisplayField && (
                         <Box sx={{ flex: 1, fontWeight: 'bold' }}>{displayField.toUpperCase()}</Box>
                       )}
@@ -167,7 +182,11 @@ const CustomLookup = ({
                   )}
                   <li {...props}>
                     <Box sx={{ flex: 1 }}>{option[valueField]}</Box>
-                    {secondDisplayField && <Box sx={{ flex: 1 }}>{option[displayField]}</Box>}
+                    {secondDisplayField && (
+                      <Box sx={{ flex: 1, fontSize: '0.88rem', height: '20px', display: 'flex' }}>
+                        {option[displayField]}
+                      </Box>
+                    )}
                   </li>
                 </Box>
               )
@@ -207,7 +226,7 @@ const CustomLookup = ({
               type={type}
               variant={variant}
               label={label}
-              required={isRequired}
+              required={_required}
               onKeyUp={e => {
                 onKeyUp(e)
                 if (e.key !== 'Enter') e.target?.value?.length >= minChars ? setFreeSolo(false) : setFreeSolo(true)
@@ -244,7 +263,7 @@ const CustomLookup = ({
                         }}
                         aria-label='clear input'
                       >
-                        <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                        <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
                       </IconButton>
                     </InputAdornment>
 
@@ -256,7 +275,7 @@ const CustomLookup = ({
                           edge='end'
                           style={{ pointerEvents: 'none' }}
                         >
-                          <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 20 }} />
+                          <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 17 }} />
                         </IconButton>
                       </InputAdornment>
                     ) : (
@@ -276,8 +295,20 @@ const CustomLookup = ({
                 }),
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
-                    border: !hasBorder && 'none'
-                  }
+                    border: !hasBorder && 'none',
+                    borderColor: '#959d9e',
+                    borderTopLeftRadius: '6px',
+                    borderBottomLeftRadius: '6px'
+                  },
+                  height: '33px !important'
+                },
+                '& .MuiInputLabel-root': {
+                  fontSize: '0.90rem',
+                  top: isFocused || firstValue ? '0px' : '-3px'
+                },
+                '& .MuiInputBase-input': {
+                  fontSize: '0.90rem',
+                  color: 'black'
                 },
                 width: '100%'
               }}
@@ -295,17 +326,17 @@ const CustomLookup = ({
             variant={variant}
             placeholder={secondFieldLabel == '' ? displayField.toUpperCase() : secondFieldLabel.toUpperCase()}
             value={secondValue ? secondValue : ''}
-            required={isRequired}
+            required={_required}
             onChange={e => {
-              if (onSecondValueChange && secondFieldName) {
-                onSecondValueChange(secondFieldName, e.target.value)
+              if (secondField?.onChange && secondField?.name) {
+                secondField?.onChange(secondField?.name, e.target.value)
               }
             }}
             InputProps={{
               inputProps: {
-                tabIndex: _readOnly || secondFieldName === '' ? -1 : 0 // Prevent focus on the input field
+                tabIndex: _readOnly || secondField?.editable === '' ? -1 : 0 // Prevent focus on the input field
               },
-              readOnly: !!secondFieldName && !_readOnly ? false : true
+              readOnly: secondField ? !secondField?.editable : _readOnly
             }}
             error={error}
             helperText={helperText}
@@ -315,7 +346,25 @@ const CustomLookup = ({
               '& .MuiInputBase-root': {
                 borderTopLeftRadius: 0,
                 borderBottomLeftRadius: 0
-              }
+              },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  border: !hasBorder && 'none',
+                  borderColor: '#959d9e',
+                  borderTopRightRadius: '6px',
+                  borderBottomRightRadius: '6px'
+                },
+                height: '33px !important'
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: '0.90rem',
+                top: firstValue ? '0px' : '-3px'
+              },
+              '& .MuiInputBase-input': {
+                fontSize: '0.90rem',
+                color: 'black'
+              },
+              width: '100%'
             }}
           />
         </Grid>

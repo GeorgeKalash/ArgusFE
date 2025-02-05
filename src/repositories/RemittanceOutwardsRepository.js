@@ -171,5 +171,24 @@ export const RemittanceOutwardsRepository = {
   },
   AssignedDispersalType: {
     assigned: service + 'assignedDT'
-  }
+  },
+  OutwardReturnSettlement: {
+    qry: service + 'qryORS',
+    page: service + 'pageORS',
+    get: service + 'getORS',
+    get2: service + 'get2ORS',
+    set: service + 'setORS',
+    set2: service + 'set2ORS',
+    del: service + 'delORS',
+    post: service + 'postORS',
+    close: service + 'closeORS',
+    reopen: service + 'reopenORS',
+    snapshot: service + 'snapshotORS'
+  },
+  OutwardReturnReason: {
+    page: service + 'pageOWRR',
+    get: service + 'getOWRR',
+    set: service + 'setOWRR',
+    del: service + 'delOWRR',
+  },
 }

@@ -1,4 +1,5 @@
-import { Button, Checkbox, FormControlLabel, Grid, Radio, RadioGroup } from '@mui/material'
+import { Button, Grid } from '@mui/material'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import React, { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -36,6 +37,7 @@ import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 import PaymentGrid from 'src/components/Shared/PaymentGrid'
 import { DataSets } from 'src/resources/DataSets'
 import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
+import CustomRadioButtonGroup from 'src/components/Inputs/CustomRadioButtonGroup'
 
 export default function TransactionForm({ recordId, labels, access, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -49,7 +51,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const [formikSettings, setFormik] = useState({})
 
   const resetAutoFilled = () => {
@@ -88,7 +90,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       }
     ],
     amount: formikSettings.initialValuePayment || [],
-    date: new Date(),
+    date: '',
     clientId: null,
     clientName: null,
     clientType: '1',
@@ -103,7 +105,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     birthDate: null,
     resident: false,
     professionId: null,
-    sponsorName: null,
+    sponsorName: '',
     idNo: null,
     id_type: null,
     expiryDate: null,
@@ -129,10 +131,48 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     enabled: !!!recordId
   })
 
+  async function fetchInfoByKey({ key }) {
+    const res = await getRequest({
+      extension: RTCLRepository.CtClientIndividual.get3,
+      parameters: `_key=${key}`
+    })
+    setIDInfoAutoFilled(false)
+
+    formik.setFieldValue('idNo', res?.record?.clientIDView.idNo)
+    formik.setFieldValue('firstName', res?.record?.clientIndividual.firstName)
+    formik.setFieldValue('clientId', res?.record?.clientId)
+    formik.setFieldValue('middleName', res?.record?.clientIndividual.middleName)
+    formik.setFieldValue('lastName', res?.record?.clientIndividual.lastName)
+    formik.setFieldValue('familyName', res?.record?.clientIndividual.familyName)
+    formik.setFieldValue('fl_firstName', res?.record?.clientIndividual.fl_firstName)
+    formik.setFieldValue('fl_lastName', res?.record?.clientIndividual.fl_lastName)
+    formik.setFieldValue('fl_middleName', res?.record?.clientIndividual.fl_middleName)
+    formik.setFieldValue('fl_familyName', res?.record?.clientIndividual.fl_familyName)
+    formik.setFieldValue('birthDate', formatDateFromApi(res?.record?.clientIndividual.birthDate))
+    formik.setFieldValue('resident', res?.record?.clientIndividual.isResident)
+    formik.setFieldValue('professionId', res?.record?.clientMaster.professionId)
+    formik.setFieldValue('sponsorName', res?.record?.clientIndividual.sponsorName)
+    formik.setFieldValue('id_type', res?.record?.clientIDView.idtId)
+    formik.setFieldValue('nationalityId', res?.record?.clientMaster.nationalityId)
+    formik.setFieldValue('nationalityType', res?.record?.clientIDView.idCountryId === 195 ? 1 : 2)
+    formik.setFieldValue('cellPhone', res?.record?.clientMaster.cellPhone)
+    formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView.idExpiryDate))
+
+    setIDInfoAutoFilled(true)
+
+    return res.record
+  }
+
+  const getValueFromDefaultsData = key => {
+    const defaultValue = defaultsData.list.find(item => item.key === key)
+
+    return defaultValue ? defaultValue.value : null
+  }
+
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
@@ -307,7 +347,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             oldReference: null,
             otp: false,
             createdDate: formatDateToApi(values.date),
-            expiryDate: null,
+            expiryDate: values.expiryDate,
             professionId: values.professionId
           },
           clientIndividual: {
@@ -443,8 +483,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const isPosted = formik.values.status === 3
   const isReleased = formik.values.status === 4
 
-  console.log(isPosted, 'isPosted')
-
   async function setOperationType(type) {
     if (type) {
       const res = await getRequest({
@@ -473,6 +511,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     ;(async function () {
       setOperationType(formik.values.functionId)
       if (recordId) await getData(recordId)
+      if (!recordId) formik.setFieldValue('date', new Date())
     })()
   }, [])
 
@@ -654,39 +693,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     }
   }
 
-  async function fetchInfoByKey({ key }) {
-    await getRequest({
-      extension: RTCLRepository.CtClientIndividual.get3,
-      parameters: `_key=${key}`
-    }).then(res => {
-      setIDInfoAutoFilled(false)
-
-      formik.setFieldValue('idNo', res.record.clientIDView.idNo)
-      formik.setFieldValue('firstName', res.record.clientIndividual.firstName)
-      formik.setFieldValue('clientId', res.record.clientId)
-      formik.setFieldValue('middleName', res.record.clientIndividual.middleName)
-      formik.setFieldValue('lastName', res.record.clientIndividual.lastName)
-      formik.setFieldValue('familyName', res.record.clientIndividual.familyName)
-      formik.setFieldValue('fl_firstName', res.record.clientIndividual.fl_firstName)
-      formik.setFieldValue('fl_lastName', res.record.clientIndividual.fl_lastName)
-      formik.setFieldValue('fl_middleName', res.record.clientIndividual.fl_middleName)
-      formik.setFieldValue('fl_familyName', res.record.clientIndividual.fl_familyName)
-      formik.setFieldValue('birthDate', formatDateFromApi(res.record.clientIndividual.birthDate))
-      formik.setFieldValue('resident', res.record.clientIndividual.isResident)
-      formik.setFieldValue('professionId', res.record.clientMaster.professionId)
-      formik.setFieldValue('sponsorName', res.record.clientIndividual.sponsorName)
-      formik.setFieldValue('id_type', res.record.clientIDView.idtId)
-      formik.setFieldValue('nationalityId', res.record.clientMaster.nationalityId)
-      formik.setFieldValue('nationalityType', res.record.clientMaster.nationalityType)
-      formik.setFieldValue('cellPhone', res.record.clientMaster.cellPhone)
-      formik.setFieldValue('expiryDate', formatDateFromApi(res.record.clientIDView.idExpiryDate))
-
-      setIDInfoAutoFilled(true)
-
-      return res.record
-    })
-  }
-
   function viewAuthOTP() {
     stack({
       Component: OTPAuthentication,
@@ -757,7 +763,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       onClick: onClose,
       disabled: isClosed || !editMode
     },
-
     {
       key: 'Reopen',
       condition: isClosed,
@@ -796,6 +801,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       disabledSubmit={balance > 0 && true}
       previewReport={editMode}
       isParentWindow={false}
+      maxAccess={maxAccess}
     >
       <VertLayout>
         <Grow>
@@ -872,28 +878,26 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                     />
                   </Grid>
                   <Grid item xs={3}>
-                    <RadioGroup
-                      row
+                    <CustomRadioButtonGroup
+                      options={[
+                        {
+                          label: labels.purchase,
+                          value: SystemFunction.CurrencyPurchase
+                        },
+                        {
+                          label: labels.sale,
+                          value: SystemFunction.CurrencySale
+                        }
+                      ]}
                       value={formik.values.functionId}
                       onChange={e => {
-                        setOperationType(parseInt(e.target.value))
-                        setFId(e.target.value)
+                        const newValue = e.target.value
+                        setOperationType(parseInt(newValue))
+                        setFId(newValue)
                         formik.setFieldValue('reference', '')
                       }}
-                    >
-                      <FormControlLabel
-                        value={SystemFunction.CurrencyPurchase}
-                        control={<Radio />}
-                        label={labels.purchase}
-                        disabled={formik?.values?.operations[0]?.currencyId != '' ? true : false}
-                      />
-                      <FormControlLabel
-                        value={SystemFunction.CurrencySale}
-                        control={<Radio />}
-                        label={labels.sale}
-                        disabled={formik?.values?.operations[0]?.currencyId != '' ? true : false}
-                      />
-                    </RadioGroup>
+                      disabledCondition={() => formik?.values?.operations[0]?.currencyId !== ''}
+                    />
                   </Grid>
                   <Grid item xs={3}>
                     <ResourceComboBox
@@ -916,10 +920,15 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                     />
                   </Grid>
                   <Grid item xs={6}>
-                    <RadioGroup row value={formik.values.clientType} onChange={formik.onChange}>
-                      <FormControlLabel value={'1'} control={<Radio />} label={labels.individual} />
-                      <FormControlLabel value={'2'} control={<Radio />} label={labels.corporate} disabled />
-                    </RadioGroup>
+                    <CustomRadioButtonGroup
+                      options={[
+                        { label: labels.individual, value: '1' },
+                        { label: labels.corporate, value: '2', disabled: true }
+                      ]}
+                      value={formik.values.clientType}
+                      onChange={e => formik.setFieldValue('clientType', e.target.value)}
+                      disabledCondition={() => formik?.values?.operations[0]?.currencyId !== ''}
+                    />
                   </Grid>
                 </Grid>
               </FieldSet>
@@ -992,11 +1001,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           valueField='recordId'
                           displayField='name'
                           onChange={(event, newValue) => {
-                            if (newValue) {
-                              formik.setFieldValue('id_type', newValue?.key)
-                            } else {
-                              formik.setFieldValue('id_type', '')
-                            }
+                            formik.setFieldValue('id_type', newValue?.key || null)
                           }}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                           values={formik.values}
@@ -1307,22 +1312,22 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         />
                       </Grid>
                       <Grid item xs={2}>
-                        <FormControlLabel
+                        <CustomCheckBox
                           name='resident'
-                          checked={formik.values.resident}
-                          onChange={formik.handleChange}
-                          control={<Checkbox defaultChecked />}
-                          label='Resident'
+                          value={formik.values.resident}
+                          onChange={event => formik.setFieldValue('resident', event.target.checked)}
+                          label={'Resident'}
+                          maxAccess={maxAccess}
                           disabled={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                         />
                       </Grid>
                       <Grid item xs={2}>
-                        <FormControlLabel
+                        <CustomCheckBox
                           name='otp'
-                          checked={formik.values.otp}
-                          onChange={formik.handleChange}
-                          control={<Checkbox defaultChecked />}
-                          label='Otp'
+                          value={formik.values.otp}
+                          onChange={event => formik.setFieldValue('otp', event.target.checked)}
+                          label={'Otp'}
+                          maxAccess={maxAccess}
                           disabled={true}
                         />
                       </Grid>
@@ -1337,7 +1342,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   onChange={value => formik.setFieldValue('operations', value)}
                   value={formik.values.operations}
                   error={emptyRows.length < 1 ? formik.errors.operations : true}
-                  height={200}
+                  height={175}
                   disabled={isClosed}
                   maxAccess={maxAccess}
                   name='operations'
@@ -1525,9 +1530,9 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             <Grid item xs={12}>
               <FieldSet title='Amount'>
                 <Grid container spacing={2}>
-                  <Grid item xs={9}>
+                  <Grid item xs={9} key={formik.values.amount?.length}>
                     <PaymentGrid
-                      height={200}
+                      height={175}
                       onChange={value => formik.setFieldValue('amount', value)}
                       value={formik.values.amount}
                       error={formik.errors.amount}

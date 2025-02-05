@@ -5,7 +5,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSubmit, ...props }) => {
+const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSubmit, actions = [], ...props }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -26,13 +26,11 @@ const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSub
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        try {
-          const res = await getRequest({
-            extension: SystemRepository.Address.get,
-            parameters: `_filter=` + '&_recordId=' + recordId
-          })
-          setAddress(res.record)
-        } catch (error) {}
+        const res = await getRequest({
+          extension: SystemRepository.Address.get,
+          parameters: `_filter=` + '&_recordId=' + recordId
+        })
+        setAddress(res.record)
       }
     })()
   }, [recordId])
@@ -44,6 +42,7 @@ const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSub
       address={address}
       allowPost={true}
       onSubmit={onAddressSubmit}
+      actions={actions}
       {...props}
     />
   )
