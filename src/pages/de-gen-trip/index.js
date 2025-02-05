@@ -37,7 +37,7 @@ const GenerateOutboundTransportation = () => {
     datasetId: ResourceIds.Trip
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value) || null;
+  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value) || null
 
   const { formik } = useForm({
     initialValues: {
@@ -99,7 +99,6 @@ const GenerateOutboundTransportation = () => {
 
   const onSelectCheckBox = (row, checked) => {
     if (checked) {
-
     } else {
       const selectedIds = selectedSaleZones ? selectedSaleZones.split(',') : []
 
@@ -134,23 +133,23 @@ const GenerateOutboundTransportation = () => {
   const onRowCheckboxChange = (data, checked) => {
     if (Array.isArray(data)) {
       if (checked) {
-        const newTotalAmount = data.reduce((sum, row) => sum + row.amount, 0);
-        const newTotalVolume = data.reduce((sum, row) => sum + row.volume, 0);
-  
-        setTotalVolumeFromChecked(newTotalVolume);
-        setTotalAmountFromChecked(newTotalAmount);
+        const newTotalAmount = data.reduce((sum, row) => sum + row.amount, 0)
+        const newTotalVolume = data.reduce((sum, row) => sum + row.volume, 0)
+
+        setTotalVolumeFromChecked(newTotalVolume)
+        setTotalAmountFromChecked(newTotalAmount)
       }
-  
+
       data.forEach(row => {
-        onSelectCheckBox(row, checked);
-      });
+        onSelectCheckBox(row, checked)
+      })
     } else {
       if (checked) {
-        setTotalAmountFromChecked(prev => prev + data.amount);
-        setTotalVolumeFromChecked(prev => prev + data.volume);
+        setTotalAmountFromChecked(prev => prev + data.amount)
+        setTotalVolumeFromChecked(prev => prev + data.volume)
       }
-  
-      onSelectCheckBox(data, checked);
+
+      onSelectCheckBox(data, checked)
     }
   }
 
@@ -477,26 +476,28 @@ const GenerateOutboundTransportation = () => {
                 handleCheckboxChange={onSaleZoneCheckbox}
               />
             </Grow>
-            <Grid item mt={2} display={'flex'} justifyContent={'flex-end'}>
-              <Button
-                onClick={() => onUndelivered(selectedSaleZones)}
-                variant='contained'
-                sx={{
-                  mr: 1,
-                  backgroundColor: '#231f20',
-                  '&:hover': {
+            <Fixed>
+              <Grid item display={'flex'} justifyContent={'flex-end'}>
+                <Button
+                  onClick={() => onUndelivered(selectedSaleZones)}
+                  variant='contained'
+                  sx={{
+                    mr: 1,
                     backgroundColor: '#231f20',
-                    opacity: 0.8
-                  },
-                  width: '85px !important',
-                  height: '40px',
-                  objectFit: 'contain',
-                  minWidth: '30px !important'
-                }}
-              >
-                {platformLabels.Preview}
-              </Button>
-            </Grid>
+                    '&:hover': {
+                      backgroundColor: '#231f20',
+                      opacity: 0.8
+                    },
+                    width: '85px !important',
+                    height: '40px',
+                    objectFit: 'contain',
+                    minWidth: '30px !important'
+                  }}
+                >
+                  {platformLabels.Preview}
+                </Button>
+              </Grid>
+            </Fixed>
           </VertLayout>
         </Grid>
         <Grid item xs={9.4} sx={{ display: 'flex', flex: 1, marginLeft: 1 }}>
