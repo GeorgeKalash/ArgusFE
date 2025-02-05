@@ -21,6 +21,7 @@ export function DataGrid({
   disabled = false,
   allowDelete = true,
   allowAddNewLine = true,
+  deleteHideCondition = '',
   onSelectionChange,
   rowSelectionModel,
   autoDelete,
@@ -524,6 +525,14 @@ export function DataGrid({
   }
 
   const ActionCellRenderer = params => {
+    if (deleteHideCondition) {
+      const shouldHide = Object.entries(deleteHideCondition).some(([key, value]) =>
+        Array.isArray(value) ? value.includes(params.data[key]) : params.data[key] === value
+      )
+
+      if (shouldHide) return null
+    }
+
     return (
       <Box
         sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}

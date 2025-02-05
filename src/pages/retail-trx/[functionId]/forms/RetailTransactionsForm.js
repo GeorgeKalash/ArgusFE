@@ -1407,6 +1407,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     value={formik.values.header.deliveryNotes}
                     rows={3.5}
                     maxAccess={maxAccess}
+                    readOnly={isPosted}
                     onChange={e => formik.setFieldValue('header.deliveryNotes', e.target.value)}
                     onClear={() => formik.setFieldValue('header.deliveryNotes', '')}
                   />
@@ -1443,6 +1444,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
             columns={columns}
             maxAccess={maxAccess}
             disabled={isPosted || !formik.values.header.currencyId}
+            allowDelete={!isPosted}
           />
         </Grow>
 
@@ -1462,6 +1464,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                 }}
                 columns={cashColumns}
                 maxAccess={maxAccess}
+                disabled={isPosted}
+                allowDelete={!isPosted}
               />
             </Grid>
 

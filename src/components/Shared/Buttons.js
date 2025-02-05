@@ -74,6 +74,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'SerialsLots',
+    label: platformLabels.SerialsLots,
+    color: '#D3D3D3',
+    image: 'serials-lots.png',
+    main: false
+  },
+  {
     key: 'Cancel',
     label: platformLabels.Cancel,
     color: '#0A4164',
@@ -465,6 +472,20 @@ export const getButtons = platformLabels => [
     label: platformLabels.DefaultShipping,
     color: '#231f20',
     image: 'shipment.png',
+    main: false
+  },
+  {
+    key: 'GenerateJob',
+    label: platformLabels.Generate,
+    color: '#D3D3D3',
+    image: 'generate2.png',
+    main: false
+  },
+  {
+    key: 'GenerateSerialsLots',
+    label: platformLabels.GenerateSerials,
+    color: '#D3D3D3',
+    image: 'generate2.png',
     main: false
   }
 ]

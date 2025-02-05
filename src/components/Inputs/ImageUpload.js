@@ -4,10 +4,13 @@ import { useRef } from 'react'
 import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import CustomButton from './CustomButton'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => {
+const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidth, customHeight, rerender }, ref) => {
   const hiddenInputRef = useRef()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [image, setImage] = useState()
   const [initialValues, setInitialData] = useState({})
 
@@ -16,21 +19,18 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
     validateOnChange: true,
     initialValues
   })
-
   const uniqueRecord = recordId || ref?.current?.value
-
   useEffect(() => {
     if (uniqueRecord) {
       getData()
     }
-  }, [])
+  }, [uniqueRecord, rerender])
 
   async function getData() {
     const result = await getRequest({
       extension: SystemRepository.Attachment.get,
       parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${uniqueRecord}`
     })
-
     setInitialData(result?.record)
   }
 
@@ -57,7 +57,6 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
         url: null,
         file: null
       }
-
       const fileSizeInKB = Math.round(file.size / 1024)
       if (parseInt(fileSizeInKB) > 500) {
         alert('Allowed PNG or JPEG. Max size of 500KB.')
@@ -66,7 +65,6 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
       }
       data = { ...data, file } //binary
       formik.setValues(data)
-
       const reader = new FileReader()
       reader.onloadend = e => {
         setImage(e.target.result)
@@ -101,7 +99,6 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
       })
     }
   }
-
   useImperativeHandle(ref, () => ({
     submit
   }))
@@ -114,11 +111,10 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
         }`}
         alt=''
         style={{
-          width: 140,
-          height: 140,
+          width: customWidth || 140,
+          height: customHeight || 140,
           objectFit: 'contain',
-          marginRight: 16,
-          border: error && '2px solid #f44336'
+          border: error && '2px solid #F44336'
         }}
         onClick={handleClick}
       />
@@ -130,27 +126,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
           onChange={handleInputImageChange}
           accept='image/png, image/jpeg, image/jpg'
         />
-        <Box
-          onClick={handleInputImageReset}
-          variant='contained'
-          sx={{
-            mr: 1,
-            backgroundColor: '#f44336',
-            '&:hover': {
-              opacity: 0.8
-            },
-            width: 40,
-            height: 30,
-            objectFit: 'contain',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '20%',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
-          }}
-        >
-          <img src={`/images/buttonsIcons/clear.png`} alt={'clear'} />
-        </Box>
+        <CustomButton onClick={handleInputImageReset} label={platformLabels.Clear} color='#F44336' image='clear.png' />
       </Box>
     </Box>
   )
