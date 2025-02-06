@@ -336,7 +336,10 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     {
       component: 'textfield',
       label: labels.notes,
-      name: 'notes'
+      name: 'notes',
+      props: {
+        readOnly: isClosed || isCancelled
+      }
     }
   ]
 
@@ -654,7 +657,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
             value={formik?.values?.items}
             error={formik?.errors?.items}
             columns={columns}
-            allowDelete={!isClosed || !isCancelled}
+            allowDelete={!isClosed && !isCancelled}
           />
         </Grow>
       </VertLayout>
