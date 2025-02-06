@@ -1,14 +1,11 @@
 import React, { useContext } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import 'ag-grid-community/styles/ag-grid.css'
-import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
 import { useState } from 'react'
 import { useEffect } from 'react'
-import 'ag-grid-community'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -70,6 +67,7 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => formatDateDefault(data?.[col.field]),
+          comparator: dateComparator,
           sortable: !disableSorting
         }
       }
@@ -77,6 +75,7 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field], col?.dateFormat),
+          comparator: dateComparator,
           sortable: !disableSorting
         }
       }
@@ -122,6 +121,36 @@ const Table = ({
       }
     })
 
+  function dateComparator(date1, date2) {
+    var date1Number = _dateTimeToNum(date1)
+    var date2Number = _dateTimeToNum(date2)
+    if (date1Number === null && date2Number === null) return 0
+    if (date1Number === null) return -1
+    if (date2Number === null) return 1
+
+    return date1Number - date2Number
+  }
+
+  function _dateTimeToNum(dateTime) {
+    if (!dateTime || dateTime.length < 10) return null
+    let [date, time = '00:00', meridian] = dateTime.split(/[\s:]+/)
+    let day = date.substring(0, 2)
+    let month = date.substring(3, 5)
+    let year = date.substring(6, 10)
+    let hours = 0
+    let minutes = 0
+    if (time.length === 2) {
+      hours = parseInt(time, 10)
+      minutes = parseInt(dateTime.substring(14, 16), 10) || 0
+      if (meridian === 'PM' && hours !== 12) hours += 12
+      else if (meridian === 'AM' && hours === 12) hours = 0
+    }
+
+    return (
+      parseInt(year, 10) * 100000000 + parseInt(month, 10) * 1000000 + parseInt(day, 10) * 10000 + hours * 100 + minutes
+    )
+  }
+
   const shouldRemoveColumn = column => {
     const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
 
@@ -162,7 +191,7 @@ const Table = ({
             if (paginationType === 'api') {
               api({ _startAt: (newPage - 1) * pageSize, _pageSize: pageSize })
             } else {
-              var slicedGridData = props?.gridData?.list.slice((newPage - 2) * pageSize, newPage * pageSize)
+              var slicedGridData = props?.gridData?.list?.slice((newPage - 2) * pageSize, newPage * pageSize)
               setGridData({
                 ...props?.gridData?.list,
                 list: slicedGridData

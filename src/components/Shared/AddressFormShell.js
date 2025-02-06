@@ -3,7 +3,7 @@ import FormShell from './FormShell'
 import AddressTab from './AddressTab'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from './Layouts/VertLayout'
-import { Grow } from './Layouts/Grow'
+import { Fixed } from './Layouts/Fixed'
 
 export const AddressFormShell = ({
   setAddress,
@@ -17,6 +17,7 @@ export const AddressFormShell = ({
   onSubmit,
   isSavedClear = true,
   isCleared = true,
+  actions,
   ...props
 }) => {
   const [required, setRequired] = useState(!optional)
@@ -116,12 +117,13 @@ export const AddressFormShell = ({
       editMode={editMode}
       isSavedClear={isSavedClear}
       isCleared={isCleared}
+      actions={actions}
       {...props}
     >
       <VertLayout>
-        <Grow>
+        <Fixed>
           <AddressTab addressValidation={formik} readOnly={readOnly} required={required} {...props} />
-        </Grow>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )

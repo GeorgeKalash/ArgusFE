@@ -266,9 +266,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   async function getFilteredMU(itemId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.items?.find(
-      item => parseInt(item.itemId) === itemId
-    )?.msId
+    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
 
     const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
     filteredMeasurements.current = arrayMU
@@ -855,8 +853,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     return res?.record
   }
 
-
-
   const handleButtonClick = () => {
     setReCal(true)
     let currentTdAmount
@@ -1093,7 +1089,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         isSavedClear: false
       },
       width: 850,
-      height: 620,
+      height: 550,
       title: labels.address
     })
   }
@@ -1358,21 +1354,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <CustomTextArea
-                    name='billAddress'
-                    label={labels.billTo}
-                    value={formik.values.billAddress}
-                    rows={2.5}
-                    maxLength='100'
-                    readOnly={isClosed}
-                    maxAccess={maxAccess}
-                    viewDropDown={formik.values.clientId}
-                    onChange={e => formik.setFieldValue('BillAddress', e.target.value)}
-                    onClear={() => formik.setFieldValue('BillAddress', '')}
-                    onDropDown={() => openAddressFilterForm(false, true)}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <CustomTextArea
                     name='shipAddress'
                     label={labels.shipTo}
                     value={formik.values.shipAddress}
@@ -1387,6 +1368,21 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     onClear={() => formik.setFieldValue('shipAddress', '')}
                     onDropDown={() => openAddressFilterForm(true, false)}
                     handleAddAction={() => openAddressForm()}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextArea
+                    name='billAddress'
+                    label={labels.billTo}
+                    value={formik.values.billAddress}
+                    rows={2.5}
+                    maxLength='100'
+                    readOnly={isClosed}
+                    maxAccess={maxAccess}
+                    viewDropDown={formik.values.clientId}
+                    onChange={e => formik.setFieldValue('BillAddress', e.target.value)}
+                    onClear={() => formik.setFieldValue('BillAddress', '')}
+                    onDropDown={() => openAddressFilterForm(false, true)}
                   />
                 </Grid>
               </Grid>

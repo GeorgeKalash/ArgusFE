@@ -56,11 +56,14 @@ const CustomComboBox = ({
       onChange(store?.[defaultIndex])
     }
   }, [defaultIndex])
+
   const autocompleteRef = useRef(null)
 
   const valueHighlightedOption = useRef(null)
 
   const selectFirstValue = useRef(null)
+
+  const filterOptions = useRef(null)
 
   useEffect(() => {
     function handleBlur(event) {
@@ -107,8 +110,11 @@ const CustomComboBox = ({
         }
       }}
       filterOptions={(options, { inputValue }) => {
+        var results
+        filterOptions.current = ''
+
         if (columnsInDropDown) {
-          return options.filter(option =>
+          results = options.filter(option =>
             columnsInDropDown
               .map(header => header.key)
               .some(field => option[field]?.toString()?.toLowerCase()?.toString()?.includes(inputValue?.toLowerCase()))
@@ -116,10 +122,14 @@ const CustomComboBox = ({
         } else {
           var displayFields = Array.isArray(displayField) ? displayField : [displayField]
 
-          return options.filter(option =>
+          results = options.filter(option =>
             displayFields.some(field => option[field]?.toString()?.toLowerCase()?.includes(inputValue?.toLowerCase()))
           )
         }
+
+        filterOptions.current = results
+
+        return results
       }}
       isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
       onChange={(event, newValue) => {
@@ -210,7 +220,7 @@ const CustomComboBox = ({
           onBlur={e => {
             const listbox = document.querySelector('[role="listbox"]')
             if (selectFirstValue.current !== 'click' && listbox && listbox.offsetHeight > 0) {
-              onBlur(e, valueHighlightedOption?.current)
+              onBlur(e, valueHighlightedOption?.current, filterOptions.current)
             }
           }}
           InputProps={{

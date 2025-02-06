@@ -135,7 +135,7 @@ export default function SaleTransactionForm({
         rateCalcMethod: 1,
         tdType: DIRTYFIELD_TDPCT,
         tdPct: 0,
-        baseAmount: null,
+        baseAmount: 0,
         volume: 0,
         weight: 0,
         qty: 0,
@@ -157,7 +157,7 @@ export default function SaleTransactionForm({
           sku: '',
           itemName: '',
           seqNo: 1,
-          siteId: '',
+          siteId: null,
           muId: null,
           qty: 0,
           volume: 0,
@@ -205,8 +205,11 @@ export default function SaleTransactionForm({
         siteId: yup
           .string()
           .nullable()
-          .test('', function (value) {
+          .test(function (value) {
             const { dtId, commitItems } = this.parent
+            if (!dtId) {
+              return !!value
+            }
             if (dtId && commitItems) {
               return !!value
             }
@@ -432,7 +435,7 @@ export default function SaleTransactionForm({
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.barcode) return
 
-        const ItemConvertPrice = await mdType(newRow)
+        const ItemConvertPrice = await getItemConvertPrice2(newRow)
         const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
         const itemInfo = await getItem(ItemConvertPrice?.itemId)
         await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
@@ -877,7 +880,8 @@ export default function SaleTransactionForm({
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           saTrx: true,
-          taxDetails: updatedSaTrxTaxes
+          taxDetails:
+            updatedSaTrxTaxes.filter(tax => saTrxItems?.some(responseTax => responseTax.seqNo != tax.seqNo)) || null
         }
       })
     )
@@ -1156,7 +1160,7 @@ export default function SaleTransactionForm({
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
       tdPct: formik?.values?.header?.tdPct,
-      taxDetails: formik.values.header.isVattable ? newRow.taxDetails : null
+      taxDetails: formik.values.header?.isVattable ? newRow.taxDetails : null
     })
 
     let commonData = {
@@ -1253,7 +1257,7 @@ export default function SaleTransactionForm({
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
         tdPct: parseFloat(tdPct),
-        taxDetails: item.taxDetails
+        taxDetails: formik.values.header?.isVattable ? item.taxDetails : null
       })
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
     })
@@ -1370,6 +1374,8 @@ export default function SaleTransactionForm({
   }, [address])
 
   function getDTD(dtId) {
+    if (!dtId) return
+
     const res = getRequest({
       extension: SaleRepository.DocumentTypeDefault.get,
       parameters: `_dtId=${dtId}`
@@ -1402,7 +1408,16 @@ export default function SaleTransactionForm({
     formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
     formik.setFieldValue('header.volume', parseFloat(totalVolume).toFixed(2))
     formik.setFieldValue('header.amount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('header.baseAmount', parseFloat(formik.values.header.baseAmount).toFixed(2))
+
+    const updatedRateRow = getRate({
+      amount: amount ?? 0,
+      exRate: formik.values?.header?.exRate,
+      baseAmount: 0,
+      rateCalcMethod: formik.values?.header?.rateCalcMethod,
+      dirtyField: DIRTYFIELD_RATE
+    })
+
+    formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
     formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
@@ -1500,7 +1515,7 @@ export default function SaleTransactionForm({
     if (!editMode) formik.setFieldValue('header.currencyId', defaultsDataState.currencyId)
     formik.setFieldValue('header.plantId', userDefaultsDataState.plantId)
     formik.setFieldValue('header.spId', userDefaultsDataState.spId)
-    formik.setFieldValue('header.siteId', userDefaultsDataState.siteId)
+    formik.setFieldValue('header.siteId', userDefaultsDataState.siteId ?? null)
   }
 
   async function previewBtnClicked() {
@@ -1637,10 +1652,10 @@ export default function SaleTransactionForm({
                     readOnly={isPosted}
                     value={formik?.values?.header?.date}
                     onChange={async (e, newValue) => {
-                      formik.setFieldValue('header.date', newValue.date)
+                      formik.setFieldValue('header.date', newValue)
                       await getMultiCurrencyFormData(
                         formik.values.header.currencyId,
-                        formatDateForGetApI(formik.values.header.date),
+                        formatDateForGetApI(newValue),
                         RateDivision.FINANCIALS
                       )
                     }}
@@ -1693,7 +1708,7 @@ export default function SaleTransactionForm({
                       formik.setFieldValue('header.siteRef', newValue ? newValue.reference : null)
                       formik.setFieldValue('header.siteName', newValue ? newValue.name : null)
                     }}
-                    error={formik.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
+                    error={formik?.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
                   />
                 </Grid>
               </Grid>
@@ -1718,7 +1733,7 @@ export default function SaleTransactionForm({
             <Grid item xs={3}>
               <ResourceLookup
                 endpointId={SaleRepository.Client.snapshot}
-                name='clientId'
+                name='header.clientId'
                 label={labels.client}
                 valueField='reference'
                 displayField='name'
@@ -1736,16 +1751,20 @@ export default function SaleTransactionForm({
                 onChange={(event, newValue) => {
                   fillClientData(newValue)
                 }}
-                secondFieldName={'header.clientName'}
-                onSecondValueChange={(name, value) => {
-                  formik.setFieldValue('header.clientName', value)
+                secondField={{
+                  name: 'header.clientName',
+                  editable: true,
+                  onChange: (name, value) => {
+                    formik.setFieldValue('header.clientName', value)
+                  }
                 }}
-                errorCheck={'header.clientId'}
                 maxAccess={maxAccess}
                 required
-                readOnly={isPosted}
+                autoSelectFistValue={!formik.values.clientId}
+                readOnly={formik.values.items.length > 0 && formik.values.items[0].sku}
                 displayFieldWidth={3}
                 editMode={editMode}
+                error={formik.touched?.header?.clientId && Boolean(formik.errors?.header?.clientId)}
               />
             </Grid>
             <Grid item xs={1}>
@@ -1982,7 +2001,18 @@ export default function SaleTransactionForm({
                     value={formik.values.header.miscAmount}
                     decimalScale={2}
                     readOnly={isPosted}
-                    onChange={e => formik.setFieldValue('header.miscAmount', e.target.value)}
+                    onChange={e => {
+                      formik.setFieldValue('header.miscAmount', e.target.value)
+
+                      const updatedRateRow = getRate({
+                        amount: e.target.value ?? 0,
+                        exRate: formik.values?.exRate,
+                        baseAmount: 0,
+                        rateCalcMethod: formik.values?.rateCalcMethod,
+                        dirtyField: DIRTYFIELD_RATE
+                      })
+                      formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                    }}
                     onBlur={async () => {
                       setReCal(true)
                     }}

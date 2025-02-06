@@ -62,8 +62,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       baseAmount: '',
       functionId: functionId,
       vatPct: '',
-      exRate: '',
-      rateCalcMethod: '',
+      exRate: 1,
+      rateCalcMethod: 1,
       subtotal: '',
       notes: '',
       vatAmount: '',
@@ -250,15 +250,15 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
       const updatedRateRow = getRate({
         amount: amount === 0 ? 0 : amount ?? formik.values.amount,
-        exRate: res.record?.exRate,
+        exRate: res.record?.exRate ?? 1,
         baseAmount: 0,
-        rateCalcMethod: res.record?.rateCalcMethod,
+        rateCalcMethod: res.record?.rateCalcMethod ?? 1,
         dirtyField: DIRTYFIELD_RATE
       })
 
       formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-      formik.setFieldValue('exRate', res.record?.exRate)
-      formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
+      formik.setFieldValue('exRate', res.record?.exRate ?? 1)
+      formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod ?? 1)
     }
   }
 
@@ -395,10 +395,10 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     label={labels.date}
                     value={formik.values.date}
                     onChange={async (e, newValue) => {
-                      formik.setFieldValue('date', newValue.date)
+                      formik.setFieldValue('date', newValue)
                       await getMultiCurrencyFormData(
                         formik.values.currencyId,
-                        formatDateForGetApI(formik.values.date),
+                        formatDateForGetApI(newValue),
                         RateDivision.FINANCIALS
                       )
                     }}
@@ -477,7 +477,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                         variant='contained'
                         size='small'
                         onClick={() => openMCRForm(formik.values)}
-                        disabled={formik.values.currencyId === defaultsDataState?.currencyId}
+                        disabled={!formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId}
                       >
                         <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                       </Button>
@@ -497,7 +497,18 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     label={labels.subtotal}
                     value={formik.values.subtotal}
                     maxAccess={maxAccess}
-                    onChange={formik.handleChange}
+                    onChange={async e => {
+                      formik.setFieldValue('subtotal', e.target.value)
+
+                      const updatedRateRow = getRate({
+                        amount: e.target.value ?? 0,
+                        exRate: formik.values?.exRate,
+                        baseAmount: 0,
+                        rateCalcMethod: formik.values?.rateCalcMethod,
+                        dirtyField: DIRTYFIELD_RATE
+                      })
+                      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                    }}
                     onClear={() => formik.setFieldValue('subtotal', '')}
                     error={formik.touched.subtotal && Boolean(formik.errors.subtotal)}
                   />
@@ -544,21 +555,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     required
                     maxAccess={maxAccess}
                     thousandSeparator={false}
-                    onChange={async e => {
-                      formik.setFieldValue('amount', e.target.value)
-
-                      const updatedRateRow = getRate({
-                        amount: formik.values.amount ?? 0,
-                        exRate: formik.values?.exRate,
-                        baseAmount: 0,
-                        rateCalcMethod: formik.values?.rateCalcMethod,
-                        dirtyField: DIRTYFIELD_RATE
-                      })
-                      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-                    }}
-                    onClear={async () => {
-                      formik.setFieldValue('amount', 0)
-                    }}
+                    readOnly
                     error={formik.touched.amount && Boolean(formik.errors.amount)}
                     maxLength={10}
                   />
