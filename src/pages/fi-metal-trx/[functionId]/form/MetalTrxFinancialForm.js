@@ -640,7 +640,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 secondDisplayField={true}
                 firstValue={formik.values.accountRef}
                 secondValue={formik.values.accountName}
-                errorCheck={'accountId'}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
