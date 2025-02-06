@@ -36,7 +36,7 @@ const PuCostAllocationWindow = ({ recordId, labels, maxAccess }) => {
         <InvoicesForm labels={labels} setStore={setStore} editMode={editMode} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <InvoicesItemsTab labels={labels} maxAccess={maxAccess} store={store} />
+        <InvoicesItemsTab labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} />
       </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab}>
         <TransactionTab store={store} labels={labels} access={maxAccess} />

@@ -7,7 +7,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 
-const InvoicesItemsTab = ({ store, labels, access }) => {
+const InvoicesItemsTab = ({ store, labels, access, setStore }) => {
   const { recordId, invoicesItemsData } = store
   const { getRequest } = useContext(RequestsContext)
 
@@ -37,10 +37,16 @@ const InvoicesItemsTab = ({ store, labels, access }) => {
   ]
 
   async function fetchGridData() {
-    return await getRequest({
+    const res = await getRequest({
       extension: CostAllocationRepository.InvoicesItems.qry,
       parameters: `_invoiceId=0&_caId=${recordId}`
     })
+    setStore(prevStore => ({
+      ...prevStore,
+      invoicesItemsData: res?.count == 0 ? invoicesItemsData : res
+    }))
+
+    return res
   }
 
   const {
@@ -58,7 +64,7 @@ const InvoicesItemsTab = ({ store, labels, access }) => {
         <Table
           name='invoicesItemsTable'
           columns={columns}
-          gridData={data.count == 0 ? invoicesItemsData : data}
+          gridData={invoicesItemsData}
           rowId={['recordId']}
           isLoading={false}
           maxAccess={access}
