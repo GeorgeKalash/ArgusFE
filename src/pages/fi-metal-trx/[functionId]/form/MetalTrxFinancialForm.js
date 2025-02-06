@@ -636,6 +636,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 valueShow='accountRef'
                 secondValueShow='accountName'
                 required
+                errorCheck={'accountId'}
                 form={formik}
                 secondDisplayField={true}
                 firstValue={formik.values.accountRef}
@@ -646,7 +647,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                 }}
-                error={formik.touched.accountId && Boolean(formik.errors.accountId)}
               />
             </Grid>
           </Grid>
