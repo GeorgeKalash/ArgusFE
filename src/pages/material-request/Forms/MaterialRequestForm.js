@@ -450,7 +450,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       key: 'Cancel',
       condition: true,
       onClick: () => onCancel(formik.values.recordId),
-      disabled: !editMode || isCancelled
+      disabled: !editMode || isCancelled || isClosed
     }
   ]
 
