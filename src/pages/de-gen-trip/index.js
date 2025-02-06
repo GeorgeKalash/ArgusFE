@@ -407,12 +407,12 @@ const GenerateOutboundTransportation = () => {
       isSaved={false}
       infoVisible={false}
     >
-      <Grid container sx={{ flex: 1, columnGap: 2 }}>
-        <Grid container xs={2.5} sx={{ display: 'flex', flex: 1 }}>
-          <VertLayout>
-            <Fixed>
+      <VertLayout>
+        <Fixed>
+          <Grid container spacing={2}>
+            <Grid item xs={3}>
               <Grid container spacing={2}>
-                <Grid item xs={8}>
+                <Grid item xs={9}>
                   <ResourceComboBox
                     endpointId={DeliveryRepository.GenerateTrip.root}
                     parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
@@ -441,8 +441,33 @@ const GenerateOutboundTransportation = () => {
                   />
                 </Grid>
               </Grid>
-            </Fixed>
-            <Fixed>
+            </Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                endpointId={DeliveryRepository.Vehicle.qry}
+                name='vehicleId'
+                label={labels.truck}
+                valueField='recordId'
+                displayField={['plateNo', 'name']}
+                columnsInDropDown={[
+                  { key: 'plateNo', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('vehicleId', newValue?.recordId || null)
+                  formik.setFieldValue('capacity', newValue?.capacityVolume || null)
+                }}
+                required
+                error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
+                maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
+            </Grid>
+            <Grid item xs={5}></Grid>
+            <Grid item xs={3}>
               <CustomTextField
                 name='search'
                 value={formik.values.search}
@@ -455,8 +480,40 @@ const GenerateOutboundTransportation = () => {
                 onSearch={e => formik.setFieldValue('search', e)}
                 search={true}
               />
-            </Fixed>
-            <Grow>
+            </Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                endpointId={DeliveryRepository.Driver.qry}
+                name='driverId'
+                label={labels.driver}
+                valueField='recordId'
+                displayField={'name'}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('driverId', newValue?.recordId || null)
+                }}
+                error={formik.touched.driverId && Boolean(formik.errors.driverId)}
+                maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomNumberField
+                name='capacity'
+                label={labels.capacity}
+                value={formik.values.capacity}
+                readOnly
+                align='right'
+              />
+            </Grid>
+            <Grid item xs={4}></Grid>
+            <Grid item xs={1}>
+              <CustomButton onClick={() => formik.handleSubmit()} label={platformLabels.Generate} color='#231f20' />
+            </Grid>
+          </Grid>
+        </Fixed>
+        <Grow>
+          <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={3} sx={{ display: 'flex', flex: 1 }}>
               <Table
                 columns={columnsZones}
                 gridData={filteredData}
@@ -468,96 +525,33 @@ const GenerateOutboundTransportation = () => {
                 showSelectAll={false}
                 handleCheckboxChange={onSaleZoneCheckbox}
               />
-            </Grow>
-            <Fixed>
-              <CustomButton
-                onClick={() => onUndelivered(selectedSaleZones)}
-                label={platformLabels.Preview}
-                color='#231f20'
-              />
-            </Fixed>
-          </VertLayout>
-        </Grid>
-
-        <Grid container sx={{ display: 'flex', flex: 1 }}>
-          <VertLayout>
-            <Fixed>
-              <Grid container>
-                <Grid container xs={6} spacing={2}>
-                  <Grid item xs={6}>
-                    <ResourceComboBox
-                      endpointId={DeliveryRepository.Vehicle.qry}
-                      name='vehicleId'
-                      label={labels.truck}
-                      valueField='recordId'
-                      displayField={['plateNo', 'name']}
-                      columnsInDropDown={[
-                        { key: 'plateNo', value: 'Reference' },
-                        { key: 'name', value: 'Name' }
-                      ]}
-                      values={formik.values}
-                      onChange={(event, newValue) => {
-                        formik.setFieldValue('vehicleId', newValue?.recordId || null)
-                        formik.setFieldValue('capacity', newValue?.capacityVolume || null)
-                      }}
-                      required
-                      error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
-                      maxAccess={access}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <ResourceComboBox
-                      endpointId={DeliveryRepository.Driver.qry}
-                      name='driverId'
-                      label={labels.driver}
-                      valueField='recordId'
-                      displayField={'name'}
-                      values={formik.values}
-                      onChange={(event, newValue) => {
-                        formik.setFieldValue('driverId', newValue?.recordId || null)
-                      }}
-                      error={formik.touched.driverId && Boolean(formik.errors.driverId)}
-                      maxAccess={access}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <CustomNumberField
-                      name='capacity'
-                      label={labels.capacity}
-                      value={formik.values.capacity}
-                      readOnly
-                      align='right'
-                    />
-                  </Grid>
+            </Grid>
+            <Grid item xs={9} sx={{ display: 'flex', flex: 1 }}>
+              <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
+                <Grid item xs={12} sx={{ display: 'flex', height: 255 }}>
+                  <Table
+                    columns={columnsOrders}
+                    gridData={formik?.values?.data}
+                    rowId={['recordId']}
+                    isLoading={false}
+                    pagination={false}
+                    maxAccess={access}
+                    showCheckboxColumn={true}
+                    handleCheckboxChange={onRowCheckboxChange}
+                  />
                 </Grid>
-                <Grid item xs={6} container alignItems='flex-end' justifyContent='flex-end'>
-                  <CustomButton onClick={() => formik.handleSubmit()} label={platformLabels.Generate} color='#231f20' />
-                </Grid>
-              </Grid>
-            </Fixed>
-            <Grow>
-              <Table
-                columns={columnsOrders}
-                gridData={formik?.values?.data}
-                rowId={['recordId']}
-                isLoading={false}
-                pagination={false}
-                maxAccess={access}
-                showCheckboxColumn={true}
-                handleCheckboxChange={onRowCheckboxChange}
-              />
-            </Grow>
-            <Fixed>
-              <Grid container pt={2} justifyContent='space-between' spacing={2}>
-                <Grid item xs={3}>
-                  <CustomButton onClick={onAdd} label={platformLabels.Import} color='#231f20' image={'import.png'} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Grid container spacing={2} justifyContent='flex-end'>
+                <Grid item xs={12} sx={{ display: 'flex', flex: 0 }}>
+                  <Grid container spacing={2}>
                     <Grid item xs={3}>
+                      <CustomButton
+                        onClick={onAdd}
+                        label={platformLabels.Import}
+                        color='#231f20'
+                        image={'import.png'}
+                      />
+                    </Grid>
+                    <Grid item xs={5}></Grid>
+                    <Grid item xs={2}>
                       <CustomNumberField
                         name='amount'
                         label={labels.amount}
@@ -566,7 +560,7 @@ const GenerateOutboundTransportation = () => {
                         align='right'
                       />
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={2}>
                       <CustomNumberField
                         name='volume'
                         label={labels.volume}
@@ -577,34 +571,44 @@ const GenerateOutboundTransportation = () => {
                     </Grid>
                   </Grid>
                 </Grid>
+                <Grid item xs={12} sx={{ display: 'flex', height: 255 }}>
+                  <Grow>
+                    <Table
+                      columns={columnsDeliveryOrders}
+                      gridData={formik?.values?.deliveryOrders}
+                      rowId={['recordId']}
+                      isLoading={false}
+                      pagination={false}
+                      maxAccess={access}
+                      showCheckboxColumn={true}
+                      handleCheckboxChange={Confirmation}
+                      showSelectAll={false}
+                    />
+                  </Grow>
+                </Grid>
               </Grid>
-            </Fixed>
-            <Grow>
-              <Table
-                columns={columnsDeliveryOrders}
-                gridData={formik?.values?.deliveryOrders}
-                rowId={['recordId']}
-                isLoading={false}
-                pagination={false}
-                maxAccess={access}
-                showCheckboxColumn={true}
-                handleCheckboxChange={Confirmation}
-                showSelectAll={false}
+            </Grid>
+          </Grid>
+        </Grow>
+        <Fixed>
+          <Grid container spacing={2}>
+            <Grid item xs={2}>
+              <CustomButton
+                onClick={() => onUndelivered(selectedSaleZones)}
+                label={platformLabels.Preview}
+                color='#231f20'
               />
-            </Grow>
-            <Fixed>
-              <Grid container pt={2} spacing={2} justifyContent='flex-end'>
-                <Grid item xs={1.5}>
-                  <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly align='right' />
-                </Grid>
-                <Grid item xs={1.5}>
-                  <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly align='right' />
-                </Grid>
-              </Grid>
-            </Fixed>
-          </VertLayout>
-        </Grid>
-      </Grid>
+            </Grid>
+            <Grid item xs={7}></Grid>
+            <Grid item xs={1.5}>
+              <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly align='right' />
+            </Grid>
+            <Grid item xs={1.5}>
+              <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly align='right' />
+            </Grid>
+          </Grid>
+        </Fixed>
+      </VertLayout>
     </FormShell>
   )
 }
