@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import { startOfYear, endOfYear } from 'date-fns'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -84,31 +83,29 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SystemRepository.FiscalYears.get,
-            parameters: `_fiscalYear=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.FiscalYears.get,
+          parameters: `_fiscalYear=${recordId}`
+        })
 
-          formik.setValues({
-            ...res.record,
+        formik.setValues({
+          ...res.record,
 
-            startDate: formatDateFromApi(res.record.startDate),
-            endDate: formatDateFromApi(res.record.endDate),
-            recordId: res.record.fiscalYear
-          })
-        }
-      } catch (exception) {}
+          startDate: formatDateFromApi(res.record.startDate),
+          endDate: formatDateFromApi(res.record.endDate),
+          recordId: res.record.fiscalYear
+        })
+      }
     })()
   }, [])
 
   useEffect(() => {
     if (formik.values.fiscalYear) {
-      const year = parseInt(formik.values.fiscalYear)
+      const year = parseInt(formik.values.fiscalYear, 10)
       if (year) {
-        formik.setFieldValue('startDate', startOfYear(new Date(year, 0, 1)))
-        formik.setFieldValue('endDate', endOfYear(new Date(year, 11, 31)))
+        formik.setFieldValue('startDate', new Date(Date.UTC(year, 0, 1)))
+        formik.setFieldValue('endDate', new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999)))
       }
     } else {
       formik.setFieldValue('startDate', null)
