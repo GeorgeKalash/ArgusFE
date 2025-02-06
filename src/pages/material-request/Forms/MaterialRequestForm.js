@@ -125,8 +125,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
         .of(
           yup.object().shape({
             sku: yup.string().required(),
-            qty: yup.string().required().min(1),
-            msId: yup.string().required()
+            qty: yup.string().required().min(1)
           })
         )
         .required()
@@ -337,7 +336,10 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     {
       component: 'textfield',
       label: labels.notes,
-      name: 'notes'
+      name: 'notes',
+      props: {
+        readOnly: isClosed || isCancelled
+      }
     }
   ]
 
@@ -414,7 +416,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     stack({
       Component: WorkFlow,
       props: {
-        functionId: SystemFunction.MaterialTransfer,
+        functionId: SystemFunction.MaterialRequest,
         recordId: formik.values.recordId
       },
       width: 950,
@@ -427,7 +429,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
-      disabled: !isClosed || !isCancelled
+      disabled: !isClosed
     },
     {
       key: 'Close',
@@ -451,7 +453,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       key: 'Cancel',
       condition: true,
       onClick: () => onCancel(formik.values.recordId),
-      disabled: !editMode || isCancelled
+      disabled: !editMode || isCancelled || isClosed
     }
   ]
 
@@ -463,12 +465,10 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
 
     const updatedRequests = await Promise.all(
       dataGrid.list.map(async item => {
-        const onHandSite = await setOnHandSite(item?.itemId)
-
         return {
           ...item,
           id: item.seqNo,
-          onHandSite
+          onHandSite: item.onhandSite
         }
       })
     )
@@ -657,7 +657,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
             value={formik?.values?.items}
             error={formik?.errors?.items}
             columns={columns}
-            allowDelete={!isClosed || !isCancelled}
+            allowDelete={!isClosed && !isCancelled}
           />
         </Grow>
       </VertLayout>
