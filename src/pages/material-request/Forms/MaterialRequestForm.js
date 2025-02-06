@@ -351,8 +351,6 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     return res
   }
 
-  console.log(formik)
-
   const onClose = async recId => {
     await postRequest({
       extension: IVReplenishementRepository.MaterialReplenishment.close,
