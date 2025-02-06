@@ -19,6 +19,7 @@ import OutboundTranspForm from '../outbound-transportation/forms/OutboundTranspF
 import { useWindow } from 'src/windows'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomButton from 'src/components/Inputs/CustomButton'
 
 const GenerateOutboundTransportation = () => {
   const [data, setData] = useState({ list: [] })
@@ -422,19 +423,12 @@ const GenerateOutboundTransportation = () => {
                   />
                 </Grid>
                 <Grid item xs={2}>
-                  <Button
+                  <CustomButton
                     onClick={() => resetForm()}
-                    sx={{
-                      backgroundColor: '#f44336',
-                      '&:hover': {
-                        backgroundColor: '#f44336',
-                        opacity: 0.8
-                      }
-                    }}
-                    variant='contained'
-                  >
-                    <img src='/images/buttonsIcons/clear.png' alt={platformLabels.Clear} />
-                  </Button>
+                    label={platformLabels.Clear}
+                    image={'clear.png'}
+                    color='#f44336'
+                  />
                 </Grid>
               </Grid>
             </Fixed>
@@ -466,26 +460,11 @@ const GenerateOutboundTransportation = () => {
               />
             </Grow>
             <Fixed>
-              <Grid item display={'flex'} justifyContent={'flex-end'}>
-                <Button
-                  onClick={() => onUndelivered(selectedSaleZones)}
-                  variant='contained'
-                  sx={{
-                    mr: 1,
-                    backgroundColor: '#231f20',
-                    '&:hover': {
-                      backgroundColor: '#231f20',
-                      opacity: 0.8
-                    },
-                    width: '85px !important',
-                    height: '40px',
-                    objectFit: 'contain',
-                    minWidth: '30px !important'
-                  }}
-                >
-                  {platformLabels.Preview}
-                </Button>
-              </Grid>
+              <CustomButton
+                onClick={() => onUndelivered(selectedSaleZones)}
+                label={platformLabels.Preview}
+                color='#231f20'
+              />
             </Fixed>
           </VertLayout>
         </Grid>
@@ -545,24 +524,7 @@ const GenerateOutboundTransportation = () => {
                   </Grid>
                 </Grid>
                 <Grid item xs={6} container alignItems='flex-end' justifyContent='flex-end'>
-                  <Button
-                    onClick={() => formik.handleSubmit()}
-                    variant='contained'
-                    sx={{
-                      mr: 1,
-                      backgroundColor: '#231f20',
-                      '&:hover': {
-                        backgroundColor: '#231f20',
-                        opacity: 0.8
-                      },
-                      width: '85px !important',
-                      height: '40px',
-                      objectFit: 'contain',
-                      minWidth: '30px !important'
-                    }}
-                  >
-                    {platformLabels.Generate}
-                  </Button>
+                  <CustomButton onClick={() => formik.handleSubmit()} label={platformLabels.Generate} color='#231f20' />
                 </Grid>
               </Grid>
             </Fixed>
@@ -581,23 +543,7 @@ const GenerateOutboundTransportation = () => {
             <Fixed>
               <Grid container pt={2} justifyContent='space-between' spacing={2}>
                 <Grid item xs={3}>
-                  <Button
-                    onClick={onAdd}
-                    variant='contained'
-                    sx={{
-                      backgroundColor: '#231f20',
-                      '&:hover': {
-                        backgroundColor: '#231f20',
-                        opacity: 0.8
-                      },
-                      width: '30px !important',
-                      height: '40px',
-                      objectFit: 'contain',
-                      minWidth: '30px !important'
-                    }}
-                  >
-                    <img src='/images/buttonsIcons/import.png' alt={platformLabels.Import} />
-                  </Button>
+                  <CustomButton onClick={onAdd} label={platformLabels.Import} color='#231f20' image={'import.png'} />
                 </Grid>
                 <Grid item xs={6}>
                   <Grid container spacing={2} justifyContent='flex-end'>
