@@ -128,7 +128,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
-      plantId: yup.string().required(),
       siteId: yup.string().required(),
       accountId: yup.string().required(),
       items: yup
@@ -138,7 +137,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
             metalId: yup.string().required(),
             qty: yup.number().required().typeError().positive(),
             purity: yup.number().required().typeError().positive(),
-            sku: yup.string().required()
+            sku: yup.string().required(),
+            creditAmount: yup.string().required()
           })
         )
         .required(' ')
@@ -598,6 +598,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('siteId', newValue?.recordId)
                 }}
+                required
+                error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
             </Grid>
             <Grid item xs={4}>
