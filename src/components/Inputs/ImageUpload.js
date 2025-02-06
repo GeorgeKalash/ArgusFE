@@ -20,8 +20,9 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
     initialValues
   })
   const uniqueRecord = recordId || ref?.current?.value
+
   useEffect(() => {
-    if (uniqueRecord) {
+    if (rerender || uniqueRecord) {
       getData()
     }
   }, [uniqueRecord, rerender])
@@ -29,7 +30,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, customWidt
   async function getData() {
     const result = await getRequest({
       extension: SystemRepository.Attachment.get,
-      parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${uniqueRecord}`
+      parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${rerender || uniqueRecord}`
     })
     setInitialData(result?.record)
   }

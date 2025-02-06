@@ -37,6 +37,11 @@ export default function WorksheetTab({ recordId, maxAccess, labels }) {
       flex: 1
     },
     {
+      field: 'designRef',
+      headerName: labels.designRef,
+      flex: 1
+    },
+    {
       field: 'wcName',
       headerName: labels.workCenter,
       flex: 1

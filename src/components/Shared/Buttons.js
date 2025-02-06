@@ -95,6 +95,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Stop',
+    label: platformLabels.Stop,
+    color: '#D3D3D3',
+    image: 'stop.png',
+    main: false
+  },
+  {
     key: 'Cancel',
     label: platformLabels.Cancel,
     color: '#0A4164',

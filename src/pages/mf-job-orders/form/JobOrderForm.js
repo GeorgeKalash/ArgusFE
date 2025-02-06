@@ -153,7 +153,7 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
       onClick: () => {
         confirmation(platformLabels.CancelConf, platformLabels.Confirmation, onCancel)
       },
-      disabled: isCancelled || isPosted
+      disabled: !editMode || isCancelled || isPosted
     },
     {
       key: 'WorkFlow',
@@ -181,7 +181,15 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
     },
     {
       key: 'Start',
-      condition: true,
+      condition: !isReleased,
+      onClick: () => {
+        confirmation(platformLabels.StartRecord, platformLabels.Confirmation, onStart)
+      },
+      disabled: !editMode || isReleased || isPosted
+    },
+    {
+      key: 'Stop',
+      condition: isReleased,
       onClick: () => {
         confirmation(platformLabels.StartRecord, platformLabels.Confirmation, onStart)
       },
@@ -418,8 +426,8 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
       previewReport={editMode}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={isCancelled || isPosted}
-      disabledSavedClear={isCancelled || isPosted}
+      disabledSubmit={isCancelled || isPosted || isReleased}
+      disabledSavedClear={isCancelled || isPosted || isReleased}
     >
       <VertLayout>
         <Fixed>
