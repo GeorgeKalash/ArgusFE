@@ -32,19 +32,21 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
 
   useEffect(() => {
     ;(async function () {
-      if (seqNo && clientId) var parameters = `_seqNo=${seqNo}&_clientId=${clientId}`
+      if (seqNo && clientId) {
+        var parameters = `_seqNo=${seqNo}&_clientId=${clientId}`
 
-      const res = await getRequest({
-        extension: RTCLRepository.ClientRelation.get,
-        parameters: parameters
-      })
+        const res = await getRequest({
+          extension: RTCLRepository.ClientRelation.get,
+          parameters: parameters
+        })
 
-      const result = res.record
-      formik.setValues({
-        ...result,
-        activationDate: formatDateFromApi(result.activationDate),
-        expiryDate: formatDateFromApi(result.expiryDate)
-      })
+        const result = res.record
+        formik.setValues({
+          ...result,
+          activationDate: formatDateFromApi(result.activationDate),
+          expiryDate: formatDateFromApi(result.expiryDate)
+        })
+      }
     })()
   }, [])
 
@@ -109,7 +111,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
     <FormShell form={formik} infoVisible={false} isSaved={!editMode} isCleared={!editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2} xs={12}>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={CTCLRepository.CtClientIndividual.snapshot}
@@ -130,6 +132,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
                 maxAccess={access}
                 readOnly={editMode}
                 required
+                errorCheck='parentId'
               />
             </Grid>
             <Grid item xs={12}>
