@@ -324,10 +324,10 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
               value={formik?.values?.date}
               required
               onChange={async (e, newValue) => {
-                formik.setFieldValue('date', newValue.date)
+                formik.setFieldValue('date', newValue)
                 await getMultiCurrencyFormData(
                   formik.values.currencyId,
-                  formatDateForGetApI(formik.values.date),
+                  formatDateForGetApI(newValue),
                   RateDivision.FINANCIALS
                 )
               }}
@@ -394,7 +394,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
                   variant='contained'
                   size='small'
                   onClick={() => openMCRForm(formik.values)}
-                  disabled={formik.values.currencyId === getDefaultsData()?.currencyId}
+                  disabled={!formik.values.currencyId || formik.values.currencyId === getDefaultsData()?.currencyId}
                 >
                   <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                 </Button>
@@ -461,7 +461,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
                 formik.setFieldValue('amount', e.target.value)
 
                 const updatedRateRow = getRate({
-                  amount: formik.values.amount ?? 0,
+                  amount: e.target.value ?? 0,
                   exRate: formik.values?.exRate,
                   baseAmount: 0,
                   rateCalcMethod: formik.values?.rateCalcMethod,

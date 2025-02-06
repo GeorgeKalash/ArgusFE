@@ -54,7 +54,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       accountType: '',
       currencyId: null,
       currencyName: '',
-      paymentMethod: '',
+      paymentMethod: 0,
       date: new Date(),
       glId: null,
       amount: null,
@@ -83,7 +83,21 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       date: yup.string().required(),
       paymentMethod: yup.string().required(),
       cashAccountId: yup.string().required(),
-      amount: yup.string().required()
+      checkNo: yup
+        .string()
+        .test(
+          'check-no-required-if-payment-method-3',
+          'Check number is required when payment method is 3.',
+          function (value) {
+            const { paymentMethod } = this.parent
+            if (paymentMethod == 3) {
+              return value && value.trim() !== ''
+            }
+
+            return true
+          }
+        ),
+      amount: yup.number().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -211,8 +225,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
           ...res.record,
           date: formatDateFromApi(res.record.date)
         })
-
-        console.log(res)
       }
       getDefaultsData()
     })()
@@ -327,7 +339,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -352,12 +364,12 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 name='date'
                 label={labels.date}
                 value={formik.values?.date}
-                required={true}
+                required
                 onChange={async (e, newValue) => {
-                  formik.setFieldValue('date', newValue.date)
+                  formik.setFieldValue('date', newValue)
                   await getMultiCurrencyFormData(
                     formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
+                    formatDateForGetApI(newValue),
                     RateDivision.FINANCIALS
                   )
                 }}
@@ -520,7 +532,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                     variant='contained'
                     size='small'
                     onClick={() => openMCRForm(formik.values)}
-                    disabled={formik.values.currencyId === defaultsDataState?.currencyId}
+                    disabled={!formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId}
                   >
                     <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                   </Button>
@@ -539,7 +551,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 readOnly={isPosted || isCancelled}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('paymentMethod', newValue?.key)
+                  formik.setFieldValue('paymentMethod', newValue?.key || null)
                   formik.setFieldValue('checkNo', '')
                   formik.setFieldValue('checkbookId', null)
                 }}
@@ -562,7 +574,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                   formik.setFieldValue('amount', e.target.value)
 
                   const updatedRateRow = getRate({
-                    amount: formik.values.amount ?? 0,
+                    amount: e.target.value ?? 0,
                     exRate: formik.values?.exRate,
                     baseAmount: 0,
                     rateCalcMethod: formik.values?.rateCalcMethod,

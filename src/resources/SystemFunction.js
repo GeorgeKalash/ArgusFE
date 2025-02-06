@@ -108,6 +108,7 @@ export const SystemFunction = {
   OutwardsTransfer: Module.Remittance * 100 + 8,
   ProductionSheet: Module.Manufacturing * 100 + 12,
   OutwardReturnSettlement: Module.Remittance * 100 + 9,
+  DraftSerialsInvoice: Module.Sales * 100 + 8,
   CashTransfers: Module.Cash * 100 + 3
 }
 

@@ -88,11 +88,12 @@ export default function ResourceComboBox({
     value ||
     ''
 
+  const onBlur = (e, HighlightedOption, options) => {
+    finalItemsListRef.current = options || finalItemsListRef.current
 
-  const onBlur = (e, HighlightedOption) => {
     if (HighlightedOption) {
       rest.onChange('', HighlightedOption)
-    } else if (!values[name] && finalItemsListRef.current?.[0]) {
+    } else if (finalItemsListRef.current?.[0]) {
       selectFirstOption()
     }
   }

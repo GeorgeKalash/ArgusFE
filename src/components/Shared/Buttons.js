@@ -445,5 +445,26 @@ export const getButtons = platformLabels => [
     image: 'popup-window.png',
     main: false
   },
-  { key: 'Attachment', label: platformLabels.Attachment, color: '#9B1944', image: 'attachment.png', main: false }
+  { key: 'Attachment', label: platformLabels.Attachment, color: '#9B1944', image: 'attachment.png', main: false },
+  {
+    key: 'Production',
+    label: platformLabels.Production,
+    color: '#d3d3d3',
+    image: 'production.png',
+    main: false
+  },
+  {
+    key: 'DefaultBilling',
+    label: platformLabels.DefaultBilling,
+    color: '#231f20',
+    image: 'generate.png',
+    main: false
+  },
+  {
+    key: 'DefaultShipping',
+    label: platformLabels.DefaultShipping,
+    color: '#231f20',
+    image: 'shipment.png',
+    main: false
+  }
 ]

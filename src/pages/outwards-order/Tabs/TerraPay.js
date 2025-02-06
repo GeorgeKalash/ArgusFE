@@ -12,12 +12,8 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { formatDateToApi } from 'src/lib/date-helper'
 
 export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData, beneficiary }) {
-  console.log('in terra')
-  console.log(terraPay, outwardsData)
-
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
 
@@ -70,8 +66,6 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
 
         formik.setFieldValue('quotation.requestCurrency', res?.record?.isoCode)
       }
-
-      console.log('formik check ', formik)
     })()
   }, [])
 

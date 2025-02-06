@@ -44,7 +44,6 @@ const IvBarcodes = () => {
     })
 
     return { ...response, _startAt: _startAt }
-    
   }
 
   const {

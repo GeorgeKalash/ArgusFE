@@ -146,7 +146,7 @@ const FiPaymentVouchers = () => {
     return getRequest({
       extension: SystemRepository.UserDefaults.get,
       parameters: parameters
-    }).then(res => res.record.value)
+    }).then(res => res?.record?.value)
   }
 
   function openOutWardsWindow(plantId, recordId) {
@@ -159,7 +159,7 @@ const FiPaymentVouchers = () => {
         maxAccess: access
       },
       width: 950,
-      height: 700,
+      height: 550,
       title: _labels.paymentVoucher
     })
   }

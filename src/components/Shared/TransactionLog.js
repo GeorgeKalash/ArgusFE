@@ -17,7 +17,6 @@ const TransactionLog = props => {
   const { recordId, resourceId } = props
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-
   const { getLabels, getAccess } = useContext(ControlContext)
   const [transactionType, setTransactionType] = useState(0)
   const [gridData, setGridData] = useState({})
@@ -57,7 +56,6 @@ const TransactionLog = props => {
   }
 
   const showInfo = obj => {
-    console.log(obj, 'obj')
     var parameters = `_recordId=${obj.recordId}`
     setInfo([])
     getRequest({
@@ -83,13 +81,20 @@ const TransactionLog = props => {
     {
       field: 'eventDt',
       headerName: _labels.eventDate,
+      flex: 2,
+      type: 'dateTime',
+      dateFormat: 'HH:mm:ss'
+    },
+    {
+      field: 'userId',
+      headerName: _labels.userId,
       flex: 1,
-      type: 'date'
+      type: 'number'
     },
     {
       field: 'userName',
       headerName: _labels.username,
-      flex: 1
+      flex: 2
     },
     {
       field: 'ttName',

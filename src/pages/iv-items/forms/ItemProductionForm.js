@@ -32,15 +32,14 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
       designId: '',
       standardCost: '',
       standardId: '',
-      cgId: ''
+      cgId: '',
+      rmcId: ''
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
-      const response = await postRequest({
+      await postRequest({
         extension: InventoryRepository.ItemProduction.set,
         record: JSON.stringify(obj)
       })
@@ -75,7 +74,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
 
   return (
     <FormShell
-      resourceId={ResourceIds.IdCategories}
+      resourceId={ResourceIds.Items}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -209,6 +208,21 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                   formik.setFieldValue('ltId', newValue ? newValue.recordId : '')
                 }}
                 error={formik.touched.ltId && Boolean(formik.errors.ltId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.RawMaterialCategory.qry}
+                name='rmcId'
+                label={labels.rmc}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('rmcId', newValue?.recordId)
+                }}
+                error={formik.touched.rmcId && Boolean(formik.errors.rmcId)}
                 maxAccess={maxAccess}
               />
             </Grid>

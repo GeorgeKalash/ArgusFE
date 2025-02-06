@@ -1,5 +1,5 @@
 import { Button, Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -34,7 +34,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     enabled: !recordId
   })
   const { platformLabels, defaultsData } = useContext(ControlContext)
-  const [defaultsDataState, setDefaultsDataState] = useState(null)
 
   const { stack } = useWindow()
 
@@ -52,14 +51,14 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       dtId: documentType?.dtId,
       plantId: '',
       date: new Date(),
-      currencyId: '',
+      currencyId: parseInt(getDefaultsData()?.currencyId),
       currencyName: '',
       status: 1,
       cashAccountId: '',
       amount: '',
       baseAmount: '',
-      exRate: '',
-      rateCalcMethod: '',
+      exRate: 1,
+      rateCalcMethod: 1,
       functionId: functionId,
       notes: ''
     },
@@ -107,24 +106,12 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     }
   })
   const editMode = !!formik.values.recordId || !!recordId
-
+  const isPosted = formik.values.status === 3
+  
   const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
     endpointId: MultiCurrencyRepository.Currency.get,
     datasetId: ResourceIds.MultiCurrencyRate
   })
-
-  async function getDefaultsData() {
-    const myObject = {}
-
-    const filteredList = defaultsData?.list?.filter(obj => {
-      return obj.key === 'currencyId'
-    })
-
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setDefaultsDataState(myObject)
-
-    return myObject
-  }
 
   function openMCRForm(data) {
     stack({
@@ -167,6 +154,18 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     }
   }
 
+  function getDefaultsData() {
+    const myObject = {}
+
+    const filteredList = defaultsData?.list?.filter(obj => {
+      return obj.key === 'currencyId'
+    })
+
+    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+
+    return myObject
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -180,6 +179,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
           date: formatDateFromApi(res.record.date)
         })
       }
+      if (!editMode) getDefaultsData()
     })()
   }, [])
 
@@ -191,6 +191,26 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
 
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
+      invalidate()
+
+      const getRes = await getRequest({
+        extension: CashBankRepository.CAadjustment.get,
+        parameters: `_recordId=${formik.values.recordId}`
+      })
+
+      getRes.record.date = formatDateFromApi(getRes.record.date)
+      formik.setValues(getRes.record)
+    }
+  }
+
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: CashBankRepository.CAadjustment.unpost,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res?.recordId) {
+      toast.success(platformLabels.Unposted)
       invalidate()
 
       const getRes = await getRequest({
@@ -228,12 +248,18 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       onClick: 'onClickGL',
       disabled: !editMode
     },
-
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || formik.values.status !== 1
+      disabled: !editMode
     },
     {
       key: 'WorkFlow',
@@ -249,10 +275,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     }
   ]
 
-  useEffect(() => {
-    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
-  }, [defaultsDataState])
-
   return (
     <FormShell
       resourceId={ResourceIds.IncreaseDecreaseAdj}
@@ -262,7 +284,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       actions={actions}
       functionId={functionId}
       previewReport={editMode}
-      disabledSubmit={formik.values.status !== 1}
+      disabledSubmit={isPosted}
     >
       <VertLayout>
         <Grow>
@@ -307,7 +329,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
                 label={labels.plant}
-                readOnly={formik.values.status == '3'}
+                readOnly={isPosted}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -327,13 +349,13 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
               <CustomDatePicker
                 name='date'
                 label={labels.date}
-                readOnly={formik.values.status == '3'}
+                readOnly={isPosted}
                 value={formik.values.date}
                 onChange={async (e, newValue) => {
-                  formik.setFieldValue('date', newValue.date)
+                  formik.setFieldValue('date', newValue)
                   await getMultiCurrencyFormData(
                     formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
+                    formatDateForGetApI(newValue),
                     RateDivision.FINANCIALS
                   )
                 }}
@@ -350,7 +372,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                     endpointId={SystemRepository.Currency.qry}
                     name='currencyId'
                     label={labels.currency}
-                    readOnly={formik.values.status == '3'}
+                    readOnly={isPosted}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
@@ -377,7 +399,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                     variant='contained'
                     size='small'
                     onClick={() => openMCRForm(formik.values)}
-                    disabled={formik.values.currencyId === defaultsDataState?.currencyId}
+                    disabled={!formik.values.currencyId || formik.values.currencyId === getDefaultsData()?.currencyId}
                   >
                     <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                   </Button>
@@ -390,7 +412,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 parameters={{
                   _type: 2
                 }}
-                readOnly={formik.values.status == '3'}
+                readOnly={isPosted}
                 valueField='reference'
                 displayField='name'
                 name='cashAccountId'
@@ -420,7 +442,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 type='text'
                 label={labels.amount}
                 value={formik.values.amount}
-                readOnly={formik.values.status == '3'}
+                readOnly={isPosted}
                 required
                 maxAccess={maxAccess}
                 thousandSeparator={false}
@@ -428,7 +450,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                   formik.setFieldValue('amount', e.target.value)
 
                   const updatedRateRow = getRate({
-                    amount: formik.values.amount ?? 0,
+                    amount: e.target.value ?? 0,
                     exRate: formik.values?.exRate,
                     baseAmount: 0,
                     rateCalcMethod: formik.values?.rateCalcMethod,
@@ -447,7 +469,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
               <CustomTextArea
                 name='notes'
                 label={labels.notes}
-                readOnly={formik.values.status == '3'}
+                readOnly={isPosted}
                 value={formik.values.notes}
                 maxLength='100'
                 rows={2}
