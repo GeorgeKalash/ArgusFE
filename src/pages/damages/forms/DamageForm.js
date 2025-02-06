@@ -118,19 +118,22 @@ export default function DamageForm({ labels, access, recordId }) {
 
   const actions = [
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      disabled: !editMode || isPosted
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
       disabled: !editMode || isPosted
     }
   ]
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        await refetchForm(recordId)
-      }
-    })()
+    if (recordId) {
+      refetchForm(recordId)
+    }
   }, [])
 
   useEffect(() => {
