@@ -102,8 +102,6 @@ const GenerateOutboundTransportation = () => {
     if (checked) {
     } else {
       const selectedIds = selectedSaleZones ? selectedSaleZones.split(',') : []
-      console.log(formik?.values?.data?.length)
-
       let modifiedData = [...(formik?.values?.data?.list?.length > 0 ? formik.values.data.list : [])]
 
       const itemToAdd = formik?.values?.deliveryOrders?.list?.find(item => item.recordId == row.recordId)
@@ -113,8 +111,6 @@ const GenerateOutboundTransportation = () => {
       ) {
         modifiedData.push(itemToAdd)
       }
-
-      console.log(modifiedData, 'modifiedData')
 
       formik.setFieldValue('data', { list: modifiedData })
 
@@ -340,8 +336,6 @@ const GenerateOutboundTransportation = () => {
     if (!items?.list) {
       return
     }
-
-    console.log(formik?.values?.deliveryOrders, 'lplplp')
     const existingDeliveryOrderIds = new Set(formik?.values?.deliveryOrders?.list?.map(item => item.recordId))
 
     const newItems = items.list.filter(item => !existingDeliveryOrderIds.has(item.recordId))
