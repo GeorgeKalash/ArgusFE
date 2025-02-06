@@ -1,4 +1,4 @@
-import { useState, useContext, useMemo } from 'react'
+import { useState, useContext, useMemo, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -23,6 +23,7 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 
 const GenerateOutboundTransportation = () => {
   const [selectedSaleZones, setSelectedSaleZones] = useState('')
+  const [reCalc, setReCalc] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -46,6 +47,8 @@ const GenerateOutboundTransportation = () => {
       capacity: 0,
       balance: 0,
       volume: 0,
+      totalAmount: 0,
+      totalVolume: 0,
       deliveryOrders: { list: [] },
       data: { list: [] },
       salesZones: { list: [] }
@@ -99,16 +102,13 @@ const GenerateOutboundTransportation = () => {
   }
 
   const onSelectCheckBox = (row, checked) => {
-    if (checked) {
-    } else {
+    if (!checked) {
       const selectedIds = selectedSaleZones ? selectedSaleZones.split(',') : []
       let modifiedData = [...(formik?.values?.data?.list?.length > 0 ? formik.values.data.list : [])]
 
       const itemToAdd = formik?.values?.deliveryOrders?.list?.find(item => item.recordId == row.recordId)
 
-      if (
-        itemToAdd && selectedIds.includes(String(itemToAdd.szId))
-      ) {
+      if (itemToAdd && selectedIds.includes(String(itemToAdd.szId))) {
         modifiedData.push(itemToAdd)
       }
 
@@ -116,43 +116,60 @@ const GenerateOutboundTransportation = () => {
 
       const updatedDeliveryOrders = {
         ...formik?.values?.deliveryOrders,
-        list: (formik?.values?.deliveryOrders?.list || []).filter(item => item.recordId !== row.recordId),
+        list: (formik?.values?.deliveryOrders?.list || []).filter(item => item.recordId !== row.recordId)
       }
-  
-      formik.setFieldValue('deliveryOrders', updatedDeliveryOrders);
 
-      if (totalVolumeFromChecked && totalAmountFromChecked) {
-        setTotalAmountFromChecked(prev => prev - row.amount)
-        setTotalVolumeFromChecked(prev => prev - row.volume)
-      }
+      formik.setFieldValue('deliveryOrders', updatedDeliveryOrders)
     }
   }
 
-  const [totalVolumeFromChecked, setTotalVolumeFromChecked] = useState(0)
-  const [totalAmountFromChecked, setTotalAmountFromChecked] = useState(0)
+  function totalAmountFromChecked() {
+    return (
+      formik?.values?.data?.list.reduce((amountSum, row) => {
+        let amountValue = 0
+        if (row.checked) {
+          amountValue = parseFloat(row?.amount?.toString().replace(/,/g, '')) || 0
+        }
+
+        return amountSum + amountValue
+      }, 0) || 0
+    )
+  }
+
+  function totalVolumeFromChecked() {
+    return (
+      formik?.values?.data?.list.reduce((volumeSum, row) => {
+        let volumeValue = 0
+
+        if (row.checked) {
+          volumeValue = parseFloat(row?.volume?.toString().replace(/,/g, '')) || 0
+        }
+
+        return volumeSum + volumeValue
+      }, 0) || 0
+    )
+  }
 
   const onRowCheckboxChange = (data, checked) => {
+    setReCalc(true)
     if (Array.isArray(data)) {
-      if (checked) {
-        const newTotalAmount = data.reduce((sum, row) => sum + row.amount, 0)
-        const newTotalVolume = data.reduce((sum, row) => sum + row.volume, 0)
-
-        setTotalVolumeFromChecked(newTotalVolume)
-        setTotalAmountFromChecked(newTotalAmount)
-      }
-
       data.forEach(row => {
         onSelectCheckBox(row, checked)
       })
     } else {
-      if (checked) {
-        setTotalAmountFromChecked(prev => prev + data.amount)
-        setTotalVolumeFromChecked(prev => prev + data.volume)
-      }
-
       onSelectCheckBox(data, checked)
     }
   }
+
+  useEffect(() => {
+    if (reCalc) {
+      const totalAmountValue = totalAmountFromChecked()
+      const totalVolumeValue = totalVolumeFromChecked()
+      formik.setFieldValue('totalAmount', totalAmountValue)
+      formik.setFieldValue('totalVolume', totalVolumeValue)
+      setReCalc(false)
+    }
+  }, [reCalc])
 
   const totalVolume = formik?.values?.deliveryOrders?.list?.reduce((sum, order) => sum + (order.volume || 0), 0) || 0
   const totalAmount = formik?.values?.deliveryOrders?.list?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0
@@ -174,10 +191,10 @@ const GenerateOutboundTransportation = () => {
 
         const updatedDeliveryOrders = {
           ...formik.values.deliveryOrders,
-          list: updatedData,
-        };
-  
-        formik.setFieldValue('deliveryOrders', updatedDeliveryOrders);
+          list: updatedData
+        }
+
+        formik.setFieldValue('deliveryOrders', updatedDeliveryOrders)
       },
       width: 400,
       height: 150,
@@ -309,10 +326,10 @@ const GenerateOutboundTransportation = () => {
       return
     }
 
-    formik.setFieldValue('salesZones', ({
+    formik.setFieldValue('salesZones', {
       ...salesZones,
       list: salesZones.list
-    }))
+    })
   }
 
   const onSaleZoneCheckbox = (row, checked) => {
@@ -345,15 +362,13 @@ const GenerateOutboundTransportation = () => {
 
   const onAdd = () => {
     const selectedRows = formik.values.data?.list?.filter(item => item.checked)
-    setTotalVolumeFromChecked(0)
-    setTotalAmountFromChecked(0)
 
     const updatedDeliveryOrders = {
       ...formik.values.deliveryOrders,
-      list: [...(formik.values.deliveryOrders?.list || []), ...selectedRows],
-    };
-  
-    formik.setFieldValue('deliveryOrders', updatedDeliveryOrders); 
+      list: [...(formik.values.deliveryOrders?.list || []), ...selectedRows]
+    }
+
+    formik.setFieldValue('deliveryOrders', updatedDeliveryOrders)
     formik.setFieldValue('data', {
       ...formik.values.data,
       list: formik.values.data.list.filter(item => !item.checked) || []
@@ -362,8 +377,6 @@ const GenerateOutboundTransportation = () => {
 
   const resetForm = () => {
     setSelectedSaleZones('')
-    setTotalVolumeFromChecked(0)
-    setTotalAmountFromChecked(0)
     formik.resetForm()
   }
 
@@ -548,7 +561,7 @@ const GenerateOutboundTransportation = () => {
                       <CustomNumberField
                         name='amount'
                         label={labels.amount}
-                        value={totalAmountFromChecked}
+                        value={formik.values.totalAmount}
                         readOnly
                         align='right'
                       />
@@ -557,7 +570,7 @@ const GenerateOutboundTransportation = () => {
                       <CustomNumberField
                         name='volume'
                         label={labels.volume}
-                        value={totalVolumeFromChecked}
+                        value={formik.values.totalVolume}
                         readOnly
                         align='right'
                       />
