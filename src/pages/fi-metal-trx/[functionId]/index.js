@@ -115,18 +115,20 @@ const MetalTrxFinancial = () => {
     },
     {
       field: 'accountName',
-      headerName: labels.accountRef,
+      headerName: labels.accountName,
       flex: 1
     },
     {
       field: 'qty',
       headerName: labels.qty,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'creditAmount',
       headerName: labels.creditAmount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
 
     {
