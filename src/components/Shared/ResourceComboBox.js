@@ -3,6 +3,7 @@ import { useContext, useEffect, useState, useRef } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CommonContext } from 'src/providers/CommonContext'
 import { useCacheDataContext } from 'src/providers/CacheDataContext'
+import { useCacheStoreContext } from 'src/providers/CacheStoreContext'
 
 export default function ResourceComboBox({
   endpointId,
@@ -23,12 +24,16 @@ export default function ResourceComboBox({
 
   const { getRequest } = useContext(RequestsContext)
   const { updateStore, fetchWithCache } = useCacheDataContext() || {}
+  const { cacheStore = {}, updateCacheStore = () => {} } = useCacheStoreContext() || {}
+
   const cacheAvailable = !!updateStore
   const { getAllKvsByDataset } = useContext(CommonContext)
 
   const [apiResponse, setApiResponse] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const finalItemsListRef = useRef([])
+
+  const key = endpointId || datasetId
 
   function fetch({ datasetId, endpointId, parameters }) {
     if (endpointId) {
@@ -49,33 +54,37 @@ export default function ResourceComboBox({
 
   useEffect(() => {
     const fetchDataAsync = async () => {
-      await fetchData()
+      await fetchData(false)
     }
 
     fetchDataAsync()
   }, [parameters])
 
-  const fetchData = async () => {
+  const fetchData = async (refresh = true) => {
     if (parameters && !data && (datasetId || endpointId)) {
       setIsLoading(true)
 
-      const data = cacheAvailable
-        ? await fetchWithCache({
-            queryKey: [datasetId || endpointId, parameters],
-            queryFn: () => fetch({ datasetId, endpointId, parameters })
-          })
-        : await fetch({ datasetId, endpointId, parameters })
+      const data =
+        cacheStore?.[key] && !refresh
+          ? cacheStore?.[key]
+          : cacheAvailable
+          ? await fetchWithCache({
+              queryKey: [datasetId || endpointId, parameters],
+              queryFn: () => fetch({ datasetId, endpointId, parameters })
+            })
+          : await fetch({ datasetId, endpointId, parameters })
+
       setApiResponse(!!datasetId ? { list: data } : data)
+
+      if (!cacheStore?.[key]) {
+        endpointId ? updateCacheStore(endpointId, data.list) : updateCacheStore(datasetId, data)
+      }
       if (typeof setData == 'function') setData(!!datasetId ? { list: data } : data)
       setIsLoading(false)
-
-      if (!values[name]) {
-        selectFirstOption()
-      }
     }
   }
-
   let finalItemsList = data ? data : reducer(apiResponse)?.filter?.(filter)
+  finalItemsList = cacheStore?.[key] ? cacheStore?.[key] : finalItemsList
 
   finalItemsListRef.current = finalItemsList || []
 
