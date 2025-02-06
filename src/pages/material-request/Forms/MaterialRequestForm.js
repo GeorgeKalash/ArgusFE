@@ -462,12 +462,10 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
 
     const updatedRequests = await Promise.all(
       dataGrid.list.map(async item => {
-        const onHandSite = await setOnHandSite(item?.itemId)
-
         return {
           ...item,
           id: item.seqNo,
-          onHandSite
+          onHandSite: item.onhandSite
         }
       })
     )
