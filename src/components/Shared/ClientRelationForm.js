@@ -111,7 +111,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
     <FormShell form={formik} infoVisible={false} isSaved={!editMode} isCleared={!editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2} xs={12}>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={CTCLRepository.CtClientIndividual.snapshot}
@@ -132,6 +132,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
                 maxAccess={access}
                 readOnly={editMode}
                 required
+                errorCheck='parentId'
               />
             </Grid>
             <Grid item xs={12}>
