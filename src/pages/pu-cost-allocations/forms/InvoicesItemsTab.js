@@ -58,7 +58,7 @@ const InvoicesItemsTab = ({ store, labels, access }) => {
         <Table
           name='invoicesItemsTable'
           columns={columns}
-          gridData={data || invoicesItemsData}
+          gridData={data.count == 0 ? invoicesItemsData : data}
           rowId={['recordId']}
           isLoading={false}
           maxAccess={access}
