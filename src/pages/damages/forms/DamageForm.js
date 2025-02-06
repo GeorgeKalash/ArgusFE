@@ -133,6 +133,12 @@ export default function DamageForm({ labels, access, recordId }) {
     })()
   }, [])
 
+  useEffect(() => {
+    if (documentType?.dtId) {
+      formik.setFieldValue('dtId', documentType.dtId)
+    }
+  }, [documentType?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.Damages}
