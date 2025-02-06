@@ -63,7 +63,7 @@ const GenerateOutboundTransportation = () => {
       const data = {
         vehicleId: obj.vehicleId,
         driverId: obj.driverId,
-        plantId: plantId,
+        plantId,
         tripOrderIDs: obj.deliveryOrders.list.map(order => order.recordId)
       }
 
@@ -373,6 +373,8 @@ const GenerateOutboundTransportation = () => {
       ...formik.values.data,
       list: formik.values.data.list.filter(item => !item.checked) || []
     })
+    formik.setFieldValue('totalAmount', 0)
+    formik.setFieldValue('totalVolume', 0)
   }
 
   const resetForm = () => {
