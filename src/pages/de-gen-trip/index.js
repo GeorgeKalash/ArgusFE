@@ -5,7 +5,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
-import { Grid, Button } from '@mui/material'
+import { Grid } from '@mui/material'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -22,9 +22,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomButton from 'src/components/Inputs/CustomButton'
 
 const GenerateOutboundTransportation = () => {
-  const [data, setData] = useState({ list: [] })
-  const [deliveryOrders, setDeliveryOrders] = useState({ list: [] })
-  const [salesZones, setSalesZones] = useState({ list: [] })
   const [selectedSaleZones, setSelectedSaleZones] = useState('')
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
@@ -48,7 +45,10 @@ const GenerateOutboundTransportation = () => {
       szId: null,
       capacity: 0,
       balance: 0,
-      volume: 0
+      volume: 0,
+      deliveryOrders: { list: [] },
+      data: { list: [] },
+      salesZones: { list: [] }
     },
     validationSchema: yup.object({
       vehicleId: yup.number().required()
@@ -61,7 +61,7 @@ const GenerateOutboundTransportation = () => {
         vehicleId: obj.vehicleId,
         driverId: obj.driverId,
         plantId: plantId,
-        tripOrderIDs: deliveryOrders.list.map(order => order.recordId)
+        tripOrderIDs: obj.deliveryOrders.list.map(order => order.recordId)
       }
 
       const res = await postRequest({
@@ -78,7 +78,7 @@ const GenerateOutboundTransportation = () => {
           amount: 0,
           balance: 0
         })
-        setDeliveryOrders({ list: [] })
+        formik.setFieldValue('deliveryOrders', { list: [] })
         toast.success(platformLabels.Generated)
       }
     }
@@ -102,22 +102,28 @@ const GenerateOutboundTransportation = () => {
     if (checked) {
     } else {
       const selectedIds = selectedSaleZones ? selectedSaleZones.split(',') : []
+      console.log(formik?.values?.data?.length)
 
-      setData(prev => {
-        const itemToAdd = deliveryOrders.list.find(item => item.recordId == row.recordId)
+      let modifiedData = [...(formik?.values?.data?.list?.length > 0 ? formik.values.data.list : [])]
 
-        if (!itemToAdd || !selectedIds.includes(String(itemToAdd.szId))) return prev
+      const itemToAdd = formik?.values?.deliveryOrders?.list?.find(item => item.recordId == row.recordId)
 
-        return {
-          ...prev,
-          list: [...(prev?.list || []), itemToAdd]
-        }
-      })
+      if (
+        itemToAdd && selectedIds.includes(String(itemToAdd.szId))
+      ) {
+        modifiedData.push(itemToAdd)
+      }
 
-      setDeliveryOrders(prev => ({
-        ...prev,
-        list: prev?.list?.filter(item => item.recordId !== row.recordId) || []
-      }))
+      console.log(modifiedData, 'modifiedData')
+
+      formik.setFieldValue('data', { list: modifiedData })
+
+      const updatedDeliveryOrders = {
+        ...formik?.values?.deliveryOrders,
+        list: (formik?.values?.deliveryOrders?.list || []).filter(item => item.recordId !== row.recordId),
+      }
+  
+      formik.setFieldValue('deliveryOrders', updatedDeliveryOrders);
 
       if (totalVolumeFromChecked && totalAmountFromChecked) {
         setTotalAmountFromChecked(prev => prev - row.amount)
@@ -152,8 +158,8 @@ const GenerateOutboundTransportation = () => {
     }
   }
 
-  const totalVolume = deliveryOrders?.list?.reduce((sum, order) => sum + (order.volume || 0), 0) || 0
-  const totalAmount = deliveryOrders?.list?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0
+  const totalVolume = formik?.values?.deliveryOrders?.list?.reduce((sum, order) => sum + (order.volume || 0), 0) || 0
+  const totalAmount = formik?.values?.deliveryOrders?.list?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0
   const balance = formik.values.capacity - totalVolume
 
   const Confirmation = (row, value) => {
@@ -166,14 +172,16 @@ const GenerateOutboundTransportation = () => {
         close: true
       },
       onClose: () => {
-        const updatedData = deliveryOrders.list.map(item =>
+        const updatedData = formik?.values?.deliveryOrders?.list.map(item =>
           item.recordId == row.recordId ? { ...item, checked: true } : item
         )
 
-        setDeliveryOrders(prev => ({
-          ...prev,
-          list: updatedData
-        }))
+        const updatedDeliveryOrders = {
+          ...formik.values.deliveryOrders,
+          list: updatedData,
+        };
+  
+        formik.setFieldValue('deliveryOrders', updatedDeliveryOrders);
       },
       width: 400,
       height: 150,
@@ -305,10 +313,10 @@ const GenerateOutboundTransportation = () => {
       return
     }
 
-    setSalesZones({
+    formik.setFieldValue('salesZones', ({
       ...salesZones,
       list: salesZones.list
-    })
+    }))
   }
 
   const onSaleZoneCheckbox = (row, checked) => {
@@ -333,38 +341,33 @@ const GenerateOutboundTransportation = () => {
       return
     }
 
-    setData(prev => {
-      const existingDeliveryOrderIds = new Set(deliveryOrders.list.map(item => item.recordId))
+    console.log(formik?.values?.deliveryOrders, 'lplplp')
+    const existingDeliveryOrderIds = new Set(formik?.values?.deliveryOrders?.list?.map(item => item.recordId))
 
-      const newItems = items.list.filter(item => !existingDeliveryOrderIds.has(item.recordId))
+    const newItems = items.list.filter(item => !existingDeliveryOrderIds.has(item.recordId))
 
-      return {
-        ...prev,
-        list: newItems
-      }
-    })
+    formik.setFieldValue('data', { list: newItems })
   }
 
   const onAdd = () => {
-    const selectedRows = data?.list?.filter(item => item.checked)
+    const selectedRows = formik.values.data?.list?.filter(item => item.checked)
     setTotalVolumeFromChecked(0)
     setTotalAmountFromChecked(0)
-    setDeliveryOrders(prev => ({
-      ...prev,
-      list: [...(prev?.list || []), ...selectedRows]
-    }))
 
-    setData(prev => ({
-      ...prev,
-      list: prev?.list?.filter(item => !item.checked) || []
-    }))
+    const updatedDeliveryOrders = {
+      ...formik.values.deliveryOrders,
+      list: [...(formik.values.deliveryOrders?.list || []), ...selectedRows],
+    };
+  
+    formik.setFieldValue('deliveryOrders', updatedDeliveryOrders); 
+    formik.setFieldValue('data', {
+      ...formik.values.data,
+      list: formik.values.data.list.filter(item => !item.checked) || []
+    })
   }
 
   const resetForm = () => {
     setSelectedSaleZones('')
-    setData({ list: [] })
-    setSalesZones({ list: [] })
-    setDeliveryOrders({ list: [] })
     setTotalVolumeFromChecked(0)
     setTotalAmountFromChecked(0)
     formik.resetForm()
@@ -379,14 +382,14 @@ const GenerateOutboundTransportation = () => {
 
   const filteredSalesZones = useMemo(() => {
     return {
-      ...salesZones,
-      list: salesZones.list.filter(item =>
+      ...formik?.values?.salesZones,
+      list: formik?.values?.salesZones?.list.filter(item =>
         item.name.toString().toLowerCase().includes(formik?.values?.search?.toLowerCase())
       )
     }
-  }, [salesZones, formik.values.search])
+  }, [formik?.values?.salesZones, formik.values.search])
 
-  const filteredData = salesZones.list.length > 0 ? filteredSalesZones : salesZones
+  const filteredData = formik?.values?.salesZones?.list.length > 0 ? filteredSalesZones : formik?.values?.salesZones
 
   return (
     <FormShell
@@ -414,10 +417,10 @@ const GenerateOutboundTransportation = () => {
                     onChange={(event, newValue) => {
                       formik.setFieldValue('szId', newValue?.recordId || null)
                       onSaleZoneChange(newValue?.recordId)
-                      setData({ list: [] })
+                      formik.setFieldValue('data', { list: [] })
                       setSelectedSaleZones('')
                     }}
-                    readOnly={deliveryOrders.list.length > 0}
+                    readOnly={formik?.values?.deliveryOrders?.list.length > 0}
                     error={formik.touched.szId && Boolean(formik.errors.szId)}
                     maxAccess={access}
                   />
@@ -531,7 +534,7 @@ const GenerateOutboundTransportation = () => {
             <Grow>
               <Table
                 columns={columnsOrders}
-                gridData={data}
+                gridData={formik?.values?.data}
                 rowId={['recordId']}
                 isLoading={false}
                 pagination={false}
@@ -572,7 +575,7 @@ const GenerateOutboundTransportation = () => {
             <Grow>
               <Table
                 columns={columnsDeliveryOrders}
-                gridData={deliveryOrders}
+                gridData={formik?.values?.deliveryOrders}
                 rowId={['recordId']}
                 isLoading={false}
                 pagination={false}
