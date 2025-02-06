@@ -28,7 +28,7 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import PreviewReport from 'src/components/Shared/PreviewReport'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId, form = {} }) {
+export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId, form = null }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
