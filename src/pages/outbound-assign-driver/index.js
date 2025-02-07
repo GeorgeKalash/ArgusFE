@@ -37,21 +37,19 @@ const OutboundAssignDriver = () => {
       )
     }),
     onSubmit: async obj => {
-      const list = obj.tripList?.map((item, index) => {
+      const list = obj.tripList?.map(item => {
         return {
           ...item,
           departureTime: formatDateToApi(item?.departureTime)
         }
       })
 
-      console.log('check obj', obj.tripList)
-
-      // const res = await postRequest({
-      //   extension: DeliveryRepository.Trip.assign,
-      //   record: JSON.stringify({ tripList: list })
-      // })
-      // toast.success(platformLabels.Edited)
-      // refetchForm(res.recordId)
+      const res = await postRequest({
+        extension: DeliveryRepository.Trip.assign,
+        record: JSON.stringify({ tripList: list })
+      })
+      toast.success(platformLabels.Edited)
+      refetchForm(res.recordId)
     }
   })
 

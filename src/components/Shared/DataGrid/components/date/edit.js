@@ -1,6 +1,6 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
-export default function DateEdit({ column: { props }, id, field, value, update }) {
+export default function DateEdit({ column: { props, field }, id, value, update }) {
   return (
     <CustomDatePicker
       autoFocus
