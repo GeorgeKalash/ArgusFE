@@ -9,37 +9,16 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import DamageForm from './forms/DamageForm'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import PuCostAllocationWindow from './window/PuCostAllocationWindow'
-import { CostAllocationRepository } from 'src/repositories/CostAllocationRepository'
 
-const PuCostAllocations = () => {
+const Damages = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params = [] } = options
-
-    const response = await getRequest({
-      extension: CostAllocationRepository.PuCostAllocations.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params}&_sortBy=recordId`
-    })
-
-    return { ...response, _startAt: _startAt }
-  }
-
-  async function fetchWithFilter({ filters, pagination }) {
-    if (filters?.qry) {
-      return await getRequest({
-        extension: CostAllocationRepository.PuCostAllocations.snapshot,
-        parameters: `_filter=${filters.qry}&_startAt=${pagination._startAt || 0}&_size=${pagination._size || 50}`
-      })
-    } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-    }
-  }
 
   const {
     query: { data },
@@ -52,8 +31,8 @@ const PuCostAllocations = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CostAllocationRepository.PuCostAllocations.page,
-    datasetId: ResourceIds.PuCostAllocation,
+    endpointId: ManufacturingRepository.Damage.page,
+    datasetId: ResourceIds.Damages,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -66,16 +45,15 @@ const PuCostAllocations = () => {
       flex: 1
     },
     {
-      field: 'baseAmount',
-      headerName: labels.amount,
-      flex: 1,
-      type: 'number'
-    },
-    {
       field: 'date',
       headerName: labels.date,
       flex: 1,
       type: 'date'
+    },
+    {
+      field: 'jobRef',
+      headerName: labels.jobRef,
+      flex: 1
     },
     {
       field: 'statusName',
@@ -83,45 +61,63 @@ const PuCostAllocations = () => {
       flex: 1
     },
     {
-      field: 'wipName',
-      headerName: labels.wipName,
+      field: 'notes',
+      headerName: labels.remarks,
       flex: 1
     }
   ]
 
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
+
+    const response = await getRequest({
+      extension: ManufacturingRepository.Damage.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_jobId=0&filter=`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry)
+      return await getRequest({
+        extension: ManufacturingRepository.Damage.snapshot,
+        parameters: `_filter=${filters.qry}&_jobId=0`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.CostAllocation,
-    action: async () => {
-      openForm()
-    },
+    functionId: SystemFunction.Damage,
+    action: openForm,
     hasDT: false
   })
 
   const add = async () => {
-    proxyAction()
+    await proxyAction()
   }
 
   const edit = obj => {
-    openForm(obj)
+    openForm(obj.recordId)
   }
 
-  async function openForm(obj) {
+  async function openForm(recordId) {
     stack({
-      Component: PuCostAllocationWindow,
+      Component: DamageForm,
       props: {
-        labels: labels,
-        recordId: obj?.recordId,
-        maxAccess: access
+        labels,
+        access,
+        recordId
       },
-      width: 800,
-      height: 500,
-      title: labels.PuCostAllocations
+      width: 850,
+      height: 680,
+      title: labels.damage
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: CostAllocationRepository.PuCostAllocations.del,
+      extension: ManufacturingRepository.Damage.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -156,12 +152,12 @@ const PuCostAllocations = () => {
           onApply={onApply}
           onSearch={onSearch}
           onClear={onClear}
-          reportName={'COTRX'}
+          reportName={'MFDMG'}
         />
       </Fixed>
       <Grow>
         <Table
-          name='allocationsTable'
+          name='damageTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
@@ -180,4 +176,4 @@ const PuCostAllocations = () => {
   )
 }
 
-export default PuCostAllocations
+export default Damages
