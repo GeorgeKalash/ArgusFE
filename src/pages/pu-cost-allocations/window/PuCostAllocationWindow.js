@@ -14,7 +14,8 @@ const PuCostAllocationWindow = ({ recordId, labels, maxAccess }) => {
   const [store, setStore] = useState({
     recordId: recordId || null,
     isPosted: false,
-    isClosed: false
+    isClosed: false,
+    invoicesItemsData: []
   })
 
   const tabs = [
@@ -32,10 +33,10 @@ const PuCostAllocationWindow = ({ recordId, labels, maxAccess }) => {
         <TRXForm labels={labels} setStore={setStore} store={store} access={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <InvoicesForm labels={labels} editMode={editMode} store={store} maxAccess={maxAccess} />
+        <InvoicesForm labels={labels} setStore={setStore} editMode={editMode} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <InvoicesItemsTab labels={labels} maxAccess={maxAccess} store={store} />
+        <InvoicesItemsTab labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} />
       </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab}>
         <TransactionTab store={store} labels={labels} access={maxAccess} />
