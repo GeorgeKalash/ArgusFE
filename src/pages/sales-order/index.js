@@ -183,18 +183,17 @@ const SalesOrder = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onSearch = value => {
-    filterBy('qry', value)
+  const onSearch = (value, rpbParams) => {
+    if (value) filterBy('qry', value)
+    else filterBy('params', rpbParams)
   }
 
-  const onClear = () => {
-    clearFilter('qry')
+  const onClear = rpbParams => {
+    filterBy('params', rpbParams)
   }
 
   const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
+    if (!search) {
       filterBy('params', rpbParams)
     } else {
       filterBy('qry', search)

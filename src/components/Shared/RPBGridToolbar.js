@@ -65,6 +65,8 @@ const RPBGridToolbar = ({
     return formattedData
   }
 
+  const reportParams = formatDataForApi(rpbParams)
+
   const actions = [
     {
       key: 'OpenRPB',
@@ -77,8 +79,8 @@ const RPBGridToolbar = ({
       condition: true,
       onClick: () =>
         onApply({
-          rpbParams: formatDataForApi(rpbParams),
-          paramsDict: formatDataDictForApi(rpbParams),
+          rpbParams: reportParams,
+          paramsDict: reportParams,
           search: search
         }),
       disabled: false
@@ -88,14 +90,14 @@ const RPBGridToolbar = ({
   return (
     <GridToolbar
       onSearch={value => {
-        value != '' ? onSearch(value) : (setSearch(''), onClear())
+        value != '' ? onSearch(value) : onSearch('', reportParams)
       }}
       onSearchClear={() => {
         setSearch('')
-        onClear()
+        onClear(reportParams)
       }}
       onSearchChange={value => {
-        value != '' ? setSearch(value) : (setSearch(''), onClear())
+        value != '' ? setSearch(value) : setSearch('')
       }}
       inputSearch={hasSearch}
       actions={actions}
