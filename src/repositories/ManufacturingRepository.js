@@ -149,5 +149,13 @@ export const ManufacturingRepository = {
   },
   ProductionSheetQueue: {
     qry: service + 'qryPSQ'
+  },
+  Damage: {
+    get: service + 'getDMG',
+    set: service + 'setDMG',
+    del: service + 'delDMG',
+    page: service + 'pageDMG',
+    snapshot: service + 'snapshotDMG',
+    post: service + 'postDMG'
   }
 }
