@@ -91,7 +91,7 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_startAt=0&_pageSize=50&_dgId=${SystemFunction.MaterialTransfer}`}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MaterialTransfer}`}
                 name='dtId'
                 required
                 label={labels.documentType}
