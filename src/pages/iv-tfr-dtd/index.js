@@ -14,7 +14,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import MaterialTransferDTDForm from './Forms/MaterialTransferDTDForm'
 
-const MetalTransferDTD = () => {
+const MaterialTransferDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -126,4 +126,4 @@ const MetalTransferDTD = () => {
   )
 }
 
-export default MetalTransferDTD
+export default MaterialTransferDTD
