@@ -110,7 +110,7 @@ export default function MaterialAdjustmentDTDForm({ labels, maxAccess, recordId,
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'
-                label={labels.fromSite}
+                label={labels.site}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
