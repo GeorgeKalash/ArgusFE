@@ -171,7 +171,7 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
                 ]}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('carrierId', newValue.recordId || '')
+                  formik.setFieldValue('carrierId', newValue?.recordId || '')
                 }}
                 error={formik.touched.carrierId && Boolean(formik.errors.carrierId)}
               />
