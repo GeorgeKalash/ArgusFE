@@ -83,6 +83,7 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
       maxAccess={maxAccess}
       editMode={editMode}
       functionId={SystemFunction.MaterialTransfer}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>
