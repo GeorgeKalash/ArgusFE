@@ -91,7 +91,7 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MaterialTransfer}`}
+                parameters={`_startAt=0&_pageSize=50&_dgId=${SystemFunction.MaterialTransfer}`}
                 name='dtId'
                 required
                 label={labels.documentType}
@@ -105,7 +105,7 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('dtId', newValue?.recordId)
+                  formik.setFieldValue('dtId', newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
@@ -124,7 +124,7 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('siteId', newValue?.recordId)
+                  formik.setFieldValue('siteId', newValue?.recordId)
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
@@ -143,7 +143,7 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('toSiteId', newValue?.recordId)
+                  formik.setFieldValue('toSiteId', newValue?.recordId)
                 }}
                 error={formik.touched.toSiteId && Boolean(formik.errors.toSiteId)}
               />
@@ -171,7 +171,7 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
                 ]}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('carrierId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('carrierId', newValue.recordId || '')
                 }}
                 error={formik.touched.carrierId && Boolean(formik.errors.carrierId)}
               />
