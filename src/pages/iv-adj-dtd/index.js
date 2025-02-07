@@ -40,7 +40,7 @@ const MaterialAdjustmentDTD = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.DocumentTypeDefaults.page,
-    datasetId: ResourceIds.MaterialAdjustmentDTD
+    datasetId: ResourceIds.MaterialTransferDTD
   })
 
   const columns = [

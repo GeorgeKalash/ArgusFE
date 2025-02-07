@@ -31,8 +31,6 @@ export default function MaterialAdjustmentDTDForm({ labels, maxAccess, recordId,
       functionId: SystemFunction.MaterialAdjustment,
       dtId: null,
       siteId: null,
-      toSiteId: null,
-      carrierId: null,
       plantId: null,
       disableSKULookup: false
     },
@@ -77,7 +75,7 @@ export default function MaterialAdjustmentDTDForm({ labels, maxAccess, recordId,
 
   return (
     <FormShell
-      resourceId={ResourceIds.MaterialAdjustmentDTD}
+      resourceId={ResourceIds.MaterialTransferDTD}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
