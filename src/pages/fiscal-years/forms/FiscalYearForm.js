@@ -105,7 +105,7 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
       const year = parseInt(formik.values.fiscalYear, 10)
       if (year) {
         formik.setFieldValue('startDate', new Date(Date.UTC(year, 0, 1)))
-        formik.setFieldValue('endDate', new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999)))
+        formik.setFieldValue('endDate', new Date(Date.UTC(year, 11, 31, 0, 0, 0, 0)))
       }
     } else {
       formik.setFieldValue('startDate', null)
