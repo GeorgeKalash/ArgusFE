@@ -25,62 +25,35 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import { getStorageData } from 'src/storage/storage'
 
 export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, window }) {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const [metal, setMetal] = useState({})
+  const [allMetals, setAllMetals] = useState([])
+  const filteredCreditCard = useRef()
+
+  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+
+  const getEndpoint = {
+    [SystemFunction.MetalReceiptVoucher]: FinancialRepository.MetalReceiptVoucher.set2,
+    [SystemFunction.MetalPaymentVoucher]: FinancialRepository.MetalPaymentVoucher.set2
+  }
+
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
     enabled: !recordId
   })
-  const userData = getStorageData('userData')
-
-  const _userId = userData.userId
-
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
-  const [baseMetalId, setBaseMetalId] = useState(null)
-  const [metal, setMetal] = useState({})
-
-  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.MetalTrx.page
   })
 
-  const getEndpoint = functionId => {
-    const id = Number(functionId)
-    switch (id) {
-      case SystemFunction.MetalReceiptVoucher:
-        return FinancialRepository.MetalReceiptVoucher.set2
-      case SystemFunction.MetalPaymentVoucher:
-        return FinancialRepository.MetalPaymentVoucher.set2
-      default:
-        return null
-    }
-  }
-
-  const getData = async (recordId, functionId) => {
-    if (!recordId || !functionId) return null
-
-    const response = await getRequest({
-      extension: FinancialRepository.MetalTrx.get,
-      parameters: `_recordId=${recordId}&_functionId=${functionId}`
-    })
-    formik.setFieldValue('reference', response?.record.reference)
-
-    return {
-      ...response?.record,
-      date: formatDateFromApi(response?.record.date)
-    }
-  }
-
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
-
   const { formik } = useForm({
     initialValues: {
       accountId: null,
-      accountName: '',
       batchId: null,
       collectorId: null,
       contactId: null,
@@ -91,16 +64,11 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       functionId: functionId,
       isVerified: null,
       plantId: plantId,
-      plantRef: '',
       qty: null,
       recordId: null,
       reference: '',
       releaseStatus: null,
       siteId: siteId,
-      statusName: '',
-      plantName: '',
-      siteRef: '',
-      siteName: '',
       status: 1,
       items: [
         {
@@ -109,13 +77,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           creditAmount: null,
           stdPurity: null,
           itemId: null,
+          sku: '',
           itemName: '',
           metalId: null,
-          metalRef: '',
           purity: null,
           qty: null,
           seqNo: 1,
-          sku: '',
           stdPurity: null,
           totalCredit: null,
           trackBy: null,
@@ -141,21 +108,18 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
             creditAmount: yup.string().required()
           })
         )
-        .required(' ')
+        .required()
     }),
-
     onSubmit: async obj => {
       const { items: originalItems, ...header } = obj
 
-      const totalQty = originalItems?.reduce((sum, item) => sum + item.qty, 0) || 0
-
       const updatedHeader = {
         ...header,
-        qty: totalQty
+        qty: originalItems?.reduce((sum, item) => sum + item.qty, 0) || 0
       }
 
-      const items = originalItems?.map((item, index) => ({
-        trxId: obj.recordId || 0,
+      const items = originalItems?.map(item => ({
+        trxId: obj?.recordId || 0,
         seqNo: item.id,
         metalId: item.metalId,
         itemId: item.itemId,
@@ -172,97 +136,84 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       }
 
       const response = await postRequest({
-        extension: getEndpoint(formik.values.functionId),
+        extension: getEndpoint[formik.values.functionId],
         record: JSON.stringify(payload)
       })
-
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
-      } else {
-        toast.success(platformLabels.Edited)
-      }
-      getData(response.recordId, functionId)
+      const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+      toast.success(actionMessage)
+      refetchForm(response?.recordId)
       invalidate()
     }
   })
 
+  const editMode = !!formik.values?.recordId
+  const isPosted = formik.values.status === 3
+  const calculateTotal = key => formik.values.items.reduce((sum, item) => sum + (parseFloat(item[key]) || 0), 0)
+  const totalQty = calculateTotal('qty')
+  const totalLabor = calculateTotal('totalCredit')
+  const totalMetal = calculateTotal('metalValue')
+
+  async function getData(recordId) {
+    if (!recordId || !functionId) return
+
+    const response = await getRequest({
+      extension: FinancialRepository.MetalTrx.get,
+      parameters: `_recordId=${recordId}&_functionId=${functionId}`
+    })
+
+    return {
+      ...response?.record,
+      date: formatDateFromApi(response?.record.date)
+    }
+  }
+
   const onPost = async () => {
     const { items, ...restValues } = formik.values
 
-    const header = JSON.stringify({
-      ...restValues,
-      qty: totalQty,
-      creditAmount: totalLabor,
-      recordId: formik.values.recordId
-    })
-
     await postRequest({
       extension: FinancialRepository.MetalTrx.post,
-      record: header
+      record: JSON.stringify({
+        ...restValues,
+        qty: totalQty,
+        creditAmount: totalLabor
+      })
     })
 
     toast.success(platformLabels.Posted)
     window.close()
     invalidate()
   }
-  const editMode = !!formik.values?.recordId || !!recordId
 
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: FinancialRepository.MetalReceiptVoucher.get,
-          parameters: `_trxId=${recordId}&_functionId=${functionId}`
-        })
+  const onUnpost = async () => {
+    const { items, ...restValues } = formik.values
 
-        const res2 = await getData(recordId, functionId)
+    const res = await postRequest({
+      extension: FinancialRepository.MetalTrx.unpost,
+      record: JSON.stringify({
+        ...restValues,
+        qty: totalQty,
+        creditAmount: totalLabor
+      })
+    })
 
-        const modifiedList = res?.list?.map((item, index) => ({
-          ...item,
-          purity: item.purity && item.purity <= 1 ? item.purity * 1000 : item.purity,
-          metalValue: metal.purity ? Math.round(((item.qty * item.purity) / metal.purity) * 100) / 100 : null,
+    toast.success(platformLabels.Unposted)
+    refetchForm(res?.recordId)
+    invalidate()
+  }
 
-          id: index + 1,
-          seqNo: index + 1
-        }))
-
-        if (modifiedList?.length > 0) {
-          formik.setValues({ items: modifiedList })
-        }
-
-        formik.setValues({ ...res2, items: modifiedList || formik.values.items })
-      }
-
-      const getDataResult = () => {
-        const myObject = {}
-
-        const filteredList = defaultsData?.list?.filter(obj => {
-          return obj.key === 'baseSalesMetalId'
-        })
-        filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-        setBaseMetalId(myObject.baseSalesMetalId)
-      }
-      getDataResult()
-    })()
-  }, [metal])
-  useEffect(() => {
-    ;(async function () {
-      if (formik.values.dtId) {
-        const res = await getRequest({
-          extension: FinancialRepository.FIDocTypeDefaults.get,
-          parameters: `_dtId=${formik.values.dtId}`
-        })
-        formik.setFieldValue('siteId', res.record?.siteId || null)
-        formik.setFieldValue('plantId', res.record?.plantId || null)
-        formik.setFieldValue('siteName', res.record?.siteName || '')
-        formik.setFieldValue('plantName', res.record?.plantName || '')
-      }
-    })()
-  }, [formik.values.dtId])
+  async function setDefaults(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: FinancialRepository.FIDocTypeDefaults.get,
+        parameters: `_dtId=${dtId}`
+      })
+      formik.setFieldValue('siteId', res.record?.siteId)
+      formik.setFieldValue('plantId', res.record?.plantId)
+    } else {
+      formik.setFieldValue('siteId', null)
+      formik.setFieldValue('plantId', null)
+    }
+  }
 
   const getResourceId = functionId => {
     switch (functionId) {
@@ -270,53 +221,46 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         return ResourceIds.MetalReceiptVoucher
       case SystemFunction.MetalPaymentVoucher:
         return ResourceIds.MetalPaymentVoucher
-
       default:
-        return null
+        return
     }
   }
-  const [allMetals, setAllMetals] = useState([])
-  const filteredCreditCard = useRef()
 
   function getFilteredMetal(metalId) {
     if (!metalId) return []
 
-    const array = allMetals.filter(metal => {
+    return allMetals.filter(metal => {
       return metal.metalId === metalId
     })
-
-    return array
   }
-
-  useEffect(() => {
-    getRequest({
+  async function getAllMetals() {
+    const res = await getRequest({
       extension: InventoryRepository.Scrap.qry,
       parameters: '_metalId=0'
-    }).then(res => {
-      setAllMetals(res.list)
     })
-  }, [])
-
-  useEffect(() => {
-    if (baseMetalId) {
-      getRequest({
-        extension: InventoryRepository.Metals.get,
-        parameters: `_recordId=${baseMetalId}`
-      }).then(res => {
-        setMetal(res.record)
-      })
-    }
-  }, [baseMetalId])
-
-  const parseNumber = value => {
-    const number = parseFloat(value)
-
-    return isNaN(number) ? 0 : number
+    setAllMetals(res?.list)
   }
+  async function refetchForm(recordId) {
+    const headerRes = await getData(recordId)
 
-  const totalQty = formik.values.items.reduce((sum, item) => sum + parseNumber(item.qty), 0)
-  const totalLabor = formik.values.items.reduce((sum, item) => sum + parseNumber(item.totalCredit), 0)
-  const totalMetal = formik.values.items.reduce((sum, item) => sum + parseNumber(item.metalValue), 0)
+    const itemsRes = await getRequest({
+      extension: FinancialRepository.MetalReceiptVoucher.qry,
+      parameters: `_trxId=${recordId}&_functionId=${functionId}`
+    })
+
+    const modifiedList = itemsRes?.list?.map((item, index) => ({
+      ...item,
+      purity: item.purity && item.purity <= 1 ? item.purity * 1000 : item.purity,
+      metalValue: metal.purity ? Math.round(((item.qty * item.purity) / metal.purity) * 100) / 100 : null,
+      id: index + 1,
+      seqNo: index + 1
+    }))
+
+    formik.setValues({
+      ...headerRes,
+      items: modifiedList?.length > 0 ? modifiedList : formik.values.items
+    })
+  }
 
   const columns = [
     {
@@ -337,10 +281,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       },
       onChange: async ({ row: { update, newRow } }) => {
         filteredCreditCard.current = newRow.metalId
-
-        if (newRow.purity) {
-          update({ purity: newRow.purity * 1000, stdPurity: newRow.stdPurity * 1000 })
-        }
+        if (newRow.purity) update({ purity: newRow.purity * 1000, stdPurity: newRow.stdPurity * 1000 })
       }
     },
     {
@@ -363,21 +304,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         return { ...props, store: getFilteredMetal(filteredCreditCard?.current) }
       },
       onChange: ({ row: { update, newRow } }) => {
-        let purityValue = newRow.purity
-
-        if (!purityValue && newRow.stdPurity) {
-          purityValue = newRow.stdPurity
-        }
-
-        if (purityValue) {
-          const totalCredit = newRow.qty * newRow.creditAmount * (purityValue / newRow.stdPurity)
-
-          if (purityValue === newRow.stdPurity) {
-            update({ purity: purityValue, totalCredit })
-          } else {
-            update({ purity: purityValue * 1000, totalCredit })
-          }
-        }
+        const purityValue = newRow.purity || newRow.stdPurity
+        if (!purityValue) return
+        const totalCredit = newRow.qty * newRow.creditAmount * (purityValue / newRow.stdPurity)
+        update({ purity: purityValue === newRow.stdPurity ? purityValue : purityValue * 1000, totalCredit })
       }
     },
     {
@@ -415,7 +345,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           ? newRow.qty * newRow.creditAmount
           : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
         update({ totalCredit })
-        if (metal && Object.keys(metal).length > 0) {
+        if (metal) {
           const metalValue = Math.round(((newRow.qty * newRow.purity) / (metal.purity * 1000)) * 100) / 100
           update({ metalValue: metalValue })
         }
@@ -434,43 +364,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       props: { allowNegative: false, readOnly: true }
     }
   ]
-  if (metal.reference) {
-    const qtyIndex = columns.findIndex(col => col.name === 'qty')
-    if (qtyIndex !== -1) {
-      columns.splice(qtyIndex + 1, 0, {
-        component: 'numberfield',
-        label: metal.reference,
-        name: 'metalValue',
-        props: {
-          decimalScale: 2,
-          readOnly: true
-        }
-      })
-    }
-  }
-
-  const onUnpost = async () => {
-    const { items, ...restValues } = formik.values
-
-    const res = await postRequest({
-      extension: FinancialRepository.MetalTrx.unpost,
-      record: JSON.stringify(restValues)
-    })
-
-    if (res?.recordId) {
-      toast.success(platformLabels.Unposted)
-
-      const res2 = await getData(res.recordId, functionId)
-
-      formik.setValues({
-        ...res2,
-        items: formik.values.items
-      })
-
-      invalidate()
-    }
-  }
-  const isPosted = formik.values.status === 3
 
   const actions = [
     {
@@ -494,6 +387,36 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       disabled: !editMode
     }
   ]
+
+  useEffect(() => {
+    ;(async function () {
+      if (recordId) refetchForm(recordId)
+      await getAllMetals()
+      const filteredItem = defaultsData?.list?.find(obj => obj.key === 'baseSalesMetalId')
+      if (parseInt(filteredItem?.value)) {
+        getRequest({
+          extension: InventoryRepository.Metals.get,
+          parameters: `_recordId=${parseInt(filteredItem?.value)}`
+        }).then(res => {
+          setMetal(res.record)
+          if (res.record.reference) {
+            const qtyIndex = columns.findIndex(col => col.name === 'qty')
+            if (qtyIndex !== -1) {
+              columns.splice(qtyIndex + 1, 0, {
+                component: 'numberfield',
+                label: res.record.reference,
+                name: 'metalValue',
+                props: {
+                  decimalScale: 2,
+                  readOnly: true
+                }
+              })
+            }
+          }
+        })
+      }
+    })()
+  }, [])
 
   return (
     <FormShell
@@ -522,7 +445,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 values={formik.values}
                 required
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId || '')
+                  formik.setFieldValue('dtId', newValue?.recordId)
+                  await setDefaults(newValue?.recordId)
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -544,7 +468,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue?.recordId || null)
+                  formik.setFieldValue('plantId', newValue?.recordId)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
@@ -554,7 +478,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 endpointId={formik.values?.accountId && FinancialRepository.Contact.qry}
                 parameters={formik.values?.accountId && `_accountId=${formik.values?.accountId}`}
                 name='contactId'
-                readOnly={false}
+                readOnly={isPosted}
                 label={labels.contact}
                 valueField='recordId'
                 displayField={'name'}
@@ -565,7 +489,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('contactId', newValue?.recordId || null)
+                  formik.setFieldValue('contactId', newValue?.recordId)
                 }}
                 error={formik.touched.contactId && Boolean(formik.errors.contactId)}
               />
@@ -595,6 +519,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
+                readOnly={isPosted}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('siteId', newValue?.recordId)
                 }}
@@ -610,8 +535,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 valueField='recordId'
                 displayField='reference'
                 values={formik.values}
+                readOnly={isPosted}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('collectorId', newValue?.recordId || '')
+                  formik.setFieldValue('collectorId', newValue?.recordId)
                 }}
                 error={formik.touched.collectorId && Boolean(formik.errors.collectorId)}
                 maxAccess={maxAccess}
@@ -621,6 +547,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
               <CustomDatePicker
                 name='date'
                 required
+                readOnly={isPosted}
                 label={labels.date}
                 value={formik.values.date}
                 onChange={formik.setFieldValue}
@@ -643,11 +570,13 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 secondDisplayField={true}
                 firstValue={formik.values.accountRef}
                 secondValue={formik.values.accountName}
+                displayFieldWidth={3}
                 maxAccess={maxAccess}
+                readOnly={isPosted}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('accountId', newValue?.recordId || '')
-                  formik.setFieldValue('accountRef', newValue?.reference || '')
-                  formik.setFieldValue('accountName', newValue?.name || '')
+                  formik.setFieldValue('accountId', newValue?.recordId)
+                  formik.setFieldValue('accountRef', newValue?.reference)
+                  formik.setFieldValue('accountName', newValue?.name)
                 }}
               />
             </Grid>
@@ -656,12 +585,13 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('items', value)}
-            value={formik.values.items}
-            error={formik.errors.items}
-            allowDelete
+            value={formik.values?.items}
+            error={formik.errors?.items}
             name='items'
             columns={columns}
             maxAccess={maxAccess}
+            disabled={isPosted}
+            allowDelete={!isPosted}
           />
         </Grow>
         <Fixed>
@@ -676,10 +606,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                     label={labels.descriptionTemplate}
                     valueField='recordId'
                     displayField='name'
+                    readOnly={isPosted}
                     onChange={(event, newValue) => {
-                      let description = formik.values.description
-
-                      if (newValue?.name) formik.setFieldValue('description', description + newValue?.name + '\n')
+                      if (newValue?.name)
+                        formik.setFieldValue('description', formik.values.description + newValue?.name + '\n')
                     }}
                     maxAccess={maxAccess}
                   />
@@ -691,6 +621,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                     label={labels.description}
                     value={formik.values.description}
                     rows={3}
+                    readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('description', e.target.value)}
                     onClear={() => formik.setFieldValue('description', '')}
@@ -698,13 +629,11 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 </Grid>
               </Grid>
             </Grid>
-
             <Grid item xs={5}>
               <Grid container spacing={2}>
                 <Grid item xs={7}>
                   <CustomNumberField label={labels.totalQty} value={totalQty} decimalScale={2} readOnly />
                 </Grid>
-
                 <Grid item xs={7}>
                   <CustomNumberField label={labels.totalLabor} value={totalLabor} decimalScale={2} readOnly />
                 </Grid>
