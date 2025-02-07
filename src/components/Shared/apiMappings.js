@@ -25,6 +25,7 @@ import { PayrollRepository } from 'src/repositories/PayrollRepository'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
+import { FoundryRepository } from 'src/repositories/FoundryRepository'
 
 export const COMBOBOX = 1
 
@@ -599,6 +600,13 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
+  },
+  [ResourceIds.FoMoulds]: {
+    type: COMBOBOX,
+    endpoint: FoundryRepository.Mould.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: 'reference'
   },
   [ResourceIds.PointOfSale]: {
     type: COMBOBOX,
