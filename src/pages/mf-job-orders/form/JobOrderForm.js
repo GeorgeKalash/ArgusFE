@@ -191,9 +191,9 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
       key: 'Stop',
       condition: isReleased,
       onClick: () => {
-        confirmation(platformLabels.StartRecord, platformLabels.Confirmation, onStart)
+        confirmation(platformLabels.StopRecord, platformLabels.Confirmation, onStop)
       },
-      disabled: false
+      disabled: !editMode || !isReleased || isPosted
     },
     {
       key: 'Sample',
@@ -213,6 +213,19 @@ export default function JobOrderForm({ labels, access, setStore, recordId }) {
       })
     })
     toast.success(platformLabels.Started)
+    invalidate()
+    await refetchForm(res.recordId)
+  }
+  async function onStop() {
+    const res = await postRequest({
+      extension: ManufacturingRepository.MFJobOrder.stop,
+      record: JSON.stringify({
+        ...formik.values,
+        date: formatDateToApi(formik.values.date),
+        deliveryDate: formik.values.deliveryDate ? formatDateToApi(formik.values.deliveryDate) : null
+      })
+    })
+    toast.success(platformLabels.Stoped)
     invalidate()
     await refetchForm(res.recordId)
   }

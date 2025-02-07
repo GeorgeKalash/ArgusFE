@@ -120,7 +120,8 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotJOB',
     cancel: service + 'cancelJOB',
     post: service + 'postJOB',
-    start: service + 'startJOB'
+    start: service + 'startJOB',
+    stop: service + 'stopJOB'
   },
   ProductionSheet: {
     page: service + 'pagePST',
