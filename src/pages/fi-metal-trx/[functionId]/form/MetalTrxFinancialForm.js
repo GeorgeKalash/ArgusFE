@@ -63,12 +63,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       dtId: documentType?.dtId,
       functionId: functionId,
       isVerified: null,
-      plantId: plantId,
+      plantId: recordId ? null : plantId,
       qty: null,
       recordId: null,
       reference: '',
       releaseStatus: null,
-      siteId: siteId,
+      siteId: recordId ? null : siteId,
       status: 1,
       items: [
         {
@@ -181,8 +181,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     })
 
     toast.success(platformLabels.Posted)
-    window.close()
     invalidate()
+    window.close()
   }
 
   const onUnpost = async () => {
@@ -256,6 +256,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         metalInfo?.purity || metal.purity
           ? Math.round(((item.qty * item.purity) / (metalInfo?.purity || metal.purity)) * 100) / 100
           : null,
+      totalCredit: item?.totalCredit || 0,
+      creditAmount: item?.creditAmount || 0,
       id: index + 1,
       seqNo: index + 1
     }))
@@ -358,12 +360,14 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       component: 'numberfield',
       name: 'creditAmount',
       label: labels.labor,
+      defaultValue: 0,
       props: { allowNegative: false, readOnly: true }
     },
     {
       component: 'numberfield',
       name: 'totalCredit',
       label: labels.totalLabor,
+      defaultValue: 0,
       props: { allowNegative: false, readOnly: true }
     }
   ]
@@ -405,7 +409,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       })
     }
   }
-
   useEffect(() => {
     ;(async function () {
       let metalInfo
