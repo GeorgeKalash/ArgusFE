@@ -90,6 +90,7 @@ export const FinancialRepository = {
     get: service + 'getMEM',
     del: service + 'delMEM',
     post: service + 'postMEM',
+    unpost: service + 'unpostMEM',
     cancel: service + 'cancelMEM',
     snapshot: service + 'snapshotMEM'
   },
