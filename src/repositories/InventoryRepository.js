@@ -222,6 +222,8 @@ export const InventoryRepository = {
     qry: service + 'qryOC'
   },
   Transaction: {
+    snapshot: service + 'snapshotTRX',
+    page: service + 'pageTRX',
     qry2: service + 'qry2TRX',
     qry3: service + 'qry3TRX'
   },
@@ -251,7 +253,10 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotPRT'
   },
   DocumentTypeDefaults: {
-    get: service + 'getDTD'
+    get: service + 'getDTD',
+    page: service + 'pageDTD',
+    del: service + 'delDTD',
+    set: service + 'setDTD',
   },
   Serial: {
     qry: service + 'qrySRL',

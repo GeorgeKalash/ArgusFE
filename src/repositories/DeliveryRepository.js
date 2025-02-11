@@ -25,7 +25,10 @@ export const DeliveryRepository = {
     reopen: service + 'reopenTRP',
     post: service + 'postTRP',
     unpost: service + 'unpostTRP',
-    close: service + 'closeTRP'
+    close: service + 'closeTRP',
+    generate: service + 'generateTRP',
+    assign: service + 'assignTRP',
+    unassign: service + 'unassignedTRP'
   },
   TripOrderPack2: {
     set2: service + 'set2TRO'
@@ -63,5 +66,16 @@ export const DeliveryRepository = {
   },
   MW: {
     qry: service + 'qryMW2'
+  },
+  GenerateTrip: {
+    root: service + 'rootSZ',
+    firstLevel: service + 'firstLevelSZ',
+    undelivered2: service + 'undeliveredSO2',
+  },
+  DeliveryLeadTime: {
+    get: service + 'getLDT',
+    page: service + 'pageLDT',
+    set: service + 'setLDT',
+    del: service + 'delLDT'
   }
 }

@@ -16,17 +16,19 @@ import { Grid } from '@mui/material'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import SegmentForm from './form/SegmentForm'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import { useError } from 'src/error'
 
 const Segments = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
   const [store, setStore] = useState([])
+  const { stack: stackError } = useError()
 
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    if (formik.values.segmentId) {
+    if (formik.values.segmentId !== null && formik.values.segmentId !== undefined) {
       const { _startAt = 0, _pageSize = 50 } = options
 
       const response = await getRequest({
@@ -35,8 +37,6 @@ const Segments = () => {
       })
 
       setData(response)
-    } else {
-      setData([])
     }
   }
 
@@ -96,19 +96,23 @@ const Segments = () => {
   }
 
   function openForm(obj) {
-    stack({
-      Component: SegmentForm,
-      props: {
-        labels: _labels,
-        obj,
-        maxAccess: access,
-        formikSegmentId: formik.values.segmentId,
-        fetchGridData
-      },
-      width: 500,
-      height: 260,
-      title: _labels.segment
-    })
+    if (formik.values.segmentId === null || formik.values.segmentId === undefined) {
+      stackError({ message: _labels.chooseSegmentError })
+    } else {
+      stack({
+        Component: SegmentForm,
+        props: {
+          labels: _labels,
+          obj,
+          maxAccess: access,
+          formikSegmentId: formik.values.segmentId,
+          fetchGridData
+        },
+        width: 500,
+        height: 260,
+        title: _labels.segment
+      })
+    }
   }
 
   useEffect(() => {
@@ -127,7 +131,7 @@ const Segments = () => {
             if (matchingSeg) {
               return {
                 key: item.value,
-                value: matchingSeg.value
+                value: item.key.split('GLACSegName')[1]
               }
             }
 

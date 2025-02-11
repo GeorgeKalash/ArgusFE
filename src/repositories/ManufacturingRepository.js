@@ -66,7 +66,6 @@ export const ManufacturingRepository = {
   },
   LeanProductionPlanning: {
     preview: service + 'previewPQ',
-    preview2: service + 'previewPQ2',
     update: service + 'updatePQ',
     snapshot: service + 'snapshotPQ',
     del: service + 'delPQ',
@@ -164,5 +163,16 @@ export const ManufacturingRepository = {
     set: service + 'setIMA',
     del: service + 'delIMA',
     post: service + 'postIMA'
+  },
+  ProductionSheetQueue: {
+    qry: service + 'qryPSQ'
+  },
+  Damage: {
+    get: service + 'getDMG',
+    set: service + 'setDMG',
+    del: service + 'delDMG',
+    page: service + 'pageDMG',
+    snapshot: service + 'snapshotDMG',
+    post: service + 'postDMG'
   }
 }

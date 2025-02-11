@@ -43,7 +43,6 @@ export default function DraftForm({ labels, access, recordId }) {
 
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [jumpToNextLine, setJumpToNextLine] = useState(false)
-  const [gridserials, setGridserials] = useState([])
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
@@ -652,7 +651,7 @@ export default function DraftForm({ labels, access, recordId }) {
 
         return {
           ...item,
-          id: index + 1,
+          id: item.seqNo,
           baseLaborPrice: parseFloat(item.baseLaborPrice).toFixed(2),
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
@@ -688,17 +687,24 @@ export default function DraftForm({ labels, access, recordId }) {
     return res?.list
   }
 
-  const filteredData = formik.values.search ? gridserials : formik.values.serials
-
-  useEffect(() => {
-    setGridserials(
-      formik.values.serials.filter(item => item.srlNo?.toString()?.includes(formik.values.search.toLowerCase()))
-    )
-  }, [formik?.values?.search])
+  const filteredData = formik.values.search
+    ? formik.values.serials.filter(item => item.srlNo?.toString()?.includes(formik.values.search.toLowerCase()))
+    : formik.values.serials
 
   const handleSearchChange = event => {
     const { value } = event.target
     formik.setFieldValue('search', value)
+  }
+
+  const handleGridChange = (value, action, row) => {
+    if (action === 'delete') {
+      let updatedSerials = formik.values.serials
+
+      updatedSerials = updatedSerials.filter(item => item.id !== row.id)
+      formik.setFieldValue('serials', updatedSerials)
+    } else {
+      formik.setFieldValue('serials', value)
+    }
   }
 
   function getDTD(dtId) {
@@ -766,7 +772,7 @@ export default function DraftForm({ labels, access, recordId }) {
             acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, seqNo: seqNo }
           }
           acc[itemId].pcs += 1
-          acc[itemId].weight += parseFloat(weight || 0)
+          acc[itemId].weight = parseFloat((acc[itemId].weight + parseFloat(weight || 0)).toFixed(2))
         }
 
         return acc
@@ -1123,16 +1129,7 @@ export default function DraftForm({ labels, access, recordId }) {
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={(value, action, row) => {
-              let result = value
-              if (action == 'delete') {
-                if (formik?.values?.search) {
-                  setGridserials(result)
-                }
-                result = formik?.values?.serials?.filter(item => item?.id !== row?.id)
-              }
-              formik.setFieldValue('serials', result)
-            }}
+            onChange={(value, action, row) => handleGridChange(value, action, row)}
             value={filteredData || []}
             error={formik.errors.serials}
             columns={serialsColumns}
