@@ -355,5 +355,7 @@ export const ResourceIds = {
   DraftSerialsInvoices: 51312,
   Damages: 42314,
   OutboundAssignDriver: 52313,
-  PriceListInquiry: 41432
+  PriceListInquiry: 41432,
+  MaterialTransferDTD: 41112,
+  ProductionStandards: 42112
 }

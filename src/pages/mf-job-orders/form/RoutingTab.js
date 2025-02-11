@@ -57,10 +57,9 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
         status: routing.status || 5,
         jobId: recordId
       }))
-      const payload = { jobId: recordId, data: modifiedRoutings }
       await postRequest({
         extension: ManufacturingRepository.JobRouting.set2,
-        record: JSON.stringify(payload)
+        record: JSON.stringify({ jobId: recordId, data: modifiedRoutings })
       })
       toast.success(platformLabels.Edited)
     }

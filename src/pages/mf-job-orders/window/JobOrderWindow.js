@@ -8,7 +8,7 @@ import OverheadTab from '../form/OverheadTab'
 import MaterialsTab from '../form/MaterialsTab'
 import SizesTab from '../form/SizesTab'
 
-const JobOrderWindow = ({ recordId, labels, maxAccess }) => {
+const JobOrderWindow = ({ recordId, access, labels }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [store, setStore] = useState(recordId)
 
@@ -25,22 +25,22 @@ const JobOrderWindow = ({ recordId, labels, maxAccess }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <JobOrderForm recordId={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
+        <JobOrderForm recordId={store} setStore={setStore} labels={labels} maxAccess={access} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <RoutingTab recordId={store} labels={labels} maxAccess={maxAccess} />
+        <RoutingTab recordId={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <WorksheetTab recordId={store} labels={labels} maxAccess={maxAccess} />
+        <WorksheetTab recordId={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab}>
-        <OverheadTab recordId={store} labels={labels} maxAccess={maxAccess} />
+        <OverheadTab recordId={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
       <CustomTabPanel index={4} value={activeTab}>
-        <MaterialsTab recordId={store} labels={labels} maxAccess={maxAccess} />
+        <MaterialsTab recordId={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
       <CustomTabPanel index={5} value={activeTab}>
-        <SizesTab recordId={store} labels={labels} maxAccess={maxAccess} />
+        <SizesTab recordId={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
     </>
   )

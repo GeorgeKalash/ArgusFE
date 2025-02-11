@@ -46,14 +46,14 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
       )
     }),
     onSubmit: async obj => {
-      const modifiedItems = obj.values.items.map((details, index) => {
+      const modifiedItems = obj?.items.map((details, index) => {
         return {
           ...details,
           seqNo: index + 1,
           jobId: recordId
         }
       })
-      const payload = { jobId: recordId, data: modifiedItems }
+      const payload = { jobId: recordId, items: modifiedItems }
       await postRequest({
         extension: ManufacturingRepository.JobOverhead.set2,
         record: JSON.stringify(payload)
@@ -142,6 +142,7 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
       onClick: generateOVH
     }
   ]
+
   async function generateOVH() {
     await postRequest({
       extension: ManufacturingRepository.JobOverhead.generate,

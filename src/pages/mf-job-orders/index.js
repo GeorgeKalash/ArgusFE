@@ -71,6 +71,16 @@ const JobOrder = () => {
       flex: 1
     },
     {
+      field: 'className',
+      headerName: labels.productionClass,
+      flex: 1
+    },
+    {
+      field: 'standardRef',
+      headerName: labels.productionStandard,
+      flex: 1
+    },
+    {
       field: 'pcs',
       headerName: labels.pcs,
       flex: 1,
@@ -146,7 +156,7 @@ const JobOrder = () => {
       Component: JobOrderWindow,
       props: {
         labels,
-        maxAccess: access,
+        access,
         recordId
       },
       width: 1150,

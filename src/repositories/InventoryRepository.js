@@ -255,7 +255,10 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotPRT'
   },
   DocumentTypeDefaults: {
-    get: service + 'getDTD'
+    get: service + 'getDTD',
+    page: service + 'pageDTD',
+    del: service + 'delDTD',
+    set: service + 'setDTD',
   },
   Serial: {
     qry: service + 'qrySRL',

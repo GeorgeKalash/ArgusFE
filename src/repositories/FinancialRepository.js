@@ -183,7 +183,7 @@ export const FinancialRepository = {
   },
   MetalReceiptVoucher: {
     set2: service + 'set2MRV',
-    get: service + 'qryMTI'
+    qry: service + 'qryMTI'
   },
   MetalPaymentVoucher: {
     set2: service + 'set2MPV'

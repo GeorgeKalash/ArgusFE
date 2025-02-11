@@ -34,9 +34,15 @@ export default function MaterialsTab({ recordId, maxAccess, labels }) {
       flex: 1
     },
     {
+      field: 'categoryRef',
+      headerName: labels.category,
+      flex: 1
+    },
+    {
       field: 'qty',
       headerName: labels.qty,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'unitCost',

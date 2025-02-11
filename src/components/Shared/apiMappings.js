@@ -914,5 +914,21 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
+  },
+  [ResourceIds.ProductionClass]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.ProductionClass.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.ProductionStandards]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.ProductionStandard.qry,
+    valueField: 'recordId',
+    displayField: 'reference'
   }
 }
