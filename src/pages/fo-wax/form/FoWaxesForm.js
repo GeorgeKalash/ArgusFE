@@ -64,12 +64,14 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       parameters: `_waxId=${recordId}`
     })
 
-    return response?.list?.map(async (item, index) => {
-      return {
-        ...item,
-        id: index + 1
-      }
-    })
+    return await Promise.all(
+      response?.list?.map(async (item, index) => {
+        return {
+          ...item,
+          id: index + 1
+        }
+      })
+    )
   }
 
   const getDesign = async recordId => {
@@ -123,6 +125,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       header: {
         dtId: documentType?.dtId,
         reference: '',
+        mouldId: '',
         mouldRef: '',
         date: new Date(),
         plantId: null,
@@ -186,7 +189,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
             jobId: yup.string().required()
           })
         )
-        .required(' ')
+        .required()
     }),
 
     onSubmit: async obj => {
@@ -226,7 +229,6 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       invalidate()
     }
   })
-  console.log(formik)
 
   const rmWgt = reCal
     ? formik.values.items.reduce((sum, item) => sum + (Number(item?.rmWgt) || 0), 0)
@@ -316,9 +318,8 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           { key: 'designRef', value: 'Design' },
           { key: 'itemName', value: 'Item Name' }
         ],
-        displayFieldWidth: 4
-
-        //filter: { lineId: formik.values?.header?.lineId }
+        displayFieldWidth: 4,
+        filter: { lineId: formik.values?.header?.lineId }
       },
       async onChange({ row: { update, newRow } }) {
         let design = null
@@ -470,13 +471,12 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     { key: 'name', value: 'Name' }
                   ]}
                   values={formik.values.header}
-                  required
                   onChange={async (event, newValue) => {
                     formik.setFieldValue('header.dtId', newValue?.recordId)
                     await setDefaults(newValue?.recordId)
                     changeDT(newValue)
                   }}
-                  error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                  error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
                   maxAccess={!editMode && maxAccess}
                 />
               </Grid>
@@ -507,7 +507,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     formik.setFieldValue('header.mouldId', newValue?.recordId || null)
                     formik.setFieldValue('header.mouldRef', newValue?.reference || null)
                   }}
-                  error={formik.touched.mouldId && Boolean(formik.errors.mouldId)}
+                  error={formik.touched?.header?.mouldId && Boolean(formik.errors?.header?.mouldId)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -581,7 +581,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     const metalSetting = await getMetalSetting(newValue?.recordId, formik.values?.header?.metalColorId)
                     formik.setFieldValue('header.factor', metalSetting?.rate || 0)
                   }}
-                  error={formik.touched.metalId && Boolean(formik.errors.metalId)}
+                  error={formik.touched?.header?.metalId && Boolean(formik.errors?.header?.metalId)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -600,7 +600,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     const metalSetting = await getMetalSetting(formik.values?.header?.metalId, newValue?.recordId)
                     formik.setFieldValue('header.factor', metalSetting?.rate || 0)
                   }}
-                  error={formik.touched.metalColorId && Boolean(formik.errors.metalColorId)}
+                  error={formik.touched?.header?.metalColorId && Boolean(formik.errors?.header?.metalColorId)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -613,7 +613,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   readOnly
                   values={formik.values.header}
                   maxAccess={maxAccess}
-                  error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
+                  error={formik.touched?.header?.workCenterId && Boolean(formik.errors?.header?.workCenterId)}
                 />
               </Grid>
             </Grid>
@@ -625,10 +625,18 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   required
                   value={formik.values.header.grossWgt}
                   onChange={e => formik.setFieldValue('header.grossWgt', e.target.value)}
+                  error={formik.touched?.header?.grossWgt && Boolean(formik.errors?.header?.grossWgt)}
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomNumberField name='rmWgt' label={labels.rmWgt} required value={rmWgt} readOnly />
+                <CustomNumberField
+                  name='rmWgt'
+                  label={labels.rmWgt}
+                  required
+                  value={rmWgt}
+                  readOnly
+                  error={formik.touched?.header?.rmWgt && Boolean(formik.errors?.header?.rmWgt)}
+                />
               </Grid>
               <Grid item xs={12}>
                 <CustomNumberField
@@ -637,6 +645,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   required
                   value={formik.values.header.mouldWgt}
                   onChange={e => formik.setFieldValue('header.mouldWgt', e.target.value)}
+                  error={formik.touched?.header?.mouldWgt && Boolean(formik.errors?.header?.mouldWgt)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -647,6 +656,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   value={netWgt}
                   readOnly
                   allowNegative={false}
+                  error={formik.touched?.header?.netWgt && Boolean(formik.errors?.header?.netWgt)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -656,6 +666,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   required
                   value={suggestedWgt}
                   readOnly
+                  error={formik.touched?.header?.suggestedWgt && Boolean(formik.errors?.header?.suggestedWgt)}
                 />
               </Grid>
             </Grid>
