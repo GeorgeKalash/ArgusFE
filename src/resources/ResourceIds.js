@@ -356,5 +356,6 @@ export const ResourceIds = {
   Damages: 42314,
   OutboundAssignDriver: 52313,
   PriceListInquiry: 41432,
-  MaterialTransferDTD: 41112
+  MaterialTransferDTD: 41112,
+  PostDraftSerials: 51315
 }
