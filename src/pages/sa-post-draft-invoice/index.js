@@ -16,9 +16,11 @@ import { IconButton } from '@mui/material'
 import Image from 'next/image'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 
-const index = () => {
+const PostDraftInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+
   const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   const {
@@ -28,6 +30,7 @@ const index = () => {
     clearFilter,
     labels,
     access,
+    invalidate,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -105,7 +108,7 @@ const index = () => {
         if (row.data.wip === 2)
           return (
             <IconButton size='small' onClick={() => confirmationPost(row.data)}>
-              <Image src={`/images/buttonsIcons/post-black.png`} width={18} height={18} alt={'post.png'} />
+              <Image src={`/images/buttonsIcons/post-black.png`} width={18} height={18} alt='post.png' />
             </IconButton>
           )
       }
@@ -118,11 +121,12 @@ const index = () => {
       props: {
         labels,
         access,
-        recordId
+        recordId,
+        invalidate
       },
       width: 1300,
-      height: 730,
-      title: labels.salesOrder
+      height: 750,
+      title: labels.draftSerInv
     })
   }
 
@@ -130,9 +134,10 @@ const index = () => {
     stack({
       Component: ConfirmationDialog,
       props: {
-        DialogText: labels.postDialogText || 'text',
+        DialogText: labels.postDialogText,
         okButtonAction: () => onPost(data),
-        fullScreen: false
+        fullScreen: false,
+        close: true
       },
       width: 450,
       height: 140,
@@ -201,4 +206,4 @@ const index = () => {
   )
 }
 
-export default index
+export default PostDraftInvoice
