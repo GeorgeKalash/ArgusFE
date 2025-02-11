@@ -11,16 +11,14 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { useError } from 'src/error'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import FoWaxesForm from './form/FoWaxesForm'
 
 const FoWax = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const { stack: stackError } = useError()
 
   const {
     query: { data },

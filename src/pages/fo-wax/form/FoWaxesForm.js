@@ -14,34 +14,27 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi } from 'src/lib/date-helper'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import { getStorageData } from 'src/storage/storage'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { DataSets } from 'src/resources/DataSets'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 export default function FoWaxesForm({ labels, access, recordId, window }) {
+  const [reCal, setReCal] = useState(false)
+
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Wax,
     access: access,
     enabled: !recordId
   })
-  const userData = getStorageData('userData')
 
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
-  const [baseMetalId, setBaseMetalId] = useState(null)
-  const [metal, setMetal] = useState({})
+  const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -49,26 +42,13 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     endpointId: FinancialRepository.MetalTrx.page
   })
 
-  const getEndpoint = functionId => {
-    const id = Number(functionId)
-    switch (id) {
-      case SystemFunction.MetalReceiptVoucher:
-        return FinancialRepository.MetalReceiptVoucher.set2
-      case SystemFunction.MetalPaymentVoucher:
-        return FinancialRepository.MetalPaymentVoucher.set2
-      default:
-        return null
-    }
-  }
-
-  const getData = async (recordId, functionId) => {
-    if (!recordId || !functionId) return null
+  const getHeaderData = async recordId => {
+    if (!recordId) return null
 
     const response = await getRequest({
-      extension: FinancialRepository.MetalTrx.get,
-      parameters: `_recordId=${recordId}&_functionId=${functionId}`
+      extension: FoundryRepository.Wax.get,
+      parameters: `_recordId=${recordId}`
     })
-    formik.setFieldValue('reference', response?.record.reference)
 
     return {
       ...response?.record,
@@ -76,8 +56,66 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     }
   }
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const getItems = async recordId => {
+    if (!recordId) return null
+
+    const response = await getRequest({
+      extension: FoundryRepository.WaxJob.qry,
+      parameters: `_waxId=${recordId}`
+    })
+
+    return response?.list?.map(async (item, index) => {
+      return {
+        ...item,
+        id: index + 1
+      }
+    })
+  }
+
+  const getDesign = async recordId => {
+    if (!recordId) return null
+
+    const response = await getRequest({
+      extension: ManufacturingRepository.Design.get,
+      parameters: `_recordId=${recordId}`
+    })
+
+    return response?.record
+  }
+
+  const getJobRouting = async (recordId, seqNo) => {
+    if (!recordId) return null
+
+    const response = await getRequest({
+      extension: ManufacturingRepository.JobRouting.get,
+      parameters: `_jobOrderId=${recordId}&_seqNo=${seqNo}`
+    })
+
+    return response?.record
+  }
+
+  const getMetalSetting = async (metalId, metalColorId) => {
+    if (!metalId || !metalColorId) return
+
+    const response = await getRequest({
+      extension: FoundryRepository.MetalSetting.get,
+      parameters: `_metalId=${metalId}&_metalColorId=${metalColorId}`
+    })
+
+    return response?.record
+  }
+
+  async function setDefaults(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: ManufacturingRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${dtId}`
+      })
+      formik.setFieldValue('header.workCenterId', res.record?.workCenterId)
+    } else {
+      formik.setFieldValue('header.workCenterId', null)
+    }
+  }
 
   const { formik } = useForm({
     initialValues: {
@@ -92,7 +130,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         metalId: null,
         metalColorId: null,
         workCenterId: null,
-        factor: null,
+        factor: 0,
         grossWgt: null,
         rmWgt: null,
         mouldWgt: null,
@@ -105,27 +143,22 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         {
           id: 1,
           jobId: null,
-          waxId: null,
+          waxId: recordId || null,
           pieces: 0,
           jobPcs: 0,
+          classId: null,
           classRef: '',
+          className: '',
           designRef: '',
           standardRef: '',
           standardId: null,
-          classId: null,
           sku: '',
           itemName: '',
           rmWgt: null,
-
+          metalColor: '',
+          metalColorId: null,
           metalId: null,
-          metalRef: '',
-          purity: null,
-          qty: null,
-          seqNo: 1,
-          stdPurity: null,
-          totalCredit: null,
-          trackBy: null,
-          trxId: recordId || 0
+          metalRef: ''
         }
       ]
     },
@@ -133,18 +166,19 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.string().required(),
-      mouldId: yup.string().required(),
-      lineId: yup.string().required(),
-      metalId: yup.string().required(),
-      metalColorId: yup.string().required(),
-      factor: yup.string().required(),
-      grossWgt: yup.string().required(),
-      rmWgt: yup.string().required(),
-      mouldWgt: yup.string().required(),
-      netWgt: yup.string().required(),
-      suggestedWgt: yup.string().required(),
-
+      header: yup.object({
+        date: yup.string().required(),
+        mouldId: yup.string().required(),
+        lineId: yup.string().required(),
+        metalId: yup.string().required(),
+        metalColorId: yup.string().required(),
+        factor: yup.string().required(),
+        grossWgt: yup.string().required(),
+        rmWgt: yup.string().required(),
+        mouldWgt: yup.string().required(),
+        netWgt: yup.string().required(),
+        suggestedWgt: yup.string().required()
+      }),
       items: yup
         .array()
         .of(
@@ -156,93 +190,112 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     }),
 
     onSubmit: async obj => {
-      // const { items: originalItems, ...header } = obj
-      // const totalQty = originalItems?.reduce((sum, item) => sum + item.qty, 0) || 0
-      // const updatedHeader = {
-      //   ...header,
-      //   qty: totalQty
-      // }
-      // const items = originalItems?.map((item, index) => ({
-      //   trxId: obj.recordId || 0,
-      //   seqNo: item.id,
-      //   metalId: item.metalId,
-      //   itemId: item.itemId,
-      //   qty: item.qty,
-      //   creditAmount: item.creditAmount,
-      //   purity: item.purity / 1000,
-      //   totalCredit: item.totalCredit,
-      //   trackBy: item.trackBy || 0
-      // }))
-      // const payload = {
-      //   header: updatedHeader,
-      //   items
-      // }
-      // const response = await postRequest({
-      //   extension: getEndpoint(formik.values.functionId),
-      //   record: JSON.stringify(payload)
-      // })
-      // if (!obj.recordId) {
-      //   toast.success(platformLabels.Added)
-      //   formik.setValues({
-      //     ...obj,
-      //     recordId: response.recordId
-      //   })
-      // } else {
-      //   toast.success(platformLabels.Edited)
-      // }
-      // getData(response.recordId, functionId)
-      // invalidate()
+      const { items: originalItems, header: header } = obj
+
+      const items = originalItems?.map((item, index) => ({
+        ...item,
+        waxId: obj.recordId || 0
+      }))
+
+      const payload = {
+        header,
+        items
+      }
+
+      const response = await postRequest({
+        extension: FoundryRepository.Wax.set2,
+        record: JSON.stringify(payload)
+      })
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
+        })
+      } else {
+        toast.success(platformLabels.Edited)
+      }
+
+      const getHeader = await getHeaderData(response.recordId)
+      const getItems = await getItems(response.recordId)
+      formik.setValues({
+        recordId: response.recordId,
+        header: getHeader,
+        items: getItems
+      })
+      invalidate()
     }
   })
+  console.log(formik)
+
+  const rmWgt = reCal
+    ? formik.values.items.reduce((sum, item) => sum + (Number(item?.rmWgt) || 0), 0)
+    : formik.values?.header.rmWgt || 0
+
+  const netWgt = reCal
+    ? formik?.values?.header?.grossWgt - formik?.values?.header?.rmWgt - formik?.values?.header?.mouldWgt
+    : formik.values?.header.netWgt || 0
+
+  const suggestedWgt = reCal ? netWgt * formik?.values?.header?.factor : formik.values?.header.suggestedWgt || 0
+
+  useEffect(() => {
+    ;(async function () {
+      if (recordId) {
+        const header = await getHeaderData(recordId)
+        const items = await getItems(recordId)
+        formik.setValues({
+          recordId: header.recordId || null,
+          header: header,
+          items: items
+        })
+      }
+      setReCal(false)
+    })()
+  }, [recordId])
+
+  useEffect(() => {
+    formik.setFieldValue('header.rmWgt', parseFloat(rmWgt).toFixed(2))
+    formik.setFieldValue('header.netWgt', parseFloat(netWgt).toFixed(2))
+    formik.setFieldValue('header.suggestedWgt', parseFloat(suggestedWgt).toFixed(2))
+  }, [rmWgt, netWgt, suggestedWgt])
 
   const onPost = async () => {
-    const { items, ...restValues } = formik.values
-
-    const header = JSON.stringify({
-      ...restValues,
-      qty: totalQty,
-      creditAmount: totalLabor,
-      recordId: formik.values.recordId
-    })
-
     await postRequest({
-      extension: FinancialRepository.MetalTrx.post,
-      record: header
+      extension: FoundryRepository.Wax.post,
+      record: JSON.stringify(formik.values.header)
     })
 
     toast.success(platformLabels.Posted)
-    window.close()
     invalidate()
+    window.close()
   }
-  const editMode = !!formik.values?.recordId || !!recordId
 
-  useEffect(() => {
-    if (baseMetalId) {
-      getRequest({
-        extension: InventoryRepository.Metals.get,
-        parameters: `_recordId=${baseMetalId}`
-      }).then(res => {
-        setMetal(res.record)
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: FoundryRepository.Wax.unpost,
+      record: JSON.stringify(formik.values.header)
+    })
+
+    if (res?.record) {
+      toast.success(platformLabels.Unposted)
+
+      const res2 = await getHeaderData(formik.values.recordId)
+
+      formik.setValues({
+        ...res2,
+        items: formik.values.items
       })
+
+      invalidate()
     }
-  }, [baseMetalId])
-
-  const parseNumber = value => {
-    const number = parseFloat(value)
-
-    return isNaN(number) ? 0 : number
   }
-
-  const totalQty = formik.values.items.reduce((sum, item) => sum + parseNumber(item.qty), 0)
-  const totalLabor = formik.values.items.reduce((sum, item) => sum + parseNumber(item.totalCredit), 0)
-  const totalMetal = formik.values.items.reduce((sum, item) => sum + parseNumber(item.metalValue), 0)
 
   const columns = [
     {
       component: 'resourcelookup',
       label: labels.jobOrder,
       name: 'jobRef',
-      flex: 2,
+      flex: 1,
       props: {
         endpointId: ManufacturingRepository.MFJobOrder.snapshot,
         displayField: 'reference',
@@ -250,7 +303,8 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         mapping: [
           { from: 'recordId', to: 'jobId' },
           { from: 'reference', to: 'jobRef' },
-          { from: 'itemName', to: 'itemName' },
+          { from: 'designRef', to: 'designRef' },
+          { from: 'designId', to: 'designId' },
           { from: 'itemName', to: 'itemName' },
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -262,36 +316,29 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           { key: 'designRef', value: 'Design' },
           { key: 'itemName', value: 'Item Name' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 4
+
+        //filter: { lineId: formik.values?.header?.lineId }
       },
       async onChange({ row: { update, newRow } }) {
-        // const design = await getDesign(newRow.itemId)
-        // if(!routingSeqNo) return;
-        // const jobRouting = await getItem(newRow.jobId, newRow.routingSeqNo)
-        // update({
-        //   volume: parseFloat(itemPhysProp?.volume) || 0,
-        //   weight: parseFloat(itemPhysProp?.weight || 0).toFixed(2),
-        //   vatAmount: parseFloat(itemInfo?.vatPct || 0).toFixed(2),
-        //   basePrice: parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5),
-        //   unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
-        //   upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
-        //   priceType: ItemConvertPrice?.priceType || 1,
-        //   mdAmount: formik.values.maxDiscount ? parseFloat(formik.values.maxDiscount).toFixed(2) : 0,
-        //   qty: 0,
-        //   msId: itemInfo?.msId,
-        //   muRef: filteredMeasurements?.[0]?.reference,
-        //   muId: filteredMeasurements?.[0]?.recordId,
-        //   extendedPrice: parseFloat('0').toFixed(2),
-        //   mdValue: 0,
-        //   taxId: rowTax,
-        //   taxDetails: formik.values.isVattable ? rowTaxDetails : null,
-        //   mdType: 1,
-        //   siteId: formik?.values?.siteId,
-        //   siteRef: await getSiteRef(formik?.values?.siteId),
-        //   saTrx: true,
-        //   taxDetailsButton: true
-        // })
-        // formik.setFieldValue('mdAmount', formik.values.currentDiscount ? formik.values.currentDiscount : 0)
+        let design = null
+        if (newRow.designId) {
+          design = await getDesign(newRow.designId)
+        }
+        if (!newRow?.routingSeqNo) return
+        const jobRouting = await getJobRouting(newRow.jobId, newRow?.routingSeqNo)
+        update({
+          classId: design?.classId,
+          className: design?.className,
+          classRef: design?.classRef,
+          standardId: design?.standardId,
+          standardRef: design?.standardRef,
+          pieces: parseFloat(jobRouting?.pcs || 0),
+          rmWgt: parseFloat(jobRouting?.qty || 0)
+        })
+        setReCal(true)
+
+        //formik.setFieldValue('header.mdAmount', formik.values.currentDiscount ? formik.values.currentDiscount : 0)
       }
     },
     {
@@ -306,6 +353,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      flex: 2,
       props: {
         readOnly: true
       }
@@ -318,12 +366,26 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         readOnly: true
       }
     },
-
+    {
+      component: 'textfield',
+      label: labels.productionclass,
+      name: 'classRef',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.productionStandatd,
+      name: 'standardRef',
+      props: {
+        readOnly: true
+      }
+    },
     {
       component: 'numberfield',
       name: 'rmWgt',
       label: labels.rmWgt,
-      props: { readOnly: true },
       defaultValue: 0,
       onChange: ({ row: { update, newRow } }) => {
         // const baseSalesMetalValue = (newRow.qty * newRow.purity) / (App.currentMetalPurity.getValue() * 1000)
@@ -352,29 +414,9 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     }
   ]
 
-  const onUnpost = async () => {
-    const { items, ...restValues } = formik.values
-
-    const res = await postRequest({
-      extension: FinancialRepository.MetalTrx.unpost,
-      record: JSON.stringify(restValues)
-    })
-
-    if (res?.recordId) {
-      toast.success(platformLabels.Unposted)
-
-      const res2 = await getData(res.recordId, functionId)
-
-      formik.setValues({
-        ...res2,
-        items: formik.values.items
-      })
-
-      invalidate()
-    }
-  }
-  const isPosted = formik.values.status === 3
-  const isClosed = formik.values.wip === 2
+  const editMode = !!formik.values?.recordId || !!recordId
+  const isPosted = formik.values.header.status === 3
+  const isClosed = formik.values.header.wip === 2
 
   const actions = [
     {
@@ -390,19 +432,26 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       onClick: onPost,
       disabled: !editMode
     },
-
     {
-      key: 'Aging',
+      key: 'Attachment',
       condition: true,
-      onClick: 'onClickAging',
+      onClick: 'onClickAttachment',
       disabled: !editMode
     }
   ]
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.ProductMaster} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.FoWaxes}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      previewReport={editMode}
+      actions={actions}
+      disabledSubmit={isPosted || isClosed}
+    >
       <VertLayout>
-        <Grow>
+        <Fixed>
           <Grid container>
             {/* First Column */}
             <Grid container rowGap={2} xs={4} sx={{ px: 2 }}>
@@ -420,10 +469,11 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  values={formik.values}
+                  values={formik.values.header}
                   required
                   onChange={async (event, newValue) => {
-                    formik.setFieldValue('dtId', newValue?.recordId || '')
+                    formik.setFieldValue('header.dtId', newValue?.recordId)
+                    await setDefaults(newValue?.recordId)
                     changeDT(newValue)
                   }}
                   error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -434,11 +484,11 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                 <CustomTextField
                   name='reference'
                   label={labels.reference}
-                  value={formik.values.reference}
-                  readOnly={editMode || !formik.values.dtId}
+                  value={formik.values.header.reference}
+                  readOnly={editMode || !formik.values.header.dtId}
                   maxAccess={!editMode && maxAccess}
                   onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('reference', '')}
+                  onClear={() => formik.setFieldValue('header.reference', '')}
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
                 />
               </Grid>
@@ -448,12 +498,14 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   name='mouldId'
                   parameters='_params=&_startAt=0&_pageSize=1000'
                   label={labels.mould}
+                  required
                   valueField='recordId'
                   displayField={'reference'}
-                  values={formik.values}
+                  values={formik.values.header}
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('mouldId', newValue?.recordId || null)
+                    formik.setFieldValue('header.mouldId', newValue?.recordId || null)
+                    formik.setFieldValue('header.mouldRef', newValue?.reference || null)
                   }}
                   error={formik.touched.mouldId && Boolean(formik.errors.mouldId)}
                 />
@@ -463,10 +515,10 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   name='date'
                   required
                   label={labels.date}
-                  value={formik.values.date}
+                  value={formik?.values?.header?.date}
                   onChange={formik.setFieldValue}
-                  onClear={() => formik.setFieldValue('date', '')}
-                  error={formik.touched.date && Boolean(formik.errors.date)}
+                  onClear={() => formik.setFieldValue('header.date', '')}
+                  error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
                 />
               </Grid>
             </Grid>
@@ -484,10 +536,10 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  values={formik.values}
+                  values={formik.values.header}
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('plantId', newValue?.recordId || null)
+                    formik.setFieldValue('header.plantId', newValue?.recordId || null)
                   }}
                   error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                 />
@@ -497,19 +549,20 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   endpointId={ManufacturingRepository.ProductionLine.qry}
                   name='lineId'
                   readOnly={editMode}
-                  label={labels.line}
+                  required
+                  label={labels.prodLine}
                   valueField='recordId'
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  values={formik.values}
+                  values={formik.values.header}
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('lineId', newValue?.recordId || null)
+                    formik.setFieldValue('header.lineId', newValue?.recordId || null)
                   }}
-                  error={formik.touched.lineId && Boolean(formik.errors.lineId)}
+                  error={formik.touched?.header?.lineId && Boolean(formik.errors?.header?.lineId)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -517,17 +570,16 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   endpointId={InventoryRepository.Metals.qry}
                   name='metalId'
                   readOnly={editMode}
+                  required
                   label={labels.metal}
                   valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  values={formik.values}
+                  displayField={'reference'}
+                  values={formik.values.header}
                   maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('metalId', newValue?.recordId || null)
+                  onChange={async (event, newValue) => {
+                    formik.setFieldValue('header.metalId', newValue?.recordId || null)
+                    const metalSetting = await getMetalSetting(newValue?.recordId, formik.values?.header?.metalColorId)
+                    formik.setFieldValue('header.factor', metalSetting?.rate || 0)
                   }}
                   error={formik.touched.metalId && Boolean(formik.errors.metalId)}
                 />
@@ -537,57 +589,85 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   endpointId={InventoryRepository.MetalColor.qry}
                   name='metalColorId'
                   readOnly={editMode}
+                  required
                   label={labels.metalColor}
                   valueField='recordId'
                   displayField={'reference'}
-                  values={formik.values}
+                  values={formik.values.header}
                   maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('metalColorId', newValue?.recordId || null)
+                  onChange={async (event, newValue) => {
+                    formik.setFieldValue('header.metalColorId', newValue?.recordId || null)
+                    const metalSetting = await getMetalSetting(formik.values?.header?.metalId, newValue?.recordId)
+                    formik.setFieldValue('header.factor', metalSetting?.rate || 0)
                   }}
                   error={formik.touched.metalColorId && Boolean(formik.errors.metalColorId)}
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  name='wcName'
+                <ResourceComboBox
+                  endpointId={ManufacturingRepository.WorkCenter.qry}
+                  name='workCenterId'
                   label={labels.workCenter}
-                  value={formik.values.wcName}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
                   readOnly
+                  values={formik.values.header}
                   maxAccess={maxAccess}
+                  error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
                 />
               </Grid>
             </Grid>
             <Grid container rowGap={2} xs={4} sx={{ px: 2 }}>
               <Grid item xs={12}>
-                <CustomNumberField name='grossWgt' label={labels.grossWgt} value={formik.values.grossWgt} />
+                <CustomNumberField
+                  name='grossWgt'
+                  label={labels.grossWgt}
+                  required
+                  value={formik.values.header.grossWgt}
+                  onChange={e => formik.setFieldValue('header.grossWgt', e.target.value)}
+                />
               </Grid>
               <Grid item xs={12}>
-                <CustomNumberField name='rmWgt' label={labels.rmWgt} value={formik.values.rmWgt} readOnly />
+                <CustomNumberField name='rmWgt' label={labels.rmWgt} required value={rmWgt} readOnly />
               </Grid>
               <Grid item xs={12}>
-                <CustomNumberField name='mouldWgt' label={labels.mouldWgt} value={formik.values.mouldWgt} />
+                <CustomNumberField
+                  name='mouldWgt'
+                  label={labels.mouldWgt}
+                  required
+                  value={formik.values.header.mouldWgt}
+                  onChange={e => formik.setFieldValue('header.mouldWgt', e.target.value)}
+                />
               </Grid>
               <Grid item xs={12}>
-                <CustomNumberField name='netWgt' label={labels.netWgt} value={formik.values.netWgt} readOnly />
+                <CustomNumberField
+                  name='netWgt'
+                  label={labels.netWgt}
+                  required
+                  value={netWgt}
+                  readOnly
+                  allowNegative={false}
+                />
               </Grid>
               <Grid item xs={12}>
                 <CustomNumberField
                   name='suggestedWgt'
                   label={labels.suggestedWgt}
-                  value={formik.values.suggestedWgt}
+                  required
+                  value={suggestedWgt}
                   readOnly
                 />
               </Grid>
             </Grid>
           </Grid>
-        </Grow>
+        </Fixed>
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values.items}
             error={formik.errors.items}
-            allowDelete
+            allowDelete={!isPosted || !isClosed}
+            disabled={!formik.values.header.lineId}
             name='items'
             columns={columns}
             maxAccess={maxAccess}
