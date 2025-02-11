@@ -16,9 +16,11 @@ import { IconButton } from '@mui/material'
 import Image from 'next/image'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 
-const index = () => {
+const PostDraftInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+
   const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   const {
@@ -28,6 +30,7 @@ const index = () => {
     clearFilter,
     labels,
     access,
+    invalidate,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -105,7 +108,7 @@ const index = () => {
         if (row.data.wip === 2)
           return (
             <IconButton size='small' onClick={() => confirmationPost(row.data)}>
-              <Image src={`/images/buttonsIcons/post-black.png`} width={18} height={18} alt={'post.png'} />
+              <Image src={`/images/buttonsIcons/post-black.png`} width={18} height={18} alt='post.png' />
             </IconButton>
           )
       }
@@ -121,8 +124,8 @@ const index = () => {
         recordId
       },
       width: 1300,
-      height: 730,
-      title: labels.salesOrder
+      height: 750,
+      title: labels.draftSerInv
     })
   }
 
@@ -131,7 +134,7 @@ const index = () => {
       Component: ConfirmationDialog,
       props: {
         DialogText: labels.postDialogText || 'text',
-        okButtonAction: () => onPost(data),
+        okButtonAction: window => onPost(window, data),
         fullScreen: false
       },
       width: 450,
@@ -140,7 +143,7 @@ const index = () => {
     })
   }
 
-  const onPost = async data => {
+  const onPost = async (window, data) => {
     const res = await postRequest({
       extension: SaleRepository.DraftInvoice.post,
       record: JSON.stringify(data)
@@ -149,6 +152,7 @@ const index = () => {
     if (res) {
       toast.success(platformLabels.Posted)
       invalidate()
+      window.close()
     }
   }
 
@@ -201,4 +205,4 @@ const index = () => {
   )
 }
 
-export default index
+export default PostDraftInvoice
