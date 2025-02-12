@@ -20,7 +20,7 @@ const MetalTransactionDTD = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const router = useRouter()
-  const { functionId } = router?.query
+  const { functionId } = router.query
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -45,14 +45,6 @@ const MetalTransactionDTD = () => {
     endpointId: FinancialRepository.FIDocTypeDefaults.page,
     datasetId: ResourceIds.FIDocTypeDefaults
   })
-
-  const getCorrectLabel = functionId => {
-    if (functionId === SystemFunction.MetalReceiptVoucher) {
-      return labels.metalTransactionReceipt
-    } else if (functionId === SystemFunction.MetalPaymentVoucher) {
-      return labels.metalTransactionPayment
-    }
-  }
 
   const columns = [
     {
@@ -92,7 +84,7 @@ const MetalTransactionDTD = () => {
       },
       width: 600,
       height: 380,
-      title: getCorrectLabel(parseInt(functionId))
+      title: (functionId == SystemFunction.MetalReceiptVoucher ? labels.metalTransactionReceipt: labels.metalTransactionPayment)
     })
   }
 
