@@ -7,5 +7,15 @@ export const FoundryRepository = {
     set: service + 'setWCT',
     get: service + 'getWCT',
     del: service + 'delWCT'
+  },
+  MetalSettings: {
+    page: service + 'pageMTS',
+    set: service + 'setMTS',
+    get: service + 'getMTS',
+    del: service + 'delMTS'
+  },
+  Scrap: {
+    qry: service + 'qryMSC',
+    set2: service + 'set2MSC',
   }
 }
