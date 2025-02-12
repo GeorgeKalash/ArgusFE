@@ -31,7 +31,6 @@ const JobWaxInquiry = () => {
   })
 
   async function fetchWithFilter({ filters }) {
-    console.log('filters?.qry', filters?.qry)
     if (filters?.qry)
       return await getRequest({
         extension: FoundryRepository.JobWaxInquiry.qry2,
@@ -100,6 +99,7 @@ const JobWaxInquiry = () => {
               secondDisplayField={false}
               form={{ values: values }}
               maxAccess={access}
+              valueShow='jobRef'
               onChange={(event, newValue) => {
                 if (newValue) filterBy('qry', newValue?.recordId)
                 else filterBy('qry', 0)
