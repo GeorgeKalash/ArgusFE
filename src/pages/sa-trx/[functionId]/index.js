@@ -1,6 +1,6 @@
 import { Grow } from '@mui/material'
 import { useRouter } from 'next/router'
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
@@ -24,7 +24,9 @@ const SaTrx = () => {
   const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
   const router = useRouter()
-  const { functionId } = router?.query
+
+  const { functionId: fId } = router?.query
+  const [functionId, setState] = useState(fId)
 
   const getResourceId = functionId => {
     switch (functionId) {

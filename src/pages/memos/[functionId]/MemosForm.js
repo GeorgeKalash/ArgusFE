@@ -160,7 +160,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
     formik.setFieldValue('amount', calculatedAmount)
     setBaseAmount(calculatedAmount)
-    
   }, [formik.values.isSubjectToVAT, initialVatPct, formik.values.subtotal])
 
   async function getDefaultsData() {
@@ -273,7 +272,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         extension: MultiCurrencyRepository.Currency.get,
         parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
       })
-      const amountValue = amount === 0 ? 0 : amount ?? formik.values.amount;
+      const amountValue = amount === 0 ? 0 : amount ?? formik.values.amount
 
       setBaseAmount(amountValue)
       formik.setFieldValue('exRate', res.record?.exRate ?? 1)
