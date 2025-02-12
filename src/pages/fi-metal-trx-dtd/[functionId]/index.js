@@ -41,9 +41,12 @@ const MetalTransactionDTD = () => {
     refetch,
     paginationParameters
   } = useResourceQuery({
-    queryFn: fetchGridData,
     endpointId: FinancialRepository.FIDocTypeDefaults.page,
-    datasetId: ResourceIds.FIDocTypeDefaults
+    datasetId: ResourceIds.FIDocTypeDefaults,
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    }
   })
 
   const columns = [
