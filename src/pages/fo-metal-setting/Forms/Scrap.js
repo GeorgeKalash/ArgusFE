@@ -33,7 +33,7 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
     }),
     initialValues: {
       recordId: recordId,
-      scrap: [
+      scrap: store?.scrap.length > 0 ? store.scrap : [
         {
           id: 1,
           metalId: recordId,
@@ -49,7 +49,7 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
         ...item,
         metalId: recordId,
         metalColorId,
-        scrapItemId: item.itemId ?? item.scrapItemId,
+        scrapItemId: item.scrapItemId,
         seqNo: id
       }))
 
@@ -106,7 +106,8 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'recordId', to: 'scrapItemId' },
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },

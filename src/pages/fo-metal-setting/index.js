@@ -72,7 +72,6 @@ const MetalSettings = () => {
   }
 
   const edit = obj => {
-    console.log(obj)
     openForm(obj)
   }
 

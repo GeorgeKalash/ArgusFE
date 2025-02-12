@@ -51,11 +51,21 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore }
 
       if (!recordId) {
         formik.setFieldValue('recordId', res.recordId)
+
+        const res2 = await getRequest({
+          extension: FoundryRepository.Scrap.qry,
+          parameters: `_metalId=${obj?.metalId}`
+        })
         setStore(prevStore => ({
           ...prevStore,
-          recordId: res?.metalId,
-          metalId: res?.metalId,
-          metalColorId: res?.metalColorId
+          recordId: obj?.metalId,
+          metalId: obj?.metalId,
+          metalColorId: obj?.metalColorId,
+          scrap: res2.list.map((item, index) => ({
+            ...item,
+            scrapItemId: item.scrapItemId,
+            id: index + 1
+          }))
         }))
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
