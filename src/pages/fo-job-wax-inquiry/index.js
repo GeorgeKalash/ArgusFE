@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -13,6 +13,8 @@ import { Grid } from '@mui/material'
 
 const JobWaxInquiry = () => {
   const { getRequest } = useContext(RequestsContext)
+
+  const [values, setValues] = useState({})
 
   const {
     query: { data },
@@ -72,12 +74,14 @@ const JobWaxInquiry = () => {
     {
       field: 'rmWgt',
       headerName: labels.rmWeight,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'pieces',
       headerName: labels.pieces,
-      flex: 1
+      flex: 1,
+      type: 'number'
     }
   ]
 
@@ -94,12 +98,13 @@ const JobWaxInquiry = () => {
               displayField='name'
               displayFieldWidth={1}
               secondDisplayField={false}
-              form={{ values: {} }}
+              form={{ values: values }}
               maxAccess={access}
               onChange={(event, newValue) => {
                 console.log(newValue)
                 if (newValue) filterBy('qry', newValue?.recordId)
                 else filterBy('qry', 0)
+                setValues({ jobRef: newValue?.reference, jobId: newValue?.recordId })
               }}
             />
           </Grid>
@@ -109,7 +114,7 @@ const JobWaxInquiry = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['waxId']}
           isLoading={false}
           pagination={false}
           maxAccess={access}
