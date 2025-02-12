@@ -183,35 +183,10 @@ const SalesOrder = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onSearch = (value, rpbParams) => {
-    if (value) filterBy('qry', value)
-    else filterBy('params', rpbParams)
-  }
-
-  const onClear = rpbParams => {
-    filterBy('params', rpbParams)
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'SAORD'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'SAORD'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
