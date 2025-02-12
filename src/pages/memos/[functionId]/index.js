@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -23,7 +23,8 @@ const Financial = () => {
   const { stack } = useWindow()
 
   const router = useRouter()
-  const { functionId } = router.query
+  const { functionId: fId } = router.query
+  const [functionId, setState] = useState(fId)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
