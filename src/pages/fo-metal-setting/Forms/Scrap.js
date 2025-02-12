@@ -75,10 +75,10 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
+      if (recordId && metalColorId) {
         const res = await getRequest({
           extension: FoundryRepository.Scrap.qry,
-          parameters: `_metalId=${recordId}`
+          parameters: `_metalId=${recordId}&_metalColorId=${metalColorId}`
         })
 
         if (res?.list?.length > 0) {
