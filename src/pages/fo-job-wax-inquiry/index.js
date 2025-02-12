@@ -101,7 +101,6 @@ const JobWaxInquiry = () => {
               form={{ values: values }}
               maxAccess={access}
               onChange={(event, newValue) => {
-                console.log(newValue)
                 if (newValue) filterBy('qry', newValue?.recordId)
                 else filterBy('qry', 0)
                 setValues({ jobRef: newValue?.reference, jobId: newValue?.recordId })
