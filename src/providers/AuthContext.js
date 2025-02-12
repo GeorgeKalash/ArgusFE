@@ -52,8 +52,8 @@ const AuthProvider = ({ children }) => {
   }
 
   const fetchData = async () => {
-    const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
-
+    const matchHostname = window.location.hostname.match(/^([^\.]+)/)
+    console.log(matchHostname)
     const accountName = matchHostname ? matchHostname[1] : 'neg-deploy'
 
     try {
