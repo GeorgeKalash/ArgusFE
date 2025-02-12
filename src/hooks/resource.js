@@ -49,7 +49,6 @@ export function useResourceQuery({ endpointId, filter, datasetId, DatasetIdAcces
     },
     filterBy(name, value) {
       setFilters({
-        ...filters,
         [name]: value
       })
     },
