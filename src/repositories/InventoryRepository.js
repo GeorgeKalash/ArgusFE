@@ -257,6 +257,24 @@ export const InventoryRepository = {
   },
   Serial: {
     qry: service + 'qrySRL',
-    snapshot: service + 'snapshotSRL'
+    snapshot: service + 'snapshotSRL',
+    get2: service + 'get2SRL'
+  },
+  DraftTransfer: {
+    page: service + 'pageDTF',
+    del: service + 'delDTF',
+    get: service + 'getDTF',
+    set2: service + 'set2DTF',
+    snapshot: service + 'snapshotDTF',
+    post: service + 'postDTF',
+    clone: service + 'cloneDTF'
+  },
+  DraftTransferSerial: {
+    qry: service + 'qryDTI',
+    del: service + 'delDTI',
+    append: service + 'appendDTI'
+  },
+  BatchDraftTransferSerial: {
+    batch: service + 'batchDTS'
   }
 }
