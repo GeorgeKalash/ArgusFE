@@ -114,8 +114,10 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         parameters: `_dtId=${dtId}`
       })
       formik.setFieldValue('header.workCenterId', res.record?.workCenterId)
+      formik.setFieldValue('header.lineId', res.record?.lineId)
     } else {
       formik.setFieldValue('header.workCenterId', null)
+      formik.setFieldValue('header.lineId', null)
     }
   }
 

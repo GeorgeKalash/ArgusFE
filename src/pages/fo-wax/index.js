@@ -104,6 +104,11 @@ const FoWax = () => {
       headerName: labels.suggestedWgt,
       flex: 1,
       type: 'number'
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
     }
   ]
 
