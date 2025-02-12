@@ -45,12 +45,20 @@ export function useResourceQuery({ endpointId, filter, datasetId, DatasetIdAcces
     labels,
     query: query,
     search(value) {
-      setSearchValue(value)
+      if (value === searchValue) {
+        query.refetch()
+      } else {
+        setSearchValue(value)
+      }
     },
     filterBy(name, value) {
-      setFilters({
-        [name]: value
-      })
+      if (value === filters[name]) {
+        query.refetch()
+      } else {
+        setFilters({
+          [name]: value
+        })
+      }
     },
     clearFilter(name) {
       setFilters(filters => {
