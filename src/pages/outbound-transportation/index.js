@@ -11,7 +11,7 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import OutboundTranspForm from './forms/OutboundTranspForm'
-import GridToolbar from 'src/components/Shared/GridToolbar'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const OutboundTransp = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -19,11 +19,11 @@ const OutboundTransp = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
       extension: DeliveryRepository.Trip.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=recordId desc`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_sortBy=recordId desc`
     })
 
     return { ...response, _startAt: _startAt }
@@ -36,7 +36,7 @@ const OutboundTransp = () => {
         parameters: `_filter=${filters.qry}`
       })
     } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0 })
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
     }
   }
 
@@ -158,16 +158,29 @@ const OutboundTransp = () => {
     clearFilter('qry')
   }
 
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
+        <RPBGridToolbar
           onSearch={onSearch}
           onSearchClear={onClear}
           labels={_labels}
           onAdd={add}
           maxAccess={access}
           inputSearch={true}
+          onApply={onApply}
+          reportName={'DETRP'}
         />
       </Fixed>
       <Grow>
