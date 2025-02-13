@@ -47,7 +47,7 @@ const PostDraftInvoice = () => {
 
     const response = await getRequest({
       extension: SaleRepository.DraftInvoice.page2,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -134,9 +134,10 @@ const PostDraftInvoice = () => {
     stack({
       Component: ConfirmationDialog,
       props: {
-        DialogText: labels.postDialogText || 'text',
+        DialogText: labels.postDialogText,
         okButtonAction: () => onPost(data),
-        fullScreen: false
+        fullScreen: false,
+        close: true
       },
       width: 450,
       height: 140,
@@ -144,7 +145,7 @@ const PostDraftInvoice = () => {
     })
   }
 
-  const onPost = async (window, data) => {
+  const onPost = async data => {
     const res = await postRequest({
       extension: SaleRepository.DraftInvoice.post,
       record: JSON.stringify(data)
@@ -153,7 +154,6 @@ const PostDraftInvoice = () => {
     if (res) {
       toast.success(platformLabels.Posted)
       invalidate()
-      window.close()
     }
   }
 
