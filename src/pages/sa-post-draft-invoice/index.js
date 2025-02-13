@@ -47,7 +47,7 @@ const PostDraftInvoice = () => {
 
     const response = await getRequest({
       extension: SaleRepository.DraftInvoice.page2,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -121,7 +121,8 @@ const PostDraftInvoice = () => {
       props: {
         labels,
         access,
-        recordId
+        recordId,
+        invalidate
       },
       width: 1300,
       height: 750,
@@ -134,7 +135,7 @@ const PostDraftInvoice = () => {
       Component: ConfirmationDialog,
       props: {
         DialogText: labels.postDialogText || 'text',
-        okButtonAction: window => onPost(window, data),
+        okButtonAction: () => onPost(data),
         fullScreen: false
       },
       width: 450,
