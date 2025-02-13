@@ -47,7 +47,7 @@ const PostDraftInvoice = () => {
 
     const response = await getRequest({
       extension: SaleRepository.DraftInvoice.page2,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
