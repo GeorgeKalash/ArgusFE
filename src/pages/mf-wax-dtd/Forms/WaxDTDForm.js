@@ -76,7 +76,7 @@ export default function WaxDTDForm({ labels, maxAccess, recordId, window }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.WaxDocTypeDefaults}
+      resourceId={ResourceIds.ProdSheetDocumentTypeDefault}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
