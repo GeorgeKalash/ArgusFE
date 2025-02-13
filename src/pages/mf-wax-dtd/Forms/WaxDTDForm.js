@@ -29,11 +29,8 @@ export default function WaxDTDForm({ labels, maxAccess, recordId, window }) {
       recordId,
       functionId: SystemFunction.Wax,
       dtId: null,
-      dtName: '',
       workCenterId: null,
-      workCenterName: '',
-      lineId: null,
-      lineName: ''
+      lineId: null
     },
     maxAccess,
     enableReinitialize: false,
@@ -132,7 +129,11 @@ export default function WaxDTDForm({ labels, maxAccess, recordId, window }) {
                 name='lineId'
                 label={labels.productionLine}
                 valueField='recordId'
-                displayField={'name'}
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
