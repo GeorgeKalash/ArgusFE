@@ -359,5 +359,6 @@ export const ResourceIds = {
   MaterialTransferDTD: 41112,
   WaxDocTypeDefaults: 42601,
   JobWaxInquiry: 47313,
-  PostDraftSerials: 51315
+  PostDraftSerials: 51315,
+  ProductionStandards: 42112
 }
