@@ -7,9 +7,18 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, u
     props?.iconsClicked(id, updateRow)
   }
 
+  const formatValue = val => {
+    if (!val) return ''
+    if (isNaN(val)) return val
+
+    return String(val)
+      .replace(/\.0+$/, '')
+      .replace(/(\.\d*?[1-9])0+$/, '$1')
+  }
+
   return (
     <CustomNumberField
-      value={value?.[field]}
+      value={formatValue(value?.[field])}
       label={''}
       readOnly={props?.readOnly}
       decimalScale={props?.decimalScale}
@@ -19,7 +28,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, u
         update({
           id,
           field,
-          value: e.target.value ? e.target.value : ''
+          value: e.target.value
         })
       }}
       onClear={() =>
