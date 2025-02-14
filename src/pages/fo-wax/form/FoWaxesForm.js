@@ -258,7 +258,6 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     })()
   }, [recordId])
 
-  console.log(formik)
   useEffect(() => {
     formik.setFieldValue('header.rmWgt', parseFloat(rmWgt).toFixed(2))
     formik.setFieldValue('header.netWgt', parseFloat(netWgt).toFixed(2))
@@ -476,7 +475,6 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   ]}
                   values={formik.values.header}
                   onChange={async (event, newValue) => {
-                    console.log('newValue', newValue)
                     formik.setFieldValue('header.dtId', newValue?.recordId)
                     await setDefaults(newValue?.recordId)
                     changeDT(newValue)
