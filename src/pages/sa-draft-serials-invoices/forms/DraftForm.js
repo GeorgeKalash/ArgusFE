@@ -6,7 +6,6 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -35,7 +34,7 @@ import { getIPR, DIRTYFIELD_UNIT_PRICE } from 'src/utils/ItemPriceCalculator'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import { useError } from 'src/error'
 
-export default function DraftForm({ labels, access, recordId }) {
+export default function DraftForm({ labels, access, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -48,10 +47,6 @@ export default function DraftForm({ labels, access, recordId }) {
     functionId: SystemFunction.DraftSerialsIn,
     access: access,
     enabled: !recordId
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: SaleRepository.DraftInvoice.page
   })
 
   useEffect(() => {
