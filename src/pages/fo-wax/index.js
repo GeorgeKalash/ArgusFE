@@ -31,7 +31,7 @@ const FoWax = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FoundryRepository.Wax.qry,
+    endpointId: FoundryRepository.Wax.page,
     datasetId: ResourceIds.FoWaxes,
     filter: {
       filterFn: fetchWithFilter
@@ -109,6 +109,11 @@ const FoWax = () => {
       field: 'statusName',
       headerName: labels.status,
       flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: labels.wip,
+      flex: 1
     }
   ]
 
@@ -116,7 +121,7 @@ const FoWax = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: FoundryRepository.Wax.qry,
+      extension: FoundryRepository.Wax.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
@@ -154,7 +159,7 @@ const FoWax = () => {
         recordId
       },
       width: 1200,
-      height: 600,
+      height: 700,
       title: labels.wax
     })
   }
