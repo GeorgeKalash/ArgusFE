@@ -72,7 +72,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
-          if (throwError) reject(error)
+          reject(error)
         })
     })
   }
@@ -101,7 +101,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
-          if (throwError) reject(error)
+          reject(error)
         })
     })
   }
@@ -127,7 +127,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
-          if (throwError) reject(error)
+          reject(error)
         })
     })
   }
@@ -196,7 +196,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
 
-          if (throwError) reject(error)
+          reject(error)
         })
     })
   }
