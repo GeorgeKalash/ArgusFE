@@ -81,6 +81,7 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
         endpointId: InventoryRepository.ItemSizes.snapshot,
         displayField: 'reference',
         valueField: 'recordId',
+        minChars: 2,
         mapping: [
           { from: 'recordId', to: 'sizeId' },
           { from: 'reference', to: 'sizeRef' },

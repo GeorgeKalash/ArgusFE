@@ -207,11 +207,13 @@ export const SaleRepository = {
   DraftInvoice: {
     qry: service + 'qryDFT',
     page: service + 'pageDFT',
+    page2: service + 'page2DFT',
     snapshot: service + 'snapshotDFT',
     get: service + 'getDFT',
     set2: service + 'set2DFT',
     del: service + 'delDFT',
     close: service + 'closeDFT',
+    post: service + 'postDFT',
     reopen: service + 'reopenDFT'
   },
   DraftInvoiceSerial: {

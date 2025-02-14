@@ -11,6 +11,7 @@ import SizesTab from '../form/SizesTab'
 const JobOrderWindow = ({ recordId, access, labels }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [store, setStore] = useState(recordId)
+  const [refetchRouting, setRefetchRouting] = useState(false)
 
   const tabs = [
     { label: labels.jobOrder },
@@ -25,10 +26,22 @@ const JobOrderWindow = ({ recordId, access, labels }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <JobOrderForm recordId={store} setStore={setStore} labels={labels} maxAccess={access} />
+        <JobOrderForm
+          recordId={store}
+          setStore={setStore}
+          labels={labels}
+          maxAccess={access}
+          setRefetchRouting={setRefetchRouting}
+        />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <RoutingTab recordId={store} labels={labels} maxAccess={access} />
+        <RoutingTab
+          recordId={store}
+          labels={labels}
+          maxAccess={access}
+          refetchRouting={refetchRouting}
+          setRefetchRouting={setRefetchRouting}
+        />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
         <WorksheetTab recordId={store} labels={labels} maxAccess={access} />

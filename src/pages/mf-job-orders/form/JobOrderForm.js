@@ -31,7 +31,7 @@ import SerialsLots from './SerialsLots'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import Samples from './Samples'
 
-export default function JobOrderForm({ labels, maxAccess: access, setStore, recordId }) {
+export default function JobOrderForm({ labels, maxAccess: access, setStore, recordId, setRefetchRouting }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -222,6 +222,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
     toast.success(platformLabels.Started)
     invalidate()
     await refetchForm(res.recordId)
+    setRefetchRouting(true)
   }
   async function onStop() {
     const res = await postRequest({
@@ -235,6 +236,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
     toast.success(platformLabels.Stoped)
     invalidate()
     await refetchForm(res.recordId)
+    setRefetchRouting(true)
   }
   async function onCancel() {
     const res = await postRequest({
