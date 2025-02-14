@@ -307,6 +307,12 @@ export function DataGrid({
       process(params, oldRow, setData)
     }
 
+    const formatNumber = value => {
+      return !value ? '' : parseFloat(value).toString()
+    }
+
+    const formattedValue = column.colDef.component === 'numberfield' ? formatNumber(params.value) : params.value
+
     return (
       <Box
         sx={{
@@ -321,7 +327,7 @@ export function DataGrid({
             'center'
         }}
       >
-        <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
+        <Component {...params} value={formattedValue} column={column.colDef} updateRow={updateRow} update={update} />
       </Box>
     )
   }

@@ -7,9 +7,15 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, u
     props?.iconsClicked(id, updateRow)
   }
 
+  const formatValue = val => {
+    if (val === null || val === undefined || val === '') return val
+
+    return parseFloat(val).toString()
+  }
+
   return (
     <CustomNumberField
-      value={value?.[field]}
+      value={formatValue(value?.[field])}
       label={''}
       readOnly={props?.readOnly}
       decimalScale={props?.decimalScale}
