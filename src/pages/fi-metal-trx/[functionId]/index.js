@@ -106,6 +106,11 @@ export default function MetalTrxFinancial() {
       flex: 1
     },
     {
+      field: 'siteName',
+      headerName: labels.siteName,
+      flex: 1
+    },
+    {
       field: 'accountRef',
       headerName: labels.accountRef,
       flex: 1
