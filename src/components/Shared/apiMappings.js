@@ -568,7 +568,7 @@ export const apiMappings = {
   [ResourceIds.Labor]: {
     type: COMBOBOX,
     endpoint: ManufacturingRepository.Labor.qry,
-    parameters: '_startAt=0&_pageSize=1000',
+    parameters: '_startAt=0&_pageSize=1000&_params=',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
