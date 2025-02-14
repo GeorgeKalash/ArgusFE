@@ -521,7 +521,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   endpointId={SystemRepository.DocumentType.qry}
                   parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Wax}`}
                   filter={!editMode ? item => item.activeStatus === 1 : undefined}
-                  name='dtId'
+                  name='header.dtId'
                   label={labels.docType}
                   readOnly={editMode}
                   valueField='recordId'
@@ -530,7 +530,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  values={formik.values.header}
+                  values={formik.values.header.dtId}
                   onChange={async (event, newValue) => {
                     formik.setFieldValue('header.dtId', newValue?.recordId)
                     await changeDT(newValue?.recordId)
