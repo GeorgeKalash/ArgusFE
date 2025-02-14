@@ -466,5 +466,12 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'shipment.png',
     main: false
+  },
+  {
+    key: 'Copy',
+    label: platformLabels.Copy,
+    color: '#CD5C5C',
+    image: 'copy.png',
+    main: false
   }
 ]
