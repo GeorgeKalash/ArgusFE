@@ -171,7 +171,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           standardId: null,
           sku: '',
           itemName: '',
-          rmWgt: null,
+          rmWgt: 0,
           metalColor: '',
           metalColorId: null,
           metalId: null,
@@ -200,7 +200,15 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         .array()
         .of(
           yup.object().shape({
-            jobId: yup.string().required()
+            jobId: yup.string().required(),
+            pieces: yup
+              .number()
+              .required()
+              .test(function (value) {
+                const { jobPcs } = this.parent
+
+                return value <= jobPcs && value >= 0
+              })
           })
         )
         .required()
@@ -238,16 +246,21 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     }
   })
 
-  console.log(maxAccess)
-
   const rmWgt = reCal
     ? formik.values.items.reduce((sum, item) => sum + (Number(item?.rmWgt) || 0), 0)
     : formik.values?.header.rmWgt || 0
+  console.log(Number(formik?.values?.header?.grossWgt || 0))
+  console.log(Number(rmWgt || 0))
+  console.log(Number(formik?.values?.header?.mouldWgt || 0))
+  console.log(Number(formik?.values?.header?.grossWgt || 0) - Number(rmWgt || 0))
+  console.log(
+    Number(formik?.values?.header?.grossWgt || 0) - Number(rmWgt || 0) - Number(formik?.values?.header?.mouldWgt || 0)
+  )
 
   const netWgt = reCal
-    ? formik?.values?.header?.grossWgt - formik?.values?.header?.rmWgt - formik?.values?.header?.mouldWgt
-    : formik.values?.header.netWgt || 0
-
+    ? Number(formik?.values?.header?.grossWgt || 0) - Number(rmWgt || 0) - Number(formik?.values?.header?.mouldWgt || 0)
+    : 0
+  console.log(netWgt)
   const suggestedWgt = reCal ? netWgt * formik?.values?.header?.factor : formik.values?.header.suggestedWgt || 0
 
   const editMode = !!formik.values?.recordId || !!recordId
@@ -339,7 +352,10 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       name: 'jobRef',
       flex: 1,
       props: {
-        endpointId: ManufacturingRepository.MFJobOrder.snapshot,
+        endpointId: ManufacturingRepository.MFJobOrder.snapshot2,
+        parameters: {
+          _workCenterId: formik.values?.header?.workCenterId
+        },
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -350,7 +366,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           { from: 'itemName', to: 'itemName' },
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'jobPcs', to: 'pcs' },
+          { from: 'pcs', to: 'jobPcs' },
           { from: 'routingSeqNo', to: 'routingSeqNo' }
         ],
         columnsInDropDown: [
@@ -363,11 +379,13 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       },
       async onChange({ row: { update, newRow } }) {
         let design = null
+        let jobRouting = null
         if (newRow.designId) {
           design = await getDesign(newRow.designId)
         }
-        if (!newRow?.routingSeqNo) return
-        const jobRouting = await getJobRouting(newRow.jobId, newRow?.routingSeqNo)
+        if (!newRow?.routingSeqNo) {
+          return
+        } else jobRouting = await getJobRouting(newRow.jobId, newRow?.routingSeqNo)
         update({
           classId: design?.classId,
           className: design?.className,
@@ -378,8 +396,6 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           rmWgt: parseFloat(jobRouting?.qty || 0)
         })
         setReCal(true)
-
-        //formik.setFieldValue('header.mdAmount', formik.values.currentDiscount ? formik.values.currentDiscount : 0)
       }
     },
     {
@@ -428,12 +444,8 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       name: 'rmWgt',
       label: labels.rmWgt,
       defaultValue: 0,
-      onChange: ({ row: { update, newRow } }) => {
-        // const baseSalesMetalValue = (newRow.qty * newRow.purity) / (App.currentMetalPurity.getValue() * 1000)
-        // const totalCredit = newRow.purity
-        //   ? newRow.qty * newRow.creditAmount
-        //   : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
-        // update({ baseSalesMetalValue, totalCredit })
+      onChange: () => {
+        setReCal(true)
       },
       props: {
         readOnly: isClosed
@@ -445,16 +457,6 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       label: labels.pieces,
       props: { allowNegative: false },
       defaultValue: 0,
-      onChange: ({ row: { update, newRow } }) => {
-        // const totalCredit = newRow.purity
-        //   ? newRow.qty * newRow.creditAmount
-        //   : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
-        // update({ totalCredit })
-        // if (metal && Object.keys(metal).length > 0) {
-        //   const metalValue = Math.round(((newRow.qty * newRow.purity) / (metal.purity * 1000)) * 100) / 100
-        //   update({ metalValue: metalValue })
-        // }
-      },
       props: {
         readOnly: isClosed
       }
@@ -521,7 +523,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   endpointId={SystemRepository.DocumentType.qry}
                   parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Wax}`}
                   filter={!editMode ? item => item.activeStatus === 1 : undefined}
-                  name='header.dtId'
+                  name='dtId'
                   label={labels.docType}
                   readOnly={editMode}
                   valueField='recordId'
@@ -530,7 +532,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  values={formik.values.header.dtId}
+                  values={formik.values.header}
                   onChange={async (event, newValue) => {
                     formik.setFieldValue('header.dtId', newValue?.recordId)
                     await changeDT(newValue?.recordId)
@@ -609,7 +611,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                 <ResourceComboBox
                   endpointId={ManufacturingRepository.ProductionLine.qry}
                   name='lineId'
-                  readOnly={isClosed}
+                  readOnly={isClosed || (formik.values.items.length > 0 && formik.values.items[0].jobId)}
                   required
                   label={labels.prodLine}
                   valueField='recordId'

@@ -114,7 +114,8 @@ export const ManufacturingRepository = {
     set: service + 'setJOB',
     get: service + 'getJOB',
     del: service + 'delJOB',
-    snapshot: service + 'snapshotJOB'
+    snapshot: service + 'snapshotJOB',
+    snapshot2: service + 'snapshotJOB2'
   },
   ProductionSheet: {
     page: service + 'pagePST',
