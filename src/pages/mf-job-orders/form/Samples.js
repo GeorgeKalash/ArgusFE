@@ -100,10 +100,7 @@ export default function Samples({ labels, maxAccess, recordId }) {
       <VertLayout>
         <Grow>
           <DataGrid
-            onChange={(value, action) => {
-              formik.setFieldValue('data', value)
-              action === 'delete'
-            }}
+            onChange={value => formik.setFieldValue('data', value)}
             value={formik.values?.data}
             error={formik.errors?.data}
             columns={columns}

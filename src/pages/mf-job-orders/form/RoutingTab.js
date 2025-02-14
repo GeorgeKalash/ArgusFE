@@ -11,7 +11,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 
-export default function RoutingTab({ labels, maxAccess, recordId }) {
+export default function RoutingTab({ labels, maxAccess, recordId, refetchRouting, setRefetchRouting }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const operationStore = useRef([])
@@ -26,7 +26,7 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
       routings: [
         {
           id: 1,
-          jobId: recordId,
+          jobId: null,
           seqNo: '',
           name: '',
           workCenterId: '',
@@ -254,9 +254,10 @@ export default function RoutingTab({ labels, maxAccess, recordId }) {
       if (recordId) {
         await fetchGridData()
         await fetchAllWorkCenters()
+        setRefetchRouting(false)
       }
     })()
-  }, [recordId])
+  }, [recordId, refetchRouting])
 
   return (
     <FormShell

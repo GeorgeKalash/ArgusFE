@@ -86,7 +86,7 @@ export default function MaterialsTab({ recordId, maxAccess, labels }) {
         />
       </Grow>
       <Fixed>
-        <Grid container p={2}>
+        <Grid container p={4}>
           <Grid item xs={2}>
             <CustomNumberField name='totalQty' label={labels.totQty} value={totQty} readOnly />
           </Grid>

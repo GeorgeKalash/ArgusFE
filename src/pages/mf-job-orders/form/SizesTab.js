@@ -81,6 +81,7 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
         endpointId: InventoryRepository.ItemSizes.snapshot,
         displayField: 'reference',
         valueField: 'recordId',
+        minChars: 2,
         mapping: [
           { from: 'recordId', to: 'sizeId' },
           { from: 'reference', to: 'sizeRef' },
@@ -177,10 +178,7 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
       <VertLayout>
         <Grow>
           <DataGrid
-            onChange={(value, action) => {
-              formik.setFieldValue('jobItemSizes', value)
-              action === 'delete'
-            }}
+            onChange={value => formik.setFieldValue('jobItemSizes', value)}
             value={formik.values.jobItemSizes}
             error={formik.errors.jobItemSizes}
             columns={columns}
@@ -189,7 +187,7 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
           />
         </Grow>
         <Fixed>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} p={1}>
             <Grid item xs={3}>
               <CustomNumberField name='totExpectedPcs' label={labels.totExpectedPcs} value={totExpectedPcs} readOnly />
             </Grid>

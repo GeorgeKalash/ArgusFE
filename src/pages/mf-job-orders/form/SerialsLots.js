@@ -89,10 +89,7 @@ export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
           )
         : []
 
-    formik.setValues({
-      jobId: recordId,
-      serials: updateSerialsList
-    })
+    formik.setFieldValue('serials', updateSerialsList)
   }
 
   const actions = [
@@ -131,10 +128,7 @@ export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
       <VertLayout>
         <Grow>
           <DataGrid
-            onChange={(value, action) => {
-              formik.setFieldValue('serials', value)
-              action === 'delete'
-            }}
+            onChange={value => formik.setFieldValue('serials', value)}
             value={formik.values?.serials}
             error={formik.errors?.serials}
             columns={columns}

@@ -77,7 +77,7 @@ export const getButtons = platformLabels => [
     key: 'Sample',
     label: platformLabels.Sample,
     color: '#231f20',
-  image: 'sample.png',
+    image: 'sample.png',
     main: false
   },
   {

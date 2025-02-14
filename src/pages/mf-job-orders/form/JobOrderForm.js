@@ -31,7 +31,7 @@ import SerialsLots from './SerialsLots'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import Samples from './Samples'
 
-export default function JobOrderForm({ labels, maxAccess: access, setStore, recordId }) {
+export default function JobOrderForm({ labels, maxAccess: access, setStore, recordId, setRefetchRouting }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -48,41 +48,40 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
   const initialValues = {
     recordId: recordId || null,
     dtId: documentType?.dtId,
-    reference: '',
+    reference: null,
     date: new Date(),
-    plantId: '',
-    designId: '',
-    workCenterId: '',
-    itemId: '',
-    clientId: '',
-    routingId: '',
-    routingSeqNo: '',
+    plantId: null,
+    designId: null,
+    workCenterId: null,
+    itemId: null,
+    clientId: null,
+    routingId: null,
+    routingSeqNo: null,
     startingDT: null,
     endingDT: null,
-    description: '',
-    weight: '',
-    qty: '',
-    pcs: '',
-    stdWeight: '',
-    netSerialsWeight: '',
-    producedWgt: '',
-    itemWeight: '',
-    stdWeight: '',
-    expectedQty: '',
-    expectedPcs: '',
-    RMCost: '',
+    description: null,
+    weight: 0,
+    qty: 0,
+    pcs: 0,
+    stdWeight: 0,
+    netSerialsWeight: 0,
+    producedWgt: 0,
+    itemWeight: 0,
+    expectedQty: 0,
+    expectedPcs: 0,
+    RMCost: 0,
     deliveryDate: null,
-    spId: '',
-    sizeId: '',
-    lineId: '',
-    itemsPL: '',
-    designPL: '',
-    trackBy: '',
-    avgWeight: '',
-    categoryId: '',
-    itemCategoryId: '',
-    classId: '',
-    standardId: '',
+    spId: null,
+    sizeId: null,
+    lineId: null,
+    itemsPL: null,
+    designPL: null,
+    trackBy: null,
+    avgWeight: 0,
+    categoryId: null,
+    itemCategoryId: null,
+    classId: null,
+    standardId: null,
     status: 1,
     itemFromDesign: false
   }
@@ -98,9 +97,11 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
-      expectedQty: yup.string().required(),
-      expectedPcs: yup.string().required(),
-      workCenterId: yup.string().required()
+      expectedQty: yup.number().required(),
+      expectedPcs: yup.number().required(),
+      workCenterId: yup.string().required(),
+      itemCategoryId: yup.string().required(),
+      routingId: yup.string().required()
     }),
     onSubmit: async values => {
       const obj = { ...values }
@@ -130,7 +131,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
       await refetchForm(res.recordId)
     }
   })
-
+  console.log('check values ', formik.values)
   const editMode = !!formik.values.recordId
   const isCancelled = formik.values.status == -1
   const isReleased = formik.values.status == 4
@@ -185,7 +186,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
       key: 'SerialsLots',
       condition: true,
       onClick: openSerials,
-      disabled: !editMode || (!isReleased && formik.values.trackBy == 1)
+      disabled: !editMode || !formik.values.itemId || (!isReleased && formik.values.trackBy == 1)
     },
     {
       key: 'Start',
@@ -222,6 +223,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
     toast.success(platformLabels.Started)
     invalidate()
     await refetchForm(res.recordId)
+    setRefetchRouting(true)
   }
   async function onStop() {
     const res = await postRequest({
@@ -235,6 +237,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
     toast.success(platformLabels.Stoped)
     invalidate()
     await refetchForm(res.recordId)
+    setRefetchRouting(true)
   }
   async function onCancel() {
     const res = await postRequest({
@@ -351,7 +354,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
       extension: InventoryRepository.ItemProduction.get,
       parameters: `_recordId=${values?.recordId}`
     })
-
+    formik.setFieldValue('itemCategoryId', values?.categoryId)
     formik.setFieldValue('itemWeight', ItemPhysProp?.record?.weight)
     formik.setFieldValue('itemsPL', ItemProduction?.record?.lineId)
     formik.setFieldValue('lineId', ItemProduction?.record?.lineId)
@@ -460,8 +463,8 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
       previewReport={editMode}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={isCancelled || isPosted || isReleased}
-      disabledSavedClear={isCancelled || isPosted || isReleased}
+      disabledSubmit={isCancelled || isPosted}
+      disabledSavedClear={isCancelled || isPosted}
     >
       <VertLayout>
         <Fixed>
@@ -508,14 +511,11 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                       <CustomDatePicker
                         name='date'
                         required
-                        readOnly={editMode}
+                        readOnly
                         label={labels.date}
                         value={formik?.values?.date}
-                        onChange={formik.setFieldValue}
                         editMode={editMode}
                         maxAccess={maxAccess}
-                        onClear={() => formik.setFieldValue('date', '')}
-                        error={formik.touched.date && Boolean(formik.errors.date)}
                       />
                     </Grid>
                     <Grid item>
@@ -526,22 +526,17 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                         onChange={formik.setFieldValue}
                         editMode={editMode}
                         maxAccess={maxAccess}
-                        readOnly={true}
-                        onClear={() => formik.setFieldValue('startingDT', '')}
-                        error={formik.touched.startingDT && Boolean(formik.errors.startingDT)}
+                        readOnly
                       />
                     </Grid>
                     <Grid item>
                       <CustomDatePicker
                         name='endingDT'
-                        readOnly={true}
+                        readOnly
                         label={labels.endingDate}
                         value={formik?.values?.endingDT}
-                        onChange={formik.setFieldValue}
                         editMode={editMode}
                         maxAccess={maxAccess}
-                        onClear={() => formik.setFieldValue('endingDT', '')}
-                        error={formik.touched.endingDT && Boolean(formik.errors.endingDT)}
                       />
                     </Grid>
                     <Grid item>
@@ -553,7 +548,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                         onChange={formik.setFieldValue}
                         editMode={editMode}
                         maxAccess={maxAccess}
-                        onClear={() => formik.setFieldValue('deliveryDate', '')}
+                        onClear={() => formik.setFieldValue('deliveryDate', null)}
                         error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
                       />
                     </Grid>
@@ -561,7 +556,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                       <ResourceLookup
                         endpointId={InventoryRepository.Item.snapshot}
                         name='itemId'
-                        readOnly={isCancelled || isPosted || isReleased}
+                        readOnly={isCancelled || isPosted}
                         label={labels.item}
                         valueField='sku'
                         displayField='sku'
@@ -608,7 +603,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                         required
                         readOnly={isCancelled || isReleased || isPosted}
                         onChange={e => formik.setFieldValue('expectedQty', e.target.value)}
-                        onClear={() => formik.setFieldValue('expectedQty', '')}
+                        onClear={() => formik.setFieldValue('expectedQty', 0)}
                         error={formik.touched.expectedQty && Boolean(formik.errors.expectedQty)}
                       />
                     </Grid>
@@ -626,7 +621,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                             formik.values.stdWeight ? formik.values.stdWeight * e.target.value : 0
                           )
                         }}
-                        onClear={() => formik.setFieldValue('expectedPcs', '')}
+                        onClear={() => formik.setFieldValue('expectedPcs', 0)}
                         error={formik.touched.expectedPcs && Boolean(formik.errors.expectedPcs)}
                       />
                     </Grid>
@@ -655,10 +650,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                         name='netSerialsWeight'
                         label={labels.netSerialsWeight}
                         value={formik.values.netSerialsWeight}
-                        readOnly={true}
-                        onChange={e => formik.setFieldValue('netSerialsWeight', e.target.value)}
-                        onClear={() => formik.setFieldValue('netSerialsWeight', '')}
-                        error={formik.touched.netSerialsWeight && Boolean(formik.errors.netSerialsWeight)}
+                        readOnly
                       />
                     </Grid>
                   </Grid>
@@ -672,10 +664,10 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                         value={formik.values.description}
                         rows={2.5}
                         maxLength='100'
-                        readOnly={isCancelled || isPosted || isReleased}
+                        readOnly={isCancelled || isPosted}
                         maxAccess={maxAccess}
                         onChange={e => formik.setFieldValue('description', e.target.value)}
-                        onClear={() => formik.setFieldValue('description', '')}
+                        onClear={() => formik.setFieldValue('description', null)}
                       />
                     </Grid>
                     <Grid item>
@@ -683,10 +675,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                         name='itemWeight'
                         label={labels.itemWeight}
                         value={formik.values.itemWeight}
-                        readOnly={true}
-                        onChange={e => formik.setFieldValue('itemWeight', e.target.value)}
-                        onClear={() => formik.setFieldValue('itemWeight', '')}
-                        error={formik.touched.itemWeight && Boolean(formik.errors.itemWeight)}
+                        readOnly
                       />
                     </Grid>
                     <Grid item>
@@ -694,10 +683,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                         name='avgWeight'
                         label={labels.avgWeight}
                         value={formik.values.avgWeight}
-                        readOnly={true}
-                        onChange={e => formik.setFieldValue('avgWeight', e.target.value)}
-                        onClear={() => formik.setFieldValue('avgWeight', '')}
-                        error={formik.touched.avgWeight && Boolean(formik.errors.avgWeight)}
+                        readOnly
                       />
                     </Grid>
                     <Grid item>
@@ -706,6 +692,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                         name='lineId'
                         label={labels.line}
                         valueField='recordId'
+                        readOnly={isCancelled || isReleased}
                         displayField='name'
                         value={formik.values.lineId}
                         onChange={(event, newValue) => {
@@ -728,6 +715,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                           { key: 'name', value: 'Name' }
                         ]}
                         readOnly={isCancelled || isReleased || isPosted}
+                        required
                         values={formik.values}
                         onChange={async (event, newValue) => {
                           formik.setFieldValue('routingId', newValue?.recordId)
@@ -759,37 +747,13 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                       />
                     </Grid>
                     <Grid item>
-                      <CustomNumberField
-                        name='qty'
-                        label={labels.netProduction}
-                        value={formik.values.qty}
-                        readOnly={true}
-                        onChange={e => formik.setFieldValue('qty', e.target.value)}
-                        onClear={() => formik.setFieldValue('qty', '')}
-                        error={formik.touched.qty && Boolean(formik.errors.qty)}
-                      />
+                      <CustomNumberField name='qty' label={labels.netProduction} value={formik.values.qty} readOnly />
                     </Grid>
                     <Grid item>
-                      <CustomNumberField
-                        name='pcs'
-                        label={labels.producedPcs}
-                        value={formik.values.pcs}
-                        readOnly={true}
-                        onChange={e => formik.setFieldValue('pcs', e.target.value)}
-                        onClear={() => formik.setFieldValue('pcs', '')}
-                        error={formik.touched.pcs && Boolean(formik.errors.pcs)}
-                      />
+                      <CustomNumberField name='pcs' label={labels.producedPcs} value={formik.values.pcs} readOnly />
                     </Grid>
                     <Grid item>
-                      <CustomNumberField
-                        name='RMCost'
-                        label={labels.rmCost}
-                        value={formik.values.RMCost}
-                        readOnly={true}
-                        onChange={e => formik.setFieldValue('RMCost', e.target.value)}
-                        onClear={() => formik.setFieldValue('RMCost', '')}
-                        error={formik.touched.RMCost && Boolean(formik.errors.RMCost)}
-                      />
+                      <CustomNumberField name='RMCost' label={labels.rmCost} value={formik.values.RMCost} readOnly />
                     </Grid>
                     <Grid item>
                       <ResourceComboBox
@@ -864,17 +828,10 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                   parameters='_pagesize=30&_startAt=0&_name='
                   name='itemCategoryId'
                   label={labels.itemCategory}
-                  readOnly={isCancelled || isReleased || isPosted}
+                  readOnly
                   valueField='recordId'
                   displayField={['caRef', 'name']}
-                  columnsInDropDown={[
-                    { key: 'caRef', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
                   values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('itemCategoryId', newValue?.recordId)
-                  }}
                   error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
                   maxAccess={maxAccess}
                 />
@@ -933,7 +890,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                   readOnly={isCancelled || isReleased || isPosted}
                   maxAccess={maxAccess}
                   onChange={e => formik.setFieldValue('billAddress', e.target.value)}
-                  onClear={() => formik.setFieldValue('billAddress', '')}
+                  onClear={() => formik.setFieldValue('billAddress', null)}
                 />
               </Grid>
             </Grid>

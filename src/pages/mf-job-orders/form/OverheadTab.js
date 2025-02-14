@@ -207,7 +207,7 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
           />
         </Grow>
         <Fixed>
-          <Grid container>
+          <Grid container p={2}>
             <Grid item xs={2}>
               <CustomNumberField name='totalAmount' label={labels.total} value={totAmount} readOnly />
             </Grid>
