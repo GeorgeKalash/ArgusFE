@@ -7,5 +7,8 @@ export const FoundryRepository = {
     set: service + 'setWCT',
     get: service + 'getWCT',
     del: service + 'delWCT'
+  },
+  JobWaxInquiry: {
+    qry2: service + 'qry2WAJ'
   }
 }

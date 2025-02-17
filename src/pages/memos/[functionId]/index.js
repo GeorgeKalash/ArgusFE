@@ -8,13 +8,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import { useRouter } from 'next/router'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import MemosForm from './MemosForm'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { ControlContext } from 'src/providers/ControlContext'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { Router } from 'src/lib/useRouter'
 
 const Financial = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,13 +22,10 @@ const Financial = () => {
 
   const { stack } = useWindow()
 
-  const router = useRouter()
-  const { functionId: fId } = router.query
-  const [functionId, setState] = useState(fId)
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    console.log('fetching')
 
     const response = await getRequest({
       extension: FinancialRepository.FiMemo.page,
