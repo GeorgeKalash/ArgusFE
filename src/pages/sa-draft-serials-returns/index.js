@@ -81,16 +81,16 @@ const DraftSerialsReturns = () => {
     {
       field: 'description',
       headerName: labels.description,
+      flex: 2
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     },
     {
       field: 'wipName',
       headerName: labels.wip,
-      flex: 1
-    },
-    {
-      field: 'statusName',
-      headerName: labels.status,
       flex: 1
     }
   ]
@@ -117,8 +117,7 @@ const DraftSerialsReturns = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.DraftInvoiceReturn,
-    action: openForm,
-    hasDT: false
+    action: openForm
   })
 
   const add = async () => {
@@ -139,7 +138,7 @@ const DraftSerialsReturns = () => {
       },
       width: 1300,
       height: 750,
-      title: labels.draftSerReturn //label
+      title: labels.draftSerReturn
     })
   }
 
