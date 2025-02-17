@@ -8,6 +8,16 @@ export const FoundryRepository = {
     get: service + 'getWCT',
     del: service + 'delWCT'
   },
+  MetalSettings: {
+    page: service + 'pageMTS',
+    set: service + 'setMTS',
+    get: service + 'getMTS',
+    del: service + 'delMTS'
+  },
+  Scrap: {
+    qry: service + 'qryMSC',
+    set2: service + 'set2MSC',
+  },
   JobWaxInquiry: {
     qry2: service + 'qry2WAJ'
   }
