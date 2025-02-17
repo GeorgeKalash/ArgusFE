@@ -62,7 +62,7 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
         
         setStore(prevStore => ({
           ...prevStore,
-          metalId: formik.values?.metalId,
+          recordId: formik.values?.metalId,
           metalColorId: formik.values?.metalColorId,
           scrap: res2.list.map((item, index) => ({
             ...item,
