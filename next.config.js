@@ -1,8 +1,10 @@
 const path = require('path')
+const dotenv = require('dotenv')
 
 /** @type {import('next').NextConfig} */
 
 // Remove this if you're not using Fullcalendar features
+dotenv.config()
 
 module.exports = {
   trailingSlash: true,
