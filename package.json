@@ -59,6 +59,7 @@
     "date-fns-jalali": "^3.6.0-1",
     "dayjs": "^1.11.10",
     "devextreme-react": "^23.1.5",
+    "dotenv": "^16.4.7",
     "draft-js": "0.11.7",
     "formik": "^2.4.5",
     "i18next": "22.4.15",
