@@ -264,5 +264,11 @@ export const InventoryRepository = {
   Serial: {
     qry: service + 'qrySRL',
     snapshot: service + 'snapshotSRL'
+  },
+  RMSKU: {
+    snapshot: service + 'snapshotRM'
+  },
+  SFSKU: {
+    snapshot: service + 'snapshotSF'
   }
 }
