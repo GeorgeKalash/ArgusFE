@@ -80,8 +80,8 @@ const MetalSettings = () => {
       Component: MetalSettingsWindow,
       props: {
         labels: labels,
-        obj,
-        recordId: obj.metalId,
+        metalColorId: obj?.metalColorId,
+        recordId: obj?.metalId,
         maxAccess: access
       },
       width: 800,

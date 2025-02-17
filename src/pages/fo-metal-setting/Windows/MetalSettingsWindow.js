@@ -4,12 +4,12 @@ import { useState } from 'react'
 import MetalSettingsForm from '../Forms/MetalSettingsForm.js'
 import ScrapForm from '../Forms/Scrap.js'
 
-const MetalSettingsWindow = ({ recordId, obj, labels, maxAccess, window }) => {
+const MetalSettingsWindow = ({ recordId, metalColorId, labels, maxAccess, window }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
     recordId: recordId || null,
-    metalColorId: obj?.metalColorId || null,
+    metalColorId: metalColorId || null,
     scrap: []
   })
 

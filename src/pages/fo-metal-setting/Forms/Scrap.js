@@ -35,7 +35,6 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
         .required()
     }),
     initialValues: {
-      recordId,
       scrap:
         store?.scrap.length > 0
           ? store.scrap
