@@ -6,6 +6,8 @@ const dotenv = require('dotenv')
 // Remove this if you're not using Fullcalendar features
 dotenv.config()
 
+console.log('NEXT_PUBLIC_ON_PREM from config:', process.env.NEXT_PUBLIC_ON_PREM)
+
 module.exports = {
   trailingSlash: true,
   reactStrictMode: false,
