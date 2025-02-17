@@ -9,18 +9,18 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import { useRouter } from 'next/router'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import DraftSerialsInvoiceForm from '../Forms/DraftSerialsInvoice'
+import { Router } from 'src/lib/useRouter'
 
 const DraftSerialsInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const router = useRouter()
-  const { functionId } = router.query
+
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -55,7 +55,7 @@ const DraftSerialsInvoice = () => {
     queryFn: fetchGridData,
     endpointId: SaleRepository.DocumentTypeDefault.page,
     datasetId: ResourceIds.DraftSerialsInvoiceDTD,
-    DatasetIdAccess: getResourceId(parseInt(functionId)),
+    DatasetIdAccess: getResourceId(parseInt(functionId))
   })
 
   const getCorrectLabel = functionId => {
