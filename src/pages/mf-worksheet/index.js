@@ -80,6 +80,11 @@ const MfWorksheet = () => {
       flex: 1
     },
     {
+      field: 'designRef',
+      headerName: _labels.designRef,
+      flex: 1
+    },
+    {
       field: 'wcName',
       headerName: _labels.workCenter,
       flex: 1
@@ -197,7 +202,6 @@ const MfWorksheet = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           paginationType='api'
