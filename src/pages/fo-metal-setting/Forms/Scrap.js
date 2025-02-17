@@ -17,6 +17,9 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+
+  const editMode = !!recordId
+
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
@@ -32,17 +35,20 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
         .required()
     }),
     initialValues: {
-      recordId: recordId,
-      scrap: store?.scrap.length > 0 ? store.scrap : [
-        {
-          id: 1,
-          metalId: recordId,
-          seqNo: '',
-          sku: '',
-          itemName: '',
-          scrapItemId: ''
-        }
-      ]
+      recordId,
+      scrap:
+        store?.scrap.length > 0
+          ? store.scrap
+          : [
+              {
+                id: 1,
+                metalId: recordId,
+                seqNo: '',
+                sku: '',
+                itemName: '',
+                scrapItemId: ''
+              }
+            ]
     },
     onSubmit: async obj => {
       const items = obj?.scrap.map(({ id, ...item }) => ({
@@ -64,12 +70,8 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
         record: JSON.stringify(data)
       })
 
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', res.recordId)
-      } else {
-        toast.success(platformLabels.Edited)
-      }
+      toast.success(platformLabels.Updated)
+      formik.setFieldValue('recordId', res.recordId)
     }
   })
 
@@ -107,7 +109,7 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
-          { from: 'recordId', to: 'scrapItemId' },
+          { from: 'recordId', to: 'scrapItemId' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -132,7 +134,7 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
       resourceId={ResourceIds.MetalSettings}
       maxAccess={maxAccess}
       infoVisible={false}
-      editMode={!!recordId}
+      editMode={editMode}
       isCleared={false}
     >
       <VertLayout>

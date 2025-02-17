@@ -4,12 +4,11 @@ import { useState } from 'react'
 import MetalSettingsForm from '../Forms/MetalSettingsForm.js'
 import ScrapForm from '../Forms/Scrap.js'
 
-const MetalSettingsWindow = ({ obj, labels, maxAccess }) => {
+const MetalSettingsWindow = ({ recordId, obj, labels, maxAccess, window }) => {
   const [activeTab, setActiveTab] = useState(0)
-  const editMode = !!obj?.metalId
 
   const [store, setStore] = useState({
-    recordId: obj?.metalId || null,
+    recordId: recordId || null,
     metalColorId: obj?.metalColorId || null,
     scrap: []
   })
@@ -23,10 +22,10 @@ const MetalSettingsWindow = ({ obj, labels, maxAccess }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <MetalSettingsForm labels={labels} setStore={setStore} store={store} access={maxAccess} />
+        <MetalSettingsForm labels={labels} setStore={setStore} store={store} access={maxAccess} window={window} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <ScrapForm labels={labels} setStore={setStore} editMode={editMode} store={store} maxAccess={maxAccess} />
+        <ScrapForm labels={labels} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
     </>
   )

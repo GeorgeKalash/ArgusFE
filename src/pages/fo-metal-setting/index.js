@@ -81,6 +81,7 @@ const MetalSettings = () => {
       props: {
         labels: labels,
         obj,
+        recordId: obj.metalId,
         maxAccess: access
       },
       width: 800,
@@ -107,7 +108,7 @@ const MetalSettings = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['metalId']}
           onEdit={edit}
           refetch={refetch}
           onDelete={del}

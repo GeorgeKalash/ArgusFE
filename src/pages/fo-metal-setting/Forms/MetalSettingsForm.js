@@ -16,7 +16,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 
-export default function MetalSettingsForm({ labels, maxAccess, store, setStore }) {
+export default function MetalSettingsForm({ labels, maxAccess, store, setStore, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { recordId, metalColorId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -27,17 +27,18 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore }
 
   const { formik } = useForm({
     initialValues: {
-      recordId,
-      metalId: recordId,
-      metalColorId,
-      rate: null,
-      stdLossRate: null,
+      recordId: null,
+      metalId: null,
+      metalColorId: null,
+      rate: '',
+      stdLossRate: '',
       rmItemId: null,
       sfItemId: null,
       damageItemId: null
     },
     maxAccess,
     enableReinitialize: false,
+    validateOnChange: true,
     validationSchema: yup.object({
       metalId: yup.string().required(),
       metalColorId: yup.string().required(),
@@ -49,18 +50,20 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore }
         record: JSON.stringify(obj)
       })
 
+      
       if (!recordId) {
-        formik.setFieldValue('recordId', res.recordId)
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', obj.metalId)
 
         const res2 = await getRequest({
           extension: FoundryRepository.Scrap.qry,
-          parameters: `_metalId=${obj?.metalId}`
+          parameters: `_metalId=${formik.values?.metalId}&_metalColorId=${formik.values?.metalColorId}`
         })
+        
         setStore(prevStore => ({
           ...prevStore,
-          recordId: obj?.metalId,
-          metalId: obj?.metalId,
-          metalColorId: obj?.metalColorId,
+          metalId: formik.values?.metalId,
+          metalColorId: formik.values?.metalColorId,
           scrap: res2.list.map((item, index) => ({
             ...item,
             scrapItemId: item.scrapItemId,
@@ -71,9 +74,10 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore }
       } else toast.success(platformLabels.Edited)
 
       invalidate()
+      window.close()
     }
   })
-  const editMode = !!formik.values.recordId
+  const editMode = !!recordId
 
   useEffect(() => {
     ;(async function () {
@@ -85,7 +89,7 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore }
 
         formik.setValues({
           ...res.record,
-          recordId: res.record.recordId
+          recordId: res.record.metalId
         })
       }
     })()
