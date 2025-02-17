@@ -26,11 +26,15 @@ import Table from 'src/components/Shared/Table'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import DamageForm from 'src/pages/damages/forms/DamageForm'
+import { useWindow } from 'src/windows'
+import WorkFlow from 'src/components/Shared/WorkFlow'
 
 export default function WorksheetForm({ labels, maxAccess, setStore, store, editMode, invalidate }) {
   const { platformLabels } = useContext(ControlContext)
-  const { recordId, seqNo } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { recordId } = store
+  const { stack } = useWindow()
   const imageUploadRef = useRef(null)
   const functionId = SystemFunction.Worksheet
   const resourceId = ResourceIds.Worksheet
@@ -44,6 +48,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
   const { formik } = useForm({
     initialValues: {
       recordId: null,
+      seqNo: 1,
       dtId: documentType?.dtId,
       reference: '',
       designRef: '',
@@ -57,16 +62,17 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
       notes: '',
       qty: 0.0,
       routingId: null,
-      seqNo: seqNo,
       wipQty: 0.0,
       rmQty: 0.0,
       wipPcs: 0.0,
       duration: 0.0,
-      startTime: new Date(),
-      endTime: new Date(),
+      joQty: 0.0,
+      joPcs: 0.0,
+      startTime: null,
+      endTime: null,
       wgtBefore: null,
       wgtAfter: null,
-      eopQty: null,
+      eopQty: 0,
       damagedPcs: null
     },
     access,
@@ -79,7 +85,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
       wipQty: yup.number().required(),
       siteId: yup.number().required(),
       qty: yup.number().required(),
-      wipQty: yup.number().required(),
       eopQty: yup.number().required(),
       joQty: yup.number().required()
     }),
@@ -87,13 +92,13 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
       const data = {
         ...obj,
         date: formatDateToApi(obj?.date),
-        startTime: formatDateToApi(obj?.startTime),
-        endTime: formatDateToApi(obj?.endTime)
+        startTime: formatDateToApi(new Date()),
+        endTime: formatDateToApi(new Date())
       }
 
       await postRequest({
         extension: ManufacturingRepository.Worksheet.set,
-        record: JSON.stringify({ ...data, attachment: null })
+        record: JSON.stringify({ ...data })
       }).then(res => {
         if (!obj.recordId) {
           toast.success(platformLabels.Added)
@@ -126,6 +131,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
         startTime: formatDateFromApi(res.record.startTime),
         endTime: formatDateFromApi(res.record.endTime)
       })
+      console.log(res.record, 'res.record,')
       setStore(prevStore => ({
         ...prevStore,
         values: {
@@ -164,12 +170,22 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
   const totalReturned = operationTableData ? operationTableData.list.reduce((op, item) => op + item.returned_qty, 0) : 0
   const otalConsumed = operationTableData ? operationTableData.list.reduce((op, item) => op + item.consumed_qty, 0) : 0
 
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      title: labels.workflow
+    })
+  }
+
   const onPost = async () => {
     const data = {
       ...formik.values,
-      date: formatDateToApi(formik.values.date),
-      startTime: formatDateToApi(formik.values.startTime),
-      endTime: formatDateToApi(formik.values.endTime)
+      date: formatDateToApi(formik.values.date)
     }
     await postRequest({
       extension: ManufacturingRepository.Worksheet.post,
@@ -181,7 +197,25 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
     })
   }
 
+  const onDamage = () => {
+    stack({
+      Component: DamageForm,
+      props: {
+        jobId: formik?.values?.jobId
+      },
+      width: 1000,
+      height: 700,
+      title: labels.Damage
+    })
+  }
+
   const actions = [
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode || isPosted
+    },
     {
       key: 'Post',
       condition: true,
@@ -193,12 +227,19 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
       condition: true,
       onClick: 'onInventoryTransaction',
       disabled: !editMode || !isPosted
+    },
+    {
+      key: 'Damage',
+      condition: true,
+      onClick: onDamage,
+      disabled: !editMode || isPosted
     }
   ]
 
   return (
     <FormShell
       resourceId={resourceId}
+      functionId={functionId}
       form={formik}
       maxAccess={access}
       editMode={editMode}
@@ -225,8 +266,39 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId || ''), changeDT(newValue)
+                    onChange={async (event, newValue) => {
+                      if (newValue) {
+                        const res = await getRequest({
+                          extension: ManufacturingRepository.DocumentTypeDefault.get,
+                          parameters: `_dtId=${newValue?.recordId}`
+                        })
+
+                        const res2 = await getRequest({
+                          extension: ManufacturingRepository.WorkCenter.get,
+                          parameters: `_recordId=${res?.record?.workCenterId}`
+                        })
+                        formik.setValues({
+                          ...formik.values,
+                          dtId: newValue?.recordId || null,
+                          siteId: res2?.record?.siteId || null,
+                          siteName: res2?.record?.siteName || '',
+                          workCenterId: res?.record?.workCenterId || null,
+                          workCenterRef: res?.record?.workCenterRef || '',
+                          workCenterName: res?.record?.workCenterName || ''
+                        })
+                      } else {
+                        formik.setValues({
+                          ...formik.values,
+                          dtId: null,
+                          siteId: null,
+                          siteName: '',
+                          workCenterId: null,
+                          workCenterRef: '',
+                          workCenterName: ''
+                        })
+                      }
+
+                      changeDT(newValue)
                     }}
                     readOnly={editMode}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -247,17 +319,21 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
-                    endpointId={ManufacturingRepository.MFJobOrder.snapshot}
+                    endpointId={ManufacturingRepository.MFJobOrder.snapshot2}
+                    parameters={{ _workCenterId: formik.values.workCenterId }}
                     name='jobRef'
                     label={labels.jobRef}
                     valueField='reference'
                     displayField='name'
                     valueShow='jobRef'
-                    readOnly={isPosted}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Job Order' },
+                      { key: 'designRef', value: 'Design Ref' }
+                    ]}
+                    readOnly={!formik?.values?.workCenterId || isPosted}
                     required
-                    secondValueShow='jobName'
+                    secondDisplayField={false}
                     form={formik}
-                    displayFieldWidth={2}
                     onChange={(event, newValue) => {
                       formik.setValues({
                         ...formik.values,
@@ -265,7 +341,14 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
                         jobRef: newValue?.reference || '',
                         jobName: newValue?.name || '',
                         routingId: newValue?.routingId || null,
-                        workCenterId: null,
+                        designRef: newValue?.designRef || '',
+                        siteId: newValue?.lineId || null,
+                        itemName: newValue?.itemName || '',
+                        joQty: newValue?.qty || 0,
+                        joPcs: newValue?.pcs || 0,
+                        wipQty: newValue?.qty || 0,
+                        wipPcs: newValue?.pcs || 0,
+                        seqNo: newValue?.routingSeqNo || 1,
                         laborId: null,
                         laborRef: '',
                         laborName: ''
@@ -280,26 +363,12 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
                     endpointId={ManufacturingRepository.WorkCenter.qry}
                     name='workCenterId'
                     label={labels.workCenter}
-                    readOnly={!formik.values.jobId || isPosted}
+                    readOnly
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    displayFieldWidth={1.5}
                     values={formik.values}
                     required
                     maxAccess={access}
-                    onChange={(event, newValue) => {
-                      formik.setValues({
-                        ...formik.values,
-                        workCenterId: newValue?.recordId || null,
-                        laborId: null,
-                        laborRef: '',
-                        laborName: ''
-                      })
-                    }}
                     error={formik.touched.workCenterId && formik.errors.workCenterId}
                   />
                 </Grid>
@@ -337,7 +406,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
                     value={formik?.values?.wipQty}
                     maxAccess={access}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('wipQty', '')}
+                    onClear={() => formik.setFieldValue('wipQty', 0)}
                     error={formik.touched.wipQty && Boolean(formik.errors.wipQty)}
                     decimalScale={3}
                   />
@@ -350,7 +419,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
                     value={formik?.values?.wipPcs}
                     maxAccess={access}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('wipPcs', '')}
+                    onClear={() => formik.setFieldValue('wipPcs', 0)}
                     error={formik.touched.wipPcs && Boolean(formik.errors.wipPcs)}
                     decimalScale={3}
                   />
@@ -363,7 +432,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
                     value={formik?.values?.damagedPcs}
                     maxAccess={access}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('damagedPcs', '')}
+                    onClear={() => formik.setFieldValue('damagedPcs', 0)}
                     error={formik.touched.damagedPcs && Boolean(formik.errors.damagedPcs)}
                   />
                 </Grid>
@@ -374,7 +443,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
                 <Grid item xs={12}>
                   <CustomTextField
                     name='itemName'
-                    label={labels.PgItem}
+                    label={labels.pgItem}
                     value={formik.values.itemName}
                     readOnly
                     maxAccess={access}
@@ -385,14 +454,10 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
                     label={labels.site}
-                    required
-                    readOnly={isPosted}
+                    readOnly
                     values={formik.values}
                     displayField='name'
                     maxAccess={access}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId || null)
-                    }}
                     error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                   />
                 </Grid>
@@ -406,7 +471,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField
+                  <CustomNumberField
                     name='joQty'
                     label={labels.joQty}
                     value={formik.values.joQty}
@@ -429,7 +494,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
                   <CustomNumberField
                     name='rmQty'
                     readOnly={isPosted}
-                    label={labels.Qty}
+                    label={labels.rmQty}
                     value={formik?.values?.rmQty}
                     maxAccess={access}
                     onChange={formik.handleChange}
@@ -544,7 +609,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
               { field: 'operationName', headerName: labels.operationName, flex: 1 },
               { field: 'issued_qty', headerName: labels.issued, type: 'number', flex: 1 },
               { field: 'returned_qty', headerName: labels.returned, type: 'number', flex: 1 },
-              { field: 'lost_qty', headerName: labels.lost, type: 'number', flex: 1 },
+              { field: 'lost_qty', headerName: labels.loss, type: 'number', flex: 1 },
               { field: 'consumed_qty', headerName: labels.consumed, type: 'number', flex: 1 }
             ]}
             rowId={['operationId']}
@@ -567,29 +632,22 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, edit
                 onClear={() => formik.setFieldValue('notes', '')}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={1}>
+              {labels.total}:
+            </Grid>
+            <Grid item xs={5}>
               <Grid container spacing={4}>
                 <Grid item xs={3}>
-                  <CustomNumberField name='totalIssued' label={labels.totaltotalIssued} value={totalIssued} readOnly />
+                  <CustomNumberField name='totalIssued' value={totalIssued} readOnly />
                 </Grid>
                 <Grid item xs={3}>
-                  <CustomNumberField name='totalLoss' label={labels.totaltotalLoss} value={totalLoss} readOnly />
+                  <CustomNumberField name='totalLoss' value={totalLoss} readOnly />
                 </Grid>
                 <Grid item xs={3}>
-                  <CustomNumberField
-                    name='totalReturned'
-                    label={labels.totaltotalReturned}
-                    value={totalReturned}
-                    readOnly
-                  />
+                  <CustomNumberField name='totalReturned' value={totalReturned} readOnly />
                 </Grid>
                 <Grid item xs={3}>
-                  <CustomNumberField
-                    name='otalConsumed'
-                    label={labels.totalotalConsumed}
-                    value={otalConsumed}
-                    readOnly
-                  />
+                  <CustomNumberField name='totalConsumed' value={otalConsumed} readOnly />
                 </Grid>
               </Grid>
             </Grid>

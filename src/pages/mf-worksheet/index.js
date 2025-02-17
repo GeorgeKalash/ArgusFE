@@ -19,7 +19,6 @@ const MfWorksheet = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [params, setParams] = useState('')
-
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -51,8 +50,6 @@ const MfWorksheet = () => {
     }
   })
 
-  const maxSeqNo = data ? data.list.reduce((max, item) => Math.max(max, item.maxSeqNo), 0) + 1 : 0
-
   async function fetchWithFilter({ filters, pagination = {} }) {
     const { _startAt = 0, _size = 50 } = pagination
     if (filters.page) {
@@ -83,7 +80,7 @@ const MfWorksheet = () => {
       flex: 1
     },
     {
-      field: 'wcRef',
+      field: 'wcName',
       headerName: _labels.workCenter,
       flex: 1
     },
@@ -99,7 +96,7 @@ const MfWorksheet = () => {
     },
     {
       field: 'qty',
-      headerName: _labels.qty,
+      headerName: _labels.firstQty,
       flex: 1
     },
     {
@@ -132,7 +129,6 @@ const MfWorksheet = () => {
         labels: _labels,
         recordId: obj?.recordId,
         maxAccess: access,
-        seqNo: obj?.seqNo || maxSeqNo,
         invalidate
       },
       width: 1200,

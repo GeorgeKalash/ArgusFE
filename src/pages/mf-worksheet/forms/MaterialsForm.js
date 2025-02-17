@@ -22,12 +22,19 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId, values }) {
+export default function MaterialsForm({ labels, access, recordId, wsId, values }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const functionId = SystemFunction.Worksheet
   const resourceId = ResourceIds.Worksheet
+
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId: functionId,
+    access,
+    enabled: !recordId
+  })
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.WorksheetMaterials.qry
@@ -35,47 +42,54 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId,
-      dtId: null,
-      caId: caId,
-      currencyId: null,
-      accountId: null,
-      functionId: null,
-      operationId: null,
-      type: null,
-      baseAmount: 0.0,
-      reference: '',
-      seqNo: seqNo || null,
-      amount: 0.0,
-      wsJobRef: '',
-      joJobRef: '',
-      date: null,
-      pgItemName: '',
-      laborName: '',
-      wipQty: 0,
-      wipPcs: 0,
-      grid: [
+      header: {
+        recordId: '',
+        jobId: null,
+        notes: '',
+        siteId: null,
+        status: 1,
+        worksheetId: wsId,
+        dtId: documentType?.dtId,
+        currencyId: null,
+        operationId: null,
+        type: null,
+        reference: '',
+        wsJobRef: '',
+        joJobRef: '',
+        date: null,
+        pgItemName: '',
+        laborName: '',
+        wipQty: 0,
+        wipPcs: 0
+      },
+      items: [
         {
           id: 1,
-          recordId: recordId,
-          seqNo: '',
+          imaId: recordId || 0,
+          worksheetId: wsId,
+          seqNo: 1,
           itemId: '',
           sku: '',
           itemName: '',
-          laborValuePerGram: '',
-          purity: ''
+          unitCost: 0.0,
+          trackBy: 0,
+          placeHolder: true,
+          qty: 0.0,
+          pcs: 0
         }
       ]
     },
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
-      operationId: yup.number().required(),
-      type: yup.number().required()
+      header: yup.object({
+        operationId: yup.number().required(),
+        type: yup.number().required()
+      })
     }),
     onSubmit: async obj => {
       await postRequest({
-        extension: ManufacturingRepository.WorksheetMaterials.set,
+        extension: ManufacturingRepository.WorksheetMaterials.set2,
         record: JSON.stringify(obj)
       }).then(res => {
         if (!obj.recordId) {
@@ -88,7 +102,6 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
       })
     }
   })
-  const editMode = !!formik.values.recordd
 
   useEffect(() => {
     ;(async function () {
@@ -99,21 +112,38 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
           parameters: `_recordId=${recordId}`
         }))
 
-      if (res) {
-        fillGrid(res?.record?.type, res?.record?.operationId)
-      }
+      const items =
+        recordId &&
+        (await getRequest({
+          extension: ManufacturingRepository.qryIMI,
+          parameters: `_imaId=${recordId}`
+        }))
+
+      const res2 = await getRequest({
+        extension: ManufacturingRepository.WorkCenter.get,
+        parameters: `_recordId=${values?.workCenterId}`
+      })
 
       if (values) {
         formik.setValues({
-          ...res?.record,
-          wsJobRef: values.reference,
-          joJobRef: values.jobRef,
-          date: values.date,
-          pgItemName: values.pgItemName,
-          laborName: values.laborName,
-          wipQty: values.wipQty,
-          wipPcs: values.wipPcs,
-          grid: formik?.values.grid
+          header: {
+            ...formik.values.header,
+            ...res?.record,
+            wsJobRef: values.reference,
+            joJobRef: values.jobRef,
+            date: values.date,
+            pgItemName: values.pgItemName,
+            laborName: values.laborName,
+            wipQty: values.wipQty,
+            wipPcs: values.wipPcs,
+            jobId: values.jobId,
+            siteId: res2?.record?.siteId
+          },
+          items:
+            items?.list?.map(({ ...item }, index) => ({
+              id: index + 1,
+              ...item
+            })) || formik.values.items
         })
       }
     })()
@@ -127,16 +157,18 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
 
   async function fillGrid(type, operationId) {
     if (type == 1) {
-      const grid = await getRequest({
-        extension: ManufacturingRepository.qryDMR2,
+      const items = await getRequest({
+        extension: ManufacturingRepository.qryDRM2,
         parameters: `_jobId=${values.jobId}&_operationId=${operationId}&_pcs=${values.wipPcs}`
       })
-      formik.setFieldValue(grid, grid.list)
+
+      formik.setFieldValue('items', items.list || formik.values.list)
     }
   }
 
-  const totalQty = formik.values.grid ? formik.values.grid.reduce((acc, item) => acc + item.qty, 0) : 0
-  const totalPcs = formik.values.grid ? formik.values.grid.reduce((acc, item) => acc + item.pcs, 0) : 0
+  const editMode = !!formik?.values?.header?.recordId
+  const totalQty = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.qty, 0) : 0
+  const totalPcs = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.pcs, 0) : 0
 
   return (
     <FormShell resourceId={resourceId} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -157,78 +189,79 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
                     ]}
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    values={formik.values}
+                    values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId || '')
+                      formik.setFieldValue('header.dtId', newValue?.recordId || ''), changeDT(newValue)
                     }}
                     readOnly={editMode}
-                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                    error={formik.touched.header?.dtId && Boolean(formik.errors.dtId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
                     name='reference'
                     label={labels.reference}
-                    value={formik.values.reference}
+                    value={formik.values.header.reference}
                     rows={2}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     readOnly={editMode}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    onClear={() => formik.setFieldValue('header.reference', '')}
+                    error={formik.touched.header?.reference && Boolean(formik.errors.reference)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.Operation.qry}
-                    parameters={`_workCenterId=0&_startAt=0&_pageSize=100&`}
+                    parameters={`_workCenterId=${values.workCenterId}&_startAt=0&_pageSize=100&`}
                     name='operationId'
                     label={labels.operation}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    required
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    values={formik.values}
+                    values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('operationId', newValue?.recordId || null)
+                      formik.setFieldValue('header.operationId', newValue?.recordId || null)
+                      formik.values.header.type && fillGrid(formik.values.header.type, newValue?.recordId)
                     }}
-                    error={formik.touched.operationId && Boolean(formik.errors.operationId)}
+                    error={formik.touched.header?.operationId && Boolean(formik.errors.header?.operationId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     datasetId={DataSets.MF_IOM_TYPE}
                     name='type'
-                    label={labels[3]}
+                    label={labels.type}
                     valueField='key'
                     displayField='value'
-                    values={formik.values}
+                    values={formik.values.header}
                     required
                     readOnly={editMode}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('type', newValue?.key || null)
-                      formik.values.operationId && fillGrid(newValue?.key, formik.values.operationId)
+                      formik.setFieldValue('header.type', newValue?.key || null)
+                      formik.values.header.operationId && fillGrid(newValue?.key, formik.values.header.operationId)
                     }}
-                    error={formik.touched.type && Boolean(formik.errors.type)}
-                    helperText={formik.touched.type && formik.errors.type}
+                    error={formik.touched.header?.type && Boolean(formik.errors.header?.type)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
                     name='notes'
                     label={labels.notes}
-                    value={formik.values.notes}
+                    value={formik.values.header.notes}
                     rows={5}
                     maxLength='100'
                     editMode={editMode}
                     maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('notes', e.target.value)}
-                    onClear={() => formik.setFieldValue('notes', '')}
+                    onChange={e => formik.setFieldValue('header.notes', e.target.value)}
+                    onClear={() => formik.setFieldValue('header.notes', '')}
                   />
                 </Grid>
               </Grid>
@@ -239,7 +272,7 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
                   <CustomTextField
                     name='wsJobRef'
                     label={labels.wsJobRef}
-                    value={formik.values.wsJobRef}
+                    value={formik.values.header.wsJobRef}
                     readOnly
                     maxAccess={maxAccess}
                   />
@@ -248,7 +281,7 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
                   <CustomTextField
                     name='joJobRef'
                     label={labels.joJobRef}
-                    value={formik.values.joJobRef}
+                    value={formik.values.header.joJobRef}
                     readOnly
                     maxAccess={maxAccess}
                   />
@@ -257,7 +290,7 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
                   <CustomDatePicker
                     name='date'
                     label={labels.date}
-                    value={formik.values.date}
+                    value={formik.values.header.date}
                     readOnly
                     maxAccess={maxAccess}
                   />
@@ -265,8 +298,8 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
                 <Grid item xs={12}>
                   <CustomTextField
                     name='pgItemName'
-                    label={labels.pgItemName}
-                    value={formik.values.pgItemName}
+                    label={labels.pgItem}
+                    value={formik.values.header.pgItemName}
                     readOnly
                     maxAccess={maxAccess}
                   />
@@ -274,8 +307,8 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
                 <Grid item xs={12}>
                   <CustomTextField
                     name='laborName'
-                    label={labels.laborName}
-                    value={formik.values.laborName}
+                    label={labels.labor}
+                    value={formik.values.header.laborName}
                     readOnly
                     maxAccess={maxAccess}
                   />
@@ -283,8 +316,8 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
                 <Grid item xs={12}>
                   <CustomTextField
                     name='wipQty'
-                    label={labels.wipQty}
-                    value={formik.values.wipQty}
+                    label={labels.wsQty}
+                    value={formik.values.header.wipQty}
                     readOnly
                     maxAccess={maxAccess}
                   />
@@ -292,8 +325,8 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
                 <Grid item xs={12}>
                   <CustomTextField
                     name='wipPcs'
-                    label={labels.wipPcs}
-                    value={formik.values.wipPcs}
+                    label={labels.wsPcs}
+                    value={formik.values.header.wipPcs}
                     readOnly
                     maxAccess={maxAccess}
                   />
@@ -304,9 +337,9 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('grid', value)}
-            value={formik.values.grid}
-            error={formik.errors.grid}
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values.items}
+            error={formik.errors.items}
             columns={[
               {
                 component: 'resourcelookup',
@@ -316,6 +349,8 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
                   endpointId: InventoryRepository.Item.snapshot,
                   valueField: 'recordId',
                   displayField: 'sku',
+                  mandatory: true,
+                  displayFieldWidth: 2,
                   mapping: [
                     { from: 'recordId', to: 'itemId' },
                     { from: 'sku', to: 'sku' },
@@ -324,13 +359,23 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
                   columnsInDropDown: [
                     { key: 'sku', value: 'SKU' },
                     { key: 'name', value: 'Name' }
-                  ],
-                  displayFieldWidth: 1
+                  ]
+                },
+                async onChange({ row: { update, newRow } }) {
+                  if (newRow?.itemId) {
+                    const unitCost = await getRequest({
+                      extension: InventoryRepository.Cost.get,
+                      parameters: `_itemId=${newRow?.itemId}`
+                    })
+                    update({
+                      unitCost: unitCost?.record?.unitCost || 0
+                    })
+                  }
                 }
               },
               {
                 component: 'textfield',
-                label: labels.itemName,
+                label: labels.item,
                 name: 'itemName',
                 props: {
                   readOnly: true
@@ -338,7 +383,7 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
               },
               {
                 component: 'numberfield',
-                label: labels.lotCategoryId,
+                label: labels.lot,
                 name: 'lotCategoryId',
                 props: {
                   maxLength: 6,
@@ -347,16 +392,7 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
               },
               {
                 component: 'numberfield',
-                label: labels.designQty,
-                name: 'designQty',
-                props: {
-                  maxLength: 6,
-                  decimalScale: 5
-                }
-              },
-              {
-                component: 'numberfield',
-                label: labels.designPcs,
+                label: labels.expectedPcs,
                 name: 'designPcs',
                 props: {
                   maxLength: 6,
@@ -365,7 +401,7 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
               },
               {
                 component: 'numberfield',
-                label: labels.designQty,
+                label: '1',
                 name: 'designQty',
                 props: {
                   maxLength: 6,
@@ -422,7 +458,7 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
                 : []),
               {
                 component: 'numberfield',
-                label: labels.qty,
+                label: labels.quantity,
                 name: 'qty',
                 props: {
                   maxLength: 6,
@@ -431,11 +467,10 @@ export default function MaterialsForm({ labels, maxAccess, recordId, seqNo, caId
               },
               {
                 component: 'numberfield',
-                label: labels.pcs,
+                label: labels.pieces,
                 name: 'pcs',
                 props: {
-                  maxLength: 6,
-                  decimalScale: 5
+                  maxLength: 6
                 }
               }
             ]}

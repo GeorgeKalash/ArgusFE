@@ -12,6 +12,8 @@ import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import MaterialsForm from './MaterialsForm'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const MaterialsTab = ({ store, labels, access }) => {
   const { platformLabels } = useContext(ControlContext)
@@ -74,20 +76,25 @@ const MaterialsTab = ({ store, labels, access }) => {
     toast.success(platformLabels.Deleted)
   }
 
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.IssueOfMaterial,
+    action: openForm,
+    hasDT: false
+  })
+
   function openForm(obj) {
     stack({
       Component: MaterialsForm,
       props: {
         labels,
         recordId: obj?.recordId,
-        caId: recordId,
-        seqNo: obj?.seqNo ?? maxSeqNo,
-        maxAccess: access,
-        values: values
+        wsId: recordId,
+        access,
+        values
       },
       width: 1000,
       height: 700,
-      title: labels.material
+      title: labels.Materials
     })
   }
 
@@ -96,10 +103,8 @@ const MaterialsTab = ({ store, labels, access }) => {
   }
 
   const add = () => {
-    openForm()
+    proxyAction()
   }
-
-  const maxSeqNo = data ? data.list.reduce((acc, item) => Math.max(acc, item.seqNo), 0) + 1 : 0
 
   return (
     <VertLayout>

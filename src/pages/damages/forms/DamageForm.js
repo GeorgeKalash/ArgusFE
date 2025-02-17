@@ -6,7 +6,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -22,18 +22,19 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function DamageForm({ labels, access, recordId }) {
+export default function DamageForm({ recordId, jobId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const { labels, access, invalidate } = useResourceQuery({
+    endpointId: ManufacturingRepository.Damage.page,
+    datasetId: ResourceIds.Damages
+  })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Damage,
     access: access,
     enabled: !recordId
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.Damage.page
   })
 
   const { formik } = useForm({
@@ -84,19 +85,24 @@ export default function DamageForm({ labels, access, recordId }) {
       extension: ManufacturingRepository.Damage.get,
       parameters: `_recordId=${damageId}`
     }).then(async res => {
-      await getRequest({
-        extension: ManufacturingRepository.MFJobOrder.get,
-        parameters: `_recordId=${res?.record?.jobId}`
-      }).then(jobRes => {
-        formik.setValues({
-          ...res?.record,
-          date: formatDateFromApi(res?.record?.date),
-          sku: jobRes?.record?.sku,
-          itemName: jobRes?.record?.itemName,
-          designName: jobRes?.record?.designName,
-          designRef: jobRes?.record?.designRef,
-          maxPcs: jobRes.record.pcs
-        })
+      refetchFormJob(res?.record?.jobId, res.record)
+    })
+  }
+
+  async function refetchFormJob(jobId, res) {
+    await getRequest({
+      extension: ManufacturingRepository.MFJobOrder.get,
+      parameters: `_recordId=${jobId}`
+    }).then(jobRes => {
+      formik.setValues({
+        ...formik.values,
+        ...res,
+        date: formatDateFromApi(res?.record?.date),
+        sku: jobRes?.record?.sku,
+        itemName: jobRes?.record?.itemName,
+        designName: jobRes?.record?.designName,
+        designRef: jobRes?.record?.designRef,
+        maxPcs: jobRes.record.pcs
       })
     })
   }
@@ -133,6 +139,8 @@ export default function DamageForm({ labels, access, recordId }) {
   useEffect(() => {
     if (recordId) {
       refetchForm(recordId)
+    } else if (jobId) {
+      refetchFormJob(jobId)
     }
   }, [])
 

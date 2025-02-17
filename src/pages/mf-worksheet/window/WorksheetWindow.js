@@ -4,14 +4,13 @@ import { useState } from 'react'
 import WorksheetForm from '../forms/WorksheetForm.js'
 import MaterialsTab from '../forms/MaterialsTab.js'
 
-const WorksheetWindow = ({ recordId, labels, maxAccess, invalidate, seqNo }) => {
+const WorksheetWindow = ({ recordId, labels, maxAccess, invalidate }) => {
   const [activeTab, setActiveTab] = useState(0)
   const editMode = !!recordId
 
   const [store, setStore] = useState({
     recordId: recordId || null,
-    isPosted: false,
-    seqNo: seqNo
+    isPosted: false
   })
 
   const tabs = [{ label: labels.Worksheet }, { label: labels.Materials, disabled: !store.recordId }]
