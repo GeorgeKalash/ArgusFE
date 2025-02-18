@@ -14,11 +14,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { CommonContext } from 'src/providers/CommonContext'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, window, resourceId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [isLoading, setIsLoading] = useState(false)
   const { getAllKvsByDataset } = useContext(CommonContext)
+  const { platformLabels } = useContext(ControlContext)
 
   async function getAccessLevel() {
     return new Promise((resolve, reject) => {
@@ -38,6 +40,7 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
     validateOnChange: true,
     initialValues: {
       gridRows: [],
+      search: '',
       ...row
     },
     onSubmit: async obj => {
@@ -66,11 +69,16 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
           record: JSON.stringify(resultObject)
         })
       }
-      toast.success('Record Edited Successfully')
+      toast.success(platformLabels.Edited)
       invalidate()
       window.close()
     }
   })
+
+  const handleSearchChange = event => {
+    const { value } = event.target
+    formik.setFieldValue('search', value)
+  }
 
   const columns = [
     {
@@ -164,6 +172,14 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
     })()
   }, [])
 
+  const filteredData = formik.values.search
+    ? formik.values.gridRows.filter(
+        item =>
+          item.controlId.toString().includes(formik.values.search.toLowerCase()) ||
+          item.name.toLowerCase().toString().includes(formik.values.search.toLowerCase())
+      )
+    : formik.values.gridRows
+
   return (
     <FormShell
       resourceId={ResourceIds.SecurityGroup}
@@ -204,6 +220,20 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
                 helperText={formik.touched.resourceName && formik.errors.resourceName}
               />
             </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='search'
+                value={formik.values.search}
+                label={platformLabels.Search}
+                onClear={() => {
+                  formik.setFieldValue('search', '')
+                }}
+                onChange={handleSearchChange}
+                onSearch={e => formik.setFieldValue('search', e)}
+                search={true}
+                height={35}
+              />
+            </Grid>
           </Grid>
         </Fixed>
         <Grow>
@@ -211,7 +241,7 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
             onChange={value => {
               formik.setFieldValue('gridRows', value)
             }}
-            value={formik.values.gridRows}
+            value={filteredData}
             error={formik.errors.gridRows}
             columns={columns}
             allowDelete={false}
