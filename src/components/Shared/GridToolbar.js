@@ -17,7 +17,6 @@ const GridToolbar = ({
   onSearchChange,
   disableAdd = false,
   actions = [],
-  filterBy,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
