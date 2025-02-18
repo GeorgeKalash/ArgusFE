@@ -13,6 +13,7 @@ const RPBGridToolbar = ({
   onSearch,
   onClear,
   hasSearch = true,
+  filterBy,
   ...rest
 }) => {
   const { stack } = useWindow()
@@ -22,6 +23,15 @@ const RPBGridToolbar = ({
   useEffect(() => {
     setRpbParams([])
   }, [reportName])
+
+  const filters = (filter, params) => {
+    if (typeof filterBy === 'function') {
+      if (filter) filterBy('qry', filter)
+      else filterBy('params', params)
+    } else {
+      onSearch(filter, params)
+    }
+  }
 
   const openRPB = () => {
     stack({
@@ -65,6 +75,8 @@ const RPBGridToolbar = ({
     return formattedData
   }
 
+  const reportParams = formatDataForApi(rpbParams)
+
   const actions = [
     {
       key: 'OpenRPB',
@@ -75,27 +87,29 @@ const RPBGridToolbar = ({
     {
       key: 'GO',
       condition: true,
-      onClick: () =>
-        onApply({
-          rpbParams: formatDataForApi(rpbParams),
-          paramsDict: formatDataDictForApi(rpbParams),
-          search: search
-        }),
+      onClick: () => {
+        if (typeof filterBy === 'function') filters(search, reportParams)
+        else
+          onApply({
+            rpbParams: reportParams,
+            paramsDict: reportParams,
+            search: search
+          })
+      },
       disabled: false
     }
   ]
 
   return (
     <GridToolbar
-      onSearch={value => {
-        value != '' ? onSearch(value) : (setSearch(''), onClear())
-      }}
+      onSearch={value => filters(value, reportParams)}
       onSearchClear={() => {
         setSearch('')
-        onClear()
+        if (typeof filterBy === 'function') filterBy('params', reportParams)
+        else onClear(reportParams)
       }}
       onSearchChange={value => {
-        value != '' ? setSearch(value) : (setSearch(''), onClear())
+        value != '' ? setSearch(value) : setSearch('')
       }}
       inputSearch={hasSearch}
       actions={actions}
