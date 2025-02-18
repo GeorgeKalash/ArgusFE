@@ -64,7 +64,6 @@ const fieldBehavior = async (getRequest, fieldName = 'reference', maxAccess, sel
   }
 
   if (maxAccess) {
-    console.log('maxAccess', maxAccess)
     maxAccess = mergeWithMaxAccess(maxAccess, field, fieldName)
   }
 
