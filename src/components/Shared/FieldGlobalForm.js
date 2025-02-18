@@ -180,6 +180,16 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
       )
     : formik.values.gridRows
 
+  function handleRowsChange(newValues) {
+    const updatedRows = formik.values.gridRows.map(row => {
+      const newValue = newValues.find(newRow => newRow.id === row.id)
+
+      return newValue ? newValue : row
+    })
+
+    formik.setFieldValue('gridRows', updatedRows)
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.SecurityGroup}
@@ -238,9 +248,7 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => {
-              formik.setFieldValue('gridRows', value)
-            }}
+            onChange={value => handleRowsChange(value)}
             value={filteredData}
             error={formik.errors.gridRows}
             columns={columns}
