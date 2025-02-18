@@ -325,6 +325,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                     name='clientId'
                     label={labels.client}
                     form={formik}
+                    readOnly={isPosted}
                     displayFieldWidth={3}
                     valueShow='clientRef'
                     secondValueShow='clientName'
