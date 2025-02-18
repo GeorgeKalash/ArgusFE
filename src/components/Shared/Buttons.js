@@ -466,5 +466,11 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'shipment.png',
     main: false
+  },
+  {
+    key: 'ORD',
+    label: platformLabels.ORD,
+    color: '#231f20',
+    main: false
   }
 ]

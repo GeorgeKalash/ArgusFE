@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import { Box, IconButton } from '@mui/material'
+import { Box, Checkbox, Grid, IconButton } from '@mui/material'
 import components from './components'
 import { CacheStoreProvider } from 'src/providers/CacheStoreContext'
 import { GridDeleteIcon } from '@mui/x-data-grid'
@@ -37,6 +37,8 @@ export function DataGrid({
   const { stack } = useWindow()
 
   const [ready, setReady] = useState(false)
+
+  const [checkAll, setCheckedAll] = useState({})
 
   const skip = allowDelete ? 1 : 0
 
@@ -523,6 +525,25 @@ export function DataGrid({
     }
   }
 
+  const selectAll = (name, params, e) => {
+    const gridApi = params.api
+    const allNodes = []
+    gridApi.forEachNode(node => allNodes.push(node))
+
+    allNodes.forEach(node => {
+      node.setDataValue(name, e.target.checked)
+    })
+
+    const data = allNodes.map(rowNode => rowNode.data)
+
+    setCheckedAll(prev => ({
+      ...prev,
+      [name]: e.target.checked
+    }))
+
+    onChange(data)
+  }
+
   const ActionCellRenderer = params => {
     return (
       <Box
@@ -546,6 +567,23 @@ export function DataGrid({
       sortable: false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
+      ...(column?.checkAll?.visible && {
+        headerComponent: params => {
+          return (
+            <Grid container justifyContent='center' alignItems='center'>
+              <Checkbox
+                checked={checkAll?.[column.name]}
+                onChange={e => selectAll(column.name, params, e)}
+                sx={{
+                  width: '20%',
+                  height: '20%'
+                }}
+                disabled={column.checkAll?.disabled || false}
+              />
+            </Grid>
+          )
+        }
+      }),
       cellEditorParams: { maxAccess },
       cellStyle: getCellStyle,
       suppressKeyboardEvent: params => {
