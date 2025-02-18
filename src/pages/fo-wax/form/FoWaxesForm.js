@@ -101,7 +101,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     if (!metalId || !metalColorId) return
 
     const response = await getRequest({
-      extension: FoundryRepository.MetalSetting.get,
+      extension: FoundryRepository.MetalSettings.get,
       parameters: `_metalId=${metalId}&_metalColorId=${metalColorId}`
     })
 
@@ -240,6 +240,10 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       invalidate()
     }
   })
+
+  const editMode = !!formik.values?.recordId || !!recordId
+  const isPosted = formik.values.header.status === 3
+  const isClosed = formik.values.header.wip === 2
 
   const rmWgt = reCal
     ? formik.values.items.reduce((sum, item) => sum + (Number(item?.rmWgt) || 0), 0)
@@ -427,10 +431,6 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       }
     }
   ]
-
-  const editMode = !!formik.values?.recordId || !!recordId
-  const isPosted = formik.values.header.status === 3
-  const isClosed = formik.values.header.wip === 2
 
   const actions = [
     {
