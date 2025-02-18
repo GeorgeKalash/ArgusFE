@@ -466,5 +466,12 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'shipment.png',
     main: false
+  },
+  {
+    key: 'Damage',
+    label: platformLabels.Damage,
+    color: '#C91E1E',
+    image: 'popup-window.png',
+    main: false
   }
 ]

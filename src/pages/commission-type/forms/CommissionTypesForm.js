@@ -104,7 +104,7 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                datasetId={DataSets.CT_COMMISSION_TYPES}
+                datasetId={DataSets.TYPE}
                 name='type'
                 label={labels.type}
                 valueField='key'

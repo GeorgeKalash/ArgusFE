@@ -166,6 +166,9 @@ export const InventoryRepository = {
   MaterialsTransferItems: {
     qry: service + 'qryTFI'
   },
+  RawMaterialItem: {
+    snapshot: service + 'snapshotRM'
+  },
   Cost: {
     get: service + 'getCOS'
   },
@@ -256,7 +259,7 @@ export const InventoryRepository = {
     get: service + 'getDTD',
     page: service + 'pageDTD',
     del: service + 'delDTD',
-    set: service + 'setDTD',
+    set: service + 'setDTD'
   },
   Serial: {
     qry: service + 'qrySRL',

@@ -1,6 +1,8 @@
 const service = 'MF.asmx/'
 
 export const ManufacturingRepository = {
+  qryDRM2: service + 'qryDRM2',
+  qryIMI: service + 'qryIMI',
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
     page: service + 'pageLBG',
@@ -39,15 +41,15 @@ export const ManufacturingRepository = {
     page: service + 'pageOPR',
     set: service + 'setOPR',
     get: service + 'getOPR',
-    del: service + 'delOPR',
-    qry: service + 'qryOPR'
+    del: service + 'delOPR'
   },
   Labor: {
     page: service + 'pageLBR',
     qry: service + 'qryLBR',
     set: service + 'setLBR',
     get: service + 'getLBR',
-    del: service + 'delLBR'
+    del: service + 'delLBR',
+    snapshot: service + 'snapshotLBR'
   },
   Machine: {
     page: service + 'pageMAC',
@@ -114,7 +116,8 @@ export const ManufacturingRepository = {
     set: service + 'setJOB',
     get: service + 'getJOB',
     del: service + 'delJOB',
-    snapshot: service + 'snapshotJOB'
+    snapshot: service + 'snapshotJOB',
+    snapshot2: service + 'snapshotJOB2'
   },
   ProductionSheet: {
     page: service + 'pagePST',
@@ -146,6 +149,23 @@ export const ManufacturingRepository = {
     set: service + 'setRMC',
     del: service + 'delRMC',
     page: service + 'pageRMC'
+  },
+  Worksheet: {
+    snapshot: service + 'snapshotWST',
+    get: service + 'getWST',
+    set: service + 'setWST',
+    del: service + 'delWST',
+    page: service + 'pageWST',
+    summary: service + 'summaryWST',
+    post: service + 'postWST'
+  },
+  WorksheetMaterials: {
+    qry: service + 'qryIMA',
+    get: service + 'getIMA',
+    set: service + 'setIMA',
+    set2: service + 'set2IMA',
+    del: service + 'delIMA',
+    post: service + 'postIMA'
   },
   ProductionSheetQueue: {
     qry: service + 'qryPSQ'
