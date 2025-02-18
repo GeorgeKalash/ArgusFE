@@ -24,7 +24,7 @@ const SaTrx = () => {
   const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
   const router = useRouter()
-  const { functionId } = router.query
+  const { functionId } = router?.query
 
   const getResourceId = functionId => {
     switch (functionId) {

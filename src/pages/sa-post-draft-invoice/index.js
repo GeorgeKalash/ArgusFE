@@ -10,14 +10,17 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import DraftForm from './forms/DraftForm'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
-import { SystemFunction } from 'src/resources/SystemFunction'
+import DraftForm from '../sa-draft-serials-invoices/forms/DraftForm'
+import { IconButton } from '@mui/material'
+import Image from 'next/image'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
 
-const DraftSerialsInvoices = () => {
+const PostDraftInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+
   const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   const {
@@ -27,21 +30,42 @@ const DraftSerialsInvoices = () => {
     clearFilter,
     labels,
     access,
-    paginationParameters,
-    invalidate
+    invalidate,
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.DraftInvoice.page,
+    endpointId: SaleRepository.DraftInvoice.page2,
     datasetId: ResourceIds.DraftSerialsInvoices,
+    DatasetIdAccess: ResourceIds.PostDraftSerials,
     filter: {
       filterFn: fetchWithFilter
     }
   })
 
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
+
+    const response = await getRequest({
+      extension: SaleRepository.DraftInvoice.page2,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: SaleRepository.DraftInvoice.snapshot,
+        parameters: `_filter=${filters.qry}&_status=1&_spId=0`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
   const columns = [
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'spRef',
+      headerName: labels.salesPerson,
       flex: 1
     },
     {
@@ -51,8 +75,8 @@ const DraftSerialsInvoices = () => {
       type: 'date'
     },
     {
-      field: 'clientRef',
-      headerName: labels.clientRef,
+      field: 'reference',
+      headerName: labels.reference,
       flex: 1
     },
     {
@@ -62,13 +86,7 @@ const DraftSerialsInvoices = () => {
     },
     {
       field: 'amount',
-      headerName: labels.amount,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'pcs',
-      headerName: labels.pcs,
+      headerName: labels.net,
       flex: 1,
       type: 'number'
     },
@@ -79,57 +97,25 @@ const DraftSerialsInvoices = () => {
       type: 'number'
     },
     {
-      field: 'description',
-      headerName: labels.description,
-      flex: 1
-    },
-    {
       field: 'wipName',
       headerName: labels.wip,
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
-      flex: 1
+      flex: 0.5,
+      headerName: labels.post,
+      cellRenderer: row => {
+        if (row.data.wip === 2)
+          return (
+            <IconButton size='small' onClick={() => confirmationPost(row.data)}>
+              <Image src={`/images/buttonsIcons/post-black.png`} width={18} height={18} alt='post.png' />
+            </IconButton>
+          )
+      }
     }
   ]
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params = [] } = options
-
-    const response = await getRequest({
-      extension: SaleRepository.DraftInvoice.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
-    })
-
-    return { ...response, _startAt: _startAt }
-  }
-
-  async function fetchWithFilter({ filters, pagination }) {
-    if (filters.qry)
-      return await getRequest({
-        extension: SaleRepository.DraftInvoice.snapshot,
-        parameters: `_filter=${filters.qry}&_status=0`
-      })
-    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-  }
-
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.DraftSerialsIn,
-    action: openForm,
-    hasDT: false
-  })
-
-  const add = async () => {
-    await proxyAction()
-  }
-
-  const editDSI = obj => {
-    openForm(obj.recordId)
-  }
-
-  async function openForm(recordId) {
+  async function edit({ recordId }) {
     stack({
       Component: DraftForm,
       props: {
@@ -144,13 +130,31 @@ const DraftSerialsInvoices = () => {
     })
   }
 
-  const delDSI = async obj => {
-    await postRequest({
-      extension: SaleRepository.DraftInvoice.del,
-      record: JSON.stringify(obj)
+  const confirmationPost = data => {
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: labels.postDialogText,
+        okButtonAction: () => onPost(data),
+        fullScreen: false,
+        close: true
+      },
+      width: 450,
+      height: 140,
+      title: platformLabels.Confirmation
     })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+  }
+
+  const onPost = async data => {
+    const res = await postRequest({
+      extension: SaleRepository.DraftInvoice.post,
+      record: JSON.stringify(data)
+    })
+
+    if (res) {
+      toast.success(platformLabels.Posted)
+      invalidate()
+    }
   }
 
   const onSearch = value => {
@@ -176,23 +180,21 @@ const DraftSerialsInvoices = () => {
     <VertLayout>
       <Fixed>
         <RPBGridToolbar
-          onAdd={add}
           maxAccess={access}
           onApply={onApply}
           onSearch={onSearch}
           onClear={onClear}
-          reportName={'SADFT'}
+          reportName={'SADFT2'}
         />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={editDSI}
           refetch={refetch}
-          onDelete={delDSI}
-          deleteConfirmationType={'strict'}
+          onEdit={edit}
           isLoading={false}
           pageSize={50}
           maxAccess={access}
@@ -204,4 +206,4 @@ const DraftSerialsInvoices = () => {
   )
 }
 
-export default DraftSerialsInvoices
+export default PostDraftInvoice

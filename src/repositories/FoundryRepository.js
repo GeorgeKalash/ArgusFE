@@ -22,12 +22,20 @@ export const FoundryRepository = {
     reopen: service + 'reopenWAX'
   },
   WaxJob: {
-    qry: service + 'qryWAJ'
+    qry: service + 'qryWAJ',
+    qry2: service + 'qry2WAJ'
   },
   Mould: {
     qry: service + 'qryMOU'
   },
-  MetalSetting: {
-    get: service + 'getMTS'
+  MetalSettings: {
+    page: service + 'pageMTS',
+    set: service + 'setMTS',
+    get: service + 'getMTS',
+    del: service + 'delMTS'
+  },
+  Scrap: {
+    qry: service + 'qryMSC',
+    set2: service + 'set2MSC'
   }
 }
