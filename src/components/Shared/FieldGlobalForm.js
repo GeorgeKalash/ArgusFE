@@ -172,13 +172,15 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
     })()
   }, [])
 
-  const filteredData = formik.values.search
-    ? formik.values.gridRows.filter(
-        item =>
-          item.controlId.toString().includes(formik.values.search.toLowerCase()) ||
-          item.name.toLowerCase().toString().includes(formik.values.search.toLowerCase())
+  const { gridRows, search } = formik.values
+  const lowerSearch = search.toLowerCase()
+
+  const filteredRows = search
+    ? gridRows.filter(
+        ({ controlId, name }) =>
+          controlId?.toLowerCase()?.toString().includes(lowerSearch) || name?.toLowerCase().includes(lowerSearch)
       )
-    : formik.values.gridRows
+    : gridRows
 
   function handleRowsChange(newValues) {
     const updatedRows = formik.values.gridRows.map(row => {
@@ -249,7 +251,7 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
         <Grow>
           <DataGrid
             onChange={value => handleRowsChange(value)}
-            value={filteredData}
+            value={filteredRows}
             error={formik.errors.gridRows}
             columns={columns}
             allowDelete={false}
