@@ -9,6 +9,7 @@ import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { ControlContext } from 'src/providers/ControlContext'
+import { SystemChecks } from 'src/resources/SystemChecks'
 
 export function DataGrid({
   name, // maxAccess
