@@ -3,18 +3,13 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import FormShell from './FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Grid } from '@mui/material'
-import CustomTextField from '../Inputs/CustomTextField'
 import ResourceComboBox from './ResourceComboBox'
 import { useForm } from 'src/hooks/form'
-import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import * as yup from 'yup'
 import { useResourceQuery } from 'src/hooks/resource'
-import { useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { DataSets } from 'src/resources/DataSets'
-import toast from 'react-hot-toast'
 import CustomNumberField from '../Inputs/CustomNumberField'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceLookup } from './ResourceLookup'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataGrid } from './DataGrid'
@@ -24,7 +19,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
 
 export const SerialsForm = ({ row, values, checkForSiteId, window, updateRow }) => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { systemChecks } = useContext(ControlContext)
   const allowNegativeQty = systemChecks.some(check => check.checkId === SystemChecks.ALLOW_INVENTORY_NEGATIVE_QTY)
@@ -37,7 +32,7 @@ export const SerialsForm = ({ row, values, checkForSiteId, window, updateRow }) 
       siteId: values.fromSiteId,
       siteName: values.fromSiteName,
       siteRef: values?.fromSiteRef,
-      totalWeight: row?.qty,
+      totalWeight: row?.qty ?? 0,
       pieces: null,
       items: row?.serials || []
     },
@@ -77,7 +72,7 @@ export const SerialsForm = ({ row, values, checkForSiteId, window, updateRow }) 
 
     return weightSum + weightValue
   }, 0)
-  const balance = formik.values.totalWeight - weightAssigned
+  const balance = formik.values.totalWeight - weightAssigned ?? 0
 
   const columns = [
     {

@@ -513,7 +513,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             row,
             values: formik.values,
             maxAccess: access,
-            checkForSiteId: false,
+            checkForSiteId: true,
             updateRow
           },
           width: 500,
