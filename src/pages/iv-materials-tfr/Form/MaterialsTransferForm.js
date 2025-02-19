@@ -28,6 +28,8 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { useError } from 'src/error'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import SkuForm from './SkuForm'
+import CustomButton from 'src/components/Inputs/CustomButton'
+import { SerialsForm } from 'src/components/Shared/SerialsForm'
 
 export default function MaterialsTransferForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -89,6 +91,16 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         totalCost: 0,
         priceType: null,
         details: false
+      }
+    ],
+    serials: [
+      {
+        transferId: recordId || 0,
+        seqNo: 1,
+        componentSeqNo: 0,
+        srlSeqNo: null,
+        srlNo: null,
+        weight: null
       }
     ]
   }
@@ -153,32 +165,49 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     onSubmit: async values => {
       const copy = { ...values }
       delete copy.transfers
+      delete copy.serials
       copy.date = !!copy.date ? formatDateToApi(copy.date) : null
       copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
       copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
 
-      const updatedRows = formik?.values?.transfers.map((transferDetail, index) => {
+      const serialsValues = []
+
+      const updatedRows = formik.values.transfers.map((transferDetails, index) => {
+        const { serials, ...restDetails } = transferDetails
+        if (serials) {
+          const updatedSerials = serials.map((serialDetail, index) => {
+            return {
+              ...serialDetail,
+              srlSeqNo: 0,
+              componentSeqNo: 0,
+              transferId: formik.values.recordId || 0
+            }
+          })
+          serialsValues.push(...updatedSerials)
+        }
+
         return {
-          ...transferDetail,
+          ...restDetails,
           seqNo: index + 1,
           transferId: formik.values.recordId || 0,
-          unitCost: parseFloat(transferDetail.unitCost),
-          totalCost: parseFloat(transferDetail.totalCost)
+          unitCost: parseFloat(transferDetails.unitCost),
+          totalCost: parseFloat(transferDetails.totalCost)
         }
       })
+
+      const resultObject = {
+        header: copy,
+        items: updatedRows,
+        serials: serialsValues,
+        lots: []
+      }
+
       if (values.fromSiteId === values.toSiteId) {
         stackError({
           message: labels.errorMessage
         })
 
         return
-      }
-
-      const resultObject = {
-        header: copy,
-        items: updatedRows,
-        serials: [],
-        lots: []
       }
 
       const res = await postRequest({
@@ -208,7 +237,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             record: JSON.stringify(data)
           })
         }
-
+        await refetchForm(formik.values.recordId)
         toast.success(platformLabels.Edited)
       }
     }
@@ -294,9 +323,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   async function getFilteredMU(itemId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.transfers?.find(
-      transfer => parseInt(transfer.itemId) === itemId
-    )?.msId
+    const currentItemId = formik.values.transfers?.find(transfer => parseInt(transfer.itemId) === itemId)?.msId
 
     const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
     filteredMeasurements.current = arrayMU
@@ -461,7 +488,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       name: 'unitCost',
       props: {
         readOnly: true
-      },
+      }
     },
     {
       component: 'numberfield',
@@ -469,7 +496,31 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       name: 'totalCost',
       props: {
         readOnly: true
+      }
+    },
+    {
+      component: 'button',
+      name: 'serials',
+      label: labels.currencyNotes,
+      props: {
+        imgSrc: '/images/TableIcons/imgSerials.png'
       },
+      onClick: (e, row, update, updateRow) => {
+        stack({
+          Component: SerialsForm,
+          props: {
+            labels,
+            row,
+            values: formik.values,
+            maxAccess: access,
+            checkForSiteId: false,
+            updateRow
+          },
+          width: 500,
+          height: 700,
+          title: platformLabels.serials
+        })
+      }
     }
   ]
 
@@ -495,15 +546,29 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
     const res3 = await getDataGrid(recordId)
 
+    const updatedTransfers = await Promise.all(
+      res3.list.map(async item => {
+        const serials = await getSerials(recordId, item.seqNo)
+
+        return {
+          ...item,
+          id: item.seqNo,
+          totalCost: calcTotalCost(item),
+          serials: serials.list.map((serialDetail, index) => {
+            return {
+              ...serialDetail,
+              id: index
+            }
+          }),
+          unitCost: item.unitCost ?? 0
+        }
+      })
+    )
+
     formik.setValues({
       ...res.record,
       recordId,
-      transfers: res3?.list?.map(item => ({
-        ...item,
-        id: item.seqNo,
-        totalCost: calcTotalCost(item),
-        unitCost: item.unitCost ?? 0
-      })),
+      transfers: updatedTransfers,
       notificationGroupId: formik.values.notificationGroupId
     })
   }
@@ -680,6 +745,13 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     })()
   }, [])
 
+  async function getSerials(recordId, seqNo) {
+    return await getRequest({
+      extension: InventoryRepository.MaterialTransferSerial.qry,
+      parameters: `_transferId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
+    })
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId && measurements) {
@@ -687,14 +759,24 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         const resNotification = await getNotificationData(recordId)
         const res3 = await getDataGrid(recordId)
 
-        const updatedTransfers = res3.list.map(item => {
-          return {
-            ...item,
-            id: item.seqNo,
-            totalCost: calcTotalCost(item),
-            unitCost: item.unitCost ?? 0
-          }
-        })
+        const updatedTransfers = await Promise.all(
+          res3.list.map(async item => {
+            const serials = await getSerials(recordId, item.seqNo)
+
+            return {
+              ...item,
+              id: item.seqNo,
+              totalCost: calcTotalCost(item),
+              serials: serials.list.map((serialDetail, index) => {
+                return {
+                  ...serialDetail,
+                  id: index
+                }
+              }),
+              unitCost: item.unitCost ?? 0
+            }
+          })
+        )
 
         formik.setValues({
           ...res.record,
