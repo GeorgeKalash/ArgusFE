@@ -10,8 +10,9 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function MaterialsTab({ recordId, maxAccess, labels }) {
+export default function MaterialsTab({ store, maxAccess, labels }) {
   const { getRequest } = useContext(RequestsContext)
+  const recordId = store?.recordId
 
   const {
     query: { data }
@@ -34,7 +35,7 @@ export default function MaterialsTab({ recordId, maxAccess, labels }) {
       flex: 1
     },
     {
-      field: 'categoryRef',
+      field: 'itemCategoryName',
       headerName: labels.category,
       flex: 1
     },

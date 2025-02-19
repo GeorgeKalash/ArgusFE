@@ -10,26 +10,20 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
-import AdjDocTypeDefaultsForm from './form/AdjDocTypeDefaultsForm'
-import { Router } from 'src/lib/useRouter'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import CollectionsForm from './Forms/CollectionsForm'
 
-const CaDocTypeDefaults = () => {
+const Collections = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
 
-  const { functionId } = Router()
-
   async function fetchGridData(options = {}) {
-    const {
-      pagination: { _startAt = 0, _pageSize = 50 }
-    } = options
+    const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: CashBankRepository.DocumentTypeDefault.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${functionId}`
+      extension: InventoryRepository.Collections.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -37,36 +31,26 @@ const CaDocTypeDefaults = () => {
 
   const {
     query: { data },
-    labels: _labels,
-    access,
+    labels,
     paginationParameters,
-    invalidate,
-    refetch
+    refetch,
+    access,
+    invalidate
   } = useResourceQuery({
-    endpointId: CashBankRepository.DocumentTypeDefault.page,
-    datasetId: ResourceIds.AdjDocumentTypeDefault,
-
-    filter: {
-      filterFn: fetchGridData,
-      default: { functionId }
-    }
+    queryFn: fetchGridData,
+    endpointId: InventoryRepository.Collections.page,
+    datasetId: ResourceIds.Collections
   })
 
   const columns = [
     {
-      field: 'dtName',
-      headerName: _labels.doctype,
-      flex: 1
-    },
-
-    {
-      field: 'plantName',
-      headerName: _labels.plant,
+      field: 'reference',
+      headerName: labels.reference,
       flex: 1
     },
     {
-      field: 'cashAccountName',
-      headerName: _labels.cashAccountName,
+      field: 'name',
+      headerName: labels.name,
       flex: 1
     }
   ]
@@ -76,31 +60,30 @@ const CaDocTypeDefaults = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.dtId)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: CollectionsForm,
+      props: {
+        labels,
+        recordId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 250,
+      title: labels.collections
+    })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: CashBankRepository.DocumentTypeDefault.del,
+      extension: InventoryRepository.Collections.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
-  }
-
-  function openForm(dtId) {
-    stack({
-      Component: AdjDocTypeDefaultsForm,
-      props: {
-        labels: _labels,
-        functionId,
-        recordId: dtId,
-        maxAccess: access
-      },
-      width: 500,
-      height: 360,
-      title: _labels.doctypeDefault
-    })
   }
 
   return (
@@ -112,14 +95,14 @@ const CaDocTypeDefaults = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['dtId']}
+          rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
+          paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}
-          paginationType='api'
           maxAccess={access}
         />
       </Grow>
@@ -127,4 +110,4 @@ const CaDocTypeDefaults = () => {
   )
 }
 
-export default CaDocTypeDefaults
+export default Collections

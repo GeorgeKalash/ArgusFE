@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useWindow } from 'src/windows'
@@ -14,21 +13,18 @@ import IvReplenishementsWindow from './windows/IvReplenishementsWindow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const IvReplenishements = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
-    try {
-      const response = await getRequest({
-        extension: IVReplenishementRepository.IvReplenishements.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params || ''}`
-      })
+    const response = await getRequest({
+      extension: IVReplenishementRepository.IvReplenishements.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params || ''}`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithFilter({ filters, pagination }) {
@@ -38,10 +34,8 @@ const IvReplenishements = () => {
   const {
     query: { data },
     labels: _labels,
-
     paginationParameters,
     filterBy,
-    clearFilter,
     refetch,
     access
   } = useResourceQuery({

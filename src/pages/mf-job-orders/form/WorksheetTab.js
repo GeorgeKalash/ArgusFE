@@ -7,8 +7,9 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function WorksheetTab({ recordId, maxAccess, labels }) {
+export default function WorksheetTab({ store, maxAccess, labels }) {
   const { getRequest } = useContext(RequestsContext)
+  const recordId = store?.recordId
 
   const {
     query: { data }
@@ -34,11 +35,6 @@ export default function WorksheetTab({ recordId, maxAccess, labels }) {
     {
       field: 'jobRef',
       headerName: labels.jobRef,
-      flex: 1
-    },
-    {
-      field: 'designRef',
-      headerName: labels.designRef,
       flex: 1
     },
     {
