@@ -9,12 +9,11 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-
-import { useRouter } from 'next/router'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import DocumentTypeDefaultForm from '../form/DocumentTypeDefaultForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import { Router } from 'src/lib/useRouter'
 
 const CAadjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,8 +21,7 @@ const CAadjustment = () => {
 
   const { stack } = useWindow()
 
-  const router = useRouter()
-  const { functionId } = router.query
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const {

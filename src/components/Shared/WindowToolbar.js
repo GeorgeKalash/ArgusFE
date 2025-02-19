@@ -16,6 +16,7 @@ const WindowToolbar = ({
   isInfo,
   isCleared,
   isGenerated,
+  onORD,
   recordId,
   onGenerateReport,
   disabledSubmit,
@@ -118,6 +119,7 @@ const WindowToolbar = ({
     isClosed,
     editMode,
     onSave,
+    onORD,
     onSaveClear,
     onClear,
     onInfo

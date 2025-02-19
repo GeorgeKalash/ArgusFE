@@ -53,6 +53,7 @@ export const DeliveryRepository = {
     get: service + 'getORD',
     snapshot: service + 'snapshotORD',
     unpost: service + 'unpostORD',
+    gen: service + 'genORD',
     post: service + 'postORD',
     del: service + 'delORD',
     cancel: service + 'cancelORD',
@@ -70,7 +71,7 @@ export const DeliveryRepository = {
   GenerateTrip: {
     root: service + 'rootSZ',
     firstLevel: service + 'firstLevelSZ',
-    undelivered2: service + 'undeliveredSO2',
+    undelivered2: service + 'undeliveredSO2'
   },
   DeliveryLeadTime: {
     get: service + 'getLDT',

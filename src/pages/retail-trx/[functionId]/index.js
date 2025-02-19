@@ -1,5 +1,4 @@
 import { Grow } from '@mui/material'
-import { useRouter } from 'next/router'
 import React, { useContext, useEffect, useRef } from 'react'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -17,14 +16,16 @@ import { useResourceQuery } from 'src/hooks/resource'
 import Table from 'src/components/Shared/Table'
 import toast from 'react-hot-toast'
 import { getStorageData } from 'src/storage/storage'
+import { Router } from 'src/lib/useRouter'
 
 const RetailTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const router = useRouter()
-  const { functionId } = router.query
+
+  const { functionId } = Router()
+
   const userId = getStorageData('userData')?.userId
   const posObj = useRef(null)
 

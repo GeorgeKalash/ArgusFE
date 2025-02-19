@@ -200,15 +200,6 @@ export function DataGrid({
     }
   }, [rowSelectionModel])
 
-  useEffect(() => {
-    if (gridApiRef.current && rowSelectionModel) {
-      const rowNode = gridApiRef.current.getRowNode(rowSelectionModel)
-      if (rowNode) {
-        rowNode.setSelected(true)
-      }
-    }
-  }, [rowSelectionModel])
-
   const addNewRow = () => {
     const highestIndex = Math.max(...value?.map(item => item.id), 0) + 1
 
@@ -525,25 +516,6 @@ export function DataGrid({
     }
   }
 
-  const selectAll = (name, params, e) => {
-    const gridApi = params.api
-    const allNodes = []
-    gridApi.forEachNode(node => allNodes.push(node))
-
-    allNodes.forEach(node => {
-      node.setDataValue(name, e.target.checked)
-    })
-
-    const data = allNodes.map(rowNode => rowNode.data)
-
-    setCheckedAll(prev => ({
-      ...prev,
-      [name]: e.target.checked
-    }))
-
-    onChange(data)
-  }
-
   const ActionCellRenderer = params => {
     return (
       <Box
@@ -569,6 +541,49 @@ export function DataGrid({
       cellEditor: CustomCellEditor,
       ...(column?.checkAll?.visible && {
         headerComponent: params => {
+          const selectAll = (name, params, e) => {
+            const gridApi = params.api
+            const allNodes = []
+            gridApi.forEachNode(node => allNodes.push(node))
+
+            const isChecked = e.target?.checked
+
+            allNodes.forEach(node => {
+              node.setDataValue(name, isChecked)
+            })
+
+            const data = allNodes.map(rowNode => rowNode?.data)
+
+            setCheckedAll(prev => ({
+              ...prev,
+              [name]: e.target?.checked
+            }))
+
+            const setData = (changes, data) => {
+              const id = data?.id
+
+              console.log('id', id)
+
+              const rowNode = params.api.getRowNode(id)
+              if (rowNode) {
+                const currentData = rowNode.data
+
+                const newData = { ...currentData, ...changes }
+
+                rowNode.updateData(newData)
+              }
+            }
+
+            const updateCommit = (data, changes) => {
+              console.log(data, changes)
+
+              setData(changes, data)
+              commit({ changes: { ...data, changes } })
+            }
+
+            column?.checkAll?.onChange(e, { update: updateCommit })
+          }
+
           return (
             <Grid container justifyContent='center' alignItems='center'>
               <Checkbox

@@ -9,18 +9,18 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import { useRouter } from 'next/router'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import MetalTransactionDTDForm from '../Forms/MetalTransactionDTD'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { Router } from 'src/lib/useRouter'
 
 const MetalTransactionDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const router = useRouter()
-  const { functionId } = router.query
+
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -87,7 +87,10 @@ const MetalTransactionDTD = () => {
       },
       width: 600,
       height: 380,
-      title: (functionId == SystemFunction.MetalReceiptVoucher ? labels.metalTransactionReceipt: labels.metalTransactionPayment)
+      title:
+        functionId == SystemFunction.MetalReceiptVoucher
+          ? labels.metalTransactionReceipt
+          : labels.metalTransactionPayment
     })
   }
 

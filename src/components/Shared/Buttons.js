@@ -469,7 +469,7 @@ export const getButtons = platformLabels => [
   },
   {
     key: 'ORD',
-    label: platformLabels.ORD,
+    label: platformLabels.ord,
     color: '#231f20',
     main: false
   }
