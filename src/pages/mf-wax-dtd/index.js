@@ -3,33 +3,28 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
-import AdjDocTypeDefaultsForm from './form/AdjDocTypeDefaultsForm'
-import { Router } from 'src/lib/useRouter'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import WaxDTDForm from './Forms/WaxDTDForm'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
-const CaDocTypeDefaults = () => {
+const WaxDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
 
-  const { functionId } = Router()
-
   async function fetchGridData(options = {}) {
-    const {
-      pagination: { _startAt = 0, _pageSize = 50 }
-    } = options
+    const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: CashBankRepository.DocumentTypeDefault.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${functionId}`
+      extension: ManufacturingRepository.DocumentTypeDefault.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=${SystemFunction.Wax}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -37,36 +32,31 @@ const CaDocTypeDefaults = () => {
 
   const {
     query: { data },
-    labels: _labels,
-    access,
-    paginationParameters,
+    labels,
     invalidate,
-    refetch
+    refetch,
+    access,
+    paginationParameters
   } = useResourceQuery({
-    endpointId: CashBankRepository.DocumentTypeDefault.page,
-    datasetId: ResourceIds.AdjDocumentTypeDefault,
-
-    filter: {
-      filterFn: fetchGridData,
-      default: { functionId }
-    }
+    queryFn: fetchGridData,
+    endpointId: ManufacturingRepository.DocumentTypeDefault.page,
+    datasetId: ResourceIds.WaxDocTypeDefaults
   })
 
   const columns = [
     {
       field: 'dtName',
-      headerName: _labels.doctype,
-      flex: 1
-    },
-
-    {
-      field: 'plantName',
-      headerName: _labels.plant,
+      headerName: labels.documentType,
       flex: 1
     },
     {
-      field: 'cashAccountName',
-      headerName: _labels.cashAccountName,
+      field: 'workCenterName',
+      headerName: labels.workCenter,
+      flex: 1
+    },
+    {
+      field: 'lineName',
+      headerName: labels.productionLine,
       flex: 1
     }
   ]
@@ -75,32 +65,31 @@ const CaDocTypeDefaults = () => {
     openForm()
   }
 
-  const edit = obj => {
-    openForm(obj?.dtId)
-  }
-
   const del = async obj => {
     await postRequest({
-      extension: CashBankRepository.DocumentTypeDefault.del,
+      extension: ManufacturingRepository.DocumentTypeDefault.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(dtId) {
+  function openForm(record) {
     stack({
-      Component: AdjDocTypeDefaultsForm,
+      Component: WaxDTDForm,
       props: {
-        labels: _labels,
-        functionId,
-        recordId: dtId,
+        labels,
+        recordId: record?.dtId,
         maxAccess: access
       },
-      width: 500,
-      height: 360,
-      title: _labels.doctypeDefault
+      width: 600,
+      height: 300,
+      title: labels.WaxDTD
     })
+  }
+
+  const edit = obj => {
+    openForm(obj)
   }
 
   return (
@@ -117,9 +106,9 @@ const CaDocTypeDefaults = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationParameters={paginationParameters}
           refetch={refetch}
           paginationType='api'
+          paginationParameters={paginationParameters}
           maxAccess={access}
         />
       </Grow>
@@ -127,4 +116,4 @@ const CaDocTypeDefaults = () => {
   )
 }
 
-export default CaDocTypeDefaults
+export default WaxDTD

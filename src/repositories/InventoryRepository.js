@@ -266,5 +266,17 @@ export const InventoryRepository = {
   },
   MaterialTransferSerial: {
     qry: service + 'qryTFS'
+  },
+  RMSKU: {
+    snapshot: service + 'snapshotRM'
+  },
+  SFSKU: {
+    snapshot: service + 'snapshotSF'
+  },
+  Collections: {
+    get: service + 'getCOL',
+    page: service + 'pageCOL',
+    del: service + 'delCOL',
+    set: service + 'setCOL',
   }
 }

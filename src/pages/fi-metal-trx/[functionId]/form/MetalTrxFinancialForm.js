@@ -31,7 +31,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const [metal, setMetal] = useState({})
   const [allMetals, setAllMetals] = useState([])
-  const filteredCreditCard = useRef()
+  const filteredItems = useRef()
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
   const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
@@ -228,11 +228,11 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   }
 
   function getFilteredMetal(metalId) {
-    if (!metalId) return []
-
-    return allMetals.filter(metal => {
-      return metal.metalId === metalId
-    })
+    filteredItems.current = metalId
+      ? allMetals.filter(metal => {
+          return metal.metalId === metalId
+        })
+      : []
   }
   async function getAllMetals() {
     const res = await getRequest({
@@ -285,7 +285,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         ]
       },
       onChange: async ({ row: { update, newRow } }) => {
-        filteredCreditCard.current = newRow.metalId
+        getFilteredMetal(newRow?.metalId)
         if (newRow.purity) update({ purity: newRow.purity * 1000, stdPurity: newRow.stdPurity * 1000 })
       }
     },
@@ -294,7 +294,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       label: labels.sku,
       name: 'sku',
       props: {
-        store: getFilteredMetal(filteredCreditCard?.current),
+        store: filteredItems?.current,
         valueField: 'itemId',
         displayField: 'sku',
         mapping: [
@@ -303,10 +303,11 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           { from: 'sku', to: 'sku' },
           { from: 'purity', to: 'purity' },
           { from: 'laborValuePerGram', to: 'creditAmount' }
-        ]
+        ],
+        displayFieldWidth: 2
       },
       propsReducer({ row, props }) {
-        return { ...props, store: getFilteredMetal(filteredCreditCard?.current) }
+        return { ...props, store: filteredItems?.current }
       },
       onChange: ({ row: { update, newRow } }) => {
         const purityValue = newRow.purity || newRow.stdPurity
@@ -386,11 +387,16 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       onClick: onPost,
       disabled: !editMode
     },
-
     {
       key: 'Aging',
       condition: true,
       onClick: 'onClickAging',
+      disabled: !editMode
+    },
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
       disabled: !editMode
     }
   ]
@@ -600,6 +606,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
             maxAccess={maxAccess}
             disabled={isPosted}
             allowDelete={!isPosted}
+            onSelectionChange={(row, update, field) => {
+              if (field == 'sku') getFilteredMetal(row?.metalId)
+            }}
           />
         </Grow>
         <Fixed>

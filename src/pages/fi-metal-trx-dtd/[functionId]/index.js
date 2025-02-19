@@ -10,25 +10,23 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
-import AdjDocTypeDefaultsForm from './form/AdjDocTypeDefaultsForm'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import MetalTransactionDTDForm from '../Forms/MetalTransactionDTD'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { Router } from 'src/lib/useRouter'
 
-const CaDocTypeDefaults = () => {
+const MetalTransactionDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
 
   const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
-    const {
-      pagination: { _startAt = 0, _pageSize = 50 }
-    } = options
+    const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: CashBankRepository.DocumentTypeDefault.page,
+      extension: FinancialRepository.FIDocTypeDefaults.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${functionId}`
     })
 
@@ -37,15 +35,14 @@ const CaDocTypeDefaults = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     access,
-    paginationParameters,
     invalidate,
-    refetch
+    refetch,
+    paginationParameters
   } = useResourceQuery({
-    endpointId: CashBankRepository.DocumentTypeDefault.page,
-    datasetId: ResourceIds.AdjDocumentTypeDefault,
-
+    endpointId: FinancialRepository.FIDocTypeDefaults.page,
+    datasetId: ResourceIds.FIDocTypeDefaults,
     filter: {
       filterFn: fetchGridData,
       default: { functionId }
@@ -55,52 +52,59 @@ const CaDocTypeDefaults = () => {
   const columns = [
     {
       field: 'dtName',
-      headerName: _labels.doctype,
+      headerName: labels.doctype,
       flex: 1
     },
-
     {
       field: 'plantName',
-      headerName: _labels.plant,
+      headerName: labels.plant,
       flex: 1
     },
     {
-      field: 'cashAccountName',
-      headerName: _labels.cashAccountName,
+      field: 'siteRef',
+      headerName: labels.siteRef,
+      flex: 1
+    },
+    {
+      field: 'siteName',
+      headerName: labels.site,
       flex: 1
     }
   ]
 
-  const add = () => {
-    openForm()
+  const edit = obj => {
+    openForm(obj)
   }
 
-  const edit = obj => {
-    openForm(obj?.dtId)
+  function openForm(record) {
+    stack({
+      Component: MetalTransactionDTDForm,
+      props: {
+        labels: labels,
+        recordId: record?.dtId,
+        maxAccess: access,
+        functionId
+      },
+      width: 600,
+      height: 380,
+      title:
+        functionId == SystemFunction.MetalReceiptVoucher
+          ? labels.metalTransactionReceipt
+          : labels.metalTransactionPayment
+    })
+  }
+
+  const add = async () => {
+    openForm()
   }
 
   const del = async obj => {
     await postRequest({
-      extension: CashBankRepository.DocumentTypeDefault.del,
+      extension: FinancialRepository.FIDocTypeDefaults.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
-  }
-
-  function openForm(dtId) {
-    stack({
-      Component: AdjDocTypeDefaultsForm,
-      props: {
-        labels: _labels,
-        functionId,
-        recordId: dtId,
-        maxAccess: access
-      },
-      width: 500,
-      height: 360,
-      title: _labels.doctypeDefault
-    })
   }
 
   return (
@@ -127,4 +131,4 @@ const CaDocTypeDefaults = () => {
   )
 }
 
-export default CaDocTypeDefaults
+export default MetalTransactionDTD
