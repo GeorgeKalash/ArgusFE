@@ -11,11 +11,12 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 
-export default function RoutingTab({ labels, maxAccess, recordId, refetchRouting, setRefetchRouting }) {
+export default function RoutingTab({ labels, maxAccess, store, refetchRouting, setRefetchRouting }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const operationStore = useRef([])
   const [allWorkCenters, setWorkCenters] = useState([])
+  const recordId = store?.recordId
   const editMode = !!recordId
 
   const { formik } = useForm({
@@ -268,6 +269,7 @@ export default function RoutingTab({ labels, maxAccess, recordId, refetchRouting
       isInfo={false}
       isCleared={false}
       isSavedClear={false}
+      disabledSubmit={store?.isCancelled || store?.isPosted}
     >
       <VertLayout>
         <Grow>
@@ -281,6 +283,7 @@ export default function RoutingTab({ labels, maxAccess, recordId, refetchRouting
             columns={columns}
             name='routings'
             maxAccess={maxAccess}
+            allowDelete={!store?.isPosted && !store?.isCancelled}
             deleteHideCondition={{ status: [1, 2, 3, 4] }}
             onSelectionChange={(row, update, field) => {
               if (field == 'operationName') fillOperation(row?.workCenterId)

@@ -33,7 +33,7 @@ export default function AddressFilterForm({
     validateOnChange: true,
     onSubmit: async obj => {
       const checkedADD = data?.list?.find(obj => obj.checked)
-      if (!checkedADD.addressId) {
+      if (!checkedADD?.addressId) {
         handleAddressValues({ shipAddress: '', BillAddress: '', address: '' })
         window.close()
 
@@ -41,25 +41,25 @@ export default function AddressFilterForm({
       }
 
       if (shipment || bill || deliveryOrder) {
-        const address = await getAddress(checkedADD.addressId)
+        const address = await getAddress(checkedADD?.addressId)
         if (shipment)
           handleAddressValues({
             shipAddress: address,
-            shipAddressId: checkedADD.addressId,
-            shipToAddressId: checkedADD.addressId
+            shipAddressId: checkedADD?.addressId,
+            shipToAddressId: checkedADD?.addressId
           })
 
         if (bill)
           handleAddressValues({
             billAddress: address,
-            billAddressId: checkedADD.addressId,
-            billToAddressId: checkedADD.addressId
+            billAddressId: checkedADD?.addressId,
+            billToAddressId: checkedADD?.addressId
           })
 
         if (deliveryOrder) {
           handleAddressValues({
             address: address,
-            addressId: checkedADD.addressId
+            addressId: checkedADD?.addressId
           })
         }
       }
@@ -232,7 +232,6 @@ export default function AddressFilterForm({
           <Table
             columns={rowColumns}
             gridData={data}
-            setData={setData}
             rowId={['recordId']}
             isLoading={false}
             pagination={false}

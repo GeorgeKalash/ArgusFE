@@ -15,9 +15,10 @@ import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function SizesTab({ labels, maxAccess, recordId }) {
+export default function SizesTab({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const recordId = store?.recordId
   const editMode = !!recordId
 
   const { formik } = useForm({
@@ -40,18 +41,33 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
     validationSchema: yup.object({
       jobItemSizes: yup.array().of(
         yup.object({
-          sizeRef: yup.string().required(),
-          sizeName: yup.string().required()
+          sizeRef: yup.string().test(function (value) {
+            if (this.options.from[1]?.value?.jobItemSizes?.length === 1) {
+              return true
+            }
+
+            return !!value
+          }),
+          sizeName: yup.string().test(function (value) {
+            if (this.options.from[1]?.value?.jobItemSizes?.length === 1) {
+              return true
+            }
+
+            return !!value
+          })
         })
       )
     }),
     onSubmit: async obj => {
-      const modifiedItems = obj.jobItemSizes.map(details => {
-        return {
-          ...details,
-          jobId: recordId
-        }
-      })
+      const modifiedItems = obj.jobItemSizes
+        .map(details => {
+          return {
+            ...details,
+            jobId: recordId
+          }
+        })
+        .filter(item => item.sizeRef)
+
       await postRequest({
         extension: ManufacturingRepository.JobItemSize.set2,
         record: JSON.stringify({ jobId: recordId, jobItemSizes: modifiedItems })
@@ -80,7 +96,7 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
       props: {
         endpointId: InventoryRepository.ItemSizes.snapshot,
         displayField: 'reference',
-        valueField: 'recordId',
+        valueField: 'reference',
         minChars: 2,
         mapping: [
           { from: 'recordId', to: 'sizeId' },
@@ -113,25 +129,37 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
       component: 'numberfield',
       label: labels.expectedPcs,
       name: 'expectedPcs',
-      defaultValue: 0
+      defaultValue: 0,
+      props: {
+        maxLength: 6
+      }
     },
     {
       component: 'numberfield',
       label: labels.expectedQty,
       name: 'expectedQty',
-      defaultValue: 0
+      defaultValue: 0,
+      props: {
+        maxLength: 6
+      }
     },
     {
       component: 'numberfield',
       label: labels.pcs,
       name: 'pcs',
-      defaultValue: 0
+      defaultValue: 0,
+      props: {
+        maxLength: 6
+      }
     },
     {
       component: 'numberfield',
       label: labels.qty,
       name: 'qty',
-      defaultValue: 0
+      defaultValue: 0,
+      props: {
+        maxLength: 6
+      }
     }
   ]
 
@@ -174,6 +202,7 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
       isInfo={false}
       isSavedClear={false}
       isCleared={false}
+      disabledSubmit={store?.isCancelled || store?.isPosted}
     >
       <VertLayout>
         <Grow>
@@ -184,6 +213,7 @@ export default function SizesTab({ labels, maxAccess, recordId }) {
             columns={columns}
             name='jobItemSizes'
             maxAccess={maxAccess}
+            allowDelete={!store?.isPosted && !store?.isCancelled}
           />
         </Grow>
         <Fixed>

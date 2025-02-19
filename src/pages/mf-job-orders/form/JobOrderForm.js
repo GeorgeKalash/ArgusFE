@@ -31,13 +31,14 @@ import SerialsLots from './SerialsLots'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import Samples from './Samples'
 
-export default function JobOrderForm({ labels, maxAccess: access, setStore, recordId, setRefetchRouting }) {
+export default function JobOrderForm({ labels, maxAccess: access, setStore, store, setRefetchRouting }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
   const currentItem = useRef({ itemId: '', sku: '', itemName: '' })
   const [plStore, setPlStore] = useState([])
+  const recordId = store?.recordId
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrder,
@@ -54,6 +55,8 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
     designId: null,
     workCenterId: null,
     itemId: null,
+    sku: null,
+    itemName: null,
     clientId: null,
     routingId: null,
     routingSeqNo: null,
@@ -127,11 +130,13 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
       invalidate()
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
       toast.success(actionMessage)
-      setStore(res?.recordId)
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: res?.recordId
+      }))
       await refetchForm(res.recordId)
     }
   })
-  console.log('check values ', formik.values)
   const editMode = !!formik.values.recordId
   const isCancelled = formik.values.status == -1
   const isReleased = formik.values.status == 4
@@ -251,6 +256,10 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
     toast.success(platformLabels.Cancelled)
     invalidate()
     await refetchForm(res.recordId)
+    setStore(prevStore => ({
+      ...prevStore,
+      isCancelled: true
+    }))
   }
   async function onPost() {
     const res = await postRequest({
@@ -264,6 +273,10 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
     toast.success(platformLabels.Post)
     invalidate()
     await refetchForm(res.recordId)
+    setStore(prevStore => ({
+      ...prevStore,
+      isPosted: true
+    }))
   }
   async function onWorkFlowClick() {
     stack({
@@ -325,12 +338,20 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
       startingDT: formatDateFromApi(res?.record?.startingDT),
       deliveryDate: formatDateFromApi(res?.record?.deliveryDate)
     })
+    currentItem.current = { itemId: res?.record?.itemId, sku: res?.record?.sku, itemName: res?.record?.itemName }
+    setStore(prevStore => ({
+      ...prevStore,
+      recordId: res?.record.recordId,
+      isPosted: res?.record.status == 3,
+      isCancelled: res?.record.status == -1
+    }))
   }
   async function fillItemInfo(values) {
     if (!values?.recordId) {
       currentItem.current = { itemId: null, sku: null, itemName: null }
       formik.setFieldValue('itemsPL', null)
       formik.setFieldValue('itemWeight', null)
+      formik.setFieldValue('itemCategoryId', null)
       formik.setFieldValue('itemFromDesign', false)
 
       return
@@ -571,7 +592,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                         onChange={async (event, newValue) => {
                           await fillItemInfo(newValue)
                         }}
-                        errorCheck={'sku'}
+                        errorCheck={'itemId'}
                         maxAccess={maxAccess}
                       />
                     </Grid>
@@ -638,7 +659,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                         errorCheck={'designId'}
                         maxAccess={maxAccess}
                         displayFieldWidth={2}
-                        readOnly={editMode}
+                        readOnly={isCancelled || isReleased || isPosted}
                         onChange={async (event, newValue) => {
                           await fillDesignInfo(newValue)
                           await updateWC(newValue?.routingId)
@@ -775,7 +796,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
                 </Grid>
               </Grid>
             </Grid>
-            <Grid container xs={4} sx={{ pl: 3 }}>
+            <Grid container spacing={2} xs={4} sx={{ pl: 3 }}>
               <Grid item>
                 <ImageUpload
                   ref={imageUploadRef}
@@ -825,7 +846,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, reco
               <Grid item xs={12}>
                 <ResourceComboBox
                   endpointId={InventoryRepository.Category.qry}
-                  parameters='_pagesize=30&_startAt=0&_name='
+                  parameters='_pagesize=1000&_startAt=0&_name='
                   name='itemCategoryId'
                   label={labels.itemCategory}
                   readOnly

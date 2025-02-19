@@ -14,16 +14,16 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function OverheadTab({ labels, maxAccess, recordId }) {
+export default function OverheadTab({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const recordId = store?.recordId
   const editMode = !!recordId
 
   const { formik } = useForm({
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
-      jobId: recordId,
       items: [
         {
           id: 1,
@@ -39,20 +39,56 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
     validationSchema: yup.object({
       items: yup.array().of(
         yup.object({
-          overheadRef: yup.string().required(),
-          overheadName: yup.string().required(),
-          units: yup.number().min(1)
+          overheadRef: yup.string().test(function (value) {
+            const isAnyFieldFilled = this.parent.units
+            if (this.options.from[1]?.value?.items?.length === 1) {
+              if (isAnyFieldFilled && isAnyFieldFilled != 0) {
+                return !!value
+              }
+
+              return true
+            }
+
+            return !!value
+          }),
+          overheadName: yup.string().test(function (value) {
+            const isAnyFieldFilled = this.parent.units
+            if (this.options.from[1]?.value?.items?.length === 1) {
+              if (isAnyFieldFilled && isAnyFieldFilled != 0) {
+                return !!value
+              }
+
+              return true
+            }
+
+            return !!value
+          }),
+          units: yup.string().test('check-value', 'Units must be at least 1', function (value) {
+            const isOverheadFilled = !!this.parent.overheadRef
+            if (isOverheadFilled) {
+              const numericValue = Number(value)
+
+              if (!value || isNaN(numericValue) || numericValue < 1) {
+                return false
+              }
+            }
+
+            return true
+          })
         })
       )
     }),
     onSubmit: async obj => {
-      const modifiedItems = obj?.items.map((details, index) => {
-        return {
-          ...details,
-          seqNo: index + 1,
-          jobId: recordId
-        }
-      })
+      const modifiedItems = obj?.items
+        .map((details, index) => {
+          return {
+            ...details,
+            seqNo: index + 1,
+            jobId: recordId
+          }
+        })
+        .filter(item => item.overheadRef || item.units)
+
       const payload = { jobId: recordId, items: modifiedItems }
       await postRequest({
         extension: ManufacturingRepository.JobOverhead.set2,
@@ -76,7 +112,7 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
       props: {
         endpointId: ManufacturingRepository.Overhead.snapshot,
         displayField: 'reference',
-        valueField: 'recordId',
+        valueField: 'reference',
         mapping: [
           { from: 'recordId', to: 'overheadId' },
           { from: 'reference', to: 'overheadRef' },
@@ -139,7 +175,8 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
     {
       key: 'GenerateJob',
       condition: true,
-      onClick: generateOVH
+      onClick: generateOVH,
+      disabled: store?.isPosted || store?.isCancelled
     }
   ]
 
@@ -149,7 +186,6 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
       record: JSON.stringify({ jobId: recordId })
     })
     toast.success(platformLabels.Generated)
-    await fetchGridData()
   }
 
   async function fetchGridData() {
@@ -170,10 +206,7 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
           )
         : [{ id: 1 }]
 
-    formik.setValues({
-      jobId: recordId,
-      items: updateItemsList
-    })
+    formik.setFieldValue('items', updateItemsList)
   }
 
   useEffect(() => {
@@ -191,19 +224,18 @@ export default function OverheadTab({ labels, maxAccess, recordId }) {
       isInfo={false}
       isSavedClear={false}
       actions={actions}
+      disabledSubmit={store?.isCancelled || store?.isPosted}
     >
       <VertLayout>
         <Grow>
           <DataGrid
-            onChange={(value, action) => {
-              formik.setFieldValue('items', value)
-              action === 'delete'
-            }}
+            onChange={value => formik.setFieldValue('items', value)}
             value={formik.values.items}
             error={formik.errors.items}
             columns={columns}
             name='items'
             maxAccess={maxAccess}
+            allowDelete={!store?.isPosted && !store?.isCancelled}
           />
         </Grow>
         <Fixed>
