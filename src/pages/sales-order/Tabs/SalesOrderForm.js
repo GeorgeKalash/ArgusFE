@@ -459,6 +459,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       label: labels.unitPrice,
       name: 'unitPrice',
       updateOn: 'blur',
+      props: {
+        decimalScale: 5
+      },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
       }
