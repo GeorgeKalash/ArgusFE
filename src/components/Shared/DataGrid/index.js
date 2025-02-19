@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton } from '@mui/material'
 import components from './components'
@@ -33,6 +34,8 @@ export function DataGrid({
   const isDup = useRef(null)
 
   const { platformLabels } = useContext(ControlContext)
+  const { systemChecks } = useContext(ControlContext)
+  const viewDecimals = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
 
   const { stack } = useWindow()
 
@@ -414,6 +417,13 @@ export function DataGrid({
       process(params, oldRow, setData)
     }
 
+    const formatNumber = value => {
+      return !value ? '' : parseFloat(value).toString()
+    }
+
+    const formattedValue =
+      viewDecimals && column.colDef.component === 'numberfield' ? formatNumber(params.value) : params.value
+
     return (
       <Box
         sx={{
@@ -428,7 +438,7 @@ export function DataGrid({
             'center'
         }}
       >
-        <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
+        <Component {...params} value={formattedValue} column={column.colDef} updateRow={updateRow} update={update} />
       </Box>
     )
   }
