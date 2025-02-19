@@ -267,5 +267,11 @@ export const InventoryRepository = {
   },
   SFSKU: {
     snapshot: service + 'snapshotSF'
+  },
+  Collections: {
+    get: service + 'getCOL',
+    page: service + 'pageCOL',
+    del: service + 'delCOL',
+    set: service + 'setCOL',
   }
 }
