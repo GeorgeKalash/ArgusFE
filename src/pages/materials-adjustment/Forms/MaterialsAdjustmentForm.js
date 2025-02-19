@@ -350,6 +350,26 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
+                    endpointId={SystemRepository.Plant.qry}
+                    name='plantId'
+                    label={labels.plant}
+                    readOnly={isPosted}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('plantId', newValue?.recordId)
+                    }}
+                    error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
                     readOnly={isPosted}
@@ -380,26 +400,6 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('description', '')}
                     error={formik.touched.description && Boolean(formik.errors.description)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Plant.qry}
-                    name='plantId'
-                    label={labels.plant}
-                    readOnly={isPosted}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik.values}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('plantId', newValue?.recordId)
-                    }}
-                    error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                   />
                 </Grid>
               </Grid>
