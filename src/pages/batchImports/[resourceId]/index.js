@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import Table from 'src/components/Shared/Table'
@@ -17,6 +16,7 @@ import { ThreadProgress } from 'src/components/Shared/ThreadProgress'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import { Router } from 'src/lib/useRouter'
 
 const transform = array => {
   return {
@@ -128,7 +128,7 @@ const formatDateForImport = dateString => {
 const BatchImports = () => {
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const router = useRouter()
+  const { resourceId } = Router()
 
   const [parsedFileContent, setParsedFileContent] = useState([])
   const [file, setFile] = useState(null)
@@ -136,7 +136,6 @@ const BatchImports = () => {
 
   const [importsConfiguration, setImportsConfiguration] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { resourceId } = router.query
   const { platformLabels } = useContext(ControlContext)
 
   const { access } = useResourceQuery({

@@ -38,8 +38,6 @@ export function DataGrid({
 
   const [ready, setReady] = useState(false)
 
-  const [checkAll, setCheckedAll] = useState({})
-
   const skip = allowDelete ? 1 : 0
 
   function checkDuplicates(field, data) {
@@ -190,15 +188,6 @@ export function DataGrid({
       setReady(false)
     }
   }, [ready, value])
-
-  useEffect(() => {
-    if (gridApiRef.current && rowSelectionModel) {
-      const rowNode = gridApiRef.current.getRowNode(rowSelectionModel)
-      if (rowNode) {
-        rowNode.setSelected(true)
-      }
-    }
-  }, [rowSelectionModel])
 
   useEffect(() => {
     if (gridApiRef.current && rowSelectionModel) {
@@ -525,25 +514,6 @@ export function DataGrid({
     }
   }
 
-  const selectAll = (name, params, e) => {
-    const gridApi = params.api
-    const allNodes = []
-    gridApi.forEachNode(node => allNodes.push(node))
-
-    allNodes.forEach(node => {
-      node.setDataValue(name, e.target.checked)
-    })
-
-    const data = allNodes.map(rowNode => rowNode.data)
-
-    setCheckedAll(prev => ({
-      ...prev,
-      [name]: e.target.checked
-    }))
-
-    onChange(data)
-  }
-
   const ActionCellRenderer = params => {
     return (
       <Box
@@ -569,16 +539,24 @@ export function DataGrid({
       cellEditor: CustomCellEditor,
       ...(column?.checkAll?.visible && {
         headerComponent: params => {
+          const selectAll = e => {
+            if (column?.checkAll?.onChange) {
+              column?.checkAll?.onChange({ checked: e.target?.checked })
+            }
+          }
+
           return (
             <Grid container justifyContent='center' alignItems='center'>
               <Checkbox
-                checked={checkAll?.[column.name]}
-                onChange={e => selectAll(column.name, params, e)}
+                checked={column?.checkAll?.value}
+                onChange={e => {
+                  selectAll(e)
+                }}
                 sx={{
                   width: '20%',
                   height: '20%'
                 }}
-                disabled={column.checkAll?.disabled || false}
+                disabled={column.checkAll?.disabled}
               />
             </Grid>
           )
@@ -639,11 +617,12 @@ export function DataGrid({
   useEffect(() => {
     function handleBlur(event) {
       if (
-        gridContainerRef.current &&
-        !gridContainerRef.current.contains(event.target) &&
-        gridApiRef.current?.getEditingCells()?.length > 0 &&
-        !event.target.classList.contains('MuiBox-root') &&
-        !event.target.classList.contains('MuiAutocomplete-option')
+        (gridContainerRef.current &&
+          !gridContainerRef.current.contains(event.target) &&
+          gridApiRef.current?.getEditingCells()?.length > 0 &&
+          !event.target.classList.contains('MuiBox-root') &&
+          !event.target.classList.contains('MuiAutocomplete-option')) ||
+        event.target.closest('.ag-header-row')
       ) {
         gridApiRef.current?.stopEditing()
       } else {

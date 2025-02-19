@@ -155,11 +155,6 @@ export default function FormShell({
                 form.handleSubmit()
               }
               break
-            case 'onORD':
-              action.onClick = () => {
-                form.handleSubmit()
-              }
-              break
             case 'onClickGL':
               action.onClick = () => {
                 stack({
