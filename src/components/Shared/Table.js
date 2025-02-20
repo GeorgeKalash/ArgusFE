@@ -38,6 +38,7 @@ const Table = ({
   checkboxFlex = '',
   handleCheckboxChange = '',
   showSelectAll = true,
+  onSelectionChange,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -512,9 +513,14 @@ const Table = ({
     const [tooltipOpen, setTooltipOpen] = useState(false)
 
     const handleClick = event => {
+      if (onSelectionChange) {
+        onSelectionChange(params.data)
+      }
+
       const range = document.createRange()
       range.selectNodeContents(event.currentTarget)
       const selection = window.getSelection()
+      console.log(params.data)
       selection.removeAllRanges()
       selection.addRange(range)
     }
