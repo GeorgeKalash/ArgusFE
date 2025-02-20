@@ -88,7 +88,6 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
             ...item,
             id: index + 1
           }))
-          s
           formik.setValues({ scrap: items })
         }
       })

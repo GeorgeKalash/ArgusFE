@@ -81,11 +81,9 @@ export default function TRXForm({ labels, access, setStore, store }) {
           }))
           formik.setFieldValue('recordId', res.recordId)
           fetchData(res.recordId)
-
-          toast.success(platformLabels.Added)
-        } else {
-          toast.success(platformLabels.Edited)
         }
+        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+        toast.success(actionMessage)
         invalidate()
       })
     }

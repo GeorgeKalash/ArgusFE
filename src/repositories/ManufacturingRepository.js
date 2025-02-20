@@ -1,8 +1,8 @@
 const service = 'MF.asmx/'
 
 export const ManufacturingRepository = {
-  qryDRM2: service + 'qryDRM2',
-  qryIMI: service + 'qryIMI',
+  DesignRawMaterial: { qry2: service + 'qryDRM2' },
+  IssueOfMaterialsItems: { qry: service + 'qryIMI' },
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
     page: service + 'pageLBG',

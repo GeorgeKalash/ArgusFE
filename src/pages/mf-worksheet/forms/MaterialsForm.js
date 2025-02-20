@@ -31,7 +31,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
   const resourceId = ResourceIds.Worksheet
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: functionId,
+    functionId,
     access,
     enabled: !recordId
   })
@@ -73,7 +73,6 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
           itemName: '',
           unitCost: 0.0,
           trackBy: 0,
-          placeHolder: true,
           qty: 0.0,
           pcs: 0
         }
@@ -93,11 +92,10 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         record: JSON.stringify(obj)
       }).then(res => {
         if (!obj.recordId) {
-          toast.success(platformLabels.Added)
           formik.setFieldValue('recordId', res.recordId)
-        } else {
-          toast.success(platformLabels.Edited)
         }
+        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+        toast.success(actionMessage)
         invalidate()
       })
     }
@@ -115,14 +113,9 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
       const items =
         recordId &&
         (await getRequest({
-          extension: ManufacturingRepository.qryIMI,
+          extension: ManufacturingRepository.IssueOfMaterialsItems.qry,
           parameters: `_imaId=${recordId}`
         }))
-
-      const res2 = await getRequest({
-        extension: ManufacturingRepository.WorkCenter.get,
-        parameters: `_recordId=${values?.workCenterId}`
-      })
 
       if (values) {
         formik.setValues({
@@ -136,8 +129,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
             laborName: values.laborName,
             wipQty: values.wipQty,
             wipPcs: values.wipPcs,
-            jobId: values.jobId,
-            siteId: res2?.record?.siteId
+            jobId: values.jobId
           },
           items:
             items?.list?.map(({ ...item }, index) => ({
@@ -152,13 +144,13 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
   const getValueFromDefaultsData = key => {
     const defaultValue = defaultsData.list.find(item => item.key === key)
 
-    return defaultValue ? defaultValue.value : null
+    return defaultValue?.value
   }
 
   async function fillGrid(type, operationId) {
     if (type == 1) {
       const items = await getRequest({
-        extension: ManufacturingRepository.qryDRM2,
+        extension: ManufacturingRepository.DesignRawMaterial.qry2,
         parameters: `_jobId=${values.jobId}&_operationId=${operationId}&_pcs=${values.wipPcs}`
       })
 

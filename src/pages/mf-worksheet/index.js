@@ -43,7 +43,7 @@ const MfWorksheet = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.Worksheet.snapshot,
+    endpointId: ManufacturingRepository.Worksheet.page,
     datasetId: ResourceIds.Worksheet,
     filter: {
       filterFn: fetchWithFilter
@@ -97,17 +97,20 @@ const MfWorksheet = () => {
     {
       field: 'pcs',
       headerName: _labels.prices,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'qty',
       headerName: _labels.firstQty,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'eopQty',
       headerName: _labels.endQty,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'pgItemName',
@@ -133,8 +136,7 @@ const MfWorksheet = () => {
       props: {
         labels: _labels,
         recordId: obj?.recordId,
-        maxAccess: access,
-        invalidate
+        maxAccess: access
       },
       width: 1200,
       height: 780,

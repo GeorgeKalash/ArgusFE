@@ -439,7 +439,6 @@ const Table = ({
     const gridApi = params?.api
     const selectedNodes = gridApi?.getSelectedNodes()
     const selectedData = selectedNodes?.map(node => node.data)
-    console.log(selectedData, 'selectedData')
     setData(selectedData)
   }
 
