@@ -29,8 +29,6 @@ const MenuProvider = ({ children }) => {
     })
   }
 
-  console.log('lastOpenedPage', lastOpenedPage)
-
   const buildMenu = (folders, commandLines, parentId = 0) => {
     const menu = []
 
