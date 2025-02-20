@@ -334,7 +334,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.procurementMethod && formik.errors.procurementMethod}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomTextField
                     name='name'
@@ -347,7 +346,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.name && formik.errors.name}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomTextField
                     name='flName'
@@ -358,7 +356,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onClear={() => formik.setFieldValue('flName', '')}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomTextField
                     name='shortName'
@@ -369,7 +366,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onClear={() => formik.setFieldValue('shortName', '')}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
