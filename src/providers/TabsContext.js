@@ -139,7 +139,7 @@ const TabsProvider = ({ children }) => {
     if (initialLoadDone) {
       const isTabOpen = openTabs.some((activeTab, index) => {
         if (activeTab.route === router.asPath) {
-          // setCurrentTabIndex(index)
+          setCurrentTabIndex(index)
 
           return true
         }
@@ -202,7 +202,7 @@ const TabsProvider = ({ children }) => {
       setOpenTabs(newTabs)
       setInitialLoadDone(true)
     }
-  }, [router.asPath, menu, gear, children, initialLoadDone, reloadOpenedPage])
+  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
 
   return (
     <>
