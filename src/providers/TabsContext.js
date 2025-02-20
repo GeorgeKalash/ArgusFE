@@ -202,7 +202,7 @@ const TabsProvider = ({ children }) => {
       setOpenTabs(newTabs)
       setInitialLoadDone(true)
     }
-  }, [router.asPath, menu, gear, children, initialLoadDone, reloadOpenedPage])
+  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
 
   return (
     <>
