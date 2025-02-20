@@ -173,7 +173,7 @@ const TabsProvider = ({ children }) => {
         )
       }
     }
-  }, [children, router.asPath, initialLoadDone, lastOpenedPage, menu, gear])
+  }, [router.asPath])
 
   useEffect(() => {
     if (router.asPath === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')

@@ -31,7 +31,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
 
   const { changeDT, maxAccess } = useRefBehavior({
     access: access,
-    readOnlyOnEditMode: store.recordId,
+    readOnlyOnEditMode: false,
     name: 'reference'
   })
 
@@ -75,23 +75,14 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
       })
 
       if (!values.recordId) {
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: res.recordId
-        }))
         formik.setFieldValue('recordId', res.recordId)
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
       await getData(res.recordId)
-      setStore(prevStore => ({
-        ...prevStore,
-        record: formik.values,
-        recordId: formik.values.recordId || res.recordId
-      }))
 
       invalidate()
     }
-    })
+  })
 
   useEffect(() => {
     ;(async function () {
@@ -110,10 +101,11 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
         ...res.record,
         acquisitionDate: formatDateFromApi(res?.record?.acquisitionDate)
       })
-      
+
       setStore(prevStore => ({
         ...prevStore,
-        record: res.record
+        record: res.record,
+        recordId: res.record.recordId
       }))
     }
   }
@@ -152,6 +144,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 endpointId={SaleRepository.ClientGroups.qry}
                 name='cgId'
                 readOnly={editMode}
+                maxAccess={maxAccess}
                 required
                 label={labels.cGroup}
                 valueField='recordId'
@@ -171,6 +164,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 label={labels.reference}
                 value={formik.values.reference}
                 maxAccess={maxAccess}
+                maxLength='10'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -183,6 +177,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 value={formik.values.name}
                 required
                 maxAccess={maxAccess}
+                maxLength='70'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
@@ -206,6 +201,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 label={labels.foreignLanguage}
                 value={formik.values.flName}
                 maxAccess={maxAccess}
+                maxLength='70'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('flName', '')}
                 error={formik.touched.flName && Boolean(formik.errors.flName)}
