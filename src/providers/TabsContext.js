@@ -122,16 +122,31 @@ const TabsProvider = ({ children }) => {
 
     if (currentTabIndex === index) {
       const newValue = index === activeTabsLength - 1 ? index - 1 : index + 1
-      setCurrentTabIndex(newValue)
-      router.push(openTabs[newValue].route)
+
+      console.log('newValue', newValue)
+      setCurrentTabIndex(newValue - 1)
+      window.history.replaceState(null, '', openTabs[newValue].route)
     } else if (index < currentTabIndex) {
       setCurrentTabIndex(currentValue => currentValue - 1)
     }
   }
 
   const reopenTab = tabRoute => {
+    console.log('tabRoute', tabRoute)
+    const index = openTabs.findIndex(tab => tab.route === tabRoute)
+
+    console.log(openTabs, tabRoute)
+
     setOpenTabs(openTabs => openTabs.map(tab => (tab.route === tabRoute ? { ...tab, id: uuidv4() } : tab)))
-    router.push(tabRoute)
+
+    setCurrentTabIndex(index)
+
+    if (index === currentTabIndex) {
+      router.push(tabRoute)
+    } else {
+      window.history.replaceState(null, '', tabRoute)
+    }
+
     setReloadOpenedPage([])
   }
 
@@ -139,7 +154,7 @@ const TabsProvider = ({ children }) => {
     if (initialLoadDone) {
       const isTabOpen = openTabs.some((activeTab, index) => {
         if (activeTab.route === router.asPath) {
-          // setCurrentTabIndex(index)
+          //  setCurrentTabIndex(index)
 
           return true
         }
@@ -176,6 +191,8 @@ const TabsProvider = ({ children }) => {
   }, [children, router.asPath, initialLoadDone, lastOpenedPage, menu, gear])
 
   useEffect(() => {
+    console.log(router.asPath, reloadOpenedPage?.path, currentTabIndex, window.history)
+
     if (router.asPath === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
     if (!initialLoadDone && router.asPath && menu.length > 0) {
       const newTabs = [
@@ -202,7 +219,7 @@ const TabsProvider = ({ children }) => {
       setOpenTabs(newTabs)
       setInitialLoadDone(true)
     }
-  }, [router.asPath, menu, gear, children, initialLoadDone, reloadOpenedPage])
+  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
 
   return (
     <>
