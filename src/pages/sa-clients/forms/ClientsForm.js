@@ -31,7 +31,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
 
   const { changeDT, maxAccess } = useRefBehavior({
     access: access,
-    readOnlyOnEditMode: store.recordId,
+    readOnlyOnEditMode: false,
     name: 'reference'
   })
 
@@ -75,23 +75,14 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
       })
 
       if (!values.recordId) {
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: res.recordId
-        }))
         formik.setFieldValue('recordId', res.recordId)
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
       await getData(res.recordId)
-      setStore(prevStore => ({
-        ...prevStore,
-        record: formik.values,
-        recordId: formik.values.recordId || res.recordId
-      }))
 
       invalidate()
     }
-    })
+  })
 
   useEffect(() => {
     ;(async function () {
@@ -110,10 +101,11 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
         ...res.record,
         acquisitionDate: formatDateFromApi(res?.record?.acquisitionDate)
       })
-      
+
       setStore(prevStore => ({
         ...prevStore,
-        record: res.record
+        record: res.record,
+        recordId: res.record.recordId
       }))
     }
   }
@@ -152,6 +144,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 endpointId={SaleRepository.ClientGroups.qry}
                 name='cgId'
                 readOnly={editMode}
+                maxAccess={maxAccess}
                 required
                 label={labels.cGroup}
                 valueField='recordId'
