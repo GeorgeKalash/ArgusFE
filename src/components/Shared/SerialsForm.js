@@ -7,7 +7,7 @@ import ResourceComboBox from './ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
 import { useResourceQuery } from 'src/hooks/resource'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import CustomNumberField from '../Inputs/CustomNumberField'
 import { ResourceLookup } from './ResourceLookup'
@@ -23,6 +23,7 @@ export const SerialsForm = ({ row, values, checkForSiteId, window, updateRow }) 
   const { stack: stackError } = useError()
   const { systemChecks } = useContext(ControlContext)
   const allowNegativeQty = systemChecks.some(check => check.checkId === SystemChecks.ALLOW_INVENTORY_NEGATIVE_QTY)
+  const [jumpToNextLine, setJumpToNextLine] = useState(false)
 
   const { formik } = useForm({
     initialValues: {
@@ -79,6 +80,7 @@ export const SerialsForm = ({ row, values, checkForSiteId, window, updateRow }) 
       component: 'textfield',
       name: 'srlNo',
       label: labels.serialNo,
+      jumpToNextLine: jumpToNextLine,
       updateOn: 'blur',
       onChange: async ({ row: { update, newRow } }) => {
         await checkSerialNo(newRow.srlNo, newRow.id, update)
@@ -102,6 +104,17 @@ export const SerialsForm = ({ row, values, checkForSiteId, window, updateRow }) 
     }
 
     formik.setFieldValue('items', updatedItems)
+  }
+
+
+  useEffect(() => {
+    getSysChecks()
+  }, [systemChecks])
+
+  async function getSysChecks() {
+    const check = systemChecks.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)
+
+    setJumpToNextLine(check?.value)
   }
 
   const checkSerialNo = async (srlNo, id, update) => {
