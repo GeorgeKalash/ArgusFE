@@ -361,5 +361,6 @@ export const ResourceIds = {
   WaxDocTypeDefaults: 42601,
   JobWaxInquiry: 47313,
   PostDraftSerials: 51315,
-  Designer: 48100
+  Designer: 48100,
+  Collections: 41119
 }
