@@ -164,6 +164,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 label={labels.reference}
                 value={formik.values.reference}
                 maxAccess={maxAccess}
+                maxLength='10'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -176,6 +177,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 value={formik.values.name}
                 required
                 maxAccess={maxAccess}
+                maxLength='70'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
@@ -199,6 +201,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 label={labels.foreignLanguage}
                 value={formik.values.flName}
                 maxAccess={maxAccess}
+                maxLength='70'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('flName', '')}
                 error={formik.touched.flName && Boolean(formik.errors.flName)}
