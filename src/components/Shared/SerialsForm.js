@@ -125,7 +125,7 @@ export const SerialsForm = ({ row, values, checkForSiteId, window, updateRow }) 
       } else if (checkForSiteId == true && allowNegativeQty == false) {
         const res = await getRequest({
           extension: InventoryRepository.AvailabilitySerial.get,
-          parameters: `_srlNo=${srlNo}&_siteId=${values.siteId}`
+          parameters: `_srlNo=${srlNo}&_siteId=${formik.values.siteId}`
         })
 
         if (!res.record) {
