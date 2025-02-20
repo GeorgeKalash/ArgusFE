@@ -76,6 +76,7 @@ export default function DesignerForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
+                maxLength='10'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -87,6 +88,7 @@ export default function DesignerForm({ labels, maxAccess, recordId }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
+                maxLength='60'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
