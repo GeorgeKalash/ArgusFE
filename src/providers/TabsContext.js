@@ -139,7 +139,7 @@ const TabsProvider = ({ children }) => {
     if (initialLoadDone) {
       const isTabOpen = openTabs.some((activeTab, index) => {
         if (activeTab.route === router.asPath) {
-          setCurrentTabIndex(index)
+          // setCurrentTabIndex(index)
 
           return true
         }
