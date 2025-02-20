@@ -1401,7 +1401,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 form={formik}
                 required
                 readOnly={isClosed}
-                displayFieldWidth={2}
+                displayFieldWidth={6}
                 valueShow='clientRef'
                 secondValueShow='clientName'
                 maxAccess={maxAccess}
