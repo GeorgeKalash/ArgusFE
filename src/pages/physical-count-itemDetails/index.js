@@ -35,7 +35,7 @@ const PhysicalCountItemDe = () => {
   const [showDefaultQty, setShowDefaultQty] = useState(false)
   const [disableItemDuplicate, setDisableItemDuplicate] = useState(false)
 
-  const { labels: _labels, maxAccess: maxAccess } = useResourceQuery({
+  const { labels: _labels, access } = useResourceQuery({
     datasetId: ResourceIds.IVPhysicalCountItemDetails
   })
 
@@ -49,7 +49,7 @@ const PhysicalCountItemDe = () => {
   }
 
   const { formik } = useForm({
-    maxAccess,
+    access,
     initialValues: {
       stockCountId: null,
       siteId: null,
@@ -508,7 +508,7 @@ const PhysicalCountItemDe = () => {
       isSavedClear={false}
       disabledSubmit={!isSaved}
       actions={actions}
-      maxAccess={maxAccess}
+      maxAccess={access}
       resourceId={ResourceIds.IVPhysicalCountItemDetails}
       filteredItems={filteredItems}
       previewReport={editMode}
@@ -527,7 +527,7 @@ const PhysicalCountItemDe = () => {
                 values={formik.values}
                 required
                 readOnly={formik.values.controllerId}
-                maxAccess={maxAccess}
+                maxAccess={access}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('stockCountId', newValue?.recordId)
                   formik.setFieldValue('siteId', '')
@@ -578,7 +578,7 @@ const PhysicalCountItemDe = () => {
                   }
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
-                maxAccess={maxAccess}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={3}>
@@ -597,7 +597,7 @@ const PhysicalCountItemDe = () => {
                   fetchGridData(newValue?.controllerId)
                 }}
                 error={formik.touched.controllerId && Boolean(formik.errors.controllerId)}
-                maxAccess={maxAccess}
+                maxAccess={access}
               />
             </Grid>
           </Grid>
@@ -618,7 +618,7 @@ const PhysicalCountItemDe = () => {
               formik.values?.EndofSiteStatus != 3 &&
               !!(!formik?.values?.rows?.length || formik.values?.rows?.[formik.values?.rows?.length - 1]?.sku)
             }
-            maxAccess={maxAccess}
+            maxAccess={access}
             name='rows'
           />
         </Grow>
@@ -631,7 +631,7 @@ const PhysicalCountItemDe = () => {
                 value={getFormattedNumber(totalQty.toFixed(2))}
                 readOnly={true}
                 hidden={!formik.values.controllerId}
-                maxAccess={maxAccess}
+                maxAccess={access}
                 numberField={true}
               />
             </Grid>
@@ -642,7 +642,7 @@ const PhysicalCountItemDe = () => {
                 value={getFormattedNumber(totalWeight.toFixed(2))}
                 readOnly={true}
                 hidden={!formik.values.controllerId}
-                maxAccess={maxAccess}
+                maxAccess={access}
                 numberField={true}
               />
             </Grid>
