@@ -108,6 +108,7 @@ const TabsProvider = ({ children }) => {
     setCurrentTabIndex(isHomeTabSelected ? 0 : newOpenTabs.length - 1)
   }
 
+  console.log('tabRoute', openTabs)
   const closeTab = tabRoute => {
     const index = openTabs.findIndex(tab => tab.route === tabRoute)
     const activeTabsLength = openTabs.length
@@ -143,8 +144,10 @@ const TabsProvider = ({ children }) => {
 
   useEffect(() => {
     if (initialLoadDone) {
+      console.log(window.history.state)
+
       const isTabOpen = openTabs.some((activeTab, index) => {
-        if (activeTab.route === router.asPath) {
+        if (activeTab.route === router.asPath || !window?.history?.state?.url) {
           setCurrentTabIndex(index)
 
           return true
@@ -152,6 +155,8 @@ const TabsProvider = ({ children }) => {
 
         return false
       })
+
+      console.log(isTabOpen, router.asPath, window.history.state)
 
       if (!isTabOpen) {
         const newValueState = openTabs.length
@@ -170,6 +175,7 @@ const TabsProvider = ({ children }) => {
 
         setCurrentTabIndex(newValueState)
       } else {
+        console.log('isTabOpen', router.asPath)
         setOpenTabs(prevState =>
           prevState.map(tab => {
             if (tab.route === router.asPath) {
@@ -195,8 +201,6 @@ const TabsProvider = ({ children }) => {
           label: 'Home'
         }
       ]
-
-      console.log(router.asPath, window.history.state.as)
 
       if (router.asPath !== '/default/') {
         newTabs.push({
