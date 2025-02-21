@@ -207,6 +207,7 @@ const TabsProvider = ({ children }) => {
             ? lastOpenedPage.name
             : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
         })
+
         // setCurrentTabIndex(1)
       }
 
