@@ -222,5 +222,13 @@ export const SaleRepository = {
     batch: service + 'batchDFS',
     append: service + 'appendDFS',
     del: service + 'delDFS'
+  },
+  SalesQuotations: {
+    page: service + 'pageQTN',
+    qry: service + 'qryQTN',
+    snapshot: service + 'snapshotQTN',
+    get: service + 'getQTN',
+    set2: service + 'set2QTN',
+    del: service + 'delQTN'
   }
 }
