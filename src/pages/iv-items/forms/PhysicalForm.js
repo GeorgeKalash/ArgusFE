@@ -76,66 +76,63 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
     invalidate()
   }
 
-  const fetchAndUpdateValues = useCallback(
-    async (dirtyField, newValue) => {
-      const parseOrZero = val => parseFloat(val) || 0
+  const fetchAndUpdateValues = useCallback(async (dirtyField, newValue) => {
+    const parseOrZero = val => parseFloat(val) || 0
 
-      const parameters = {
-        _dirtyField: dirtyField,
-        _shape: parseOrZero(formik.values.shape),
-        _length: parseOrZero(formik.values.length),
-        _width: parseOrZero(formik.values.width),
-        _depth: parseOrZero(formik.values.depth),
-        _diameter: parseOrZero(formik.values.diameter),
-        _volume: parseOrZero(formik.values.volume),
-        _weight: parseOrZero(formik.values.weight),
-        _density: parseOrZero(formik.values.density)
-      }
+    const parameters = {
+      _dirtyField: dirtyField,
+      _shape: parseOrZero(formik.values.shape),
+      _length: parseOrZero(formik.values.length),
+      _width: parseOrZero(formik.values.width),
+      _depth: parseOrZero(formik.values.depth),
+      _diameter: parseOrZero(formik.values.diameter),
+      _volume: parseOrZero(formik.values.volume),
+      _weight: parseOrZero(formik.values.weight),
+      _density: parseOrZero(formik.values.density)
+    }
 
-      switch (dirtyField) {
-        case 1:
-          parameters._length = parseFloat(newValue) || 0
-          break
-        case 2:
-          parameters._width = parseFloat(newValue) || 0
-          break
-        case 3:
-          parameters._depth = parseFloat(newValue) || 0
-          break
-        case 4:
-          parameters._diameter = parseFloat(newValue) || 0
-          break
-        case 5:
-          parameters._volume = parseFloat(newValue) || 0
-          break
-        case 6:
-          parameters._weight = parseFloat(newValue) || 0
-          break
-        case 7:
-          parameters._density = parseFloat(newValue) || 0
-          break
-        default:
-          break
-      }
+    switch (dirtyField) {
+      case 1:
+        parameters._length = parseFloat(newValue) || 0
+        break
+      case 2:
+        parameters._width = parseFloat(newValue) || 0
+        break
+      case 3:
+        parameters._depth = parseFloat(newValue) || 0
+        break
+      case 4:
+        parameters._diameter = parseFloat(newValue) || 0
+        break
+      case 5:
+        parameters._volume = parseFloat(newValue) || 0
+        break
+      case 6:
+        parameters._weight = parseFloat(newValue) || 0
+        break
+      case 7:
+        parameters._density = parseFloat(newValue) || 0
+        break
+      default:
+        break
+    }
 
-      const calc = await getRequest({
-        extension: InventoryRepository.Physical.calc,
-        parameters: new URLSearchParams(parameters).toString()
-      })
+    const calc = await getRequest({
+      extension: InventoryRepository.Physical.calc,
+      parameters: new URLSearchParams(parameters).toString()
+    })
 
-      formik.setValues(prevValues => ({
-        ...prevValues,
-        length: calc.record.length || prevValues.length,
-        width: calc.record.width || prevValues.width,
-        depth: calc.record.depth || prevValues.depth,
-        diameter: calc.record.diameter || prevValues.diameter,
-        volume: calc.record.volume || prevValues.volume,
-        weight: calc.record.weight || prevValues.weight,
-        density: calc.record.density || prevValues.density
-      }))
-    },
-    [formik.values, getRequest]
-  )
+    formik.setValues(prevValues => ({
+      ...prevValues,
+      length: calc.record.length || prevValues.length,
+      width: calc.record.width || prevValues.width,
+      depth: calc.record.depth || prevValues.depth,
+      diameter: calc.record.diameter || prevValues.diameter,
+      volume: calc.record.volume || prevValues.volume,
+      weight: calc.record.weight || prevValues.weight,
+      density: calc.record.density || prevValues.density
+    }))
+  }, [])
 
   useEffect(() => {
     const fetchRecord = async () => {
