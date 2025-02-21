@@ -79,7 +79,8 @@ const VerticalNavItems = props => {
                   menu,
                   node.path.replace(/\/$/, '') + '/' === router.asPath &&
                     node.path.replace(/\/$/, '') + '/' !== window?.history?.state?.as
-                )
+                ) ||
+                window?.history?.state?.as === node.path.replace(/\/$/, '') + '/'
               ) {
                 setReloadOpenedPage(node)
               } else {
