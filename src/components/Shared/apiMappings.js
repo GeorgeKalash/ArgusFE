@@ -903,5 +903,32 @@ export const apiMappings = {
     valueField: 'recordId',
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
+  },
+  [ResourceIds.Routings]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.Routing.qry,
+    parameters: `_params=`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.ProductionClass]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.ProductionClass.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.ProductionStandards]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.ProductionStandard.qry,
+    valueField: 'recordId',
+    displayField: 'reference'
   }
 }
