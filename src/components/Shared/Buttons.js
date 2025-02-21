@@ -314,12 +314,9 @@ export const getButtons = platformLabels => [
   {
     key: 'generate',
     label: platformLabels.Generate,
-    condition: 'isGenerated',
-    onClick: 'onGenerate',
-    disabled: '!editMode',
     color: 'black',
     image: 'generate.png',
-    main: true
+    main: false
   },
   {
     key: 'Audit',
