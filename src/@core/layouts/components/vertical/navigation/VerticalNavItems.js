@@ -83,7 +83,6 @@ const VerticalNavItems = props => {
               ) {
                 setReloadOpenedPage(node)
               } else {
-                console.log(node.path)
                 router.push(node.path)
               }
               setLastOpenedPage(node)

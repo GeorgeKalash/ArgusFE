@@ -153,10 +153,9 @@ const TabsProvider = ({ children }) => {
         return false
       })
 
-      console.log('isTabOpen', isTabOpen)
-
       if (!isTabOpen) {
         const newValueState = openTabs.length
+
         setOpenTabs(prevState => [
           ...prevState,
           {
@@ -168,6 +167,7 @@ const TabsProvider = ({ children }) => {
               : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
           }
         ])
+
         setCurrentTabIndex(newValueState)
       } else {
         setOpenTabs(prevState =>
