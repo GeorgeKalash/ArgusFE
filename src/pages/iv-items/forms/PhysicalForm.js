@@ -1,10 +1,9 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useCallback } from 'react'
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useEffect } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
@@ -62,65 +61,60 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
         })
     }),
     onSubmit: async values => {
-      await postPhysical(values)
+      await submitPhysical(values)
     }
   })
 
-  const postPhysical = async obj => {
-    const isNewRecord = !obj?.itemId
-
-    const res = await postRequest({
+  const submitPhysical = async values => {
+    const isNewRecord = !values?.itemId
+    await postRequest({
       extension: InventoryRepository.Physical.set,
-      record: JSON.stringify(obj)
+      record: JSON.stringify(values)
     })
 
-    if (isNewRecord) {
-      toast.success(platformLabels.Added)
-    } else {
-      toast.success(platformLabels.Edited)
-    }
+    toast.success(isNewRecord ? platformLabels.Added : platformLabels.Edited)
     invalidate()
   }
 
-  const fetchAndSetValues = async (dirtyField, newValue) => {
+  const fetchAndUpdateValues = useCallback(async (dirtyField, newValue) => {
+    const parseOrZero = val => parseFloat(val) || 0
+
     const parameters = {
       _dirtyField: dirtyField,
-      _shape: parseFloat(formik.values.shape) || 0,
-      _length: parseFloat(formik.values.length) || 0,
-      _width: parseFloat(formik.values.width) || 0,
-      _depth: parseFloat(formik.values.depth) || 0,
-      _diameter: parseFloat(formik.values.diameter) || 0,
-      _volume: parseFloat(formik.values.volume) || 0,
-      _weight: parseFloat(formik.values.weight) || 0,
-      _density: parseFloat(formik.values.density) || 0
+      _shape: parseOrZero(formik.values.shape),
+      _length: parseOrZero(formik.values.length),
+      _width: parseOrZero(formik.values.width),
+      _depth: parseOrZero(formik.values.depth),
+      _diameter: parseOrZero(formik.values.diameter),
+      _volume: parseOrZero(formik.values.volume),
+      _weight: parseOrZero(formik.values.weight),
+      _density: parseOrZero(formik.values.density)
     }
 
-    if (dirtyField) {
-      switch (dirtyField) {
-        case 1:
-          parameters._length = parseFloat(newValue) || 0
-          break
-        case 2:
-          parameters._width = parseFloat(newValue) || 0
-          break
-        case 3:
-          parameters._depth = parseFloat(newValue) || 0
-          break
-        case 4:
-          parameters._diameter = parseFloat(newValue) || 0
-          break
-        case 5:
-          parameters._volume = parseFloat(newValue) || 0
-          break
-        case 6:
-          parameters._weight = parseFloat(newValue) || 0
-          break
-        case 7:
-          parameters._density = parseFloat(newValue) || 0
-          break
-        default:
-          break
-      }
+    switch (dirtyField) {
+      case 1:
+        parameters._length = parseFloat(newValue) || 0
+        break
+      case 2:
+        parameters._width = parseFloat(newValue) || 0
+        break
+      case 3:
+        parameters._depth = parseFloat(newValue) || 0
+        break
+      case 4:
+        parameters._diameter = parseFloat(newValue) || 0
+        break
+      case 5:
+        parameters._volume = parseFloat(newValue) || 0
+        break
+      case 6:
+        parameters._weight = parseFloat(newValue) || 0
+        break
+      case 7:
+        parameters._density = parseFloat(newValue) || 0
+        break
+      default:
+        break
     }
 
     const calc = await getRequest({
@@ -138,35 +132,37 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       weight: calc.record.weight || prevValues.weight,
       density: calc.record.density || prevValues.density
     }))
-  }
+  }, [])
 
   useEffect(() => {
-    ;(async function () {
+    const fetchRecord = async () => {
       if (recordId) {
         const res = await getRequest({
           extension: InventoryRepository.Physical.get,
           parameters: `_itemId=${recordId}`
         })
-
         if (res.record) {
           formik.setValues({ ...res.record, isMetal: !!res.record.isMetal })
         }
       }
-    })()
+    }
+    fetchRecord()
   }, [recordId])
 
-  const handleFieldChange = (fieldName, dirtyField, e) => {
-    const value = e?.target?.value
-    if (value > 0) {
-      formik.setFieldValue(fieldName, value)
-      if (formik.values[fieldName]?.toString() != value?.toString()) fetchAndSetValues(dirtyField, value)
+  const handleFieldChange = (fieldName, dirtyField, event) => {
+    const newValue = event?.target?.value
+    if (Number(newValue) > 0) {
+      formik.setFieldValue(fieldName, newValue)
+
+      if (formik.values[fieldName]?.toString() !== newValue?.toString()) {
+        fetchAndUpdateValues(dirtyField, newValue)
+      }
     }
   }
 
   const handleFieldClear = (fieldName, dirtyField) => {
-    const newValue = 0
-    formik.setFieldValue(fieldName, newValue)
-    fetchAndSetValues(dirtyField, newValue)
+    formik.setFieldValue(fieldName, 0)
+    fetchAndUpdateValues(dirtyField, 0)
   }
 
   return (
@@ -184,12 +180,10 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
             <ResourceComboBox
               endpointId={InventoryRepository.Items.pack}
               reducer={response => {
-                const formattedShape = response?.record?.shapes.map(shape => ({
+                return response?.record?.shapes?.map(shape => ({
                   key: parseInt(shape.key),
                   value: shape.value
                 }))
-
-                return formattedShape
               }}
               values={formik.values}
               name='shape'
@@ -217,9 +211,9 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               label={labels.diameter}
               value={formik.values.diameter}
               maxAccess={maxAccess}
-              readOnly={formik.values?.shape === 1}
+              readOnly={formik.values.shape === 1}
               onMouseLeave={e => handleFieldChange('diameter', 4, e)}
-              onClear={() => handleFieldClear('length', 4)}
+              onClear={() => handleFieldClear('diameter', 4)}
             />
           </Grid>
           <Grid item xs={12}>
@@ -236,7 +230,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
             <CustomNumberField
               name='width'
               label={labels.width}
-              readOnly={formik.values?.shape === 2}
+              readOnly={formik.values.shape === 2}
               value={formik.values.width}
               maxAccess={maxAccess}
               onMouseLeave={e => handleFieldChange('width', 2, e)}
@@ -248,7 +242,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               name='depth'
               label={labels.depth}
               value={formik.values.depth}
-              readOnly={formik.values?.shape === 2}
+              readOnly={formik.values.shape === 2}
               maxAccess={maxAccess}
               onMouseLeave={e => handleFieldChange('depth', 3, e)}
               onClear={() => handleFieldClear('depth', 3)}
@@ -289,7 +283,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
           <Grid item xs={12}>
             <CustomCheckBox
               name='isMetal'
-              value={formik.values?.isMetal}
+              value={formik.values.isMetal}
               onChange={event => {
                 if (!event.target.checked) {
                   formik.setFieldValue('metalId', '')
@@ -307,14 +301,12 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={InventoryRepository.Items.pack}
-              reducer={response => {
-                return response?.record?.metals
-              }}
+              reducer={response => response?.record?.metals}
               values={formik.values}
               name='metalId'
               label={labels.metal}
-              readOnly={formik.values?.isMetal === false}
-              required={formik.values?.isMetal === true}
+              readOnly={!formik.values.isMetal}
+              required={formik.values.isMetal}
               valueField='recordId'
               displayField='reference'
               displayFieldWidth={1}
@@ -330,18 +322,16 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={InventoryRepository.Items.pack}
-              reducer={response => {
-                return response?.record?.metalColors
-              }}
+              reducer={response => response?.record?.metalColors}
               values={formik.values}
               name='metalColorId'
               label={labels.metalColor}
-              readOnly={formik.values?.isMetal === false}
+              readOnly={!formik.values.isMetal}
               valueField='recordId'
               displayField='reference'
               displayFieldWidth={1}
               columnsInDropDown={[{ key: 'reference', value: 'Reference' }]}
-              required={formik.values?.isMetal === true}
+              required={formik.values.isMetal}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 formik.setFieldValue('metalColorId', newValue?.recordId || '')
