@@ -70,13 +70,20 @@ const VerticalNavItems = props => {
           className={`node ${isFolder ? 'folder' : 'file'} ${isOpen ? 'open' : ''}`}
           style={{ display: !isFolder && navCollapsed ? 'none' : 'flex' }}
           onClick={() => {
-            setReloadOpenedPage([])
             if (node.children) {
               toggleFolder(node.id)
             } else {
-              if (findNode(menu, node.path.replace(/\/$/, '')) + '/' === router.asPath) {
+              setReloadOpenedPage([])
+              if (
+                findNode(
+                  menu,
+                  node.path.replace(/\/$/, '') + '/' === router.asPath &&
+                    node.path.replace(/\/$/, '') + '/' !== window?.history?.state?.as
+                )
+              ) {
                 setReloadOpenedPage(node)
               } else {
+                console.log(node.path)
                 router.push(node.path)
               }
               setLastOpenedPage(node)
