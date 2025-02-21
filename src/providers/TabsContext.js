@@ -122,8 +122,14 @@ const TabsProvider = ({ children }) => {
 
     if (currentTabIndex === index) {
       const newValue = index === activeTabsLength - 1 ? index - 1 : index + 1
-      setCurrentTabIndex(newValue)
-      router.push(openTabs[newValue].route)
+
+      // if closing last tab
+
+      if (newValue === index - 1) {
+        setCurrentTabIndex(newValue)
+      }
+
+      window.history.replaceState(null, '', openTabs[newValue].route)
     } else if (index < currentTabIndex) {
       setCurrentTabIndex(currentValue => currentValue - 1)
     }
