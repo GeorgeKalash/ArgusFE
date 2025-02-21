@@ -108,13 +108,9 @@ const TabsProvider = ({ children }) => {
     setCurrentTabIndex(isHomeTabSelected ? 0 : newOpenTabs.length - 1)
   }
 
-  console.log('tabRoute', openTabs)
-
   const closeTab = tabRoute => {
     const index = openTabs.findIndex(tab => tab.route === tabRoute)
     const activeTabsLength = openTabs.length
-
-    setOpenTabs(prevState => prevState.filter(tab => tab.route !== tabRoute))
 
     if (activeTabsLength === 2) {
       handleCloseAllTabs()
@@ -131,10 +127,12 @@ const TabsProvider = ({ children }) => {
         setCurrentTabIndex(newValue)
       }
 
-      window.history.replaceState(null, '', openTabs[newValue].route)
+      window.history.replaceState(null, '', openTabs?.filter(tab => tab.route !== tabRoute)?.[newValue]?.route)
     } else if (index < currentTabIndex) {
       setCurrentTabIndex(currentValue => currentValue - 1)
     }
+
+    setOpenTabs(prevState => prevState.filter(tab => tab.route !== tabRoute))
   }
 
   const reopenTab = tabRoute => {
@@ -145,10 +143,8 @@ const TabsProvider = ({ children }) => {
 
   useEffect(() => {
     if (initialLoadDone) {
-      console.log(window.history.state)
-
       const isTabOpen = openTabs.some((activeTab, index) => {
-        if (activeTab.route === router.asPath || !window?.history?.state?.url) {
+        if (activeTab.route === router.asPath || !window?.history?.state?.as) {
           setCurrentTabIndex(index)
 
           return true
@@ -156,8 +152,6 @@ const TabsProvider = ({ children }) => {
 
         return false
       })
-
-      console.log(isTabOpen, router.asPath, window.history.state)
 
       if (!isTabOpen) {
         const newValueState = openTabs.length
@@ -176,7 +170,6 @@ const TabsProvider = ({ children }) => {
 
         setCurrentTabIndex(newValueState)
       } else {
-        console.log('isTabOpen', router.asPath)
         setOpenTabs(prevState =>
           prevState.map(tab => {
             if (tab.route === router.asPath) {
@@ -186,6 +179,8 @@ const TabsProvider = ({ children }) => {
             return tab
           })
         )
+        const index = openTabs.findIndex(tab => tab.route === router.asPath)
+        setCurrentTabIndex(index)
       }
     }
   }, [router.asPath, reloadOpenedPage])
