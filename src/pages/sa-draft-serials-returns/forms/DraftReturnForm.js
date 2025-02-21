@@ -42,13 +42,12 @@ export default function DraftReturnForm({ labels, access, recordId }) {
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
 
-  const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [jumpToNextLine, setJumpToNextLine] = useState(false)
   const { systemChecks } = useContext(ControlContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftInvoiceReturn,
-    access: access,
+    access,
     enabled: !recordId
   })
 
@@ -62,18 +61,21 @@ export default function DraftReturnForm({ labels, access, recordId }) {
     }
   }, [documentType?.dtId])
 
+  const defCurrencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const defplId = parseInt(defaultsData?.list?.find(obj => obj.key === 'plId')?.value)
+  const defspId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'spId')?.value)
+  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: recordId,
+      recordId,
       dtId: documentType?.dtId,
       reference: '',
       date: new Date(),
       plantId: null,
       clientId: null,
-      clientRef: '',
-      clientName: '',
-      currencyId: null,
+      currencyId: defCurrencyId,
       spId: null,
       siteId: null,
       description: '',
@@ -84,7 +86,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
       subTotal: 0,
       amount: 0,
       vatAmount: 0,
-      plId: null,
+      plId: defplId,
       ptId: null,
       weight: 0,
       disSkuLookup: false,
@@ -101,7 +103,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
           itemId: '',
           sku: '',
           itemName: '',
-          seqNo: '',
+          seqNo: 1,
           extendedPrice: 0,
           baseLaborPrice: 0,
           weight: 0,
@@ -117,7 +119,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
           volume: 0,
           invoiceReference: '',
           invoiceTrxId: null,
-          invoiceSeqNo: 0,
+          invoiceSeqNo: 1,
           invoiceComponentSeqNo: 0
         }
       ],
@@ -157,7 +159,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
         date: formatDateToApi(date)
       }
 
-      const updatedRows = formik.values.serials
+      const updatedRows = formik?.values?.serials
         .filter(row => row.srlNo)
         .map(({ taxDetails, recordId, ...rest }, index) => ({
           ...rest,
@@ -182,10 +184,10 @@ export default function DraftReturnForm({ labels, access, recordId }) {
     }
   })
 
-  async function refetchForm(recordId, plId) {
+  async function refetchForm(recordId) {
     const diHeader = await getDraftReturn(recordId)
     const diItems = await getDraftReturnItems(recordId)
-    await fillForm(diHeader, diItems, plId)
+    await fillForm(diHeader, diItems)
   }
 
   async function getDraftReturn(diId) {
@@ -266,15 +268,13 @@ export default function DraftReturnForm({ labels, access, recordId }) {
   const assignStoreTaxDetails = serials => {
     if (serials.length) {
       const updatedSer = serials?.map(serial => {
-        if (serial.taxId != null) {
-          return {
-            ...serial,
-            extendedPrice: serial.unitPrice,
-            taxDetails: FilteredListByTaxId(formik?.values?.taxDetailsStore, serial.taxId)
-          }
-        }
-
-        return serial
+        return serial.taxId != null
+          ? {
+              ...serial,
+              extendedPrice: serial.unitPrice,
+              taxDetails: FilteredListByTaxId(formik?.values?.taxDetailsStore, serial.taxId)
+            }
+          : serial
       })
       formik.setFieldValue('serials', updatedSer)
     }
@@ -335,7 +335,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
   async function autoSave(header, lastLine) {
     if (lastLine?.srlNo) {
       const resp = autoSaveProcess(header, lastLine)
-      if (resp == true) {
+      if (resp) {
         toast.success(platformLabels.Saved)
 
         return true
@@ -367,13 +367,8 @@ export default function DraftReturnForm({ labels, access, recordId }) {
     formik.setFieldValue('reference', diHeader?.record?.reference)
     formik.setFieldValue('date', diHeader?.record?.date)
 
-    let success = true
-
-    if (type == 'import') {
-      success = await autoSaveImport(diHeader?.record, lastLine)
-    } else {
-      success = await autoSave(diHeader?.record, lastLine)
-    }
+    const success =
+      type === 'import' ? await autoSaveImport(diHeader?.record, lastLine) : await autoSave(diHeader?.record, lastLine)
 
     if (success) {
       toast.success(platformLabels.Saved)
@@ -648,7 +643,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
     {
       key: 'Import',
       condition: true,
-      onClick: () => onImportClick(),
+      onClick: onImportClick,
       disabled: !editMode || formik.values.status != 1 || isClosed
     }
   ]
@@ -679,7 +674,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
     assignStoreTaxDetails(modifiedList)
   }
 
-  async function fillForm(diHeader, diItems, plId) {
+  async function fillForm(diHeader, diItems) {
     const modifiedList = await Promise.all(
       diItems?.list?.map(async (item, index) => {
         const taxDetailsResponse = diHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
@@ -700,7 +695,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
     await formik.setValues({
       ...formik.values,
       ...diHeader.record,
-      plId: plId || formik?.values?.plId,
+      plId: defplId || formik?.values?.plId,
       amount: parseFloat(diHeader?.record?.amount).toFixed(2),
       vatAmount: parseFloat(diHeader?.record?.vatAmount).toFixed(2),
       subTotal: parseFloat(diHeader?.record?.subTotal).toFixed(2),
@@ -750,8 +745,8 @@ export default function DraftReturnForm({ labels, access, recordId }) {
       })
 
       formik.setFieldValue('plantId', dtd?.record?.plantId || null)
-      formik.setFieldValue('spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
-      formik.setFieldValue('siteId', dtd?.record?.siteId || userDefaultsDataState?.siteId || null)
+      formik.setFieldValue('spId', dtd?.record?.spId || defspId || null)
+      formik.setFieldValue('siteId', dtd?.record?.siteId || defSiteId || null)
     }
   }
 
@@ -821,56 +816,19 @@ export default function DraftReturnForm({ labels, access, recordId }) {
     formik.setFieldValue('amount', subTotal + vatAmount)
   }, [weight, subTotal, vatAmount])
 
-  async function getUserDefaultsData() {
-    const myObject = {}
-
-    const filteredList = userDefaultsData?.list?.filter(obj => {
-      return obj.key === 'siteId' || obj.key === 'spId'
-    })
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setUserDefaultsDataState(myObject)
-
-    return myObject
-  }
-
-  async function getDefaultsData() {
-    const myObject = {}
-
-    const filteredList = defaultsData?.list?.filter(obj => {
-      return (
-        obj.key === 'draft_gc_vat' ||
-        obj.key === 'plId' ||
-        obj.key === 'draft_gc_lbr' ||
-        obj.key === 'draft_gc_txd' ||
-        obj.key === 'currencyId'
-      )
-    })
-    filteredList.forEach(obj => {
-      myObject[obj.key] =
-        obj.value === 'True' || obj.value === 'False' ? obj.value : obj.value ? parseInt(obj.value) : null
-    })
-
-    return myObject
-  }
-
   useEffect(() => {
     ;(async function () {
-      const defaults = await getDefaultsData()
-      getUserDefaultsData()
-
-      defaults?.plId
-        ? formik.setFieldValue('plId', defaults?.plId)
-        : stackError({
-            message: labels.noSelectedplId
-          })
+      if (!defplId)
+        stackError({
+          message: labels.noSelectedplId
+        })
 
       fillTaxStore()
 
       if (formik?.values?.recordId) {
-        await refetchForm(formik?.values?.recordId, defaults?.plId)
+        await refetchForm(formik?.values?.recordId)
       } else {
         if (formik?.values?.dtId) {
-          formik.setFieldValue('currencyId', parseInt(defaults?.currencyId))
           onChangeDtId(formik?.values?.dtId)
         }
       }
@@ -1184,7 +1142,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
                 endpointId={
                   formik?.values?.clientId && formik?.values?.date && SaleRepository.InvoiceReturnBalance.balance
                 }
-                parameters={`_clientId=${formik?.values?.clientId}&_returnDate=${(formik?.values?.date).toISOString()}`}
+                parameters={`_clientId=${formik?.values?.clientId}&_returnDate=${formik?.values?.date?.toISOString()}`}
                 filter={item => item.currencyId == formik?.values?.currencyId}
                 name='invoiceId'
                 label={labels.salesInv}

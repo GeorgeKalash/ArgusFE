@@ -222,7 +222,6 @@ export const SaleRepository = {
     del: service + 'delDFS'
   },
   DraftReturn: {
-    qry: service + 'qryDRE',
     page: service + 'pageDRE',
     snapshot: service + 'snapshotDRE',
     get: service + 'getDRE',
@@ -233,7 +232,6 @@ export const SaleRepository = {
   },
   DraftReturnSerial: {
     qry: service + 'qryDRS',
-    get: service + 'get2DRS',
     batch: service + 'batchDRS',
     append: service + 'appendDRS',
     del: service + 'delDRS'
