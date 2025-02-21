@@ -109,6 +109,7 @@ const TabsProvider = ({ children }) => {
   }
 
   console.log('tabRoute', openTabs)
+
   const closeTab = tabRoute => {
     const index = openTabs.findIndex(tab => tab.route === tabRoute)
     const activeTabsLength = openTabs.length
