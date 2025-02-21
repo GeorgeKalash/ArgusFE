@@ -91,7 +91,6 @@ const TabsProvider = ({ children }) => {
 
   const handleCloseAllTabs = () => {
     const firstTab = openTabs[0]
-    console.log(firstTab)
     router.push(firstTab.route)
     setOpenTabs([firstTab])
     setCurrentTabIndex(0)
