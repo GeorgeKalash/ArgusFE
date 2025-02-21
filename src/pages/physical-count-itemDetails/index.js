@@ -257,7 +257,7 @@ const PhysicalCountItemDe = () => {
             { from: 'priceType', to: 'priceType' }
           ],
           displayField: 'sku',
-          valueField: 'recordId',
+          valueField: 'sku',
           columnsInDropDown: [
             { key: 'sku', value: 'sku' },
             { key: 'name', value: 'Name' },

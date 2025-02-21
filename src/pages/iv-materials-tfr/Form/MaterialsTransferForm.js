@@ -294,9 +294,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   async function getFilteredMU(itemId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.transfers?.find(
-      transfer => parseInt(transfer.itemId) === itemId
-    )?.msId
+    const currentItemId = formik.values.transfers?.find(transfer => parseInt(transfer.itemId) === itemId)?.msId
 
     const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
     filteredMeasurements.current = arrayMU
@@ -309,11 +307,11 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       name: 'sku',
       props: {
         endpointId: InventoryRepository.Item.snapshot,
-        valueField: 'recordId',
+        valueField: 'sku',
         displayField: 'sku',
         mandatory: true,
         readOnly: isClosed,
-        displayFieldWidth: 4,
+        displayFieldWidth: 3,
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'msId', to: 'msId' },
@@ -461,7 +459,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       name: 'unitCost',
       props: {
         readOnly: true
-      },
+      }
     },
     {
       component: 'numberfield',
@@ -469,7 +467,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       name: 'totalCost',
       props: {
         readOnly: true
-      },
+      }
     }
   ]
 

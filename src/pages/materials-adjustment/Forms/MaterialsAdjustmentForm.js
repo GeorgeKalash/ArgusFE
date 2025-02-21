@@ -163,7 +163,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       name: 'sku',
       props: {
         endpointId: InventoryRepository.Item.snapshot,
-        valueField: 'recordId',
+        valueField: 'sku',
         displayField: 'sku',
         mapping: [
           { from: 'recordId', to: 'itemId' },

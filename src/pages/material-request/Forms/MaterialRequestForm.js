@@ -230,7 +230,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       name: 'sku',
       props: {
         endpointId: InventoryRepository.Item.snapshot,
-        valueField: 'recordId',
+        valueField: 'sku',
         displayField: 'sku',
         mandatory: true,
         readOnly: isClosed || isCancelled,
@@ -262,7 +262,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
           const itemInfo = await getItem(newRow.itemId)
           getFilteredMU(newRow?.itemId)
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-          const onHandSite = await setOnHandSite(newRow?.itemId) ?? 0
+          const onHandSite = (await setOnHandSite(newRow?.itemId)) ?? 0
           update({
             msId: itemInfo?.msId,
             onHandSite: onHandSite,

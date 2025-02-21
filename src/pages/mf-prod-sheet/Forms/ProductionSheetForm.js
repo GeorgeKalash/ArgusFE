@@ -238,7 +238,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       name: 'sku',
       props: {
         endpointId: InventoryRepository.Item.snapshot,
-        valueField: 'recordId',
+        valueField: 'sku',
         displayField: 'sku',
         mandatory: true,
         displayFieldWidth: 2,
