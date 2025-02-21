@@ -261,5 +261,17 @@ export const InventoryRepository = {
   Serial: {
     qry: service + 'qrySRL',
     snapshot: service + 'snapshotSRL'
+  },
+  RMSKU: {
+    snapshot: service + 'snapshotRM'
+  },
+  SFSKU: {
+    snapshot: service + 'snapshotSF'
+  },
+  Collections: {
+    get: service + 'getCOL',
+    page: service + 'pageCOL',
+    del: service + 'delCOL',
+    set: service + 'setCOL',
   }
 }
