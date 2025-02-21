@@ -23,6 +23,9 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 
 const GenerateOutboundTransportation = () => {
   const [selectedSaleZones, setSelectedSaleZones] = useState('')
+  const [selectedTrucks, setSelectedTrucks] = useState([])
+  const [filteredOrders, setFilteredOrders] = useState([])
+  const [trucks, setTrucks] = useState([])
   const [reCalc, setReCalc] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
@@ -49,6 +52,8 @@ const GenerateOutboundTransportation = () => {
       volume: 0,
       totalAmount: 0,
       totalVolume: 0,
+      selectedTrucks: { list: [] },
+      vehicleOrders: { list: [] },
       deliveryOrders: { list: [] },
       data: { list: [] },
       salesZones: { list: [] }
@@ -161,6 +166,19 @@ const GenerateOutboundTransportation = () => {
     }
   }
 
+  const getAllTrucks = async () => {
+    const trucks = await getRequest({
+      extension: DeliveryRepository.Vehicle.qry,
+      parameters: ``
+    })
+
+    if (!trucks?.list) {
+      return
+    }
+
+    setTrucks(trucks)
+  }
+
   useEffect(() => {
     if (reCalc) {
       const totalAmountValue = totalAmountFromChecked()
@@ -170,6 +188,10 @@ const GenerateOutboundTransportation = () => {
       setReCalc(false)
     }
   }, [reCalc])
+
+  useEffect(() => {
+    getAllTrucks()
+  }, [])
 
   const totalVolume = formik?.values?.deliveryOrders?.list?.reduce((sum, order) => sum + (order.volume || 0), 0) || 0
   const totalAmount = formik?.values?.deliveryOrders?.list?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0
@@ -212,50 +234,33 @@ const GenerateOutboundTransportation = () => {
     }
   ]
 
-  const columnsOrders = [
+  const columnsTrucks = [
     {
-      field: 'date',
-      headerName: labels.date,
-      type: 'date',
-      width: 120
-    },
-    {
-      field: 'reference',
-      headerName: labels.reference,
-      width: 130
-    },
-    {
-      field: 'spName',
-      headerName: labels.salesPerson,
-      width: 130,
-      wrapText: true,
-      autoHeight: true
-    },
-    {
-      field: 'szName',
-      headerName: labels.zone,
-      width: 120,
-      wrapText: true,
-      autoHeight: true
-    },
-    {
-      field: 'clientName',
-      headerName: labels.client,
+      field: 'plateNo',
+      headerName: labels.plateNo,
       wrapText: true,
       autoHeight: true,
-      width: 130
+      flex: 1
+    }
+  ]
+
+  const columnsSelectedTrucks = [
+    {
+      field: 'plateNo',
+      headerName: labels.plateNo,
+      flex: 1
     },
     {
-      field: 'amount',
-      headerName: labels.amount,
+      field: 'allocatedVolume',
+      headerName: labels.allocatedVolume,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'volume',
       headerName: labels.volume,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'notes',
@@ -264,44 +269,29 @@ const GenerateOutboundTransportation = () => {
     }
   ]
 
-  const columnsDeliveryOrders = [
+  const columnsSalesOrders = [
     {
-      field: 'date',
-      headerName: labels.date,
+      field: 'vehicle',
+      headerName: labels.truck,
+      width: 130
+    },
+    {
+      field: 'orderDate',
+      headerName: labels.orderDate,
       type: 'date',
       width: 130
     },
     {
-      field: 'reference',
+      field: 'orderRef',
       headerName: labels.reference,
       width: 130
     },
     {
-      field: 'spName',
-      headerName: labels.salesPerson,
+      field: 'szRef',
+      headerName: labels.zone,
       width: 130,
       wrapText: true,
       autoHeight: true
-    },
-    {
-      field: 'szName',
-      headerName: labels.zone,
-      width: 120,
-      wrapText: true,
-      autoHeight: true
-    },
-    {
-      field: 'clientName',
-      headerName: labels.client,
-      wrapText: true,
-      autoHeight: true,
-      width: 130
-    },
-    {
-      field: 'amount',
-      headerName: labels.amount,
-      type: 'number',
-      width: 130
     },
     {
       field: 'volume',
@@ -344,6 +334,20 @@ const GenerateOutboundTransportation = () => {
     })
   }
 
+  const onTripCheckbox = (row, checked) => {
+    setSelectedTrucks(prev => {
+      let updatedTrucks
+
+      if (checked) {
+        updatedTrucks = [...prev, row]
+      } else {
+        updatedTrucks = prev.filter(truck => truck.recordId !== row.recordId)
+      }
+
+      return updatedTrucks
+    })
+  }
+
   const onUndelivered = async szIds => {
     const items = await getRequest({
       extension: DeliveryRepository.GenerateTrip.undelivered2,
@@ -358,6 +362,25 @@ const GenerateOutboundTransportation = () => {
     const newItems = items.list.filter(item => !existingDeliveryOrderIds.has(item.recordId))
 
     formik.setFieldValue('data', { list: newItems })
+  }
+
+  const onPreviewOutbounds = async (szIds, trucks) => {
+    const commaSeparatedTrucks = trucks.map(truck => truck.recordId).join(',')
+
+    const items = await getRequest({
+      extension: DeliveryRepository.GenerateTrip.previewTRP,
+      parameters: `_szIds=${szIds || 0}&_vehicleIds=${commaSeparatedTrucks}`
+    })
+
+    formik.setFieldValue('selectedTrucks', { list: items?.record?.vehicleAllocations })
+    formik.setFieldValue('vehicleOrders', { list: items?.record?.vehicleOrders })
+
+    // if (!items?.list) {
+    //   return
+    // }
+    // const existingDeliveryOrderIds = new Set(formik?.values?.deliveryOrders?.list?.map(item => item.recordId))
+
+    // const newItems = items.list.filter(item => !existingDeliveryOrderIds.has(item.recordId))
   }
 
   const onAdd = () => {
@@ -445,7 +468,7 @@ const GenerateOutboundTransportation = () => {
               </Grid>
             </Grid>
             <Grid item xs={2}>
-              <ResourceComboBox
+              {/*  <ResourceComboBox
                 endpointId={DeliveryRepository.Vehicle.qry}
                 name='vehicleId'
                 label={labels.truck}
@@ -463,7 +486,7 @@ const GenerateOutboundTransportation = () => {
                 required
                 error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
                 maxAccess={access}
-              />
+              /> */}
             </Grid>
             <Grid item xs={2}>
               <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
@@ -515,7 +538,7 @@ const GenerateOutboundTransportation = () => {
         </Fixed>
         <Grow>
           <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
-            <Grid item xs={3} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={2} sx={{ display: 'flex', flex: 1 }}>
               <Table
                 columns={columnsZones}
                 gridData={filteredData}
@@ -528,21 +551,43 @@ const GenerateOutboundTransportation = () => {
                 handleCheckboxChange={onSaleZoneCheckbox}
               />
             </Grid>
-            <Grid item xs={9} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={1.5} sx={{ display: 'flex', flex: 1 }}>
+              <Table
+                columns={columnsTrucks}
+                gridData={trucks}
+                rowId={['recordId']}
+                isLoading={false}
+                pagination={false}
+                maxAccess={access}
+                showCheckboxColumn={true}
+                showSelectAll={false}
+                handleCheckboxChange={onTripCheckbox}
+              />
+            </Grid>
+            <Grid item xs={8.5} sx={{ display: 'flex', flex: 1 }}>
               <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
-                <Grid item xs={12} sx={{ display: 'flex', height: 255 }}>
+                <Grid item xs={12} sx={{ display: 'flex' }}>
                   <Table
-                    columns={columnsOrders}
-                    gridData={formik?.values?.data}
+                    columns={columnsSelectedTrucks}
+                    gridData={formik?.values?.selectedTrucks}
                     rowId={['recordId']}
                     isLoading={false}
                     pagination={false}
                     maxAccess={access}
-                    showCheckboxColumn={true}
-                    handleCheckboxChange={onRowCheckboxChange}
+                    onSelectionChange={row => {
+                      if (row) {
+                        console.log(row)
+
+                        const filteredOrders = formik.values.vehicleOrders.list.filter(
+                          item => row.vehicleId == item.vehicleId
+                        )
+
+                        setFilteredOrders({ list: filteredOrders })
+                      }
+                    }}
                   />
                 </Grid>
-                <Grid item xs={12} sx={{ display: 'flex', flex: 0 }}>
+                {/* <Grid item xs={12} sx={{ display: 'flex', flex: 0 }}>
                   <Grid container spacing={2}>
                     <Grid item xs={3}>
                       <CustomButton
@@ -572,19 +617,20 @@ const GenerateOutboundTransportation = () => {
                       />
                     </Grid>
                   </Grid>
-                </Grid>
-                <Grid item xs={12} sx={{ display: 'flex', height: 255 }}>
+                </Grid> */}
+                <Grid item xs={12} sx={{ display: 'flex' }}>
                   <Grow>
                     <Table
-                      columns={columnsDeliveryOrders}
-                      gridData={formik?.values?.deliveryOrders}
-                      rowId={['recordId']}
+                      columns={columnsSalesOrders}
+                      gridData={filteredOrders}
+                      rowId={['vehicleId']}
                       isLoading={false}
                       pagination={false}
                       maxAccess={access}
-                      showCheckboxColumn={true}
-                      handleCheckboxChange={Confirmation}
-                      showSelectAll={false}
+
+                      // showCheckboxColumn={true}
+                      // handleCheckboxChange={Confirmation}
+                      // showSelectAll={false}
                     />
                   </Grow>
                 </Grid>
@@ -594,14 +640,15 @@ const GenerateOutboundTransportation = () => {
         </Grow>
         <Fixed>
           <Grid container spacing={2}>
+            <Grid item xs={3}></Grid>
             <Grid item xs={2}>
               <CustomButton
-                onClick={() => onUndelivered(selectedSaleZones)}
+                onClick={() => onPreviewOutbounds(selectedSaleZones, selectedTrucks)}
                 label={platformLabels.Preview}
                 color='#231f20'
               />
             </Grid>
-            <Grid item xs={7}></Grid>
+            <Grid item xs={4}></Grid>
             <Grid item xs={1.5}>
               <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly align='right' />
             </Grid>
