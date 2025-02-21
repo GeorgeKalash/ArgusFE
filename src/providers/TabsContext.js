@@ -112,9 +112,7 @@ const TabsProvider = ({ children }) => {
     const index = openTabs.findIndex(tab => tab.route === tabRoute)
     const activeTabsLength = openTabs.length
 
-    setOpenTabs(prevState => prevState.filter(tab => tab.route !== tabRoute))
-
-    if (activeTabsLength === 1) {
+    if (activeTabsLength === 2) {
       handleCloseAllTabs()
 
       return
@@ -122,11 +120,19 @@ const TabsProvider = ({ children }) => {
 
     if (currentTabIndex === index) {
       const newValue = index === activeTabsLength - 1 ? index - 1 : index + 1
-      setCurrentTabIndex(newValue)
-      router.push(openTabs[newValue].route)
+
+      // if closing last tab
+
+      if (newValue === index - 1 || router.asPath === window?.history?.state?.as) {
+        setCurrentTabIndex(newValue)
+      }
+
+      window.history.replaceState(null, '', openTabs?.filter(tab => tab.route !== tabRoute)?.[newValue]?.route)
     } else if (index < currentTabIndex) {
       setCurrentTabIndex(currentValue => currentValue - 1)
     }
+
+    setOpenTabs(prevState => prevState.filter(tab => tab.route !== tabRoute))
   }
 
   const reopenTab = tabRoute => {
@@ -138,7 +144,7 @@ const TabsProvider = ({ children }) => {
   useEffect(() => {
     if (initialLoadDone) {
       const isTabOpen = openTabs.some((activeTab, index) => {
-        if (activeTab.route === router.asPath) {
+        if (activeTab.route === router.asPath || !window?.history?.state?.as) {
           setCurrentTabIndex(index)
 
           return true
@@ -149,6 +155,7 @@ const TabsProvider = ({ children }) => {
 
       if (!isTabOpen) {
         const newValueState = openTabs.length
+
         setOpenTabs(prevState => [
           ...prevState,
           {
@@ -160,6 +167,7 @@ const TabsProvider = ({ children }) => {
               : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
           }
         ])
+
         setCurrentTabIndex(newValueState)
       } else {
         setOpenTabs(prevState =>
@@ -171,12 +179,15 @@ const TabsProvider = ({ children }) => {
             return tab
           })
         )
+        const index = openTabs.findIndex(tab => tab.route === router.asPath)
+        setCurrentTabIndex(index)
       }
     }
-  }, [children, router.asPath, initialLoadDone, lastOpenedPage, menu, gear])
+  }, [router.asPath, reloadOpenedPage])
 
   useEffect(() => {
     if (router.asPath === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
+
     if (!initialLoadDone && router.asPath && menu.length > 0) {
       const newTabs = [
         {
@@ -196,7 +207,8 @@ const TabsProvider = ({ children }) => {
             ? lastOpenedPage.name
             : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
         })
-        setCurrentTabIndex(1)
+
+        // setCurrentTabIndex(1)
       }
 
       setOpenTabs(newTabs)
