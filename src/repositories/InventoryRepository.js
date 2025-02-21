@@ -256,7 +256,7 @@ export const InventoryRepository = {
     get: service + 'getDTD',
     page: service + 'pageDTD',
     del: service + 'delDTD',
-    set: service + 'setDTD',
+    set: service + 'setDTD'
   },
   Serial: {
     qry: service + 'qrySRL',
@@ -279,5 +279,17 @@ export const InventoryRepository = {
   },
   BatchDraftTransferSerial: {
     batch: service + 'batchDTS'
+  },
+  RMSKU: {
+    snapshot: service + 'snapshotRM'
+  },
+  SFSKU: {
+    snapshot: service + 'snapshotSF'
+  },
+  Collections: {
+    get: service + 'getCOL',
+    page: service + 'pageCOL',
+    del: service + 'delCOL',
+    set: service + 'setCOL'
   }
 }
