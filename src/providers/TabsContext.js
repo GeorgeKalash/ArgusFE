@@ -91,6 +91,7 @@ const TabsProvider = ({ children }) => {
 
   const handleCloseAllTabs = () => {
     const firstTab = openTabs[0]
+    console.log(firstTab)
     router.push(firstTab.route)
     setOpenTabs([firstTab])
     setCurrentTabIndex(0)
@@ -114,7 +115,7 @@ const TabsProvider = ({ children }) => {
 
     setOpenTabs(prevState => prevState.filter(tab => tab.route !== tabRoute))
 
-    if (activeTabsLength === 1) {
+    if (activeTabsLength === 2) {
       handleCloseAllTabs()
 
       return
@@ -196,17 +197,19 @@ const TabsProvider = ({ children }) => {
         }
       ]
 
-      // if (router.asPath !== '/default/') {
-      //   newTabs.push({
-      //     page: children,
-      //     id: uuidv4(),
-      //     route: router.asPath,
-      //     label: lastOpenedPage
-      //       ? lastOpenedPage.name
-      //       : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
-      //   })
-      //   setCurrentTabIndex(1)
-      // }
+      console.log(router.asPath, window.history.state.as)
+
+      if (router.asPath !== '/default/') {
+        newTabs.push({
+          page: children,
+          id: uuidv4(),
+          route: router.asPath,
+          label: lastOpenedPage
+            ? lastOpenedPage.name
+            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
+        })
+        // setCurrentTabIndex(1)
+      }
 
       setOpenTabs(newTabs)
       setInitialLoadDone(true)
