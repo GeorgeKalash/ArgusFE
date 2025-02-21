@@ -70,6 +70,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       defSaleMUId: '',
       pgId: '',
       productionLevel: '',
+      collectionId: null,
       isInactive: false
     },
     maxAccess,
@@ -333,7 +334,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.procurementMethod && formik.errors.procurementMethod}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomTextField
                     name='name'
@@ -346,7 +346,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.name && formik.errors.name}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomTextField
                     name='flName'
@@ -357,7 +356,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onClear={() => formik.setFieldValue('flName', '')}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomTextField
                     name='shortName'
@@ -368,7 +366,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onClear={() => formik.setFieldValue('shortName', '')}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
@@ -393,7 +390,25 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.groupId && formik.errors.groupId}
                   />
                 </Grid>
-
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Collections.qry}
+                    name='collectionId'
+                    label={labels.collection}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('collectionId', newValue?.recordId)
+                    }}
+                    error={formik.touched.collectionId && Boolean(formik.errors.collectionId)}
+                  />
+                </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
