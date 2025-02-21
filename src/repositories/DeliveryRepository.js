@@ -71,6 +71,7 @@ export const DeliveryRepository = {
     root: service + 'rootSZ',
     firstLevel: service + 'firstLevelSZ',
     undelivered2: service + 'undeliveredSO2',
+    previewTRP: service + 'previewTRP'
   },
   DeliveryLeadTime: {
     get: service + 'getLDT',

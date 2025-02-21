@@ -24,6 +24,7 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 const GenerateOutboundTransportation = () => {
   const [selectedSaleZones, setSelectedSaleZones] = useState('')
   const [selectedTrucks, setSelectedTrucks] = useState([])
+  const [filteredOrders, setFilteredOrders] = useState([])
   const [trucks, setTrucks] = useState([])
   const [reCalc, setReCalc] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -52,6 +53,7 @@ const GenerateOutboundTransportation = () => {
       totalAmount: 0,
       totalVolume: 0,
       selectedTrucks: { list: [] },
+      vehicleOrders: { list: [] },
       deliveryOrders: { list: [] },
       data: { list: [] },
       salesZones: { list: [] }
@@ -234,13 +236,6 @@ const GenerateOutboundTransportation = () => {
 
   const columnsTrucks = [
     {
-      field: 'name',
-      headerName: labels.name,
-      wrapText: true,
-      autoHeight: true,
-      flex: 1
-    },
-    {
       field: 'plateNo',
       headerName: labels.plateNo,
       wrapText: true,
@@ -251,18 +246,13 @@ const GenerateOutboundTransportation = () => {
 
   const columnsSelectedTrucks = [
     {
-      field: 'name',
-      headerName: labels.Truck,
-      flex: 1
-    },
-    {
       field: 'plateNo',
       headerName: labels.plateNo,
       flex: 1
     },
     {
-      field: 'amount',
-      headerName: labels.amount,
+      field: 'allocatedVolume',
+      headerName: labels.allocatedVolume,
       type: 'number',
       flex: 1
     },
@@ -286,42 +276,22 @@ const GenerateOutboundTransportation = () => {
       width: 130
     },
     {
-      field: 'date',
-      headerName: labels.date,
+      field: 'orderDate',
+      headerName: labels.orderDate,
       type: 'date',
       width: 130
     },
     {
-      field: 'reference',
+      field: 'orderRef',
       headerName: labels.reference,
       width: 130
     },
     {
-      field: 'spName',
-      headerName: labels.salesPerson,
+      field: 'szRef',
+      headerName: labels.zone,
       width: 130,
       wrapText: true,
       autoHeight: true
-    },
-    {
-      field: 'szName',
-      headerName: labels.zone,
-      width: 120,
-      wrapText: true,
-      autoHeight: true
-    },
-    {
-      field: 'clientName',
-      headerName: labels.client,
-      wrapText: true,
-      autoHeight: true,
-      width: 130
-    },
-    {
-      field: 'amount',
-      headerName: labels.amount,
-      type: 'number',
-      width: 130
     },
     {
       field: 'volume',
@@ -395,13 +365,15 @@ const GenerateOutboundTransportation = () => {
   }
 
   const onPreviewOutbounds = async (szIds, trucks) => {
-    formik.setFieldValue('selectedTrucks', { list: trucks })
     const commaSeparatedTrucks = trucks.map(truck => truck.recordId).join(',')
 
     const items = await getRequest({
-      extension: DeliveryRepository.GenerateTrip.undelivered2,
-      parameters: `_szIds=${szIds || 0}&_truckIds=${commaSeparatedTrucks}`
+      extension: DeliveryRepository.GenerateTrip.previewTRP,
+      parameters: `_szIds=${szIds || 0}&_vehicleIds=${commaSeparatedTrucks}`
     })
+
+    formik.setFieldValue('selectedTrucks', { list: items?.record?.vehicleAllocations })
+    formik.setFieldValue('vehicleOrders', { list: items?.record?.vehicleOrders })
 
     // if (!items?.list) {
     //   return
@@ -579,7 +551,7 @@ const GenerateOutboundTransportation = () => {
                 handleCheckboxChange={onSaleZoneCheckbox}
               />
             </Grid>
-            <Grid item xs={2} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={1.5} sx={{ display: 'flex', flex: 1 }}>
               <Table
                 columns={columnsTrucks}
                 gridData={trucks}
@@ -592,7 +564,7 @@ const GenerateOutboundTransportation = () => {
                 handleCheckboxChange={onTripCheckbox}
               />
             </Grid>
-            <Grid item xs={8} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={8.5} sx={{ display: 'flex', flex: 1 }}>
               <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
                 <Grid item xs={12} sx={{ display: 'flex' }}>
                   <Table
@@ -606,78 +578,11 @@ const GenerateOutboundTransportation = () => {
                       if (row) {
                         console.log(row)
 
-                        // const data = [
-                        //   {
-                        //     truck: null,
-                        //     plName: null,
-                        //     ptName: 'Cash',
-                        //     spName: 'OUATTARA AHMED JOÃ‹L',
-                        //     currencyName: 'CFA',
-                        //     currencyProfileId: 7,
-                        //     siteName: 'Stock',
-                        //     szName: 'AdjamÃ©',
-                        //     printStatusName: 'Yes',
-                        //     dgName: null,
-                        //     wipName: 'Work In Process',
-                        //     decimals: 0,
-                        //     statusName: 'Draft (raw)',
-                        //     plantName: 'Head Offices',
-                        //     plantRef: 'HO',
-                        //     dtRef: 'SO',
-                        //     dtName: 'Sales Order',
-                        //     clientRef: 'DPT001',
-                        //     spRef: 'JOÃ‹L ',
-                        //     dsName: 'Not Delivered',
-                        //     rsName: null,
-                        //     maxDiscount: null,
-                        //     plantId: 1,
-                        //     clientId: 618,
-                        //     taxId: null,
-                        //     quotationId: null,
-                        //     currencyId: 4,
-                        //     ptId: 1,
-                        //     siteId: 2,
-                        //     plId: 6,
-                        //     spId: 16,
-                        //     szId: 13,
-                        //     clientName: 'V L',
-                        //     description: 'ABIDJAN',
-                        //     subtotal: 89000,
-                        //     tdType: 2,
-                        //     tdPct: 0,
-                        //     tdAmount: 0,
-                        //     isVattable: false,
-                        //     vatAmount: 0,
-                        //     amount: 89000,
-                        //     exRate: 1,
-                        //     rateCalcMethod: 1,
-                        //     baseAmount: 89000,
-                        //     miscAmount: 0,
-                        //     volume: 53.72,
-                        //     weight: 0,
-                        //     listPrice: 89000,
-                        //     qty: 3,
-                        //     deliveredQty: null,
-                        //     mdValue: 0,
-                        //     mdPct: 0,
-                        //     printStatus: 2,
-                        //     billToAddressId: null,
-                        //     shipToAddressId: 35853,
-                        //     exWorks: false,
-                        //     deliveryStatus: 1,
-                        //     wip: 1,
-                        //     overdraft: true,
-                        //     dtId: 111,
-                        //     batchId: null,
-                        //     reference: 'SO-032603',
-                        //     status: 1,
-                        //     releaseStatus: null,
-                        //     date: '/Date(1736553600000)/',
-                        //     isVerified: null,
-                        //     recordId: 33392
-                        //   }
-                        // ]
-                        // formik.setFieldValue('deliveryOrders', data)
+                        const filteredOrders = formik.values.vehicleOrders.list.filter(
+                          item => row.vehicleId == item.vehicleId
+                        )
+
+                        setFilteredOrders({ list: filteredOrders })
                       }
                     }}
                   />
@@ -717,8 +622,8 @@ const GenerateOutboundTransportation = () => {
                   <Grow>
                     <Table
                       columns={columnsSalesOrders}
-                      gridData={formik?.values?.deliveryOrders}
-                      rowId={['recordId']}
+                      gridData={filteredOrders}
+                      rowId={['vehicleId']}
                       isLoading={false}
                       pagination={false}
                       maxAccess={access}
