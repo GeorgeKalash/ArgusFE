@@ -39,6 +39,7 @@ const Table = ({
   handleCheckboxChange = '',
   showSelectAll = true,
   onSelectionChange,
+  rowDragManaged = false,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -713,6 +714,7 @@ const Table = ({
             rowHeight={35}
             onFirstDataRendered={onFirstDataRendered}
             gridOptions={gridOptions}
+            rowDragManaged={rowDragManaged}
           />
         </Box>
       </Grow>
