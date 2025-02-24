@@ -228,7 +228,8 @@ const DocumentsOnHold = () => {
         labels = await getLabels(ResourceIds.Sketch)
         relevantAccess = await getAccess(ResourceIds.Sketch)
 
-        windowWidth = 1100
+        windowWidth = 700
+        windowHeight = 700
         title = labels.Sketch
         break
       default:
