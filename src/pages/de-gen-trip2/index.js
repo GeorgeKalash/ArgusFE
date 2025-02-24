@@ -250,13 +250,13 @@ const GenerateOutboundTransportation2 = () => {
       headerName: labels.name,
       wrapText: true,
       autoHeight: true,
-      width: 120,
+      flex: 3,
       rowDrag: true
     },
     {
       field: 'volume',
       headerName: labels.volume,
-      flex: 1,
+      flex: 2,
       type: 'number'
     }
   ]
@@ -280,7 +280,7 @@ const GenerateOutboundTransportation2 = () => {
     {
       field: 'seqNo',
       headerName: labels.seqNo,
-      flex: 1
+      width: 100
     },
     {
       field: 'allocatedVolume',
@@ -295,16 +295,21 @@ const GenerateOutboundTransportation2 = () => {
       flex: 1
     },
     {
-      field: 'notes',
-      headerName: labels.notes,
-      flex: 1
+      field: 'route',
+      headerName: labels.route,
+      flex: 2
     }
   ]
 
   const columnsSalesOrders = [
     {
-      field: 'vehicle',
-      headerName: labels.truck,
+      field: 'szName',
+      headerName: labels.szName,
+      width: 130
+    },
+    {
+      field: 'orderRef',
+      headerName: labels.reference,
       width: 130
     },
     {
@@ -314,16 +319,9 @@ const GenerateOutboundTransportation2 = () => {
       width: 130
     },
     {
-      field: 'orderRef',
-      headerName: labels.reference,
+      field: 'clientName',
+      headerName: labels.clientName,
       width: 130
-    },
-    {
-      field: 'szRef',
-      headerName: labels.zone,
-      width: 130,
-      wrapText: true,
-      autoHeight: true
     },
     {
       field: 'volume',
@@ -334,7 +332,9 @@ const GenerateOutboundTransportation2 = () => {
     {
       field: 'notes',
       headerName: labels.notes,
-      flex: 1
+      flex: 1,
+      wrapText: true,
+      autoHeight: true
     }
   ]
 
@@ -585,7 +585,7 @@ const GenerateOutboundTransportation2 = () => {
               <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
             </Grid> */}
             <Grid item xs={6}></Grid>
-            <Grid item xs={2}>
+            <Grid item xs={3}>
               <CustomTextField
                 name='search'
                 value={formik.values.search}
@@ -648,7 +648,7 @@ const GenerateOutboundTransportation2 = () => {
         </Fixed>
         <Grow>
           <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
-            <Grid item xs={2} sx={{ display: 'flex' }}>
+            <Grid item xs={3} sx={{ display: 'flex' }}>
               <Grid container sx={{ display: 'flex', flex: 1 }}>
                 <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   <Table
@@ -702,7 +702,7 @@ const GenerateOutboundTransportation2 = () => {
                 handleCheckboxChange={onTripCheckbox}
               /> */}
             </Grid>
-            <Grid item xs={8} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={7} sx={{ display: 'flex', flex: 1 }}>
               <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
                 <Grid item xs={12} sx={{ display: 'flex' }}>
                   <Table
@@ -716,9 +716,7 @@ const GenerateOutboundTransportation2 = () => {
                       if (row) {
                         console.log(row)
 
-                        const filteredOrders = formik.values.vehicleOrders.list.filter(
-                          item => row.seqNo == item.seqNo
-                        )
+                        const filteredOrders = formik.values.vehicleOrders.list.filter(item => row.seqNo == item.seqNo)
 
                         setFilteredOrders({ list: filteredOrders })
                       }
@@ -778,7 +776,7 @@ const GenerateOutboundTransportation2 = () => {
         </Grow>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={2}></Grid>
+            <Grid item xs={4}></Grid>
             <Grid item xs={2}>
               <CustomButton
                 onClick={() => onPreviewOutbounds(selectedSaleZonesIds, selectedTrucks)}
@@ -786,7 +784,7 @@ const GenerateOutboundTransportation2 = () => {
                 color='#231f20'
               />
             </Grid>
-            <Grid item xs={4}></Grid>
+            <Grid item xs={2}></Grid>
             <Grid item xs={1.5}>
               <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly align='right' />
             </Grid>
