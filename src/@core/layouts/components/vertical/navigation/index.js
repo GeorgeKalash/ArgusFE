@@ -244,7 +244,7 @@ const Navigation = props => {
       setCurrentTabIndex(index)
       window.history.replaceState(null, '', openTabs[index].route)
     } else {
-      router.push(node)
+      router.push(node.path)
     }
 
     setLastOpenedPage(node)
