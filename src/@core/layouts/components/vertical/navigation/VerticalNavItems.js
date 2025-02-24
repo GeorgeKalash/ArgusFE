@@ -13,10 +13,11 @@ import { ControlContext } from 'src/providers/ControlContext'
 
 const VerticalNavItems = props => {
   const router = useRouter()
-  const { handleBookmark, setLastOpenedPage, setReloadOpenedPage } = useContext(MenuContext)
+  const { handleBookmark, setLastOpenedPage, setReloadOpenedPage, openTabs, setCurrentTabIndex, currentTabIndex } =
+    useContext(MenuContext)
   const { platformLabels } = useContext(ControlContext)
   const { verticalNavItems, settings, openFolders, setOpenFolders, navCollapsed, isArabic } = props
-  const { menu } = useContext(MenuContext)
+
   const [selectedNode, setSelectedNode] = useState(false)
 
   let theme = createTheme(themeOptions(settings, 'light'))
@@ -73,20 +74,31 @@ const VerticalNavItems = props => {
             if (node.children) {
               toggleFolder(node.id)
             } else {
-              setReloadOpenedPage([])
-              if (
-                findNode(
-                  menu,
-                  node.path.replace(/\/$/, '') + '/' === router.asPath ||
-                    node.path.replace(/\/$/, '') + '/' !== window?.history?.state?.as
-                )
-              ) {
+              if (openTabs[currentTabIndex]?.route === node.path.replace(/\/$/, '') + '/') {
+                setReloadOpenedPage([])
                 setReloadOpenedPage(node)
-              } else if (window?.history?.state?.as === node.path.replace(/\/$/, '') + '/') {
-                setReloadOpenedPage(node)
+              } else if (openTabs.find(tab => tab.route === node.path.replace(/\/$/, '') + '/')) {
+                const index = openTabs.findIndex(tab => tab.route === node.path.replace(/\/$/, '') + '/')
+                setCurrentTabIndex(index)
+                window.history.replaceState(null, '', openTabs[index].route)
               } else {
                 router.push(node.path)
               }
+
+              // if (
+              //   findNode(
+              //     menu,
+              //     node.path.replace(/\/$/, '') + '/' === router.asPath ||
+              //       node.path.replace(/\/$/, '') + '/' !== window?.history?.state?.as
+              //   )
+              // ) {
+              //   setReloadOpenedPage(node)
+              // } else if (window?.history?.state?.as === node.path.replace(/\/$/, '') + '/') {
+              //   setReloadOpenedPage(node)
+              // } else {
+              //   router.push(node.path)
+              // }
+
               setLastOpenedPage(node)
             }
           }}

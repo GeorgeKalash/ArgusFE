@@ -41,17 +41,43 @@ CustomTabPanel.propTypes = {
 
 const TabsProvider = ({ children }) => {
   const router = useRouter()
-  const { menu, gear, lastOpenedPage, reloadOpenedPage, setReloadOpenedPage } = useContext(MenuContext)
+
+  const {
+    menu,
+    gear,
+    lastOpenedPage,
+    reloadOpenedPage,
+    setReloadOpenedPage,
+    openTabs,
+    setOpenTabs,
+    currentTabIndex,
+    setCurrentTabIndex
+  } = useContext(MenuContext)
+
   const [anchorEl, setAnchorEl] = useState(null)
 
-  const [openTabs, setOpenTabs] = useState([
-    {
-      page: children,
-      route: '/default/',
-      label: 'Home'
-    }
-  ])
-  const [currentTabIndex, setCurrentTabIndex] = useState(0)
+  // const [openTabs, setOpenTabs] = useState([
+  //   {
+  //     page: children,
+  //     route: '/default/',
+  //     label: 'Home'
+  //   }
+  // ])
+
+  // useEffect(() => {
+  //   if (openTabs.length < 1) {
+  //     setOpenTabs([
+  //       {
+  //         page: children,
+  //         route: '/default/',
+  //         label: 'Home'
+  //       }
+  //     ])
+  //   }
+  // }, [children])
+
+  // const [currentTabIndex, setCurrentTabIndex] = useState(0)
+
   const [tabsIndex, setTabsIndex] = useState(null)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
   const { dashboardId } = JSON.parse(window.sessionStorage.getItem('userData'))
@@ -183,10 +209,10 @@ const TabsProvider = ({ children }) => {
         setCurrentTabIndex(index)
       }
     }
-  }, [router.asPath, reloadOpenedPage])
+  }, [router.asPath])
 
   useEffect(() => {
-    if (router.asPath === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
+    if (openTabs[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
 
     if (!initialLoadDone && router.asPath && menu.length > 0) {
       const newTabs = [
@@ -207,6 +233,9 @@ const TabsProvider = ({ children }) => {
             ? lastOpenedPage.name
             : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
         })
+
+        const index = newTabs.findIndex(tab => tab.route === router.asPath)
+        setCurrentTabIndex(index)
 
         // setCurrentTabIndex(1)
       }
