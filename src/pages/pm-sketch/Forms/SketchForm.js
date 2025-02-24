@@ -230,7 +230,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
-                    readOnly={isClosed}
+                    readOnly={isPosted || isClosed}
                     valueField='recordId'
                     displayField='name'
                     values={formik?.values}
@@ -266,6 +266,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     onChange={(event, newValue) => {
                       formik.setFieldValue('source', newValue?.key || '')
                     }}
+                    readOnly={isPosted || isClosed}
                     maxAccess={maxAccess}
                     error={formik.touched.source && Boolean(formik.errors.source)}
                   />
@@ -282,6 +283,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     required
+                    readOnly={isPosted || isClosed}
                     maxAccess={maxAccess}
                     values={formik.values}
                     onChange={(event, newValue) => {
@@ -298,7 +300,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     required
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('date', null)}
-                    readOnly={isClosed}
+                    readOnly={isPosted || isClosed}
                     error={formik.touched.date && Boolean(formik.errors.date)}
                     maxAccess={maxAccess}
                   />
@@ -315,6 +317,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                       formik.setFieldValue('metalId', newValue?.recordId)
                       formik.setFieldValue('metalPurity', newValue?.purity)
                     }}
+                    readOnly={isPosted || isClosed}
                     error={formik.touched.metalId && Boolean(formik.errors.metalId)}
                     maxAccess={maxAccess}
                   />
@@ -336,6 +339,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    readOnly={isPosted || isClosed}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('itemGroupId', newValue?.recordId || '')
@@ -352,6 +356,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     valueField='recordId'
                     displayField='name'
                     maxAccess={maxAccess}
+                    readOnly={isPosted || isClosed}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('productionClassId', newValue?.recordId || '')
                     }}
@@ -367,6 +372,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     valueField='recordId'
                     displayField='reference'
                     maxAccess={maxAccess}
+                    readOnly={isPosted || isClosed}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('productionStandardId', newValue?.recordId || '')
                     }}
@@ -385,6 +391,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     maxAccess={maxAccess}
+                    readOnly={isPosted || isClosed}
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('collectionId', newValue?.recordId)
@@ -401,7 +408,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     type='text'
                     label={labels.notes}
                     value={formik.values.notes}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     rows={3}
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('notes', e.target.value)}
