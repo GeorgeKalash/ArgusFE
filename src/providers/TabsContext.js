@@ -56,28 +56,6 @@ const TabsProvider = ({ children }) => {
 
   const [anchorEl, setAnchorEl] = useState(null)
 
-  // const [openTabs, setOpenTabs] = useState([
-  //   {
-  //     page: children,
-  //     route: '/default/',
-  //     label: 'Home'
-  //   }
-  // ])
-
-  // useEffect(() => {
-  //   if (openTabs.length < 1) {
-  //     setOpenTabs([
-  //       {
-  //         page: children,
-  //         route: '/default/',
-  //         label: 'Home'
-  //       }
-  //     ])
-  //   }
-  // }, [children])
-
-  // const [currentTabIndex, setCurrentTabIndex] = useState(0)
-
   const [tabsIndex, setTabsIndex] = useState(null)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
   const { dashboardId } = JSON.parse(window.sessionStorage.getItem('userData'))
@@ -153,7 +131,7 @@ const TabsProvider = ({ children }) => {
         setCurrentTabIndex(newValue)
       }
 
-      window.history.replaceState(null, '', openTabs?.filter(tab => tab.route !== tabRoute)?.[newValue]?.route)
+      window.history.replaceState(null, '', openTabs?.[newValue]?.route)
     } else if (index < currentTabIndex) {
       setCurrentTabIndex(currentValue => currentValue - 1)
     }
@@ -168,11 +146,10 @@ const TabsProvider = ({ children }) => {
   }
 
   useEffect(() => {
+    console.log('openTabs-2', openTabs)
     if (initialLoadDone) {
       const isTabOpen = openTabs.some((activeTab, index) => {
         if (activeTab.route === router.asPath || !window?.history?.state?.as) {
-          setCurrentTabIndex(index)
-
           return true
         }
 
@@ -205,11 +182,9 @@ const TabsProvider = ({ children }) => {
             return tab
           })
         )
-        const index = openTabs.findIndex(tab => tab.route === router.asPath)
-        setCurrentTabIndex(index)
       }
     }
-  }, [router.asPath])
+  }, [router.asPath, window.history.state?.as])
 
   useEffect(() => {
     if (openTabs[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
@@ -236,8 +211,6 @@ const TabsProvider = ({ children }) => {
 
         const index = newTabs.findIndex(tab => tab.route === router.asPath)
         setCurrentTabIndex(index)
-
-        // setCurrentTabIndex(1)
       }
 
       setOpenTabs(newTabs)
