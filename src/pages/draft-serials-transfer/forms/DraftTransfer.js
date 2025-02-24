@@ -37,12 +37,11 @@ export default function DraftTransfer({ labels, access, recordId }) {
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
 
-  const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [jumpToNextLine, setJumpToNextLine] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftTransfer,
-    access: access,
+    access,
     enabled: !recordId
   })
 
@@ -56,14 +55,17 @@ export default function DraftTransfer({ labels, access, recordId }) {
     }
   }, [documentType?.dtId])
 
+  const defUserSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const defSiteId = parseInt(defaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: recordId,
+      recordId,
       dtId: documentType?.dtId,
       reference: '',
       date: new Date(),
-      fromSiteId: null,
+      fromSiteId: defUserSiteId || defSiteId,
       toSiteId: null,
       notes: '',
       status: 1,
@@ -79,7 +81,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
           itemId: null,
           sku: '',
           itemName: '',
-          seqNo: null,
+          seqNo: 1,
           weight: 0,
           metalRef: '',
           designRef: ''
@@ -101,8 +103,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
             name: 'srlNo-first-row-check',
             test(value, context) {
               const { parent } = context
-              if (parent?.id == 1 && value) return true
-              if (parent?.id == 1 && !value) return true
+              if (parent?.id == 1) return true
               if (parent?.id > 1 && !value) return false
 
               return value
@@ -126,7 +127,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
         return
       }
 
-      const updatedRows = formik.values.serials
+      const updatedRows = formik?.values?.serials
         .filter(row => row.srlNo)
         .map(({ recordId, ...rest }, index) => ({
           ...rest,
@@ -473,7 +474,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
     {
       key: 'Import',
       condition: true,
-      onClick: () => onImportClick(),
+      onClick: onImportClick,
       disabled: !editMode || isPosted
     },
     {
@@ -509,49 +510,23 @@ export default function DraftTransfer({ labels, access, recordId }) {
       })
     )
 
-    await formik.setValues({
+    formik.setValues({
       ...formik.values,
       ...diHeader.record,
       serials: modifiedList.length ? modifiedList : formik?.initialValues?.serials
     })
   }
 
-  function getDTD(dtId) {
-    return getRequest({
-      extension: InventoryRepository.DocumentTypeDefaults.get,
-      parameters: `_dtId=${dtId}`
-    })
-  }
-
-  async function getSiteRef(siteId) {
-    if (!siteId) return null
-
-    const res = await getRequest({
-      extension: InventoryRepository.Site.get,
-      parameters: `_recordId=${siteId}`
-    })
-
-    return res?.record?.reference
-  }
-
   async function onChangeDtId(recordId) {
     if (recordId) {
-      const dtd = await getDTD(recordId)
+      const dtd = await getRequest({
+        extension: InventoryRepository.DocumentTypeDefaults.get,
+        parameters: `_dtId=${recordId}`
+      })
 
-      formik.setFieldValue('carrierId', dtd?.record?.carrierId)
-      formik.setFieldValue(
-        'fromSiteId',
-        dtd?.record?.siteId || userDefaultsDataState?.siteId || formik?.values?.fromSiteId
-      )
-      formik.setFieldValue('fromSiteRef', await getSiteRef(dtd?.record?.siteId))
-      formik.setFieldValue('toSiteId', dtd?.record?.toSiteId)
-      formik.setFieldValue('toSiteRef', await getSiteRef(dtd?.record?.toSiteId))
-    } else {
-      formik.setFieldValue('fromSiteId', null)
-      formik.setFieldValue('fromSiteRef', null)
-      formik.setFieldValue('carrierId', null)
-      formik.setFieldValue('toSiteId', null)
-      formik.setFieldValue('toSiteRef', null)
+      formik.setFieldValue('carrierId', dtd?.record?.carrierId || null)
+      formik.setFieldValue('fromSiteId', dtd?.record?.siteId || formik?.values?.fromSiteId || null)
+      formik.setFieldValue('toSiteId', dtd?.record?.toSiteId || null)
     }
   }
 
@@ -614,40 +589,13 @@ export default function DraftTransfer({ labels, access, recordId }) {
     formik.setFieldValue('totalWeight', totalWeight)
   }, [totalWeight])
 
-  async function getUserDefaultsData() {
-    const filteredList = userDefaultsData?.list?.filter(obj => obj.key === 'siteId') || []
-
-    const myObject = Object.fromEntries(filteredList.map(obj => [obj.key, obj.value ? parseInt(obj.value) : null]))
-
-    setUserDefaultsDataState(myObject)
-
-    return myObject
-  }
-
-  async function getDefaultsData() {
-    const filteredList = defaultsData?.list?.filter(obj => obj.key === 'siteId') || []
-
-    const myObject = Object.fromEntries(
-      filteredList.map(obj => [
-        obj.key,
-        obj.value === 'True' || obj.value === 'False' ? obj.value : obj.value ? parseInt(obj.value) : null
-      ])
-    )
-
-    return myObject
-  }
-
   useEffect(() => {
     ;(async function () {
-      const myObject = await getDefaultsData()
-      const myObject2 = await getUserDefaultsData()
-
       if (formik?.values?.recordId) {
         await refetchForm(formik?.values?.recordId)
       } else {
-        const defaultSiteId = myObject2?.siteId ? myObject2?.siteId : parseInt(myObject?.siteId)
+        const defaultSiteId = defUserSiteId || defSiteId
         formik.setFieldValue('fromSiteId', defaultSiteId)
-        formik.setFieldValue('fromSiteRef', await getSiteRef(defaultSiteId))
         if (formik?.values?.dtId) {
           onChangeDtId(formik?.values?.dtId)
         }
@@ -715,10 +663,8 @@ export default function DraftTransfer({ labels, access, recordId }) {
                     onChange={(event, newValue) => {
                       if (!newValue?.isInactive) {
                         formik.setFieldValue('fromSiteId', newValue?.recordId)
-                        formik.setFieldValue('fromSiteRef', newValue?.reference)
                       } else {
                         formik.setFieldValue('fromSiteId', null)
-                        formik.setFieldValue('fromSiteRef', null)
                         stackError({
                           message: labels.inactiveSite
                         })
@@ -757,10 +703,8 @@ export default function DraftTransfer({ labels, access, recordId }) {
                     onChange={(event, newValue) => {
                       if (!newValue?.isInactive) {
                         formik.setFieldValue('toSiteId', newValue?.recordId)
-                        formik.setFieldValue('toSiteRef', newValue?.reference)
                       } else {
                         formik.setFieldValue('toSiteId', null)
-                        formik.setFieldValue('toSiteRef', null)
                         stackError({
                           message: labels.inactiveSite
                         })
