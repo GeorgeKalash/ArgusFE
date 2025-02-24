@@ -801,8 +801,6 @@ export default function DraftTransfer({ labels, access, recordId }) {
             allowDelete={!isPosted}
             autoDelete={autoDelete}
           />
-        </Grow>
-        <Fixed>
           <Grid container spacing={16}>
             <Grid item xs={8}>
               <Grid container>
@@ -853,7 +851,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
               </Grid>
             </Grid>
           </Grid>
-        </Fixed>
+        </Grow>
       </VertLayout>
     </FormShell>
   )
