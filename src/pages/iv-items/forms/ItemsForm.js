@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState, useRef } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -69,13 +69,12 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       categoryName: '',
       defSaleMUId: '',
       pgId: '',
-      productionLevel:'',
-      isInactive: false,
+      productionLevel: '',
+      isInactive: false
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
-
     validationSchema: yup.object({
       categoryId: yup.string().required(),
       name: yup.string().required(),
@@ -297,6 +296,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 <Grid item xs={6}>
                   <CustomTextField
                     name='sku'
+                    required
                     label={labels.reference}
                     value={formik.values.sku}
                     maxAccess={access}
@@ -520,7 +520,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     displayField='value'
                     values={formik.values}
                     onChange={(event, newValue) => {
-                        formik.setFieldValue('productionLevel',  newValue?.key || '')
+                      formik.setFieldValue('productionLevel', newValue?.key || '')
                     }}
                     maxAccess={maxAccess}
                     error={formik.touched.productionLevel && Boolean(formik.errors.productionLevel)}
