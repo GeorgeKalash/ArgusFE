@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -14,6 +13,7 @@ import { ProductModelingRepository } from 'src/repositories/ProductModelingRepos
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import SketchForm from './Forms/SketchForm'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const Sketch = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -21,11 +21,13 @@ const Sketch = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: ProductModelingRepository.Sketch.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${
+        params || ''
+      }`
     })
 
     return { ...response, _startAt: _startAt }
@@ -37,12 +39,26 @@ const Sketch = () => {
     paginationParameters,
     refetch,
     access,
-    invalidate
+    invalidate,
+    filterBy,
+    clearFilter,
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ProductModelingRepository.Sketch.page,
-    datasetId: ResourceIds.Sketch
+    datasetId: ResourceIds.Sketch,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: ProductModelingRepository.Sketch.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
 
   const columns = [
     {
@@ -85,7 +101,7 @@ const Sketch = () => {
       field: 'wipName',
       headerName: labels.wip,
       flex: 1
-    },
+    }
   ]
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -125,10 +141,37 @@ const Sketch = () => {
     toast.success(platformLabels.Deleted)
   }
 
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar
+          onSearch={onSearch}
+          onClear={onClear}
+          labels={labels}
+          maxAccess={access}
+          onApply={onApply}
+          onAdd={add}
+          reportName={'PMSKH'}
+        />
       </Fixed>
       <Grow>
         <Table
