@@ -554,7 +554,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 name='amount'
                 required
                 label={labels.amount}
-                readOnly={editMode}
                 value={formik.values.amount}
                 maxAccess={maxAccess}
                 maxLength={'10'}
