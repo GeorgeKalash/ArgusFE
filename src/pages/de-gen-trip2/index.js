@@ -62,6 +62,7 @@ const GenerateOutboundTransportation2 = () => {
           volume: 0
         }
       ],
+      vehicleAllocations: { list: [] },
       vehicleOrders: { list: [] },
       deliveryOrders: { list: [] },
       data: { list: [] },
@@ -249,8 +250,14 @@ const GenerateOutboundTransportation2 = () => {
       headerName: labels.name,
       wrapText: true,
       autoHeight: true,
-      flex: 1,
+      width: 120,
       rowDrag: true
+    },
+    {
+      field: 'volume',
+      headerName: labels.volume,
+      flex: 1,
+      type: 'number'
     }
   ]
 
@@ -269,10 +276,10 @@ const GenerateOutboundTransportation2 = () => {
     }
   ]
 
-  const columnsSelectedTrucks = [
+  const columnsVehicleAllocations = [
     {
-      field: 'plateNo',
-      headerName: labels.plateNo,
+      field: 'seqNo',
+      headerName: labels.seqNo,
       flex: 1
     },
     {
@@ -357,19 +364,20 @@ const GenerateOutboundTransportation2 = () => {
 
       return updatedIds.join(',')
     })
-    setSelectedSaleZones(prev => {
-      // Ensure `prev` is an object with a `list` property or fallback to an empty list.
-      const currentList = prev?.list || []
 
-      let updatedZonesList
-      if (checked) {
-        updatedZonesList = [...currentList, row] // Add the new zone if checked.
-      } else {
-        updatedZonesList = currentList.filter(zone => zone.recordId !== row.recordId) // Remove the zone if unchecked.
-      }
+    // setSelectedSaleZones(prev => {
+    //   // Ensure `prev` is an object with a `list` property or fallback to an empty list.
+    //   const currentList = prev?.list || []
 
-      return { list: updatedZonesList } // Return the updated state as an object.
-    })
+    //   let updatedZonesList
+    //   if (checked) {
+    //     updatedZonesList = [...currentList, row] // Add the new zone if checked.
+    //   } else {
+    //     updatedZonesList = currentList.filter(zone => zone.recordId !== row.recordId) // Remove the zone if unchecked.
+    //   }
+
+    //   return { list: updatedZonesList } // Return the updated state as an object.
+    // })
   }
 
   const onTripCheckbox = (row, checked) => {
@@ -405,12 +413,19 @@ const GenerateOutboundTransportation2 = () => {
   const onPreviewOutbounds = async (szIds, trucks) => {
     const commaSeparatedTrucks = trucks.map(truck => truck.recordId).join(',')
 
+    const volumes = formik.values.selectedTrucks?.map(truck => truck.volume).join(',')
+
     const items = await getRequest({
       extension: DeliveryRepository.GenerateTrip.previewTRP,
-      parameters: `_szIds=${szIds || 0}&_vehicleIds=${commaSeparatedTrucks}`
+      parameters: `_szIds=${szIds || 0}&_volumes=${volumes}`
     })
 
-    formik.setFieldValue('selectedTrucks', { list: items?.record?.vehicleAllocations })
+    if (items?.record?.vehicleAllocations) {
+      formik.setFieldValue('vehicleAllocations', { list: items.record.vehicleAllocations })
+    }
+
+    //formik.setFieldValue('selectedTrucks', { list: items?.record?.vehicleAllocations })
+
     formik.setFieldValue('vehicleOrders', { list: items?.record?.vehicleOrders })
 
     // if (!items?.list) {
@@ -461,6 +476,28 @@ const GenerateOutboundTransportation2 = () => {
   }, [formik?.values?.salesZones, formik.values.search])
 
   const filteredData = formik?.values?.salesZones?.list.length > 0 ? filteredSalesZones : formik?.values?.salesZones
+
+  const handleImport = async () => {
+    const items = await getRequest({
+      extension: DeliveryRepository.Volume.vol,
+      parameters: `_szIds=${selectedSaleZonesIds || 0}`
+    })
+
+    setSelectedSaleZones(() => {
+      const selectedRows = filteredData?.list
+        .filter(item => item.checked)
+        .map(item => {
+          const volumeData = items?.list.find(v => v.szId === item.recordId) || { volume: 0 }
+
+          return {
+            ...item,
+            volume: volumeData.volume
+          }
+        })
+
+      return { list: selectedRows }
+    })
+  }
 
   const handleTruckNoChange = truckNo => {
     if (!truckNo || truckNo <= 0) {
@@ -613,7 +650,7 @@ const GenerateOutboundTransportation2 = () => {
           <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
             <Grid item xs={2} sx={{ display: 'flex' }}>
               <Grid container sx={{ display: 'flex', flex: 1 }}>
-                <Grid item xs={12} sx={{ display: 'flex' }}>
+                <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   <Table
                     columns={columnsZones}
                     gridData={filteredData}
@@ -624,6 +661,12 @@ const GenerateOutboundTransportation2 = () => {
                     showCheckboxColumn={true}
                     showSelectAll={false}
                     handleCheckboxChange={onSaleZoneCheckbox}
+                  />
+                  <CustomButton
+                    onClick={handleImport}
+                    label={platformLabels.Import}
+                    color='#231f20'
+                    image={'import.png'}
                   />
                 </Grid>
                 <Grid item xs={12} sx={{ display: 'flex' }}>
@@ -663,8 +706,8 @@ const GenerateOutboundTransportation2 = () => {
               <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
                 <Grid item xs={12} sx={{ display: 'flex' }}>
                   <Table
-                    columns={columnsSelectedTrucks}
-                    gridData={formik?.values?.selectedTrucks}
+                    columns={columnsVehicleAllocations}
+                    gridData={formik?.values?.vehicleAllocations}
                     rowId={['recordId']}
                     isLoading={false}
                     pagination={false}
@@ -674,7 +717,7 @@ const GenerateOutboundTransportation2 = () => {
                         console.log(row)
 
                         const filteredOrders = formik.values.vehicleOrders.list.filter(
-                          item => row.vehicleId == item.vehicleId
+                          item => row.seqNo == item.seqNo
                         )
 
                         setFilteredOrders({ list: filteredOrders })

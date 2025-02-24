@@ -78,5 +78,8 @@ export const DeliveryRepository = {
     page: service + 'pageLDT',
     set: service + 'setLDT',
     del: service + 'delLDT'
+  },
+  Volume: {
+    vol: service + 'volZO'
   }
 }
