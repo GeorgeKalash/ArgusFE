@@ -1220,8 +1220,6 @@ export default function DraftReturnForm({ labels, access, recordId }) {
             allowAddNewLine={!formik?.values?.search}
             autoDelete={autoDelete}
           />
-        </Grow>
-        <Fixed>
           <Grid container spacing={16}>
             <Grid item xs={8}>
               <Grid container>
@@ -1304,7 +1302,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
               </Grid>
             </Grid>
           </Grid>
-        </Fixed>
+        </Grow>
       </VertLayout>
     </FormShell>
   )
