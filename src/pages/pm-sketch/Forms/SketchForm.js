@@ -92,7 +92,9 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
 
         const res2 = await getData(res.recordId)
 
-        formik.setValues(res.record)
+        formik.setValues({
+          ...res2.record
+        })
 
         invalidate()
       } else toast.success(platformLabels.Edited)
@@ -125,7 +127,9 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
 
     const res = await getData(recId)
 
-    formik.setValues(res.record)
+    formik.setValues({
+      ...res.record
+    })
   }
 
   const onReopen = async recId => {
@@ -140,7 +144,9 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
     invalidate()
     const res = await getData(recId)
 
-    formik.setValues(res.record)
+    formik.setValues({
+      ...res.record
+    })
   }
 
   const onPost = async recId => {
@@ -155,7 +161,9 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
     invalidate()
     const res = await getData(recId)
 
-    formik.setValues(res.record)
+    formik.setValues({
+      ...res.record
+    })
   }
 
   const actions = [
@@ -196,7 +204,9 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
       if (recordId) {
         const res = await getData(recordId)
 
-        formik.setValues(res.record)
+        formik.setValues({
+          ...res.record
+        })
       }
     })()
   }, [])
