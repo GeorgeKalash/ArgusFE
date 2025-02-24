@@ -45,7 +45,7 @@ const AvailabilityCrossTab = () => {
     return {
       count: response?.record?.recordCount || 0,
 
-      //FIX SCROLL, TEST PARAMS, TEST FORMS, IMPLEMENT PROP
+      //FIX SCROLL, TEST PARAMS, FIX FORMS
       list: response?.record?.recordCount ? gridData : [],
       _startAt: _startAt
     }
@@ -178,7 +178,8 @@ const AvailabilityCrossTab = () => {
   }
 
   const onLot = obj => {
-    openLotForm(obj.lotCategoryId, obj.itemId, obj.siteId)
+    console.log('obj', obj)
+    openLotForm(obj.lotCategoryId, obj.itemId)
   }
 
   function openSerialForm(itemId) {
@@ -194,14 +195,13 @@ const AvailabilityCrossTab = () => {
     })
   }
 
-  function openLotForm(lotId, itemId, siteId) {
+  function openLotForm(categoryId, itemId) {
     stack({
       Component: LotForm,
       props: {
         labels,
-        lotId,
+        categoryId,
         itemId,
-        siteId,
         maxAccess: access
       },
       width: 1150,

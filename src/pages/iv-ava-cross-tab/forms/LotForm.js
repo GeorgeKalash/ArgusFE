@@ -5,7 +5,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const LotForm = ({ labels, maxAccess, lotId, itemId, siteId }) => {
+const LotForm = ({ labels, categoryId, itemId, maxAccess }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const [data, setData] = useState([])
@@ -13,7 +13,7 @@ const LotForm = ({ labels, maxAccess, lotId, itemId, siteId }) => {
   async function fetchGridData() {
     const response = await getRequest({
       extension: InventoryRepository.AvailabilityLot.qry,
-      parameters: `_itemId=${itemId}&_siteId=${siteId}`
+      parameters: `_itemId=${itemId}&_siteId=0`
     })
     setData(response)
   }
@@ -21,11 +21,6 @@ const LotForm = ({ labels, maxAccess, lotId, itemId, siteId }) => {
   const [columns, setColumns] = useState([])
 
   async function getDynamicColumns() {
-    const response = await getRequest({
-      extension: InventoryRepository.LotCategory.get,
-      parameters: `_recordId=${lotId}`
-    })
-
     const dynamicColumns = [
       {
         field: 'lotRef',
@@ -39,54 +34,61 @@ const LotForm = ({ labels, maxAccess, lotId, itemId, siteId }) => {
       }
     ]
 
-    if (response.record.udd1) {
-      dynamicColumns.push({
-        field: 'udd1',
-        headerName: response.record.udd1,
-        flex: 1,
-        type: 'date'
+    if (categoryId) {
+      const response = await getRequest({
+        extension: InventoryRepository.LotCategory.get,
+        parameters: `_recordId=${categoryId}`
       })
-    }
 
-    if (response.record.udd2) {
-      dynamicColumns.push({
-        field: 'udd2',
-        headerName: response.record.udd2,
-        flex: 1,
-        type: 'date'
-      })
-    }
+      if (response?.record?.udd1) {
+        dynamicColumns.push({
+          field: 'udd1',
+          headerName: response.record.udd1,
+          flex: 1,
+          type: 'date'
+        })
+      }
 
-    if (response.record.udn1) {
-      dynamicColumns.push({
-        field: 'udn1',
-        headerName: response.record.udn1,
-        flex: 1
-      })
-    }
+      if (response?.record?.udd2) {
+        dynamicColumns.push({
+          field: 'udd2',
+          headerName: response.record.udd2,
+          flex: 1,
+          type: 'date'
+        })
+      }
 
-    if (response.record.udn2) {
-      dynamicColumns.push({
-        field: 'udn2',
-        headerName: response.record.udn2,
-        flex: 1
-      })
-    }
+      if (response?.record?.udn1) {
+        dynamicColumns.push({
+          field: 'udn1',
+          headerName: response.record.udn1,
+          flex: 1
+        })
+      }
 
-    if (response.record.udt1) {
-      dynamicColumns.push({
-        field: 'udt1',
-        headerName: response.record.udt1,
-        flex: 1
-      })
-    }
+      if (response?.record?.udn2) {
+        dynamicColumns.push({
+          field: 'udn2',
+          headerName: response.record.udn2,
+          flex: 1
+        })
+      }
 
-    if (response.record.udt2) {
-      dynamicColumns.push({
-        field: 'udt2',
-        headerName: response.record.udt2,
-        flex: 1
-      })
+      if (response?.record?.udt1) {
+        dynamicColumns.push({
+          field: 'udt1',
+          headerName: response.record.udt1,
+          flex: 1
+        })
+      }
+
+      if (response?.record?.udt2) {
+        dynamicColumns.push({
+          field: 'udt2',
+          headerName: response.record.udt2,
+          flex: 1
+        })
+      }
     }
 
     dynamicColumns.push({
