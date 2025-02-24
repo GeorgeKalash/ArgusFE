@@ -7,23 +7,26 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const SerialForm = ({ labels, itemId, siteId }) => {
+const SerialForm = ({ labels, itemId }) => {
   const { getRequest } = useContext(RequestsContext)
   const [data, setData] = useState([])
 
   async function fetchGridData() {
     const response = await getRequest({
       extension: InventoryRepository.AvailabilitySerial.qry,
-      parameters: `_itemId=${itemId}&_siteId=${siteId}&_srlNo=&_startAt=0&_pageSize=50`
+      parameters: `_itemId=${itemId}&_siteId=$0&_srlNo=0&_startAt=0&_pageSize=50`
     })
     setData(response)
   }
 
   const { refetch, access, paginationParameters } = useResourceQuery({
-    datasetId: ResourceIds.AvailabilitiesBySite,
     queryFn: fetchGridData,
     endpointId: InventoryRepository.AvailabilitySerial.qry
   })
+
+  useEffect(() => {
+    fetchGridData()
+  }, [])
 
   const columns = [
     {
@@ -41,12 +44,6 @@ const SerialForm = ({ labels, itemId, siteId }) => {
       headerName: labels.site,
       flex: 1
     }
-    
-    /*  {
-      field: 'pcs',
-      headerName: labels.pieces,
-      flex: 1
-    } */
   ]
 
   return (

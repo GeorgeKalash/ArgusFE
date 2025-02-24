@@ -26,8 +26,10 @@ const AvailabilityCrossTab = () => {
 
     const response = await getRequest({
       extension: ReportIvGenerator.Report415,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_properties=` //fix properties
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_properties=`
     })
+
+    console.log('response', response)
 
     let gridData
 
@@ -41,10 +43,10 @@ const AvailabilityCrossTab = () => {
     }
 
     return {
-      count: response.record.availabilities.length > 0 ? response.record.availabilities.length : 0,
+      count: response?.record?.recordCount || 0,
 
-      //FIX COUNT, FIX SCROLL, TEST PARAMS, TEST FORMS, IMPLEMENT PROP
-      list: response.record.availabilities.length > 0 ? gridData : [],
+      //FIX SCROLL, TEST PARAMS, TEST FORMS, IMPLEMENT PROP
+      list: response?.record?.recordCount ? gridData : [],
       _startAt: _startAt
     }
   }
@@ -172,20 +174,19 @@ const AvailabilityCrossTab = () => {
   })
 
   const onSerial = obj => {
-    openSerialForm(obj.itemId, obj.siteId)
+    openSerialForm(obj.itemId)
   }
 
   const onLot = obj => {
     openLotForm(obj.lotCategoryId, obj.itemId, obj.siteId)
   }
 
-  function openSerialForm(itemId, siteId) {
+  function openSerialForm(itemId) {
     stack({
       Component: SerialForm,
       props: {
         labels,
-        itemId,
-        siteId
+        itemId
       },
       width: 600,
       height: 400,
