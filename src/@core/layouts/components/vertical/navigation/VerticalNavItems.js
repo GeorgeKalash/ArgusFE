@@ -13,6 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 
 const VerticalNavItems = props => {
   const router = useRouter()
+
   const { handleBookmark, setLastOpenedPage, setReloadOpenedPage, openTabs, setCurrentTabIndex, currentTabIndex } =
     useContext(MenuContext)
   const { platformLabels } = useContext(ControlContext)
