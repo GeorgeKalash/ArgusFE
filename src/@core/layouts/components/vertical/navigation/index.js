@@ -64,6 +64,7 @@ const Navigation = props => {
 
   const router = useRouter()
   const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props
+
   const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex } =
     useContext(MenuContext)
   const { platformLabels } = useContext(ControlContext)
