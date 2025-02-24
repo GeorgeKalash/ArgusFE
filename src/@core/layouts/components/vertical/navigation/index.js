@@ -64,7 +64,8 @@ const Navigation = props => {
 
   const router = useRouter()
   const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props
-  const { setLastOpenedPage } = useContext(MenuContext)
+  const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex } =
+    useContext(MenuContext)
   const { platformLabels } = useContext(ControlContext)
   const [currentActiveGroup, setCurrentActiveGroup] = useState([])
   const [filteredMenu, setFilteredMenu] = useState([])
@@ -233,6 +234,21 @@ const Navigation = props => {
 
   const ScrollWrapper = hidden ? Box : PerfectScrollbar
 
+  const go = node => {
+    if (openTabs[currentTabIndex]?.route === node.path.replace(/\/$/, '') + '/') {
+      setReloadOpenedPage([])
+      setReloadOpenedPage(node)
+    } else if (openTabs.find(tab => tab.route === node.path.replace(/\/$/, '') + '/')) {
+      const index = openTabs.findIndex(tab => tab.route === node.path.replace(/\/$/, '') + '/')
+      setCurrentTabIndex(index)
+      window.history.replaceState(null, '', openTabs[index].route)
+    } else {
+      router.push(node)
+    }
+
+    setLastOpenedPage(node)
+  }
+
   return (
     <ThemeProvider theme={darkTheme}>
       <Drawer {...props}>
@@ -273,8 +289,7 @@ const Navigation = props => {
             Image={<SettingsIcon />}
             TooltipTitle={platformLabels.Gear}
             onClickAction={GearItem => {
-              router.push(GearItem?.path)
-              setLastOpenedPage(GearItem)
+              go(GearItem)
             }}
             map={gear.gear}
             navCollapsed={navCollapsed}
@@ -284,8 +299,7 @@ const Navigation = props => {
               Image={<GradeIcon style={{ color: 'yellow' }} />}
               TooltipTitle={platformLabels.Favorite}
               onClickAction={favorite => {
-                router.push(favorite?.path)
-                setLastOpenedPage(favorite)
+                go(favorite)
               }}
               map={filterFav(menu)}
               navCollapsed={navCollapsed}
