@@ -146,7 +146,6 @@ const TabsProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    console.log('openTabs-2', openTabs)
     if (initialLoadDone) {
       const isTabOpen = openTabs.some((activeTab, index) => {
         if (activeTab.route === router.asPath || !window?.history?.state?.as) {
@@ -184,7 +183,7 @@ const TabsProvider = ({ children }) => {
         )
       }
     }
-  }, [router.asPath, window.history.state?.as])
+  }, [router.asPath, window.history?.state?.as])
 
   useEffect(() => {
     if (openTabs[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
@@ -210,6 +209,7 @@ const TabsProvider = ({ children }) => {
         })
 
         const index = newTabs.findIndex(tab => tab.route === router.asPath)
+
         setCurrentTabIndex(index)
       }
 

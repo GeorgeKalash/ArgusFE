@@ -289,9 +289,7 @@ const Navigation = props => {
           <Dropdown
             Image={<SettingsIcon />}
             TooltipTitle={platformLabels.Gear}
-            onClickAction={GearItem => {
-              go(GearItem)
-            }}
+            onClickAction={GearItem => go(GearItem)}
             map={gear.gear}
             navCollapsed={navCollapsed}
           />
@@ -299,9 +297,7 @@ const Navigation = props => {
             <Dropdown
               Image={<GradeIcon style={{ color: 'yellow' }} />}
               TooltipTitle={platformLabels.Favorite}
-              onClickAction={favorite => {
-                go(favorite)
-              }}
+              onClickAction={favorite => go(favorite)}
               map={filterFav(menu)}
               navCollapsed={navCollapsed}
             />
