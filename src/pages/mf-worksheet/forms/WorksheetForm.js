@@ -29,6 +29,7 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import DamageForm from 'src/pages/damages/forms/DamageForm'
 import { useWindow } from 'src/windows'
 import WorkFlow from 'src/components/Shared/WorkFlow'
+import { KeyboardReturn } from '@mui/icons-material'
 
 export default function WorksheetForm({ labels, maxAccess, setStore, store }) {
   const { platformLabels } = useContext(ControlContext)
@@ -163,7 +164,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store }) {
   }, [])
 
   const {
-    query: { operationTableData }
+    query: { data }
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.Worksheet.summary,
@@ -177,13 +178,12 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store }) {
       parameters: `_worksheetId=${recordId}`
     })
   }
-  console.log(operationTableData, 'operationTableData')
 
   const isPosted = formik.values.status === 3
-  const totalIssued = operationTableData ? operationTableData.list.reduce((op, item) => op + item.issued_qty) : 0
-  const totalLoss = operationTableData ? operationTableData.list.reduce((op, item) => op + item.lost_qty) : 0
-  const totalReturned = operationTableData ? operationTableData.list.reduce((op, item) => op + item.returned_qty) : 0
-  const otalConsumed = operationTableData ? operationTableData.list.reduce((op, item) => op + item.consumed_qty) : 0
+  const totalIssued = data ? data.list.reduce((op, item) => op + item?.issued_qty, 0) : 0
+  const totalLoss = data ? data.list.reduce((op, item) => op + item?.lost_qty, 0) : 0
+  const totalReturned = data ? data.list.reduce((op, item) => op + item?.returned_qty, 0) : 0
+  const otalConsumed = data ? data.list.reduce((op, item) => op + item?.consumed_qty, 0) : 0
 
   const onWorkFlowClick = async () => {
     stack({
@@ -621,7 +621,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store }) {
         <Grow>
           <Table
             name='operationTable'
-            gridData={operationTableData}
+            gridData={data}
             maxAccess={access}
             columns={[
               { field: 'operationRef', headerName: labels.operationRef, flex: 1 },
