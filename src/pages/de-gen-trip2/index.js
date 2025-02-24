@@ -20,9 +20,14 @@ import { useWindow } from 'src/windows'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomButton from 'src/components/Inputs/CustomButton'
+import { DataGrid } from 'src/components/Shared/DataGrid'
 
-const GenerateOutboundTransportation = () => {
-  const [selectedSaleZones, setSelectedSaleZones] = useState('')
+const GenerateOutboundTransportation2 = () => {
+  const [selectedSaleZones, setSelectedSaleZones] = useState([])
+  const [selectedSaleZonesIds, setSelectedSaleZonesIds] = useState('')
+  const [selectedTrucks, setSelectedTrucks] = useState([])
+  const [filteredOrders, setFilteredOrders] = useState([])
+  const [trucks, setTrucks] = useState([])
   const [reCalc, setReCalc] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
@@ -49,6 +54,15 @@ const GenerateOutboundTransportation = () => {
       volume: 0,
       totalAmount: 0,
       totalVolume: 0,
+      truckNo: 0,
+      selectedTrucks: [
+        {
+          id: 1,
+          no: 1,
+          volume: 0
+        }
+      ],
+      vehicleOrders: { list: [] },
       deliveryOrders: { list: [] },
       data: { list: [] },
       salesZones: { list: [] }
@@ -103,7 +117,7 @@ const GenerateOutboundTransportation = () => {
 
   const onSelectCheckBox = (row, checked) => {
     if (!checked) {
-      const selectedIds = selectedSaleZones ? selectedSaleZones.split(',') : []
+      const selectedIds = selectedSaleZonesIds ? selectedSaleZonesIds.split(',') : []
       let modifiedData = [...(formik?.values?.data?.list?.length > 0 ? formik.values.data.list : [])]
 
       const itemToAdd = formik?.values?.deliveryOrders?.list?.find(item => item.recordId == row.recordId)
@@ -161,6 +175,19 @@ const GenerateOutboundTransportation = () => {
     }
   }
 
+  const getAllTrucks = async () => {
+    const trucks = await getRequest({
+      extension: DeliveryRepository.Vehicle.qry,
+      parameters: ``
+    })
+
+    if (!trucks?.list) {
+      return
+    }
+
+    setTrucks(trucks)
+  }
+
   useEffect(() => {
     if (reCalc) {
       const totalAmountValue = totalAmountFromChecked()
@@ -170,6 +197,10 @@ const GenerateOutboundTransportation = () => {
       setReCalc(false)
     }
   }, [reCalc])
+
+  useEffect(() => {
+    getAllTrucks()
+  }, [])
 
   const totalVolume = formik?.values?.deliveryOrders?.list?.reduce((sum, order) => sum + (order.volume || 0), 0) || 0
   const totalAmount = formik?.values?.deliveryOrders?.list?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0
@@ -212,50 +243,49 @@ const GenerateOutboundTransportation = () => {
     }
   ]
 
-  const columnsOrders = [
+  const columnsSelectedZones = [
     {
-      field: 'date',
-      headerName: labels.date,
-      type: 'date',
-      width: 120
-    },
-    {
-      field: 'reference',
-      headerName: labels.reference,
-      width: 130
-    },
-    {
-      field: 'spName',
-      headerName: labels.salesPerson,
-      width: 130,
-      wrapText: true,
-      autoHeight: true
-    },
-    {
-      field: 'szName',
-      headerName: labels.zone,
-      width: 120,
-      wrapText: true,
-      autoHeight: true
-    },
-    {
-      field: 'clientName',
-      headerName: labels.client,
+      field: 'name',
+      headerName: labels.name,
       wrapText: true,
       autoHeight: true,
-      width: 130
+      flex: 1,
+      rowDrag: true
+    }
+  ]
+
+  const columnsTrucks = [
+    {
+      component: 'numberfield',
+      name: 'no',
+      label: labels.No,
+      flex: 1
     },
     {
-      field: 'amount',
-      headerName: labels.amount,
+      component: 'numberfield',
+      name: 'volume',
+      label: labels.allocatedVolume,
+      flex: 2
+    }
+  ]
+
+  const columnsSelectedTrucks = [
+    {
+      field: 'plateNo',
+      headerName: labels.plateNo,
+      flex: 1
+    },
+    {
+      field: 'allocatedVolume',
+      headerName: labels.allocatedVolume,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'volume',
       headerName: labels.volume,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'notes',
@@ -264,44 +294,29 @@ const GenerateOutboundTransportation = () => {
     }
   ]
 
-  const columnsDeliveryOrders = [
+  const columnsSalesOrders = [
     {
-      field: 'date',
-      headerName: labels.date,
+      field: 'vehicle',
+      headerName: labels.truck,
+      width: 130
+    },
+    {
+      field: 'orderDate',
+      headerName: labels.orderDate,
       type: 'date',
       width: 130
     },
     {
-      field: 'reference',
+      field: 'orderRef',
       headerName: labels.reference,
       width: 130
     },
     {
-      field: 'spName',
-      headerName: labels.salesPerson,
+      field: 'szRef',
+      headerName: labels.zone,
       width: 130,
       wrapText: true,
       autoHeight: true
-    },
-    {
-      field: 'szName',
-      headerName: labels.zone,
-      width: 120,
-      wrapText: true,
-      autoHeight: true
-    },
-    {
-      field: 'clientName',
-      headerName: labels.client,
-      wrapText: true,
-      autoHeight: true,
-      width: 130
-    },
-    {
-      field: 'amount',
-      headerName: labels.amount,
-      type: 'number',
-      width: 130
     },
     {
       field: 'volume',
@@ -335,12 +350,39 @@ const GenerateOutboundTransportation = () => {
   const onSaleZoneCheckbox = (row, checked) => {
     const { recordId } = row
 
-    setSelectedSaleZones(prev => {
+    setSelectedSaleZonesIds(prev => {
       const ids = prev ? prev.split(',') : []
 
       const updatedIds = checked ? [...new Set([...ids, recordId])] : ids.filter(id => id != recordId)
 
       return updatedIds.join(',')
+    })
+    setSelectedSaleZones(prev => {
+      // Ensure `prev` is an object with a `list` property or fallback to an empty list.
+      const currentList = prev?.list || []
+
+      let updatedZonesList
+      if (checked) {
+        updatedZonesList = [...currentList, row] // Add the new zone if checked.
+      } else {
+        updatedZonesList = currentList.filter(zone => zone.recordId !== row.recordId) // Remove the zone if unchecked.
+      }
+
+      return { list: updatedZonesList } // Return the updated state as an object.
+    })
+  }
+
+  const onTripCheckbox = (row, checked) => {
+    setSelectedTrucks(prev => {
+      let updatedTrucks
+
+      if (checked) {
+        updatedTrucks = [...prev, row]
+      } else {
+        updatedTrucks = prev.filter(truck => truck.recordId !== row.recordId)
+      }
+
+      return updatedTrucks
     })
   }
 
@@ -358,6 +400,25 @@ const GenerateOutboundTransportation = () => {
     const newItems = items.list.filter(item => !existingDeliveryOrderIds.has(item.recordId))
 
     formik.setFieldValue('data', { list: newItems })
+  }
+
+  const onPreviewOutbounds = async (szIds, trucks) => {
+    const commaSeparatedTrucks = trucks.map(truck => truck.recordId).join(',')
+
+    const items = await getRequest({
+      extension: DeliveryRepository.GenerateTrip.previewTRP,
+      parameters: `_szIds=${szIds || 0}&_vehicleIds=${commaSeparatedTrucks}`
+    })
+
+    formik.setFieldValue('selectedTrucks', { list: items?.record?.vehicleAllocations })
+    formik.setFieldValue('vehicleOrders', { list: items?.record?.vehicleOrders })
+
+    // if (!items?.list) {
+    //   return
+    // }
+    // const existingDeliveryOrderIds = new Set(formik?.values?.deliveryOrders?.list?.map(item => item.recordId))
+
+    // const newItems = items.list.filter(item => !existingDeliveryOrderIds.has(item.recordId))
   }
 
   const onAdd = () => {
@@ -378,7 +439,8 @@ const GenerateOutboundTransportation = () => {
   }
 
   const resetForm = () => {
-    setSelectedSaleZones('')
+    setSelectedSaleZones([])
+    setSelectedSaleZonesIds('')
     formik.resetForm()
   }
 
@@ -400,6 +462,22 @@ const GenerateOutboundTransportation = () => {
 
   const filteredData = formik?.values?.salesZones?.list.length > 0 ? filteredSalesZones : formik?.values?.salesZones
 
+  const handleTruckNoChange = truckNo => {
+    if (!truckNo || truckNo <= 0) {
+      formik.setFieldValue('selectedTrucks', [])
+
+      return
+    }
+
+    const trucks = Array.from({ length: truckNo }, (_, index) => ({
+      id: index + 1,
+      no: index + 1,
+      volume: 0
+    }))
+
+    formik.setFieldValue('selectedTrucks', trucks)
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.GenerateTrip}
@@ -411,9 +489,9 @@ const GenerateOutboundTransportation = () => {
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
+          <Grid container spacing={1.5}>
             <Grid item xs={3}>
-              <Grid container spacing={2}>
+              <Grid container spacing={1.5}>
                 <Grid item xs={9}>
                   <ResourceComboBox
                     endpointId={DeliveryRepository.GenerateTrip.root}
@@ -427,7 +505,8 @@ const GenerateOutboundTransportation = () => {
                       formik.setFieldValue('szId', newValue?.recordId || null)
                       onSaleZoneChange(newValue?.recordId)
                       formik.setFieldValue('data', { list: [] })
-                      setSelectedSaleZones('')
+                      setSelectedSaleZonesIds('')
+                      setSelectedSaleZones([])
                     }}
                     readOnly={formik?.values?.deliveryOrders?.list.length > 0}
                     error={formik.touched.szId && Boolean(formik.errors.szId)}
@@ -445,7 +524,7 @@ const GenerateOutboundTransportation = () => {
               </Grid>
             </Grid>
             <Grid item xs={2}>
-              <ResourceComboBox
+              {/*  <ResourceComboBox
                 endpointId={DeliveryRepository.Vehicle.qry}
                 name='vehicleId'
                 label={labels.truck}
@@ -463,13 +542,13 @@ const GenerateOutboundTransportation = () => {
                 required
                 error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
                 maxAccess={access}
-              />
+              /> */}
             </Grid>
-            <Grid item xs={2}>
+            {/* <Grid item xs={2}>
               <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
-            </Grid>
-            <Grid item xs={5}></Grid>
-            <Grid item xs={3}>
+            </Grid> */}
+            <Grid item xs={6}></Grid>
+            <Grid item xs={2}>
               <CustomTextField
                 name='search'
                 value={formik.values.search}
@@ -484,6 +563,23 @@ const GenerateOutboundTransportation = () => {
               />
             </Grid>
             <Grid item xs={2}>
+              <CustomNumberField
+                name='truckNo'
+                label={labels.truckNo}
+                value={formik.values.truckNo}
+                onChange={async e => {
+                  formik.setFieldValue('truckNo', e.target.value)
+
+                  //handleTruckNoChange(e.target.value)
+                }}
+                onBlur={async e => {
+                  //formik.setFieldValue('truckNo', e.target.value)
+
+                  handleTruckNoChange(e.target.value)
+                }}
+              />
+            </Grid>
+            {/* <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={DeliveryRepository.Driver.qry}
                 name='driverId'
@@ -497,8 +593,8 @@ const GenerateOutboundTransportation = () => {
                 error={formik.touched.driverId && Boolean(formik.errors.driverId)}
                 maxAccess={access}
               />
-            </Grid>
-            <Grid item xs={2}>
+            </Grid> */}
+            {/* <Grid item xs={2}>
               <CustomNumberField
                 name='capacity'
                 label={labels.capacity}
@@ -506,7 +602,7 @@ const GenerateOutboundTransportation = () => {
                 readOnly
                 align='right'
               />
-            </Grid>
+            </Grid> */}
             <Grid item xs={4}></Grid>
             <Grid item xs={1}>
               <CustomButton onClick={() => formik.handleSubmit()} label={platformLabels.Generate} color='#231f20' />
@@ -515,34 +611,78 @@ const GenerateOutboundTransportation = () => {
         </Fixed>
         <Grow>
           <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
-            <Grid item xs={3} sx={{ display: 'flex', flex: 1 }}>
-              <Table
-                columns={columnsZones}
-                gridData={filteredData}
+            <Grid item xs={2} sx={{ display: 'flex' }}>
+              <Grid container sx={{ display: 'flex', flex: 1 }}>
+                <Grid item xs={12} sx={{ display: 'flex' }}>
+                  <Table
+                    columns={columnsZones}
+                    gridData={filteredData}
+                    rowId={['recordId']}
+                    isLoading={false}
+                    pagination={false}
+                    maxAccess={access}
+                    showCheckboxColumn={true}
+                    showSelectAll={false}
+                    handleCheckboxChange={onSaleZoneCheckbox}
+                  />
+                </Grid>
+                <Grid item xs={12} sx={{ display: 'flex' }}>
+                  <Table
+                    columns={columnsSelectedZones}
+                    gridData={selectedSaleZones}
+                    rowId={['recordId']}
+                    isLoading={false}
+                    pagination={false}
+                    maxAccess={access}
+                    rowDragManaged={true}
+                    disableSorting={true}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={2} sx={{ display: 'flex' }}>
+              <DataGrid
+                onChange={value => formik.setFieldValue('selectedTrucks', value)}
+                value={formik.values.selectedTrucks || []}
+                error={formik.errors.selectedTrucks}
+                columns={columnsTrucks}
+              />
+              {/* <DataGrid
+                columns={columnsTrucks}
+                gridData={trucks}
                 rowId={['recordId']}
                 isLoading={false}
                 pagination={false}
                 maxAccess={access}
                 showCheckboxColumn={true}
                 showSelectAll={false}
-                handleCheckboxChange={onSaleZoneCheckbox}
-              />
+                handleCheckboxChange={onTripCheckbox}
+              /> */}
             </Grid>
-            <Grid item xs={9} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={8} sx={{ display: 'flex', flex: 1 }}>
               <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
-                <Grid item xs={12} sx={{ display: 'flex', height: 255 }}>
+                <Grid item xs={12} sx={{ display: 'flex' }}>
                   <Table
-                    columns={columnsOrders}
-                    gridData={formik?.values?.data}
+                    columns={columnsSelectedTrucks}
+                    gridData={formik?.values?.selectedTrucks}
                     rowId={['recordId']}
                     isLoading={false}
                     pagination={false}
                     maxAccess={access}
-                    showCheckboxColumn={true}
-                    handleCheckboxChange={onRowCheckboxChange}
+                    onSelectionChange={row => {
+                      if (row) {
+                        console.log(row)
+
+                        const filteredOrders = formik.values.vehicleOrders.list.filter(
+                          item => row.vehicleId == item.vehicleId
+                        )
+
+                        setFilteredOrders({ list: filteredOrders })
+                      }
+                    }}
                   />
                 </Grid>
-                <Grid item xs={12} sx={{ display: 'flex', flex: 0 }}>
+                {/* <Grid item xs={12} sx={{ display: 'flex', flex: 0 }}>
                   <Grid container spacing={2}>
                     <Grid item xs={3}>
                       <CustomButton
@@ -572,19 +712,20 @@ const GenerateOutboundTransportation = () => {
                       />
                     </Grid>
                   </Grid>
-                </Grid>
-                <Grid item xs={12} sx={{ display: 'flex', height: 255 }}>
+                </Grid> */}
+                <Grid item xs={12} sx={{ display: 'flex' }}>
                   <Grow>
                     <Table
-                      columns={columnsDeliveryOrders}
-                      gridData={formik?.values?.deliveryOrders}
-                      rowId={['recordId']}
+                      columns={columnsSalesOrders}
+                      gridData={filteredOrders}
+                      rowId={['vehicleId']}
                       isLoading={false}
                       pagination={false}
                       maxAccess={access}
-                      showCheckboxColumn={true}
-                      handleCheckboxChange={Confirmation}
-                      showSelectAll={false}
+
+                      // showCheckboxColumn={true}
+                      // handleCheckboxChange={Confirmation}
+                      // showSelectAll={false}
                     />
                   </Grow>
                 </Grid>
@@ -594,14 +735,15 @@ const GenerateOutboundTransportation = () => {
         </Grow>
         <Fixed>
           <Grid container spacing={2}>
+            <Grid item xs={2}></Grid>
             <Grid item xs={2}>
               <CustomButton
-                onClick={() => onUndelivered(selectedSaleZones)}
+                onClick={() => onPreviewOutbounds(selectedSaleZonesIds, selectedTrucks)}
                 label={platformLabels.Preview}
                 color='#231f20'
               />
             </Grid>
-            <Grid item xs={7}></Grid>
+            <Grid item xs={4}></Grid>
             <Grid item xs={1.5}>
               <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly align='right' />
             </Grid>
@@ -615,4 +757,4 @@ const GenerateOutboundTransportation = () => {
   )
 }
 
-export default GenerateOutboundTransportation
+export default GenerateOutboundTransportation2
