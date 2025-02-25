@@ -269,7 +269,10 @@ const GenerateOutboundTransportation2 = () => {
       component: 'numberfield',
       name: 'no',
       label: labels.No,
-      flex: 1
+      flex: 1,
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'numberfield',
@@ -371,8 +374,8 @@ const GenerateOutboundTransportation2 = () => {
   }
 
   const sortedZoneIds = useMemo(() => {
-    return sortedZones.map(zone => zone.recordId).join(',');
-  }, [sortedZones]);
+    return sortedZones.map(zone => zone.recordId).join(',')
+  }, [sortedZones])
 
   const onSaleZoneCheckbox = (row, checked) => {
     const { recordId } = row
@@ -520,7 +523,7 @@ const GenerateOutboundTransportation2 = () => {
   }
 
   useEffect(() => {
-    setSortedZones(selectedSaleZones.list || []);
+    setSortedZones(selectedSaleZones.list || [])
   }, [selectedSaleZones])
 
   const totalOrdersVolume = useMemo(() => {
@@ -629,23 +632,9 @@ const GenerateOutboundTransportation2 = () => {
                 search={true}
               />
             </Grid>
-            <Grid item xs={2}>
-              <CustomNumberField
-                name='truckNo'
-                label={labels.truckNo}
-                value={formik.values.truckNo}
-                onChange={async e => {
-                  formik.setFieldValue('truckNo', e.target.value)
-
-                  //handleTruckNoChange(e.target.value)
-                }}
-                onBlur={async e => {
-                  //formik.setFieldValue('truckNo', e.target.value)
-
-                  handleTruckNoChange(e.target.value)
-                }}
-              />
-            </Grid>
+            {/* <Grid item xs={2}>
+              
+            </Grid> */}
             {/* <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={DeliveryRepository.Driver.qry}
@@ -712,46 +701,35 @@ const GenerateOutboundTransportation2 = () => {
                     onRowDragEnd={handleRowDragEnd}
                   />
                 </Grid>
+                <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', paddingTop: 5 }}>
+                  <CustomNumberField
+                    name='truckNo'
+                    label={labels.truckNo}
+                    value={formik.values.truckNo}
+                    onChange={async e => {
+                      formik.setFieldValue('truckNo', e.target.value)
+                    }}
+                    onClear={async () => {
+                      formik.setFieldValue('truckNo', 0)
+                      handleTruckNoChange(0)
+                    }}
+                    onBlur={async e => {
+                      handleTruckNoChange(e.target.value)
+                    }}
+                  />
+                  <DataGrid
+                    onChange={value => formik.setFieldValue('selectedTrucks', value)}
+                    value={formik.values.selectedTrucks || []}
+                    error={formik.errors.selectedTrucks}
+                    columns={columnsTrucks}
+                    allowAddNewLine={false}
+                    allowDelete={false}
+                  />
+                </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={2} sx={{ display: 'flex' }}>
-              <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <DataGrid
-                  onChange={value => formik.setFieldValue('selectedTrucks', value)}
-                  value={formik.values.selectedTrucks || []}
-                  error={formik.errors.selectedTrucks}
-                  columns={columnsTrucks}
-                />
-                <CustomNumberField
-                  name='totalTrucksVolume'
-                  label={labels.totalTrucksVolume}
-                  value={totalTrucksVolume}
-                  readOnly
-                  align='right'
-                />
-                <CustomNumberField
-                  name='totalOrdersVolume'
-                  label={labels.totalOrdersVolume}
-                  value={totalOrdersVolume}
-                  readOnly
-                  align='right'
-                />
-                <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
-              </Grid>
 
-              {/* <DataGrid
-                columns={columnsTrucks}
-                gridData={trucks}
-                rowId={['recordId']}
-                isLoading={false}
-                pagination={false}
-                maxAccess={access}
-                showCheckboxColumn={true}
-                showSelectAll={false}
-                handleCheckboxChange={onTripCheckbox}
-              /> */}
-            </Grid>
-            <Grid item xs={7} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={9} sx={{ display: 'flex', flex: 1 }}>
               <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
                 <Grid item xs={12} sx={{ display: 'flex' }}>
                   <Table
@@ -825,7 +803,6 @@ const GenerateOutboundTransportation2 = () => {
         </Grow>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={4}></Grid>
             <Grid item xs={2}>
               <CustomButton
                 onClick={() => onPreviewOutbounds(sortedZoneIds, selectedTrucks)}
@@ -833,13 +810,35 @@ const GenerateOutboundTransportation2 = () => {
                 color='#231f20'
               />
             </Grid>
-            <Grid item xs={2}></Grid>
-            <Grid item xs={1.5}>
+            <Grid item xs={4}></Grid>
+            <Grid item xs={2}>
+              <CustomNumberField
+                name='totalTrucksVolume'
+                label={labels.totalTrucksVolume}
+                value={totalTrucksVolume}
+                readOnly
+                align='right'
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomNumberField
+                name='totalOrdersVolume'
+                label={labels.totalOrdersVolume}
+                value={totalOrdersVolume}
+                readOnly
+                align='right'
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
+            </Grid>
+
+            {/* <Grid item xs={1.5}>
               <CustomNumberField name='amount' label={labels.amount} value={totalAmount} readOnly align='right' />
             </Grid>
             <Grid item xs={1.5}>
               <CustomNumberField name='volume' label={labels.volume} value={totalVolume} readOnly align='right' />
-            </Grid>
+            </Grid> */}
           </Grid>
         </Fixed>
       </VertLayout>
