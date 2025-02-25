@@ -9,8 +9,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import SerialForm from './forms/SerialForm'
-import serialIcon from '../../../public/images/TableIcons/imgSerials.png'
-import lotIcon from '../../../public/images/TableIcons/lot.png'
+import serialIcon from 'public/images/TableIcons/imgSerials.png'
+import lotIcon from 'public/images/TableIcons/lot.png'
 import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
 import LotForm from './forms/LotForm'
@@ -29,34 +29,22 @@ const AvailabilityCrossTab = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_properties=`
     })
 
-    console.log('response', response)
-
     let gridData
 
     if (response) {
       gridData = processGridData(response.record)
-      const finalDisp = gridData?.length > 0 ? gridData : []
-      console.log('gridData', gridData, {
-        ...finalDisp,
-        _startAt: _startAt
-      })
     }
 
     return {
       count: response?.record?.recordCount || 0,
-
-      //FIX SCROLL, TEST PARAMS, FIX FORMS
       list: response?.record?.recordCount ? gridData : [],
       _startAt: _startAt
     }
   }
 
   const processGridData = responseData => {
-    console.log('responseData', responseData)
     const { availabilities, usedSites } = responseData
     usedSites.sort()
-
-    //setUsedSites(sites)
 
     buildColumns(usedSites)
 
@@ -87,8 +75,6 @@ const AvailabilityCrossTab = () => {
     })
 
     return processedData
-
-    //setPagination(prev => ({ ...prev, total: recordCount }))
   }
 
   const buildColumns = usedSites => {
@@ -96,18 +82,19 @@ const AvailabilityCrossTab = () => {
       {
         field: 'sku',
         headerName: labels.sku,
-        flex: 2
+        width: 150
       },
       {
         field: 'itemName',
         headerName: labels.itemName,
-        flex: 2
+        width: 250,
+        flex: 1
       },
       {
         field: 'total',
         headerName: labels.total,
         align: 'right',
-        flex: 1
+        width: 110
       }
     ]
 
@@ -115,9 +102,8 @@ const AvailabilityCrossTab = () => {
       dynamicColumns.push({
         field: site,
         headerName: site,
-
-        //width: usedSites.length <= 8 ? null : 100,
-        flex: 1,
+        width: usedSites.length <= 8 ? null : 100,
+        flex: usedSites.length <= 8 ? 1 : null,
         align: 'right'
       })
     })
@@ -125,9 +111,7 @@ const AvailabilityCrossTab = () => {
     dynamicColumns.push({
       field: 'trackBy',
       headerName: 'S/L',
-      flex: 1,
-
-      //align: 'right',
+      width: 60,
       cellRenderer: row => {
         const { trackBy } = row.data
 
@@ -178,8 +162,7 @@ const AvailabilityCrossTab = () => {
   }
 
   const onLot = obj => {
-    console.log('obj', obj)
-    openLotForm(obj.lotCategoryId, obj.itemId)
+    openLotForm(obj.categoryId, obj.itemId)
   }
 
   function openSerialForm(itemId) {
