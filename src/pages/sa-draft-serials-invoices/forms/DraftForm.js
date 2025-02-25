@@ -1134,7 +1134,6 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
             allowDelete={!isClosed}
             allowAddNewLine={!formik?.values?.search}
             autoDelete={autoDelete}
-            autoSave={true}
           />
         </Grow>
         <Fixed>
