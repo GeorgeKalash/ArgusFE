@@ -114,7 +114,8 @@ export const ManufacturingRepository = {
     set: service + 'setJOB',
     get: service + 'getJOB',
     del: service + 'delJOB',
-    snapshot: service + 'snapshotJOB'
+    snapshot: service + 'snapshotJOB',
+    snapshot2: service + 'snapshotJOB2'
   },
   ProductionSheet: {
     page: service + 'pagePST',
@@ -157,5 +158,12 @@ export const ManufacturingRepository = {
     page: service + 'pageDMG',
     snapshot: service + 'snapshotDMG',
     post: service + 'postDMG'
+  },
+  JobRouting: {
+    qry: service + 'qryJRO',
+    get: service + 'getJRO',
+    set: service + 'setJRO',
+    set2: service + 'set2JRO',
+    del: service + 'delJRO'
   }
 }

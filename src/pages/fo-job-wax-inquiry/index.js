@@ -22,10 +22,10 @@ const JobWaxInquiry = () => {
     filterBy,
     access
   } = useResourceQuery({
-    endpointId: FoundryRepository.JobWaxInquiry.qry2,
+    endpointId: FoundryRepository.WaxJob.qry2,
     datasetId: ResourceIds.JobWaxInquiry,
     filter: {
-      endpointId: FoundryRepository.JobWaxInquiry.qry2,
+      endpointId: FoundryRepository.WaxJob.qry2,
       filterFn: fetchWithFilter
     }
   })
@@ -33,7 +33,7 @@ const JobWaxInquiry = () => {
   async function fetchWithFilter({ filters }) {
     if (filters?.qry)
       return await getRequest({
-        extension: FoundryRepository.JobWaxInquiry.qry2,
+        extension: FoundryRepository.WaxJob.qry2,
         parameters: `_jobId=${filters?.qry}`
       })
     else return { list: [] }
