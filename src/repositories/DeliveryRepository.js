@@ -27,6 +27,7 @@ export const DeliveryRepository = {
     unpost: service + 'unpostTRP',
     close: service + 'closeTRP',
     generate: service + 'generateTRP',
+    setTRP2: service + 'setTRP2',
     assign: service + 'assignTRP',
     unassign: service + 'unassignedTRP'
   },
