@@ -95,7 +95,7 @@ const TabsProvider = ({ children }) => {
 
   const handleCloseAllTabs = () => {
     const firstTab = openTabs[0]
-    router.push(firstTab.route)
+    window.history.replaceState(null, '', firstTab.route)
     setOpenTabs([firstTab])
     setCurrentTabIndex(0)
   }
@@ -107,8 +107,10 @@ const TabsProvider = ({ children }) => {
 
     const newOpenTabs = openTabs.filter((tab, index) => index === 0 || index === tabIndex)
 
-    router.push(selectedTab.route)
+    window.history.replaceState(null, '', selectedTab.route)
+
     setOpenTabs(newOpenTabs)
+
     setCurrentTabIndex(isHomeTabSelected ? 0 : newOpenTabs.length - 1)
   }
 
