@@ -388,6 +388,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       props: {
         decimalScale: 5
       },
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
       }
