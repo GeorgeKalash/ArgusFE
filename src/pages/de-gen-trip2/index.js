@@ -203,9 +203,12 @@ const GenerateOutboundTransportation2 = () => {
     getAllTrucks()
   }, [])
 
+  const totalTrucksVolume =
+    formik?.values?.selectedTrucks?.reduce((sum, order) => sum + parseInt(order.volume || 0), 0) || 0
+
   const totalVolume = formik?.values?.deliveryOrders?.list?.reduce((sum, order) => sum + (order.volume || 0), 0) || 0
+
   const totalAmount = formik?.values?.deliveryOrders?.list?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0
-  const balance = formik.values.capacity - totalVolume
 
   const Confirmation = (row, value) => {
     stack({
@@ -354,6 +357,23 @@ const GenerateOutboundTransportation2 = () => {
     })
   }
 
+  const [sortedZones, setSortedZones] = useState(selectedSaleZones)
+
+  const handleRowDragEnd = event => {
+    if (!event.api) return
+
+    let allNodes = []
+    event.api.forEachNode(node => allNodes.push(node))
+
+    const newOrder = allNodes.sort((a, b) => a.rowIndex - b.rowIndex).map(node => node.data)
+
+    setSortedZones(newOrder)
+  }
+
+  const sortedZoneIds = useMemo(() => {
+    return sortedZones.map(zone => zone.recordId).join(',');
+  }, [sortedZones]);
+
   const onSaleZoneCheckbox = (row, checked) => {
     const { recordId } = row
 
@@ -498,6 +518,16 @@ const GenerateOutboundTransportation2 = () => {
       return { list: selectedRows }
     })
   }
+
+  useEffect(() => {
+    setSortedZones(selectedSaleZones.list || []);
+  }, [selectedSaleZones])
+
+  const totalOrdersVolume = useMemo(() => {
+    return (selectedSaleZones.list || []).reduce((sum, zone) => sum + (zone.volume || 0), 0)
+  }, [selectedSaleZones])
+
+  const balance = totalTrucksVolume - totalOrdersVolume
 
   const handleTruckNoChange = truckNo => {
     if (!truckNo || truckNo <= 0) {
@@ -679,17 +709,36 @@ const GenerateOutboundTransportation2 = () => {
                     maxAccess={access}
                     rowDragManaged={true}
                     disableSorting={true}
+                    onRowDragEnd={handleRowDragEnd}
                   />
                 </Grid>
               </Grid>
             </Grid>
             <Grid item xs={2} sx={{ display: 'flex' }}>
-              <DataGrid
-                onChange={value => formik.setFieldValue('selectedTrucks', value)}
-                value={formik.values.selectedTrucks || []}
-                error={formik.errors.selectedTrucks}
-                columns={columnsTrucks}
-              />
+              <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <DataGrid
+                  onChange={value => formik.setFieldValue('selectedTrucks', value)}
+                  value={formik.values.selectedTrucks || []}
+                  error={formik.errors.selectedTrucks}
+                  columns={columnsTrucks}
+                />
+                <CustomNumberField
+                  name='totalTrucksVolume'
+                  label={labels.totalTrucksVolume}
+                  value={totalTrucksVolume}
+                  readOnly
+                  align='right'
+                />
+                <CustomNumberField
+                  name='totalOrdersVolume'
+                  label={labels.totalOrdersVolume}
+                  value={totalOrdersVolume}
+                  readOnly
+                  align='right'
+                />
+                <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
+              </Grid>
+
               {/* <DataGrid
                 columns={columnsTrucks}
                 gridData={trucks}
@@ -779,7 +828,7 @@ const GenerateOutboundTransportation2 = () => {
             <Grid item xs={4}></Grid>
             <Grid item xs={2}>
               <CustomButton
-                onClick={() => onPreviewOutbounds(selectedSaleZonesIds, selectedTrucks)}
+                onClick={() => onPreviewOutbounds(sortedZoneIds, selectedTrucks)}
                 label={platformLabels.Preview}
                 color='#231f20'
               />

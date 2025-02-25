@@ -40,6 +40,7 @@ const Table = ({
   showSelectAll = true,
   onSelectionChange,
   rowDragManaged = false,
+  onRowDragEnd = false,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -679,6 +680,8 @@ const Table = ({
     }
   }
 
+  console.log(props?.gridData?.list, '-------')
+
   return (
     <VertLayout>
       <Grow>
@@ -715,6 +718,7 @@ const Table = ({
             onFirstDataRendered={onFirstDataRendered}
             gridOptions={gridOptions}
             rowDragManaged={rowDragManaged}
+            onRowDragEnd={onRowDragEnd}
           />
         </Box>
       </Grow>
