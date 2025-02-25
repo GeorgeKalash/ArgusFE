@@ -140,10 +140,20 @@ const TabsProvider = ({ children }) => {
   }
 
   const reopenTab = tabRoute => {
-    setOpenTabs(openTabs => openTabs.map(tab => (tab.route === tabRoute ? { ...tab, id: uuidv4() } : tab)))
-    router.push(tabRoute)
-    setReloadOpenedPage([])
+    if (tabRoute === router.asPath) {
+      setOpenTabs(openTabs => openTabs.map(tab => (tab.route === tabRoute ? { ...tab, id: uuidv4() } : tab)))
+      setReloadOpenedPage([])
+    } else {
+      router.push(tabRoute)
+    }
   }
+
+  useEffect(() => {
+    if (reloadOpenedPage) {
+      setOpenTabs(openTabs => openTabs.map(tab => (tab.route === router.asPath ? { ...tab, id: uuidv4() } : tab)))
+      setReloadOpenedPage([])
+    }
+  }, [router.asPath])
 
   useEffect(() => {
     if (initialLoadDone) {
