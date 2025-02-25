@@ -29,9 +29,9 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import DamageForm from 'src/pages/damages/forms/DamageForm'
 import { useWindow } from 'src/windows'
 import WorkFlow from 'src/components/Shared/WorkFlow'
-import { KeyboardReturn } from '@mui/icons-material'
+import WorksheetWindow from '../window/WorksheetWindow'
 
-export default function WorksheetForm({ labels, maxAccess, setStore, store }) {
+export default function WorksheetForm({ labels, maxAccess, setStore, store, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
@@ -224,6 +224,21 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store }) {
     })
   }
 
+  const onRefresh = () => {
+    window.close()
+    stack({
+      Component: WorksheetWindow,
+      props: {
+        labels,
+        recordId,
+        maxAccess: access
+      },
+      width: 1200,
+      height: 780,
+      title: labels.Worksheet
+    })
+  }
+
   const actions = [
     {
       key: 'WorkFlow',
@@ -258,6 +273,12 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store }) {
       key: 'Damage',
       condition: true,
       onClick: onDamage,
+      disabled: !editMode || isPosted
+    },
+    {
+      key: 'Refresh',
+      condition: true,
+      onClick: onRefresh,
       disabled: !editMode || isPosted
     }
   ]

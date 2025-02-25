@@ -4,7 +4,7 @@ import { useState } from 'react'
 import WorksheetForm from '../forms/WorksheetForm.js'
 import MaterialsTab from '../forms/MaterialsTab.js'
 
-const WorksheetWindow = ({ recordId, labels, maxAccess }) => {
+const WorksheetWindow = ({ recordId, labels, maxAccess, window }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -19,7 +19,7 @@ const WorksheetWindow = ({ recordId, labels, maxAccess }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <WorksheetForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} />
+        <WorksheetForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} window={window} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
         <MaterialsTab labels={labels} access={maxAccess} store={store} />

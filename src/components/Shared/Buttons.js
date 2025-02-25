@@ -473,5 +473,12 @@ export const getButtons = platformLabels => [
     color: '#C91E1E',
     image: 'popup-window.png',
     main: false
+  },
+  {
+    key: 'Refresh',
+    label: 'platformLabels.Refresh',
+    color: 'red',
+    image: 'popup-window.png',
+    main: false
   }
 ]
