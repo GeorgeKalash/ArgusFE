@@ -157,7 +157,14 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       date: yup.string().required(),
       clientId: yup.string().test('clientId-required', 'Client ID is required if bpId is empty', function (value) {
         return this.parent.bpId ? true : !!value
-      })
+      }),
+      items: yup.array().of(
+        yup.object().shape({
+          qty: yup.string().test('check-value', 'qty must be at least 1', function (value) {
+            return !!this.parent.sku ? Number(value) > 0 : true
+          })
+        })
+      )
     }),
     onSubmit: async obj => {
       const copy = {
@@ -353,7 +360,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.quantity,
       name: 'qty',
-      updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
       }
@@ -389,7 +395,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.unitPrice,
       name: 'unitPrice',
-      updateOn: 'blur',
       props: {
         decimalScale: 5
       },
@@ -401,7 +406,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.upo,
       name: 'upo',
-      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UPO)
       }
@@ -440,7 +444,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.markdown,
       name: 'mdAmount',
-      updateOn: 'blur',
       flex: 2,
       props: {
         ShowDiscountIcons: true,
@@ -476,7 +479,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.extendedprice,
       name: 'extendedPrice',
-      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_EXTENDED_PRICE)
       }
