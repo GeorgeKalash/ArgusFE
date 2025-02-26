@@ -680,8 +680,6 @@ const Table = ({
     }
   }
 
-  console.log(props?.gridData?.list, '-------')
-
   return (
     <VertLayout>
       <Grow>

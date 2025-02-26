@@ -52,6 +52,7 @@ const GenerateOutboundTransportation2 = () => {
       volume: 0,
       totalAmount: 0,
       totalVolume: 0,
+      totalOrdersVolume: 0,
       truckNo: 0,
       selectedTrucks: [
         {
@@ -64,7 +65,8 @@ const GenerateOutboundTransportation2 = () => {
       vehicleOrders: { list: [] },
       deliveryOrders: { list: [] },
       data: { list: [] },
-      salesZones: { list: [] }
+      salesZones: { list: [] },
+      orders: { list: [] }
     },
     maxAccess: access,
     enableReinitialize: true,
@@ -159,6 +161,20 @@ const GenerateOutboundTransportation2 = () => {
     )
   }
 
+  function totalVolume() {
+    return (
+      formik?.values?.orders?.list.reduce((volumeSum, row) => {
+        let volumeValue = 0
+
+        if (row.checked) {
+          volumeValue = parseFloat(row?.volume?.toString().replace(/,/g, '')) || 0
+        }
+
+        return volumeSum + volumeValue
+      }, 0) || 0
+    )
+  }
+
   const onRowCheckboxChange = (data, checked) => {
     setReCalc(true)
     if (Array.isArray(data)) {
@@ -170,12 +186,19 @@ const GenerateOutboundTransportation2 = () => {
     }
   }
 
+  const onOrderChecked = () => {
+    setReCalc(true)
+  }
+
   useEffect(() => {
     if (reCalc) {
       const totalAmountValue = totalAmountFromChecked()
       const totalVolumeValue = totalVolumeFromChecked()
+      const totalOrdersVolume = totalVolume()
+
       formik.setFieldValue('totalAmount', totalAmountValue)
       formik.setFieldValue('totalVolume', totalVolumeValue)
+      formik.setFieldValue('totalOrdersVolume', totalOrdersVolume)
       setReCalc(false)
     }
   }, [reCalc])
@@ -183,7 +206,13 @@ const GenerateOutboundTransportation2 = () => {
   const totalTrucksVolume =
     formik?.values?.selectedTrucks?.reduce((sum, order) => sum + parseInt(order.volume || 0), 0) || 0
 
-  // const totalVolume = formik?.values?.deliveryOrders?.list?.reduce((sum, order) => sum + (order.volume || 0), 0) || 0
+  const totalOrderVolume =
+    formik?.values?.orders?.list?.filter(order => order.checked).reduce((sum, order) => sum + (order.volume || 0), 0) ||
+    0
+
+  useEffect(() => {
+    formik.setFieldValue('totalOrdersVolume', totalOrderVolume)
+  }, [formik?.values?.orders?.list])
 
   // const totalAmount = formik?.values?.deliveryOrders?.list?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0
 
@@ -220,7 +249,13 @@ const GenerateOutboundTransportation2 = () => {
       headerName: labels.name,
       wrapText: true,
       autoHeight: true,
-      flex: 1
+      flex: 3
+    },
+    {
+      field: 'volume',
+      headerName: labels.volume,
+      flex: 2,
+      type: 'number'
     }
   ]
 
@@ -321,19 +356,78 @@ const GenerateOutboundTransportation2 = () => {
     }
   ]
 
+  const columnsOrders = [
+    {
+      field: 'date',
+      headerName: labels.date,
+      type: 'date',
+      width: 120
+    },
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      width: 130
+    },
+    {
+      field: 'spName',
+      headerName: labels.salesPerson,
+      flex: 1,
+      wrapText: true,
+      autoHeight: true
+    },
+    {
+      field: 'szName',
+      headerName: labels.zone,
+      flex: 1,
+      wrapText: true,
+      autoHeight: true
+    },
+    {
+      field: 'clientName',
+      headerName: labels.client,
+      wrapText: true,
+      autoHeight: true,
+      flex: 1
+    },
+    {
+      field: 'amount',
+      headerName: labels.amount,
+      type: 'number',
+      width: 130
+    },
+    {
+      field: 'volume',
+      headerName: labels.volume,
+      type: 'number',
+      width: 130
+    }
+  ]
+
   const onSaleZoneChange = async szId => {
-    const salesZones = await getRequest({
-      extension: DeliveryRepository.GenerateTrip.firstLevel,
-      parameters: `_szId=${szId || 0}`
+    const response = await getRequest({
+      extension: DeliveryRepository.Volume.vol,
+      parameters: `_parentId=${szId || 0}`
     })
 
-    if (!salesZones?.list) {
+    if (!response?.record?.saleZoneOrderVolumeSummaries) {
       return
     }
 
+    const { saleZoneOrderVolumeSummaries = [], orders = [] } = response.record
+
+    const updatedSalesZones = saleZoneOrderVolumeSummaries.map(zone => {
+      const zoneOrders = orders.filter(order => order.szId === zone.szId)
+
+      return {
+        ...zone,
+        name: zone.zoneName,
+        orders: zoneOrders
+      }
+    })
+
     formik.setFieldValue('salesZones', {
-      ...salesZones,
-      list: salesZones.list
+      ...response.record,
+      list: updatedSalesZones
     })
   }
 
@@ -351,7 +445,7 @@ const GenerateOutboundTransportation2 = () => {
   }
 
   const sortedZoneIds = useMemo(() => {
-    return sortedZones.map(zone => zone.recordId).join(',')
+    return sortedZones.map(zone => zone.szId).join(',')
   }, [sortedZones])
 
   const onSaleZoneCheckbox = (row, checked) => {
@@ -369,9 +463,14 @@ const GenerateOutboundTransportation2 = () => {
   const onPreviewOutbounds = async szIds => {
     const volumes = formik.values.selectedTrucks?.map(truck => truck.volume).join(',')
 
+    const orderIds = selectedSaleZones.list
+      .flatMap(zone => zone.orders.filter(order => order.checked))
+      .map(order => order.recordId)
+      .join(',')
+
     const items = await getRequest({
       extension: DeliveryRepository.GenerateTrip.previewTRP,
-      parameters: `_szIds=${szIds || 0}&_volumes=${volumes}`
+      parameters: `_szIds=${szIds || 0}&_orderIds=${orderIds || 0}&_volumes=${volumes}`
     })
 
     if (items?.record?.vehicleAllocations) {
@@ -398,7 +497,7 @@ const GenerateOutboundTransportation2 = () => {
     return {
       ...formik?.values?.salesZones,
       list: formik?.values?.salesZones?.list.filter(item =>
-        item.name.toString().toLowerCase().includes(formik?.values?.search?.toLowerCase())
+        item?.name?.toString().toLowerCase().includes(formik?.values?.search?.toLowerCase())
       )
     }
   }, [formik?.values?.salesZones, formik.values.search])
@@ -406,22 +505,13 @@ const GenerateOutboundTransportation2 = () => {
   const filteredData = formik?.values?.salesZones?.list.length > 0 ? filteredSalesZones : formik?.values?.salesZones
 
   const handleImport = async () => {
-    const items = await getRequest({
-      extension: DeliveryRepository.Volume.vol,
-      parameters: `_szIds=${selectedSaleZonesIds || 0}`
-    })
-
     setSelectedSaleZones(() => {
       const selectedRows = filteredData?.list
         .filter(item => item.checked)
-        .map(item => {
-          const volumeData = items?.list.find(v => v.szId === item.recordId) || { volume: 0 }
-
-          return {
-            ...item,
-            volume: volumeData.volume
-          }
-        })
+        .map(item => ({
+          ...item,
+          orders: item.orders?.map(order => ({ ...order, checked: true }))
+        }))
 
       return { list: selectedRows }
     })
@@ -478,6 +568,7 @@ const GenerateOutboundTransportation2 = () => {
                   formik.setFieldValue('szId', newValue?.recordId || null)
                   onSaleZoneChange(newValue?.recordId)
                   formik.setFieldValue('data', { list: [] })
+                  formik.setFieldValue('orders', { list: [] })
                   setSelectedSaleZonesIds('')
                   setSelectedSaleZones([])
                 }}
@@ -541,9 +632,9 @@ const GenerateOutboundTransportation2 = () => {
         </Fixed>
         <Grow>
           <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
-            <Grid item xs={3} sx={{ display: 'flex' }}>
-              <Grid container sx={{ display: 'flex', flex: 1 }}>
-                <Grid item xs={12} sx={{ display: 'flex' }}>
+            <Grid item xs={12} sx={{ display: 'flex' }}>
+              <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
+                <Grid item xs={3} sx={{ display: 'flex' }}>
                   <Table
                     columns={columnsZones}
                     gridData={filteredData}
@@ -556,7 +647,32 @@ const GenerateOutboundTransportation2 = () => {
                     handleCheckboxChange={onSaleZoneCheckbox}
                   />
                 </Grid>
-                <Grid item xs={12} sx={{ display: 'flex' }}>
+                <Grid item xs={9} sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <Table
+                    columns={columnsOrders}
+                    gridData={formik?.values?.orders}
+                    rowId={['recordId']}
+                    isLoading={false}
+                    pagination={false}
+                    maxAccess={access}
+                    showCheckboxColumn={true}
+                    showSelectAll={false}
+                    handleCheckboxChange={onOrderChecked}
+                  />
+                  <Grid container>
+                    <Grid item xs={10}></Grid>
+                    <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
+                      <CustomNumberField
+                        name='ordersVolume'
+                        label={labels.totalVolume}
+                        value={formik.values.totalOrdersVolume}
+                        readOnly
+                        align='right'
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+                <Grid item xs={3} sx={{ display: 'flex' }}>
                   <Table
                     columns={columnsSelectedZones}
                     gridData={selectedSaleZones}
@@ -567,24 +683,16 @@ const GenerateOutboundTransportation2 = () => {
                     rowDragManaged={true}
                     disableSorting={true}
                     onRowDragEnd={handleRowDragEnd}
+                    onSelectionChange={row => {
+                      if (row) {
+                        formik.setFieldValue('orders', {
+                          list: row.orders
+                        })
+                      }
+                    }}
                   />
                 </Grid>
-                <Grid item xs={12} sx={{ display: 'flex' }}>
-                  <DataGrid
-                    onChange={value => formik.setFieldValue('selectedTrucks', value)}
-                    value={formik.values.selectedTrucks || []}
-                    error={formik.errors.selectedTrucks}
-                    columns={columnsTrucks}
-                    allowAddNewLine={false}
-                    allowDelete={false}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-
-            <Grid item xs={9} sx={{ display: 'flex', flex: 1 }}>
-              <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
-                <Grid item xs={12} sx={{ display: 'flex' }}>
+                <Grid item xs={9} sx={{ display: 'flex' }}>
                   <Table
                     columns={columnsVehicleAllocations}
                     gridData={formik?.values?.vehicleAllocations}
@@ -600,25 +708,32 @@ const GenerateOutboundTransportation2 = () => {
                     }}
                   />
                 </Grid>
-
-                <Grid item xs={12} sx={{ display: 'flex' }}>
-                  <Grow>
-                    <Table
-                      columns={columnsSalesOrders}
-                      gridData={filteredOrders}
-                      rowId={['vehicleId']}
-                      isLoading={false}
-                      pagination={false}
-                      maxAccess={access}
-                    />
-                  </Grow>
+                <Grid item xs={3} sx={{ display: 'flex', mt: 1.5 }}>
+                  <DataGrid
+                    onChange={value => formik.setFieldValue('selectedTrucks', value)}
+                    value={formik.values.selectedTrucks || []}
+                    error={formik.errors.selectedTrucks}
+                    columns={columnsTrucks}
+                    allowAddNewLine={false}
+                    allowDelete={false}
+                  />
+                </Grid>
+                <Grid item xs={9} sx={{ display: 'flex' }}>
+                  <Table
+                    columns={columnsSalesOrders}
+                    gridData={filteredOrders}
+                    rowId={['vehicleId']}
+                    isLoading={false}
+                    pagination={false}
+                    maxAccess={access}
+                  />
                 </Grid>
               </Grid>
             </Grid>
           </Grid>
         </Grow>
         <Fixed>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} mt={2}>
             <Grid item xs={2}>
               <CustomButton
                 onClick={() => onPreviewOutbounds(sortedZoneIds)}
