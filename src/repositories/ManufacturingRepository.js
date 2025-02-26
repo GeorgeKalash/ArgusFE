@@ -47,7 +47,8 @@ export const ManufacturingRepository = {
     qry: service + 'qryLBR',
     set: service + 'setLBR',
     get: service + 'getLBR',
-    del: service + 'delLBR'
+    del: service + 'delLBR',
+    snapshot: service + 'snapshotLBR'
   },
   Machine: {
     page: service + 'pageMAC',
