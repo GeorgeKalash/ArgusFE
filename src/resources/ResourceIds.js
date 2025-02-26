@@ -363,5 +363,7 @@ export const ResourceIds = {
   PostDraftSerials: 51315,
   Collections: 41119,
   Designer: 48100,
-  SalesQuotations: 51301
+  SalesQuotations: 51301,
+  ModelMaker: 48304,
+  ThreeDPrint: 48302
 }

@@ -6,5 +6,23 @@ export const ProductModelingRepository = {
     get: service + 'getDSR',
     set: service + 'setDSR',
     del: service + 'delDSR'
+  },
+  ModelMaker: {
+    snapshot: service + 'snapshotMDL',
+    page: service + 'pageMDL',
+    get: service + 'getMDL',
+    set: service + 'setMDL',
+    del: service + 'delMDL',
+    post: service + 'postMDL',
+    close: service + 'closeMDL',
+    reopen: service + 'reopenMDL'
+  },
+  ModellingMaterial: {
+    qry: service + 'qryMDLM',
+    set2: service + 'set2MDLM'
+  },
+  ThreeDPrint: {
+    qry: service + 'qry3DP',
+    snapshot: service + 'snapshot3DP'
   }
 }
