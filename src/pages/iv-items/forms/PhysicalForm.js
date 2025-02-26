@@ -93,8 +93,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   }, [recordId])
 
   const handleFieldChange = (fieldName, dirtyField, event) => {
-    const newValue = Number(event?.target?.value)
-    if (newValue > 0) {
+    const newValue = Number(event?.target?.value || 0)
+    if (newValue >= 0) {
       const updatedValues = { ...formik.values, [fieldName]: newValue }
 
       const keys = [
