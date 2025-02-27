@@ -50,7 +50,6 @@ const CycleCounts = () => {
     invalidate,
     refetch,
     filterBy,
-    clearFilter,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -144,37 +143,10 @@ const CycleCounts = () => {
     openCycleCountsWindow(plantId, recordId)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          labels={_labels}
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          reportName={'SCHDR'}
-        />
+        <RPBGridToolbar labels={_labels} onAdd={add} maxAccess={access} reportName={'SCHDR'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
