@@ -40,13 +40,11 @@ const CustomNumberField = ({
   const name = props.name
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
   const [isFocused, setIsFocused] = useState(false)
-
   const inputRef = useRef(null)
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/
     const key = String.fromCharCode(e.which || e.keyCode)
-
     if (!regex.test(key)) {
       e.preventDefault()
     }
@@ -62,7 +60,6 @@ const CustomNumberField = ({
     if (!isEmptyFunction) {
       const value = formatNumber(e)
       if (value) e.target.value = value
-
       onMouseLeave(e)
     }
   }
@@ -88,24 +85,13 @@ const CustomNumberField = ({
       if (inputValue?.length > maxLength - decimalScale) {
         e.target.value = value
       }
-
       onChange(e)
     }
   }
-
   const displayButtons = (!_readOnly || allowClear) && !props.disabled && (value || value === 0)
-
   useEffect(() => {
     if (value) formatNumber({ target: { value } })
   }, [])
-
-  const handleFocus = e => {
-    if (e.target.value === '0') {
-      e.target.value = ''
-      onChange({ ...e, target: { ...e.target, value: '' } })
-    }
-  }
-
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.select()
@@ -130,13 +116,14 @@ const CustomNumberField = ({
       helperText={helperText}
       required={_required}
       onInput={handleInput}
-      onFocus={() => setIsFocused(true)}
+      onFocus={() => {
+        setIsFocused(true)
+      }}
       onBlur={() => setIsFocused(false)}
       InputProps={{
         inputRef,
         autoFocus: false,
         inputProps: {
-          onFocus: handleFocus,
           min: min,
           max: max,
           type: arrow ? 'number' : 'text',
@@ -167,7 +154,7 @@ const CustomNumberField = ({
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
             border: !hasBorder && 'none',
-            borderColor: '#959d9e',
+            borderColor: '#959D9E',
             borderRadius: '6px'
           },
           height: `33px !important`
