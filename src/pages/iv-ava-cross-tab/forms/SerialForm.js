@@ -9,14 +9,17 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 const SerialForm = ({ labels, itemId }) => {
   const { getRequest } = useContext(RequestsContext)
+  const [tableData, setTableData] = useState([])
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 10 } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.AvailabilitySerial.qry,
+      extension: InventoryRepository.AvailabilitySerial.page,
       parameters: `_itemId=${itemId}&_siteId=0&_srlNo=0&_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
+
+    setTableData({ ...response, _startAt: _startAt })
 
     return { ...response, _startAt: _startAt }
   }
@@ -28,8 +31,13 @@ const SerialForm = ({ labels, itemId }) => {
   } = useResourceQuery({
     datasetId: ResourceIds.AvailabilitiesCrossTab,
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.AvailabilitySerial.qry
+    endpointId: InventoryRepository.AvailabilitySerial.page
   })
+
+  useEffect(() => {
+    setTableData([])
+    refetch()
+  }, [itemId])
 
   const columns = [
     {
@@ -54,10 +62,10 @@ const SerialForm = ({ labels, itemId }) => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data}
+          gridData={tableData}
           rowId={['srlNo']}
-          isLoading={false}
-          pageSize={50}
+          isLoading={true}
+          pageSize={10}
           paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}

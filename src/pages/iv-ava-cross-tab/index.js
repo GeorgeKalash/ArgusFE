@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -70,7 +70,7 @@ const AvailabilityCrossTab = () => {
         sum += row[site]
       })
 
-      row['total'] = sum
+      row['total'] = parseFloat(sum).toFixed(2)
       processedData.push(row)
     })
 
@@ -82,19 +82,18 @@ const AvailabilityCrossTab = () => {
       {
         field: 'sku',
         headerName: labels.sku,
-        width: 150
+        width: 250
       },
       {
         field: 'itemName',
         headerName: labels.itemName,
-        width: 250,
-        flex: 1
+        width: 350
       },
       {
         field: 'total',
         headerName: labels.total,
-        align: 'right',
-        width: 110
+        type: 'number',
+        width: 210
       }
     ]
 
@@ -104,7 +103,7 @@ const AvailabilityCrossTab = () => {
         headerName: site,
         width: usedSites.length <= 8 ? null : 100,
         flex: usedSites.length <= 8 ? 1 : null,
-        align: 'right'
+        type: 'number'
       })
     })
 
@@ -123,7 +122,7 @@ const AvailabilityCrossTab = () => {
                   src={trackBy === 1 ? serialIcon : lotIcon}
                   width={trackBy === 1 ? 25 : 18}
                   height={18}
-                  alt={trackBy === 1 ? labels.serial : labels.lot}
+                  alt={trackBy === 1 ? 'Serial' : 'Lot'}
                 />
               </IconButton>
             </Box>
@@ -158,23 +157,25 @@ const AvailabilityCrossTab = () => {
   })
 
   const onSerial = obj => {
-    openSerialForm(obj.itemId)
+    console.log('obj', obj)
+    console.log('objlabels', labels)
+    openSerialForm(obj.itemId, labels)
   }
 
   const onLot = obj => {
     openLotForm(obj.categoryId, obj.itemId)
   }
 
-  function openSerialForm(itemId) {
+  function openSerialForm(itemId, currentLabels) {
     stack({
       Component: SerialForm,
       props: {
-        labels,
+        labels: { ...currentLabels },
         itemId
       },
-      width: 600,
-      height: 400,
-      title: labels.serialNo
+      width: 900,
+      height: 600,
+      title: currentLabels.serialNo
     })
   }
 
@@ -192,6 +193,11 @@ const AvailabilityCrossTab = () => {
       title: labels.lotAva
     })
   }
+
+  /*  useEffect(() => {
+    console.log('Updated labels:', labels)
+    setLabels(labels)
+  }, [labels]) */
 
   const onApply = ({ rpbParams }) => {
     filterBy('params', rpbParams)
