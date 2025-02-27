@@ -42,7 +42,6 @@ const OpenOutwardsReturn = () => {
     query: { data },
     labels: _labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     refetch,
     access
@@ -96,7 +95,7 @@ const OpenOutwardsReturn = () => {
       field: 'settlementStatusName',
       headerName: _labels.settlementStatus,
       flex: 1
-    },
+    }
   ]
 
   async function getLabels(datasetId) {
@@ -129,35 +128,10 @@ const OpenOutwardsReturn = () => {
     openForm(obj?.recordId)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          labels={_labels}
-          onApply={onApply}
-          reportName={'RTOWR2'}
-        />
+        <RPBGridToolbar labels={_labels} reportName={'RTOWR2'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

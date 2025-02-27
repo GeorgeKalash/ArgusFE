@@ -25,12 +25,8 @@ const RPBGridToolbar = ({
   }, [reportName])
 
   const filters = (filter, params) => {
-    if (typeof filterBy === 'function') {
-      if (filter) filterBy('qry', filter)
-      else filterBy('params', params)
-    } else {
-      onSearch(filter, params)
-    }
+    if (filter) filterBy('qry', filter)
+    else filterBy('params', params)
   }
 
   const openRPB = () => {
@@ -61,16 +57,6 @@ const RPBGridToolbar = ({
       ?.filter(({ fieldId, value }) => fieldId && value)
       .map(({ fieldId, value }) => `${fieldId}|${value}`)
       .reduce((acc, curr, index) => acc + (index === 0 ? `${curr}` : `^${curr}`), '')
-
-    return formattedData
-  }
-
-  const formatDataDictForApi = rpbParams => {
-    const formattedData = rpbParams.reduce((acc, { display }, index) => {
-      acc[index] = display || ''
-
-      return acc
-    }, {})
 
     return formattedData
   }
