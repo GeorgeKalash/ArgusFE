@@ -414,17 +414,17 @@ export default function DraftReturnForm({ labels, access, recordId }) {
               invoiceSeqNo: newRow.id,
               invoiceComponentSeqNo: res?.record?.invoiceComponentSeqNo || 0,
               returnId: formik?.values?.recordId,
-              srlNo: res?.record?.srlNo || '',
-              sku: res?.record?.sku || '',
-              itemName: res?.record?.itemName || '',
+              srlNo: res?.record?.srlNo,
+              sku: res?.record?.sku,
+              itemName: res?.record?.itemName,
               weight: res?.record?.weight || 0,
-              itemId: res?.record?.itemId || null,
+              itemId: res?.record?.itemId,
               priceType: res?.record?.priceType || 0,
-              metalId: res?.record?.metalId || null,
-              metalRef: res?.record?.metalRef || '',
-              designId: res?.record?.designId || null,
-              designRef: res?.record?.designRef || null,
-              invoiceReference: res?.record?.invoiceRef || null,
+              metalId: res?.record?.metalId,
+              metalRef: res?.record?.metalRef,
+              designId: res?.record?.designId,
+              designRef: res?.record?.designRef,
+              invoiceReference: res?.record?.invoiceRef,
               volume: res?.record?.volume || 0,
               baseLaborPrice: res?.record?.laborPrice || 0,
               unitPrice: res?.record?.unitPrice || 0,
@@ -1112,7 +1112,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
                   formik.setFieldValue('invoiceId', null)
                   formik.setFieldValue('invoiceRef', '')
                 }}
-                errorCheck={'clientId'}
+                errorCheck={'clientRef'}
               />
             </Grid>
 
