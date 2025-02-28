@@ -128,7 +128,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
   }
 
   const onReopen = async recId => {
-    const header = { ...formik.values, date: formatDateToApi(formik.values?.date) || null }
+    const header = { ...formik.values, date: formatDateToApi(formik.values?.date) }
 
     await postRequest({
       extension: ProductModelingRepository.Sketch.reopen,
@@ -145,7 +145,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
   }
 
   const onPost = async recId => {
-    const header = { ...formik.values, date: formatDateToApi(formik.values?.date) || null }
+    const header = { ...formik.values, date: formatDateToApi(formik.values?.date) }
 
     await postRequest({
       extension: ProductModelingRepository.Sketch.post,
