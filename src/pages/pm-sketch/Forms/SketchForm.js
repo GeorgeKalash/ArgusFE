@@ -54,8 +54,6 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
       collectionId: null,
       source: null,
       statusName: '',
-      rsName: '',
-      wipName: '',
       notes: '',
       status: 1,
       wip: 1
@@ -70,12 +68,18 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
       source: yup.string().required()
     }),
     onSubmit: async values => {
-      const data = { ...values, date: formatDateToApi(values?.date) || null }
+      const data = { ...values, date: formatDateToApi(values?.date) }
 
       const res = await postRequest({
         extension: ProductModelingRepository.Sketch.set,
         record: JSON.stringify(data)
       })
+
+      if (imageUploadRef.current) {
+        imageUploadRef.current.value = res.recordId
+
+        await imageUploadRef.current.submit()
+      }
 
       if (!values.recordId) {
         toast.success(platformLabels.Added)
@@ -89,12 +93,6 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
 
         invalidate()
       } else toast.success(platformLabels.Edited)
-
-      if (imageUploadRef.current) {
-        imageUploadRef.current.value = res.recordId
-
-        await imageUploadRef.current.submit()
-      }
     }
   })
 
@@ -426,6 +424,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                 seqNo={0}
                 recordId={recordId}
                 width={250}
+                height={'auto'}
               />
             </Grid>
           </Grid>

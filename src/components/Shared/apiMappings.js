@@ -946,6 +946,10 @@ export const apiMappings = {
     endpoint: InventoryRepository.Collections.qry,
     parameters: `_params=&_startAt=0&_pageSize=1000`,
     valueField: 'recordId',
-    displayField: 'reference'
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   },
 }
