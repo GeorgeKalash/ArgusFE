@@ -40,10 +40,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
-
-  const [jumpToNextLine, setJumpToNextLine] = useState(false)
-  const { systemChecks } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftInvoiceReturn,
@@ -176,8 +173,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
         extension: SaleRepository.DraftReturn.set2,
         record: JSON.stringify(DraftReturnPack)
       }).then(async diRes => {
-        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
+        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
         await refetchForm(diRes.recordId)
         invalidate()
       })
@@ -217,16 +213,6 @@ export default function DraftReturnForm({ labels, access, recordId }) {
     formik.setFieldValue('taxDetailsStore', taxDet?.list)
   }
 
-  useEffect(() => {
-    getSysChecks()
-  }, [systemChecks])
-
-  async function getSysChecks() {
-    const check = systemChecks.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)
-
-    setJumpToNextLine(check?.value)
-  }
-
   function getItemPriceRow(newRow, dirtyField) {
     const itemPriceRow = getIPR({
       priceType: 3,
@@ -262,6 +248,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
     }
   }
 
+  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
 
