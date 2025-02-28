@@ -462,13 +462,10 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='damagedPcs'
-                    readOnly={isPosted}
+                    readOnly
                     label={labels.damagedPcs}
                     value={formik?.values?.damagedPcs}
                     maxAccess={access}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('damagedPcs', 0)}
-                    error={formik.touched.damagedPcs && Boolean(formik.errors.damagedPcs)}
                   />
                 </Grid>
               </Grid>
@@ -529,13 +526,10 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='rmQty'
-                    readOnly={isPosted || editMode}
+                    readOnly
                     label={labels.rmQty}
                     value={formik?.values?.rmQty}
                     maxAccess={access}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('rmQty', '')}
-                    error={formik.touched.rmQty && Boolean(formik.errors.rmQty)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -594,41 +588,29 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
-                    readOnly={isPosted || editMode}
+                    readOnly
                     label={labels.date}
                     value={formik.values.date}
-                    onChange={formik.setFieldValue}
                     maxAccess={access}
-                    onClear={() => formik.setFieldValue('date', null)}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDateTimePicker
                     name='startTime'
-                    readOnly={isPosted || editMode}
+                    readOnly
                     label={labels.startTime}
                     value={formik.values?.startTime}
-                    onChange={(name, newValue) => {
-                      formik.setFieldValue(startTime, newValue || null)
-                    }}
                     maxAccess={access}
                     error={formik.errors?.startTime && Boolean(formik.errors?.startTime)}
-                    onClear={() => formik.setFieldValue(startTime, null)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDateTimePicker
                     name='endTime'
-                    readOnly={isPosted || editMode}
+                    readOnly
                     label={labels.endTime}
                     value={formik.values?.endTime}
-                    onChange={(name, newValue) => {
-                      formik.setFieldValue(endTime, newValue || null)
-                    }}
                     maxAccess={access}
-                    error={formik.errors?.endTime && Boolean(formik.errors?.endTime)}
-                    onClear={() => formik.setFieldValue(endTime, null)}
                   />
                 </Grid>
               </Grid>

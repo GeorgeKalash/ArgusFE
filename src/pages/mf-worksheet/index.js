@@ -96,7 +96,7 @@ const MfWorksheet = () => {
     },
     {
       field: 'pcs',
-      headerName: _labels.prices,
+      headerName: _labels.pieces,
       flex: 1,
       type: 'number'
     },
