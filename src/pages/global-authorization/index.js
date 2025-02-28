@@ -101,7 +101,7 @@ const GlobalAuthorization = () => {
         resourceId: ResourceIds.GlobalAuthorization
       },
       width: 500,
-      height: 480,
+      height: 600,
       title: labels.fieldGlobal
     })
   }
