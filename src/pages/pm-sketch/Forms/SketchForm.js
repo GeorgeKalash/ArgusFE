@@ -178,7 +178,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        getData(recordId)
+        await getData(recordId)
       }
     })()
   }, [])
