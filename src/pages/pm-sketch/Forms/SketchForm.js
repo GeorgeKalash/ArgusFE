@@ -81,11 +81,9 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
         await imageUploadRef.current.submit()
       }
 
-      if (!values.recordId) {
-        await getData(res.recordId)
+      await getData(res.recordId)
+      invalidate()
 
-        invalidate()
-      }
       toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
     }
   })
@@ -105,8 +103,6 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
     formik.setValues({
       ...res.record
     })
-
-    return res
   }
 
   const onClose = async () => {
