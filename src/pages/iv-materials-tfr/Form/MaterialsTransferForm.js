@@ -501,7 +501,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     {
       component: 'button',
       name: 'serials',
-      label: labels.currencyNotes,
+      label: platformLabels.serials,
       props: {
         imgSrc: '/images/TableIcons/imgSerials.png'
       },
@@ -511,7 +511,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           props: {
             labels,
             row,
-            values: formik.values,
+            siteId: formik?.values?.fromSiteId,
+            siteName: formik?.values?.fromSiteName,
+            siteRef: formik?.values?.fromSiteRef,
             maxAccess: access,
             checkForSiteId: true,
             updateRow

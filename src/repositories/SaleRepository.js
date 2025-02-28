@@ -222,5 +222,8 @@ export const SaleRepository = {
     batch: service + 'batchDFS',
     append: service + 'appendDFS',
     del: service + 'delDFS'
+  },
+  Serials: {
+    qry: service + 'qrySRL',
   }
 }

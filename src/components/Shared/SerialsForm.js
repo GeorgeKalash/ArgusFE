@@ -18,7 +18,7 @@ import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
 
-export const SerialsForm = ({ row, values, checkForSiteId, window, updateRow }) => {
+export const SerialsForm = ({ row, siteId, siteName, siteRef, checkForSiteId, window, updateRow }) => {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { systemChecks } = useContext(ControlContext)
@@ -30,9 +30,9 @@ export const SerialsForm = ({ row, values, checkForSiteId, window, updateRow }) 
       sku: row?.sku,
       itemName: row?.itemName,
       itemId: row?.itemId,
-      siteId: values.fromSiteId,
-      siteName: values.fromSiteName,
-      siteRef: values?.fromSiteRef,
+      siteId,
+      siteName,
+      siteRef,
       totalWeight: row?.qty ?? 0,
       pieces: null,
       items: row?.serials || []
@@ -135,7 +135,7 @@ export const SerialsForm = ({ row, values, checkForSiteId, window, updateRow }) 
         })
 
         clearRow(id)
-      } else if (checkForSiteId == true && allowNegativeQty == false) {
+      } else if (checkForSiteId == true && allowNegativeQty == false && formik.values.siteId) {
         const res = await getRequest({
           extension: InventoryRepository.AvailabilitySerial.get,
           parameters: `_srlNo=${srlNo}&_siteId=${formik.values.siteId}`
