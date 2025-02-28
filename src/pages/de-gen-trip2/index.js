@@ -463,7 +463,7 @@ const GenerateOutboundTransportation2 = () => {
   const onPreviewOutbounds = async szIds => {
     const volumes = formik.values.selectedTrucks?.map(truck => truck.volume).join(',')
 
-    const orderIds = selectedSaleZones.list
+    const orderIds = sortedZones
       .flatMap(zone => zone.orders.filter(order => order.checked))
       .map(order => order.recordId)
       .join(',')
