@@ -267,6 +267,9 @@ export const InventoryRepository = {
   MaterialTransferSerial: {
     qry: service + 'qryTFS'
   },
+  MaterialAdjustmentSerial: {
+    qry: service + 'qryADS'
+  },
   RMSKU: {
     snapshot: service + 'snapshotRM'
   },
