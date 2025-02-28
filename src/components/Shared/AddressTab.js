@@ -167,7 +167,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
               value={addressValidation.values.street1}
               readOnly={readOnly}
               required={required}
-              maxLength='20'
+              maxLength='100'
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('street1', '')}
               error={addressValidation.touched.street1 && Boolean(addressValidation.errors.street1)}
@@ -179,7 +179,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
               name='street2'
               label={labels.street2}
               value={addressValidation.values.street2}
-              maxLength='20'
+              maxLength='100'
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('street2', '')}
