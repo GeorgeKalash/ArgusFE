@@ -260,7 +260,6 @@ export const InventoryRepository = {
   },
   Serial: {
     qry: service + 'qrySRL',
-    snapshot: service + 'snapshotSRL',
     get2: service + 'get2SRL'
   },
   DraftTransfer: {

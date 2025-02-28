@@ -35,9 +35,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
-
-  const [jumpToNextLine, setJumpToNextLine] = useState(false)
+  const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftTransfer,
@@ -65,7 +63,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
       dtId: documentType?.dtId,
       reference: '',
       date: new Date(),
-      fromSiteId: defUserSiteId || defSiteId,
+      fromSiteId: defUserSiteId || defSiteId || null,
       toSiteId: null,
       notes: '',
       status: 1,
@@ -93,7 +91,6 @@ export default function DraftTransfer({ labels, access, recordId }) {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      dtId: yup.string().required(),
       date: yup.string().required(),
       fromSiteId: yup.string().required(),
       toSiteId: yup.string().required(),
@@ -144,8 +141,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
         extension: InventoryRepository.DraftTransfer.set2,
         record: JSON.stringify(DraftTransferPack)
       }).then(async diRes => {
-        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
+        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
         await refetchForm(diRes.recordId)
         invalidate()
       })
@@ -176,19 +172,8 @@ export default function DraftTransfer({ labels, access, recordId }) {
     })
   }
 
-  useEffect(() => {
-    getSysChecks()
-  }, [SystemChecks.POS_JUMP_TO_NEXT_LINE])
-
-  async function getSysChecks() {
-    const Jres = await getRequest({
-      extension: SystemRepository.SystemChecks.get,
-      parameters: `_checkId=${SystemChecks.POS_JUMP_TO_NEXT_LINE}&_scopeId=1&_masterId=0`
-    })
-
-    setJumpToNextLine(Jres?.record?.value)
-  }
-
+  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
+  console.log('jumpToNextLine', jumpToNextLine)
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
 
@@ -594,7 +579,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
       if (formik?.values?.recordId) {
         await refetchForm(formik?.values?.recordId)
       } else {
-        const defaultSiteId = defUserSiteId || defSiteId
+        const defaultSiteId = defUserSiteId || defSiteId || null
         formik.setFieldValue('fromSiteId', defaultSiteId)
         if (formik?.values?.dtId) {
           onChangeDtId(formik?.values?.dtId)
@@ -632,7 +617,6 @@ export default function DraftTransfer({ labels, access, recordId }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     readOnly={editMode}
-                    required
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     values={formik.values}
