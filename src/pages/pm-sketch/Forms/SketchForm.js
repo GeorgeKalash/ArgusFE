@@ -322,16 +322,14 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Items.pack}
-                    reducer={response => {
-                      return response?.record?.itemGroups
-                    }}
+                    endpointId={InventoryRepository.Group.qry}
+                    parameters='_startAt=0&_pageSize=1000'
                     values={formik.values}
                     name='itemGroupId'
                     required
                     label={labels.itemGroup}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['reference', 'name']}
                     displayFieldWidth={1}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
