@@ -29,6 +29,7 @@ import InwardTransferForm from '../inward-transfer/forms/InwardTransferForm'
 import InwardSettlementForm from '../inward-settlement/forms/InwardSettlementForm'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import OutwardsForm from '../outwards-order/Tabs/OutwardsForm'
+import SketchForm from '../pm-sketch/Forms/SketchForm'
 
 const DocumentsOnHold = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -221,6 +222,15 @@ const DocumentsOnHold = () => {
 
         windowWidth = 1200
         title = labels.InwardSettlement
+        break
+      case SystemFunction.Sketch:
+        relevantComponent = SketchForm
+        labels = await getLabels(ResourceIds.Sketch)
+        relevantAccess = await getAccess(ResourceIds.Sketch)
+
+        windowWidth = 700
+        windowHeight = 700
+        title = labels.Sketch
         break
       default:
         // Handle default case if needed
