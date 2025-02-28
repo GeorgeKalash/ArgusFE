@@ -9,12 +9,11 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-
-import { useRouter } from 'next/router'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 import MemosDtdForm from './form/MemosDtdForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import { Router } from 'src/lib/useRouter'
 
 const Financial = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,8 +21,7 @@ const Financial = () => {
 
   const { stack } = useWindow()
 
-  const router = useRouter()
-  const { functionId } = router.query
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const {
