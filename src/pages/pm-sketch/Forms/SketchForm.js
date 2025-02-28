@@ -28,9 +28,10 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
+  const systemFunction = SystemFunction.Sketch
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.Sketch,
+    functionId: systemFunction,
     access,
     enabled: !recordId
   })
@@ -47,7 +48,6 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
       date: new Date(),
       designerId: null,
       itemGroupId: null,
-      notes: '',
       productionClassId: null,
       productionStandardId: null,
       metalId: null,
@@ -82,17 +82,11 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
       }
 
       if (!values.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', res.recordId)
-
-        const res2 = await getData(res.recordId)
-
-        formik.setValues({
-          ...res2.record
-        })
+        await getData(res.recordId)
 
         invalidate()
-      } else toast.success(platformLabels.Edited)
+      }
+      toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
     }
   })
 
@@ -108,26 +102,25 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
 
     res.record.date = formatDateFromApi(res?.record?.date)
 
-    return res
-  }
-
-  const onClose = async recId => {
-    await postRequest({
-      extension: ProductModelingRepository.Sketch.close,
-      record: JSON.stringify({ recordId: recId })
-    })
-
-    toast.success(platformLabels.Closed)
-    invalidate()
-
-    const res = await getData(recId)
-
     formik.setValues({
       ...res.record
     })
+
+    return res
   }
 
-  const onReopen = async recId => {
+  const onClose = async () => {
+    await postRequest({
+      extension: ProductModelingRepository.Sketch.close,
+      record: JSON.stringify({ recordId: formik.values.recordId })
+    })
+
+    await getData(formik.values.recordId)
+    toast.success(platformLabels.Closed)
+    invalidate()
+  }
+
+  const onReopen = async () => {
     const header = { ...formik.values, date: formatDateToApi(formik.values?.date) }
 
     await postRequest({
@@ -135,16 +128,12 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
       record: JSON.stringify(header)
     })
 
+    await getData(formik.values.recordId)
     toast.success(platformLabels.Reopened)
     invalidate()
-    const res = await getData(recId)
-
-    formik.setValues({
-      ...res.record
-    })
   }
 
-  const onPost = async recId => {
+  const onPost = async () => {
     const header = { ...formik.values, date: formatDateToApi(formik.values?.date) }
 
     await postRequest({
@@ -152,13 +141,9 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
       record: JSON.stringify(header)
     })
 
+    await getData(formik.values.recordId)
     toast.success(platformLabels.Posted)
     invalidate()
-    const res = await getData(recId)
-
-    formik.setValues({
-      ...res.record
-    })
   }
 
   const actions = [
@@ -171,19 +156,19 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
     {
       key: 'Post',
       condition: true,
-      onClick: () => onPost(formik.values.recordId),
+      onClick: onPost,
       disabled: !editMode || isPosted || !isClosed
     },
     {
       key: 'Close',
       condition: !isClosed,
-      onClick: () => onClose(formik.values.recordId),
+      onClick: onClose,
       disabled: !editMode || isPosted
     },
     {
       key: 'Reopen',
       condition: isClosed,
-      onClick: () => onReopen(formik.values.recordId),
+      onClick: onReopen,
       disabled: !editMode || isPosted
     }
   ]
@@ -213,7 +198,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      functionId={SystemFunction.Sketch}
+      functionId={systemFunction}
       disabledSubmit={isClosed || isPosted}
     >
       <VertLayout>
@@ -224,7 +209,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_dgId=${SystemFunction.Sketch}&_startAt=0&_pageSize=50`}
+                    parameters={`_dgId=${systemFunction}&_startAt=0&_pageSize=50`}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
@@ -262,7 +247,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     required
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('source', newValue?.key || '')
+                      formik.setFieldValue('source', newValue?.key || null)
                     }}
                     readOnly={isPosted || isClosed}
                     maxAccess={maxAccess}
@@ -285,7 +270,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     maxAccess={maxAccess}
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('designerId', newValue?.recordId || '')
+                      formik.setFieldValue('designerId', newValue?.recordId || null)
                     }}
                     error={formik.touched.designerId && Boolean(formik.errors.designerId)}
                   />
@@ -312,8 +297,8 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     displayField={['reference']}
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('metalId', newValue?.recordId)
-                      formik.setFieldValue('metalPurity', newValue?.purity)
+                      formik.setFieldValue('metalId', newValue?.recordId || null)
+                      formik.setFieldValue('metalPurity', newValue?.purity || null)
                     }}
                     readOnly={isPosted || isClosed}
                     error={formik.touched.metalId && Boolean(formik.errors.metalId)}
@@ -338,7 +323,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     readOnly={isPosted || isClosed}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('itemGroupId', newValue?.recordId || '')
+                      formik.setFieldValue('itemGroupId', newValue?.recordId || null)
                     }}
                     error={formik.touched.itemGroupId && formik.errors.itemGroupId}
                   />
@@ -354,7 +339,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     maxAccess={maxAccess}
                     readOnly={isPosted || isClosed}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('productionClassId', newValue?.recordId || '')
+                      formik.setFieldValue('productionClassId', newValue?.recordId || null)
                     }}
                     error={formik.touched.productionClassId && Boolean(formik.errors.productionClassId)}
                   />
@@ -370,7 +355,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     maxAccess={maxAccess}
                     readOnly={isPosted || isClosed}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('productionStandardId', newValue?.recordId || '')
+                      formik.setFieldValue('productionStandardId', newValue?.recordId || null)
                     }}
                     error={formik.touched.productionStandardId && Boolean(formik.errors.productionStandardId)}
                   />
@@ -390,7 +375,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     readOnly={isPosted || isClosed}
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('collectionId', newValue?.recordId)
+                      formik.setFieldValue('collectionId', newValue?.recordId || null)
                     }}
                     error={formik.touched.collectionId && Boolean(formik.errors.collectionId)}
                   />
@@ -407,7 +392,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     readOnly={isPosted || isClosed}
                     rows={3}
                     maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('notes', e.target.value)}
+                    onChange={e => formik.setFieldValue('notes', e.target.value || null)}
                     onClear={() => formik.setFieldValue('notes', '')}
                     error={formik.touched.notes && Boolean(formik.errors.notes)}
                   />
