@@ -173,7 +173,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
   }
 
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
-  console.log('jumpToNextLine', jumpToNextLine)
+
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
 
