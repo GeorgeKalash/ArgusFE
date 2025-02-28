@@ -178,11 +178,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res = await getData(recordId)
-
-        formik.setValues({
-          ...res.record
-        })
+        getData(recordId)
       }
     })()
   }, [])
