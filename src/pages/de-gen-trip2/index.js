@@ -470,7 +470,7 @@ const GenerateOutboundTransportation2 = () => {
 
     const items = await getRequest({
       extension: DeliveryRepository.GenerateTrip.previewTRP,
-      parameters: `_szIds=${szIds || 0}&_orderIds=${orderIds || 0}&_volumes=${volumes}`
+      parameters: `_orderIds=${orderIds || 0}&_volumes=${volumes}`
     })
 
     if (items?.record?.vehicleAllocations) {
