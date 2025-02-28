@@ -72,8 +72,7 @@ export default function DamageForm({ recordId, jobId }) {
         extension: ManufacturingRepository.Damage.set,
         record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date) })
       }).then(async res => {
-        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
+        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
         await refetchForm(res.recordId)
         invalidate()
       })
@@ -85,7 +84,7 @@ export default function DamageForm({ recordId, jobId }) {
       extension: ManufacturingRepository.Damage.get,
       parameters: `_recordId=${damageId}`
     }).then(async res => {
-      refetchFormJob(res?.record?.jobId, res.record)
+      await refetchFormJob(res?.record?.jobId, res.record)
     })
   }
 
@@ -97,7 +96,7 @@ export default function DamageForm({ recordId, jobId }) {
       formik.setValues({
         ...formik.values,
         ...res,
-        date: formatDateFromApi(res?.record?.date),
+        date: formatDateFromApi(jobRes?.record?.date),
         sku: jobRes?.record?.sku,
         itemName: jobRes?.record?.itemName,
         designName: jobRes?.record?.designName,

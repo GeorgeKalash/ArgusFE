@@ -118,13 +118,9 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
             isPosted: res?.status == 3,
             values: data
           }))
-
-          formik.setFieldValue('recordId', res.recordId)
-          getData(res.recordId)
         }
-
-        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
+        getData(res.recordId)
+        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
         invalidate()
       })
     }
@@ -140,18 +136,18 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
         parameters: `_recordId=${res?.record?.workCenterId}`
       })
       formik.setValues({
-        ...res.record,
-        date: formatDateFromApi(res.record.date),
-        startTime: formatDateFromApi(res.record.startTime),
-        endTime: formatDateFromApi(res.record.endTime),
+        ...res?.record,
+        date: formatDateFromApi(res?.record?.date),
+        startTime: formatDateFromApi(res?.record?.startTime),
+        endTime: formatDateFromApi(res?.record?.endTime),
         siteId: res2?.record?.siteId
       })
       setStore(prevStore => ({
         ...prevStore,
         values: {
-          ...res.record,
+          ...res?.record,
           siteId: res2?.record?.siteId,
-          date: formatDateFromApi(res.record.date)
+          date: formatDateFromApi(res?.record?.date)
         }
       }))
     })
@@ -200,15 +196,15 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
   const onPost = async () => {
     const data = {
       ...formik.values,
-      date: formatDateToApi(formik.values.date)
+      date: formatDateToApi(formik?.values?.date) || null
     }
     await postRequest({
       extension: ManufacturingRepository.Worksheet.post,
       record: JSON.stringify(data)
     }).then(async () => {
       await getData()
-      toast.success(platformLabels.Posted)
       invalidate()
+      toast.success(platformLabels.Posted)
     })
   }
 
@@ -273,7 +269,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       key: 'Damage',
       condition: true,
       onClick: onDamage,
-      disabled: !editMode || isPosted
+      disabled: !editMode
     },
     {
       key: 'Refresh',
@@ -603,7 +599,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     value={formik.values.date}
                     onChange={formik.setFieldValue}
                     maxAccess={access}
-                    onClear={() => formik.setFieldValue('date', '')}
+                    onClear={() => formik.setFieldValue('date', null)}
                     error={formik.touched.date && Boolean(formik.errors.date)}
                   />
                 </Grid>
@@ -614,7 +610,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     label={labels.startTime}
                     value={formik.values?.startTime}
                     onChange={(name, newValue) => {
-                      formik.setFieldValue(startTime, newValue)
+                      formik.setFieldValue(startTime, newValue || null)
                     }}
                     maxAccess={access}
                     error={formik.errors?.startTime && Boolean(formik.errors?.startTime)}
@@ -628,7 +624,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     label={labels.endTime}
                     value={formik.values?.endTime}
                     onChange={(name, newValue) => {
-                      formik.setFieldValue(endTime, newValue)
+                      formik.setFieldValue(endTime, newValue || null)
                     }}
                     maxAccess={access}
                     error={formik.errors?.endTime && Boolean(formik.errors?.endTime)}

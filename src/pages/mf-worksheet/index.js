@@ -127,7 +127,7 @@ const MfWorksheet = () => {
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.Worksheet,
     action: openForm,
-    hasDT: false
+    hasDT: true
   })
 
   function openForm(obj) {

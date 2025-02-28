@@ -78,8 +78,9 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         }
       ]
     },
+    maxAccess,
     enableReinitialize: false,
-    validateOnChange: false,
+    validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
         operationId: yup.number().required(),
@@ -94,8 +95,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         if (!obj.recordId) {
           formik.setFieldValue('recordId', res.recordId)
         }
-        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
+        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
         invalidate()
       })
     }
@@ -122,6 +122,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
           header: {
             ...formik.values.header,
             ...res?.record,
+            siteId: values.siteId,
             wsJobRef: values.reference,
             joJobRef: values.jobRef,
             date: values.date,
@@ -154,13 +155,19 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         parameters: `_jobId=${values.jobId}&_operationId=${operationId}&_pcs=${values.wipPcs}`
       })
 
-      formik.setFieldValue('items', items.list || formik.values.list)
+      formik.setFieldValue(
+        'items',
+        items?.list?.map(({ ...item }, index) => ({
+          id: index + 1,
+          ...item
+        })) || formik.values.items
+      )
     }
   }
 
   const editMode = !!formik?.values?.header?.recordId
-  const totalQty = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.qty, 0) : 0
-  const totalPcs = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.pcs, 0) : 0
+  const totalQty = formik.values.items ? formik.values.items.reduce((acc, item) => acc + parseInt(item.qty), 0) : 0
+  const totalPcs = formik.values.items ? formik.values.items.reduce((acc, item) => acc + parseInt(item.pcs), 0) : 0
 
   return (
     <FormShell resourceId={resourceId} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -220,7 +227,9 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.operationId', newValue?.recordId || null)
-                      formik.values.header.type && fillGrid(formik.values.header.type, newValue?.recordId)
+                      newValue?.recordId &&
+                        formik.values.header.type &&
+                        fillGrid(formik.values.header.type, newValue?.recordId)
                     }}
                     error={formik.touched.header?.operationId && Boolean(formik.errors.header?.operationId)}
                   />
@@ -238,7 +247,9 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.type', newValue?.key || null)
-                      formik.values.header.operationId && fillGrid(newValue?.key, formik.values.header.operationId)
+                      newValue?.key &&
+                        formik.values.header.operationId &&
+                        fillGrid(newValue?.key, formik.values.header.operationId)
                     }}
                     error={formik.touched.header?.type && Boolean(formik.errors.header?.type)}
                   />
