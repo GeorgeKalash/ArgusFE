@@ -21,6 +21,24 @@ const AvailabilityCrossTab = () => {
   const { stack } = useWindow()
   const [columns, setColumns] = useState([])
 
+  const {
+    query: { data },
+    labels,
+    paginationParameters,
+    refetch,
+    access,
+    filterBy
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: ReportIvGenerator.Report415,
+    datasetId: ResourceIds.AvailabilitiesCrossTab,
+    filter: {
+      filterFn: fetchWithFilter
+    }
+  })
+
+  console.log('labels', labels)
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
@@ -101,7 +119,7 @@ const AvailabilityCrossTab = () => {
       dynamicColumns.push({
         field: site,
         headerName: site,
-        width: usedSites.length <= 8 ? null : 100,
+        width: usedSites.length <= 8 ? null : 120,
         flex: usedSites.length <= 8 ? 1 : null,
         type: 'number'
       })
@@ -137,45 +155,28 @@ const AvailabilityCrossTab = () => {
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    return fetchGridData({ _startAt: filters?.params ? 0 : pagination._startAt, params: filters?.params })
   }
 
-  const {
-    query: { data },
-    labels,
-    paginationParameters,
-    refetch,
-    access,
-    filterBy
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: ReportIvGenerator.Report415,
-    datasetId: ResourceIds.AvailabilitiesCrossTab,
-    filter: {
-      filterFn: fetchWithFilter
-    }
-  })
-
   const onSerial = obj => {
-    console.log('obj', obj)
     console.log('objlabels', labels)
-    openSerialForm(obj.itemId, labels)
+    openSerialForm(obj.itemId)
   }
 
   const onLot = obj => {
     openLotForm(obj.categoryId, obj.itemId)
   }
 
-  function openSerialForm(itemId, currentLabels) {
+  function openSerialForm(itemId) {
     stack({
       Component: SerialForm,
       props: {
-        labels: { ...currentLabels },
+        labels,
         itemId
       },
       width: 900,
       height: 600,
-      title: currentLabels.serialNo
+      title: labels.serialNo
     })
   }
 
@@ -201,7 +202,8 @@ const AvailabilityCrossTab = () => {
 
   const onApply = ({ rpbParams }) => {
     filterBy('params', rpbParams)
-    refetch()
+
+    //refetch()
   }
 
   return (

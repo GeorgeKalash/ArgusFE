@@ -109,9 +109,8 @@ const LotForm = ({ labels, categoryId, itemId, maxAccess }) => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['lotId']}
+          rowId={['lotId', 'siteId']}
           isLoading={false}
-          pageSize={50}
           pagination={false}
           maxAccess={maxAccess}
         />
