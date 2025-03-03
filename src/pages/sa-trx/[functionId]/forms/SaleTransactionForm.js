@@ -58,6 +58,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import TaxDetails from 'src/components/Shared/TaxDetails'
+import { SerialsForm } from 'src/components/Shared/SerialsForm'
 
 export default function SaleTransactionForm({
   labels,
@@ -191,7 +192,16 @@ export default function SaleTransactionForm({
           taxDetailsButton: false
         }
       ],
-      serials: [],
+      serials: [
+        {
+          trxId: recordId || 0,
+          seqNo: 1,
+          componentSeqNo: 0,
+          srlSeqNo: null,
+          srlNo: null,
+          weight: null
+        }
+      ],
       lots: [],
       taxes: []
     },
@@ -236,8 +246,33 @@ export default function SaleTransactionForm({
           extension: SaleRepository.Address.set,
           record: JSON.stringify(addressData)
         })
+
         obj.header.billAddressId = addressRes.recordId
       }
+
+      let serialsValues = []
+
+      const updatedRows = obj.items.map(({ id, isVattable, taxDetails, ...rest }) => {
+        const { serials, ...restDetails } = rest
+
+        if (serials) {
+          const updatedSerials = serials.map(serialDetail => ({
+            ...serialDetail,
+            srlSeqNo: 0,
+            componentSeqNo: 0,
+            trxId: formik.values.recordId || 0,
+            seqNo: id
+          }))
+
+          serialsValues = [...serialsValues, ...updatedSerials]
+        }
+
+        return {
+          ...restDetails,
+          seqNo: id,
+          applyVat: isVattable
+        }
+      })
 
       const payload = {
         header: {
@@ -245,11 +280,8 @@ export default function SaleTransactionForm({
           date: formatDateToApi(obj.header.date),
           dueDate: formatDateToApi(obj.header.dueDate)
         },
-        items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
-          seqNo: id,
-          applyVat: isVattable,
-          ...rest
-        })),
+        items: updatedRows,
+        serials: serialsValues,
         taxes: [
           ...[
             ...obj.taxes,
@@ -261,7 +293,7 @@ export default function SaleTransactionForm({
               }))
           ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
         ],
-        ...(({ header, items, taxes, ...rest }) => rest)(obj)
+        ...(({ header, items, taxes, serials, ...rest }) => rest)(obj)
       }
 
       const saTrxRes = await postRequest({
@@ -695,6 +727,32 @@ export default function SaleTransactionForm({
       component: 'textfield',
       label: labels.notes,
       name: 'notes'
+    },
+    {
+      component: 'button',
+      name: 'serials',
+      label: platformLabels.serials,
+      props: {
+        imgSrc: '/images/TableIcons/imgSerials.png'
+      },
+      onClick: (e, row, update, updateRow) => {
+        stack({
+          Component: SerialsForm,
+          props: {
+            labels,
+            row,
+            siteId: formik?.values?.header.siteId,
+            siteName: formik?.values?.header.siteName,
+            siteRef: formik?.values?.header.siteRef,
+            maxAccess,
+            checkForSiteId: true,
+            updateRow
+          },
+          width: 500,
+          height: 700,
+          title: platformLabels.serials
+        })
+      }
     }
   ]
 
@@ -847,6 +905,13 @@ export default function SaleTransactionForm({
     }
   ]
 
+  async function getSerials(recordId, seqNo) {
+    return await getRequest({
+      extension: SaleRepository.Serials.qry,
+      parameters: `_trxId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
+    })
+  }
+
   async function fillForm(saTrxPack, dtInfo) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
@@ -860,6 +925,7 @@ export default function SaleTransactionForm({
     const modifiedList = await Promise.all(
       saTrxItems?.map(async (item, index) => {
         const taxDetailsResponse = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
+        const serials = await getSerials(recordId, item.seqNo)
 
         const updatedSaTrxTaxes =
           saTrxTaxes?.map(tax => {
@@ -880,6 +946,12 @@ export default function SaleTransactionForm({
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           saTrx: true,
+          serials: serials.list.map((serialDetail, index) => {
+            return {
+              ...serialDetail,
+              id: index
+            }
+          }),
           taxDetails:
             updatedSaTrxTaxes.filter(tax => saTrxItems?.some(responseTax => responseTax.seqNo != tax.seqNo)) || null
         }

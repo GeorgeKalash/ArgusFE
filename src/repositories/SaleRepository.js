@@ -224,6 +224,9 @@ export const SaleRepository = {
     append: service + 'appendDFS',
     del: service + 'delDFS'
   },
+  Serials: {
+    qry: service + 'qrySRL'
+  },
   SalesQuotations: {
     page: service + 'pageQTN',
     qry: service + 'qryQTN',

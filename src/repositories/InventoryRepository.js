@@ -206,7 +206,8 @@ export const InventoryRepository = {
     page: service + 'pageSIZ'
   },
   AvailabilitySerial: {
-    qry: service + 'qryAVS'
+    qry: service + 'qryAVS',
+    get: service + 'getAVS',
   },
   AvailabilityLot: {
     qry: service + 'qryLOA'
@@ -260,7 +261,14 @@ export const InventoryRepository = {
   },
   Serial: {
     qry: service + 'qrySRL',
-    snapshot: service + 'snapshotSRL'
+    snapshot: service + 'snapshotSRL',
+    get: service + 'getSRL'
+  },
+  MaterialTransferSerial: {
+    qry: service + 'qryTFS'
+  },
+  MaterialAdjustmentSerial: {
+    qry: service + 'qryADS'
   },
   RMSKU: {
     snapshot: service + 'snapshotRM'
