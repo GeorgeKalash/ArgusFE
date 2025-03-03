@@ -148,7 +148,7 @@ const CustomDateTimePicker = ({
                     </IconButton>
                   )}
                   <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
-                    <EventIcon />
+                    <EventIcon sx={{ border: '0px', fontSize: 17 }} />
                   </IconButton>
                 </InputAdornment>
               )

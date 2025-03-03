@@ -72,11 +72,9 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
     postRequest({
       extension: InventoryRepository.Scrap.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      toast.success(platformLabels.Added)
     })
-      .then(res => {
-        toast.success(platformLabels.Added)
-      })
-      .catch(error => {})
   }
 
   useEffect(() => {
@@ -84,18 +82,15 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
       getRequest({
         extension: InventoryRepository.Scrap.qry,
         parameters: `_metalId=${recordId}`
+      }).then(res => {
+        if (res?.list?.length > 0) {
+          const items = res.list.map((item, index) => ({
+            ...item,
+            id: index + 1
+          }))
+          formik.setValues({ scrap: items })
+        }
       })
-        .then(res => {
-          if (res?.list?.length > 0) {
-            const items = res.list.map((item, index) => ({
-              ...item,
-              id: index + 1
-            }))
-            s
-            formik.setValues({ scrap: items })
-          }
-        })
-        .catch(error => {})
     }
   }, [])
 

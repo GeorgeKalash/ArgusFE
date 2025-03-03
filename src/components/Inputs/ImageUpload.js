@@ -4,10 +4,13 @@ import { useRef } from 'react'
 import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import CustomButton from './CustomButton'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, width = 140 , height = 140 }, ref) => {
+const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, width = 140, height = 140 }, ref) => {
   const hiddenInputRef = useRef()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [image, setImage] = useState()
   const [initialValues, setInitialData] = useState({})
 
@@ -117,7 +120,6 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, width = 14
           width,
           height,
           objectFit: 'contain',
-          marginRight: 16,
           border: error && '2px solid #f44336'
         }}
         onClick={handleClick}
@@ -130,27 +132,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, width = 14
           onChange={handleInputImageChange}
           accept='image/png, image/jpeg, image/jpg'
         />
-        <Box
-          onClick={handleInputImageReset}
-          variant='contained'
-          sx={{
-            mr: 1,
-            backgroundColor: '#f44336',
-            '&:hover': {
-              opacity: 0.8
-            },
-            width: 40,
-            height: 30,
-            objectFit: 'contain',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '20%',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
-          }}
-        >
-          <img src={`/images/buttonsIcons/clear.png`} alt={'clear'} />
-        </Box>
+        <CustomButton onClick={handleInputImageReset} label={platformLabels.Clear} color='#f44336' image='clear.png' />
       </Box>
     </Box>
   )
