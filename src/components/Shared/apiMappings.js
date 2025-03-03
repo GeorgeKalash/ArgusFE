@@ -25,6 +25,7 @@ import { PayrollRepository } from 'src/repositories/PayrollRepository'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
+import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 
 export const COMBOBOX = 1
 
@@ -903,5 +904,12 @@ export const apiMappings = {
     valueField: 'recordId',
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
-  }
+  },
+  [ResourceIds.Printing]: {
+    type: LOOKUP,
+    endpoint: ProductModelingRepository.Printing.qry,
+    valueOnSelection: 'recordId',
+    firstField: 'reference',
+    secondDisplayField: false
+  },
 }
