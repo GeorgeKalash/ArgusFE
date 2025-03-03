@@ -6,7 +6,18 @@ export const ProductModelingRepository = {
     get: service + 'getDSR',
     set: service + 'setDSR',
     del: service + 'delDSR',
-    qry: service + 'qryDSR',
+    snapshot: service + 'snapshotDSR',
+    qry: service + 'qryDSR'
+  },
+  ThreeDDesign: {
+    page: service + 'page3DD',
+    get: service + 'get3DD',
+    set: service + 'set3DD',
+    del: service + 'del3DD',
+    post: service + 'post3DD',
+    close: service + 'close3DD',
+    reopen: service + 'reopen3DD',
+    snapshot: service + 'snapshot3DD'
   },
   Sketch: {
     page: service + 'pageSKH',
