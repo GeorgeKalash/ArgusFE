@@ -162,7 +162,8 @@ const IvItems = () => {
   }
 
   const onSearch = value => {
-    filterBy('qry', value)
+    const encodedValue = value.replace(/\+/g, '%2B')
+    filterBy('qry', encodedValue)
   }
 
   const onClear = () => {
