@@ -206,7 +206,7 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
-                    readOnly={isPosted || isClosed}
+                    readOnly={editMode}
                     valueField='recordId'
                     displayField='name'
                     values={formik?.values}
