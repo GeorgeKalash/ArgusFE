@@ -3,145 +3,143 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { ControlContext } from 'src/providers/ControlContext'
 import { useWindow } from 'src/windows'
-import { SCRepository } from 'src/repositories/SCRepository'
-import CycleCountsWindow from './Windows/CycleCountsWindow'
-import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { ControlContext } from 'src/providers/ControlContext'
+import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import SketchForm from './Forms/SketchForm'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
-const CycleCounts = () => {
+const Sketch = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
-
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: SCRepository.StockCount.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
+      extension: ProductModelingRepository.Sketch.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${
+        params || ''
+      }`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithFilter({ filters, pagination }) {
-    if (filters?.qry) {
-      return await getRequest({
-        extension: SCRepository.StockCount.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-    }
-  }
-
   const {
     query: { data },
-    labels: _labels,
+    labels,
+    paginationParameters,
+    refetch,
     access,
     invalidate,
-    refetch,
     filterBy,
     clearFilter,
-    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SCRepository.StockCount.qry,
-    datasetId: ResourceIds.StockCounts,
+    endpointId: ProductModelingRepository.Sketch.page,
+    datasetId: ResourceIds.Sketch,
     filter: {
       filterFn: fetchWithFilter
     }
   })
 
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: ProductModelingRepository.Sketch.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
-      field: 'statusName',
-      headerName: _labels.status,
-      flex: 1
-    },
-    {
-      field: 'wipName',
-      headerName: _labels.workInProgress,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'date',
-      headerName: _labels.date,
+      headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
-      field: 'plantName',
-      headerName: _labels.plant,
+      field: 'designerName',
+      headerName: labels.designer,
       flex: 1
     },
     {
-      field: 'notes',
-      headerName: _labels.notes,
+      field: 'itemGroupName',
+      headerName: labels.itemGroup,
       flex: 1
     },
     {
-      field: 'clientName',
-      headerName: _labels.client,
+      field: 'sourceName',
+      headerName: labels.sketchSource,
+      flex: 1
+    },
+    {
+      field: 'rsName',
+      headerName: labels.releaseStatus,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: labels.wip,
       flex: 1
     }
   ]
 
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
-  const del = async obj => {
-    await postRequest({
-      extension: SCRepository.StockCount.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
-  }
-
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.StockCount,
+    functionId: SystemFunction.Sketch,
     action: openForm,
-    hasDT: false
+    hasDT: true
   })
 
   const add = async () => {
     await proxyAction()
   }
 
-  async function openCycleCountsWindow(plantId, recordId) {
+
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
     stack({
-      Component: CycleCountsWindow,
+      Component: SketchForm,
       props: {
-        labels: _labels,
+        labels,
         recordId,
-        plantId,
         maxAccess: access
       },
-      width: 650,
-      height: 750,
-      title: _labels.cycleCounts
+      width: 700,
+      height: 700,
+      title: labels.Sketch
     })
   }
 
-  async function openForm(recordId) {
-    const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-
-    openCycleCountsWindow(plantId, recordId)
+  const del = async obj => {
+    await postRequest({
+      extension: ProductModelingRepository.Sketch.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const onApply = ({ search, rpbParams }) => {
@@ -169,22 +167,20 @@ const CycleCounts = () => {
         <RPBGridToolbar
           onSearch={onSearch}
           onClear={onClear}
-          labels={_labels}
-          onAdd={add}
+          labels={labels}
           maxAccess={access}
           onApply={onApply}
-          reportName={'SCHDR'}
+          onAdd={add}
+          reportName={'PMSKH'}
         />
       </Fixed>
       <Grow>
         <Table
-          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           paginationType='api'
@@ -197,4 +193,4 @@ const CycleCounts = () => {
   )
 }
 
-export default CycleCounts
+export default Sketch

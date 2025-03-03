@@ -336,11 +336,11 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       name: 'sku',
       props: {
         endpointId: InventoryRepository.Item.snapshot,
-        valueField: 'recordId',
+        valueField: 'sku',
         displayField: 'sku',
         mandatory: true,
         readOnly: isClosed,
-        displayFieldWidth: 4,
+        displayFieldWidth: 3,
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'msId', to: 'msId' },

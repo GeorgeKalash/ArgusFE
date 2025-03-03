@@ -11,14 +11,14 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 
-export default function CollectionsForm({ labels, maxAccess, recordId }) {
+export default function DesignerForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Collections.page
+    endpointId: ProductModelingRepository.Designer.page
   })
 
   const { formik } = useForm({
@@ -36,7 +36,7 @@ export default function CollectionsForm({ labels, maxAccess, recordId }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: InventoryRepository.Collections.set,
+        extension: ProductModelingRepository.Designer.set,
         record: JSON.stringify(obj)
       })
 
@@ -55,7 +55,7 @@ export default function CollectionsForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: InventoryRepository.Collections.get,
+          extension: ProductModelingRepository.Designer.get,
           parameters: `_recordId=${recordId}`
         })
 
@@ -65,7 +65,7 @@ export default function CollectionsForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.Collections} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.Designer} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -75,8 +75,8 @@ export default function CollectionsForm({ labels, maxAccess, recordId }) {
                 label={labels.reference}
                 value={formik.values.reference}
                 required
-                maxLength='10'
                 maxAccess={maxAccess}
+                maxLength='10'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -88,7 +88,7 @@ export default function CollectionsForm({ labels, maxAccess, recordId }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
-                maxLength='30'
+                maxLength='60'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
