@@ -72,7 +72,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
       date: new Date(),
       plantId: null,
       clientId: null,
-      currencyId: defCurrencyId,
+      currencyId: defCurrencyId || null,
       spId: null,
       siteId: null,
       description: '',
@@ -970,7 +970,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId)
+                  formik.setFieldValue('currencyId', newValue?.recordId || null)
                   formik.setFieldValue('invoiceId', null)
                   formik.setFieldValue('invoiceRef', '')
                 }}
@@ -1099,7 +1099,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
                   formik.setFieldValue('invoiceId', null)
                   formik.setFieldValue('invoiceRef', '')
                 }}
-                errorCheck={'clientRef'}
+                errorCheck={'clientId'}
               />
             </Grid>
 
