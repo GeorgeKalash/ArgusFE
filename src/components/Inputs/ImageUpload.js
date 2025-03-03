@@ -5,7 +5,7 @@ import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => {
+const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId, width = 140 , height = 140 }, ref) => {
   const hiddenInputRef = useRef()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [image, setImage] = useState()
@@ -114,8 +114,8 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
         }`}
         alt=''
         style={{
-          width: 140,
-          height: 140,
+          width,
+          height,
           objectFit: 'contain',
           marginRight: 16,
           border: error && '2px solid #f44336'

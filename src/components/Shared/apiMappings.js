@@ -905,6 +905,53 @@ export const apiMappings = {
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
+  [ResourceIds.Designer]: {
+    type: COMBOBOX,
+    endpoint: ProductModelingRepository.Designer.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Metals]: {
+    type: COMBOBOX,
+    endpoint: InventoryRepository.Metals.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: 'reference'
+  },
+  [ResourceIds.ProductionClass]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.ProductionClass.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.ProductionStandard]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.ProductionStandard.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: 'reference'
+  },
+  [ResourceIds.Collections]: {
+    type: COMBOBOX,
+    endpoint: InventoryRepository.Collections.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
   [ResourceIds.ThreeDPrint]: {
     type: COMBOBOX,
     endpoint: ProductModelingRepository.ThreeDPrint.qry,

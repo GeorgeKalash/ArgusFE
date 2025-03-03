@@ -26,15 +26,18 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
   })
 
   const { formik } = useForm({
+    maxAccess,
     initialValues: {
       recordId: null,
-      name: '',
-      szRef: '',
-      countryId: '',
-      productionOrderLevel: '',
-      parentId: ''
+      name: null,
+      szRef: null,
+      countryId: null,
+      productionOrderLevel: null,
+      parentId: null,
+      parentRef: '',
+      parentName: null
     },
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -137,23 +140,29 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
                 endpointId={SaleRepository.SalesZone.qry}
                 parameters={{
                   _startAt: 0,
-                  _pageSize: 100,
+                  _pageSize: 3000,
                   _sortField: 'recordId',
                   _filter: ''
                 }}
+                valueField='szRef'
+                displayField='name'
                 name='parentId'
                 label={labels.parent}
-                valueField='parentRef'
-                displayField='name'
+                form={formik}
                 valueShow='parentRef'
                 secondValueShow='parentName'
-                form={formik}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('parentId', newValue?.recordId || '')
-                  formik.setFieldValue('parentName', newValue?.parentName || '')
-                  formik.setFieldValue('parentRef', newValue?.parentRef || '')
-                }}
+                columnsInDropDown={[
+                  { key: 'szRef', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 maxAccess={maxAccess}
+                displayFieldWidth={2}
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('parentId', newValue?.recordId)
+                  formik.setFieldValue('parentName', newValue?.name)
+                  formik.setFieldValue('parentRef', newValue?.szRef || '')
+                }}
+                errorCheck={'parentId'}
               />
             </Grid>
           </Grid>
