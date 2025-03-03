@@ -970,9 +970,9 @@ export default function DraftReturnForm({ labels, access, recordId }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId || null)
                   formik.setFieldValue('invoiceId', null)
                   formik.setFieldValue('invoiceRef', '')
+                  formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
@@ -1090,7 +1090,6 @@ export default function DraftReturnForm({ labels, access, recordId }) {
                   { key: 'cgName', value: 'Client Group' }
                 ]}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('clientId', newValue?.recordId || null)
                   formik.setFieldValue('clientName', newValue?.name || null)
                   formik.setFieldValue('clientRef', newValue?.reference || null)
                   formik.setFieldValue('accountId', newValue?.accountId || null)
@@ -1098,6 +1097,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
                   formik.setFieldValue('taxId', newValue?.taxId || null)
                   formik.setFieldValue('invoiceId', null)
                   formik.setFieldValue('invoiceRef', '')
+                  formik.setFieldValue('clientId', newValue?.recordId || null)
                 }}
                 errorCheck={'clientId'}
               />
