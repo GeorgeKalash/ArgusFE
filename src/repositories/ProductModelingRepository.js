@@ -6,7 +6,8 @@ export const ProductModelingRepository = {
     get: service + 'getDSR',
     set: service + 'setDSR',
     del: service + 'delDSR',
-    snapshot: service + 'snapshotDSR'
+    snapshot: service + 'snapshotDSR',
+    qry: service + 'qryDSR'
   },
   ThreeDDesign: {
     page: service + 'page3DD',
