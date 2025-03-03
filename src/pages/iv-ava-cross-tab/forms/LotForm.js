@@ -30,7 +30,8 @@ const LotForm = ({ labels, categoryId, itemId, maxAccess }) => {
       {
         field: 'onHand',
         headerName: labels.qtyOnHand,
-        flex: 1
+        flex: 1,
+        type: 'number'
       }
     ]
 

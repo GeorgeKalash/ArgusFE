@@ -12,7 +12,7 @@ const SerialForm = ({ labels, itemId }) => {
   const [tableData, setTableData] = useState([])
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 10 } = options
+    const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
       extension: InventoryRepository.AvailabilitySerial.page,
@@ -48,7 +48,8 @@ const SerialForm = ({ labels, itemId }) => {
     {
       field: 'weight',
       headerName: labels.weight,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'siteRef',
@@ -65,7 +66,7 @@ const SerialForm = ({ labels, itemId }) => {
           gridData={tableData}
           rowId={['srlNo']}
           isLoading={true}
-          pageSize={10}
+          pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}
