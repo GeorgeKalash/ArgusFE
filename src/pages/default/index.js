@@ -8,6 +8,7 @@ import ProgressBarComponent from '../../components/Shared/dashboardApplets/Progr
 import HorizontalTimeline from '../../components/Shared/dashboardApplets/HorizontalTimeline'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
+import DynamicDashboard from '../dynamicDashboard'
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Open+Sans:700,600,300');
@@ -270,7 +271,7 @@ const Home = () => {
   ]
 
   return (
-    dashboardId == 2 && (
+    (dashboardId == 2 && (
       <>
         <GlobalStyle />
         <Frame>
@@ -339,7 +340,8 @@ const Home = () => {
           </Card>
         </Frame>
       </>
-    )
+    )) ||
+    (dashboardId == 1 && <DynamicDashboard />)
   )
 }
 
