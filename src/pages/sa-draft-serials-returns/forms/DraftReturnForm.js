@@ -943,7 +943,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   if (!newValue?.isInactive) {
-                    formik.setFieldValue('siteId', newValue?.recordId)
+                    formik.setFieldValue('siteId', newValue?.recordId || null)
                   } else {
                     formik.setFieldValue('siteId', null)
                     stackError({
