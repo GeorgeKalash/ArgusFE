@@ -21,24 +21,6 @@ const AvailabilityCrossTab = () => {
   const { stack } = useWindow()
   const [columns, setColumns] = useState([])
 
-  const {
-    query: { data },
-    labels,
-    paginationParameters,
-    refetch,
-    access,
-    filterBy
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: ReportIvGenerator.Report415,
-    datasetId: ResourceIds.AvailabilitiesCrossTab,
-    filter: {
-      filterFn: fetchWithFilter
-    }
-  })
-
-  console.log('labels', labels)
-
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
@@ -119,64 +101,81 @@ const AvailabilityCrossTab = () => {
       dynamicColumns.push({
         field: site,
         headerName: site,
-        width: usedSites.length <= 8 ? null : 120,
+        width: usedSites.length <= 8 ? null : 100,
         flex: usedSites.length <= 8 ? 1 : null,
         type: 'number'
       })
     })
 
-    dynamicColumns.push({
-      field: 'trackBy',
-      headerName: 'S/L',
-      width: 60,
-      cellRenderer: row => {
-        const { trackBy } = row.data
+    // dynamicColumns.push({
+    //   field: 'trackBy',
+    //   headerName: 'S/L',
+    //   width: 60,
+    //   cellRenderer: row => {
+    //     const { trackBy } = row.data
 
-        if (trackBy === 1 || trackBy === 2) {
-          return (
-            <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-              <IconButton size='small' onClick={() => (trackBy === 1 ? onSerial(row.data) : onLot(row.data))}>
-                <Image
-                  src={trackBy === 1 ? serialIcon : lotIcon}
-                  width={trackBy === 1 ? 25 : 18}
-                  height={18}
-                  alt={trackBy === 1 ? 'Serial' : 'Lot'}
-                />
-              </IconButton>
-            </Box>
-          )
-        }
+    //     if (trackBy === 1 || trackBy === 2) {
+    //       return (
+    //         <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+    //           <IconButton size='small' onClick={() => (trackBy === 1 ? onSerial(row.data) : onLot(row.data))}>
+    //             <Image
+    //               src={trackBy === 1 ? serialIcon : lotIcon}
+    //               width={trackBy === 1 ? 25 : 18}
+    //               height={18}
+    //               alt={trackBy === 1 ? 'Serial' : 'Lot'}
+    //             />
+    //           </IconButton>
+    //         </Box>
+    //       )
+    //     }
 
-        return null
-      }
-    })
+    //     return null
+    //   }
+    // })
 
     setColumns(dynamicColumns)
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    return fetchGridData({ _startAt: filters?.params ? 0 : pagination._startAt, params: filters?.params })
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
+  const {
+    query: { data },
+    labels,
+    paginationParameters,
+    refetch,
+    access,
+    filterBy
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: ReportIvGenerator.Report415,
+    datasetId: ResourceIds.AvailabilitiesCrossTab,
+    filter: {
+      filterFn: fetchWithFilter
+    }
+  })
+
   const onSerial = obj => {
+    console.log('obj', obj)
     console.log('objlabels', labels)
-    openSerialForm(obj.itemId)
+    openSerialForm(obj.itemId, labels)
   }
 
   const onLot = obj => {
     openLotForm(obj.categoryId, obj.itemId)
   }
 
-  function openSerialForm(itemId) {
+  function openSerialForm(itemId, currentLabels) {
     stack({
       Component: SerialForm,
       props: {
-        labels,
+        labels: { ...currentLabels },
         itemId
       },
       width: 900,
       height: 600,
-      title: labels.serialNo
+      title: currentLabels.serialNo
     })
   }
 
@@ -202,9 +201,37 @@ const AvailabilityCrossTab = () => {
 
   const onApply = ({ rpbParams }) => {
     filterBy('params', rpbParams)
-
-    //refetch()
+    refetch()
   }
+
+  const cols = [
+    ...columns,
+    {
+      field: 'trackBy',
+      headerName: 'S/L',
+      width: 60,
+      cellRenderer: row => {
+        const { trackBy } = row.data
+
+        if (trackBy === 1 || trackBy === 2) {
+          return (
+            <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+              <IconButton size='small' onClick={() => (trackBy === 1 ? onSerial(row.data) : onLot(row.data))}>
+                <Image
+                  src={trackBy === 1 ? serialIcon : lotIcon}
+                  width={trackBy === 1 ? 25 : 18}
+                  height={18}
+                  alt={trackBy === 1 ? 'Serial' : 'Lot'}
+                />
+              </IconButton>
+            </Box>
+          )
+        }
+
+        return null
+      }
+    }
+  ]
 
   return (
     <VertLayout>
@@ -213,7 +240,7 @@ const AvailabilityCrossTab = () => {
       </Fixed>
       <Grow>
         <Table
-          columns={columns}
+          columns={cols}
           gridData={data}
           rowId={['itemId']}
           maxAccess={access}
