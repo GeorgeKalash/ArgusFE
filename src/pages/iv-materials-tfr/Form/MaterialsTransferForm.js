@@ -144,8 +144,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         .of(
           yup.object().shape({
             sku: yup.string().required(),
-            qty: yup.string().required(),
-            msId: yup.string().required()
+            qty: yup.string().required()
           })
         )
         .required()
