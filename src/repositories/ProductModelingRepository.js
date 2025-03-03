@@ -23,8 +23,6 @@ export const ProductModelingRepository = {
     get: service + 'getCAS',
     set: service + 'setCAS',
     del: service + 'delCAS',
-    close: service + 'closeCAS',
-    reopen: service + 'reopenCAS',
     snapshot: service + 'snapshotCAS',
     post: service + 'postCAS'
   },
