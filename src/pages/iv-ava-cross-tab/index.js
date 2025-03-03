@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react'
+import { useContext, useState } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -41,6 +41,22 @@ const AvailabilityCrossTab = () => {
       _startAt: _startAt
     }
   }
+
+  const {
+    query: { data },
+    labels,
+    paginationParameters,
+    refetch,
+    access,
+    filterBy
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: ReportIvGenerator.Report415,
+    datasetId: ResourceIds.AvailabilitiesCrossTab,
+    filter: {
+      filterFn: fetchWithFilter
+    }
+  })
 
   const processGridData = responseData => {
     const { availabilities, usedSites } = responseData
@@ -101,81 +117,37 @@ const AvailabilityCrossTab = () => {
       dynamicColumns.push({
         field: site,
         headerName: site,
-        width: usedSites.length <= 8 ? null : 100,
+        width: usedSites.length <= 8 ? null : 130,
         flex: usedSites.length <= 8 ? 1 : null,
         type: 'number'
       })
     })
 
-    // dynamicColumns.push({
-    //   field: 'trackBy',
-    //   headerName: 'S/L',
-    //   width: 60,
-    //   cellRenderer: row => {
-    //     const { trackBy } = row.data
-
-    //     if (trackBy === 1 || trackBy === 2) {
-    //       return (
-    //         <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-    //           <IconButton size='small' onClick={() => (trackBy === 1 ? onSerial(row.data) : onLot(row.data))}>
-    //             <Image
-    //               src={trackBy === 1 ? serialIcon : lotIcon}
-    //               width={trackBy === 1 ? 25 : 18}
-    //               height={18}
-    //               alt={trackBy === 1 ? 'Serial' : 'Lot'}
-    //             />
-    //           </IconButton>
-    //         </Box>
-    //       )
-    //     }
-
-    //     return null
-    //   }
-    // })
-
     setColumns(dynamicColumns)
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    return fetchGridData({ _startAt: filters?.params ? 0 : pagination._startAt, params: filters?.params })
   }
 
-  const {
-    query: { data },
-    labels,
-    paginationParameters,
-    refetch,
-    access,
-    filterBy
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: ReportIvGenerator.Report415,
-    datasetId: ResourceIds.AvailabilitiesCrossTab,
-    filter: {
-      filterFn: fetchWithFilter
-    }
-  })
-
   const onSerial = obj => {
-    console.log('obj', obj)
-    console.log('objlabels', labels)
-    openSerialForm(obj.itemId, labels)
+    openSerialForm(obj.itemId)
   }
 
   const onLot = obj => {
     openLotForm(obj.categoryId, obj.itemId)
   }
 
-  function openSerialForm(itemId, currentLabels) {
+  function openSerialForm(itemId) {
     stack({
       Component: SerialForm,
       props: {
-        labels: { ...currentLabels },
+        labels,
         itemId
       },
       width: 900,
       height: 600,
-      title: currentLabels.serialNo
+      title: labels.serialNo
     })
   }
 
@@ -194,17 +166,11 @@ const AvailabilityCrossTab = () => {
     })
   }
 
-  /*  useEffect(() => {
-    console.log('Updated labels:', labels)
-    setLabels(labels)
-  }, [labels]) */
-
   const onApply = ({ rpbParams }) => {
     filterBy('params', rpbParams)
-    refetch()
   }
 
-  const cols = [
+  const updatedColumns = [
     ...columns,
     {
       field: 'trackBy',
@@ -240,7 +206,7 @@ const AvailabilityCrossTab = () => {
       </Fixed>
       <Grow>
         <Table
-          columns={cols}
+          columns={updatedColumns}
           gridData={data}
           rowId={['itemId']}
           maxAccess={access}
