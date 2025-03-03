@@ -25,6 +25,7 @@ import { PayrollRepository } from 'src/repositories/PayrollRepository'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
+import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 
 export const COMBOBOX = 1
 
@@ -904,6 +905,53 @@ export const apiMappings = {
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
+  [ResourceIds.Designer]: {
+    type: COMBOBOX,
+    endpoint: ProductModelingRepository.Designer.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Metals]: {
+    type: COMBOBOX,
+    endpoint: InventoryRepository.Metals.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: 'reference'
+  },
+  [ResourceIds.ProductionClass]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.ProductionClass.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.ProductionStandard]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.ProductionStandard.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: 'reference'
+  },
+  [ResourceIds.Collections]: {
+    type: COMBOBOX,
+    endpoint: InventoryRepository.Collections.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
   [ResourceIds.Routings]: {
     type: COMBOBOX,
     endpoint: ManufacturingRepository.Routing.qry,
@@ -914,21 +962,5 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  },
-  [ResourceIds.ProductionClass]: {
-    type: COMBOBOX,
-    endpoint: ManufacturingRepository.ProductionClass.qry,
-    valueField: 'recordId',
-    displayField: ['reference', 'name'],
-    columnsInDropDown: [
-      { key: 'reference', value: 'Reference' },
-      { key: 'name', value: 'Name' }
-    ]
-  },
-  [ResourceIds.ProductionStandards]: {
-    type: COMBOBOX,
-    endpoint: ManufacturingRepository.ProductionStandard.qry,
-    valueField: 'recordId',
-    displayField: 'reference'
   }
 }

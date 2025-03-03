@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState, useRef } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -69,13 +69,13 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       categoryName: '',
       defSaleMUId: '',
       pgId: '',
-      productionLevel:'',
-      isInactive: false,
+      productionLevel: '',
+      collectionId: null,
+      isInactive: false
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
-
     validationSchema: yup.object({
       categoryId: yup.string().required(),
       name: yup.string().required(),
@@ -297,6 +297,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 <Grid item xs={6}>
                   <CustomTextField
                     name='sku'
+                    required
                     label={labels.reference}
                     value={formik.values.sku}
                     maxAccess={access}
@@ -333,7 +334,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.procurementMethod && formik.errors.procurementMethod}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomTextField
                     name='name'
@@ -346,7 +346,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.name && formik.errors.name}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomTextField
                     name='flName'
@@ -357,7 +356,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onClear={() => formik.setFieldValue('flName', '')}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomTextField
                     name='shortName'
@@ -368,7 +366,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onClear={() => formik.setFieldValue('shortName', '')}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
@@ -393,7 +390,25 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.groupId && formik.errors.groupId}
                   />
                 </Grid>
-
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Collections.qry}
+                    name='collectionId'
+                    label={labels.collection}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('collectionId', newValue?.recordId)
+                    }}
+                    error={formik.touched.collectionId && Boolean(formik.errors.collectionId)}
+                  />
+                </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
@@ -520,7 +535,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     displayField='value'
                     values={formik.values}
                     onChange={(event, newValue) => {
-                        formik.setFieldValue('productionLevel',  newValue?.key || '')
+                      formik.setFieldValue('productionLevel', newValue?.key || '')
                     }}
                     maxAccess={maxAccess}
                     error={formik.touched.productionLevel && Boolean(formik.errors.productionLevel)}
