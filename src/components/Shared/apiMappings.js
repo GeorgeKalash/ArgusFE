@@ -905,6 +905,13 @@ export const apiMappings = {
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
+  [ResourceIds.Printing]: {
+    type: LOOKUP,
+    endpoint: ProductModelingRepository.Printing.qry,
+    valueOnSelection: 'recordId',
+    firstField: 'reference',
+    secondDisplayField: false
+  },
   [ResourceIds.Designer]: {
     type: COMBOBOX,
     endpoint: ProductModelingRepository.Designer.qry,
