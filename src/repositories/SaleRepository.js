@@ -217,6 +217,11 @@ export const SaleRepository = {
     post: service + 'postDFT',
     reopen: service + 'reopenDFT'
   },
+  DraftReturn: {
+    qry: service + 'qry2DRE',
+    snapshot: service + 'snapshotDRE',
+    post: service + 'postDRE'
+  },
   DraftInvoiceSerial: {
     qry: service + 'qryDFS',
     get: service + 'get2DFS',
