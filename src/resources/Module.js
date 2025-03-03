@@ -26,5 +26,6 @@ export const Module = {
   LeaveReq: 73,
   Loans: 74,
   HR: 100,
-  Casting: 48
+  Casting: 48,
+  Sketch: 48
 }
