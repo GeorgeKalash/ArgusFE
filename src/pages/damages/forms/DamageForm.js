@@ -101,6 +101,11 @@ export default function DamageForm({ recordId, jobId }) {
         itemName: jobRes?.record?.itemName,
         designName: jobRes?.record?.designName,
         designRef: jobRes?.record?.designRef,
+        jobRef: jobRes?.record?.reference,
+        jobId: jobRes?.record?.recordId,
+        wcName: jobRes?.record?.wcName,
+        wcRef: jobRes?.record?.wcRef,
+        wcId: jobRes?.record?.wcId,
         maxPcs: jobRes.record.pcs
       })
     })

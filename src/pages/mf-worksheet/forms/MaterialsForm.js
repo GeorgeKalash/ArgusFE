@@ -395,8 +395,8 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
               },
               {
                 component: 'numberfield',
-                label: labels.expectedPcs,
-                name: 'designPcs',
+                label: labels.expectedQty,
+                name: 'designQty',
                 props: {
                   maxLength: 6,
                   decimalScale: 5
@@ -404,19 +404,19 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
               },
               {
                 component: 'numberfield',
-                label: '1',
-                name: 'designQty',
+                label: labels.expectedPcs,
+                name: 'designPcs',
                 props: {
                   maxLength: 6,
                   decimalScale: 5
                 }
               },
-              ...(getValueFromDefaultsData('mfimd1')
+              ...(getValueFromDefaultsData('ivtDimension1')
                 ? [
                     {
                       component: 'resourcecombobox',
-                      label: getValueFromDefaultsData('mfimd1') && labels.ivDimension1,
-                      name: 'mfimd1',
+                      label: getValueFromDefaultsData('ivtDimension1'),
+                      name: 'ivtDimension1',
                       props: {
                         endpointId: InventoryRepository.Dimension.qry,
                         valueField: 'recordId',
@@ -435,12 +435,12 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                     }
                   ]
                 : []),
-              ...(getValueFromDefaultsData('mfimd2')
+              ...(getValueFromDefaultsData('ivtDimension2')
                 ? [
                     {
                       component: 'resourcecombobox',
-                      label: getValueFromDefaultsData('mfimd2') && labels.ivDimension2,
-                      name: 'mfimd2',
+                      label: getValueFromDefaultsData('ivtDimension2'),
+                      name: 'ivtDimension2',
                       props: {
                         endpointId: InventoryRepository.Dimension.qry,
                         valueField: 'recordId',

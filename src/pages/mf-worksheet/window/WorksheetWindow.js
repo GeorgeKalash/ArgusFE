@@ -8,7 +8,7 @@ const WorksheetWindow = ({ recordId, labels, maxAccess, window }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId: recordId || null,
+    recordId: recordId,
     isPosted: false,
     values: null
   })
