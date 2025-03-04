@@ -67,16 +67,25 @@ const ThreeDDesign = () => {
       flex: 1
     },
     {
-      field: 'baseAmount',
-      headerName: labels.amount,
-      flex: 1,
-      type: 'number'
-    },
-    {
       field: 'date',
       headerName: labels.date,
       flex: 1,
       type: 'date'
+    },
+    {
+      field: 'sketchRef',
+      headerName: labels.sketchRef,
+      flex: 1
+    },
+    {
+      field: 'designerName',
+      headerName: labels.Drawer,
+      flex: 1
+    },
+    {
+      field: 'castingName',
+      headerName: labels.castingType,
+      flex: 1
     },
     {
       field: 'statusName',
@@ -114,8 +123,8 @@ const ThreeDDesign = () => {
         recordId: obj?.recordId,
         maxAccess: access
       },
-      width: 1200,
-      height: 800,
+      width: 800,
+      height: 650,
       title: labels.ThreeDDesign
     })
   }

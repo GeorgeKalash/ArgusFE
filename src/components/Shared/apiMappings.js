@@ -916,12 +916,25 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  [ResourceIds.Sketch]: {
+    type: LOOKUP,
+    endpoint: ProductModelingRepository.Sketch.snapshot,
+    secondDisplayField: false,
+    firstField: ['reference', 'sourceName', 'designerRef'],
+    valueOnSelection: 'recordId',
+    displayFieldWidth: 1,
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'sourceName', value: 'Source' },
+      { key: 'designerRef', value: 'designer' }
+    ]
+  },
   [ResourceIds.Metals]: {
     type: COMBOBOX,
     endpoint: InventoryRepository.Metals.qry,
     parameters: `_params=&_startAt=0&_pageSize=1000`,
     valueField: 'recordId',
-    displayField: 'reference',
+    displayField: 'reference'
   },
   [ResourceIds.ProductionClass]: {
     type: COMBOBOX,
@@ -951,5 +964,5 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  },
+  }
 }
