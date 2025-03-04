@@ -101,8 +101,7 @@ const ThreeDPrinting = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.ThreeDPrint,
-    action: openForm,
-    hasDT: true
+    action: openForm
   })
 
   const add = async () => {

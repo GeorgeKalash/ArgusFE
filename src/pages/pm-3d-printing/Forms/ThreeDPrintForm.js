@@ -67,7 +67,8 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       date: yup.date().required(),
       fileReference: yup.string().required(),
       threeDDId: yup.string().required(),
-      machineId: yup.string().required()
+      machineId: yup.string().required(),
+      setPcs: yup.number().nullable().min(0).max(1000)
     }),
     onSubmit: async values => {
       const data = { ...values, date: formatDateToApi(values?.date) }
@@ -86,7 +87,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       await getData(res.recordId)
       invalidate()
 
-      toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
+      toast.success(!values.recordId ? platformLabels.Edited : platformLabels.Added)
     }
   })
 
@@ -99,15 +100,19 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       parameters: `_recordId=${recordId}`
     })
 
-    res.record.date = formatDateFromApi(res?.record?.date)
-
     formik.setValues({
-      ...res.record
+      ...res.record,
+      date: formatDateFromApi(res?.record?.date),
+      startDate: formatDateFromApi(res?.record?.startDate),
+      endDate: formatDateFromApi(res?.record?.endDate)
     })
   }
 
   const onPost = async () => {
-    const header = { ...formik.values, date: formatDateToApi(formik.values?.date) }
+    const header = {
+      ...formik.values,
+      date: formatDateToApi(formik.values?.date)
+    }
 
     await postRequest({
       extension: ProductModelingRepository.ThreeDPrint.post,
@@ -125,19 +130,24 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted
+    },
+    {
+      key: 'Start',
+      condition: true,
+      onClick: onStart,
+      disabled: !editMode || isPosted
     }
   ]
 
   async function onStart() {
-    const start = new Date();
+    const header = {
+      ...formik.values,
+      date: formatDateToApi(formik.values?.date)
+    }
 
     const res = await postRequest({
       extension: ProductModelingRepository.ThreeDPrint.start,
-      record: JSON.stringify({
-        ...formik.values,
-        date: formatDateToApi(formik.values.date),
-        deliveryDate: formatDateToApi(start)
-      })
+      record: JSON.stringify(header)
     })
     toast.success(platformLabels.Started)
     invalidate()
@@ -288,9 +298,9 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
-                        { key: 'reference', value: 'Reference' },
-                        { key: 'name', value: 'Name' }
-                      ]}
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('machineId', newValue?.recordId || null)
@@ -324,6 +334,8 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     value={formik.values.density}
                     maxAccess={maxAccess}
                     readOnly={isPosted}
+                    maxLength={9}
+                    decimalScale={3}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('density', '')}
                     error={formik.touched.density && Boolean(formik.errors.density)}
