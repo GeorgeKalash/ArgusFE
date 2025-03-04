@@ -108,7 +108,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
   return <canvas id={id}></canvas>
 }
 
-export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor }) => {
+export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {
   useEffect(() => {
     const ctx = document.getElementById(id).getContext('2d')
 
@@ -127,7 +127,8 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
         ]
       },
       options: {
-        responsive: true
+        responsive: true,
+        aspectRatio: ratio
       }
     })
 

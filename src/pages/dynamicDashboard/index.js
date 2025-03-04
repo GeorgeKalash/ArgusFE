@@ -150,6 +150,7 @@ const DashboardLayout = () => {
                 labels={retailLabels}
                 data={retailValues}
                 label='Retail Sales'
+                ratio={5}
               />
             </ChartCard>
           </TopRow>
