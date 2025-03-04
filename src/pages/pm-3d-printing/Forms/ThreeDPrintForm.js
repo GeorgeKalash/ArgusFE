@@ -340,7 +340,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     maxLength={9}
                     decimalScale={3}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('density', '')}
+                    onClear={() => formik.setFieldValue('density', null)}
                     error={formik.touched.density && Boolean(formik.errors.density)}
                   />
                 </Grid>
@@ -352,7 +352,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     maxAccess={maxAccess}
                     readOnly={isPosted}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('setPcs', '')}
+                    onClear={() => formik.setFieldValue('setPcs', null)}
                     error={formik.touched.setPcs && Boolean(formik.errors.setPcs)}
                   />
                 </Grid>
@@ -366,7 +366,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     onChange={formik.handleChange}
                     maxLength={8}
                     decimalScale={2}
-                    onClear={() => formik.setFieldValue('weight', '')}
+                    onClear={() => formik.setFieldValue('weight', null)}
                     error={formik.touched.weight && Boolean(formik.errors.weight)}
                   />
                 </Grid>
