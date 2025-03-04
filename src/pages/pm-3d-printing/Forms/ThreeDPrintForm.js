@@ -272,11 +272,14 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
-                    label={labels.date}
-                    value={formik?.values?.date}
                     required
-                    readOnly
+                    label={labels.date}
+                    readOnly={isPosted}
+                    value={formik?.values?.date}
+                    onChange={formik.setFieldValue}
                     maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('date', '')}
+                    error={formik.touched.date && Boolean(formik.errors.date)}
                   />
                 </Grid>
                 <Grid item xs={12}>
