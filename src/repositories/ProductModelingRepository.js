@@ -16,8 +16,7 @@ export const ProductModelingRepository = {
     close: service + 'closeSKH',
     reopen: service + 'reopenSKH',
     snapshot: service + 'snapshotSKH',
-    post: service + 'postSKH',
-    del: service + 'delDSR'
+    post: service + 'postSKH'
   },
   ModelMaker: {
     snapshot: service + 'snapshotMDL',

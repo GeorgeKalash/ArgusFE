@@ -54,8 +54,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       weight: 0,
       wip: null,
       notes: '',
-      status: 1,
-      statusName: null
+      status: 1
     },
     maxAccess,
     enableReinitialize: false,

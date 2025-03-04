@@ -24,7 +24,6 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
-    enableReinitialize: false,
     validationSchema: yup.object({
       items: yup
         .array()
@@ -81,17 +80,31 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
     {
       component: 'numberfield',
       label: labels.pcs,
-      name: 'pcs'
+      name: 'pcs',
+      props: {
+        maxLength: 7
+      },
+      updateOn: 'blur',
+      onChange({ row: { update, newRow } }) {
+        if (newRow.pcs > 32767) update({ pcs: 0 })
+      }
     },
     {
       component: 'textfield',
       label: labels.size,
-      name: 'size'
+      name: 'size',
+      props: {
+        maxLength: 10
+      }
     },
     {
       component: 'numberfield',
       label: labels.weight,
-      name: 'weight'
+      name: 'weight',
+      props: {
+        maxLength: 10,
+        decimalScale: 2
+      }
     }
   ]
 
@@ -133,6 +146,8 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
       <VertLayout>
         <Grow>
           <DataGrid
+            name='materials'
+            maxAccess={maxAccess}
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values?.items}
             error={formik.errors?.items}

@@ -115,8 +115,7 @@ const ModelMaker = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.ModelMaker,
-    action: openForm,
-    hasDT: true
+    action: openForm
   })
 
   const add = async () => {

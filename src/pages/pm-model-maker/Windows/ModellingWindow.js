@@ -8,7 +8,7 @@ export default function ModellingWindow({ labels, access, recordId }) {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId: recordId || null,
+    recordId: recordId,
     isClosed: false
   })
 
