@@ -24,7 +24,7 @@ const ThreeDPrinting = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: ProductModelingRepository.ThreeDPrint.page,
+      extension: ProductModelingRepository.Printing.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${
         params || ''
       }`
@@ -44,7 +44,7 @@ const ThreeDPrinting = () => {
     clearFilter,
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ProductModelingRepository.ThreeDPrint.page,
+    endpointId: ProductModelingRepository.Printing.page,
     datasetId: ResourceIds.ThreeDPrint,
     filter: {
       filterFn: fetchWithFilter
@@ -54,7 +54,7 @@ const ThreeDPrinting = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
       return await getRequest({
-        extension: ProductModelingRepository.ThreeDPrint.snapshot,
+        extension: ProductModelingRepository.Printing.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
@@ -129,7 +129,7 @@ const ThreeDPrinting = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: ProductModelingRepository.ThreeDPrint.del,
+      extension: ProductModelingRepository.Printing.del,
       record: JSON.stringify(obj)
     })
     invalidate()

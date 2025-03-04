@@ -37,7 +37,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
   })
 
   const invalidate = useInvalidate({
-    endpointId: ProductModelingRepository.ThreeDPrint.page
+    endpointId: ProductModelingRepository.Printing.page
   })
 
   const { formik } = useForm({
@@ -74,7 +74,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       const data = { ...values, date: formatDateToApi(values?.date) }
 
       const res = await postRequest({
-        extension: ProductModelingRepository.ThreeDPrint.set,
+        extension: ProductModelingRepository.Printing.set,
         record: JSON.stringify(data)
       })
 
@@ -96,7 +96,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
 
   async function getData(recordId) {
     const res = await getRequest({
-      extension: ProductModelingRepository.ThreeDPrint.get,
+      extension: ProductModelingRepository.Printing.get,
       parameters: `_recordId=${recordId}`
     })
 
@@ -115,7 +115,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
     }
 
     await postRequest({
-      extension: ProductModelingRepository.ThreeDPrint.post,
+      extension: ProductModelingRepository.Printing.post,
       record: JSON.stringify(header)
     })
 
@@ -146,7 +146,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
     }
 
     const res = await postRequest({
-      extension: ProductModelingRepository.ThreeDPrint.start,
+      extension: ProductModelingRepository.Printing.start,
       record: JSON.stringify(header)
     })
     toast.success(platformLabels.Started)
