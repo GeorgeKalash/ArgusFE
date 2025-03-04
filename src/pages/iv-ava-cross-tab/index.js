@@ -38,7 +38,7 @@ const AvailabilityCrossTab = () => {
     return {
       count: response?.record?.recordCount || 0,
       list: response?.record?.recordCount ? gridData : [],
-      _startAt: _startAt
+      _startAt
     }
   }
 
