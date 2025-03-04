@@ -86,10 +86,9 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       parameters: `_recordId=${recordId}`
     })
 
-    res.record.date = formatDateFromApi(res?.record?.date)
-
     formik.setValues({
-      ...res.record
+      ...res.record,
+      date: formatDateFromApi(res?.record?.date)
     })
   }
 
