@@ -21,13 +21,17 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
 export default function RubberForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  console.log(access)
+
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.Damage,
+    functionId: SystemFunction.Rubber,
     access: access,
     enabled: !recordId
   })
@@ -42,36 +46,40 @@ export default function RubberForm({ labels, access, recordId }) {
       recordId: recordId,
       dtId: documentType?.dtId,
       reference: '',
+      date: new Date(),
       modelId: null,
       threeDPId: null,
       laborId: null,
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: null,
+      endDate: null,
       pcs: null,
       jobId: null,
       itemId: null,
-
+      sku: '',
+      itemName: '',
       status: 1,
-      statusName: '',
-      jobId: null,
-      seqNo: 0,
-      pcs: 0,
-      workCenterId: null,
-      maxPcs: 50
+      weight: null,
+      notes: '',
+      disabledItem: false
     },
     enableReinitialize: false,
     validateOnChange: true,
-    validationSchema: yup.object({}),
+    validationSchema: yup.object({
+      pcs: yup.number().moreThan(0, 'min').max(10000, 'max').required(),
+      itemId: yup.string().required(),
+      laborId: yup.string().required(),
+      modelId: yup.string().required()
+    }),
     onSubmit: async obj => {
       postRequest({
-        extension: ManufacturingRepository.Damage.set,
+        extension: ProductModelingRepository.Rubber.set,
         record: JSON.stringify({
           ...obj,
-          startDate: formatDateToApi(obj.startDate),
-          endDate: formatDateToApi(obj.endDate)
+          startDate: obj.startDate ? formatDateToApi(obj.startDate) : null,
+          endDate: obj.endDate ? formatDateToApi(obj.endDate) : null
         })
       }).then(async res => {
-        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+        const actionMessage = obj.recordId ? platformLabels.Edited : platformLabels.Added
         toast.success(actionMessage)
         await refetchForm(res.recordId)
         invalidate()
@@ -81,9 +89,9 @@ export default function RubberForm({ labels, access, recordId }) {
 
   async function refetchForm(damageId) {
     await getRequest({
-      extension: ManufacturingRepository.Damage.get,
+      extension: ProductModelingRepository.Rubber.get,
       parameters: `_recordId=${damageId}`
-    }).then(async res => {
+    }).then(res => {
       formik.setValues({
         ...res?.record,
         startDate: formatDateFromApi(res?.record?.startDate),
@@ -97,7 +105,7 @@ export default function RubberForm({ labels, access, recordId }) {
 
   const onPost = async () => {
     await postRequest({
-      extension: ManufacturingRepository.Damage.post,
+      extension: ProductModelingRepository.Rubber.post,
       record: JSON.stringify(formik.values)
     })
 
@@ -133,10 +141,12 @@ export default function RubberForm({ labels, access, recordId }) {
     }
   }, [documentType?.dtId])
 
+  console.log(formik)
+
   return (
     <FormShell
-      resourceId={ResourceIds.Damages}
-      functionId={SystemFunction.Damage}
+      resourceId={ResourceIds.Rubber}
+      functionId={SystemFunction.Rubber}
       form={formik}
       maxAccess={maxAccess}
       previewReport={editMode}
@@ -149,167 +159,202 @@ export default function RubberForm({ labels, access, recordId }) {
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
-            <Grid item container xs={6} spacing={2}>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.DocumentType.qry}
-                  parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Damage}`}
-                  name='dtId'
-                  label={labels.documentType}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  readOnly={editMode}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  values={formik.values}
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('dtId', newValue?.recordId)
-                    changeDT(newValue)
-                  }}
-                  error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='reference'
-                  label={labels.reference}
-                  value={formik?.values?.reference}
-                  maxAccess={!editMode && maxAccess}
-                  readOnly={editMode}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('reference', '')}
-                  error={formik.touched.reference && Boolean(formik.errors.reference)}
-                />
-              </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Damage}`}
+                name='dtId'
+                label={labels.dcType}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                readOnly={editMode}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('dtId', newValue?.recordId)
+                  changeDT(newValue)
+                }}
+                error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik?.values?.reference}
+                maxAccess={!editMode && maxAccess}
+                readOnly={editMode}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
 
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={ProductModelingRepository.Model.qry}
-                  parameters={`_startAt=0&_pageSize=200&_params=`}
-                  name='modelId'
-                  label={labels.laborId}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  valueField='recordId'
-                  displayField='reference'
-                  values={formik.values}
-                  onChange={async (event, newValue) => {
-                    formik.setFieldValue('modelId', newValue?.recordId || '')
-                    formik.setFieldValue('jobId', newValue?.jobId || '')
-                    formik.setFieldValue('threeDPId', newValue?.threeDPId || '')
-                    if (newValue?.jobId) {
-                      const response = await getRequest({
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ProductModelingRepository.Modeling.qry}
+                parameters={`_startAt=0&_pageSize=200&_params=`}
+                name='modelId'
+                label={labels.model}
+                dis
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField='reference'
+                values={formik.values}
+                required
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('modelId', newValue?.recordId || '')
+                  formik.setFieldValue('threeDPId', newValue?.threeDPId || '')
+                  formik.setFieldValue('laborId', newValue?.laborId || '')
+                  formik.setFieldValue('laborName', newValue?.laborName || '')
+                  if (newValue?.threeDPId) {
+                    const response = await getRequest({
+                      extension: ProductModelingRepository.Printing.get3,
+                      parameters: `_recordId=${newValue?.threeDPId}`
+                    })
+
+                    const jobId = response?.record?.jobId
+                    formik.setFieldValue('jobId', jobId || '')
+
+                    if (jobId) {
+                      const result = await getRequest({
                         extension: ManufacturingRepository.MFJobOrder.get,
-                        parameters: `_recordId=${newValue?.jobId}`
+                        parameters: `_recordId=${response?.record?.jobId}`
                       })
-                    }
-                  }}
-                  error={formik.touched.modelId && Boolean(formik.errors.modelId)}
-                />
-              </Grid>
 
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={ManufacturingRepository.Labor.qry}
-                  parameters={`_startAt=0&_pageSize=200&_params=`}
-                  name='laborId'
-                  label={labels.laborId}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  valueField='recordId'
-                  displayField='name'
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue('laborId', newValue?.recordId)
+                      formik.setFieldValue('sku', result?.record?.sku || '')
+                      formik.setFieldValue('itemId', result?.record?.itemId || '')
+                      formik.setFieldValue('itemName', result?.record?.itemName || null)
+                      formik.setFieldValue('pcs', result?.record?.pcs)
+                      formik.setFieldValue('disabledItem', true)
                     } else {
-                      formik.setFieldValue('laborId', '')
+                      formik.setFieldValue('sku', '')
+                      formik.setFieldValue('itemId', '')
+                      formik.setFieldValue('itemName', '')
+                      formik.setFieldValue('pcs', null)
+                      formik.setFieldValue('disabledItem', false)
                     }
-                  }}
-                  error={formik.touched.laborId && Boolean(formik.errors.laborId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='sku'
-                  label={labels.item}
-                  value={formik?.values?.sku}
-                  maxAccess={maxAccess}
-                  readOnly
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='itemName'
-                  value={formik?.values?.itemName}
-                  maxAccess={maxAccess}
-                  readOnly
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('reference', '')}
-                  error={formik.touched.reference && Boolean(formik.errors.reference)}
-                />
-              </Grid>
+                  }
+                }}
+                error={formik.touched.modelId && Boolean(formik.errors.modelId)}
+              />
+            </Grid>
 
-              <Grid item xs={12}>
-                <CustomDatePicker
-                  name='startDate'
-                  required
-                  label={labels.startDate}
-                  value={formik?.values?.startDate}
-                  onChange={formik.setFieldValue}
-                  readOnly={editMode}
-                  maxAccess={maxAccess}
-                  onClear={() => formik.setFieldValue('startDate', null)}
-                  error={formik.touched.startDate && Boolean(formik.errors.startDate)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomDatePicker
-                  name='endDate'
-                  required
-                  label={labels.endDate}
-                  value={formik?.values?.endDate}
-                  onChange={formik.setFieldValue}
-                  readOnly={editMode}
-                  maxAccess={maxAccess}
-                  onClear={() => formik.setFieldValue('endDate', null)}
-                  error={formik.touched.endDate && Boolean(formik.errors.endDate)}
-                />
-              </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.Labor.qry}
+                parameters={`_startAt=0&_pageSize=200&_params=`}
+                name='laborId'
+                required
+                label={labels.labor}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('laborId', newValue?.recordId)
+                  } else {
+                    formik.setFieldValue('laborId', '')
+                  }
+                }}
+                error={formik.touched.laborId && Boolean(formik.errors.laborId)}
+              />
+            </Grid>
 
-              <Grid item xs={12}>
-                <CustomNumberField
-                  name='weight'
-                  label={labels.workCenter}
-                  value={formik?.values?.wcName}
-                  maxAccess={maxAccess}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('weight', '')}
-                  error={formik.touched.weight && Boolean(formik.errors.weight)}
-                />
-              </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={InventoryRepository.Item.snapshot}
+                name='itemId'
+                label={labels.item}
+                valueField='sku'
+                displayField='name'
+                readOnly={formik.values.disabledItem}
+                valueShow='sku'
+                secondValueShow='itemName'
+                displayFieldWidth='2'
+                form={formik}
+                required
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('itemId', newValue?.recordId)
+                  formik.setFieldValue('itemName', newValue?.name || '')
+                  formik.setFieldValue('sku', newValue?.sku || '')
+                }}
+                maxAccess={access}
+                errorCheck={'itemId'}
+              />
+            </Grid>
 
-              <Grid item xs={12}>
-                <CustomTextArea
-                  name='notes'
-                  label={labels.remarks}
-                  value={formik.values.notes}
-                  rows={4}
-                  editMode={editMode}
-                  readOnly={isPosted}
-                  maxAccess={maxAccess}
-                  onChange={e => formik.setFieldValue('notes', e.target.value)}
-                  onClear={() => formik.setFieldValue('notes', '')}
-                  error={formik.touched.notes && Boolean(formik.errors.notes)}
-                />
-              </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='pcs'
+                required
+                label={labels.silverPieces}
+                value={formik?.values?.pcs}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('pcs', '')}
+                error={formik.touched.weight && Boolean(formik.errors.pcs)}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='startDate'
+                label={labels.startDate}
+                value={formik?.values?.startDate}
+                onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('startDate', null)}
+                error={formik.touched.startDate && Boolean(formik.errors.startDate)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='endDate'
+                label={labels.endDate}
+                value={formik?.values?.endDate}
+                onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('endDate', null)}
+                error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='weight'
+                label={labels.weight}
+                value={formik?.values?.weight}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('weight', '')}
+                error={formik.touched.weight && Boolean(formik.errors.weight)}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <CustomTextArea
+                name='notes'
+                label={labels.notes}
+                value={formik.values.notes}
+                rows={4}
+                readOnly={isPosted}
+                maxAccess={maxAccess}
+                onChange={e => formik.setFieldValue('notes', e.target.value)}
+                onClear={() => formik.setFieldValue('notes', '')}
+                error={formik.touched.notes && Boolean(formik.errors.notes)}
+              />
             </Grid>
           </Grid>
         </Grow>

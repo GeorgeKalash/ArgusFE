@@ -569,7 +569,7 @@ export const apiMappings = {
   [ResourceIds.Labor]: {
     type: COMBOBOX,
     endpoint: ManufacturingRepository.Labor.qry,
-    parameters: '_startAt=0&_pageSize=1000',
+    parameters: '_startAt=0&_pageSize=1000&_params=',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -921,7 +921,7 @@ export const apiMappings = {
     endpoint: InventoryRepository.Metals.qry,
     parameters: `_params=&_startAt=0&_pageSize=1000`,
     valueField: 'recordId',
-    displayField: 'reference',
+    displayField: 'reference'
   },
   [ResourceIds.ProductionClass]: {
     type: COMBOBOX,
@@ -951,5 +951,5 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  },
+  }
 }

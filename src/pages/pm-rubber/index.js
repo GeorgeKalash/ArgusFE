@@ -12,6 +12,8 @@ import { ControlContext } from 'src/providers/ControlContext'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 import RubberForm from './Forms/RubberForm'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import SystemFunction from '../system-functions'
 
 const Rubber = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -64,13 +66,37 @@ const Rubber = () => {
       flex: 1
     },
     {
-      field: 'name',
-      headerName: labels.name,
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'modelRef',
+      headerName: labels.modelRef,
       flex: 1
     },
     {
-      field: 'flName',
-      headerName: labels.flName,
+      field: 'sku',
+      headerName: labels.sku,
+      flex: 1
+    },
+
+    {
+      field: 'weight',
+      headerName: labels.threeDPRef,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'pcs',
+      headerName: labels.silverPieces,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'status',
+      headerName: labels.status,
       flex: 1
     }
   ]
@@ -85,8 +111,13 @@ const Rubber = () => {
     invalidate()
   }
 
-  const add = () => {
-    openForm()
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.Rubber,
+    action: openForm
+  })
+
+  const add = async () => {
+    await proxyAction()
   }
 
   function openForm(recordId) {
@@ -95,11 +126,11 @@ const Rubber = () => {
       props: {
         labels,
         recordId: recordId,
-        maxAccess: access
+        access: access
       },
       width: 800,
       height: 600,
-      title: labels?.Rubber
+      title: labels?.rubber
     })
   }
 

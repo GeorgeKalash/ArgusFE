@@ -24,9 +24,13 @@ export const ProductModelingRepository = {
     set: service + 'setRBR',
     del: service + 'delRBR',
     qry: service + 'qryRBR',
-    snapshot: service + 'snapshotRBR'
+    snapshot: service + 'snapshotRBR',
+    post: service + 'postRBR'
   },
-  Model: {
+  Modeling: {
     qry: service + 'qryMDL'
+  },
+  Printing: {
+    get3: service + 'get3DP'
   }
 }
