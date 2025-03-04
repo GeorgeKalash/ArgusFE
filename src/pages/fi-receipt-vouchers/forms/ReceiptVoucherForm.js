@@ -393,7 +393,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               <ResourceComboBox
                 endpointId={SaleRepository.SalesPerson.qry}
                 name='spId'
-                readOnly={!formik.values.accountId}
+                readOnly={!formik.values.accountId || isCancelled || isPosted}
                 label={labels.salePerson}
                 valueField='recordId'
                 displayField={['spRef', 'name']}
