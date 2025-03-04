@@ -366,5 +366,6 @@ export const ResourceIds = {
   Collections: 41119,
   Sketch: 48300,
   ProductionStandard: 42112,
-  SalesQuotations: 51301
+  SalesQuotations: 51301,
+  Rubber: 48305
 }

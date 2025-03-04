@@ -6,7 +6,7 @@ export const ProductModelingRepository = {
     get: service + 'getDSR',
     set: service + 'setDSR',
     del: service + 'delDSR',
-    qry: service + 'qryDSR',
+    qry: service + 'qryDSR'
   },
   Sketch: {
     page: service + 'pageSKH',
@@ -17,5 +17,16 @@ export const ProductModelingRepository = {
     reopen: service + 'reopenSKH',
     snapshot: service + 'snapshotSKH',
     post: service + 'postSKH'
+  },
+  Rubber: {
+    page: service + 'pageRBR',
+    get: service + 'getRBR',
+    set: service + 'setRBR',
+    del: service + 'delRBR',
+    qry: service + 'qryRBR',
+    snapshot: service + 'snapshotRBR'
+  },
+  Model: {
+    qry: service + 'qryMDL'
   }
 }
