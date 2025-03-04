@@ -112,8 +112,7 @@ const Casting = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.Casting,
-    action: openForm,
-    hasDT: true
+    action: openForm
   })
 
   const add = async () => {
