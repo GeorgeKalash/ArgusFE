@@ -25,7 +25,7 @@ const RPBGridToolbar = ({
   }, [reportName])
 
   const filters = (filter, params) => {
-    if (filter) filterBy('qry', filter)
+    if (filter) filterBy('qry', filter?.replace(/\+/g, '%2B'))
     else filterBy('params', params)
   }
 
