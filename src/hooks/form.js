@@ -102,10 +102,7 @@ export function useForm({ documentType = {}, maxAccess, validate = () => {}, ...
   const { key, value } = documentType
 
   useEffect(() => {
-    if (value)
-      if (key && value && formik.values[key] !== value) {
-        formik.setFieldValue(key, value)
-      }
+    if (key && value && formik.values[key] !== value) formik.setFieldValue(key, value)
   }, [value])
 
   return { formik }
