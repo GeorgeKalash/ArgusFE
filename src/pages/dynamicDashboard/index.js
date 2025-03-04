@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useContext } from 'react'
 import styled from 'styled-components'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { DashboardRepository } from 'src/repositories/DashboardRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CompositeBarChartDark, HorizontalBarChartDark } from '../../components/Shared/dashboardApplets/charts'
+import { getStorageData } from 'src/storage/storage'
+import { DashboardRepository } from 'src/repositories/DashboardRepository'
 
 const Frame = styled.div`
   display: flex;
@@ -107,14 +109,29 @@ const Value = styled.div`
 const DashboardLayout = () => {
   const { getRequest } = useContext(RequestsContext)
   const [data, setData] = useState(null)
+  const [applets, setApplets] = useState(null)
+  const userData = getStorageData('userData')
+  const _userId = userData.userId
 
   useEffect(() => {
     getRequest({
-      extension: DashboardRepository.dashboard
-    }).then(res => {
-      setData(res.record)
+      extension: SystemRepository.DynamicDashboard,
+      parameters: `_userId=${_userId}`
+    }).then(result => {
+      setApplets(result.list)
+      getRequest({
+        extension: DashboardRepository.dashboard
+      }).then(res => {
+        setData(res.record)
+      })
     })
   }, [])
+
+  const containsApplet = appletId => {
+    if (!Array.isArray(applets)) return false
+
+    return applets.some(applet => applet.appletId === appletId)
+  }
 
   if (!data) return null
 
@@ -161,7 +178,7 @@ const DashboardLayout = () => {
   return (
     <Frame>
       <Container>
-        {retailValues.length > 0 && (
+        {containsApplet(60110) && (
           <TopRow>
             <ChartCard>
               <SummaryCard>
@@ -179,52 +196,60 @@ const DashboardLayout = () => {
           </TopRow>
         )}
         <MiddleRow>
-          <SummaryGrid>
-            <SummaryItem>
-              <RedCenter>Today's Sales</RedCenter>
-              <InnerGrid>
-                <Label>HO Sales:</Label>
-                <Value>{todayHoSales.toLocaleString()}</Value>
-                <Label>Retail Sales:</Label>
-                <Value>{todayRetailSales.toLocaleString()}</Value>
-                <Label>Total:</Label>
-                <Value>{todaysSales.toLocaleString()}</Value>
-              </InnerGrid>
-            </SummaryItem>
-            <SummaryItem>
-              <RedCenter>Global Sales</RedCenter>
-              <InnerGrid>
-                <Label>HO Sales:</Label>
-                <Value>{globalHoSales.toLocaleString()}</Value>
-                <Label>Retail Sales:</Label>
-                <Value>{globalRetailSales.toLocaleString()}</Value>
-                <Label>Total:</Label>
-                <Value>{globalSales.toLocaleString()}</Value>
-              </InnerGrid>
-            </SummaryItem>
-            <SummaryItem>
-              <RedCenter>Misc Data</RedCenter>
-              <InnerGrid>
-                <Label>Open SO:</Label>
-                <Value>{openSo.toLocaleString()}</Value>
-                <Label>Return Sales:</Label>
-                <Value>{returnSales.toLocaleString()}</Value>
-              </InnerGrid>
-            </SummaryItem>
-            <SummaryItem>
-              <RedCenter>General Revenues</RedCenter>
-              <InnerGrid>
-                <Label>Revenues:</Label>
-                <Value>{revenues.toLocaleString()}</Value>
-                <Label>Profit:</Label>
-                <Value>{profit.toLocaleString()}</Value>
-              </InnerGrid>
-            </SummaryItem>
-            <SummaryItem style={{ gridColumn: '1 / 3' }}>
-              <RedCenter>New Customers: {newCustomers.toLocaleString()}</RedCenter>
-            </SummaryItem>
-          </SummaryGrid>
-          {weeklyValues.length > 0 && (
+          {(containsApplet(60106) || containsApplet(60112)) && (
+            <SummaryGrid>
+              {containsApplet(60112) && (
+                <>
+                  <SummaryItem>
+                    <RedCenter>Today's Sales</RedCenter>
+                    <InnerGrid>
+                      <Label>HO Sales:</Label>
+                      <Value>{todayHoSales.toLocaleString()}</Value>
+                      <Label>Retail Sales:</Label>
+                      <Value>{todayRetailSales.toLocaleString()}</Value>
+                      <Label>Total:</Label>
+                      <Value>{todaysSales.toLocaleString()}</Value>
+                    </InnerGrid>
+                  </SummaryItem>
+                  <SummaryItem>
+                    <RedCenter>Global Sales</RedCenter>
+                    <InnerGrid>
+                      <Label>HO Sales:</Label>
+                      <Value>{globalHoSales.toLocaleString()}</Value>
+                      <Label>Retail Sales:</Label>
+                      <Value>{globalRetailSales.toLocaleString()}</Value>
+                      <Label>Total:</Label>
+                      <Value>{globalSales.toLocaleString()}</Value>
+                    </InnerGrid>
+                  </SummaryItem>
+                  <SummaryItem>
+                    <RedCenter>Misc Data</RedCenter>
+                    <InnerGrid>
+                      <Label>Open SO:</Label>
+                      <Value>{openSo.toLocaleString()}</Value>
+                      <Label>Return Sales:</Label>
+                      <Value>{returnSales.toLocaleString()}</Value>
+                    </InnerGrid>
+                  </SummaryItem>
+                  <SummaryItem>
+                    <RedCenter>General Revenues</RedCenter>
+                    <InnerGrid>
+                      <Label>Revenues:</Label>
+                      <Value>{revenues.toLocaleString()}</Value>
+                      <Label>Profit:</Label>
+                      <Value>{profit.toLocaleString()}</Value>
+                    </InnerGrid>
+                  </SummaryItem>
+                </>
+              )}
+              {containsApplet(60106) && (
+                <SummaryItem style={{ gridColumn: '1 / 3' }}>
+                  <RedCenter>New Customers: {newCustomers.toLocaleString()}</RedCenter>
+                </SummaryItem>
+              )}
+            </SummaryGrid>
+          )}
+          {containsApplet(60100) && (
             <ChartCard>
               <SummaryCard>
                 <Title>Average Weekly Sales</Title>
@@ -238,7 +263,7 @@ const DashboardLayout = () => {
               />
             </ChartCard>
           )}
-          {monthlyValues.length > 0 && (
+          {containsApplet(60101) && (
             <ChartCard>
               <SummaryCard>
                 <Title>Average Monthly Sales</Title>
@@ -252,7 +277,7 @@ const DashboardLayout = () => {
               />
             </ChartCard>
           )}
-          {revenuesValues.length > 0 && (
+          {containsApplet(60107) && (
             <ChartCard>
               <SummaryCard>
                 <Title>Accumulated Revenues</Title>
@@ -267,7 +292,7 @@ const DashboardLayout = () => {
               />
             </ChartCard>
           )}
-          {receivablesValues.length > 0 && (
+          {containsApplet(60109) && (
             <ChartCard>
               <SummaryCard>
                 <Title>Receivables</Title>
@@ -282,7 +307,7 @@ const DashboardLayout = () => {
               />
             </ChartCard>
           )}
-          {topCustomersValues.length > 0 && (
+          {containsApplet(60102) && (
             <ChartCard>
               <SummaryCard>
                 <Title>Top Customers</Title>
