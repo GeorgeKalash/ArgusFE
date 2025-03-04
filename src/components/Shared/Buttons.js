@@ -181,6 +181,20 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Order',
+    label: platformLabels.Order,
+    color: '#231f20',
+    image: 'order.png',
+    main: false
+  },
+  {
+    key: 'Consignments',
+    label: platformLabels.Consignments,
+    color: '#231f20',
+    image: 'consignment.png',
+    main: false
+  },
+  {
     key: 'Receipt Voucher',
     label: platformLabels.ReceiptVoucher,
     color: '#231f20',
