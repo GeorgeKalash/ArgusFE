@@ -269,7 +269,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                 maxAccess={maxAccess}
                 readOnly={isPosted}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('setPcs', '')}
+                onClear={() => formik.setFieldValue('setPcs', null)}
                 error={formik.touched.setPcs && Boolean(formik.errors.setPcs)}
               />
             </Grid>
@@ -283,7 +283,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                 onChange={formik.handleChange}
                 maxLength={8}
                 decimalScale={2}
-                onClear={() => formik.setFieldValue('weight', '')}
+                onClear={() => formik.setFieldValue('weight', null)}
                 error={formik.touched.weight && Boolean(formik.errors.weight)}
               />
             </Grid>
@@ -298,7 +298,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                 maxLength={10}
                 decimalScale={2}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('rmQty', '')}
+                onClear={() => formik.setFieldValue('rmQty', null)}
                 error={formik.touched.rmQty && Boolean(formik.errors.rmQty)}
               />
             </Grid>

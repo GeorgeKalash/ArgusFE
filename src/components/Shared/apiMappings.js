@@ -906,11 +906,11 @@ export const apiMappings = {
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
   [ResourceIds.Printing]: {
-    type: LOOKUP,
+    type: COMBOBOX,
     endpoint: ProductModelingRepository.Printing.qry,
-    valueOnSelection: 'recordId',
-    firstField: 'reference',
-    secondDisplayField: false
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: 'reference',
   },
   [ResourceIds.Designer]: {
     type: COMBOBOX,
