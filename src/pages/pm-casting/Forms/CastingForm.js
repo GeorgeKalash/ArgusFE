@@ -73,7 +73,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       await getData(res.recordId)
       invalidate()
 
-      toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
+      toast.success(!values.recordId ? platformLabels.Added : platformLabels.Edited)
     }
   })
 
