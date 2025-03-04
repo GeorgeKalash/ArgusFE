@@ -14,6 +14,7 @@ const CustomNumberField = ({
   label,
   onChange = () => {},
   onMouseLeave = () => {},
+  renderMouseLeave = false,
   readOnly = false,
   allowClear = false,
   decimalScale = 2,
@@ -59,7 +60,7 @@ const CustomNumberField = ({
   }
 
   const handleNumberMouseLeave = e => {
-    if (!isEmptyFunction) {
+    if (!isEmptyFunction && !renderMouseLeave) {
       const value = formatNumber(e)
       if (value) e.target.value = value
 
@@ -68,16 +69,11 @@ const CustomNumberField = ({
   }
 
   const formatNumber = e => {
-    let inputValue = e?.target?.value
+    const inputValue = e?.target?.value
     if (typeof inputValue !== 'string') return inputValue
-    const regex = /^[0-9,]+(\.\d+)?$/
-    if (inputValue && regex.test(inputValue)) {
-      inputValue = inputValue.replace(/[^0-9.]/g, '')
+    let num = getNumberWithoutCommas(inputValue)
 
-      return getNumberWithoutCommas(inputValue)
-    }
-
-    return inputValue
+    return num.replace(/\.$/, '')
   }
 
   const handleInput = e => {
