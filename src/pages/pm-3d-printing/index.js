@@ -25,9 +25,7 @@ const ThreeDPrinting = () => {
 
     const response = await getRequest({
       extension: ProductModelingRepository.Printing.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${
-        params || ''
-      }`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -41,11 +39,11 @@ const ThreeDPrinting = () => {
     access,
     invalidate,
     filterBy,
-    clearFilter,
+    clearFilter
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ProductModelingRepository.Printing.page,
-    datasetId: ResourceIds.ThreeDPrint,
+    datasetId: ResourceIds.Printing,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -107,7 +105,6 @@ const ThreeDPrinting = () => {
   const add = async () => {
     await proxyAction()
   }
-
 
   const edit = obj => {
     openForm(obj?.recordId)

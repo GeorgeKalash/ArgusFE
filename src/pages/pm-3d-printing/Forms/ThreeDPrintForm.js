@@ -170,7 +170,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
 
   return (
     <FormShell
-      resourceId={ResourceIds.ThreeDPrint}
+      resourceId={ResourceIds.Printing}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -389,7 +389,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
             <Grid item xs={6}>
               <ImageUpload
                 ref={imageUploadRef}
-                resourceId={ResourceIds.ThreeDPrint}
+                resourceId={ResourceIds.Printing}
                 seqNo={0}
                 recordId={recordId}
                 width={250}
