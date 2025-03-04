@@ -921,7 +921,7 @@ export const apiMappings = {
     endpoint: InventoryRepository.Metals.qry,
     parameters: `_params=&_startAt=0&_pageSize=1000`,
     valueField: 'recordId',
-    displayField: 'reference',
+    displayField: 'reference'
   },
   [ResourceIds.ProductionClass]: {
     type: COMBOBOX,
@@ -959,4 +959,15 @@ export const apiMappings = {
     firstField: 'reference',
     secondDisplayField: false
   },
+  [ResourceIds.Routings]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.Routing.qry,
+    parameters: `_params=`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  }
 }
