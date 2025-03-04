@@ -952,4 +952,11 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  [ResourceIds.ThreeDDesign]: {
+    type: LOOKUP,
+    endpoint: ProductModelingRepository.ThreeDDrawing.snapshot,
+    valueOnSelection: 'recordId',
+    firstField: 'reference',
+    secondDisplayField: false
+  },
 }

@@ -17,5 +17,17 @@ export const ProductModelingRepository = {
     reopen: service + 'reopenSKH',
     snapshot: service + 'snapshotSKH',
     post: service + 'postSKH'
+  },
+  ThreeDPrint: {
+    page: service + 'page3DP',
+    get: service + 'get3DP',
+    set: service + 'set3DP',
+    del: service + 'del3DP',
+    start: service + 'start3DP',
+    snapshot: service + 'snapshot3DP',
+    post: service + 'post3DP'
+  },
+  ThreeDDrawing: {
+    snapshot: service + 'snapshot3DD',
   }
 }
