@@ -25,9 +25,18 @@ export const ProductModelingRepository = {
     del: service + 'del3DP',
     start: service + 'start3DP',
     snapshot: service + 'snapshot3DP',
-    post: service + 'post3DP'
+    post: service + 'post3DP',
+    qry: service + 'qry3DP'
   },
   ThreeDDrawing: {
     snapshot: service + 'snapshot3DD',
+  },
+  Casting: {
+    page: service + 'pageCAS',
+    get: service + 'getCAS',
+    set: service + 'setCAS',
+    del: service + 'delCAS',
+    snapshot: service + 'snapshotCAS',
+    post: service + 'postCAS'
   }
 }
