@@ -14,7 +14,6 @@ const Container = styled.div`
   width: 100%;
   height: 100%;
   padding: 10px;
-  padding-right: 20px;
   background: rgb(204, 204, 204);
   display: flex;
   flex-direction: column;
@@ -82,7 +81,27 @@ const RedCenter = styled.div`
   text-align: center;
   color: red;
   font-size: 18px;
-  margin-top: 10px;
+  margin-bottom: 5px;
+`
+
+const InnerGrid = styled.div`
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 5px 20px;
+  align-items: center;
+  text-align: left;
+`
+
+const Label = styled.div`
+  justify-self: start;
+  color: #000;
+  font-size: 16px;
+`
+
+const Value = styled.div`
+  justify-self: end;
+  color: #000;
+  font-size: 16px;
 `
 
 const DashboardLayout = () => {
@@ -102,13 +121,17 @@ const DashboardLayout = () => {
   const todayHoSales = data?.summaryFigures?.find(f => f.itemId === 12)?.amount ?? 0
   const todayRetailSales = data?.summaryFigures?.find(f => f.itemId === 13)?.amount ?? 0
   const todaysSales = todayHoSales + todayRetailSales
+
   const globalHoSales = data?.summaryFigures?.find(f => f.itemId === 16)?.amount ?? 0
   const globalRetailSales = data?.summaryFigures?.find(f => f.itemId === 15)?.amount ?? 0
   const globalSales = globalHoSales + globalRetailSales
+
   const openSo = data?.summaryFigures?.find(f => f.itemId === 18)?.amount ?? 0
   const returnSales = data?.summaryFigures?.find(f => f.itemId === 17)?.amount ?? 0
+
   const revenues = data?.summaryFigures?.find(f => f.itemId === 2)?.amount ?? 0
   const profit = data?.summaryFigures?.find(f => f.itemId === 3)?.amount ?? 0
+
   const newCustomers = data?.summaryFigures?.find(f => f.itemId === 1)?.amount ?? 0
 
   const retailLabels = data?.todaysRetailSales?.map(ws => ws.posRef) || []
@@ -159,27 +182,45 @@ const DashboardLayout = () => {
           <SummaryGrid>
             <SummaryItem>
               <RedCenter>Today's Sales</RedCenter>
-              <strong>HO Sales: {todayHoSales.toLocaleString()}</strong>
-              <strong>Retail Sales: {todayRetailSales.toLocaleString()}</strong>
-              <strong>Total: {todaysSales.toLocaleString()}</strong>
+              <InnerGrid>
+                <Label>HO Sales:</Label>
+                <Value>{todayHoSales.toLocaleString()}</Value>
+                <Label>Retail Sales:</Label>
+                <Value>{todayRetailSales.toLocaleString()}</Value>
+                <Label>Total:</Label>
+                <Value>{todaysSales.toLocaleString()}</Value>
+              </InnerGrid>
             </SummaryItem>
             <SummaryItem>
-              <RedCenter>Today's Sales</RedCenter>
-              <strong>HO Sales: {globalHoSales.toLocaleString()}</strong>
-              <strong>Retail Sales: {globalRetailSales.toLocaleString()}</strong>
-              <strong>Total: {globalSales.toLocaleString()}</strong>
+              <RedCenter>Global Sales</RedCenter>
+              <InnerGrid>
+                <Label>HO Sales:</Label>
+                <Value>{globalHoSales.toLocaleString()}</Value>
+                <Label>Retail Sales:</Label>
+                <Value>{globalRetailSales.toLocaleString()}</Value>
+                <Label>Total:</Label>
+                <Value>{globalSales.toLocaleString()}</Value>
+              </InnerGrid>
             </SummaryItem>
             <SummaryItem>
               <RedCenter>Misc Data</RedCenter>
-              <strong>Open SO: {openSo.toLocaleString()}</strong>
-              <strong>Return Sales: {returnSales.toLocaleString()}</strong>
+              <InnerGrid>
+                <Label>Open SO:</Label>
+                <Value>{openSo.toLocaleString()}</Value>
+                <Label>Return Sales:</Label>
+                <Value>{returnSales.toLocaleString()}</Value>
+              </InnerGrid>
             </SummaryItem>
             <SummaryItem>
               <RedCenter>General Revenues</RedCenter>
-              <strong>Revenues: {revenues.toLocaleString()}</strong>
-              <strong>Profit: {profit.toLocaleString()}</strong>
+              <InnerGrid>
+                <Label>Revenues:</Label>
+                <Value>{revenues.toLocaleString()}</Value>
+                <Label>Profit:</Label>
+                <Value>{profit.toLocaleString()}</Value>
+              </InnerGrid>
             </SummaryItem>
-            <SummaryItem>
+            <SummaryItem style={{ gridColumn: '1 / 3' }}>
               <RedCenter>New Customers: {newCustomers.toLocaleString()}</RedCenter>
             </SummaryItem>
           </SummaryGrid>
