@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -242,12 +242,11 @@ export default function DraftTransfer({ labels, access, recordId }) {
     formik.setFieldValue('reference', diHeader?.record?.reference)
     formik.setFieldValue('date', diHeader?.record?.date)
 
-    const success = await autoSave(diHeader, lastLine)
+    const success = await autoSave(diHeader?.record, lastLine)
 
     if (success) {
       toast.success(platformLabels.Saved)
 
-      const diHeader = await getDraftTransfer(diRes.recordId)
       const diItems = await getDraftTransferItems(diRes.recordId)
       await fillForm(diHeader, diItems)
 
@@ -581,9 +580,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
       } else {
         const defaultSiteId = defUserSiteId || defSiteId || null
         formik.setFieldValue('fromSiteId', defaultSiteId)
-        if (formik?.values?.dtId) {
-          onChangeDtId(formik?.values?.dtId)
-        }
+        onChangeDtId(formik?.values?.dtId)
       }
     })()
   }, [])
