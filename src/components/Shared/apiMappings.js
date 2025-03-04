@@ -905,6 +905,13 @@ export const apiMappings = {
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
+  [ResourceIds.Printing]: {
+    type: COMBOBOX,
+    endpoint: ProductModelingRepository.Printing.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: 'reference'
+  },
   [ResourceIds.Designer]: {
     type: COMBOBOX,
     endpoint: ProductModelingRepository.Designer.qry,

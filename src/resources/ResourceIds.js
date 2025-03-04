@@ -357,6 +357,7 @@ export const ResourceIds = {
   OutboundAssignDriver: 52313,
   PriceListInquiry: 41432,
   MaterialTransferDTD: 41112,
+  DraftSerialReturns: 51314,
   MetalSettings: 47100,
   WaxDocTypeDefaults: 42601,
   JobWaxInquiry: 47313,
@@ -366,6 +367,8 @@ export const ResourceIds = {
   Collections: 41119,
   Sketch: 48300,
   ProductionStandard: 42112,
+  Casting: 48303,
+  Printing: 48302,
   SalesQuotations: 51301,
   Rubber: 48305
 }

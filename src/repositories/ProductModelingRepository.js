@@ -32,5 +32,16 @@ export const ProductModelingRepository = {
   },
   Printing: {
     get3: service + 'get3DP'
+  },
+  Casting: {
+    page: service + 'pageCAS',
+    get: service + 'getCAS',
+    set: service + 'setCAS',
+    del: service + 'delCAS',
+    snapshot: service + 'snapshotCAS',
+    post: service + 'postCAS'
+  },
+  Printing: {
+    qry: service + 'qry3DP'
   }
 }
