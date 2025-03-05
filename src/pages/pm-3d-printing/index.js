@@ -119,7 +119,7 @@ const ThreeDPrinting = () => {
         maxAccess: access
       },
       width: 700,
-      height: 750,
+      height: 650,
       title: labels.ThreeDPrint
     })
   }

@@ -68,7 +68,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       fileReference: yup.string().required(),
       threeDDId: yup.string().required(),
       machineId: yup.string().required(),
-      setPcs: yup.number().nullable().min(0).max(1000)
+      setPcs: yup.number().nullable()
     }),
     onSubmit: async values => {
       const data = { ...values, date: formatDateToApi(values?.date) }
@@ -92,6 +92,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
   })
 
   const isPosted = formik.values.status === 3
+  const isReleased = formik.values.status == 4
   const editMode = !!formik.values.recordId
 
   async function getData(recordId) {
@@ -129,13 +130,13 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !editMode || isPosted
+      disabled: !editMode || isPosted || !isReleased
     },
     {
       key: 'Start',
       condition: true,
       onClick: onStart,
-      disabled: !editMode || isPosted
+      disabled: !editMode || isPosted || isReleased
     }
   ]
 
@@ -176,7 +177,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       editMode={editMode}
       actions={actions}
       functionId={systemFunction}
-      disabledSubmit={isPosted}
+      disabledSubmit={isPosted || isReleased}
     >
       <VertLayout>
         <Fixed>
@@ -223,7 +224,6 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     name='jobId'
                     label={labels.jobOrder}
                     form={formik}
-                    displayFieldWidth={2}
                     valueShow='jobRef'
                     maxAccess={maxAccess}
                     editMode={editMode}
@@ -231,7 +231,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                       { key: 'reference', value: 'Reference' },
                       { key: 'itemName', value: 'Item Name' }
                     ]}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isReleased}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('jobId', newValue?.recordId || null)
                       formik.setFieldValue('jobRef', newValue?.reference || '')
@@ -250,7 +250,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     form={formik}
                     valueShow='threeDDRef'
                     maxAccess={maxAccess}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isReleased}
                     required
                     onChange={(event, newValue) => {
                       formik.setFieldValue('threeDDId', newValue?.recordId || null)
@@ -260,21 +260,13 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     errorCheck={'threeDDId'}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='fileReference'
-                    label={labels.threeDDFile}
-                    value={formik.values.fileReference}
-                    maxAccess={maxAccess}
-                    readOnly
-                  />
-                </Grid>
+                
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
                     required
                     label={labels.date}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isReleased}
                     value={formik?.values?.date}
                     onChange={formik.setFieldValue}
                     maxAccess={maxAccess}
@@ -309,7 +301,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                       formik.setFieldValue('machineId', newValue?.recordId || null)
                     }}
                     required
-                    readOnly={isPosted}
+                    readOnly={isPosted || isReleased}
                     error={formik.touched.machineId && Boolean(formik.errors.machineId)}
                     maxAccess={maxAccess}
                   />
@@ -321,9 +313,13 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     name='productionClassId'
                     label={labels.productionClass}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
                     maxAccess={maxAccess}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isReleased}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('productionClassId', newValue?.recordId || null)
                     }}
@@ -336,7 +332,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     label={labels.density}
                     value={formik.values.density}
                     maxAccess={maxAccess}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isReleased}
                     maxLength={9}
                     decimalScale={3}
                     onChange={formik.handleChange}
@@ -350,7 +346,9 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     label={labels.pieces}
                     value={formik.values.setPcs}
                     maxAccess={maxAccess}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isReleased}
+                    maxLength={4}
+                    decimalScale={0}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('setPcs', null)}
                     error={formik.touched.setPcs && Boolean(formik.errors.setPcs)}
@@ -362,12 +360,39 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     label={labels.weight}
                     value={formik.values.weight}
                     maxAccess={maxAccess}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isReleased}
                     onChange={formik.handleChange}
                     maxLength={8}
                     decimalScale={2}
                     onClear={() => formik.setFieldValue('weight', null)}
                     error={formik.touched.weight && Boolean(formik.errors.weight)}
+                  />
+                </Grid>
+                
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ImageUpload
+                    ref={imageUploadRef}
+                    resourceId={ResourceIds.Printing}
+                    seqNo={0}
+                    recordId={recordId}
+                    width={272}
+                    height={'auto'}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='fileReference'
+                    label={labels.threeDDFile}
+                    value={formik.values.fileReference}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    readOnly={isPosted || isReleased}
+                    onClear={() => formik.setFieldValue('fileReference', '')}
+                    error={formik.touched.fileReference && Boolean(formik.errors.fileReference)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -376,7 +401,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     type='text'
                     label={labels.notes}
                     value={formik.values.notes}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isReleased}
                     rows={3}
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('notes', e.target.value || null)}
@@ -385,16 +410,6 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                   />
                 </Grid>
               </Grid>
-            </Grid>
-            <Grid item xs={6}>
-              <ImageUpload
-                ref={imageUploadRef}
-                resourceId={ResourceIds.Printing}
-                seqNo={0}
-                recordId={recordId}
-                width={250}
-                height={'auto'}
-              />
             </Grid>
           </Grid>
         </Fixed>
