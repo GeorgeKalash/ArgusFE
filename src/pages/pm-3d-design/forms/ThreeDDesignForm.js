@@ -21,14 +21,15 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { DataSets } from 'src/resources/DataSets'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
+import SketchForm from 'src/pages/pm-sketch/Forms/SketchForm'
+import { useWindow } from 'src/windows'
 
 export default function ThreeDDesignForm({ labels, access, recordId }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
   const functionId = SystemFunction.ThreeDDesign
   const imageUploadRef = useRef(null)
 
@@ -131,22 +132,6 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     })
   }
 
-  //   const onUnpost = async () => {
-  //     const data = {
-  //       ...formik.values,
-  //       date: formatDateToApi(formik.values.date)
-  //     }
-
-  //     await postRequest({
-  //       extension: ProductModelingRepository.ThreeDDesign.unpost,
-  //       record: JSON.stringify(data)
-  //     }).then(async res => {
-  //       await fetchData(res.recordId)
-  //       toast.success(platformLabels.Unposted)
-  //       invalidate()
-  //     })
-  //   }
-
   async function onClose() {
     const data = {
       ...formik.values,
@@ -176,6 +161,20 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       await fetchData(res.recordId)
       toast.success(platformLabels.Reopened)
       invalidate()
+    })
+  }
+
+  async function onSketch() {
+    stack({
+      Component: SketchForm,
+      props: {
+        labels: labels,
+        recordId: formik?.values?.sketchId,
+        maxAccess: access
+      },
+      width: 700,
+      height: 700,
+      title: labels.Sketch
     })
   }
 
@@ -209,6 +208,12 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       condition: true,
       onClick: 'onApproval',
       disabled: !isClosed
+    },
+    {
+      key: 'Sketch',
+      condition: true,
+      onClick: onSketch,
+      disabled: !formik?.values?.sketchId
     }
   ]
 

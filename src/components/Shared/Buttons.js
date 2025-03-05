@@ -477,5 +477,12 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'shipment.png',
     main: false
+  },
+  {
+    key: 'Sketch',
+    label: platformLabels.Sketch,
+    color: '#048693',
+    image: 'sketch.png',
+    main: false
   }
 ]

@@ -124,7 +124,7 @@ const ThreeDDesign = () => {
         maxAccess: access
       },
       width: 800,
-      height: 650,
+      height: 750,
       title: labels.ThreeDDesign
     })
   }
