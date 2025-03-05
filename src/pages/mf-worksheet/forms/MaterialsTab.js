@@ -44,7 +44,7 @@ const MaterialsTab = ({ store, labels, access }) => {
       type: 'date'
     },
     {
-      field: 'type',
+      field: 'typeName',
       headerName: labels.type,
       flex: 1
     },

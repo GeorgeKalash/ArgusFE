@@ -103,9 +103,9 @@ export default function DamageForm({ recordId, jobId }) {
         designRef: jobRes?.record?.designRef,
         jobRef: jobRes?.record?.reference,
         jobId: jobRes?.record?.recordId,
-        wcName: jobRes?.record?.wcName,
-        wcRef: jobRes?.record?.wcRef,
-        wcId: jobRes?.record?.wcId,
+        workCenterName: jobRes?.record?.wcName,
+        workCenterRef: jobRes?.record?.wcRef,
+        workCenterId: jobRes?.record?.workCenterId,
         maxPcs: jobRes.record.pcs
       })
     })
@@ -236,7 +236,7 @@ export default function DamageForm({ recordId, jobId }) {
                     designRef: newValue?.designRef || '',
                     designName: newValue?.designName || '',
                     itemName: newValue?.itemName || '',
-                    wcName: newValue?.wcName || '',
+                    workCenterName: newValue?.wcName || '',
                     workCenterId: newValue?.workCenterId || null,
                     plantId: newValue?.plantId || null,
                     maxPcs: newValue?.pcs || 0
@@ -311,9 +311,9 @@ export default function DamageForm({ recordId, jobId }) {
             <Grid item xs={7}></Grid>
             <Grid item xs={5}>
               <CustomTextField
-                name='wcName'
+                name='workCenterName'
                 label={labels.workCenter}
-                value={formik?.values?.wcName}
+                value={formik?.values?.workCenterName}
                 maxAccess={maxAccess}
                 readOnly
               />

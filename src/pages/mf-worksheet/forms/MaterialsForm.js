@@ -68,7 +68,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
           imaId: recordId || 0,
           worksheetId: wsId,
           seqNo: 1,
-          itemId: '',
+          itemId: null,
           sku: '',
           itemName: '',
           unitCost: 0.0,
@@ -85,7 +85,13 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
       header: yup.object({
         operationId: yup.number().required(),
         type: yup.number().required()
-      })
+      }),
+      items: yup.array().of(
+        yup.object({
+          sku: yup.string().required(),
+          itemName: yup.string().required()
+        })
+      )
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -95,7 +101,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         if (!obj.recordId) {
           formik.setFieldValue('recordId', res.recordId)
         }
-        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
+        toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
         invalidate()
       })
     }
@@ -341,6 +347,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('items', value)}
+            name='items'
             value={formik.values.items}
             error={formik.errors.items}
             columns={[

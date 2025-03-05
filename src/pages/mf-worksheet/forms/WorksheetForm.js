@@ -120,7 +120,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
           }))
         }
         getData(res.recordId)
-        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
+        toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
         invalidate()
       })
     }
@@ -144,6 +144,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       })
       setStore(prevStore => ({
         ...prevStore,
+        isPosted: res?.record?.status == 3,
         values: {
           ...res?.record,
           siteId: res2?.record?.siteId,
@@ -263,7 +264,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
-      disabled: !editMode || isPosted
+      disabled: !editMode
     },
     {
       key: 'Damage',
@@ -360,6 +361,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                   <ResourceLookup
                     endpointId={ManufacturingRepository.MFJobOrder.snapshot2}
                     parameters={{ _workCenterId: formik.values.workCenterId }}
+                    filter={{ status: 4 }}
                     name='jobRef'
                     label={labels.jobRef}
                     valueField='reference'
@@ -511,11 +513,10 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     required
                     readOnly
                     maxAccess={access}
-                    error={formik.touched.joQty && Boolean(formik.errors.joQty)}
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField
+                  <CustomNumberField
                     name='joPcs'
                     label={labels.joPcs}
                     value={formik.values.joPcs}
