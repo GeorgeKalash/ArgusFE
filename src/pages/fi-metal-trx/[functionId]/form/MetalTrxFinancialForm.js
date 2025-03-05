@@ -282,7 +282,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           { from: 'recordId', to: 'metalId' },
           { from: 'purity', to: 'purity' },
           { from: 'purity', to: 'stdPurity' }
-        ]
+        ],
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !!row.sku }
       },
       onChange: async ({ row: { update, newRow } }) => {
         getFilteredMetal(newRow?.metalId)
@@ -328,7 +331,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       component: 'numberfield',
       name: 'purity',
       label: labels.purity,
-      props: { readOnly: true },
       defaultValue: 0,
       onChange: ({ row: { update, newRow } }) => {
         const baseSalesMetalValue = (newRow.qty * newRow.purity) / (App.currentMetalPurity.getValue() * 1000)
