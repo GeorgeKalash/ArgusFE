@@ -33,9 +33,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const [allMetals, setAllMetals] = useState([])
   const filteredItems = useRef()
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
-
   const getEndpoint = {
     [SystemFunction.MetalReceiptVoucher]: FinancialRepository.MetalReceiptVoucher.set2,
     [SystemFunction.MetalPaymentVoucher]: FinancialRepository.MetalPaymentVoucher.set2
@@ -51,6 +48,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     endpointId: FinancialRepository.MetalTrx.page
   })
 
+  const plantId = !documentType?.dtId && parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const siteId = !documentType?.dtId && parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+
   const { formik } = useForm({
     initialValues: {
       accountId: null,
@@ -63,12 +63,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       dtId: documentType?.dtId,
       functionId: functionId,
       isVerified: null,
-      plantId: recordId ? null : plantId,
+      plantId,
       qty: null,
       recordId: null,
       reference: '',
       releaseStatus: null,
-      siteId: recordId ? null : siteId,
+      siteId,
       status: 1,
       items: [
         {
@@ -203,17 +203,26 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   }
 
   async function setDefaults(dtId) {
+    let siteIdValue = null
+    let plantIdValue = null
+
     if (dtId) {
       const res = await getRequest({
         extension: FinancialRepository.FIDocTypeDefaults.get,
         parameters: `_dtId=${dtId}`
       })
-      formik.setFieldValue('siteId', res.record?.siteId)
-      formik.setFieldValue('plantId', res.record?.plantId)
-    } else {
-      formik.setFieldValue('siteId', null)
-      formik.setFieldValue('plantId', null)
+
+      siteIdValue = res.record?.siteId ?? null
+      plantIdValue = res.record?.plantId ?? null
     }
+
+    if (!siteIdValue || !plantIdValue) {
+      siteIdValue = siteId
+      plantIdValue = plantId
+    }
+
+    formik.setFieldValue('siteId', siteIdValue)
+    formik.setFieldValue('plantId', plantIdValue)
   }
 
   const getResourceId = functionId => {
@@ -428,6 +437,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         setMetal(metalRes.record)
         metalInfo = metalRes.record
       }
+      setDefaults(formik?.values?.dtId)
       if (recordId) refetchForm(recordId, metalInfo)
     })()
   }, [])
