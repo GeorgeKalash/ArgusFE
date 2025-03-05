@@ -756,7 +756,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
               <CustomTextArea
                 name='notes'
                 label={labels.description}
-                value={formik.values.description}
+                value={formik.values.notes}
                 rows={4}
                 editMode={editMode}
                 readOnly={isPosted}
