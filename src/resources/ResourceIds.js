@@ -364,9 +364,9 @@ export const ResourceIds = {
   PostDraftSerials: 51315,
   Collections: 41119,
   Designer: 48100,
-  Collections: 41119,
   Sketch: 48300,
   ProductionStandard: 42112,
+  ThreeDDesign: 48301,
   Casting: 48303,
   Printing: 48302,
   SalesQuotations: 51301
