@@ -53,7 +53,6 @@ const IvMaterialsTransfer = () => {
     query: { data },
     labels: _labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     refetch,
     access,
@@ -117,7 +116,7 @@ const IvMaterialsTransfer = () => {
       field: 'wipName',
       headerName: _labels.wip,
       flex: 1
-    },
+    }
   ]
 
   const edit = obj => {
@@ -147,37 +146,10 @@ const IvMaterialsTransfer = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          labels={_labels}
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          reportName={'IRREQ'}
-        />
+        <RPBGridToolbar labels={_labels} onAdd={add} maxAccess={access} reportName={'IRREQ'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

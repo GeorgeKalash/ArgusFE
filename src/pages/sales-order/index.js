@@ -26,7 +26,6 @@ const SalesOrder = () => {
     query: { data },
     filterBy,
     refetch,
-    clearFilter,
     labels,
     access,
     paginationParameters,
@@ -183,36 +182,10 @@ const SalesOrder = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'SAORD'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'SAORD'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
