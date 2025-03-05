@@ -84,7 +84,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
         await imageUploadRef.current.submit()
       }
 
-      await getData(res.recordId)
+      getData(res.recordId)
       invalidate()
 
       toast.success(!values.recordId ? platformLabels.Edited : platformLabels.Added)
@@ -120,7 +120,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       record: JSON.stringify(header)
     })
 
-    await getData(formik.values.recordId)
+    getData(formik.values.recordId)
     toast.success(platformLabels.Posted)
     invalidate()
   }
@@ -152,7 +152,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
     })
     toast.success(platformLabels.Started)
     invalidate()
-    await getData(res.recordId)
+    getData(res.recordId)
   }
 
   useEffect(() => {
@@ -162,11 +162,9 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
   }, [documentType?.dtId])
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        await getData(recordId)
-      }
-    })()
+    if (recordId) {
+      getData(recordId)
+    }
   }, [])
 
   return (
@@ -260,7 +258,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     errorCheck={'threeDDId'}
                   />
                 </Grid>
-                
+
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
@@ -368,7 +366,6 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     error={formik.touched.weight && Boolean(formik.errors.weight)}
                   />
                 </Grid>
-                
               </Grid>
             </Grid>
             <Grid item xs={6}>
