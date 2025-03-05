@@ -66,6 +66,9 @@ const CustomNumberField = ({
 
       onMouseLeave(e)
     }
+
+    const inputValue = e?.target?.value
+    if (inputValue) e.target.value = inputValue.replace(/\.$/, '')
   }
 
   const formatNumber = e => {
@@ -73,7 +76,7 @@ const CustomNumberField = ({
     if (typeof inputValue !== 'string') return inputValue
     let num = getNumberWithoutCommas(inputValue)
 
-    return num.replace(/\.$/, '')
+    return num
   }
 
   const handleInput = e => {

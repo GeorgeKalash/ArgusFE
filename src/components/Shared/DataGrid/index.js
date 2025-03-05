@@ -417,12 +417,13 @@ export function DataGrid({
       process(params, oldRow, setData)
     }
 
-    const formatNumber = value => {
-      return !value ? '' : parseFloat(value.toString().replace(/,/g, '')).toString()
-    }
+    const formatNumber = value =>
+      value ? (parseFloat(value.toString().replace(/,/g, '')) || '').toString().replace(/\.$/, '') : ''
 
     const formattedValue =
-      viewDecimals && column.colDef.component === 'numberfield' ? formatNumber(params.value) : params.value
+      viewDecimals && column.colDef.component === 'numberfield'
+        ? formatNumber(params.value)
+        : params?.value?.toString().replace(/\.$/, '')
 
     return (
       <Box
