@@ -502,16 +502,14 @@ export default function DraftTransfer({ labels, access, recordId }) {
   }
 
   async function onChangeDtId(recordId) {
-    if (recordId) {
-      const dtd = await getRequest({
-        extension: InventoryRepository.DocumentTypeDefaults.get,
-        parameters: `_dtId=${recordId}`
-      })
+    const dtd = await getRequest({
+      extension: InventoryRepository.DocumentTypeDefaults.get,
+      parameters: `_dtId=${recordId}`
+    })
 
-      formik.setFieldValue('carrierId', dtd?.record?.carrierId || null)
-      formik.setFieldValue('fromSiteId', dtd?.record?.siteId || formik?.values?.fromSiteId || null)
-      formik.setFieldValue('toSiteId', dtd?.record?.toSiteId || null)
-    }
+    formik.setFieldValue('carrierId', dtd?.record?.carrierId || null)
+    formik.setFieldValue('fromSiteId', dtd?.record?.siteId || formik?.values?.fromSiteId || null)
+    formik.setFieldValue('toSiteId', dtd?.record?.toSiteId || null)
   }
 
   useEffect(() => {
@@ -580,7 +578,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
       } else {
         const defaultSiteId = defUserSiteId || defSiteId || null
         formik.setFieldValue('fromSiteId', defaultSiteId)
-        onChangeDtId(formik?.values?.dtId)
+        formik?.values?.dtId && onChangeDtId(formik?.values?.dtId)
       }
     })()
   }, [])
@@ -620,7 +618,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId)
-                      onChangeDtId(newValue?.recordId)
+                      newValue?.recordId && onChangeDtId(newValue?.recordId)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -747,7 +745,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
                     readOnly={editMode}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('carrierId', newValue?.recordId)
+                      formik.setFieldValue('carrierId', newValue?.recordId)
                     }}
                     error={formik.touched.carrierId && Boolean(formik.errors.carrierId)}
                   />
