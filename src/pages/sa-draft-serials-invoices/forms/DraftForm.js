@@ -40,7 +40,6 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
 
-  const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [jumpToNextLine, setJumpToNextLine] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -52,8 +51,14 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
   useEffect(() => {
     if (documentType?.dtId) {
       formik.setFieldValue('dtId', documentType.dtId)
+      onChangeDtId(documentType.dtId)
     }
   }, [documentType?.dtId])
+
+  const defCurrencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const defplId = parseInt(defaultsData?.list?.find(obj => obj.key === 'plId')?.value)
+  const defspId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'spId')?.value)
+  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const { formik } = useForm({
     maxAccess,
@@ -66,9 +71,9 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       clientId: null,
       clientRef: '',
       clientName: '',
-      currencyId: null,
-      spId: null,
-      siteId: null,
+      currencyId: defCurrencyId || null,
+      spId: defspId || null,
+      siteId: defSiteId || null,
       description: '',
       status: 1,
       wip: 1,
@@ -77,7 +82,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       subtotal: 0,
       amount: 0,
       vatAmount: 0,
-      plId: null,
+      plId: defplId || null,
       ptId: null,
       weight: 0,
       disSkuLookup: false,
@@ -168,10 +173,10 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     }
   })
 
-  async function refetchForm(recordId, plId) {
+  async function refetchForm(recordId) {
     const diHeader = await getDraftInv(recordId)
     const diItems = await getDraftInvItems(recordId)
-    await fillForm(diHeader, diItems, plId)
+    await fillForm(diHeader, diItems)
   }
 
   async function getDraftInv(diId) {
@@ -639,7 +644,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     assignStoreTaxDetails(modifiedList)
   }
 
-  async function fillForm(diHeader, diItems, plId) {
+  async function fillForm(diHeader, diItems) {
     const modifiedList = await Promise.all(
       diItems?.list?.map(async (item, index) => {
         const taxDetailsResponse = diHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
@@ -660,7 +665,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     await formik.setValues({
       ...formik.values,
       ...diHeader.record,
-      plId: plId || formik?.values?.plId,
+      plId: defplId || formik?.values?.plId,
       amount: parseFloat(diHeader?.record?.amount).toFixed(2),
       vatAmount: parseFloat(diHeader?.record?.vatAmount).toFixed(2),
       subtotal: parseFloat(diHeader?.record?.subtotal).toFixed(2),
@@ -709,30 +714,13 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     })
   }
 
-  async function getSiteRef(siteId) {
-    if (!siteId) return null
-
-    const res = await getRequest({
-      extension: InventoryRepository.Site.get,
-      parameters: `_recordId=${siteId}`
-    })
-
-    return res?.record?.reference
-  }
-
   async function onChangeDtId(recordId) {
     if (recordId) {
       const dtd = await getDTD(recordId)
 
-      formik.setFieldValue('plantId', dtd?.record?.plantId)
-      formik.setFieldValue('spId', dtd?.record?.spId || userDefaultsDataState?.spId)
-      formik.setFieldValue('siteId', dtd?.record?.siteId || userDefaultsDataState?.siteId)
-      formik.setFieldValue('siteRef', await getSiteRef(dtd?.record?.siteId))
-    } else {
-      formik.setFieldValue('siteId', null)
-      formik.setFieldValue('siteRef', null)
-      formik.setFieldValue('spId', null)
-      formik.setFieldValue('plantId', null)
+      formik.setFieldValue('plantId', dtd?.record?.plantId || null)
+      formik.setFieldValue('spId', dtd?.record?.spId || defspId || null)
+      formik.setFieldValue('siteId', dtd?.record?.siteId || defSiteId || null)
     }
   }
 
@@ -802,56 +790,17 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     formik.setFieldValue('amount', subtotal + vatAmount)
   }, [totalWeight, subtotal, vatAmount])
 
-  async function getUserDefaultsData() {
-    const myObject = {}
-
-    const filteredList = userDefaultsData?.list?.filter(obj => {
-      return obj.key === 'siteId' || obj.key === 'spId'
-    })
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setUserDefaultsDataState(myObject)
-
-    return myObject
-  }
-
-  async function getDefaultsData() {
-    const myObject = {}
-
-    const filteredList = defaultsData?.list?.filter(obj => {
-      return (
-        obj.key === 'draft_gc_vat' ||
-        obj.key === 'draft_gc_des' ||
-        obj.key === 'plId' ||
-        obj.key === 'draft_gc_lbr' ||
-        obj.key === 'draft_gc_txd' ||
-        obj.key === 'currencyId'
-      )
-    })
-    filteredList.forEach(obj => {
-      myObject[obj.key] =
-        obj.value === 'True' || obj.value === 'False' ? obj.value : obj.value ? parseInt(obj.value) : null
-    })
-
-    return myObject
-  }
-
   useEffect(() => {
     ;(async function () {
-      const myObject = await getDefaultsData()
-      getUserDefaultsData()
-
-      myObject?.plId
-        ? formik.setFieldValue('plId', myObject?.plId)
-        : stackError({
-            message: labels.noSelectedplId
-          })
+      if (!defplId)
+        stackError({
+          message: labels.noSelectedplId
+        })
 
       fillTaxStore()
 
       if (formik?.values?.recordId) {
-        await refetchForm(formik?.values?.recordId, myObject?.plId)
-      } else {
-        formik.setFieldValue('currencyId', parseInt(myObject?.currencyId))
+        await refetchForm(formik?.values?.recordId)
       }
     })()
   }, [])
@@ -888,9 +837,9 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
-                  onChangeDtId(newValue?.recordId)
+                  await onChangeDtId(newValue?.recordId)
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -914,10 +863,8 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 onChange={(event, newValue) => {
                   if (!newValue?.isInactive) {
                     formik.setFieldValue('siteId', newValue?.recordId)
-                    formik.setFieldValue('siteRef', newValue?.recordId)
                   } else {
                     formik.setFieldValue('siteId', null)
-                    formik.setFieldValue('siteRef', null)
                     stackError({
                       message: labels.inactiveSite
                     })
