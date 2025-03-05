@@ -74,6 +74,34 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Sample',
+    label: platformLabels.Sample,
+    color: '#231f20',
+    image: 'sample.png',
+    main: false
+  },
+  {
+    key: 'SerialsLots',
+    label: platformLabels.SerialsLots,
+    color: '#D3D3D3',
+    image: 'serials-lots.png',
+    main: false
+  },
+  {
+    key: 'Start',
+    label: platformLabels.Start,
+    color: '#4eb558',
+    image: 'play.png',
+    main: false
+  },
+  {
+    key: 'Stop',
+    label: platformLabels.Stop,
+    color: '#D3D3D3',
+    image: 'stop.png',
+    main: false
+  },
+  {
     key: 'Cancel',
     label: platformLabels.Cancel,
     color: '#0A4164',
@@ -341,7 +369,7 @@ export const getButtons = platformLabels => [
   },
   {
     key: 'Import',
-    label: platformLabels.Import,
+    label: platformLabels.import,
     color: '#000',
     image: 'import.png',
     main: false
@@ -483,6 +511,20 @@ export const getButtons = platformLabels => [
     label: platformLabels.Sketch,
     color: '#048693',
     image: 'sketch.png',
+    main: false
+  },
+  {
+    key: 'GenerateJob',
+    label: platformLabels.Generate,
+    color: '#D3D3D3',
+    image: 'generate2.png',
+    main: false
+  },
+  {
+    key: 'GenerateSerialsLots',
+    label: platformLabels.GenerateSerials,
+    color: '#D3D3D3',
+    image: 'generate2.png',
     main: false
   }
 ]
