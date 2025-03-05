@@ -577,6 +577,17 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  [ResourceIds.Modeling]: {
+    type: COMBOBOX,
+    endpoint: ProductModelingRepository.Modeling.qry,
+    parameters: '_startAt=0&_pageSize=1000&_params=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
   [ResourceIds.MFJobOrders]: {
     type: LOOKUP,
     endpoint: ManufacturingRepository.MFJobOrder.snapshot,
@@ -952,6 +963,24 @@ export const apiMappings = {
     type: COMBOBOX,
     endpoint: InventoryRepository.Collections.qry,
     parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.ThreeDDesign]: {
+    type: LOOKUP,
+    endpoint: ProductModelingRepository.ThreeDDrawing.snapshot,
+    valueOnSelection: 'recordId',
+    firstField: 'reference',
+    secondDisplayField: false
+  },
+  [ResourceIds.Routings]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.Routing.qry,
+    parameters: `_params=`,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [

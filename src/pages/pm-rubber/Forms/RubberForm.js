@@ -23,12 +23,14 @@ import { ProductModelingRepository } from 'src/repositories/ProductModelingRepos
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { useWindow } from 'src/windows'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
 
 export default function RubberForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  console.log(access)
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Rubber,
@@ -76,7 +78,8 @@ export default function RubberForm({ labels, access, recordId }) {
         record: JSON.stringify({
           ...obj,
           startDate: obj.startDate ? formatDateToApi(obj.startDate) : null,
-          endDate: obj.endDate ? formatDateToApi(obj.endDate) : null
+          endDate: obj.endDate ? formatDateToApi(obj.endDate) : null,
+          date: formatDateToApi(obj.date)
         })
       }).then(async res => {
         const actionMessage = obj.recordId ? platformLabels.Edited : platformLabels.Added
@@ -86,6 +89,10 @@ export default function RubberForm({ labels, access, recordId }) {
       })
     }
   })
+
+  const editMode = !!formik.values.recordId
+  const isReleased = formik.values.status == 4
+  const isPosted = formik.values.status == 3
 
   async function refetchForm(damageId) {
     await getRequest({
@@ -100,19 +107,46 @@ export default function RubberForm({ labels, access, recordId }) {
     })
   }
 
-  const editMode = !!formik.values.recordId
-  const isPosted = formik.values.status === 3
-
   const onPost = async () => {
     await postRequest({
       extension: ProductModelingRepository.Rubber.post,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify({
+        ...formik.values,
+        startDate: formatDateToApi(formik.values.startDate)
+      })
     })
 
     toast.success(platformLabels.Posted)
     invalidate()
 
     await refetchForm(formik.values.recordId)
+  }
+
+  async function onStart() {
+    const res = await postRequest({
+      extension: ProductModelingRepository.Rubber.start,
+      record: JSON.stringify(formik.values)
+    })
+    toast.success(platformLabels.Started)
+    invalidate()
+    await refetchForm(res.recordId)
+  }
+
+  function confirmation(dialogText, titleText, event) {
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: dialogText,
+        okButtonAction: async () => {
+          await event()
+        },
+        fullScreen: false,
+        close: true
+      },
+      width: 400,
+      height: 150,
+      title: titleText
+    })
   }
 
   const actions = [
@@ -125,7 +159,32 @@ export default function RubberForm({ labels, access, recordId }) {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || isPosted
+      disabled: !editMode || isPosted || !isReleased
+    },
+    {
+      key: 'Start',
+      condition: !isReleased,
+      onClick: () => {
+        confirmation(platformLabels.StartRecord, platformLabels.Confirmation, onStart)
+      },
+      disabled: !editMode || isReleased || isPosted
+    },
+    {
+      key: 'threeDPrinting',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: ThreeDPrintForm,
+          props: {
+            recordId: formik.values?.threeDPId,
+            labels
+          },
+          width: 750,
+          height: 650,
+          title: platformLabels.threeDPrinting
+        })
+      },
+      disabled: !formik.values.threeDPId
     }
   ]
 
@@ -141,20 +200,17 @@ export default function RubberForm({ labels, access, recordId }) {
     }
   }, [documentType?.dtId])
 
-  console.log(formik)
-
   return (
     <FormShell
       resourceId={ResourceIds.Rubber}
       functionId={SystemFunction.Rubber}
       form={formik}
       maxAccess={maxAccess}
-      previewReport={editMode}
       isPosted={isPosted}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={isPosted}
-      disabledSavedClear={isPosted}
+      disabledSubmit={isReleased}
+      disabledSavedClear={isReleased}
     >
       <VertLayout>
         <Grow>
@@ -162,9 +218,9 @@ export default function RubberForm({ labels, access, recordId }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Damage}`}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Rubber}`}
                 name='dtId'
-                label={labels.dcType}
+                label={labels.documentType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -209,6 +265,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 displayField='reference'
                 values={formik.values}
                 required
+                readOnly={isReleased || isPosted}
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('modelId', newValue?.recordId || '')
                   formik.setFieldValue('threeDPId', newValue?.threeDPId || '')
@@ -216,7 +273,7 @@ export default function RubberForm({ labels, access, recordId }) {
                   formik.setFieldValue('laborName', newValue?.laborName || '')
                   if (newValue?.threeDPId) {
                     const response = await getRequest({
-                      extension: ProductModelingRepository.Printing.get3,
+                      extension: ProductModelingRepository.Printing.get,
                       parameters: `_recordId=${newValue?.threeDPId}`
                     })
 
@@ -253,20 +310,17 @@ export default function RubberForm({ labels, access, recordId }) {
                 parameters={`_startAt=0&_pageSize=200&_params=`}
                 name='laborId'
                 required
+                readOnly={isReleased || isPosted}
                 label={labels.labor}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('laborId', newValue?.recordId)
-                  } else {
-                    formik.setFieldValue('laborId', '')
-                  }
+                  formik.setFieldValue('laborId', newValue?.recordId || null)
                 }}
                 error={formik.touched.laborId && Boolean(formik.errors.laborId)}
               />
@@ -279,14 +333,14 @@ export default function RubberForm({ labels, access, recordId }) {
                 label={labels.item}
                 valueField='sku'
                 displayField='name'
-                readOnly={formik.values.disabledItem}
+                readOnly={formik.values.disabledItem || isReleased || isPosted}
                 valueShow='sku'
                 secondValueShow='itemName'
                 displayFieldWidth='2'
                 form={formik}
                 required
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('itemId', newValue?.recordId)
+                  formik.setFieldValue('itemId', newValue?.recordId || null)
                   formik.setFieldValue('itemName', newValue?.name || '')
                   formik.setFieldValue('sku', newValue?.sku || '')
                 }}
@@ -302,6 +356,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 label={labels.silverPieces}
                 value={formik?.values?.pcs}
                 maxAccess={maxAccess}
+                readOnly={isReleased || isPosted}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('pcs', '')}
                 error={formik.touched.weight && Boolean(formik.errors.pcs)}
@@ -315,8 +370,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 value={formik?.values?.startDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('startDate', null)}
-                error={formik.touched.startDate && Boolean(formik.errors.startDate)}
+                readOnly={true}
               />
             </Grid>
             <Grid item xs={12}>
@@ -326,8 +380,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 value={formik?.values?.endDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('endDate', null)}
-                error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+                readOnly={true}
               />
             </Grid>
 
@@ -337,9 +390,19 @@ export default function RubberForm({ labels, access, recordId }) {
                 label={labels.weight}
                 value={formik?.values?.weight}
                 maxAccess={maxAccess}
+                readOnly={isReleased || isPosted}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('weight', '')}
                 error={formik.touched.weight && Boolean(formik.errors.weight)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='status'
+                label={labels.status}
+                value={formik?.values?.statusName}
+                maxAccess={maxAccess}
+                readOnly={true}
               />
             </Grid>
 
@@ -349,7 +412,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 label={labels.notes}
                 value={formik.values.notes}
                 rows={4}
-                readOnly={isPosted}
+                readOnly={isReleased || isPosted}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('notes', e.target.value)}
                 onClear={() => formik.setFieldValue('notes', '')}

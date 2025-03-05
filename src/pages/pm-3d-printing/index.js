@@ -2,62 +2,60 @@ import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
-import { useWindow } from 'src/windows'
+import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
-import RubberForm from './Forms/RubberForm'
+import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
-import SystemFunction from '../system-functions'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import ThreeDPrintForm from './Forms/ThreeDPrintForm'
 
-const Rubber = () => {
+const ThreeDPrinting = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params } = options
+
+    const response = await getRequest({
+      extension: ProductModelingRepository.Printing.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
 
   const {
     query: { data },
     labels,
-    filterBy,
-    clearFilter,
     paginationParameters,
-    invalidate,
     refetch,
-    access
+    access,
+    invalidate,
+    filterBy,
+    clearFilter
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ProductModelingRepository.Rubber.page,
-    datasetId: ResourceIds.Rubber,
+    endpointId: ProductModelingRepository.Printing.page,
+    datasetId: ResourceIds.Printing,
     filter: {
       filterFn: fetchWithFilter
     }
   })
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters?.qry) {
+    if (filters.qry)
       return await getRequest({
-        extension: ProductModelingRepository.Rubber.snapshot,
+        extension: ProductModelingRepository.Printing.snapshot,
         parameters: `_filter=${filters.qry}`
       })
-    } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-    }
-  }
-
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params } = options
-
-    const response = await getRequest({
-      extension: ProductModelingRepository.Rubber.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
-    })
-
-    return { ...response, _startAt: _startAt }
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const columns = [
@@ -73,25 +71,24 @@ const Rubber = () => {
       type: 'date'
     },
     {
-      field: 'modelRef',
-      headerName: labels.modelRef,
+      field: 'machineName',
+      headerName: labels.machine,
       flex: 1
     },
     {
-      field: 'sku',
-      headerName: labels.sku,
+      field: 'machineRef',
+      headerName: labels.machineRef,
       flex: 1
     },
     {
-      field: 'laborRef',
-      headerName: labels.laborRef,
+      field: 'threeDDRef',
+      headerName: labels.threeDD,
       flex: 1
     },
     {
-      field: 'pcs',
-      headerName: labels.silverPieces,
-      flex: 1,
-      type: 'number'
+      field: 'fileReference',
+      headerName: labels.fileReference,
+      flex: 1
     },
     {
       field: 'statusName',
@@ -100,18 +97,8 @@ const Rubber = () => {
     }
   ]
 
-  const del = async obj => {
-    await postRequest({
-      extension: ProductModelingRepository.Rubber.del,
-      record: JSON.stringify(obj)
-    })
-
-    toast.success(platformLabels.Deleted)
-    invalidate()
-  }
-
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.Rubber,
+    functionId: SystemFunction.ThreeDPrint,
     action: openForm
   })
 
@@ -119,22 +106,31 @@ const Rubber = () => {
     await proxyAction()
   }
 
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
   function openForm(recordId) {
     stack({
-      Component: RubberForm,
+      Component: ThreeDPrintForm,
       props: {
         labels,
         recordId,
-        access: access
+        maxAccess: access
       },
-      width: 550,
+      width: 700,
       height: 650,
-      title: labels?.rubber
+      title: labels.ThreeDPrint
     })
   }
 
-  const edit = obj => {
-    openForm(obj?.recordId)
+  const del = async obj => {
+    await postRequest({
+      extension: ProductModelingRepository.Printing.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const onApply = ({ search, rpbParams }) => {
@@ -160,12 +156,13 @@ const Rubber = () => {
     <VertLayout>
       <Fixed>
         <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
           onSearch={onSearch}
           onClear={onClear}
-          reportName={'PMRBR'}
+          labels={labels}
+          maxAccess={access}
+          onApply={onApply}
+          onAdd={add}
+          reportName={'PM3DP'}
         />
       </Fixed>
       <Grow>
@@ -173,13 +170,13 @@ const Rubber = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          paginationParameters={paginationParameters}
-          paginationType='api'
-          refetch={refetch}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
+          paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>
@@ -187,4 +184,4 @@ const Rubber = () => {
   )
 }
 
-export default Rubber
+export default ThreeDPrinting

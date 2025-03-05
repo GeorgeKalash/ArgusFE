@@ -18,6 +18,20 @@ export const ProductModelingRepository = {
     snapshot: service + 'snapshotSKH',
     post: service + 'postSKH'
   },
+  Printing: {
+    page: service + 'page3DP',
+    get: service + 'get3DP',
+    set: service + 'set3DP',
+    del: service + 'del3DP',
+    start: service + 'start3DP',
+    snapshot: service + 'snapshot3DP',
+    post: service + 'post3DP',
+    qry: service + 'qry3DP'
+  },
+  ThreeDDrawing: {
+    snapshot: service + 'snapshot3DD',
+    get: service + 'get3DD'
+  },
   Rubber: {
     page: service + 'pageRBR',
     get: service + 'getRBR',
@@ -25,13 +39,11 @@ export const ProductModelingRepository = {
     del: service + 'delRBR',
     qry: service + 'qryRBR',
     snapshot: service + 'snapshotRBR',
-    post: service + 'postRBR'
+    post: service + 'postRBR',
+    start: service + 'startRBR'
   },
   Modeling: {
     qry: service + 'qryMDL'
-  },
-  Printing: {
-    get3: service + 'get3DP'
   },
   Casting: {
     page: service + 'pageCAS',
@@ -40,8 +52,5 @@ export const ProductModelingRepository = {
     del: service + 'delCAS',
     snapshot: service + 'snapshotCAS',
     post: service + 'postCAS'
-  },
-  Printing: {
-    qry: service + 'qry3DP'
   }
 }
