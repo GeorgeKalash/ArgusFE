@@ -52,6 +52,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
   useEffect(() => {
     if (documentType?.dtId) {
       formik.setFieldValue('dtId', documentType.dtId)
+      onChangeDtId(documentType.dtId)
     }
   }, [documentType?.dtId])
 
@@ -888,9 +889,9 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
-                  onChangeDtId(newValue?.recordId)
+                  await onChangeDtId(newValue?.recordId)
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
