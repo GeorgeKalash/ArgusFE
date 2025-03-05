@@ -27,24 +27,22 @@ const CompanyInfo = () => {
   }, [])
 
   async function getData() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.CompanyInfo.get,
-        parameters: `_filter=`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.CompanyInfo.get,
+      parameters: `_filter=`
+    })
 
-      formik.setValues({
-        ...formik.values,
-        name: res.record.name,
-        webSite: res.record.taxNo,
-        taxNo: res.record.taxNo,
-        licenseNo: res.record.licenseNo,
-        plantId: res.record.plantId,
-        crNo: res.record.crNo,
-        logoUrl: res.record.logoUrl,
-        flName: res.record.flName
-      })
-    } catch (e) {}
+    formik.setValues({
+      ...formik.values,
+      name: res.record.name,
+      webSite: res.record.taxNo,
+      taxNo: res.record.taxNo,
+      licenseNo: res.record.licenseNo,
+      plantId: res.record.plantId,
+      crNo: res.record.crNo,
+      logoUrl: res.record.logoUrl,
+      flName: res.record.flName
+    })
   }
 
   const { formik } = useForm({
@@ -68,16 +66,14 @@ const CompanyInfo = () => {
   })
 
   const post = async obj => {
-    try {
-      await postRequest({
-        extension: SystemRepository.CompanyInfo.set,
-        record: JSON.stringify({ ...obj, attachment: null })
-      })
-      if (imageUploadRef.current) {
-        await imageUploadRef.current.submit()
-      }
-      toast.success('Record Edited Successfully')
-    } catch (e) {}
+    await postRequest({
+      extension: SystemRepository.CompanyInfo.set,
+      record: JSON.stringify({ ...obj, attachment: null })
+    })
+    if (imageUploadRef.current) {
+      await imageUploadRef.current.submit()
+    }
+    toast.success('Record Edited Successfully')
   }
 
   return (
