@@ -200,6 +200,8 @@ export const InventoryRepository = {
     get: service + 'getITR'
   },
   ItemSizes: {
+    qry: service + 'qrySIZ',
+    snapshot: service + 'snapshotSIZ',
     get: service + 'getSIZ',
     set: service + 'setSIZ',
     del: service + 'delSIZ',

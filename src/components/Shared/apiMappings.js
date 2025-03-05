@@ -905,6 +905,13 @@ export const apiMappings = {
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
+  [ResourceIds.Printing]: {
+    type: COMBOBOX,
+    endpoint: ProductModelingRepository.Printing.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: 'reference',
+  },
   [ResourceIds.Designer]: {
     type: COMBOBOX,
     endpoint: ProductModelingRepository.Designer.qry,
@@ -921,7 +928,7 @@ export const apiMappings = {
     endpoint: InventoryRepository.Metals.qry,
     parameters: `_params=&_startAt=0&_pageSize=1000`,
     valueField: 'recordId',
-    displayField: 'reference',
+    displayField: 'reference'
   },
   [ResourceIds.ProductionClass]: {
     type: COMBOBOX,
@@ -952,4 +959,15 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  [ResourceIds.Routings]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.Routing.qry,
+    parameters: `_params=`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  }
 }

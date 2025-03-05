@@ -17,5 +17,16 @@ export const ProductModelingRepository = {
     reopen: service + 'reopenSKH',
     snapshot: service + 'snapshotSKH',
     post: service + 'postSKH'
+  },
+  Casting: {
+    page: service + 'pageCAS',
+    get: service + 'getCAS',
+    set: service + 'setCAS',
+    del: service + 'delCAS',
+    snapshot: service + 'snapshotCAS',
+    post: service + 'postCAS'
+  },
+  Printing: {
+    qry: service + 'qry3DP'
   }
 }
