@@ -214,6 +214,7 @@ const AvailabilityCrossTab = () => {
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'
+          name='avaCrossTable'
         />
       </Grow>
     </VertLayout>

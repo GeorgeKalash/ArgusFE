@@ -24,11 +24,7 @@ const SerialForm = ({ labels, itemId }) => {
     return { ...response, _startAt: _startAt }
   }
 
-  const {
-    query: { data },
-    refetch,
-    paginationParameters
-  } = useResourceQuery({
+  const { refetch, paginationParameters } = useResourceQuery({
     datasetId: ResourceIds.AvailabilitiesCrossTab,
     queryFn: fetchGridData,
     endpointId: InventoryRepository.AvailabilitySerial.page
@@ -70,6 +66,7 @@ const SerialForm = ({ labels, itemId }) => {
           paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}
+          name='avaSerial'
         />
       </Grow>
     </VertLayout>

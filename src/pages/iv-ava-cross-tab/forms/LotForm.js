@@ -114,6 +114,7 @@ const LotForm = ({ labels, categoryId, itemId, maxAccess }) => {
           isLoading={false}
           pagination={false}
           maxAccess={maxAccess}
+          name='avaLot'
         />
       </Grow>
     </VertLayout>
