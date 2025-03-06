@@ -72,8 +72,6 @@ const CorrespondentDispersal = () => {
     }
   }
 
-  console.log(formik)
-
   return (
     <VertLayout>
       <Fixed>
