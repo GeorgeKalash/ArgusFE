@@ -369,5 +369,6 @@ export const ResourceIds = {
   ProductionStandard: 42112,
   Casting: 48303,
   Printing: 48302,
-  SalesQuotations: 51301
+  SalesQuotations: 51301,
+  CorrespondentDispersal: 36136
 }
