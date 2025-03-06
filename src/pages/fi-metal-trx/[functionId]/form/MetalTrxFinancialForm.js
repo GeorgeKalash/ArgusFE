@@ -270,6 +270,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     })
   }
 
+  useEffect(() => {
+    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
+  }, [documentType?.dtId])
+
   const columns = [
     {
       component: 'resourcecombobox',
