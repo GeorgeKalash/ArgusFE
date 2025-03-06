@@ -14,6 +14,7 @@ const CustomNumberField = ({
   label,
   onChange = () => {},
   onMouseLeave = () => {},
+  onBlur = () => {},
   readOnly = false,
   allowClear = false,
   decimalScale = 2,
@@ -70,9 +71,9 @@ const CustomNumberField = ({
   const formatNumber = e => {
     let inputValue = e?.target?.value
     if (typeof inputValue !== 'string') return inputValue
-    const regex = /^[0-9,]+(\.\d+)?$/
+    const regex = /^-?[0-9,]+(\.\d+)?$/
     if (inputValue && regex.test(inputValue)) {
-      inputValue = inputValue.replace(/[^0-9.]/g, '')
+      inputValue = inputValue.replace(/(?!^-)[^0-9.]/g, '')
 
       return getNumberWithoutCommas(inputValue)
     }
@@ -131,7 +132,14 @@ const CustomNumberField = ({
       required={_required}
       onInput={handleInput}
       onFocus={() => setIsFocused(true)}
-      onBlur={() => setIsFocused(false)}
+      onBlur={e => {
+        onBlur(e)
+        if (e.target.value?.endsWith('.')) {
+          e.target.value = e.target.value.slice(0, -1)
+          handleNumberChangeValue(e)
+        }
+        setIsFocused(false)
+      }}
       InputProps={{
         inputRef,
         autoFocus: false,
