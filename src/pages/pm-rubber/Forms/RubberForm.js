@@ -34,7 +34,7 @@ export default function RubberForm({ labels, access, recordId }) {
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Rubber,
-    access: access,
+    access,
     enabled: !recordId
   })
 
@@ -45,7 +45,7 @@ export default function RubberForm({ labels, access, recordId }) {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: recordId,
+      recordId,
       dtId: documentType?.dtId,
       reference: '',
       date: new Date(),
@@ -61,16 +61,15 @@ export default function RubberForm({ labels, access, recordId }) {
       itemName: '',
       status: 1,
       weight: null,
-      notes: '',
-      disabledItem: false
+      notes: ''
     },
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      pcs: yup.number().moreThan(0, 'min').max(10000, 'max').required(),
-      itemId: yup.string().required(),
-      laborId: yup.string().required(),
-      modelId: yup.string().required()
+      pcs: yup.number().moreThan(0, 'min'),
+      itemId: yup.number().required(),
+      laborId: yup.number().required(),
+      modelId: yup.number().required()
     }),
     onSubmit: async obj => {
       postRequest({
@@ -78,8 +77,7 @@ export default function RubberForm({ labels, access, recordId }) {
         record: JSON.stringify({
           ...obj,
           startDate: obj.startDate ? formatDateToApi(obj.startDate) : null,
-          endDate: obj.endDate ? formatDateToApi(obj.endDate) : null,
-          date: formatDateToApi(obj.date)
+          endDate: obj.endDate ? formatDateToApi(obj.endDate) : null
         })
       }).then(async res => {
         const actionMessage = obj.recordId ? platformLabels.Edited : platformLabels.Added
@@ -206,11 +204,9 @@ export default function RubberForm({ labels, access, recordId }) {
       functionId={SystemFunction.Rubber}
       form={formik}
       maxAccess={maxAccess}
-      isPosted={isPosted}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={isReleased}
-      disabledSavedClear={isReleased}
+      disabledSubmit={isReleased || isPosted}
     >
       <VertLayout>
         <Grow>
@@ -256,11 +252,6 @@ export default function RubberForm({ labels, access, recordId }) {
                 parameters={`_startAt=0&_pageSize=200&_params=`}
                 name='modelId'
                 label={labels.model}
-                dis
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
                 valueField='recordId'
                 displayField='reference'
                 values={formik.values}
@@ -269,7 +260,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('modelId', newValue?.recordId || '')
                   formik.setFieldValue('threeDPId', newValue?.threeDPId || '')
-                  formik.setFieldValue('laborId', newValue?.laborId || '')
+                  formik.setFieldValue('laborId', newValue?.laborId || null)
                   formik.setFieldValue('laborName', newValue?.laborName || '')
                   if (newValue?.threeDPId) {
                     const response = await getRequest({
@@ -287,16 +278,14 @@ export default function RubberForm({ labels, access, recordId }) {
                       })
 
                       formik.setFieldValue('sku', result?.record?.sku || '')
-                      formik.setFieldValue('itemId', result?.record?.itemId || '')
-                      formik.setFieldValue('itemName', result?.record?.itemName || null)
+                      formik.setFieldValue('itemId', result?.record?.itemId || null)
+                      formik.setFieldValue('itemName', result?.record?.itemName || '')
                       formik.setFieldValue('pcs', result?.record?.pcs)
-                      formik.setFieldValue('disabledItem', true)
                     } else {
                       formik.setFieldValue('sku', '')
                       formik.setFieldValue('itemId', '')
                       formik.setFieldValue('itemName', '')
                       formik.setFieldValue('pcs', null)
-                      formik.setFieldValue('disabledItem', false)
                     }
                   }
                 }}
@@ -333,7 +322,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 label={labels.item}
                 valueField='sku'
                 displayField='name'
-                readOnly={formik.values.disabledItem || isReleased || isPosted}
+                readOnly={formik.values.jobId || isReleased || isPosted}
                 valueShow='sku'
                 secondValueShow='itemName'
                 displayFieldWidth='2'
@@ -352,6 +341,7 @@ export default function RubberForm({ labels, access, recordId }) {
             <Grid item xs={12}>
               <CustomNumberField
                 name='pcs'
+                decimalScale={0}
                 required
                 label={labels.silverPieces}
                 value={formik?.values?.pcs}
@@ -359,6 +349,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 readOnly={isReleased || isPosted}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('pcs', '')}
+                maxLength={4}
                 error={formik.touched.weight && Boolean(formik.errors.pcs)}
               />
             </Grid>
@@ -370,7 +361,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 value={formik?.values?.startDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
-                readOnly={true}
+                readOnly
               />
             </Grid>
             <Grid item xs={12}>
@@ -380,7 +371,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 value={formik?.values?.endDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
-                readOnly={true}
+                readOnly
               />
             </Grid>
 
@@ -390,6 +381,8 @@ export default function RubberForm({ labels, access, recordId }) {
                 label={labels.weight}
                 value={formik?.values?.weight}
                 maxAccess={maxAccess}
+                maxLength={8}
+                decimalScale={2}
                 readOnly={isReleased || isPosted}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('weight', '')}
@@ -402,7 +395,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 label={labels.status}
                 value={formik?.values?.statusName}
                 maxAccess={maxAccess}
-                readOnly={true}
+                readOnly
               />
             </Grid>
 

@@ -37,7 +37,6 @@ export const ProductModelingRepository = {
     get: service + 'getRBR',
     set: service + 'setRBR',
     del: service + 'delRBR',
-    qry: service + 'qryRBR',
     snapshot: service + 'snapshotRBR',
     post: service + 'postRBR',
     start: service + 'startRBR'

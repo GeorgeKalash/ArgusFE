@@ -125,7 +125,7 @@ const Rubber = () => {
       props: {
         labels,
         recordId,
-        access: access
+        access
       },
       width: 550,
       height: 650,
