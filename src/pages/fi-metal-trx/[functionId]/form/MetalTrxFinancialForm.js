@@ -285,7 +285,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         ],
       },
       propsReducer({ row, props }) {
-        return { ...props, readOnly: !!row.sku }
+        return { ...props, readOnly: !!row.itemId }
       },
       onChange: async ({ row: { update, newRow } }) => {
         getFilteredMetal(newRow?.metalId)
