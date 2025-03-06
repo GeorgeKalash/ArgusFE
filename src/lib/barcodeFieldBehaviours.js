@@ -3,10 +3,10 @@ import { DISABLED, MANDATORY } from 'src/services/api/maxAccess'
 
 const getData = async (getRequest, id) => {
   const res = await getRequest({
- 
-   extension: SystemRepository.NumberRange.get,
+    extension: SystemRepository.NumberRange.get,
     parameters: `_recordId=${id}`
   })
+
   return res.record
 }
 
