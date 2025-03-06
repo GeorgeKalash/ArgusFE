@@ -1,10 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CompositeBarChartDark, HorizontalBarChartDark } from '../../components/Shared/dashboardApplets/charts'
 import { getStorageData } from 'src/storage/storage'
 import { DashboardRepository } from 'src/repositories/DashboardRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import useResourceParams from 'src/hooks/useResourceParams'
+import { debounce } from 'lodash'
 
 const Frame = styled.div`
   display: flex;
@@ -107,33 +110,48 @@ const Value = styled.div`
 `
 
 const DashboardLayout = () => {
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, LoadingOverlay } = useContext(RequestsContext)
   const [data, setData] = useState(null)
   const [applets, setApplets] = useState(null)
+  const [loading, setLoading] = useState(true)
   const userData = getStorageData('userData')
   const _userId = userData.userId
+
+  const debouncedCloseLoading = debounce(() => {
+    setLoading(false)
+  }, 500)
+
+  const { labels } = useResourceParams({
+    datasetId: ResourceIds.UserDashboard
+  })
 
   useEffect(() => {
     getRequest({
       extension: SystemRepository.DynamicDashboard,
       parameters: `_userId=${_userId}`
-    }).then(result => {
-      setApplets(result.list)
-      getRequest({
-        extension: DashboardRepository.dashboard
-      }).then(res => {
-        setData(res.record)
-      })
     })
+      .then(result => {
+        setApplets(result.list)
+
+        return getRequest({
+          extension: DashboardRepository.dashboard
+        })
+      })
+      .then(res => {
+        setData(res.record)
+        debouncedCloseLoading()
+      })
   }, [])
+
+  if (loading) {
+    return <LoadingOverlay />
+  }
 
   const containsApplet = appletId => {
     if (!Array.isArray(applets)) return false
 
     return applets.some(applet => applet.appletId === appletId)
   }
-
-  if (!data) return null
 
   const todayHoSales = data?.summaryFigures?.find(f => f.itemId === 12)?.amount ?? 0
   const todayRetailSales = data?.summaryFigures?.find(f => f.itemId === 13)?.amount ?? 0
@@ -182,14 +200,14 @@ const DashboardLayout = () => {
           <TopRow>
             <ChartCard>
               <SummaryCard>
-                <Title>Retail Sales</Title>
-                <strong> {todayRetailSales.toLocaleString()}</strong>
+                <Title>{labels.retailSales}</Title>
+                <strong>{todayRetailSales.toLocaleString()}</strong>
               </SummaryCard>
               <CompositeBarChartDark
                 id='retailSalesChart'
                 labels={retailLabels}
                 data={retailValues}
-                label='Retail Sales'
+                label={labels.retailSales}
                 ratio={5}
               />
             </ChartCard>
@@ -201,42 +219,42 @@ const DashboardLayout = () => {
               {containsApplet(60112) && (
                 <>
                   <SummaryItem>
-                    <RedCenter>Today's Sales</RedCenter>
+                    <RedCenter>{labels.todaysSale}</RedCenter>
                     <InnerGrid>
-                      <Label>HO Sales:</Label>
+                      <Label>{labels.hoSales}:</Label>
                       <Value>{todayHoSales.toLocaleString()}</Value>
-                      <Label>Retail Sales:</Label>
+                      <Label>{labels.retailSales}:</Label>
                       <Value>{todayRetailSales.toLocaleString()}</Value>
-                      <Label>Total:</Label>
+                      <Label>{labels.total}:</Label>
                       <Value>{todaysSales.toLocaleString()}</Value>
                     </InnerGrid>
                   </SummaryItem>
                   <SummaryItem>
-                    <RedCenter>Global Sales</RedCenter>
+                    <RedCenter>{labels.globalSales}</RedCenter>
                     <InnerGrid>
-                      <Label>HO Sales:</Label>
+                      <Label>{labels.hoSales}:</Label>
                       <Value>{globalHoSales.toLocaleString()}</Value>
-                      <Label>Retail Sales:</Label>
+                      <Label>{labels.retailSales}:</Label>
                       <Value>{globalRetailSales.toLocaleString()}</Value>
-                      <Label>Total:</Label>
+                      <Label>{labels.total}:</Label>
                       <Value>{globalSales.toLocaleString()}</Value>
                     </InnerGrid>
                   </SummaryItem>
                   <SummaryItem>
-                    <RedCenter>Misc Data</RedCenter>
+                    <RedCenter>{labels.miscData}</RedCenter>
                     <InnerGrid>
-                      <Label>Open SO:</Label>
+                      <Label>{labels.openSo}:</Label>
                       <Value>{openSo.toLocaleString()}</Value>
-                      <Label>Return Sales:</Label>
+                      <Label>{labels.returnSales}:</Label>
                       <Value>{returnSales.toLocaleString()}</Value>
                     </InnerGrid>
                   </SummaryItem>
                   <SummaryItem>
-                    <RedCenter>General Revenues</RedCenter>
+                    <RedCenter>{labels.generalRevenue}</RedCenter>
                     <InnerGrid>
-                      <Label>Revenues:</Label>
+                      <Label>{labels.revenues}:</Label>
                       <Value>{revenues.toLocaleString()}</Value>
-                      <Label>Profit:</Label>
+                      <Label>{labels.profit}:</Label>
                       <Value>{profit.toLocaleString()}</Value>
                     </InnerGrid>
                   </SummaryItem>
@@ -244,7 +262,9 @@ const DashboardLayout = () => {
               )}
               {containsApplet(60106) && (
                 <SummaryItem style={{ gridColumn: '1 / 3' }}>
-                  <RedCenter>New Customers: {newCustomers.toLocaleString()}</RedCenter>
+                  <RedCenter>
+                    {labels.newCostumers}: {newCustomers.toLocaleString()}
+                  </RedCenter>
                 </SummaryItem>
               )}
             </SummaryGrid>
@@ -252,41 +272,41 @@ const DashboardLayout = () => {
           {containsApplet(60100) && (
             <ChartCard>
               <SummaryCard>
-                <Title>Average Weekly Sales</Title>
+                <Title>{labels.avWeeklySales}</Title>
                 <strong>{averageWeekly.toLocaleString()}</strong>
               </SummaryCard>
               <CompositeBarChartDark
                 id='weeklySalesChart'
                 labels={weeklyLabels}
                 data={weeklyValues}
-                label='Weekly Sales'
+                label={labels.weeklySales}
               />
             </ChartCard>
           )}
           {containsApplet(60101) && (
             <ChartCard>
               <SummaryCard>
-                <Title>Average Monthly Sales</Title>
+                <Title>{labels.avMonthlySales}</Title>
                 <strong>{averageMonthly.toLocaleString()}</strong>
               </SummaryCard>
               <CompositeBarChartDark
                 id='monthlySalesChart'
                 labels={monthlyLabels}
                 data={monthlyValues}
-                label='Monthly Sales'
+                label={labels.monthlySales}
               />
             </ChartCard>
           )}
           {containsApplet(60107) && (
             <ChartCard>
               <SummaryCard>
-                <Title>Accumulated Revenues</Title>
+                <Title>{labels.accRevenues}</Title>
               </SummaryCard>
               <CompositeBarChartDark
                 id='accumulatedRevenuesChart'
                 labels={revenuesLabels}
                 data={revenuesValues}
-                label='Monthly Sales'
+                label={labels.accRevenues}
                 color='#ff6c02'
                 hoverColor='#fec106'
               />
@@ -295,13 +315,13 @@ const DashboardLayout = () => {
           {containsApplet(60109) && (
             <ChartCard>
               <SummaryCard>
-                <Title>Receivables</Title>
+                <Title>{labels.receivables}</Title>
               </SummaryCard>
               <HorizontalBarChartDark
                 id='Receivables'
                 labels={receivablesLabels}
                 data={receivablesValues}
-                label='Receivables'
+                label={labels.receivables}
                 color='#6e87b6'
                 hoverColor='#818181'
               />
@@ -310,13 +330,13 @@ const DashboardLayout = () => {
           {containsApplet(60102) && (
             <ChartCard>
               <SummaryCard>
-                <Title>Top Customers</Title>
+                <Title>{labels.topCostumers}</Title>
               </SummaryCard>
               <HorizontalBarChartDark
                 id='TopCustomers'
                 labels={topCustomersLabels}
                 data={topCustomersValues}
-                label='TopCustomers'
+                label={labels.topCostumers}
                 color='#d5b552'
                 hoverColor='#818181'
               />
