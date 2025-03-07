@@ -14,6 +14,7 @@ export const Module = {
   RepairAndServices: 45,
   Replenishment: 46,
   Foundry: 47,
+  ProductModeling: 48,
   Purchase: 50,
   Sales: 51, //continue + 40
   Delivery: 52,

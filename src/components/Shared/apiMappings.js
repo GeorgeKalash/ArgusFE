@@ -966,6 +966,13 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  [ResourceIds.ThreeDPrint]: {
+    type: COMBOBOX,
+    endpoint: ProductModelingRepository.Printing.qry,
+    parameters: `_params=`,
+    valueField: 'recordId',
+    displayField: 'reference'
+  },
   [ResourceIds.ThreeDDesign]: {
     type: LOOKUP,
     endpoint: ProductModelingRepository.ThreeDDrawing.snapshot,

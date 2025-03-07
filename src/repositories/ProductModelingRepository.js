@@ -18,6 +18,20 @@ export const ProductModelingRepository = {
     snapshot: service + 'snapshotSKH',
     post: service + 'postSKH'
   },
+  ModelMaker: {
+    snapshot: service + 'snapshotMDL',
+    page: service + 'pageMDL',
+    get: service + 'getMDL',
+    set: service + 'setMDL',
+    del: service + 'delMDL',
+    post: service + 'postMDL',
+    close: service + 'closeMDL',
+    reopen: service + 'reopenMDL'
+  },
+  ModellingMaterial: {
+    qry: service + 'qryMDLM',
+    set2: service + 'set2MDLM'
+  },
   Printing: {
     page: service + 'page3DP',
     get: service + 'get3DP',
