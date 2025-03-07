@@ -930,6 +930,19 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  [ResourceIds.Sketch]: {
+    type: LOOKUP,
+    endpoint: ProductModelingRepository.Sketch.snapshot,
+    secondDisplayField: false,
+    firstField: ['reference', 'sourceName', 'designerRef'],
+    valueOnSelection: 'recordId',
+    displayFieldWidth: 1,
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'sourceName', value: 'Source' },
+      { key: 'designerRef', value: 'designer' }
+    ]
+  },
   [ResourceIds.Metals]: {
     type: COMBOBOX,
     endpoint: InventoryRepository.Metals.qry,

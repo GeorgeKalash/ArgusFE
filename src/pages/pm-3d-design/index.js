@@ -1,62 +1,62 @@
 import { useContext } from 'react'
-import toast from 'react-hot-toast'
-import Table from 'src/components/Shared/Table'
-import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import Table from 'src/components/Shared/Table'
+import toast from 'react-hot-toast'
+import { useWindow } from 'src/windows'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
-import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
-import SketchForm from './Forms/SketchForm'
+import { SystemFunction } from 'src/resources/SystemFunction'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
+import ThreeDDesignForm from './forms/ThreeDDesignForm'
 
-const Sketch = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+const ThreeDDesign = () => {
+  const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: ProductModelingRepository.Sketch.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
+      extension: ProductModelingRepository.ThreeDDesign.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
-  const {
-    query: { data },
-    labels,
-    paginationParameters,
-    refetch,
-    access,
-    invalidate,
-    filterBy,
-    clearFilter
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: ProductModelingRepository.Sketch.page,
-    datasetId: ResourceIds.Sketch,
-    filter: {
-      filterFn: fetchWithFilter
-    }
-  })
-
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
       return await getRequest({
-        extension: ProductModelingRepository.Sketch.snapshot,
+        extension: ProductModelingRepository.ThreeDDesign.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
+
+  const {
+    query: { data },
+    filterBy,
+    refetch,
+    clearFilter,
+    labels,
+    access,
+    paginationParameters,
+    invalidate
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: ProductModelingRepository.ThreeDDesign.page,
+    datasetId: ResourceIds.ThreeDDesign,
+    filter: {
+      filterFn: fetchWithFilter
+    }
+  })
 
   const columns = [
     {
@@ -71,23 +71,18 @@ const Sketch = () => {
       type: 'date'
     },
     {
+      field: 'sketchRef',
+      headerName: labels.sketchRef,
+      flex: 1
+    },
+    {
       field: 'designerName',
-      headerName: labels.designer,
+      headerName: labels.Drawer,
       flex: 1
     },
     {
-      field: 'itemGroupName',
-      headerName: labels.itemGroup,
-      flex: 1
-    },
-    {
-      field: 'sourceName',
-      headerName: labels.sketchSource,
-      flex: 1
-    },
-    {
-      field: 'rsName',
-      headerName: labels.releaseStatus,
+      field: 'castingName',
+      headerName: labels.castingType,
       flex: 1
     },
     {
@@ -97,44 +92,55 @@ const Sketch = () => {
     },
     {
       field: 'wipName',
-      headerName: labels.wip,
+      headerName: labels.wipName,
       flex: 1
     }
   ]
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.Sketch,
-    action: openForm,
-    hasDT: true
+    functionId: SystemFunction.ThreeDDesign,
+    action: async () => {
+      openForm()
+    }
   })
 
   const add = async () => {
-    await proxyAction()
+    proxyAction()
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj)
   }
 
-  function openForm(recordId) {
+  async function openForm(obj) {
     stack({
-      Component: SketchForm,
+      Component: ThreeDDesignForm,
       props: {
-        recordId
+        labels,
+        recordId: obj?.recordId,
+        maxAccess: access
       },
-      width: 700,
+      width: 1200,
       height: 700,
-      title: labels.Sketch
+      title: labels.ThreeDDesign
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: ProductModelingRepository.Sketch.del,
+      extension: ProductModelingRepository.ThreeDDesign.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
   }
 
   const onApply = ({ search, rpbParams }) => {
@@ -148,44 +154,36 @@ const Sketch = () => {
     refetch()
   }
 
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
         <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          labels={labels}
+          onAdd={add}
           maxAccess={access}
           onApply={onApply}
-          onAdd={add}
-          reportName={'PMSKH'}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'PM3DD'}
         />
       </Fixed>
       <Grow>
         <Table
+          name='3dDesignTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
+          refetch={refetch}
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='api'
-          paginationParameters={paginationParameters}
-          refetch={refetch}
           maxAccess={access}
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default Sketch
+export default ThreeDDesign
