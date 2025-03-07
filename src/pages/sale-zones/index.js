@@ -1,7 +1,6 @@
 import { useContext, useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import Tree from 'src/components/Shared/Tree'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useWindow } from 'src/windows'
@@ -13,6 +12,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import SaleZoneForm from './forms/SaleZoneForm'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const SalesZone = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -30,6 +30,14 @@ const SalesZone = () => {
 
     return { ...response, _startAt: _startAt }
   }
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: SaleRepository.SalesZone.snapshot,
+        parameters: `_filter=${filters.qry}&_sortField=`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0 })
+  }
 
   const {
     query: { data },
@@ -37,11 +45,16 @@ const SalesZone = () => {
     refetch,
     invalidate,
     paginationParameters,
-    access
+    access,
+    filterBy,
+    clearFilter
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SaleRepository.SalesZone.page,
-    datasetId: ResourceIds.SalesZone
+    datasetId: ResourceIds.SalesZone,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   useEffect(() => {
@@ -130,14 +143,24 @@ const SalesZone = () => {
     openForm(obj?.recordId)
   }
 
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
+        <RPBGridToolbar
           onAdd={add}
           maxAccess={access}
           actions={actions}
           onTree={onTreeClick}
+          onSearch={onSearch}
+          onClear={onClear}
           previewReport={ResourceIds.SalesZone}
         />
       </Fixed>

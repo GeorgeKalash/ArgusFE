@@ -31,7 +31,8 @@ export const SaleRepository = {
     get: service + 'getSZ',
     set: service + 'setSZ',
     del: service + 'delSZ',
-    page: service + 'pageSZ'
+    page: service + 'pageSZ',
+    snapshot: service + 'snapshotSZ'
   },
   SalesTeam: {
     qry: service + 'qrySPT',
