@@ -111,8 +111,6 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     }
   })
 
-  console.log(formik.values)
-
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
@@ -296,8 +294,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
-                    endpointId={ProductModelingRepository.Sketch.snapshot}
-                    filter={{ status: 3 }}
+                    endpointId={ProductModelingRepository.Sketch.snapshot2}
                     name='sketchRef'
                     required
                     label={labels.sketchRef}
@@ -307,7 +304,6 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                     form={formik}
                     readOnly={isClosed}
                     onChange={(event, newValue) => {
-                      console.log(newValue)
                       formik.setValues({
                         ...formik.values,
                         sketchId: newValue?.recordId || null,

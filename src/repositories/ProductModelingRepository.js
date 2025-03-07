@@ -27,6 +27,7 @@ export const ProductModelingRepository = {
     close: service + 'closeSKH',
     reopen: service + 'reopenSKH',
     snapshot: service + 'snapshotSKH',
+    snapshot2: service + 'snapshot2SKH',
     post: service + 'postSKH'
   },
   Printing: {
@@ -40,7 +41,7 @@ export const ProductModelingRepository = {
     qry: service + 'qry3DP'
   },
   ThreeDDrawing: {
-    snapshot: service + 'snapshot3DD',
+    snapshot: service + 'snapshot3DD'
   },
   Casting: {
     page: service + 'pageCAS',

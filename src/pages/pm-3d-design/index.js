@@ -32,14 +32,12 @@ const ThreeDDesign = () => {
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters?.qry) {
+    if (filters.qry)
       return await getRequest({
         extension: ProductModelingRepository.ThreeDDesign.snapshot,
-        parameters: `_filter=${filters.qry}&_startAt=${pagination._startAt || 0}&_size=${pagination._size || 50}`
+        parameters: `_filter=${filters.qry}`
       })
-    } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-    }
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
