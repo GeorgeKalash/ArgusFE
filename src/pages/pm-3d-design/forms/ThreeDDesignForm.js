@@ -25,6 +25,9 @@ import { DataSets } from 'src/resources/DataSets'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
 import SketchForm from 'src/pages/pm-sketch/Forms/SketchForm'
 import { useWindow } from 'src/windows'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 
 export default function ThreeDDesignForm({ labels, access, recordId }) {
   const { platformLabels } = useContext(ControlContext)
@@ -39,7 +42,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
-    access: access,
+    access,
     enabled: !recordId
   })
 
@@ -61,11 +64,24 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       statusName: '',
       castingType: null,
       notes: '',
-      date: new Date()
+      date: new Date(),
+      startDate: null,
+      endDate: null,
+      fileReference: '',
+      itemGroupId: null,
+      itemGroupRef: '',
+      itemGroupName: '',
+      productionClassId: null,
+      productionClassRef: '',
+      productionClassName: '',
+      productionStandardId: null,
+      productionStandardRef: '',
+      productionStandardName: '',
+      purity: 0
     },
     maxAccess,
     enableReinitialize: false,
-    validateOnChange: false,
+    validateOnChange: true,
     validationSchema: yup.object({
       designerId: yup.number().required(),
       sketchId: yup.number().required(),
@@ -89,11 +105,11 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       }
       await fetchData(res.recordId)
       invalidate()
-      toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
+      toast.success(recordId ? platformLabels.Edited : platformLabels.Added)
     }
   })
 
-  const editMode = !!recordId || formik.values.recordId
+  const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
 
@@ -230,7 +246,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       <VertLayout>
         <Grow>
           <Grid container spacing={3}>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <ResourceComboBox
@@ -259,7 +275,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                     label={labels.reference}
                     value={formik.values.reference}
                     rows={2}
-                    maxAccess={maxAccess}
+                    maxAccess={!editMode && maxAccess}
                     onChange={formik.handleChange}
                     readOnly={editMode}
                     onClear={() => formik.setFieldValue('reference', '')}
@@ -267,42 +283,39 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomDatePicker
-                    name='date'
-                    label={labels.date}
-                    value={formik?.values?.date}
-                    onChange={formik.setFieldValue}
-                    editMode={editMode}
-                    maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('date', '')}
-                    readOnly={isClosed}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
                   <ResourceLookup
-                    name='sketchId'
-                    required
                     endpointId={ProductModelingRepository.Sketch.snapshot}
+                    filter={{ status: 3 }}
+                    name='sketchRef'
+                    required
+                    displayFieldWidth={2}
                     label={labels.sketchRef}
-                    form={formik}
                     valueField='reference'
                     displayField='reference'
+                    valueShow='sketchRef'
+                    secondValueShow='sketchName'
+                    form={formik}
                     readOnly={isClosed}
-                    firstValue={formik.values.sketchRef}
-                    secondDisplayField={false}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'sourceName', value: 'Source' },
-                      { key: 'designerRef', value: 'designer' }
-                    ]}
-                    displayFieldWidth={1.5}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('sketchId', newValue?.recordId || null)
-                      formik.setFieldValue('sketchRef', newValue?.reference || '')
-                      formik.setFieldValue('designerId', newValue?.designerId || null)
-                      formik.setFieldValue('designerRef', newValue?.designerRef || '')
-                      formik.setFieldValue('designerName', newValue?.designerName || '')
+                      formik.setValues({
+                        ...formik.values,
+                        sketchId: newValue?.recordId || null,
+                        sketchRef: newValue?.reference || '',
+                        sketchName: newValue?.name || '',
+                        itemGroupId: newValue?.itemGroupId || null,
+                        itemGroupRef: newValue?.itemGroupRef || '',
+                        itemGroupName: newValue?.itemGroupName || '',
+                        designerId: newValue?.designerId || null,
+                        designerRef: newValue?.designerRef || '',
+                        designerName: newValue?.designerName || '',
+                        productionClassId: newValue?.productionClassId || null,
+                        productionClassRef: newValue?.productionClassRef || '',
+                        productionClassName: newValue?.productionClassName || '',
+                        productionStandardId: newValue?.productionStandardId || null,
+                        productionStandardRef: newValue?.productionStandardRef || '',
+                        productionStandardName: newValue?.productionStandardName || '',
+                        purity: newValue?.metalPurity || null
+                      })
                     }}
                     errorCheck={'sketchId'}
                     maxAccess={access}
@@ -313,12 +326,13 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                     endpointId={ProductModelingRepository.Designer.snapshot}
                     name='designerRef'
                     required
-                    label={labels.Drawer}
+                    label={labels.designer}
+                    displayFieldWidth={2}
                     valueField='reference'
                     displayField='name'
                     valueShow='designerRef'
-                    secondValueShow='designerName'
                     readOnly={isClosed}
+                    secondValueShow='designerName'
                     form={formik}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('designerId', newValue?.recordId || null),
@@ -331,31 +345,87 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='setPcs'
-                    label={labels.setPcs}
-                    value={formik.values.setPcs}
+                    name='purity'
+                    label={labels.purity}
+                    value={formik.values.purity}
                     maxAccess={maxAccess}
                     readOnly={isClosed}
-                    maxLength={6}
-                    decimalScale={5}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('setPcs', 0)}
-                    error={formik.touched.setPcs && Boolean(formik.errors.setPcs)}
+                    onClear={() => formik.setFieldValue('purity', 0)}
+                    error={formik.touched.purity && Boolean(formik.errors.purity)}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
-                  <CustomNumberField
-                    name='weight'
-                    label={labels.weight}
-                    value={formik.values.weight}
-                    maxAccess={maxAccess}
-                    maxLength={11}
-                    decimalScale={5}
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Items.pack}
+                    values={formik.values}
+                    name='itemGroupId'
+                    label={labels.itemGroup}
                     readOnly={isClosed}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('weight', 0)}
-                    error={formik.touched.weight && Boolean(formik.errors.weight)}
+                    valueField='recordId'
+                    displayField='name'
+                    displayFieldWidth={1}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('itemGroupId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.itemGroupId && formik.errors.itemGroupId}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.ProductionClass.qry}
+                    values={formik.values}
+                    name='productionClassId'
+                    label={labels.productionClass}
+                    valueField='recordId'
+                    readOnly={isClosed}
+                    displayField='name'
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('productionClassId', newValue?.recordId || '')
+                    }}
+                    error={formik.touched.productionClassId && Boolean(formik.errors.productionClassId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.ProductionStandard.qry}
+                    values={formik.values}
+                    name='productionStandardId'
+                    label={labels.productionStandard}
+                    valueField='recordId'
+                    displayField='reference'
+                    readOnly={isClosed}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('productionStandardId', newValue?.recordId || '')
+                    }}
+                    error={formik.touched.productionStandardId && Boolean(formik.errors.productionStandardId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Collections.qry}
+                    name='collectionId'
+                    label={labels.collection}
+                    valueField='recordId'
+                    readOnly={isClosed}
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('collectionId', newValue?.recordId)
+                    }}
+                    error={formik.touched.collectionId && Boolean(formik.errors.collectionId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -365,10 +435,10 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                     required
                     label={labels.castingType}
                     valueField='key'
+                    readOnly={isClosed}
                     displayField='value'
                     values={formik.values}
                     maxAccess={maxAccess}
-                    readOnly={isClosed}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('castingType', newValue?.key)
                     }}
@@ -382,19 +452,6 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                     value={formik.values.statusName}
                     maxAccess={maxAccess}
                     readOnly
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='fileReference'
-                    label={labels.fileReference}
-                    value={formik.values.fileReference}
-                    maxAccess={maxAccess}
-                    required
-                    readOnly={isClosed}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('fileReference', '')}
-                    error={formik.touched.fileReference && Boolean(formik.errors.fileReference)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -413,7 +470,95 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='date'
+                    label={labels.date}
+                    value={formik?.values?.date}
+                    onChange={formik.setFieldValue}
+                    editMode={editMode}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('date', null)}
+                    readOnly={isClosed}
+                    error={formik.touched.date && Boolean(formik.errors.date)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDateTimePicker
+                    name='startDate'
+                    readOnly={isClosed}
+                    label={labels.startDate}
+                    onChange={formik.setFieldValue}
+                    editMode={editMode}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('startDate', null)}
+                    value={formik.values?.startDate}
+                    error={formik.errors?.startDate && Boolean(formik.errors?.startDate)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDateTimePicker
+                    name='endDate'
+                    readOnly={isClosed}
+                    label={labels.endDate}
+                    onChange={formik.setFieldValue}
+                    editMode={editMode}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('endDate', null)}
+                    value={formik.values?.endDate}
+                    error={formik.errors?.endDate && Boolean(formik.errors?.endDate)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='setPcs'
+                    label={labels.setPcs}
+                    value={formik.values.setPcs}
+                    maxAccess={maxAccess}
+                    readOnly={isClosed}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('setPcs', 0)}
+                    error={formik.touched.setPcs && Boolean(formik.errors.setPcs)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='weight'
+                    label={labels.weight}
+                    value={formik.values.weight}
+                    maxAccess={maxAccess}
+                    readOnly={isClosed}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('weight', 0)}
+                    error={formik.touched.weight && Boolean(formik.errors.weight)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='fileReference'
+                    required
+                    label={labels.fileReference}
+                    value={formik.values.fileReference}
+                    rows={2}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    readOnly={isClosed}
+                    onClear={() => formik.setFieldValue('fileReference ', '')}
+                    error={formik.touched.fileReference && Boolean(formik.errors.fileReference)}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={4}>
               <ImageUpload
                 ref={imageUploadRef}
                 resourceId={ResourceIds.Items}

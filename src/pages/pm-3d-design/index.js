@@ -103,8 +103,7 @@ const ThreeDDesign = () => {
     functionId: SystemFunction.ThreeDDesign,
     action: async () => {
       openForm()
-    },
-    hasDT: true
+    }
   })
 
   const add = async () => {
@@ -119,12 +118,12 @@ const ThreeDDesign = () => {
     stack({
       Component: ThreeDDesignForm,
       props: {
-        labels: labels,
+        labels,
         recordId: obj?.recordId,
         maxAccess: access
       },
-      width: 800,
-      height: 750,
+      width: 1200,
+      height: 700,
       title: labels.ThreeDDesign
     })
   }
