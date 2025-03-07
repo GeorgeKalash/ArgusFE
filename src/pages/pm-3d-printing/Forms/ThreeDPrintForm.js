@@ -23,6 +23,7 @@ import { ProductModelingRepository } from 'src/repositories/ProductModelingRepos
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 
 export default function ThreeDPrintForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -239,7 +240,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
-                    endpointId={ProductModelingRepository.ThreeDDrawing.snapshot}
+                    endpointId={ProductModelingRepository.ThreeDDrawing.snapshot2}
                     valueField='reference'
                     displayField='reference'
                     secondDisplayField={false}
@@ -254,6 +255,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                       formik.setFieldValue('threeDDId', newValue?.recordId || null)
                       formik.setFieldValue('threeDDRef', newValue?.reference || '')
                       formik.setFieldValue('fileReference', newValue?.fileReference || '')
+                      formik.setFieldValue('productionClassId', newValue?.productionClassId || null)
                     }}
                     errorCheck={'threeDDId'}
                   />
@@ -273,7 +275,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomDatePicker
+                  <CustomDateTimePicker
                     name='startDate'
                     label={labels.startDate}
                     value={formik.values?.startDate}
@@ -281,7 +283,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomDatePicker name='endDate' label={labels.endDate} value={formik.values?.endDate} readOnly />
+                  <CustomDateTimePicker name='endDate' label={labels.endDate} value={formik.values?.endDate} readOnly />
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
@@ -352,6 +354,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     error={formik.touched.setPcs && Boolean(formik.errors.setPcs)}
                   />
                 </Grid>
+                
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='weight'
