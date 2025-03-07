@@ -84,7 +84,8 @@ export default function SaleTransactionForm({
   const { documentType, maxAccess } = useDocumentType({
     functionId: functionId,
     access: access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   const invalidate = useInvalidate({

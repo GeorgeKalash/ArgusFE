@@ -38,7 +38,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
   const { documentType, maxAccess } = useDocumentType({
     functionId: SystemFunction.RemittanceReceiptVoucher,
     access: access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   const invalidate = useInvalidate({
