@@ -6,7 +6,7 @@ export const ProductModelingRepository = {
     get: service + 'getDSR',
     set: service + 'setDSR',
     del: service + 'delDSR',
-    qry: service + 'qryDSR',
+    qry: service + 'qryDSR'
   },
   Sketch: {
     page: service + 'pageSKH',
@@ -30,6 +30,19 @@ export const ProductModelingRepository = {
   },
   ThreeDDrawing: {
     snapshot: service + 'snapshot3DD',
+    get: service + 'get3DD'
+  },
+  Rubber: {
+    page: service + 'pageRBR',
+    get: service + 'getRBR',
+    set: service + 'setRBR',
+    del: service + 'delRBR',
+    snapshot: service + 'snapshotRBR',
+    post: service + 'postRBR',
+    start: service + 'startRBR'
+  },
+  Modeling: {
+    qry: service + 'qryMDL'
   },
   Casting: {
     page: service + 'pageCAS',
