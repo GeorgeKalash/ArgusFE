@@ -10,10 +10,10 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import CollectionsForm from './Forms/CollectionsForm'
+import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
+import DesignerForm from './Forms/DesignerForm'
 
-const Collections = () => {
+const Designer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,7 +22,7 @@ const Collections = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.Collections.page,
+      extension: ProductModelingRepository.Designer.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
@@ -38,8 +38,8 @@ const Collections = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Collections.page,
-    datasetId: ResourceIds.Collections
+    endpointId: ProductModelingRepository.Designer.page,
+    datasetId: ResourceIds.Designer
   })
 
   const columns = [
@@ -65,7 +65,7 @@ const Collections = () => {
 
   function openForm(recordId) {
     stack({
-      Component: CollectionsForm,
+      Component: DesignerForm,
       props: {
         labels,
         recordId,
@@ -73,13 +73,13 @@ const Collections = () => {
       },
       width: 600,
       height: 250,
-      title: labels.collections
+      title: labels.designer
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: InventoryRepository.Collections.del,
+      extension: ProductModelingRepository.Designer.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -110,4 +110,4 @@ const Collections = () => {
   )
 }
 
-export default Collections
+export default Designer

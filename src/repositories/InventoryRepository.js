@@ -271,6 +271,7 @@ export const InventoryRepository = {
   Collections: {
     get: service + 'getCOL',
     page: service + 'pageCOL',
+    qry: service + 'qryCOL',
     del: service + 'delCOL',
     set: service + 'setCOL',
   }
