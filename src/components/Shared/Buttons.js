@@ -526,5 +526,12 @@ export const getButtons = platformLabels => [
     color: '#D3D3D3',
     image: 'generate2.png',
     main: false
+  },
+  {
+    key: 'threeDPrinting',
+    label: platformLabels.threeDPrinting,
+    color: '#067851',
+    image: '3d-printer.png',
+    main: false
   }
 ]
