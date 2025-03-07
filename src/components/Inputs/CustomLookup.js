@@ -113,8 +113,6 @@ const CustomLookup = ({
             setInputValue(newValue ? newValue[valueField] : '')
             onChange(name, newValue)
             setAutoFocus(true)
-
-            valueHighlightedOption.current = ''
           }}
           onHighlightChange={(event, newValue) => {
             valueHighlightedOption.current = newValue
