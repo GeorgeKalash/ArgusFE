@@ -32,7 +32,8 @@ const RetailTrx = () => {
   const getResourceId = {
     [SystemFunction.RetailInvoice]: ResourceIds.RetailInvoice,
     [SystemFunction.RetailReturn]: ResourceIds.RetailInvoiceReturn,
-    [SystemFunction.RetailPurchase]: ResourceIds.RetailPurchase
+    [SystemFunction.RetailPurchase]: ResourceIds.RetailPurchase,
+    [SystemFunction.RetailPurchaseReturn]: ResourceIds.RetailPurchase
   }
 
   const {

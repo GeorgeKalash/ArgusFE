@@ -68,6 +68,7 @@ export const SystemFunction = {
   RetailInvoice: Module.PointOfSale * 100 + 0,
   RetailReturn: Module.PointOfSale * 100 + 1,
   RetailPurchase: Module.PointOfSale * 100 + 2,
+  RetailPurchaseReturn: Module.PointOfSale * 100 + 3,
   ChartOfAccounts: Module.GeneralLedger * 100 + 2,
   Assets: Module.FixedAssets * 100 + 0,
   AssetsDepreciation: Module.FixedAssets * 100 + 2,
