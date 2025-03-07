@@ -237,5 +237,27 @@ export const SaleRepository = {
   },
   QuotationItem: {
     qry: service + 'qryQTI'
+  },
+  DraftReturn: {
+    page: service + 'pageDRE',
+    snapshot: service + 'snapshotDRE',
+    get: service + 'getDRE',
+    set2: service + 'set2DRE',
+    del: service + 'delDRE',
+    close: service + 'closeDRE',
+    reopen: service + 'reopenDRE'
+  },
+  DraftReturnSerial: {
+    qry: service + 'qryDRS',
+    batch: service + 'batchDRS',
+    append: service + 'appendDRS',
+    del: service + 'delDRS'
+  },
+  LastSerialInvoice: {
+    get: service + 'lastSRL',
+    qry: service + 'importSRL'
+  },
+  InvoiceReturnBalance: {
+    balance: service + 'balanceRET'
   }
 }
