@@ -341,7 +341,7 @@ export const getButtons = platformLabels => [
   },
   {
     key: 'Import',
-    label: platformLabels.Import,
+    label: platformLabels.import,
     color: '#000',
     image: 'import.png',
     main: false
