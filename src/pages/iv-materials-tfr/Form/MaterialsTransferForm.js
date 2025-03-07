@@ -144,8 +144,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         .of(
           yup.object().shape({
             sku: yup.string().required(),
-            qty: yup.string().required(),
-            msId: yup.string().required()
+            qty: yup.string().required()
           })
         )
         .required()
@@ -186,13 +185,12 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         record: JSON.stringify(resultObject)
       })
 
+      invalidate()
       if (!values.recordId) {
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', res.recordId)
 
         await refetchForm(res.recordId)
-
-        invalidate()
       } else {
         if (formik.values.notificationGroupId) {
           handleNotificationSubmission(res.recordId, formik.values.reference, formik, 1)
