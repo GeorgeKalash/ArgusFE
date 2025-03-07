@@ -30,6 +30,7 @@ export const ProductModelingRepository = {
   },
   ThreeDDrawing: {
     snapshot: service + 'snapshot3DD',
+    snapshot2: service + 'snapshot23DD',
   },
   Casting: {
     page: service + 'pageCAS',
