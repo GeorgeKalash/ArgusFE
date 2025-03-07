@@ -357,6 +357,7 @@ export const ResourceIds = {
   OutboundAssignDriver: 52313,
   PriceListInquiry: 41432,
   MaterialTransferDTD: 41112,
+  DraftTransfer: 41228,
   DraftSerialReturns: 51314,
   MetalSettings: 47100,
   WaxDocTypeDefaults: 42601,
