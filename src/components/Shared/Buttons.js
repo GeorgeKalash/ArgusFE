@@ -513,6 +513,7 @@ export const getButtons = platformLabels => [
     image: 'sketch.png',
     main: false
   },
+  { key: 'Copy', label: platformLabels.Copy, color: '#CD5C5C', image: 'copy.png', main: false },
   {
     key: 'GenerateJob',
     label: platformLabels.Generate,
