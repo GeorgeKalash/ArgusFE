@@ -280,7 +280,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={ProductModelingRepository.ThreeDPrint.snapshot}
+                endpointId={ProductModelingRepository.Printing.snapshot}
                 valueField='reference'
                 displayField='reference'
                 name='threeDPId'
@@ -301,8 +301,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={FoundryRepository.Casting.qry}
-                parameters={`_startAt=0&_pageSize=1000&&_filter=&_params=`}
+                endpointId={ProductModelingRepository.Casting.qry}
                 name='castingId'
                 label={labels.casting}
                 values={formik.values}

@@ -32,7 +32,7 @@ export const ProductModelingRepository = {
     qry: service + 'qryMDLM',
     set2: service + 'set2MDLM'
   },
-  ThreeDPrint: {
+  Printing: {
     page: service + 'page3DP',
     get: service + 'get3DP',
     set: service + 'set3DP',

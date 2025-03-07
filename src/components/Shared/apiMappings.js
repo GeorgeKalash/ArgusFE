@@ -968,7 +968,7 @@ export const apiMappings = {
   },
   [ResourceIds.ThreeDPrint]: {
     type: COMBOBOX,
-    endpoint: ProductModelingRepository.ThreeDPrint.qry,
+    endpoint: ProductModelingRepository.Printing.qry,
     parameters: `_params=`,
     valueField: 'recordId',
     displayField: 'reference'
