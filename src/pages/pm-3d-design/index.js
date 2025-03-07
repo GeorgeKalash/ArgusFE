@@ -177,7 +177,6 @@ const ThreeDDesign = () => {
           onEdit={edit}
           refetch={refetch}
           onDelete={del}
-          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           maxAccess={access}
