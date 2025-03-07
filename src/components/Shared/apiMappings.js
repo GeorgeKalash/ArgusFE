@@ -582,11 +582,7 @@ export const apiMappings = {
     endpoint: ProductModelingRepository.Modeling.qry,
     parameters: '_startAt=0&_pageSize=1000&_params=',
     valueField: 'recordId',
-    displayField: 'reference',
-    columnsInDropDown: [
-      { key: 'reference', value: 'Reference' },
-      { key: 'name', value: 'Name' }
-    ]
+    displayField: 'reference'
   },
   [ResourceIds.MFJobOrders]: {
     type: LOOKUP,

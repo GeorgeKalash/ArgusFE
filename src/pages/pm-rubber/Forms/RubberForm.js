@@ -348,7 +348,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 maxAccess={maxAccess}
                 readOnly={isReleased || isPosted}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('pcs', '')}
+                onClear={() => formik.setFieldValue('pcs', null)}
                 maxLength={4}
                 error={formik.touched.weight && Boolean(formik.errors.pcs)}
               />
@@ -385,7 +385,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 decimalScale={2}
                 readOnly={isReleased || isPosted}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('weight', '')}
+                onClear={() => formik.setFieldValue('weight', null)}
                 error={formik.touched.weight && Boolean(formik.errors.weight)}
               />
             </Grid>
