@@ -368,7 +368,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                         formik.setFieldValue('metalId', newValue?.recordId || null)
                         formik.setFieldValue('metalPurity', newValue?.purity || null)
                       }}
-                      readOnly={isPosted || isClosed}
+                      readOnly={isClosed}
                       error={formik.touched.metalId && Boolean(formik.errors.metalId)}
                       maxAccess={maxAccess}
                     />
