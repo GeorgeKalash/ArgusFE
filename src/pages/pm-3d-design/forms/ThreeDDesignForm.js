@@ -77,7 +77,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       productionStandardId: null,
       productionStandardRef: '',
       productionStandardName: '',
-      purity: 0
+      metalId: null
     },
     maxAccess,
     enableReinitialize: false,
@@ -91,7 +91,9 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     onSubmit: async obj => {
       const data = {
         ...obj,
-        date: formatDateToApi(obj.date)
+        date: formatDateToApi(obj.date),
+        startDate: obj.startDate ? formatDateToApi(obj.startDate) : null,
+        endDate: obj.endDate ? formatDateToApi(obj.endDate) : null
       }
 
       const res = await postRequest({
@@ -108,6 +110,8 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       toast.success(recordId ? platformLabels.Edited : platformLabels.Added)
     }
   })
+
+  console.log(formik.values)
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
@@ -128,7 +132,9 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     }).then(res => {
       formik.setValues({
         ...res.record,
-        date: formatDateFromApi(res?.record?.date)
+        date: formatDateFromApi(res?.record?.date),
+        startDate: formatDateFromApi(res?.record?.startDate),
+        endDate: formatDateFromApi(res?.record?.endDate)
       })
     })
   }
@@ -136,7 +142,9 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
   const onPost = async () => {
     const data = {
       ...formik.values,
-      date: formatDateToApi(formik.values.date)
+      date: formatDateToApi(formik.values.date),
+      startDate: formatDateToApi(formik.values.startDate),
+      endDate: formatDateToApi(formik.values.endDate)
     }
     await postRequest({
       extension: ProductModelingRepository.ThreeDDesign.post,
@@ -151,7 +159,9 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
   async function onClose() {
     const data = {
       ...formik.values,
-      date: formatDateToApi(formik.values.date)
+      date: formatDateToApi(formik.values.date),
+      startDate: formatDateToApi(formik.values.startDate),
+      endDate: formatDateToApi(formik.values.endDate)
     }
 
     await postRequest({
@@ -167,7 +177,9 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
   async function onReopen() {
     const data = {
       ...formik.values,
-      date: formatDateToApi(formik.values.date)
+      date: formatDateToApi(formik.values.date),
+      startDate: formatDateToApi(formik.values.startDate),
+      endDate: formatDateToApi(formik.values.endDate)
     }
 
     await postRequest({
@@ -288,15 +300,14 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                     filter={{ status: 3 }}
                     name='sketchRef'
                     required
-                    displayFieldWidth={2}
                     label={labels.sketchRef}
+                    secondDisplayField={false}
                     valueField='reference'
-                    displayField='reference'
                     valueShow='sketchRef'
-                    secondValueShow='sketchName'
                     form={formik}
                     readOnly={isClosed}
                     onChange={(event, newValue) => {
+                      console.log(newValue)
                       formik.setValues({
                         ...formik.values,
                         sketchId: newValue?.recordId || null,
@@ -314,7 +325,8 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                         productionStandardId: newValue?.productionStandardId || null,
                         productionStandardRef: newValue?.productionStandardRef || '',
                         productionStandardName: newValue?.productionStandardName || '',
-                        purity: newValue?.metalPurity || null
+                        metalPurity: newValue?.metalPurity || null,
+                        metalId: newValue?.metalId || null
                       })
                     }}
                     errorCheck={'sketchId'}
@@ -344,31 +356,39 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField
-                    name='purity'
-                    label={labels.purity}
-                    value={formik.values.purity}
-                    maxAccess={maxAccess}
-                    readOnly={isClosed}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('purity', 0)}
-                    error={formik.touched.purity && Boolean(formik.errors.purity)}
-                  />
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={InventoryRepository.Metals.qry}
+                      name='metalId'
+                      label={labels.purity}
+                      valueField='recordId'
+                      displayField={['reference']}
+                      values={formik.values}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('metalId', newValue?.recordId || null)
+                        formik.setFieldValue('metalPurity', newValue?.purity || null)
+                      }}
+                      readOnly={isPosted || isClosed}
+                      error={formik.touched.metalId && Boolean(formik.errors.metalId)}
+                      maxAccess={maxAccess}
+                    />
+                  </Grid>
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Items.pack}
+                    endpointId={InventoryRepository.Group.qry}
+                    parameters='_startAt=0&_pageSize=1000'
                     values={formik.values}
                     name='itemGroupId'
                     label={labels.itemGroup}
-                    readOnly={isClosed}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['reference', 'name']}
                     displayFieldWidth={1}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    readOnly={isClosed}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('itemGroupId', newValue?.recordId || null)
