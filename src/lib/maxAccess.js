@@ -4,7 +4,14 @@ import { TrxType } from 'src/resources/AccessLevels'
 const checkAccess = (name, maxAccess, required, readOnly, hidden, disabled) => {
   const generalMaxAccess = maxAccess && maxAccess.record?.maxAccess
 
-  const { accessLevel } = (maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
+  const check = (controlId, name) => {
+    const fieldPath = controlId?.split('.')
+    const [parent, child] = fieldPath
+
+    return child === name || controlId === name
+  }
+
+  const { accessLevel } = (maxAccess?.record?.controls ?? []).find(({ controlId }) => check(controlId, name)) ?? 0
 
   const isReadOnly =
     accessLevel === DISABLED || (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)

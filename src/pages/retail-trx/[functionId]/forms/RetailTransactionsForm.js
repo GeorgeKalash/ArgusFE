@@ -76,7 +76,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
   const { documentType, maxAccess } = useDocumentType({
     functionId: functionId,
     access: access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   const initialValues = {
