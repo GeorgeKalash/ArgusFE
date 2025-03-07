@@ -419,7 +419,7 @@ export function DataGrid({
     }
 
     const formatNumber = value => {
-      return !value ? '' : parseFloat(value).toString()
+      return !value ? '' : parseFloat(value.toString().replace(/,/g, '')).toString()
     }
 
     const formattedValue =
