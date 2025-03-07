@@ -42,7 +42,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId,
+      recordId,
       dtId: documentType?.dtId,
       reference: null,
       date: new Date(),
@@ -271,9 +271,9 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                   { key: 'name', value: 'Name' }
                 ]}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('laborId', newValue?.recordId)
                   formik.setFieldValue('laborName', newValue?.name)
                   formik.setFieldValue('laborRef', newValue?.reference)
+                  formik.setFieldValue('laborId', newValue?.recordId)
                 }}
                 errorCheck={'laborId'}
               />
@@ -293,8 +293,8 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                 secondDisplayField={false}
                 required
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('threeDPId', newValue?.recordId)
                   formik.setFieldValue('threeDPRef', newValue?.reference)
+                  formik.setFieldValue('threeDPId', newValue?.recordId)
                 }}
                 errorCheck={'threeDPId'}
               />
@@ -322,6 +322,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                 maxAccess={maxAccess}
                 label={labels.weight}
                 value={formik.values.weight}
+                maxLength={10}
                 decimalScale={2}
                 readOnly={isClosed}
                 onChange={e => formik.setFieldValue('weight', e.target.value)}
