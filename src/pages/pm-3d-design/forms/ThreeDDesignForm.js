@@ -143,8 +143,8 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     const data = {
       ...formik.values,
       date: formatDateToApi(formik.values.date),
-      startDate: formatDateToApi(formik.values.startDate),
-      endDate: formatDateToApi(formik.values.endDate)
+      startDate: formik.values.startDate ? formatDateToApi(formik.values.startDate) : null,
+      endDate: formik.values.endDate ? formatDateToApi(formik.values.endDate) : null
     }
     await postRequest({
       extension: ProductModelingRepository.ThreeDDesign.post,
@@ -160,8 +160,8 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     const data = {
       ...formik.values,
       date: formatDateToApi(formik.values.date),
-      startDate: formatDateToApi(formik.values.startDate),
-      endDate: formatDateToApi(formik.values.endDate)
+      startDate: formik.values.startDate ? formatDateToApi(formik.values.startDate) : null,
+      endDate: formik.values.endDate ? formatDateToApi(formik.values.endDate) : null
     }
 
     await postRequest({
@@ -178,8 +178,8 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     const data = {
       ...formik.values,
       date: formatDateToApi(formik.values.date),
-      startDate: formatDateToApi(formik.values.startDate),
-      endDate: formatDateToApi(formik.values.endDate)
+      startDate: formik.values.startDate ? formatDateToApi(formik.values.startDate) : null,
+      endDate: formik.values.endDate ? formatDateToApi(formik.values.endDate) : null
     }
 
     await postRequest({
