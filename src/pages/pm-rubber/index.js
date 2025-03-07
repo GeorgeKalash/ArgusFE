@@ -2,60 +2,62 @@ import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useResourceQuery } from 'src/hooks/resource'
+import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
-import { SystemFunction } from 'src/resources/SystemFunction'
-import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import CastingForm from './Forms/CastingForm'
+import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
+import RubberForm from './Forms/RubberForm'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import SystemFunction from '../system-functions'
 
-const Casting = () => {
+const Rubber = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params } = options
-
-    const response = await getRequest({
-      extension: ProductModelingRepository.Casting.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
-    })
-
-    return { ...response, _startAt: _startAt }
-  }
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
     labels,
-    paginationParameters,
-    refetch,
-    access,
-    invalidate,
     filterBy,
-    clearFilter
+    clearFilter,
+    paginationParameters,
+    invalidate,
+    refetch,
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ProductModelingRepository.Casting.page,
-    datasetId: ResourceIds.Casting,
+    endpointId: ProductModelingRepository.Rubber.page,
+    datasetId: ResourceIds.Rubber,
     filter: {
       filterFn: fetchWithFilter
     }
   })
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters.qry)
+    if (filters?.qry) {
       return await getRequest({
-        extension: ProductModelingRepository.Casting.snapshot,
+        extension: ProductModelingRepository.Rubber.snapshot,
         parameters: `_filter=${filters.qry}`
       })
-    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
+  }
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params } = options
+
+    const response = await getRequest({
+      extension: ProductModelingRepository.Rubber.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
+    })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const columns = [
@@ -71,8 +73,13 @@ const Casting = () => {
       type: 'date'
     },
     {
-      field: 'threeDPRef',
-      headerName: labels.threeDP,
+      field: 'modelRef',
+      headerName: labels.modelRef,
+      flex: 1
+    },
+    {
+      field: 'sku',
+      headerName: labels.sku,
       flex: 1
     },
     {
@@ -81,19 +88,10 @@ const Casting = () => {
       flex: 1
     },
     {
-      field: 'laborName',
-      headerName: labels.labor,
-      flex: 1
-    },
-    {
-      field: 'productionLineRef',
-      headerName: labels.productionLineRef,
-      flex: 1
-    },
-    {
-      field: 'productionLineName',
-      headerName: labels.productionLine,
-      flex: 1
+      field: 'pcs',
+      headerName: labels.silverPieces,
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'statusName',
@@ -102,8 +100,18 @@ const Casting = () => {
     }
   ]
 
+  const del = async obj => {
+    await postRequest({
+      extension: ProductModelingRepository.Rubber.del,
+      record: JSON.stringify(obj)
+    })
+
+    toast.success(platformLabels.Deleted)
+    invalidate()
+  }
+
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.Casting,
+    functionId: SystemFunction.Rubber,
     action: openForm
   })
 
@@ -111,31 +119,22 @@ const Casting = () => {
     await proxyAction()
   }
 
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
   function openForm(recordId) {
     stack({
-      Component: CastingForm,
+      Component: RubberForm,
       props: {
         labels,
         recordId,
-        maxAccess: access
+        access
       },
-      width: 700,
-      height: 550,
-      title: labels.Casting
+      width: 550,
+      height: 650,
+      title: labels?.rubber
     })
   }
 
-  const del = async obj => {
-    await postRequest({
-      extension: ProductModelingRepository.Casting.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+  const edit = obj => {
+    openForm(obj?.recordId)
   }
 
   const onApply = ({ search, rpbParams }) => {
@@ -161,13 +160,12 @@ const Casting = () => {
     <VertLayout>
       <Fixed>
         <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          labels={labels}
+          onAdd={add}
           maxAccess={access}
           onApply={onApply}
-          onAdd={add}
-          reportName={'PMCAS'}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'PMRBR'}
         />
       </Fixed>
       <Grow>
@@ -175,13 +173,13 @@ const Casting = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          refetch={refetch}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='api'
-          paginationParameters={paginationParameters}
-          refetch={refetch}
           maxAccess={access}
         />
       </Grow>
@@ -189,4 +187,4 @@ const Casting = () => {
   )
 }
 
-export default Casting
+export default Rubber

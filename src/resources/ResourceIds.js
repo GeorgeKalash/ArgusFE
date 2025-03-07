@@ -368,8 +368,13 @@ export const ResourceIds = {
   Collections: 41119,
   Sketch: 48300,
   ProductionStandard: 42112,
+  SalesQuotations: 51301,
+  ModelMaker: 48304,
+  ThreeDPrint: 48302,
   ThreeDDesign: 48301,
   Casting: 48303,
   Printing: 48302,
-  SalesQuotations: 51301
+  SalesQuotations: 51301,
+  Rubber: 48305,
+  Modeling: 48304
 }

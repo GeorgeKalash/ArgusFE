@@ -569,13 +569,20 @@ export const apiMappings = {
   [ResourceIds.Labor]: {
     type: COMBOBOX,
     endpoint: ManufacturingRepository.Labor.qry,
-    parameters: '_startAt=0&_pageSize=1000',
+    parameters: '_startAt=0&_pageSize=1000&_params=',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
+  },
+  [ResourceIds.Modeling]: {
+    type: COMBOBOX,
+    endpoint: ProductModelingRepository.Modeling.qry,
+    parameters: '_startAt=0&_pageSize=1000&_params=',
+    valueField: 'recordId',
+    displayField: 'reference'
   },
   [ResourceIds.MFJobOrders]: {
     type: LOOKUP,
@@ -971,6 +978,13 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
+  },
+  [ResourceIds.ThreeDPrint]: {
+    type: COMBOBOX,
+    endpoint: ProductModelingRepository.Printing.qry,
+    parameters: `_params=`,
+    valueField: 'recordId',
+    displayField: 'reference'
   },
   [ResourceIds.ThreeDDesign]: {
     type: LOOKUP,
