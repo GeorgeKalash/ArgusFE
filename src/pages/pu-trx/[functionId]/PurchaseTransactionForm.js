@@ -73,7 +73,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const { documentType, maxAccess } = useDocumentType({
     functionId: functionId,
     access: access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   const initialValues = {
@@ -1255,6 +1256,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         return null
     }
   }
+  console.log('check formik', formik)
 
   return (
     <FormShell
@@ -1299,7 +1301,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                     setmetalPriceVisibility(false)
                   }
                 }}
-                error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
               />
             </Grid>
             <Grid item xs={2.4}>

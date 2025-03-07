@@ -16,7 +16,7 @@ const getData = async (getRequest, extension, parameters) => {
   }
 }
 
-const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
+const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired, objectName) => {
   maxAccess = JSON.parse(JSON.stringify(maxAccess))
   let controls = maxAccess.record.controls
 
@@ -28,26 +28,26 @@ const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
       controls.push({
         sgId: 0,
         resourceId: '',
-        controlId: 'reference',
+        controlId: `${objectName ? objectName + '.' : ''}reference`,
         accessLevel: reference?.mandatory ? MANDATORY : DISABLED
       })
     } else if (reference?.readOnly) {
       controls.push({
         sgId: 0,
         resourceId: '',
-        controlId: 'reference',
+        controlId: `${objectName ? objectName + '.' : ''}reference`,
         accessLevel: reference?.readOnly ? DISABLED : MANDATORY
       })
     } else {
       controls = maxAccess.record.controls.filter(obj => obj.controlId != 'reference')
     }
   }
-
+  console.log('check access doc ', dcTypeRequired)
   if (dcTypeRequired) {
     controls.push({
       sgId: 0,
       resourceId: '',
-      controlId: 'dtId',
+      controlId: `${objectName ? objectName + '.' : ''}dtId`,
       accessLevel: MANDATORY
     })
   }
@@ -94,7 +94,14 @@ const fetchData = async (getRequest, id, repository) => {
   return await getData(getRequest, extension, parameters)
 }
 
-const documentType = async (getRequest, functionId = undefined, maxAccess, selectNraId = undefined, hasDT = true) => {
+const documentType = async (
+  getRequest,
+  functionId = undefined,
+  maxAccess,
+  selectNraId = undefined,
+  hasDT = true,
+  objectName
+) => {
   const docType = selectNraId === undefined && functionId && (await fetchData(getRequest, functionId, 'dtId')) // ufu
   const dtId = docType?.dtId
   let nraId
@@ -145,9 +152,9 @@ const documentType = async (getRequest, functionId = undefined, maxAccess, selec
       readOnly: isExternal?.external ? false : true,
       mandatory: isExternal?.external ? true : false
     }
-    if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired)
+    if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired, objectName)
   } else if (!nraId) {
-    if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired)
+    if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired, objectName)
   }
 
   return {
