@@ -21,8 +21,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useWindow } from 'src/windows'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
@@ -56,9 +54,6 @@ export default function RubberForm({ labels, access, recordId }) {
       endDate: null,
       pcs: null,
       jobId: null,
-      itemId: null,
-      sku: '',
-      itemName: '',
       status: 1,
       weight: null,
       notes: ''
@@ -67,7 +62,6 @@ export default function RubberForm({ labels, access, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       pcs: yup.number().moreThan(0, 'min'),
-      itemId: yup.number().required(),
       laborId: yup.number().required(),
       modelId: yup.number().required()
     }),
@@ -277,14 +271,8 @@ export default function RubberForm({ labels, access, recordId }) {
                         parameters: `_recordId=${response?.record?.jobId}`
                       })
 
-                      formik.setFieldValue('sku', result?.record?.sku || '')
-                      formik.setFieldValue('itemId', result?.record?.itemId || null)
-                      formik.setFieldValue('itemName', result?.record?.itemName || '')
                       formik.setFieldValue('pcs', result?.record?.pcs)
                     } else {
-                      formik.setFieldValue('sku', '')
-                      formik.setFieldValue('itemId', '')
-                      formik.setFieldValue('itemName', '')
                       formik.setFieldValue('pcs', null)
                     }
                   }
@@ -314,30 +302,6 @@ export default function RubberForm({ labels, access, recordId }) {
                 error={formik.touched.laborId && Boolean(formik.errors.laborId)}
               />
             </Grid>
-
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={InventoryRepository.Item.snapshot}
-                name='itemId'
-                label={labels.item}
-                valueField='sku'
-                displayField='name'
-                readOnly={formik.values.jobId || isReleased || isPosted}
-                valueShow='sku'
-                secondValueShow='itemName'
-                displayFieldWidth='2'
-                form={formik}
-                required
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('itemId', newValue?.recordId || null)
-                  formik.setFieldValue('itemName', newValue?.name || '')
-                  formik.setFieldValue('sku', newValue?.sku || '')
-                }}
-                maxAccess={access}
-                errorCheck={'itemId'}
-              />
-            </Grid>
-
             <Grid item xs={12}>
               <CustomNumberField
                 name='pcs'
