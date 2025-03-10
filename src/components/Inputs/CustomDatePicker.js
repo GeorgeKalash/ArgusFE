@@ -105,7 +105,16 @@ const CustomDatePicker = ({
         }}
         autoFocus={autoFocus}
         format={dateFormat}
-        onChange={newValue => onChange(name, newValue)}
+        onChange={newValue => {
+          if (newValue) {
+            const now = new Date()
+            const updatedDate = new Date(newValue)
+            updatedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds())
+            onChange(name, updatedDate)
+          } else {
+            onChange(name, newValue)
+          }
+        }}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}
         disabled={disabled}

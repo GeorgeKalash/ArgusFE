@@ -172,22 +172,22 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
                 onChange={formik.setFieldValue}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('dateFrom', '')}
+                onClear={() => formik.setFieldValue('dateFrom', null)}
                 error={formik.touched.dateFrom && Boolean(formik.errors.dateFrom)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomDatePicker
                 name='dateTo'
-                readOnly={editMode}
                 min={formik.values.dateFrom}
                 max={formik.values.date}
+                readOnly={editMode}
                 label={labels.dateTo}
                 value={formik.values.dateTo}
                 onChange={formik.setFieldValue}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('dateTo', '')}
+                onClear={() => formik.setFieldValue('dateTo', null)}
                 error={formik.touched.dateTo && Boolean(formik.errors.dateTo)}
               />
             </Grid>
@@ -201,7 +201,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
                 onChange={formik.setFieldValue}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
