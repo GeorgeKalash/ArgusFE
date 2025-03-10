@@ -45,16 +45,21 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
         .required()
         .test(function (value) {
           const { dateTo } = this.parent
+          const dateFromNoTime = new Date(value).setHours(0, 0, 0, 0)
+          const dateToNoTime = new Date(dateTo).setHours(0, 0, 0, 0)
 
-          return value.getTime() <= dateTo?.getTime()
+          return dateFromNoTime <= dateToNoTime
         }),
       dateTo: yup
         .date()
         .required()
         .test(function (value) {
           const { date, dateFrom } = this.parent
+          const dateToNoTime = new Date(value).setHours(0, 0, 0, 0)
+          const dateFromNoTime = dateFrom ? new Date(dateFrom).setHours(0, 0, 0, 0) : null
+          const dateNoTime = date ? new Date(date).setHours(0, 0, 0, 0) : null
 
-          return value.getTime() <= date?.getTime() && value.getTime() >= dateFrom?.getTime()
+          return dateToNoTime >= dateFromNoTime && dateToNoTime <= dateNoTime
         }),
       date: yup
         .date()
@@ -62,7 +67,10 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
         .test(function (value) {
           const { dateTo } = this.parent
 
-          return value.getTime() >= dateTo?.getTime()
+          const dateNoTime = new Date(value).setHours(0, 0, 0, 0)
+          const dateToNoTime = new Date(dateTo).setHours(0, 0, 0, 0)
+
+          return dateNoTime >= dateToNoTime
         })
     }),
     onSubmit: async obj => {
@@ -84,7 +92,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
     }
   })
   const editMode = !!recordId
-
+  console.log(formik, 'formik')
   async function getDefaultSiteId() {
     if (editMode) {
       return
@@ -172,22 +180,22 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
                 onChange={formik.setFieldValue}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('dateFrom', '')}
+                onClear={() => formik.setFieldValue('dateFrom', null)}
                 error={formik.touched.dateFrom && Boolean(formik.errors.dateFrom)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomDatePicker
                 name='dateTo'
-                readOnly={editMode}
                 min={formik.values.dateFrom}
                 max={formik.values.date}
+                readOnly={editMode}
                 label={labels.dateTo}
                 value={formik.values.dateTo}
                 onChange={formik.setFieldValue}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('dateTo', '')}
+                onClear={() => formik.setFieldValue('dateTo', null)}
                 error={formik.touched.dateTo && Boolean(formik.errors.dateTo)}
               />
             </Grid>
@@ -201,7 +209,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
                 onChange={formik.setFieldValue}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
