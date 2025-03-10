@@ -45,16 +45,21 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
         .required()
         .test(function (value) {
           const { dateTo } = this.parent
+          const dateFromNoTime = new Date(value).setHours(0, 0, 0, 0)
+          const dateToNoTime = new Date(dateTo).setHours(0, 0, 0, 0)
 
-          return value.getTime() <= dateTo?.getTime()
+          return dateFromNoTime <= dateToNoTime
         }),
       dateTo: yup
         .date()
         .required()
         .test(function (value) {
           const { date, dateFrom } = this.parent
+          const dateToNoTime = new Date(value).setHours(0, 0, 0, 0)
+          const dateFromNoTime = dateFrom ? new Date(dateFrom).setHours(0, 0, 0, 0) : null
+          const dateNoTime = date ? new Date(date).setHours(0, 0, 0, 0) : null
 
-          return value.getTime() <= date?.getTime() && value.getTime() >= dateFrom?.getTime()
+          return dateToNoTime >= dateFromNoTime && dateToNoTime <= dateNoTime
         }),
       date: yup
         .date()
@@ -62,7 +67,10 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
         .test(function (value) {
           const { dateTo } = this.parent
 
-          return value.getTime() >= dateTo?.getTime()
+          const dateNoTime = new Date(value).setHours(0, 0, 0, 0)
+          const dateToNoTime = new Date(dateTo).setHours(0, 0, 0, 0)
+
+          return dateNoTime >= dateToNoTime
         })
     }),
     onSubmit: async obj => {
@@ -84,7 +92,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
     }
   })
   const editMode = !!recordId
-
+  console.log(formik, 'formik')
   async function getDefaultSiteId() {
     if (editMode) {
       return
