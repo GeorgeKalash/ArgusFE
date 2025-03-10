@@ -1,4 +1,4 @@
-import { useContext, useEffect, useCallback } from 'react'
+import { useContext, useEffect } from 'react'
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -13,6 +13,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { DirtyField, GeometricShape, PhysicalPropertyCalculatorCtrl } from 'src/utils/PhysicalPropertyCalc'
 
 const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -76,64 +77,6 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
     invalidate()
   }
 
-  const fetchAndUpdateValues = useCallback(async (dirtyField, newValue) => {
-    const parseOrZero = val => parseFloat(val) || 0
-
-    const parameters = {
-      _dirtyField: dirtyField,
-      _shape: parseOrZero(formik.values.shape),
-      _length: parseOrZero(formik.values.length),
-      _width: parseOrZero(formik.values.width),
-      _depth: parseOrZero(formik.values.depth),
-      _diameter: parseOrZero(formik.values.diameter),
-      _volume: parseOrZero(formik.values.volume),
-      _weight: parseOrZero(formik.values.weight),
-      _density: parseOrZero(formik.values.density)
-    }
-
-    switch (dirtyField) {
-      case 1:
-        parameters._length = parseFloat(newValue) || 0
-        break
-      case 2:
-        parameters._width = parseFloat(newValue) || 0
-        break
-      case 3:
-        parameters._depth = parseFloat(newValue) || 0
-        break
-      case 4:
-        parameters._diameter = parseFloat(newValue) || 0
-        break
-      case 5:
-        parameters._volume = parseFloat(newValue) || 0
-        break
-      case 6:
-        parameters._weight = parseFloat(newValue) || 0
-        break
-      case 7:
-        parameters._density = parseFloat(newValue) || 0
-        break
-      default:
-        break
-    }
-
-    const calc = await getRequest({
-      extension: InventoryRepository.Physical.calc,
-      parameters: new URLSearchParams(parameters).toString()
-    })
-
-    formik.setValues(prevValues => ({
-      ...prevValues,
-      length: calc.record.length || prevValues.length,
-      width: calc.record.width || prevValues.width,
-      depth: calc.record.depth || prevValues.depth,
-      diameter: calc.record.diameter || prevValues.diameter,
-      volume: calc.record.volume || prevValues.volume,
-      weight: calc.record.weight || prevValues.weight,
-      density: calc.record.density || prevValues.density
-    }))
-  }, [])
-
   useEffect(() => {
     const fetchRecord = async () => {
       if (recordId) {
@@ -150,19 +93,34 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   }, [recordId])
 
   const handleFieldChange = (fieldName, dirtyField, event) => {
-    const newValue = event?.target?.value
-    if (Number(newValue) > 0) {
-      formik.setFieldValue(fieldName, newValue)
+    const newValue = Number(event?.target?.value || 0)
+    if (newValue >= 0) {
+      const updatedValues = { ...formik.values, [fieldName]: newValue }
 
-      if (formik.values[fieldName]?.toString() !== newValue?.toString()) {
-        fetchAndUpdateValues(dirtyField, newValue)
-      }
+      const keys = [
+        dirtyField,
+        formik.values.shape,
+        updatedValues.length,
+        updatedValues.width,
+        updatedValues.depth,
+        updatedValues.diameter,
+        updatedValues.volume,
+        updatedValues.weight,
+        updatedValues.density
+      ]
+
+      const ctrl = new PhysicalPropertyCalculatorCtrl()
+      const result = ctrl.get(keys)
+
+      formik.setValues(prevValues => ({
+        ...prevValues,
+        ...result
+      }))
     }
   }
 
-  const handleFieldClear = (fieldName, dirtyField) => {
+  const handleFieldClear = fieldName => {
     formik.setFieldValue(fieldName, 0)
-    fetchAndUpdateValues(dirtyField, 0)
   }
 
   return (
@@ -194,10 +152,10 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 formik.setFieldValue('shape', newValue?.key || '')
-                if (newValue?.key === 1) {
+                if (newValue?.key === GeometricShape.CUBIC) {
                   formik.setFieldValue('diameter', 0)
                 }
-                if (newValue?.key === 2) {
+                if (newValue?.key === GeometricShape.CYLINDER) {
                   formik.setFieldValue('width', 0)
                   formik.setFieldValue('depth', 0)
                 }
@@ -211,9 +169,9 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               label={labels.diameter}
               value={formik.values.diameter}
               maxAccess={maxAccess}
-              readOnly={formik.values.shape === 1}
-              onMouseLeave={e => handleFieldChange('diameter', 4, e)}
-              onClear={() => handleFieldClear('diameter', 4)}
+              readOnly={formik.values.shape === GeometricShape.CUBIC}
+              onBlur={e => handleFieldChange('diameter', DirtyField.DIAMETER, e)}
+              onClear={() => handleFieldClear('diameter')}
             />
           </Grid>
           <Grid item xs={12}>
@@ -222,19 +180,19 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               label={labels.length}
               value={formik.values.length}
               maxAccess={maxAccess}
-              onMouseLeave={e => handleFieldChange('length', 1, e)}
-              onClear={() => handleFieldClear('length', 1)}
+              onBlur={e => handleFieldChange('length', DirtyField.LENGTH, e)}
+              onClear={() => handleFieldClear('length')}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomNumberField
               name='width'
               label={labels.width}
-              readOnly={formik.values.shape === 2}
               value={formik.values.width}
               maxAccess={maxAccess}
-              onMouseLeave={e => handleFieldChange('width', 2, e)}
-              onClear={() => handleFieldClear('width', 2)}
+              readOnly={formik.values.shape === GeometricShape.CYLINDER}
+              onBlur={e => handleFieldChange('width', DirtyField.WIDTH, e)}
+              onClear={() => handleFieldClear('width')}
             />
           </Grid>
           <Grid item xs={12}>
@@ -242,10 +200,10 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               name='depth'
               label={labels.depth}
               value={formik.values.depth}
-              readOnly={formik.values.shape === 2}
               maxAccess={maxAccess}
-              onMouseLeave={e => handleFieldChange('depth', 3, e)}
-              onClear={() => handleFieldClear('depth', 3)}
+              readOnly={formik.values.shape === GeometricShape.CYLINDER}
+              onBlur={e => handleFieldChange('depth', DirtyField.DEPTH, e)}
+              onClear={() => handleFieldClear('depth')}
             />
           </Grid>
           <Grid item xs={12}>
@@ -254,8 +212,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               label={labels.volume}
               value={formik.values.volume}
               maxAccess={maxAccess}
-              onMouseLeave={e => handleFieldChange('volume', 5, e)}
-              onClear={() => handleFieldClear('volume', 5)}
+              onBlur={e => handleFieldChange('volume', DirtyField.VOLUME, e)}
+              onClear={() => handleFieldClear('volume')}
             />
           </Grid>
           <Grid item xs={12}>
@@ -265,8 +223,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               value={formik.values.weight}
               maxAccess={maxAccess}
               allowNegative={false}
-              onMouseLeave={e => handleFieldChange('weight', 6, e)}
-              onClear={() => handleFieldClear('weight', 6)}
+              onBlur={e => handleFieldChange('weight', DirtyField.WEIGHT, e)}
+              onClear={() => handleFieldClear('weight')}
             />
           </Grid>
           <Grid item xs={12}>
@@ -275,9 +233,9 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               label={labels.density}
               value={formik.values.density}
               maxAccess={maxAccess}
-              onMouseLeave={e => handleFieldChange('density', 7, e)}
-              onClear={() => handleFieldClear('density', 7)}
               decimalScale={3}
+              onBlur={e => handleFieldChange('density', DirtyField.DENSITY, e)}
+              onClear={() => handleFieldClear('density')}
             />
           </Grid>
           <Grid item xs={12}>

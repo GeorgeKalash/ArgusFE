@@ -81,33 +81,36 @@ export const ThreadProgress = ({ recordId, access, window }) => {
     return res.record
   }
 
-  const tasksCompleted = data.currentPhase === data.phases && data.completed === data.iterations;
+  const tasksCompleted = data.currentPhase === data.phases && data.completed === data.iterations
 
-  const hasLogError = !!data.logInfo;
+  const hasLogError = !!data.status && data.status < 0
 
+  //console.log(!!data.status)
+  //console.log(hasLogError)
   useEffect(() => {
     const fetchDataAndSet = async () => {
       const data = await fetchData()
       setData(data)
     }
-  
+
     fetchDataAndSet()
-  
+
     const interval = setInterval(async () => {
       const data = await fetchData()
       setData(data)
-  
-      if (data.status < 0 || data.status === null || tasksCompleted || hasLogError) {
+      const tasksCompleted = data.currentPhase === data.phases && data.completed === data.iterations
+
+      const hasLogError = !!data.status && data.status < 0
+      if ((!!data.status && data.status < 0) || tasksCompleted || hasLogError) {
         clearInterval(interval)
       }
     }, 2000)
-  
+
     return () => clearInterval(interval)
   }, [])
 
   const currentPhaseProgress = data.phases ? (data.currentPhase / data.phases) * 100 : 0
   const completedProgress = data.iterations ? (data.completed / data.iterations) * 100 : 0
-
 
   const actions = [
     {

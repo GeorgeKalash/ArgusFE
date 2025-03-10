@@ -362,5 +362,6 @@ export const ResourceIds = {
   JobWaxInquiry: 47313,
   PostDraftSerials: 51315,
   AvailabilitiesCrossTab: 41227,
-  Collections: 41119
+  Collections: 41119,
+  SalesQuotations: 51301
 }
