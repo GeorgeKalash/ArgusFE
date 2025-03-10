@@ -208,7 +208,8 @@ export const InventoryRepository = {
     page: service + 'pageSIZ'
   },
   AvailabilitySerial: {
-    qry: service + 'qryAVS'
+    qry: service + 'qryAVS',
+    page: service + 'pageAVS'
   },
   AvailabilityLot: {
     qry: service + 'qryLOA'
