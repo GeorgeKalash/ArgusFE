@@ -38,7 +38,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
   const { documentType, maxAccess } = useDocumentType({
     functionId: SystemFunction.RemittanceReceiptVoucher,
     access: access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   const invalidate = useInvalidate({
@@ -341,7 +342,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <CustomTextField
-                    name='reference'
+                    name='header.reference'
                     label={labels.reference}
                     value={formik?.values?.header?.reference}
                     readOnly={editMode}
@@ -354,7 +355,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                 </Grid>
                 <Grid item xs={6}>
                   <CustomDatePicker
-                    name='date'
+                    name='header.date'
                     label={labels.date}
                     readOnly={true}
                     value={formik?.values?.header?.date}
@@ -370,7 +371,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                   <ResourceLookup
                     endpointId={RemittanceOutwardsRepository.OutwardsOrder.snapshot}
                     valueField='reference'
-                    name='owoId'
+                    name='header.owoId'
                     label={labels.outwards}
                     form={formik}
                     secondDisplayField={false}
@@ -394,7 +395,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                 </Grid>
                 <Grid item xs={6}>
                   <CustomNumberField
-                    name='amount'
+                    name='header.amount'
                     label={labels.amount}
                     value={formik?.values?.header?.amount}
                     readOnly={true}
