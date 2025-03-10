@@ -44,11 +44,12 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   })
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: recordId || null,
       reference: '',
       name: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       plantId: '',
       date: new Date(),
       currencyId: parseInt(getDefaultsData()?.currencyId),
@@ -107,7 +108,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   })
   const editMode = !!formik.values.recordId || !!recordId
   const isPosted = formik.values.status === 3
-  
+
   const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
     endpointId: MultiCurrencyRepository.Currency.get,
     datasetId: ResourceIds.MultiCurrencyRate

@@ -47,6 +47,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
   })
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       reference: '',
@@ -66,7 +67,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       rateCalcMethod: 1,
       baseAmount: null,
       cashAccountId: null,
-      dtId: documentType?.dtId,
+      dtId: null,
       status: 1,
       releaseStatus: null,
       plantId: parseInt(plantId),

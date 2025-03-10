@@ -92,6 +92,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
   ]
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       reference: '',
@@ -104,7 +105,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       driverId: null,
       date: new Date(),
       notes: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       status: 1,
       statusName: '',
       printStatusName: '',
@@ -454,10 +455,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
 
     invalidate()
   }
-
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
 
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {

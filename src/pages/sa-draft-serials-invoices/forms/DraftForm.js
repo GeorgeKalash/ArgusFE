@@ -49,17 +49,12 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     enabled: !recordId
   })
 
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: recordId || '',
-      dtId: documentType?.dtId,
+      dtId: null,
       reference: '',
       date: new Date(),
       plantId: null,

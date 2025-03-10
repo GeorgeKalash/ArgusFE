@@ -54,6 +54,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
   }, [])
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       reference: form?.values?.reference,
       plantId: form?.values?.plantId,
@@ -63,7 +64,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
       clientRef: form?.values?.clientRef,
       clientName: form?.values?.clientName,
       date: new Date(),
-      dtId: documentType?.dtId,
+      dtId: null,
       currency: null,
       dtName: '',
       ptId: null,
@@ -106,10 +107,6 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
       }
     })()
   }, [])
-
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
 
   return (
     <FormShell

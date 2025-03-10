@@ -37,7 +37,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
 
   const initialValues = {
     recordId: recordId,
-    dtId: documentType?.dtId,
+    dtId: null,
     reference: '',
     plantId: '',
     siteId: '',
@@ -72,6 +72,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -234,10 +235,6 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   useEffect(() => {
     if (recordId) refetchForm(recordId)
   }, [])
-
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
 
   const actions = [
     {
