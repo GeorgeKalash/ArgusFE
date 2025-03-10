@@ -1276,7 +1276,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
-                name='dtId'
+                name='header.dtId'
                 readOnly={editMode}
                 label={labels.documentType}
                 columnsInDropDown={[
@@ -1306,7 +1306,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             </Grid>
             <Grid item xs={2.4}>
               <CustomDatePicker
-                name='date'
+                name='header.date'
                 required
                 label={labels.date}
                 readOnly={isPosted}
@@ -1321,7 +1321,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             <Grid item xs={2.4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
-                name='plantId'
+                name='header.plantId'
                 label={labels.plant}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -1342,7 +1342,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             <Grid item xs={2.4}>
               <ResourceComboBox
                 datasetId={DataSets.PAYMENT_METHOD}
-                name='paymentMethod'
+                name='header.paymentMethod'
                 readOnly={isPosted}
                 label={labels.paymentMethod}
                 valueField='key'
@@ -1357,7 +1357,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             </Grid>
             <Grid item xs={2.4}>
               <CustomTextField
-                name='vendorDocRef'
+                name='header.vendorDocRef'
                 label={labels.vendorDocRef}
                 value={formik?.values?.header?.vendorDocRef}
                 maxAccess={maxAccess}
@@ -1371,7 +1371,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
             <Grid item xs={2.4}>
               <CustomTextField
-                name='reference'
+                name='header.reference'
                 label={labels.reference}
                 value={formik?.values?.header?.reference}
                 maxAccess={!editMode && maxAccess}
@@ -1383,7 +1383,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             </Grid>
             <Grid item xs={2.4}>
               <CustomDatePicker
-                name='dueDate'
+                name='header.dueDate'
                 required
                 label={labels.dueDate}
                 readOnly={isPosted}
@@ -1398,7 +1398,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             <Grid item xs={2.4}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
-                name='siteId'
+                name='header.siteId'
                 label={labels.site}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -1429,7 +1429,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             <Grid item xs={2.4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
-                name='currencyId'
+                name='header.currencyId'
                 label={labels.currency}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -1452,7 +1452,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             <Grid item xs={4.8}>
               <ResourceLookup
                 endpointId={PurchaseRepository.Vendor.snapshot}
-                name='vendorId'
+                name='header.vendorId'
                 label={labels.vendor}
                 valueField='reference'
                 displayField='name'
@@ -1493,7 +1493,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             <Grid item xs={2.4}>
               <ResourceComboBox
                 endpointId={FinancialRepository.TaxSchedules.qry}
-                name='taxId'
+                name='header.taxId'
                 label={labels.tax}
                 valueField='recordId'
                 displayField={['name']}
@@ -1512,7 +1512,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
             <Grid item xs={2.4}>
               <CustomNumberField
-                name='KGmetalPrice'
+                name='header.KGmetalPrice'
                 label={labels.metalPrice}
                 value={formik.values.header.KGmetalPrice}
                 readOnly
@@ -1544,7 +1544,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           <Grid container spacing={2} sx={{ mt: '5px' }}>
             <Grid item xs={6}>
               <CustomTextArea
-                name='description'
+                name='header.description'
                 label={labels.description}
                 value={formik.values.header.description}
                 rows={3}
@@ -1559,14 +1559,14 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
               <Stack spacing={2}>
                 <CustomNumberField name='qty' maxAccess={maxAccess} label={labels.totQty} value={totalQty} readOnly />
                 <CustomNumberField
-                  name='volume'
+                  name='header.volume'
                   maxAccess={maxAccess}
                   label={labels.totVolume}
                   value={totalVolume}
                   readOnly
                 />
                 <CustomNumberField
-                  name='weight'
+                  name='header.weight'
                   maxAccess={maxAccess}
                   label={labels.totWeight}
                   value={totalWeight}
@@ -1577,14 +1577,14 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             <Grid item xs={3}>
               <Stack spacing={2}>
                 <CustomNumberField
-                  name='subTotal'
+                  name='header.subTotal'
                   maxAccess={maxAccess}
                   label={labels.subtotal}
                   value={subtotal}
                   readOnly
                 />
                 <CustomNumberField
-                  name='tdAmount'
+                  name='header.tdAmount'
                   maxAccess={maxAccess}
                   label={labels.discount}
                   value={formik.values.header.tdAmount}
@@ -1630,7 +1630,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                   }}
                 />
                 <CustomNumberField
-                  name='miscAmount'
+                  name='header.miscAmount'
                   maxAccess={maxAccess}
                   label={labels.misc}
                   value={formik.values.header.miscAmount}
@@ -1643,13 +1643,19 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                   onClear={() => formik.setFieldValue('header.miscAmount', 0)}
                 />
                 <CustomNumberField
-                  name='vatAmount'
+                  name='header.vatAmount'
                   maxAccess={maxAccess}
                   label={labels.VAT}
                   value={vatAmount}
                   readOnly
                 />
-                <CustomNumberField name='amount' maxAccess={maxAccess} label={labels.net} value={amount} readOnly />
+                <CustomNumberField
+                  name='header.amount'
+                  maxAccess={maxAccess}
+                  label={labels.net}
+                  value={amount}
+                  readOnly
+                />
               </Stack>
             </Grid>
           </Grid>

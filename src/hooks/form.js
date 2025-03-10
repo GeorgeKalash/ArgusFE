@@ -54,7 +54,8 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
         const { controlId, accessLevel } = obj
         if (accessLevel === MANDATORY)
           if (controlId?.indexOf('.') < 0) {
-            if (!values[controlId])
+            const keys = Object.keys(formik.initialValues)
+            if (!values[controlId] && keys?.indexOf(controlId) > -1)
               maxAccessErrors = {
                 ...maxAccessErrors,
                 [controlId]: `${controlId} is required.`

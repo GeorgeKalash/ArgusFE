@@ -1551,7 +1551,7 @@ export default function SaleTransactionForm({
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
-                    name='dtId'
+                    name='header.dtId'
                     readOnly={editMode}
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -1583,7 +1583,7 @@ export default function SaleTransactionForm({
                 <Grid item xs={3}>
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesPerson.qry}
-                    name='spId'
+                    name='header.spId'
                     readOnly={isPosted}
                     label={labels.salesPerson}
                     columnsInDropDown={[
@@ -1603,7 +1603,7 @@ export default function SaleTransactionForm({
                 </Grid>
                 <Grid item xs={3}>
                   <CustomNumberField
-                    name='creditLimit'
+                    name='header.creditLimit'
                     maxAccess={maxAccess}
                     label={labels.creditLimit}
                     value={formik.values.header.creditLimit}
@@ -1613,7 +1613,7 @@ export default function SaleTransactionForm({
                 <Grid item xs={3}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
-                    name='plantId'
+                    name='header.plantId'
                     label={labels.plant}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -1635,7 +1635,7 @@ export default function SaleTransactionForm({
               <Grid container spacing={2}>
                 <Grid item xs={3}>
                   <CustomTextField
-                    name='reference'
+                    name='header.reference'
                     label={labels.reference}
                     value={formik?.values?.header?.reference}
                     maxAccess={!editMode && maxAccess}
@@ -1647,7 +1647,7 @@ export default function SaleTransactionForm({
                 </Grid>
                 <Grid item xs={3}>
                   <CustomDatePicker
-                    name='date'
+                    name='header.date'
                     required
                     label={labels.date}
                     readOnly={isPosted}
@@ -1670,7 +1670,7 @@ export default function SaleTransactionForm({
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesZone.qry}
                     parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
-                    name='szId'
+                    name='header.szId'
                     label={labels.saleZone}
                     readOnly={isPosted}
                     columnsInDropDown={[{ key: 'name', value: 'Name' }]}
@@ -1688,7 +1688,7 @@ export default function SaleTransactionForm({
                 <Grid item xs={3}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
-                    name='siteId'
+                    name='header.siteId'
                     label={labels.site}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -1716,7 +1716,7 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={3}>
               <CustomTextArea
-                name='billAddress'
+                name='header.billAddress'
                 label={labels.billTo}
                 value={formik.values.header.billAddress}
                 rows={3}
@@ -1770,7 +1770,7 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={1}>
               <CustomCheckBox
-                name='isVattable'
+                name='header.isVattable'
                 value={formik.values?.header?.isVattable}
                 onChange={event => formik.setFieldValue('header.isVattable', event.target.checked)}
                 label={labels.VAT}
@@ -1781,7 +1781,7 @@ export default function SaleTransactionForm({
             <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={FinancialRepository.TaxSchedules.qry}
-                name='taxId'
+                name='header.taxId'
                 label={labels.tax}
                 valueField='recordId'
                 displayField={['name']}
@@ -1796,7 +1796,7 @@ export default function SaleTransactionForm({
                 <Grid item xs={8}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Currency.qry}
-                    name='currencyId'
+                    name='header.currencyId'
                     label={labels.currency}
                     valueField='recordId'
                     displayField={['reference', 'name']}
@@ -1836,7 +1836,7 @@ export default function SaleTransactionForm({
               <ResourceComboBox
                 endpointId={formik?.values?.header?.clientId && SaleRepository.Contact.qry}
                 parameters={`_clientId=${formik?.values?.header?.clientId}`}
-                name='contactId'
+                name='header.contactId'
                 label={labels.contact}
                 valueField='recordId'
                 readOnly={isPosted}
@@ -1856,7 +1856,7 @@ export default function SaleTransactionForm({
             <Grid item xs={2}>
               {metalPriceVisibility && (
                 <CustomNumberField
-                  name='KGmetalPrice'
+                  name='header.KGmetalPrice'
                   label={labels.metalPrice}
                   value={formik.values.header.KGmetalPrice}
                   maxAccess={maxAccess}
@@ -1888,7 +1888,7 @@ export default function SaleTransactionForm({
           <Grid container spacing={2} sx={{ pt: 2 }}>
             <Grid item xs={6}>
               <CustomTextArea
-                name='description'
+                name='header.description'
                 label={labels.description}
                 value={formik.values.header.description}
                 rows={3}
@@ -1902,11 +1902,17 @@ export default function SaleTransactionForm({
             <Grid item xs={3}>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
-                  <CustomNumberField name='qty' maxAccess={maxAccess} label={labels.totQty} value={totalQty} readOnly />
+                  <CustomNumberField
+                    name='header.qty'
+                    maxAccess={maxAccess}
+                    label={labels.totQty}
+                    value={totalQty}
+                    readOnly
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='volume'
+                    name='header.volume'
                     maxAccess={maxAccess}
                     label={labels.totVolume}
                     value={totalVolume}
@@ -1915,7 +1921,7 @@ export default function SaleTransactionForm({
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='weight'
+                    name='header.weight'
                     maxAccess={maxAccess}
                     label={labels.totWeight}
                     value={totalWeight}
@@ -1924,7 +1930,7 @@ export default function SaleTransactionForm({
                 </Grid>
                 <Grid item>
                   <CustomNumberField
-                    name='balance'
+                    name='header.balance'
                     maxAccess={maxAccess}
                     label={labels.balance}
                     value={formik.values.header.balance}
@@ -1937,7 +1943,7 @@ export default function SaleTransactionForm({
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='subTotal'
+                    name='header.subTotal'
                     maxAccess={maxAccess}
                     label={labels.subtotal}
                     value={subtotal}
@@ -1946,7 +1952,7 @@ export default function SaleTransactionForm({
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='discount'
+                    name='header.discount'
                     maxAccess={maxAccess}
                     label={labels.discount}
                     value={formik.values.header.currentDiscount}
@@ -1997,7 +2003,7 @@ export default function SaleTransactionForm({
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='miscAmount'
+                    name='header.miscAmount'
                     maxAccess={maxAccess}
                     label={labels.misc}
                     value={formik.values.header.miscAmount}
@@ -2023,7 +2029,7 @@ export default function SaleTransactionForm({
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='vatAmount'
+                    name='header.vatAmount'
                     maxAccess={maxAccess}
                     label={labels.VAT}
                     value={vatAmount}
@@ -2031,7 +2037,13 @@ export default function SaleTransactionForm({
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField name='amount' maxAccess={maxAccess} label={labels.net} value={amount} readOnly />
+                  <CustomNumberField
+                    name='header.amount'
+                    maxAccess={maxAccess}
+                    label={labels.net}
+                    value={amount}
+                    readOnly
+                  />
                 </Grid>
               </Grid>
             </Grid>
