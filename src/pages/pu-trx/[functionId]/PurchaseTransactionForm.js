@@ -83,7 +83,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       dgId: functionId,
       functionId: functionId,
       recordId: null,
-      dtId: documentType?.dtId,
+      dtId: null,
       reference: '',
       date: new Date(),
       dueDate: new Date(),
@@ -188,6 +188,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -1141,7 +1142,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   useEffect(() => {
     if (documentType?.dtId) {
       formik.setFieldValue('dtId', documentType.dtId)
-      formik.setFieldValue('header.dtId', documentType.dtId)
       onChangeDtId(documentType.dtId)
     }
   }, [documentType?.dtId])

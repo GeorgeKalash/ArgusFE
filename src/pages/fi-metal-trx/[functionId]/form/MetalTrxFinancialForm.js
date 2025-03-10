@@ -52,6 +52,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const siteId = !documentType?.dtId && parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       accountId: null,
       batchId: null,
@@ -60,7 +61,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       creditAmount: null,
       date: new Date(),
       description: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       functionId: functionId,
       isVerified: null,
       plantId,
@@ -269,10 +270,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       items: modifiedList?.length > 0 ? modifiedList : formik.values.items
     })
   }
-
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
 
   const columns = [
     {
