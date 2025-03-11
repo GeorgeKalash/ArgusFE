@@ -36,7 +36,7 @@ import { SystemChecks } from 'src/resources/SystemChecks'
 import { useError } from 'src/error'
 import CustomButton from 'src/components/Inputs/CustomButton'
 
-export default function DraftReturnForm({ labels, access, recordId }) {
+export default function DraftReturnForm({ labels, access, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -46,10 +46,6 @@ export default function DraftReturnForm({ labels, access, recordId }) {
     functionId: SystemFunction.DraftInvoiceReturn,
     access,
     enabled: !recordId
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: SaleRepository.DraftReturn.page
   })
 
   useEffect(() => {

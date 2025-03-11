@@ -10,14 +10,17 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import DraftReturnForm from './forms/DraftReturnForm'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
-import { SystemFunction } from 'src/resources/SystemFunction'
+import { IconButton } from '@mui/material'
+import Image from 'next/image'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import DraftReturnForm from '../sa-draft-serials-returns/forms/DraftReturnForm'
 
-const DraftSerialsReturns = () => {
+const PostDraftReturn = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+
   const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   const {
@@ -27,79 +30,23 @@ const DraftSerialsReturns = () => {
     clearFilter,
     labels,
     access,
-    paginationParameters,
-    invalidate
+    invalidate,
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.DraftReturn.page,
+    endpointId: SaleRepository.DraftReturn.page2,
     datasetId: ResourceIds.DraftSerialReturns,
+    DatasetIdAccess: ResourceIds.PostDraftReturns,
     filter: {
       filterFn: fetchWithFilter
     }
   })
 
-  const columns = [
-    {
-      field: 'reference',
-      headerName: labels.reference,
-      flex: 1
-    },
-    {
-      field: 'date',
-      headerName: labels.date,
-      flex: 1,
-      type: 'date'
-    },
-    {
-      field: 'clientRef',
-      headerName: labels.clientRef,
-      flex: 1
-    },
-    {
-      field: 'clientName',
-      headerName: labels.client,
-      flex: 1
-    },
-    {
-      field: 'amount',
-      headerName: labels.amount,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'pcs',
-      headerName: labels.pcs,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'weight',
-      headerName: labels.totalWeight,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'description',
-      headerName: labels.description,
-      flex: 2
-    },
-    {
-      field: 'statusName',
-      headerName: labels.status,
-      flex: 1
-    },
-    {
-      field: 'wipName',
-      headerName: labels.wip,
-      flex: 1
-    }
-  ]
-
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: SaleRepository.DraftReturn.page,
+      extension: SaleRepository.DraftReturn.page2,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
     })
 
@@ -110,25 +57,65 @@ const DraftSerialsReturns = () => {
     if (filters.qry)
       return await getRequest({
         extension: SaleRepository.DraftReturn.snapshot,
-        parameters: `_filter=${filters.qry}&_status=0`
+        parameters: `_filter=${filters.qry}&_status=1&_spId=0`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.DraftInvoiceReturn,
-    action: openForm
-  })
+  const columns = [
+    {
+      field: 'spRef',
+      headerName: labels.salesPerson,
+      flex: 1
+    },
+    {
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
+      field: 'clientName',
+      headerName: labels.client,
+      flex: 1
+    },
+    {
+      field: 'amount',
+      headerName: labels.net,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'weight',
+      headerName: labels.totalWeight,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'wipName',
+      headerName: labels.wip,
+      flex: 1
+    },
+    {
+      flex: 0.5,
+      headerName: labels.post,
+      cellRenderer: row => {
+        if (row.data.wip === 2)
+          return (
+            <IconButton size='small' onClick={() => confirmationPost(row.data)}>
+              <Image src={`/images/buttonsIcons/post-black.png`} width={18} height={18} alt='post.png' />
+            </IconButton>
+          )
+      }
+    }
+  ]
 
-  const add = async () => {
-    await proxyAction()
-  }
-
-  const edit = obj => {
-    openForm(obj.recordId)
-  }
-
-  async function openForm(recordId) {
+  async function edit({ recordId }) {
     stack({
       Component: DraftReturnForm,
       props: {
@@ -143,13 +130,31 @@ const DraftSerialsReturns = () => {
     })
   }
 
-  const del = async obj => {
-    await postRequest({
-      extension: SaleRepository.DraftReturn.del,
-      record: JSON.stringify(obj)
+  const confirmationPost = data => {
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: labels.postDialogText,
+        okButtonAction: () => onPost(data),
+        fullScreen: false,
+        close: true
+      },
+      width: 450,
+      height: 160,
+      title: platformLabels.Confirmation
     })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+  }
+
+  const onPost = async data => {
+    const res = await postRequest({
+      extension: SaleRepository.DraftReturn.post,
+      record: JSON.stringify(data)
+    })
+
+    if (res) {
+      toast.success(platformLabels.Posted)
+      invalidate()
+    }
   }
 
   const onSearch = value => {
@@ -175,23 +180,21 @@ const DraftSerialsReturns = () => {
     <VertLayout>
       <Fixed>
         <RPBGridToolbar
-          onAdd={add}
           maxAccess={access}
           onApply={onApply}
           onSearch={onSearch}
           onClear={onClear}
-          reportName={'SADRE'}
+          reportName={'SADRE2'}
         />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={edit}
           refetch={refetch}
-          onDelete={del}
-          deleteConfirmationType={'strict'}
+          onEdit={edit}
           isLoading={false}
           pageSize={50}
           maxAccess={access}
@@ -203,4 +206,4 @@ const DraftSerialsReturns = () => {
   )
 }
 
-export default DraftSerialsReturns
+export default PostDraftReturn
