@@ -107,12 +107,13 @@ const CustomDatePicker = ({
         format={dateFormat}
         onChange={newValue => {
           if (newValue) {
-            const now = new Date()
-            const updatedDate = new Date(newValue)
-            updatedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds())
-            onChange(name, updatedDate)
+            const localDate = new Date(newValue)
+            const utcDate = new Date(Date.UTC(localDate.getFullYear(), localDate.getMonth(), localDate.getDate()))
+            console.log(localDate, 'localDate')
+            console.log(utcDate, 'utcDate')
+            onChange(name, utcDate)
           } else {
-            onChange(name, newValue)
+            onChange(name, null)
           }
         }}
         onClose={() => setOpenDatePicker(false)}

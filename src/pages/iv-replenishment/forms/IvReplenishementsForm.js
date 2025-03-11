@@ -16,6 +16,8 @@ import { formatDateFromApi } from 'src/lib/date-helper'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 
 const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -25,6 +27,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
   const invalidate = useInvalidate({
     endpointId: IVReplenishementRepository.IvReplenishements.page
   })
+  dayjs.extend(utc)
 
   const { formik } = useForm({
     maxAccess,
@@ -33,7 +36,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
       siteId: '',
       dateFrom: null,
       dateTo: null,
-      date: new Date(),
+      date: dayjs().utc().startOf('day').toDate(),
       notes: ''
     },
     enableReinitialize: false,
@@ -45,21 +48,16 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
         .required()
         .test(function (value) {
           const { dateTo } = this.parent
-          const dateFromNoTime = new Date(value).setHours(0, 0, 0, 0)
-          const dateToNoTime = new Date(dateTo).setHours(0, 0, 0, 0)
 
-          return dateFromNoTime <= dateToNoTime
+          return value.getTime() <= dateTo?.getTime()
         }),
       dateTo: yup
         .date()
         .required()
         .test(function (value) {
           const { date, dateFrom } = this.parent
-          const dateToNoTime = new Date(value).setHours(0, 0, 0, 0)
-          const dateFromNoTime = dateFrom ? new Date(dateFrom).setHours(0, 0, 0, 0) : null
-          const dateNoTime = date ? new Date(date).setHours(0, 0, 0, 0) : null
 
-          return dateToNoTime >= dateFromNoTime && dateToNoTime <= dateNoTime
+          return value.getTime() <= date?.getTime() && value.getTime() >= dateFrom?.getTime()
         }),
       date: yup
         .date()
@@ -67,10 +65,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
         .test(function (value) {
           const { dateTo } = this.parent
 
-          const dateNoTime = new Date(value).setHours(0, 0, 0, 0)
-          const dateToNoTime = new Date(dateTo).setHours(0, 0, 0, 0)
-
-          return dateNoTime >= dateToNoTime
+          return value.getTime() >= dateTo?.getTime()
         })
     }),
     onSubmit: async obj => {
@@ -92,7 +87,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
     }
   })
   const editMode = !!recordId
-  console.log(formik, 'formik')
+
   async function getDefaultSiteId() {
     if (editMode) {
       return
