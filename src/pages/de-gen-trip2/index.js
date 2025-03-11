@@ -22,6 +22,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import UnallocatedOrdersForm from './Forms/UnallocatedOrders'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateToApi } from 'src/lib/date-helper'
+import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 
 const GenerateOutboundTransportation2 = () => {
   const [selectedSaleZones, setSelectedSaleZones] = useState([])
@@ -45,14 +46,15 @@ const GenerateOutboundTransportation2 = () => {
       balance: 0,
       totalAmount: 0,
       totalVolume: 0,
-      totalOrdersVolume: 0,
+      zonesVolume: 0,
       truckNo: 0,
       selectedTrucks: [],
       vehicleAllocations: { list: [] },
       vehicleOrders: { list: [] },
       data: { list: [] },
       salesZones: { list: [] },
-      orders: { list: [] }
+      orders: { list: [] },
+      unallocatedOrders: { list: [] }
     },
     maxAccess: access,
     enableReinitialize: true,
@@ -141,11 +143,11 @@ const GenerateOutboundTransportation2 = () => {
     if (reCalc) {
       const totalAmountValue = totalAmountFromChecked()
       const totalVolumeValue = totalVolumeFromChecked()
-      const totalOrdersVolume = totalVolume()
+      const zonesVolume = totalVolume()
 
       formik.setFieldValue('totalAmount', totalAmountValue)
       formik.setFieldValue('totalVolume', totalVolumeValue)
-      formik.setFieldValue('totalOrdersVolume', totalOrdersVolume)
+      formik.setFieldValue('zonesVolume', zonesVolume)
       setReCalc(false)
     }
   }, [reCalc])
@@ -153,12 +155,12 @@ const GenerateOutboundTransportation2 = () => {
   const totalTrucksVolume =
     formik?.values?.selectedTrucks?.reduce((sum, order) => sum + parseInt(order.volume || 0), 0) || 0
 
-  const totalOrderVolume =
+  const zonesVolume =
     formik?.values?.orders?.list?.filter(order => order.checked).reduce((sum, order) => sum + (order.volume || 0), 0) ||
     0
 
   useEffect(() => {
-    formik.setFieldValue('totalOrdersVolume', totalOrderVolume)
+    formik.setFieldValue('zonesVolume', zonesVolume)
   }, [formik?.values?.orders?.list])
 
   const columnsZones = [
@@ -205,11 +207,34 @@ const GenerateOutboundTransportation2 = () => {
       }
     },
     {
-      component: 'numberfield',
+      component: 'resourcecombobox',
+      label: labels.volume,
       name: 'volume',
-      label: labels.allocatedVolume,
-      flex: 2
-    }
+      flex: 2,
+      props: {
+        endpointId: DeliveryRepository.AllocatedVolume.qry,
+        valueField: 'volume',
+        displayField: 'volume',
+        displayFieldWidth: 1,
+        mapping: [
+          { from: 'volume', to: 'volume' },
+          { from: 'count', to: 'count' }
+        ],
+        columnsInDropDown: [
+          { key: 'volume', value: 'volume' },
+          { key: 'count', value: 'count' }
+        ]
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'count',
+      label: labels.truck,
+      flex: 1,
+      props: {
+        readOnly: true
+      }
+    },
   ]
 
   const columnsVehicleAllocations = [
@@ -428,12 +453,6 @@ const GenerateOutboundTransportation2 = () => {
     setSortedZones(selectedSaleZones.list || [])
   }, [selectedSaleZones])
 
-  const totalOrdersVolume = useMemo(() => {
-    return (selectedSaleZones.list || []).reduce((sum, zone) => sum + (zone.volume || 0), 0)
-  }, [selectedSaleZones])
-
-  const balance = totalTrucksVolume - totalOrdersVolume
-
   const handleTruckNoChange = truckNo => {
     if (!truckNo || truckNo <= 0) {
       formik.setFieldValue('selectedTrucks', [])
@@ -450,6 +469,18 @@ const GenerateOutboundTransportation2 = () => {
     formik.setFieldValue('selectedTrucks', trucks)
   }
 
+  const ordersVolume = useMemo(() => {
+    return (selectedSaleZones.list || []).reduce((sum, zone) => {
+      const ordersSum = (zone.orders || [])
+        .filter(order => order.checked)
+        .reduce((orderSum, order) => orderSum + (order.volume || 0), 0)
+
+      return sum + ordersSum
+    }, 0)
+  }, [JSON.stringify(selectedSaleZones.list)])
+
+  const balance = totalTrucksVolume - ordersVolume
+
   return (
     <FormShell
       resourceId={ResourceIds.GenerateTrip}
@@ -461,8 +492,8 @@ const GenerateOutboundTransportation2 = () => {
     >
       <VertLayout>
         <Fixed>
-          <Grid container>
-            <Grid item xs={2}>
+          <Grid container spacing={2}>
+            <Grid item xs={1.5}>
               <ResourceComboBox
                 endpointId={DeliveryRepository.GenerateTrip.root}
                 parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
@@ -486,16 +517,7 @@ const GenerateOutboundTransportation2 = () => {
               />
             </Grid>
 
-            <Grid item xs={0.25}></Grid>
-            <Grid item xs={0.75}>
-              <CustomButton
-                onClick={() => resetForm()}
-                label={platformLabels.Clear}
-                image={'clear.png'}
-                color='#f44336'
-              />
-            </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={1.5}>
               <CustomTextField
                 name='search'
                 value={formik.values.search}
@@ -509,11 +531,8 @@ const GenerateOutboundTransportation2 = () => {
                 search={true}
               />
             </Grid>
-            <Grid item xs={0.25}></Grid>
-            <Grid item xs={0.75}>
-              <CustomButton onClick={handleImport} label={platformLabels.Import} color='#231f20' image={'import.png'} />
-            </Grid>
-            <Grid item xs={2}>
+
+            <Grid item xs={1.5}>
               <CustomNumberField
                 name='truckNo'
                 label={labels.truckNo}
@@ -530,9 +549,8 @@ const GenerateOutboundTransportation2 = () => {
                 }}
               />
             </Grid>
-            <Grid item xs={0.25}></Grid>
-            <Grid item xs={2}>
-              <CustomDatePicker
+            <Grid item xs={1.5}>
+              <CustomDateTimePicker
                 name='departureDate'
                 label={labels.departureDate}
                 value={formik.values.departureDate}
@@ -543,17 +561,35 @@ const GenerateOutboundTransportation2 = () => {
                 error={formik.touched.departureDate && Boolean(formik.errors.departureDate)}
               />
             </Grid>
-            <Grid item xs={0.15}></Grid>
-            <Grid item xs={0.75}>
-              <CustomButton
-                onClick={openForm}
-                label={labels.unallocatedOrders}
-                image={'cancelWhite.png'}
-                color='#f44336'
+            <Grid item xs={1.5}>
+              <CustomNumberField
+                name='totalTrucksVolume'
+                label={labels.trucksVolume}
+                value={totalTrucksVolume}
+                readOnly
+                align='right'
               />
             </Grid>
-            <Grid item xs={0.75}>
-              <CustomButton onClick={() => formik.handleSubmit()} label={platformLabels.Generate} color='#231f20' />
+            <Grid item xs={1.5}>
+              <CustomNumberField
+                name='ordersVolume'
+                label={labels.ordersVolume}
+                value={ordersVolume}
+                readOnly
+                align='right'
+              />
+            </Grid>
+            <Grid item xs={1.5}>
+              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
+            </Grid>
+            <Grid item xs={1.5}>
+              <CustomNumberField
+                name='zonesVolume'
+                label={labels.zonesVolume}
+                value={formik.values.zonesVolume}
+                readOnly
+                align='right'
+              />
             </Grid>
           </Grid>
         </Fixed>
@@ -585,18 +621,6 @@ const GenerateOutboundTransportation2 = () => {
                     showSelectAll={false}
                     handleCheckboxChange={onOrderChecked}
                   />
-                  <Grid container>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
-                      <CustomNumberField
-                        name='ordersVolume'
-                        label={labels.totalVolume}
-                        value={formik.values.totalOrdersVolume}
-                        readOnly
-                        align='right'
-                      />
-                    </Grid>
-                  </Grid>
                 </Grid>
                 <Grid item xs={3} sx={{ display: 'flex' }}>
                   <Table
@@ -660,7 +684,30 @@ const GenerateOutboundTransportation2 = () => {
         </Grow>
         <Fixed>
           <Grid container spacing={2} mt={2}>
-            <Grid item xs={2}>
+            <Grid item xs={8.75}></Grid>
+            <Grid item xs={0.65}>
+              <CustomButton
+                onClick={() => resetForm()}
+                label={platformLabels.Clear}
+                image={'clear.png'}
+                color='#f44336'
+              />
+            </Grid>
+            <Grid item xs={0.65}>
+              <CustomButton
+                onClick={openForm}
+                tooltipText={labels.unallocatedOrders}
+                label={labels.unallocatedOrders}
+                image={'cancelWhite.png'}
+                disabled={formik.values.unallocatedOrders?.list?.length == 0}
+                color='#f44336'
+              />
+            </Grid>
+
+            <Grid item xs={0.65}>
+              <CustomButton onClick={handleImport} label={platformLabels.Import} color='#231f20' image={'import.png'} />
+            </Grid>
+            <Grid item xs={0.65}>
               <CustomButton
                 onClick={() => onPreviewOutbounds(sortedZoneIds)}
                 disabled={
@@ -668,31 +715,18 @@ const GenerateOutboundTransportation2 = () => {
                   formik.values.selectedTrucks.some(truck => !truck.volume) ||
                   formik.values.orders.length === 0
                 }
-                label={platformLabels.Preview}
+                image={'preview.png'}
                 color='#231f20'
               />
             </Grid>
-            <Grid item xs={4}></Grid>
-            <Grid item xs={2}>
-              <CustomNumberField
-                name='totalTrucksVolume'
-                label={labels.totalTrucksVolume}
-                value={totalTrucksVolume}
-                readOnly
-                align='right'
+            <Grid item xs={0.65}>
+              <CustomButton
+                onClick={() => formik.handleSubmit()}
+                label={platformLabels.Generate}
+                color='#231f20'
+                image={'generate.png'}
+                disabled={balance < 0}
               />
-            </Grid>
-            <Grid item xs={2}>
-              <CustomNumberField
-                name='totalOrdersVolume'
-                label={labels.totalOrdersVolume}
-                value={totalOrdersVolume}
-                readOnly
-                align='right'
-              />
-            </Grid>
-            <Grid item xs={2}>
-              <CustomNumberField name='balance' label={labels.balance} value={balance} readOnly align='right' />
             </Grid>
           </Grid>
         </Fixed>

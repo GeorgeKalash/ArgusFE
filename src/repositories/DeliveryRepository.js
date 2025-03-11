@@ -82,5 +82,8 @@ export const DeliveryRepository = {
   },
   Volume: {
     vol: service + 'volZO'
+  },
+  AllocatedVolume: {
+    qry: service + 'qryVEH2'
   }
 }
