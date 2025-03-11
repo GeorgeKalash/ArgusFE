@@ -464,7 +464,7 @@ export function DataGrid({
       const oldRow = params.data
 
       const changes = {
-        [field]: value || undefined
+        [field]: value ?? column.colDef?.defaultValue ?? ''
       }
 
       setCurrentValue(changes)
@@ -694,6 +694,7 @@ export function DataGrid({
     if (lastCellStopped.current == cellId) return
     lastCellStopped.current = cellId
     const { data, colDef } = params
+
     if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
         stackDuplicate(params)
