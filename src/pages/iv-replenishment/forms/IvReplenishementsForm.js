@@ -12,12 +12,10 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToISO } from 'src/lib/date-helper'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
 
 const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -27,7 +25,6 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
   const invalidate = useInvalidate({
     endpointId: IVReplenishementRepository.IvReplenishements.page
   })
-  dayjs.extend(utc)
 
   const { formik } = useForm({
     maxAccess,
@@ -36,7 +33,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
       siteId: '',
       dateFrom: null,
       dateTo: null,
-      date: dayjs().utc().startOf('day').toDate(),
+      date: new Date(),
       notes: ''
     },
     enableReinitialize: false,
@@ -69,9 +66,15 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
         })
     }),
     onSubmit: async obj => {
+      const data = {
+        ...obj,
+        dateTo: formatDateToISO(new Date(obj.dateTo)),
+        dateFrom: formatDateToISO(new Date(obj.dateFrom))
+      }
+
       const response = await postRequest({
         extension: IVReplenishementRepository.IvReplenishements.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify(data)
       })
 
       if (!obj.recordId) {
@@ -87,6 +90,8 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
     }
   })
   const editMode = !!recordId
+
+  console.log(formik.values.dateFrom, 'from')
 
   async function getDefaultSiteId() {
     if (editMode) {

@@ -105,15 +105,7 @@ const CustomDatePicker = ({
         }}
         autoFocus={autoFocus}
         format={dateFormat}
-        onChange={newValue => {
-          if (newValue) {
-            const localDate = new Date(newValue)
-            const utcDate = new Date(Date.UTC(localDate.getFullYear(), localDate.getMonth(), localDate.getDate()))
-            onChange(name, utcDate)
-          } else {
-            onChange(name, null)
-          }
-        }}
+        onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}
         disabled={disabled}
