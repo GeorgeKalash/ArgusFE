@@ -10,7 +10,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
-import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemFunction } from 'src/resources/SystemFunction'
@@ -21,7 +21,6 @@ import { ProductModelingRepository } from 'src/repositories/ProductModelingRepos
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 export default function ModellingForm({ labels, access, setStore, store }) {
@@ -47,7 +46,6 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       reference: null,
       date: new Date(),
       threeDPId: null,
-      castingId: null,
       laborId: null,
       startDate: null,
       endDate: null,
@@ -227,26 +225,26 @@ export default function ModellingForm({ labels, access, setStore, store }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomDatePicker
+              <CustomDateTimePicker
                 name='startDate'
                 label={labels.startDate}
                 value={formik.values.startDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
                 readOnly={isClosed}
-                onClear={() => formik.setFieldValue('startDate', '')}
+                onClear={() => formik.setFieldValue('startDate', null)}
                 error={formik.touched.startDate && Boolean(formik.errors.startDate)}
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomDatePicker
+              <CustomDateTimePicker
                 name='endDate'
                 label={labels.endDate}
                 value={formik.values.endDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
                 readOnly={isClosed}
-                onClear={() => formik.setFieldValue('endDate', '')}
+                onClear={() => formik.setFieldValue('endDate', null)}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
               />
             </Grid>
@@ -297,22 +295,6 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                   formik.setFieldValue('threeDPId', newValue?.recordId)
                 }}
                 errorCheck={'threeDPId'}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={ProductModelingRepository.Casting.qry}
-                name='castingId'
-                label={labels.casting}
-                values={formik.values}
-                valueField='recordId'
-                displayField='reference'
-                maxAccess={maxAccess}
-                readOnly={isClosed}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('castingId', newValue?.recordId)
-                }}
-                error={formik.touched.castingId && Boolean(formik.errors.castingId)}
               />
             </Grid>
             <Grid item xs={12}>

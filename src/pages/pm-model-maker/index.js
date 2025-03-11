@@ -61,11 +61,6 @@ const ModelMaker = () => {
       flex: 1
     },
     {
-      field: 'castingRef',
-      headerName: labels.casting,
-      flex: 1
-    },
-    {
       field: 'weight',
       headerName: labels.weight,
       flex: 1,
