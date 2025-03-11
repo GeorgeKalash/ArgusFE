@@ -91,8 +91,6 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
   })
   const editMode = !!recordId
 
-  console.log(formik.values.dateFrom, 'from')
-
   async function getDefaultSiteId() {
     if (editMode) {
       return

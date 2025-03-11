@@ -139,8 +139,6 @@ const formatDate = dateString => {
 
 //Used for cases that we use Json.Stringify with no initial value in fields
 const formatDateToISO = date => {
-  console.log(date)
-
   // Adjust date to keep the local time
   const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
 
