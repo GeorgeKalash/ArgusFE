@@ -109,8 +109,6 @@ const CustomDatePicker = ({
           if (newValue) {
             const localDate = new Date(newValue)
             const utcDate = new Date(Date.UTC(localDate.getFullYear(), localDate.getMonth(), localDate.getDate()))
-            console.log(localDate, 'localDate')
-            console.log(utcDate, 'utcDate')
             onChange(name, utcDate)
           } else {
             onChange(name, null)
