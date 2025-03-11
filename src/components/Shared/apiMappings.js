@@ -577,6 +577,13 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  [ResourceIds.Modeling]: {
+    type: COMBOBOX,
+    endpoint: ProductModelingRepository.Modeling.qry,
+    parameters: '_startAt=0&_pageSize=1000&_params=',
+    valueField: 'recordId',
+    displayField: 'reference'
+  },
   [ResourceIds.MFJobOrders]: {
     type: LOOKUP,
     endpoint: ManufacturingRepository.MFJobOrder.snapshot,
@@ -910,7 +917,7 @@ export const apiMappings = {
     endpoint: ProductModelingRepository.Printing.qry,
     parameters: `_params=&_startAt=0&_pageSize=1000`,
     valueField: 'recordId',
-    displayField: 'reference',
+    displayField: 'reference'
   },
   [ResourceIds.Designer]: {
     type: COMBOBOX,
@@ -921,6 +928,19 @@ export const apiMappings = {
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Sketch]: {
+    type: LOOKUP,
+    endpoint: ProductModelingRepository.Sketch.snapshot,
+    secondDisplayField: false,
+    firstField: ['reference', 'sourceName', 'designerRef'],
+    valueOnSelection: 'recordId',
+    displayFieldWidth: 1,
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'sourceName', value: 'Source' },
+      { key: 'designerRef', value: 'designer' }
     ]
   },
   [ResourceIds.Metals]: {
@@ -958,6 +978,20 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
+  },
+  [ResourceIds.ThreeDPrint]: {
+    type: COMBOBOX,
+    endpoint: ProductModelingRepository.Printing.qry,
+    parameters: `_params=`,
+    valueField: 'recordId',
+    displayField: 'reference'
+  },
+  [ResourceIds.ThreeDDesign]: {
+    type: LOOKUP,
+    endpoint: ProductModelingRepository.ThreeDDrawing.snapshot,
+    valueOnSelection: 'recordId',
+    firstField: 'reference',
+    secondDisplayField: false
   },
   [ResourceIds.Routings]: {
     type: COMBOBOX,

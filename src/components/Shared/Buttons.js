@@ -513,6 +513,14 @@ export const getButtons = platformLabels => [
     image: 'popup-window.png'
   },
   {
+    key: 'Sketch',
+    label: platformLabels.Sketch,
+    color: '#048693',
+    image: 'sketch.png',
+    main: false
+  },
+  { key: 'Copy', label: platformLabels.Copy, color: '#CD5C5C', image: 'copy.png', main: false },
+  {
     key: 'GenerateJob',
     label: platformLabels.Generate,
     color: '#D3D3D3',
@@ -524,6 +532,20 @@ export const getButtons = platformLabels => [
     label: platformLabels.GenerateSerials,
     color: '#D3D3D3',
     image: 'generate2.png',
+    main: false
+  },
+  {
+    key: 'threeDPrinting',
+    label: platformLabels.threeDPrinting,
+    color: '#067851',
+    image: '3d-printer.png',
+    main: false
+  },
+  {
+    key: 'threeDDesign',
+    label: platformLabels.threeDDesign,
+    color: '#1f78b4',
+    image: '3d-printer.png',
     main: false
   }
 ]

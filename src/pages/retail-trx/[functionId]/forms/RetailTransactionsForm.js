@@ -1068,6 +1068,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     })()
   }, [])
 
+  console.log(formik)
+
   return (
     <FormShell
       resourceId={getResourceId[parseInt(functionId)]}
@@ -1160,7 +1162,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.spId', newValue?.spId)
                     }}
-                    error={formik.errors.spId && Boolean(formik.errors?.header?.spId)}
+                    error={formik.touched?.header?.spId && Boolean(formik.errors?.header?.spId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
