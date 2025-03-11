@@ -20,7 +20,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import UnallocatedOrdersForm from './Forms/UnallocatedOrders'
-import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateToApi } from 'src/lib/date-helper'
 import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 
