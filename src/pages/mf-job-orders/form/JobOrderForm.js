@@ -401,7 +401,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     formik.setFieldValue('designPL', values?.lineId)
     formik.setFieldValue('classId', values?.classId)
     formik.setFieldValue('standardId', values?.standardId)
-    formik.setFieldValue('itemCategoryId', values?.categoryId)
+    formik.setFieldValue('itemCategoryId', values?.itemCategoryId)
   }
   async function fillBillingInfo(values) {
     if (!values?.recordId) return
