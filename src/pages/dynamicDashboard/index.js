@@ -153,8 +153,8 @@ const DashboardLayout = () => {
     return applets.some(applet => applet.appletId === appletId)
   }
 
-  const todayHoSales = data?.summaryFigures?.find(f => f.itemId === 12)?.amount ?? 0
   const todayRetailSales = data?.summaryFigures?.find(f => f.itemId === 13)?.amount ?? 0
+  const todayHoSales = data?.summaryFigures?.find(f => f.itemId === 14)?.amount ?? 0
   const todaysSales = todayHoSales + todayRetailSales
 
   const globalHoSales = data?.summaryFigures?.find(f => f.itemId === 16)?.amount ?? 0
@@ -221,41 +221,41 @@ const DashboardLayout = () => {
                   <SummaryItem>
                     <RedCenter>{labels.todaysSale}</RedCenter>
                     <InnerGrid>
-                      <Label>{labels.hoSales}:</Label>
-                      <Value>{todayHoSales.toLocaleString()}</Value>
+                      <Label>{labels.hoSalesOrders}:</Label>
+                      <Value>{todayHoSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
                       <Label>{labels.retailSales}:</Label>
-                      <Value>{todayRetailSales.toLocaleString()}</Value>
+                      <Value>{todayRetailSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
                       <Label>{labels.total}:</Label>
-                      <Value>{todaysSales.toLocaleString()}</Value>
+                      <Value>{todaysSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
                     </InnerGrid>
                   </SummaryItem>
                   <SummaryItem>
                     <RedCenter>{labels.globalSales}</RedCenter>
                     <InnerGrid>
                       <Label>{labels.hoSales}:</Label>
-                      <Value>{globalHoSales.toLocaleString()}</Value>
+                      <Value>{globalHoSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
                       <Label>{labels.retailSales}:</Label>
-                      <Value>{globalRetailSales.toLocaleString()}</Value>
+                      <Value>{globalRetailSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
                       <Label>{labels.total}:</Label>
-                      <Value>{globalSales.toLocaleString()}</Value>
+                      <Value>{globalSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
                     </InnerGrid>
                   </SummaryItem>
                   <SummaryItem>
                     <RedCenter>{labels.miscData}</RedCenter>
                     <InnerGrid>
                       <Label>{labels.openSo}:</Label>
-                      <Value>{openSo.toLocaleString()}</Value>
+                      <Value>{openSo.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
                       <Label>{labels.returnSales}:</Label>
-                      <Value>{returnSales.toLocaleString()}</Value>
+                      <Value>{returnSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
                     </InnerGrid>
                   </SummaryItem>
                   <SummaryItem>
                     <RedCenter>{labels.generalRevenue}</RedCenter>
                     <InnerGrid>
                       <Label>{labels.revenues}:</Label>
-                      <Value>{revenues.toLocaleString()}</Value>
+                      <Value>{revenues.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
                       <Label>{labels.profit}:</Label>
-                      <Value>{profit.toLocaleString()}</Value>
+                      <Value>{profit.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
                     </InnerGrid>
                   </SummaryItem>
                 </>
