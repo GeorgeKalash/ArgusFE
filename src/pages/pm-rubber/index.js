@@ -13,7 +13,7 @@ import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 import RubberForm from './Forms/RubberForm'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
-import SystemFunction from '../system-functions'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const Rubber = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -75,11 +75,6 @@ const Rubber = () => {
     {
       field: 'modelRef',
       headerName: labels.modelRef,
-      flex: 1
-    },
-    {
-      field: 'sku',
-      headerName: labels.sku,
       flex: 1
     },
     {
