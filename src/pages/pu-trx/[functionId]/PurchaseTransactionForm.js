@@ -317,7 +317,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Item Name' }
         ],
-        displayFieldWidth: 5
+        displayFieldWidth: 5,
+        minChars: 2
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.itemId) {
