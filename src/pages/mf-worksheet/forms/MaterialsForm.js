@@ -27,7 +27,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 export default function MaterialsForm({ labels, access, recordId, wsId, values }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
-  const functionId = SystemFunction.Worksheet
+  const functionId = SystemFunction.IssueOfMaterial
   const resourceId = ResourceIds.Worksheet
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -360,7 +360,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                   valueField: 'recordId',
                   displayField: 'sku',
                   mandatory: true,
-                  displayFieldWidth: 2,
+                  displayFieldWidth: 3,
                   mapping: [
                     { from: 'recordId', to: 'itemId' },
                     { from: 'sku', to: 'sku' },
@@ -396,8 +396,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                 label: labels.lot,
                 name: 'lotCategoryId',
                 props: {
-                  maxLength: 6,
-                  decimalScale: 2
+                  readOnly: true
                 }
               },
               {
@@ -405,8 +404,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                 label: labels.expectedQty,
                 name: 'designQty',
                 props: {
-                  maxLength: 6,
-                  decimalScale: 5
+                  readOnly: true
                 }
               },
               {

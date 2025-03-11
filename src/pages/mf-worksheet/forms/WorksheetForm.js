@@ -79,7 +79,9 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       wgtBefore: null,
       wgtAfter: null,
       eopQty: 0,
-      damagedPcs: null
+      damagedPcs: null,
+      category: '',
+      pgItemName: ''
     },
     maxAccess: access,
     enableReinitialize: false,
@@ -383,7 +385,8 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                         jobName: newValue?.name || '',
                         routingId: newValue?.routingId || null,
                         designRef: newValue?.designRef || '',
-                        itemName: newValue?.itemName || '',
+                        pgItemName: newValue?.itemName || '',
+                        category: newValue?.categoryName || '',
                         joQty: newValue?.qty || 0,
                         joPcs: newValue?.pcs || 0,
                         wipQty: newValue?.qty || 0,
@@ -476,9 +479,18 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='itemName'
+                    name='pgItemName'
                     label={labels.pgItem}
-                    value={formik.values.itemName}
+                    value={formik.values.pgItemName}
+                    readOnly
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='category'
+                    label={labels.category}
+                    value={formik.values.category}
                     readOnly
                     maxAccess={access}
                   />
@@ -574,17 +586,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField
-                    name='eopQty'
-                    readOnly={isPosted || editMode}
-                    required
-                    label={labels.eopQty}
-                    value={formik?.values?.eopQty}
-                    maxAccess={access}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('eopQty', '')}
-                    error={formik.touched.eopQty && Boolean(formik.errors.eopQty)}
-                  />
+                  <CustomNumberField name='eopQty' readOnly label={labels.eopQty} maxAccess={access} />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
@@ -602,7 +604,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     label={labels.startTime}
                     value={formik.values?.startTime}
                     maxAccess={access}
-                    error={formik.errors?.startTime && Boolean(formik.errors?.startTime)}
                   />
                 </Grid>
                 <Grid item xs={12}>
