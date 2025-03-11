@@ -228,7 +228,7 @@ const GenerateOutboundTransportation2 = () => {
     {
       component: 'numberfield',
       name: 'count',
-      label: labels.truck,
+      label: labels.trucksCount,
       flex: 1,
       props: {
         readOnly: true
