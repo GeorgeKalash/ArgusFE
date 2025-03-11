@@ -156,7 +156,7 @@ const CustomNumberField = ({
         },
         '& .MuiInputLabel-root': {
           fontSize: '0.90rem',
-          top: isFocused || value ? '0px' : '-3px'
+          top: '0px'
         },
         '& .MuiInputBase-input': {
           fontSize: '0.90rem',
