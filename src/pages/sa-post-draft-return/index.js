@@ -47,7 +47,7 @@ const PostDraftReturn = () => {
 
     const response = await getRequest({
       extension: SaleRepository.DraftReturn.page2,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -140,7 +140,7 @@ const PostDraftReturn = () => {
         close: true
       },
       width: 450,
-      height: 150,
+      height: 160,
       title: platformLabels.Confirmation
     })
   }
