@@ -5,7 +5,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
@@ -24,20 +24,21 @@ import { ProductModelingRepository } from 'src/repositories/ProductModelingRepos
 import { DataSets } from 'src/resources/DataSets'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
-export default function SketchForm({ labels, maxAccess: access, recordId }) {
+export default function SketchForm({ recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
   const systemFunction = SystemFunction.Sketch
 
+  const { labels, access, invalidate } = useResourceQuery({
+    endpointId: ProductModelingRepository.Sketch.page,
+    datasetId: ResourceIds.Sketch
+  })
+
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: systemFunction,
     access,
     enabled: !recordId
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: ProductModelingRepository.Sketch.page
   })
 
   const { formik } = useForm({
@@ -175,7 +176,6 @@ export default function SketchForm({ labels, maxAccess: access, recordId }) {
     }
   }, [documentType?.dtId])
 
-  
   useEffect(() => {
     ;(async function () {
       if (recordId) {

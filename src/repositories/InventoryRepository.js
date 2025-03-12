@@ -208,7 +208,8 @@ export const InventoryRepository = {
     page: service + 'pageSIZ'
   },
   AvailabilitySerial: {
-    qry: service + 'qryAVS'
+    qry: service + 'qryAVS',
+    page: service + 'pageAVS'
   },
   AvailabilityLot: {
     qry: service + 'qryLOA'
@@ -258,11 +259,28 @@ export const InventoryRepository = {
     get: service + 'getDTD',
     page: service + 'pageDTD',
     del: service + 'delDTD',
-    set: service + 'setDTD',
+    set: service + 'setDTD'
   },
   Serial: {
     qry: service + 'qrySRL',
-    snapshot: service + 'snapshotSRL'
+    get2: service + 'get2SRL'
+  },
+  DraftTransfer: {
+    page: service + 'pageDTF',
+    del: service + 'delDTF',
+    get: service + 'getDTF',
+    set2: service + 'set2DTF',
+    snapshot: service + 'snapshotDTF',
+    post: service + 'postDTF',
+    clone: service + 'cloneDTF'
+  },
+  DraftTransferSerial: {
+    qry: service + 'qryDTI',
+    del: service + 'delDTI',
+    append: service + 'appendDTI'
+  },
+  BatchDraftTransferSerial: {
+    batch: service + 'batchDTS'
   },
   RMSKU: {
     snapshot: service + 'snapshotRM'
@@ -275,6 +293,6 @@ export const InventoryRepository = {
     page: service + 'pageCOL',
     qry: service + 'qryCOL',
     del: service + 'delCOL',
-    set: service + 'setCOL',
+    set: service + 'setCOL'
   }
 }

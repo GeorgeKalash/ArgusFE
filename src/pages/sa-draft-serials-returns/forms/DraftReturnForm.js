@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -36,7 +36,7 @@ import { SystemChecks } from 'src/resources/SystemChecks'
 import { useError } from 'src/error'
 import CustomButton from 'src/components/Inputs/CustomButton'
 
-export default function DraftReturnForm({ labels, access, recordId }) {
+export default function DraftReturnForm({ labels, access, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -48,13 +48,10 @@ export default function DraftReturnForm({ labels, access, recordId }) {
     enabled: !recordId
   })
 
-  const invalidate = useInvalidate({
-    endpointId: SaleRepository.DraftReturn.page
-  })
-
   useEffect(() => {
     if (documentType?.dtId) {
       formik.setFieldValue('dtId', documentType.dtId)
+      onChangeDtId(documentType.dtId)
     }
   }, [documentType?.dtId])
 
@@ -73,8 +70,8 @@ export default function DraftReturnForm({ labels, access, recordId }) {
       plantId: null,
       clientId: null,
       currencyId: defCurrencyId || null,
-      spId: null,
-      siteId: null,
+      spId: defspId || null,
+      siteId: defSiteId || null,
       description: '',
       status: 1,
       wip: 1,
@@ -814,10 +811,6 @@ export default function DraftReturnForm({ labels, access, recordId }) {
 
       if (formik?.values?.recordId) {
         await refetchForm(formik?.values?.recordId)
-      } else {
-        if (formik?.values?.dtId) {
-          onChangeDtId(formik?.values?.dtId)
-        }
       }
     })()
   }, [])
@@ -918,9 +911,9 @@ export default function DraftReturnForm({ labels, access, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
-                  onChangeDtId(newValue?.recordId)
+                  await onChangeDtId(newValue?.recordId)
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -1073,7 +1066,7 @@ export default function DraftReturnForm({ labels, access, recordId }) {
                 displayField='name'
                 secondFieldLabel={labels.name}
                 name='clientId'
-                label={labels.customer}
+                label={labels.client}
                 form={formik}
                 required
                 readOnly={isClosed}

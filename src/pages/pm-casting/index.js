@@ -25,9 +25,7 @@ const Casting = () => {
 
     const response = await getRequest({
       extension: ProductModelingRepository.Casting.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${
-        params || ''
-      }`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -41,7 +39,7 @@ const Casting = () => {
     access,
     invalidate,
     filterBy,
-    clearFilter,
+    clearFilter
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ProductModelingRepository.Casting.page,
@@ -98,12 +96,6 @@ const Casting = () => {
       flex: 1
     },
     {
-      field: 'rmQty',
-      headerName: labels.rmQty,
-      flex: 1,
-      type: 'number'
-    },
-    {
       field: 'statusName',
       headerName: labels.status,
       flex: 1
@@ -118,7 +110,6 @@ const Casting = () => {
   const add = async () => {
     await proxyAction()
   }
-
 
   const edit = obj => {
     openForm(obj?.recordId)
