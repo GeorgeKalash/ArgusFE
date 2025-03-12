@@ -22,16 +22,7 @@ const CorrespondentDispersal = () => {
 
   const initialValues = {
     corId: null,
-    items: [
-      {
-        id: 1,
-        corId: '',
-        corDeliveryMode: '',
-        dispersalType: '',
-        corDeliveryModeName: '',
-        interfaceId: null
-      }
-    ]
+    items: []
   }
 
   const { labels: labels, maxAccess } = useResourceQuery({
@@ -44,7 +35,7 @@ const CorrespondentDispersal = () => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      corId: yup.number().required()
+      corId: yup.string().required()
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -57,20 +48,49 @@ const CorrespondentDispersal = () => {
   })
 
   const getData = async corId => {
-    const res = await getRequest({
-      extension: RemittanceSettingsRepository.CorrespondentDispersal.qry,
-      parameters: `_corId=${corId}`
-    })
+    if (corId) {
+      const res = await getRequest({
+        extension: RemittanceSettingsRepository.CorrespondentDispersal.qry,
+        parameters: `_corId=${corId}`
+      })
 
-    if (res?.list?.length > 0) {
-      const items = res.list.map((item, index) => ({
-        ...item,
-        id: index + 1,
-        dispersalType: parseInt(item.dispersalType)
-      }))
-      formik.setFieldValue('items', items)
+      if (res?.list?.length > 0) {
+        const items = res.list.map((item, index) => ({
+          ...item,
+          id: index + 1,
+          dispersalType: parseInt(item.dispersalType)
+        }))
+        formik.setFieldValue('items', items)
+      }
+    } else {
+      formik.setFieldValue('items', [])
     }
   }
+
+  const columns = [
+    {
+      component: 'textfield',
+      name: 'corDeliveryModeName',
+      label: labels.corDeliveryModeName,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.dispersalType,
+      name: 'dispersalTypeName',
+      props: {
+        datasetId: DataSets.RT_Dispersal_Type,
+        displayField: 'value',
+        valueField: 'key',
+        mapping: [
+          { from: 'key', to: 'dispersalType' },
+          { from: 'value', to: 'dispersalTypeName' }
+        ]
+      }
+    }
+  ]
 
   return (
     <VertLayout>
@@ -88,9 +108,11 @@ const CorrespondentDispersal = () => {
                 { key: 'name', value: 'Name' }
               ]}
               values={formik.values}
+              required
+              onClear={() => formik.setFieldValue('corId', 0)}
               onChange={(event, newValue) => {
                 getData(newValue?.recordId)
-                formik.setFieldValue('corId', newValue?.recordId)
+                formik.setFieldValue('corId', newValue?.recordId || 0)
               }}
             />
           </Grid>
@@ -100,37 +122,17 @@ const CorrespondentDispersal = () => {
       <Grow>
         <DataGrid
           onChange={value => formik.setFieldValue('items', value)}
-          value={formik.values.items}
+          value={formik?.values?.items}
           error={formik.errors.items}
+          name='items'
+          allowAddNewLine={false}
+          maxAccess={maxAccess}
           allowDelete={false}
-          columns={[
-            {
-              component: 'textfield',
-              name: 'corDeliveryModeName',
-              label: labels.corDeliveryModeName,
-              props: {
-                readOnly: true
-              }
-            },
-            {
-              component: 'resourcecombobox',
-              label: labels.dispersalType,
-              name: 'dispersalTypeName',
-              props: {
-                datasetId: DataSets.RT_Dispersal_Type,
-                displayField: 'value',
-                valueField: 'key',
-                mapping: [
-                  { from: 'key', to: 'dispersalType' },
-                  { from: 'value', to: 'dispersalTypeName' }
-                ]
-              }
-            }
-          ]}
+          columns={columns}
         />
       </Grow>
       <Fixed>
-        <WindowToolbar onSave={formik.handleSubmit} isSaved={true} smallBox={true} />
+        <WindowToolbar onSave={() => formik.handleSubmit()} isSaved={true} smallBox={true} />
       </Fixed>
     </VertLayout>
   )
