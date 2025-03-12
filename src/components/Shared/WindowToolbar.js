@@ -139,7 +139,9 @@ const WindowToolbar = ({
               style={{ ml: 1 }}
               onClick={onGenerateReport}
               label={platformLabels.Preview}
+              image={'preview.png'}
               disabled={!selectedReport}
+              tooltipText={platformLabels.Preview}
             />
           </Box>
         ) : (
