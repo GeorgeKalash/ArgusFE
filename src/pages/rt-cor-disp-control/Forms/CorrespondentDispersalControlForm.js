@@ -39,7 +39,10 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId }
     onSubmit: async obj => {
       const filteredObj = {
         ...obj,
-        items: obj.items?.filter(item => item.corDeliveryMode) || []
+        items:
+          obj.items
+            ?.filter(item => item.corDeliveryMode) 
+            .map(({ items, ...rest }) => rest) || [] 
       }
 
       await postRequest({
@@ -65,7 +68,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId }
 
   const onPreview = async () => {
     if (formik.values.plantId && formik.values.countryId && formik.values.currencyId) {
-      const dispersalModes = await getDispersalMode() 
+      const dispersalModes = await getDispersalMode()
 
       const res = await getRequest({
         extension: RemittanceSettingsRepository.CorDispControl.qry,
@@ -79,15 +82,10 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId }
 
         return {
           id: index + 1,
-          dispersalTypeName: mode.value, 
+          dispersalTypeName: mode.value,
           dispersalType: mode.id,
-          plantId: formik.values.plantId,
-          countryId: formik.values.countryId,
-          currencyId: formik.values.currencyId,
-          countryName: formik.values.countryName,
-          currencyName: formik.values.currencyName,
-          plantName: formik.values.plantName,
-          ...existingItem 
+          ...formik.values,
+          ...existingItem
         }
       })
 
