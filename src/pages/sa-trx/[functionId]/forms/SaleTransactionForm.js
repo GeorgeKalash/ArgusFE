@@ -1577,7 +1577,7 @@ export default function SaleTransactionForm({
                         setmetalPriceVisibility(false)
                       }
                     }}
-                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                    error={formik?.touched?.header?.dtId && Boolean(formik?.errors?.header?.dtId)}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1598,7 +1598,7 @@ export default function SaleTransactionForm({
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.spId', newValue ? newValue.recordId : null)
                     }}
-                    error={formik.touched.spId && Boolean(formik.errors.spId)}
+                    error={formik?.touched?.header?.spId && Boolean(formik?.errors?.header?.spId)}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1628,7 +1628,7 @@ export default function SaleTransactionForm({
                       formik.setFieldValue('header.plantId', newValue ? newValue.recordId : null)
                     }}
                     displayFieldWidth={2}
-                    error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                    error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
                   />
                 </Grid>
               </Grid>
@@ -1642,7 +1642,7 @@ export default function SaleTransactionForm({
                     readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    error={formik?.touched?.header?.reference && Boolean(formik?.errors?.header?.reference)}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1682,7 +1682,7 @@ export default function SaleTransactionForm({
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.szId', newValue ? newValue.recordId : null)
                     }}
-                    error={formik.touched.szId && Boolean(formik.errors.szId)}
+                    error={formik?.touched?.header?.szId && Boolean(formik?.errors?.header?.szId)}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1729,6 +1729,7 @@ export default function SaleTransactionForm({
                 onClear={() => formik.setFieldValue('header.billAddress', '')}
                 onDropDown={() => openAddressFilterForm()}
                 handleAddAction={() => openAddressForm()}
+                error={formik?.touched?.header?.billAddress && Boolean(formik?.errors?.header?.billAddress)}
               />
             </Grid>
             <Grid item xs={3}>
@@ -1787,7 +1788,7 @@ export default function SaleTransactionForm({
                 displayField={['name']}
                 readOnly
                 values={formik.values.header}
-                error={formik.touched.taxId && Boolean(formik.errors.taxId)}
+                error={formik?.touched?.header?.taxId && Boolean(formik?.errors?.header?.taxId)}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -1850,7 +1851,7 @@ export default function SaleTransactionForm({
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.contactId', newValue?.recordId || null)
                 }}
-                error={formik.touched.contactId && Boolean(formik.errors.contactId)}
+                error={formik?.touched?.header?.contactId && Boolean(formik?.errors?.header?.contactId)}
               />
             </Grid>
             <Grid item xs={2}>
@@ -1896,7 +1897,7 @@ export default function SaleTransactionForm({
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.description', e.target.value)}
                 onClear={() => formik.setFieldValue('header.description', '')}
-                error={formik.touched.description && Boolean(formik.errors.description)}
+                error={formik?.touched?.header?.description && Boolean(formik?.errors?.header?.description)}
               />
             </Grid>
             <Grid item xs={3}>

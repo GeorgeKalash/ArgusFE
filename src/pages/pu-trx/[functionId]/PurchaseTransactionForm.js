@@ -1256,7 +1256,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         return null
     }
   }
-  console.log('check formik', formik)
 
   return (
     <FormShell
@@ -1336,7 +1335,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                   formik.setFieldValue('header.plantId', newValue ? newValue.recordId : null)
                 }}
                 displayFieldWidth={2}
-                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                error={formik.touched.header?.plantId && Boolean(formik.errors.header?.plantId)}
               />
             </Grid>
             <Grid item xs={2.4}>
@@ -1351,7 +1350,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.paymentMethod', newValue ? newValue.key : null)
                 }}
-                error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
+                error={formik.touched.header?.paymentMethod && Boolean(formik.errors.header?.paymentMethod)}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -1365,7 +1364,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 maxLength='15'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('header.vendorDocRef', '')}
-                error={formik.touched.vendorDocRef && Boolean(formik.errors.vendorDocRef)}
+                error={formik.touched.header?.vendorDocRef && Boolean(formik.errors.header?.vendorDocRef)}
               />
             </Grid>
 
@@ -1378,7 +1377,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 readOnly={editMode}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('header.reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
+                error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
               />
             </Grid>
             <Grid item xs={2.4}>
@@ -1505,7 +1504,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.taxId', newValue?.recordId || null)
                 }}
-                error={formik.touched.taxId && Boolean(formik.errors.taxId)}
+                error={formik.touched.header?.taxId && Boolean(formik.errors.header?.taxId)}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -1552,12 +1551,18 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.description', e.target.value)}
                 onClear={() => formik.setFieldValue('header.description', '')}
-                error={formik.touched.description && Boolean(formik.errors.description)}
+                error={formik.touched.header?.description && Boolean(formik.errors.header?.description)}
               />
             </Grid>
             <Grid item xs={3}>
               <Stack spacing={2}>
-                <CustomNumberField name='qty' maxAccess={maxAccess} label={labels.totQty} value={totalQty} readOnly />
+                <CustomNumberField
+                  name='header.qty'
+                  maxAccess={maxAccess}
+                  label={labels.totQty}
+                  value={totalQty}
+                  readOnly
+                />
                 <CustomNumberField
                   name='header.volume'
                   maxAccess={maxAccess}

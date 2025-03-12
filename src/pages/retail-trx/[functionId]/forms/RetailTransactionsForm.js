@@ -188,7 +188,6 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       header: yup.object({
         date: yup.string().required(),
         dtId: yup.string().required(),
-        spId: yup.string().required(),
         name: yup.string().test('Name-Required', 'Name is required when street1 or street2 has a value', function () {
           const { street1, street2, name, phone, cityId } = this.parent
 
@@ -266,7 +265,6 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       record: JSON.stringify(payload)
     })
   }
-
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
@@ -1108,7 +1106,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     onChange={async (_, newValue) => {
                       formik.setFieldValue('header.dtId', newValue?.recordId)
                     }}
-                    error={formik.errors?.dtId && Boolean(formik.errors?.header?.dtId)}
+                    error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1120,7 +1118,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.reference', '')}
-                    error={formik.errors?.header?.reference && Boolean(formik.errors?.header?.reference)}
+                    error={formik.touched?.header?.reference && Boolean(formik.errors?.header?.reference)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1161,7 +1159,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.spId', newValue?.spId)
                     }}
-                    error={formik.errors.spId && Boolean(formik.errors?.header?.spId)}
+                    error={formik.touched?.header?.spId && Boolean(formik.errors?.header?.spId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1174,7 +1172,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     readOnly={!formik.values.baseMetalCuId || isPosted}
                     hidden={(!editMode && !formik.values.baseMetalCuId) || (!editMode && formik.values.header.dtId)}
                     onClear={() => formik.setFieldValue('header.KGmetalPrice', '')}
-                    error={formik.errors?.header?.KGmetalPrice && Boolean(formik.errors?.header?.KGmetalPrice)}
+                    error={formik.touched?.header?.KGmetalPrice && Boolean(formik.errors?.header?.KGmetalPrice)}
                   />
                 </Grid>
               </Grid>
@@ -1260,7 +1258,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                       }))
                       setAddressModified(true)
                     }}
-                    error={formik.errors?.header?.street2 && Boolean(formik.errors?.header?.street2)}
+                    error={formik.touched?.header?.street2 && Boolean(formik.errors?.header?.street2)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1335,7 +1333,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.posRef', '')}
-                    error={formik.errors?.header?.posRef && Boolean(formik.errors?.header?.posRef)}
+                    error={formik.touched?.header?.posRef && Boolean(formik.errors?.header?.posRef)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1347,7 +1345,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     readOnly
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.plantName', '')}
-                    error={formik.errors?.header?.plantName && Boolean(formik.errors?.header?.plantName)}
+                    error={formik.touched?.header?.plantName && Boolean(formik.errors?.header?.plantName)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1359,7 +1357,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     readOnly
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.siteName', '')}
-                    error={formik.errors?.header?.siteName && Boolean(formik.errors?.header?.siteName)}
+                    error={formik.touched?.header?.siteName && Boolean(formik.errors?.header?.siteName)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1371,7 +1369,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     readOnly
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.currencyName', '')}
-                    error={formik.errors?.header?.currencyName && Boolean(formik.errors?.header?.currencyName)}
+                    error={formik.touched?.header?.currencyName && Boolean(formik.errors?.header?.currencyName)}
                   />
                 </Grid>
                 <Grid item xs={10}>
@@ -1383,7 +1381,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     readOnly
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.taxRef', '')}
-                    error={formik.errors?.header?.axName && Boolean(formik.errors?.header?.taxRef)}
+                    error={formik.touched?.header?.taxRef && Boolean(formik.errors?.header?.taxRef)}
                   />
                 </Grid>
                 <Grid item xs={2}>

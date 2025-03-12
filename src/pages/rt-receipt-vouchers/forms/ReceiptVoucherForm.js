@@ -350,7 +350,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                     maxLength='30'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -360,7 +360,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                     readOnly={true}
                     value={formik?.values?.header?.date}
                     maxAccess={maxAccess}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
+                    error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
                   />
                 </Grid>
               </Grid>
@@ -391,6 +391,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                       formik.setFieldValue('header.amount', newValue ? newValue.amount : '')
                       formik.setFieldValue('header.clientId', newValue ? newValue.clientId : '')
                     }}
+                    errorCheck={'header.owoId'}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -408,7 +409,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                         formik.setFieldValue('header.products', [])
                       }
                     }}
-                    error={formik.touched.amount && Boolean(formik.errors.amount)}
+                    error={formik.touched.header?.amount && Boolean(formik.errors.header?.amount)}
                     maxLength={10}
                   />
                 </Grid>
