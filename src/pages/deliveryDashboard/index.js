@@ -48,47 +48,34 @@ const DashboardLayout = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        // Step 1: Fetch root zones (DE.rootSZ)
-        const rootResponse = await getRequest({ extension: DeliveryRepository.GenerateTrip.root })
+      const rootResponse = await getRequest({ extension: DeliveryRepository.GenerateTrip.root })
 
-        if (!rootResponse.list || rootResponse.list.length === 0) {
-          setChartsData([])
-          debouncedCloseLoading()
-
-          return
-        }
-
-        // Step 2: Fetch volumes for each sale zone (DE.volZO)
-        const volumeRequests = rootResponse.list.map(async zone => {
-          const response = await getRequest({
-            extension: DeliveryRepository.Volume.vol,
-            parameters: `_parentId=${zone.recordId}`
-          })
-
-          return {
-            zoneName: zone.zoneName,
-            volumes:
-              response?.record?.saleZoneOrderVolumeSummaries?.map(summary => ({
-                subZone: summary.zoneName ?? '',
-                volume: summary.volume ?? 0
-              })) ?? []
-          }
+      const volumeRequests = rootResponse.list.map(async zone => {
+        const response = await getRequest({
+          extension: DeliveryRepository.Volume.vol,
+          parameters: `_parentId=${zone.recordId}`
         })
 
-        const allChartsData = await Promise.all(volumeRequests)
+        return {
+          zoneName: zone.zoneName,
+          volumes:
+            response?.record?.saleZoneOrderVolumeSummaries?.map(summary => ({
+              subZone: summary.zoneName ?? '',
+              volume: summary.volume ?? 0
+            })) ?? []
+        }
+      })
 
-        setChartsData(
-          allChartsData.map(chart => ({
-            zoneName: chart.zoneName,
-            volumes: chart.volumes.filter(v => v.subZone && v.volume !== null && v.volume !== undefined)
-          }))
-        )
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error)
-      } finally {
-        debouncedCloseLoading()
-      }
+      const allChartsData = await Promise.all(volumeRequests)
+
+      setChartsData(
+        allChartsData.map((chart, index) => ({
+          zoneName: rootResponse.list[index]?.name ?? 'Unknown Zone',
+          volumes: chart.volumes.filter(v => v.subZone && v.volume !== null && v.volume !== undefined)
+        }))
+      )
+
+      debouncedCloseLoading()
     }
 
     fetchData()
