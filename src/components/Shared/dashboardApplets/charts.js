@@ -82,6 +82,8 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
   useEffect(() => {
     const ctx = document.getElementById(id).getContext('2d')
 
+    const globalMax = Math.max(...data, 1)
+
     const chart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -89,7 +91,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
         datasets: [
           {
             label,
-            data,
+            data: data.map(value => (value / globalMax) * 100),
             backgroundColor: color || 'rgb(88, 2, 1)',
             hoverBackgroundColor: hoverColor || 'rgb(113, 27, 26)',
             borderWidth: 1
@@ -98,6 +100,12 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
       },
       options: {
         indexAxis: 'y',
+        scales: {
+          x: {
+            suggestedMin: 0,
+            suggestedMax: 100
+          }
+        },
         plugins: {
           datalabels: {
             anchor: context => {
@@ -152,7 +160,11 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
     }
   }, [id, labels, data, label])
 
-  return <canvas id={id} style={{ width: '100%', height: '400px' }}></canvas>
+  const baseHeight = 200
+  const barHeight = 25
+  const dynamicHeight = baseHeight + labels.length * barHeight
+
+  return <canvas id={id} style={{ width: '100%', height: `${dynamicHeight}px` }}></canvas>
 }
 
 export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {

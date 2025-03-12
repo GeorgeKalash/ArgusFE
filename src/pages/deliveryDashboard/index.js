@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react'
 import styled from 'styled-components'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
-import { CompositeBarChartDark } from '../../components/Shared/dashboardApplets/charts'
+import { HorizontalBarChartDark } from '../../components/Shared/dashboardApplets/charts'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { debounce } from 'lodash'
@@ -20,17 +20,18 @@ const Container = styled.div`
   height: auto;
   padding: 10px;
   background: rgb(204, 204, 204);
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 10px;
 `
 
 const ChartCard = styled.div`
   background: white;
   border-radius: 10px;
   padding: 10px;
+  height: auto;
   display: flex;
   flex-direction: column;
-  margin-bottom: 10px;
 `
 
 const Title = styled.h2`
@@ -91,7 +92,7 @@ const DashboardLayout = () => {
             <Title>
               {labels.deliveryVolumes} - {chart.zoneName}
             </Title>
-            <CompositeBarChartDark
+            <HorizontalBarChartDark
               id={`zonesVolumeChart-${index}`}
               labels={chart.volumes.map(v => v.subZone)}
               data={chart.volumes.map(v => v.volume)}
