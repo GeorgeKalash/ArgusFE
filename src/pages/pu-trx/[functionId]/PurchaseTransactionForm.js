@@ -78,6 +78,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const initialValues = {
     recordId: recordId,
+    dtId: documentType?.dtId,
     header: {
       dgId: functionId,
       functionId: functionId,
@@ -316,7 +317,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Item Name' }
         ],
-        displayFieldWidth: 5
+        displayFieldWidth: 5,
+        minChars: 2
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.itemId) {
@@ -1139,6 +1141,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   useEffect(() => {
     if (documentType?.dtId) {
+      formik.setFieldValue('dtId', documentType.dtId)
       formik.setFieldValue('header.dtId', documentType.dtId)
       onChangeDtId(documentType.dtId)
     }
@@ -1290,8 +1293,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
                   if (newValue) {
                     formik.setFieldValue('header.dtId', recordId)
+                    formik.setFieldValue('dtId', recordId)
                     onChangeDtId(recordId)
                   } else {
+                    formik.setFieldValue('dtId', null)
                     formik.setFieldValue('header.dtId', null)
                     formik.setFieldValue('header.siteId', null)
                     formik.setFieldValue('header.metalPrice', 0)
@@ -1299,7 +1304,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                     setmetalPriceVisibility(false)
                   }
                 }}
-                error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                error={
+                  (formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)) ||
+                  (formik.touched?.dtId && Boolean(formik.errors?.dtId))
+                }
               />
             </Grid>
             <Grid item xs={2.4}>
