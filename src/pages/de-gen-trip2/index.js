@@ -26,6 +26,7 @@ import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 const GenerateOutboundTransportation2 = () => {
   const [selectedSaleZones, setSelectedSaleZones] = useState([])
   const [filteredOrders, setFilteredOrders] = useState([])
+  const [sortedZones, setSortedZones] = useState(selectedSaleZones)
   const [reCalc, setReCalc] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
@@ -75,6 +76,7 @@ const GenerateOutboundTransportation2 = () => {
         record: JSON.stringify(data)
       })
 
+      resetForm()
       toast.success(platformLabels.Generated)
     }
   })
@@ -132,10 +134,6 @@ const GenerateOutboundTransportation2 = () => {
         return volumeSum + volumeValue
       }, 0) || 0
     )
-  }
-
-  const onOrderChecked = () => {
-    setReCalc(true)
   }
 
   useEffect(() => {
@@ -233,7 +231,7 @@ const GenerateOutboundTransportation2 = () => {
       props: {
         readOnly: true
       }
-    },
+    }
   ]
 
   const columnsVehicleAllocations = [
@@ -373,8 +371,6 @@ const GenerateOutboundTransportation2 = () => {
     })
   }
 
-  const [sortedZones, setSortedZones] = useState(selectedSaleZones)
-
   const handleRowDragEnd = event => {
     if (!event.api) return
 
@@ -403,9 +399,7 @@ const GenerateOutboundTransportation2 = () => {
       parameters: `_zones=${szIds || 0}&_orderIds=${orderIds || 0}&_volumes=${volumes}`
     })
 
-    if (items?.record?.vehicleAllocations) {
-      formik.setFieldValue('vehicleAllocations', { list: items.record.vehicleAllocations })
-    }
+    formik.setFieldValue('vehicleAllocations', { list: items?.record?.vehicleAllocations })
 
     formik.setFieldValue('vehicleOrders', { list: items?.record?.vehicleOrders })
     formik.setFieldValue('unallocatedOrders', { list: items?.record?.unallocatedOrders })
@@ -502,7 +496,7 @@ const GenerateOutboundTransportation2 = () => {
                 displayField={'name'}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('szId', newValue?.recordId || null)
+                  formik.setFieldValue('szId', newValue?.recordId)
                   onSaleZoneChange(newValue?.recordId)
                   formik.setFieldValue('data', { list: [] })
                   formik.setFieldValue('orders', { list: [] })
@@ -551,6 +545,7 @@ const GenerateOutboundTransportation2 = () => {
             <Grid item xs={1.5}>
               <CustomDateTimePicker
                 name='departureDate'
+                min={new Date()}
                 label={labels.departureDate}
                 value={formik.values.departureDate}
                 onChange={formik.setFieldValue}
@@ -618,7 +613,9 @@ const GenerateOutboundTransportation2 = () => {
                     maxAccess={access}
                     showCheckboxColumn={true}
                     showSelectAll={false}
-                    handleCheckboxChange={onOrderChecked}
+                    handleCheckboxChange={() => {
+                      setReCalc(true)
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3} sx={{ display: 'flex' }}>
@@ -688,6 +685,7 @@ const GenerateOutboundTransportation2 = () => {
               <CustomButton
                 onClick={() => resetForm()}
                 label={platformLabels.Clear}
+                tooltipText={platformLabels.Clear}
                 image={'clear.png'}
                 color='#f44336'
               />
@@ -704,7 +702,13 @@ const GenerateOutboundTransportation2 = () => {
             </Grid>
 
             <Grid item xs={0.65}>
-              <CustomButton onClick={handleImport} label={platformLabels.Import} color='#231f20' image={'import.png'} />
+              <CustomButton
+                onClick={handleImport}
+                label={platformLabels.import}
+                tooltipText={platformLabels.import}
+                color='#231f20'
+                image={'import.png'}
+              />
             </Grid>
             <Grid item xs={0.65}>
               <CustomButton
@@ -714,6 +718,7 @@ const GenerateOutboundTransportation2 = () => {
                   formik.values.selectedTrucks.some(truck => !truck.volume) ||
                   formik.values.orders.length === 0
                 }
+                tooltipText={platformLabels.Preview}
                 image={'preview.png'}
                 color='#231f20'
               />
@@ -723,6 +728,7 @@ const GenerateOutboundTransportation2 = () => {
                 onClick={() => formik.handleSubmit()}
                 label={platformLabels.Generate}
                 color='#231f20'
+                tooltipText={platformLabels.Generate}
                 image={'generate.png'}
                 disabled={balance < 0}
               />

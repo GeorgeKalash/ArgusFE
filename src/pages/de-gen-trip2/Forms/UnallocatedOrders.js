@@ -45,6 +45,7 @@ export default function UnallocatedOrdersForm({ data, labels, access }) {
     <VertLayout>
       <Grow>
         <Table
+          name={'unallocatedOrders'}
           columns={columnsUnallocatedOrders}
           gridData={data}
           rowId={['recordId']}
