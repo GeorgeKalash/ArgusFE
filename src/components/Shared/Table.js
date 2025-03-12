@@ -522,7 +522,6 @@ const Table = ({
       const range = document.createRange()
       range.selectNodeContents(event.currentTarget)
       const selection = window.getSelection()
-      console.log(params.data)
       selection.removeAllRanges()
       selection.addRange(range)
     }
