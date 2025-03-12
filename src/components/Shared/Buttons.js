@@ -102,6 +102,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Received',
+    label: platformLabels.Received,
+    color: '#D3D3D3',
+    image: 'received.png',
+    main: false
+  },
+  {
     key: 'Cancel',
     label: platformLabels.Cancel,
     color: '#0A4164',

@@ -230,6 +230,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         },
         cash: result.list.map((amount, index) => ({
           id: index + 1,
+          enabled: true,
           ...amount
         }))
       })
@@ -386,7 +387,6 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.owoId', newValue ? newValue.recordId : '')
                       formik.setFieldValue('header.owoRef', newValue ? newValue.reference : '')
-
                       formik.setFieldValue('header.amount', newValue ? newValue.amount : '')
                       formik.setFieldValue('header.clientId', newValue ? newValue.clientId : '')
                     }}
@@ -425,6 +425,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
             allowDelete={!isPosted}
             allowAddNewLine={!isPosted}
             amount={formik.values.header.amount}
+            formik={formik}
             setFormik={setFormik}
             name='cash'
           />

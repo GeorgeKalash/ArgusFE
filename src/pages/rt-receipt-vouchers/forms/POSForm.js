@@ -1,231 +1,161 @@
-import { Box, Grid, Typography } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { Grid, FormControlLabel, RadioGroup, Radio } from '@mui/material'
+import { useContext, useEffect } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { useForm } from 'src/hooks/form'
 
-export default function POSForm({ labels, formik }) {
-  const { getRequest } = useContext(RequestsContext)
-  const [owiFields, setowiFieldsIFields] = useState({})
-  const [baseCurSymbol, setBaseCurSymbol] = useState('')
-  const [corCurSymbol, setCorCurSymbol] = useState('')
+export default function POSForm({ labels, form, maxAccess, amount }) {
+  const { getRequestFullEndPoint, getRequest, postRequest } = useContext(RequestsContext)
 
-  async function getDefaultBaseCurrency() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=baseCurrencyId`
-    })
+  const { formik } = useForm({
+    maxAccess: maxAccess,
+    enableReinitialize: false,
+    validateOnChange: true,
+    initialValues: {
+      msgid: null,
+      ecrno: null,
+      ecR_RCPT: form?.values?.header?.reference,
+      amount: amount * 100,
+      a1: 'E',
+      a2: null,
+      a3: null,
+      a4: null,
+      a5: null,
+      ipaddressOrPort: process.env.NEXT_PUBLIC_POS_PORT,
+      log: 1,
+      posSelected: 1
+    },
+    onSubmit: async obj => {}
+  })
 
-    return res?.record?.value
-  }
-  async function getCurrencySymbol(currencyId) {
-    const res = await getRequest({
-      extension: SystemRepository.Currency.get,
-      parameters: `_recordId=${currencyId}`
-    })
-
-    return res?.record?.symbol
-  }
-  async function getBaseCurrencySymbol() {
-    const getBaseCurId = await getDefaultBaseCurrency()
-    const symbol = await getCurrencySymbol(getBaseCurId)
-    setBaseCurSymbol(symbol)
-  }
-  async function getCorCurrencySymbol() {
-    const symbol = await getCurrencySymbol(formik.values.corCurrencyId)
-    setCorCurSymbol(symbol)
-  }
+  const actions = [
+    {
+      key: 'Received',
+      condition: true,
+      onClick: () => {}
+    },
+    {
+      key: 'Cancel',
+      condition: true,
+      onClick: () => {}
+    }
+  ]
+  useEffect(() => {
+    ;(async function () {
+      // const response = await getRequestFullEndPoint({
+      //   endPoint: 'checkDevice?_port=' + process.env.NEXT_PUBLIC_POS_PORT
+      // })
+      // if (response.data) {
+      // }
+    })()
+  }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.OutwardsOrder} form={formik} isCleared={false} isInfo={false} isSaved={false}>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sx={{ mx: 5, mt: 2 }}>
-          <CustomTextField
-            name='corCurrencyRef'
-            readOnly
-            label={labels?.corCurrency}
-            value={owiFields?.corCurrencyRef}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField
-            name='corExRate'
-            readOnly
-            label={labels?.corCurrencyRate}
-            value={owiFields?.corExRate}
-            decimalScale={5}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='corEvalExRate'
-            readOnly
-            label={labels?.corCurrencyEval}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.corEvalExRate}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {corCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField name='taxPercent' readOnly label={labels.TaxPct} value={owiFields?.taxPercent} />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='corAmount'
-            readOnly
-            label={labels.corAmount}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.corAmount}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {corCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
+    <FormShell
+      resourceId={ResourceIds.POSPayment}
+      form={formik}
+      isCleared={false}
+      isInfo={false}
+      isSaved={false}
+      actions={actions}
+    >
+      <Grow>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='reference'
+              readOnly
+              label={labels?.reference}
+              maxAccess={maxAccess}
+              value={form?.values?.header?.reference}
+            />
+          </Grid>
+          <Grid item container spacing={2}>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='clientName'
+                readOnly
+                label={labels?.client}
+                value={form?.values?.header?.clientName}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='beneficiaryName'
+                readOnly
+                label={labels?.beneficiary}
+                value={form?.values?.header?.beneficiaryName}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+          </Grid>
 
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='corComission'
-            readOnly
-            label={labels.corComission}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.corCommission}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {corCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
+          <Grid item xs={12}>
+            <RadioGroup row value={formik.values.posSelected} defaultValue={1}>
+              <FormControlLabel value={1} control={<Radio />} label={labels.manualPOS} />
+              <FormControlLabel value={2} control={<Radio />} label={labels.apiPOS} />
+            </RadioGroup>
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceLookup
+              endpointId={SaleRepository.Client.snapshot}
+              valueField='reference'
+              displayField='name'
+              name='posAccountId'
+              label={labels.posAccount}
+              form={formik}
+              required
+              displayFieldWidth={6}
+              valueShow='posAccountRef'
+              secondValueShow='posAccountName'
+              editMode={true}
+              maxAccess={maxAccess}
+              errorCheck={'posAccountId'}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomNumberField
+              name='amount'
+              label={labels.amount}
+              value={formik?.values?.amount}
+              maxAccess={maxAccess}
+              readOnly
+              error={formik.touched?.amount && Boolean(formik.errors?.amount)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='posRef'
+              label={labels?.posRef}
+              value={formik?.posRef}
+              maxAccess={maxAccess}
+              error={formik.touched.posRef && Boolean(formik.errors.posRef)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextArea
+              name='remarks'
+              label={labels.remarks}
+              value={formik.values.remarks}
+              rows={3}
+              maxAccess={maxAccess}
+              editMode={true}
+              onChange={e => formik.setFieldValue('remarks', e.target.value)}
+              onClear={() => formik.setFieldValue('remarks', '')}
+              error={formik.touched?.remarks && Boolean(formik.errors.remarks)}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='corBaseAmount'
-            readOnly
-            label={labels.corBaseAmount}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.corBaseAmount}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {baseCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='grossProfitFromExRate'
-            readOnly
-            label={labels.grossProfit}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.grossProfit}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {baseCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='netCommssionCost'
-            readOnly
-            label={labels.netCommission}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.baseCorCommission}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {baseCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='netCommissionRevenue'
-            readOnly
-            label={labels.netCommissionRevenue}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.netCommissionRevenue}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {baseCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-      </Grid>
+      </Grow>
     </FormShell>
   )
 }
