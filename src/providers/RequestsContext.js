@@ -33,12 +33,21 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
   const errorModel = useError()
   const [loading, setLoading] = useState(false)
+  const [activeRequests, setActiveRequests] = useState(0)
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
 
   async function showError(props) {
     if (errorModel) await errorModel.stack(props)
+  }
+
+  const incrementRequests = () => {
+    setActiveRequests(prev => prev + 1)
+  }
+
+  const decrementRequests = () => {
+    setActiveRequests(prev => prev - 1)
   }
 
   const debouncedCloseLoading = debounce(() => {
@@ -51,6 +60,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     !disableLoading && !loading && setLoading(true)
 
     const throwError = body.throwError || false
+
+    if (!disableLoading) incrementRequests()
 
     return new Promise(async (resolve, reject) => {
       axios({
@@ -73,6 +84,9 @@ const RequestsProvider = ({ showLoading = false, children }) => {
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
           if (throwError) reject(error)
+        })
+        .finally(() => {
+          if (!disableLoading) decrementRequests()
         })
     })
   }
@@ -291,13 +305,14 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     getIdentityRequest,
     getMicroRequest,
     getRequestFullEndPoint,
-    LoadingOverlay
+    LoadingOverlay,
+    loading: activeRequests
   }
 
   return (
     <>
       <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
-      {showLoading && loading && <LoadingOverlay />}
+      {showLoading && Boolean(activeRequests) && <LoadingOverlay />}
     </>
   )
 }

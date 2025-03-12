@@ -1,4 +1,4 @@
-import { DialogContent } from '@mui/material'
+import { Box, DialogContent } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
@@ -23,6 +23,26 @@ import SalesTrxForm from './SalesTrxForm'
 import StrictUnpostConfirmation from './StrictUnpostConfirmation'
 import ClientSalesTransaction from './ClientSalesTransaction'
 import AttachmentList from './AttachmentList'
+import { RequestsContext } from 'src/providers/RequestsContext'
+
+function LoadingOverlay() {
+  return (
+    <Box
+      style={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        left: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(250, 250, 250, 1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999
+      }}
+    ></Box>
+  )
+}
 
 export default function FormShell({
   form,
@@ -56,6 +76,8 @@ export default function FormShell({
   const { clear, open } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
+  const { loading } = useContext(RequestsContext)
+  const [showOverlay, setShowOverlay] = useState(false)
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -64,6 +86,22 @@ export default function FormShell({
     : maxAccess < TrxType.ADD
     ? false
     : true
+
+  useEffect(() => {
+    if (!loading && editMode) {
+      const timer = setTimeout(() => {
+        setShowOverlay(true)
+      }, 100)
+
+      return () => clearTimeout(timer)
+    } else if (!editMode) {
+      const timer = setTimeout(() => {
+        setShowOverlay(true)
+      })
+
+      return () => clearTimeout(timer)
+    }
+  }, [loading, editMode])
 
   actions?.filter(Boolean)?.forEach(action => {
     if (typeof action?.onClick !== 'function') {
@@ -419,6 +457,7 @@ export default function FormShell({
           flex: 1,
           flexDirection: 'column',
           overflow: 'auto',
+          position: 'relative',
           '.MuiBox-root': {
             paddingTop: isParentWindow ? '7px !important' : '0px !important',
             px: '0px !important',
@@ -426,6 +465,7 @@ export default function FormShell({
           }
         }}
       >
+        {!showOverlay && LoadingOverlay()}
         {children}
       </DialogContent>
       {windowToolbarVisible && (
