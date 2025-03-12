@@ -599,6 +599,7 @@ const GenerateOutboundTransportation2 = () => {
                     isLoading={false}
                     pagination={false}
                     maxAccess={access}
+                    disableSorting={true}
                     showCheckboxColumn={true}
                     showSelectAll={false}
                   />
@@ -730,7 +731,7 @@ const GenerateOutboundTransportation2 = () => {
                 color='#231f20'
                 tooltipText={platformLabels.Generate}
                 image={'generate.png'}
-                disabled={balance < 0}
+                disabled={balance + 0.1 * totalTrucksVolume < 0}
               />
             </Grid>
           </Grid>
