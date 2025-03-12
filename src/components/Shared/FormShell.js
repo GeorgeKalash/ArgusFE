@@ -88,18 +88,20 @@ export default function FormShell({
     : true
 
   useEffect(() => {
-    if (!loading && editMode) {
-      const timer = setTimeout(() => {
-        setShowOverlay(true)
-      }, 100)
+    if (maxAccess) {
+      if (!loading && editMode && maxAccess) {
+        const timer = setTimeout(() => {
+          setShowOverlay(true)
+        }, 100)
 
-      return () => clearTimeout(timer)
-    } else if (!editMode) {
-      const timer = setTimeout(() => {
-        setShowOverlay(true)
-      })
+        return () => clearTimeout(timer)
+      } else if (!editMode && !loading) {
+        const timer = setTimeout(() => {
+          setShowOverlay(true)
+        }, 50)
 
-      return () => clearTimeout(timer)
+        return () => clearTimeout(timer)
+      }
     }
   }, [loading, editMode])
 
