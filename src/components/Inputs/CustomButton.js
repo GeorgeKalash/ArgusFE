@@ -99,7 +99,8 @@ const CustomButton = ({ onClick, label, image, color, border, disabled, tooltipT
               color: 'white',
               padding: '3px 7px',
               borderRadius: '7px',
-              opacity: 1,
+              opacity: tooltip ? 1 : 0,
+              visibility: tooltip ? 'visible' : 'hidden',
               transition: 'opacity 0.3s, top 0.3s',
               zIndex: 1
             }}
