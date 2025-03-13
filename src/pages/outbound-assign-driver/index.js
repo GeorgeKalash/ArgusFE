@@ -162,6 +162,7 @@ const OutboundAssignDriver = () => {
             name='tripList'
             allowDelete={false}
             allowAddNewLine={false}
+            maxAccess={maxAccess}
           />
         </Grow>
       </VertLayout>
