@@ -27,7 +27,8 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
         paidAmount: 0,
         returnedAmount: 0,
         bankFees: '',
-        receiptRef: ''
+        receiptRef: '',
+        pos: true
       }
     ]
 
@@ -221,12 +222,9 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     },
     {
       component: 'button',
-      name: 'POS',
+      name: 'pos',
       props: {
         imgSrc: '/images/buttonsIcons/open-external.png'
-      },
-      propsReducer({ row, props }) {
-        return { ...props, readOnly: true }
       },
       label: labels.pos,
       onClick: (e, row, update, updateRow) => {

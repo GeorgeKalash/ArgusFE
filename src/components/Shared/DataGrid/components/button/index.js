@@ -1,6 +1,6 @@
 import { Button } from '@mui/material'
 
-function DataGridButton({ data, column: { props, ...column }, update, updateRow, isEditMode }) {
+function DataGridButton({ data, column: { props, field, ...column }, update, updateRow, isEditMode }) {
   return (
     <Button
       sx={{
@@ -15,6 +15,7 @@ function DataGridButton({ data, column: { props, ...column }, update, updateRow,
         column?.onClick(e, data, update, updateRow)
       }}
       variant={!!props?.imgSrc ? '' : 'contained'}
+      disabled={data?.[field]}
     >
       {!!props?.imgSrc ? (
         <img
