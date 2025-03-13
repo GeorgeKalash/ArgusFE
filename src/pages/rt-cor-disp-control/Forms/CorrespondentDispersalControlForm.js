@@ -102,7 +102,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId }
     const { plantId, countryId, currencyId, plantName, countryName } = formik.values
     const dispersalModes = await getDispersalMode()
 
-    const resData = (await fetchData(countryId, currencyId, plantId))?.list || []
+    const resData = await fetchData(countryId, currencyId, plantId)?.list || []
 
     if (plantId && countryId && currencyId) {
       formik.setFieldValue(
@@ -308,7 +308,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId }
     }
 
     if (plantId && !countryId && currencyId) {
-      const countries = (await fetchCountries(countryId, countryName)).filter(country => country.recordId)
+      const countries = await fetchCountries(countryId, countryName).filter(country => country.recordId)
       if (!countries.length) return
 
       formik.setFieldValue(
@@ -372,52 +372,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId }
       return
     }
 
-    if (!plantId && !countryId && !currencyId) {
-      const plants = await fetchPlants(plantId, plantName)
-      const countries = await fetchCountries(countryId, countryName)
-
-      if (!plants.length || !countries.length) return
-
-      const currenciesMap = {}
-      for (const country of countries) {
-        currenciesMap[country.recordId] = await fetchCurrencies(country.recordId)
-      }
-
-      formik.setFieldValue(
-        'items',
-        plants.flatMap(plant =>
-          countries.flatMap(country =>
-            (currenciesMap[country.recordId] || []).flatMap(currency =>
-              dispersalModes.map(mode => {
-                const existingItem = resData.find(
-                  item =>
-                    parseInt(item.dispersalType) == mode.key &&
-                    item.plantId == plant.recordId &&
-                    item.countryId == country.recordId &&
-                    item.currencyId == currency.recordId
-                )
-
-                return {
-                  id: `${plant.recordId}-${country.recordId}-${currency.recordId}-${mode.key}`,
-                  ...formik.values,
-                  plantId: plant.recordId,
-                  plantName: plant.name,
-                  countryId: country.recordId,
-                  countryName: country.name,
-                  currencyId: currency.recordId,
-                  currencyName: currency.name,
-                  dispersalTypeName: mode.value,
-                  dispersalType: mode.key,
-                  corDeliveryModeName: existingItem?.deliveryModeDescription || null,
-                  corDeliveryMode: existingItem?.deliveryMode || null,
-                  ...existingItem
-                }
-              })
-            )
-          )
-        )
-      )
-    }
   }
 
   const columns = [
