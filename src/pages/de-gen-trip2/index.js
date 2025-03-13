@@ -344,31 +344,35 @@ const GenerateOutboundTransportation2 = () => {
   ]
 
   const onSaleZoneChange = async szId => {
-    const response = await getRequest({
-      extension: DeliveryRepository.Volume.vol,
-      parameters: `_parentId=${szId || 0}`
-    })
+    if (szId) {
+      const response = await getRequest({
+        extension: DeliveryRepository.Volume.vol,
+        parameters: `_parentId=${szId}`
+      })
 
-    if (!response?.record?.saleZoneOrderVolumeSummaries) {
-      return
-    }
-
-    const { saleZoneOrderVolumeSummaries = [], orders = [] } = response.record
-
-    const updatedSalesZones = saleZoneOrderVolumeSummaries.map(zone => {
-      const zoneOrders = orders.filter(order => order.szId === zone.szId)
-
-      return {
-        ...zone,
-        name: zone.zoneName,
-        orders: zoneOrders
+      if (!response?.record?.saleZoneOrderVolumeSummaries) {
+        return
       }
-    })
 
-    formik.setFieldValue('salesZones', {
-      ...response.record,
-      list: updatedSalesZones
-    })
+      const { saleZoneOrderVolumeSummaries = [], orders = [] } = response.record
+
+      const updatedSalesZones = saleZoneOrderVolumeSummaries.map(zone => {
+        const zoneOrders = orders.filter(order => order.szId === zone.szId)
+
+        return {
+          ...zone,
+          name: zone.zoneName,
+          orders: zoneOrders
+        }
+      })
+
+      formik.setFieldValue('salesZones', {
+        ...response.record,
+        list: updatedSalesZones
+      })
+    } else {
+      formik.setFieldValue('salesZones', { list: [] })
+    }
   }
 
   const handleRowDragEnd = event => {
@@ -430,15 +434,25 @@ const GenerateOutboundTransportation2 = () => {
   const filteredData = formik?.values?.salesZones?.list.length > 0 ? filteredSalesZones : formik?.values?.salesZones
 
   const handleImport = async () => {
-    setSelectedSaleZones(() => {
-      const selectedRows = filteredData?.list
+    setSelectedSaleZones(prevState => {
+      const prevSelected = prevState?.list || []
+
+      const newlySelected = formik.values.salesZones.list
         .filter(item => item.checked)
         .map(item => ({
           ...item,
           orders: item.orders?.map(order => ({ ...order, checked: true }))
         }))
 
-      return { list: selectedRows }
+      const updatedPrevSelected = prevSelected.filter(prevItem =>
+        formik.values.salesZones.list.some(newItem => newItem.szId === prevItem.szId && newItem.checked)
+      )
+
+      const uniqueNewlySelected = newlySelected.filter(
+        newItem => !updatedPrevSelected.some(prevItem => prevItem.szId === newItem.szId)
+      )
+
+      return { list: [...updatedPrevSelected, ...uniqueNewlySelected] }
     })
   }
 
@@ -502,6 +516,7 @@ const GenerateOutboundTransportation2 = () => {
                   formik.setFieldValue('orders', { list: [] })
                   formik.setFieldValue('selectedTrucks', [])
                   formik.setFieldValue('vehicleAllocations', { list: [] })
+                  formik.setFieldValue('salesZones', { list: [] })
                   setFilteredOrders([])
                   setSelectedSaleZones([])
                 }}
