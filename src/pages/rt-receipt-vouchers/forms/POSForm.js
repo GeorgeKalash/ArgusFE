@@ -11,9 +11,10 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ControlContext } from 'src/providers/ControlContext'
+import axios from 'axios'
 
 export default function POSForm({ labels, form, maxAccess, amount }) {
-  const { getRequestFullEndPoint, getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequestFullEndPoint, getRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
@@ -23,7 +24,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
     validateOnChange: true,
     initialValues: {
       msgid: null,
-      ecrno: null,
+      ecrno: process.env.NEXT_PUBLIC_ECRNO,
       ecR_RCPT: form?.values?.header?.reference,
       amount: amount * 100,
       a1: 'E',
@@ -45,14 +46,23 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
     {
       key: 'Received',
       condition: true,
-      onClick: () => {}
+      onClick: onReceived
     },
     {
       key: 'Cancel',
       condition: true,
-      onClick: () => {}
+      onClick: onCancel
     }
   ]
+  async function onReceived() {
+    axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/start_PUR`, {
+      record: JSON.stringify(formik.values)
+    })
+  }
+  async function onCancel() {
+    await axios.get(`${process.env.NEXT_PUBLIC_POS_URL}/cancelTransaction`)
+  }
+
   async function fillCashAccount() {
     if (!cashAccountId) return
 
@@ -69,7 +79,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
       await fillCashAccount()
 
       const response = await getRequestFullEndPoint({
-        endPoint: 'checkDevice?_port=' + process.env.NEXT_PUBLIC_POS_PORT
+        endPoint: `${process.env.NEXT_PUBLIC_POS_URL}/checkDevice?_port=${process.env.NEXT_PUBLIC_POS_PORT}`
       })
       formik.setFieldValue('posSelected', response?.data ? 2 : 1)
     })()

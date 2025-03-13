@@ -230,7 +230,6 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         },
         cash: result.list.map((amount, index) => ({
           id: index + 1,
-          enabled: true,
           ...amount
         }))
       })
@@ -425,7 +424,6 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
             allowDelete={!isPosted}
             allowAddNewLine={!isPosted}
             amount={formik.values.header.amount}
-            formik={formik}
             setFormik={setFormik}
             name='cash'
           />

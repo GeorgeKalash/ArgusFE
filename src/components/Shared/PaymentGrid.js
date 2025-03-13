@@ -27,8 +27,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
         paidAmount: 0,
         returnedAmount: 0,
         bankFees: '',
-        receiptRef: '',
-        enabled: false
+        receiptRef: ''
       }
     ]
 
@@ -222,12 +221,18 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     },
     {
       component: 'button',
-      name: 'enabled',
+      name: 'POS',
+      props: {
+        imgSrc: '/images/buttonsIcons/open-external.png'
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: true }
+      },
       label: labels.pos,
       onClick: (e, row, update, updateRow) => {
         stack({
           Component: POSForm,
-          props: { labels, form: rest.formik, amount: row?.amount, maxAccess: access },
+          props: { labels, form: value, amount: row?.amount, maxAccess: access },
           width: 700,
           title: labels?.pos
         })
