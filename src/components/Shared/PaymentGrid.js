@@ -232,7 +232,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       onClick: (e, row, update, updateRow) => {
         stack({
           Component: POSForm,
-          props: { labels, form: value, amount: row?.amount, maxAccess: access },
+          props: { labels, form: rest.formik, amount: row?.amount, maxAccess: access },
           width: 700,
           title: labels?.pos
         })
