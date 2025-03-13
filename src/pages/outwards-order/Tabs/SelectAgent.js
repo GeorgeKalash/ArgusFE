@@ -6,6 +6,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
+import * as yup from 'yup'
 
 export default function SelectAgent({
   labels,
@@ -16,10 +17,9 @@ export default function SelectAgent({
   payingCurrency,
   receivingCountry,
   agentCode,
-  deliveryModeId,
   setData,
-  sysDefault,
   targetCurrency,
+  agentDeliveryMode,
   window
 }) {
   const { formik } = useForm({
@@ -33,17 +33,22 @@ export default function SelectAgent({
       baseAmount: baseAmount,
       bankName: '',
       bankNameCode: '',
-      deliveryModeId: deliveryModeId,
+      deliveryModeId: agentDeliveryMode,
       payingCurrency: payingCurrency
     },
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
+    validationSchema: yup.object({
+      agentCode: yup.string().required()
+    }),
     onSubmit: async obj => {
       setData(obj)
       window.close()
     }
   })
+
+  console.log(formik)
 
   return (
     <FormShell form={formik} isCleared={false} infoVisible={false}>
@@ -52,35 +57,15 @@ export default function SelectAgent({
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={RemittanceBankInterface.Combos.qryCBX}
-                parameters={`_combo=1`}
-                name='deliveryModeId'
-                label={labels.deliveryMode}
-                valueField='recordId'
-                displayField='name'
-                values={formik.values}
-                required
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('deliveryModeId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('agentCode', null)
-                  formik.setFieldValue('agentName', '')
-                  formik.setFieldValue('payingCurrency', '')
-                }}
-                maxAccess={maxAccess}
-                error={formik.touched.deliveryModeId && Boolean(formik.errors.deliveryModeId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
                 endpointId={formik.values.deliveryModeId && RemittanceBankInterface.PayingAgent.qry}
                 parameters={
                   formik.values.deliveryModeId &&
                   `_deliveryMode=${formik.values.deliveryModeId}&_receivingCountry=${receivingCountry}&_payoutCurrency=${targetCurrency}`
                 }
                 name='agentCode'
+                required
                 label={labels.payingAgent}
                 valueField='recordId'
-                required
                 displayField='description'
                 columnsInDropDown={[
                   { key: 'description', value: 'Paying Agent' },

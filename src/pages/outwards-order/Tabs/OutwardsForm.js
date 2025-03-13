@@ -586,7 +586,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         editMode
       },
       width: 900,
-      height: 500
+      height: 500,
+      title: labels.products
     })
   }
 
@@ -607,9 +608,9 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           },
           sysDefault,
           agentCode: formik.values.agentCode,
-          deliveryModeId: selectRow?.deliveryModeId,
+          deliveryModeId: selectRow?.deliveryModeId || selectRow.agentDeliveryMode,
           payingAgent: selectRow?.agentCode,
-          payingCurrency: selectRow?.payingCurrency,
+          payingCurrency: selectRow?.payingCurrency || selectRow.agentPayingCurrency,
           clientData: {
             hiddenTrxAmount: formik.values.hiddenTrxAmount,
             hiddenTrxCount: formik.values.hiddenTrxCount,
@@ -1121,7 +1122,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
                   <Grid item xs={12}>
                     <CustomButton
-                      label={'product'}
+                      label={labels.products}
                       color='#000000'
                       disabled={
                         !(

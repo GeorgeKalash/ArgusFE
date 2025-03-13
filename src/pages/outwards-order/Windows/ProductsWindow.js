@@ -32,7 +32,7 @@ const ProductsWindow = ({
 
   const { stack: stackError } = useError()
 
-  const setData = async ({ productId, agentId, agentName, agentCode, payingCurrency, deliveryModeId }) => {
+  const setData = async ({ productId, agentName, agentCode, payingCurrency, deliveryModeId }) => {
     const targetAmount = fcAmount || 0
     const srcAmount = lcAmount || 0
 
@@ -59,15 +59,14 @@ const ProductsWindow = ({
       row.productId === productId
         ? {
             ...row,
-            agentName,
-            agentId,
+            agentName: agentName || row?.agentName,
+            agentCode: agentCode,
             originAmount: result?.originalAmount,
             baseAmount: result?.baseAmount,
             fees: data?.charge,
             exRate: result.settlementRate,
             deliveryModeId: deliveryModeId,
-            payingCurrency: payingCurrency,
-            agentCode
+            payingCurrency: payingCurrency
           }
         : row
     )
@@ -116,13 +115,13 @@ const ProductsWindow = ({
                   targetCurrency: targetCurrency,
                   payingCurrency: params.data?.payingCurrency,
                   agentCode: params.data?.agentCode,
-                  sysDefault,
+                  agentDeliveryMode: params.data?.agentDeliveryMode,
                   labels,
                   maxAccess
                 },
-                width: 600,
-                height: 400,
-                title: labels.Agent
+                width: 500,
+                height: 200,
+                title: params.data?.productName
               })
             }
           >
@@ -147,6 +146,11 @@ const ProductsWindow = ({
       headerName: labels.BaseAmount,
       flex: 1,
       type: { field: 'number', decimal: 2 }
+    },
+    {
+      field: 'dispersalName',
+      headerName: labels.extraInfo,
+      flex: 1
     }
   ]
 
@@ -156,9 +160,13 @@ const ProductsWindow = ({
         setGridData({
           list: products.map(item => ({
             ...item,
+            defaultAgentCode: item.agentCode,
+            defaultAgentName: item.agentName,
+            payingCurrency: item.agentPayingCurrency,
+            defaultPayoutCurrency: item.payingCurrency,
             checked: item.productId === productId ? true : false,
-            originAmount: item.interfaceId !== 0 ? 0 : item.originAmount,
-            baseAmount: item.interfaceId !== 0 ? 0 : item.baseAmount
+            originAmount: item.originAmount,
+            baseAmount: item.baseAmount
           }))
         })
       } catch (error) {}

@@ -90,6 +90,7 @@ export const FinancialRepository = {
     get: service + 'getMEM',
     del: service + 'delMEM',
     post: service + 'postMEM',
+    unpost: service + 'unpostMEM',
     cancel: service + 'cancelMEM',
     snapshot: service + 'snapshotMEM'
   },
@@ -182,7 +183,7 @@ export const FinancialRepository = {
   },
   MetalReceiptVoucher: {
     set2: service + 'set2MRV',
-    get: service + 'qryMTI'
+    qry: service + 'qryMTI'
   },
   MetalPaymentVoucher: {
     set2: service + 'set2MPV'

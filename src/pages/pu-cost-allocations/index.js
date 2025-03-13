@@ -68,7 +68,8 @@ const PuCostAllocations = () => {
     {
       field: 'baseAmount',
       headerName: labels.amount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'date',
@@ -90,13 +91,11 @@ const PuCostAllocations = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.CostAllocation,
-    action: async () => {
-      openForm()
-    },
+    action: openForm,
     hasDT: false
   })
 
-  const add = async () => {
+  const add = () => {
     proxyAction()
   }
 

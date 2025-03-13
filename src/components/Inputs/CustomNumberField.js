@@ -14,6 +14,7 @@ const CustomNumberField = ({
   label,
   onChange = () => {},
   onMouseLeave = () => {},
+  renderMouseLeave = false,
   readOnly = false,
   allowClear = false,
   decimalScale = 2,
@@ -31,6 +32,7 @@ const CustomNumberField = ({
   allowNegative = true,
   arrow = false,
   displayCycleButton = false,
+  align = 'left',
   handleButtonClick,
   cycleButtonLabel = '',
   ...props
@@ -39,13 +41,11 @@ const CustomNumberField = ({
   const name = props.name
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
   const [isFocused, setIsFocused] = useState(false)
-
   const inputRef = useRef(null)
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/
     const key = String.fromCharCode(e.which || e.keyCode)
-
     if (!regex.test(key)) {
       e.preventDefault()
     }
@@ -58,25 +58,18 @@ const CustomNumberField = ({
   }
 
   const handleNumberMouseLeave = e => {
-    if (!isEmptyFunction) {
+    if (!isEmptyFunction && !renderMouseLeave) {
       const value = formatNumber(e)
       if (value) e.target.value = value
-
       onMouseLeave(e)
     }
   }
 
   const formatNumber = e => {
-    let inputValue = e?.target?.value
+    const inputValue = e?.target?.value
     if (typeof inputValue !== 'string') return inputValue
-    const regex = /^[0-9,]+(\.\d+)?$/
-    if (inputValue && regex.test(inputValue)) {
-      inputValue = inputValue.replace(/[^0-9.]/g, '')
 
-      return getNumberWithoutCommas(inputValue)
-    }
-
-    return inputValue
+    return getNumberWithoutCommas(inputValue)
   }
 
   const handleInput = e => {
@@ -87,24 +80,13 @@ const CustomNumberField = ({
       if (inputValue?.length > maxLength - decimalScale) {
         e.target.value = value
       }
-
       onChange(e)
     }
   }
-
   const displayButtons = (!_readOnly || allowClear) && !props.disabled && (value || value === 0)
-
   useEffect(() => {
     if (value) formatNumber({ target: { value } })
   }, [])
-
-  const handleFocus = e => {
-    if (e.target.value === '0') {
-      e.target.value = ''
-      onChange({ ...e, target: { ...e.target, value: '' } })
-    }
-  }
-
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.select()
@@ -129,13 +111,14 @@ const CustomNumberField = ({
       helperText={helperText}
       required={_required}
       onInput={handleInput}
-      onFocus={() => setIsFocused(true)}
+      onFocus={() => {
+        setIsFocused(true)
+      }}
       onBlur={() => setIsFocused(false)}
       InputProps={{
         inputRef,
         autoFocus: false,
         inputProps: {
-          onFocus: handleFocus,
           min: min,
           max: max,
           type: arrow ? 'number' : 'text',
@@ -166,18 +149,19 @@ const CustomNumberField = ({
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
             border: !hasBorder && 'none',
-            borderColor: '#959d9e',
+            borderColor: '#959D9E',
             borderRadius: '6px'
           },
           height: `33px !important`
         },
         '& .MuiInputLabel-root': {
           fontSize: '0.90rem',
-          top: isFocused || value ? '0px' : '-3px'
+          top: '0px'
         },
         '& .MuiInputBase-input': {
           fontSize: '0.90rem',
-          color: 'black'
+          color: 'black',
+          textAlign: align
         },
         '& .MuiAutocomplete-clearIndicator': {
           pl: '0px !important',

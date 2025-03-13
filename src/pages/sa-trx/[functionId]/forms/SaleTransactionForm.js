@@ -450,7 +450,7 @@ export default function SaleTransactionForm({
         endpointId: InventoryRepository.Item.snapshot,
         parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
         displayField: 'sku',
-        valueField: 'recordId',
+        valueField: 'sku',
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -1698,7 +1698,7 @@ export default function SaleTransactionForm({
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     displayFieldWidth={2}
-                    readOnly={isPosted || formik?.values?.header?.dtId ? !formik?.values?.header?.commitItems : false}
+                    readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
                     required={
                       !formik?.values?.header.dtId ||
                       (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
@@ -1879,6 +1879,7 @@ export default function SaleTransactionForm({
             name='items'
             columns={columns}
             maxAccess={maxAccess}
+            allowDelete={!isPosted}
             disabled={isPosted || !formik.values.header.clientId || !formik.values.header.currencyId}
           />
         </Grow>

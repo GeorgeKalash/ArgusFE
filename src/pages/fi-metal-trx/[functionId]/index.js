@@ -8,22 +8,20 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import { useRouter } from 'next/router'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { ControlContext } from 'src/providers/ControlContext'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import MetalTrxFinancialForm from './form/MetalTrxFinancialForm'
+import { Router } from 'src/lib/useRouter'
 
-const MetalTrxFinancial = () => {
+export default function MetalTrxFinancial() {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
 
-  const router = useRouter()
-  const { functionId } = router.query
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -44,9 +42,8 @@ const MetalTrxFinancial = () => {
         return ResourceIds.MetalReceiptVoucher
       case SystemFunction.MetalPaymentVoucher:
         return ResourceIds.MetalPaymentVoucher
-
       default:
-        return null
+        return
     }
   }
 
@@ -109,24 +106,31 @@ const MetalTrxFinancial = () => {
       flex: 1
     },
     {
+      field: 'siteName',
+      headerName: labels.siteName,
+      flex: 1
+    },
+    {
       field: 'accountRef',
       headerName: labels.accountRef,
       flex: 1
     },
     {
       field: 'accountName',
-      headerName: labels.accountRef,
+      headerName: labels.accountName,
       flex: 1
     },
     {
       field: 'qty',
       headerName: labels.qty,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'creditAmount',
       headerName: labels.creditAmount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
 
     {
@@ -137,7 +141,7 @@ const MetalTrxFinancial = () => {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId, obj?.date)
+    openForm(obj?.recordId)
   }
 
   const getcorrectLabel = functionId => {
@@ -150,13 +154,12 @@ const MetalTrxFinancial = () => {
     }
   }
 
-  function openForm(recordId, date) {
+  function openForm(recordId) {
     stack({
       Component: MetalTrxFinancialForm,
       props: {
         labels,
-        recordId: recordId,
-        date,
+        recordId,
         access,
         functionId
       },
@@ -176,14 +179,12 @@ const MetalTrxFinancial = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: FinancialRepository.MetalTrx.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: FinancialRepository.MetalTrx.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const onApply = ({ search, rpbParams }) => {
@@ -236,5 +237,3 @@ const MetalTrxFinancial = () => {
     </VertLayout>
   )
 }
-
-export default MetalTrxFinancial

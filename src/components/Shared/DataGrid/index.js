@@ -2,13 +2,14 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton } from '@mui/material'
 import components from './components'
-import { CacheDataProvider } from 'src/providers/CacheDataContext'
+import { CacheStoreProvider } from 'src/providers/CacheStoreContext'
 import { GridDeleteIcon } from '@mui/x-data-grid'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { ControlContext } from 'src/providers/ControlContext'
+import { SystemChecks } from 'src/resources/SystemChecks'
 
 export function DataGrid({
   name, // maxAccess
@@ -21,6 +22,7 @@ export function DataGrid({
   disabled = false,
   allowDelete = true,
   allowAddNewLine = true,
+  deleteHideCondition = '',
   onSelectionChange,
   rowSelectionModel,
   autoDelete,
@@ -33,6 +35,8 @@ export function DataGrid({
   const isDup = useRef(null)
 
   const { platformLabels } = useContext(ControlContext)
+  const { systemChecks } = useContext(ControlContext)
+  const viewDecimals = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
 
   const { stack } = useWindow()
 
@@ -414,6 +418,13 @@ export function DataGrid({
       process(params, oldRow, setData)
     }
 
+    const formatNumber = value => {
+      return !value ? '' : parseFloat(value.toString().replace(/,/g, '')).toString()
+    }
+
+    const formattedValue =
+      viewDecimals && column.colDef.component === 'numberfield' ? formatNumber(params.value) : params.value
+
     return (
       <Box
         sx={{
@@ -428,7 +439,7 @@ export function DataGrid({
             'center'
         }}
       >
-        <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
+        <Component {...params} value={formattedValue} column={column.colDef} updateRow={updateRow} update={update} />
       </Box>
     )
   }
@@ -524,6 +535,14 @@ export function DataGrid({
   }
 
   const ActionCellRenderer = params => {
+    if (deleteHideCondition) {
+      const shouldHide = Object.entries(deleteHideCondition).some(([key, value]) =>
+        Array.isArray(value) ? value.includes(params.data[key]) : params.data[key] === value
+      )
+
+      if (shouldHide) return null
+    }
+
     return (
       <Box
         sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}
@@ -668,7 +687,7 @@ export function DataGrid({
 
   const setData = (changes, params) => {
     const id = params.node?.id
-
+    lastCellStopped.current = ''
     const rowNode = params.api.getRowNode(id)
     if (rowNode) {
       const currentData = rowNode.data
@@ -696,7 +715,7 @@ export function DataGrid({
 
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>
-      <CacheDataProvider>
+      <CacheStoreProvider>
         <Box
           className='ag-theme-alpine'
           style={{ height: '100%', width: '100%' }}
@@ -750,7 +769,7 @@ export function DataGrid({
             />
           )}
         </Box>
-      </CacheDataProvider>
+      </CacheStoreProvider>
     </Box>
   )
 }

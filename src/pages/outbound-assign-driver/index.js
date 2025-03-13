@@ -11,7 +11,9 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const OutboundAssignDriver = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -31,14 +33,21 @@ const OutboundAssignDriver = () => {
     validationSchema: yup.object({
       tripList: yup.array().of(
         yup.object().shape({
-          vehicleId: yup.string().required()
+          departureTime: yup.string().required()
         })
       )
     }),
     onSubmit: async obj => {
+      const list = obj.tripList?.map(item => {
+        return {
+          ...item,
+          departureTime: formatDateToApi(item?.departureTime)
+        }
+      })
+
       const res = await postRequest({
         extension: DeliveryRepository.Trip.assign,
-        record: JSON.stringify({ tripList: obj.tripList })
+        record: JSON.stringify({ tripList: list })
       })
       toast.success(platformLabels.Edited)
       refetchForm(res.recordId)
@@ -57,7 +66,8 @@ const OutboundAssignDriver = () => {
             return {
               ...item,
               id: index + 1,
-              date: formatDateFromApi(item?.date)
+              date: formatDateFromApi(item?.date),
+              departureTime: formatDateFromApi(item?.departureTime)
             }
           })
         : []
@@ -80,6 +90,11 @@ const OutboundAssignDriver = () => {
       props: {
         readOnly: true
       }
+    },
+    {
+      component: 'date',
+      name: 'departureTime',
+      label: labels.departureDate
     },
     {
       component: 'resourcecombobox',
@@ -119,6 +134,15 @@ const OutboundAssignDriver = () => {
     }
   ]
 
+  const actions = [
+    {
+      key: 'Refresh',
+      condition: true,
+      onClick: () => {
+        refetchForm()
+      }
+    }
+  ]
   useEffect(() => {
     refetchForm()
   }, [])
@@ -126,6 +150,9 @@ const OutboundAssignDriver = () => {
   return (
     <FormShell form={formik} infoVisible={false} visibleClear={false} isCleared={false} isSavedClear={false}>
       <VertLayout>
+        <Fixed>
+          <GridToolbar actions={actions} />
+        </Fixed>
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('tripList', value)}
@@ -135,6 +162,7 @@ const OutboundAssignDriver = () => {
             name='tripList'
             allowDelete={false}
             allowAddNewLine={false}
+            maxAccess={maxAccess}
           />
         </Grow>
       </VertLayout>

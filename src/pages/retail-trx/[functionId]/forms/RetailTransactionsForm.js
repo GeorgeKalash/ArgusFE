@@ -653,7 +653,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
           _siteId: totalQty > 0 || SystemFunction.RetailInvoice === functionId ? 0 : formik.values?.header?.siteId || 0
         },
         displayField: 'sku',
-        valueField: 'recordId',
+        valueField: 'sku',
         mapping: [
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -1068,6 +1068,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     })()
   }, [])
 
+  console.log(formik)
+
   return (
     <FormShell
       resourceId={getResourceId[parseInt(functionId)]}
@@ -1160,7 +1162,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.spId', newValue?.spId)
                     }}
-                    error={formik.errors.spId && Boolean(formik.errors?.header?.spId)}
+                    error={formik.touched?.header?.spId && Boolean(formik.errors?.header?.spId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1407,6 +1409,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     value={formik.values.header.deliveryNotes}
                     rows={3.5}
                     maxAccess={maxAccess}
+                    readOnly={isPosted}
                     onChange={e => formik.setFieldValue('header.deliveryNotes', e.target.value)}
                     onClear={() => formik.setFieldValue('header.deliveryNotes', '')}
                   />
@@ -1443,6 +1446,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
             columns={columns}
             maxAccess={maxAccess}
             disabled={isPosted || !formik.values.header.currencyId}
+            allowDelete={!isPosted}
           />
         </Grow>
 
@@ -1462,6 +1466,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                 }}
                 columns={cashColumns}
                 maxAccess={maxAccess}
+                disabled={isPosted}
+                allowDelete={!isPosted}
               />
             </Grid>
 

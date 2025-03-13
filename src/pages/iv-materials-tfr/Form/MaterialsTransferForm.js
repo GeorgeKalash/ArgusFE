@@ -144,8 +144,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         .of(
           yup.object().shape({
             sku: yup.string().required(),
-            qty: yup.string().required(),
-            msId: yup.string().required()
+            qty: yup.string().required()
           })
         )
         .required()
@@ -161,7 +160,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         return {
           ...transferDetail,
           seqNo: index + 1,
-          transferId: formik.values.recordId || 0
+          transferId: formik.values.recordId || 0,
+          unitCost: parseFloat(transferDetail.unitCost),
+          totalCost: parseFloat(transferDetail.totalCost)
         }
       })
       if (values.fromSiteId === values.toSiteId) {
@@ -184,13 +185,12 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         record: JSON.stringify(resultObject)
       })
 
+      invalidate()
       if (!values.recordId) {
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', res.recordId)
 
         await refetchForm(res.recordId)
-
-        invalidate()
       } else {
         if (formik.values.notificationGroupId) {
           handleNotificationSubmission(res.recordId, formik.values.reference, formik, 1)
@@ -245,20 +245,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     else return 0
   }
 
-  function calcUnitCost(rec, totalCost) {
-    if (rec.priceType === 1) {
-      rec.unitCost = totalCost / rec.qty
-    } else if (rec.priceType === 2) {
-      rec.unitCost = totalCost / (rec.qty * rec.volume)
-    } else if (rec.priceType === 3) {
-      rec.unitCost = totalCost / (rec.qty * rec.weight)
-    } else {
-      rec.unitCost = 0
-    }
-
-    return rec.unitCost
-  }
-
   async function getDTD(dtId) {
     const res = await getRequest({
       extension: InventoryRepository.DocumentTypeDefaults.get,
@@ -306,9 +292,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   async function getFilteredMU(itemId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.transfers?.find(
-      transfer => parseInt(transfer.itemId) === itemId
-    )?.msId
+    const currentItemId = formik.values.transfers?.find(transfer => parseInt(transfer.itemId) === itemId)?.msId
 
     const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
     filteredMeasurements.current = arrayMU
@@ -321,11 +305,11 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       name: 'sku',
       props: {
         endpointId: InventoryRepository.Item.snapshot,
-        valueField: 'recordId',
+        valueField: 'sku',
         displayField: 'sku',
         mandatory: true,
         readOnly: isClosed,
-        displayFieldWidth: 4,
+        displayFieldWidth: 3,
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'msId', to: 'msId' },
@@ -472,16 +456,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       label: labels.unitCost,
       name: 'unitCost',
       props: {
-        readOnly: isClosed
-      },
-      async onChange({ row: { update, newRow } }) {
-        if (newRow) {
-          const totalCost = calcTotalCost(newRow)
-
-          update({
-            totalCost
-          })
-        }
+        readOnly: true
       }
     },
     {
@@ -489,16 +464,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       label: labels.totalCost,
       name: 'totalCost',
       props: {
-        readOnly: isClosed
-      },
-      async onChange({ row: { update, newRow } }) {
-        if (newRow?.totalCost) {
-          const unitCost = calcUnitCost(newRow, newRow.totalCost)
-
-          update({
-            unitCost: unitCost.toFixed(2)
-          })
-        }
+        readOnly: true
       }
     }
   ]

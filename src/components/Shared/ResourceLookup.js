@@ -36,7 +36,7 @@ export const ResourceLookup = ({
       })
         .then(res => {
           if (filter) {
-            res.list = res.list.filter(item => {
+            res.list = res?.list?.filter(item => {
               return Object.keys(filter).every(key => {
                 return parseInt(item[key]) == parseInt(filter[key]) || item[key] == filter[key]
               })
