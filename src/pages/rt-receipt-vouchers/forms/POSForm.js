@@ -7,13 +7,15 @@ import FormShell from 'src/components/Shared/FormShell'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { SystemFunction } from 'src/resources/SystemFunction'
 import { useForm } from 'src/hooks/form'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function POSForm({ labels, form, maxAccess, amount }) {
   const { getRequestFullEndPoint, getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   const { formik } = useForm({
     maxAccess: maxAccess,
@@ -31,7 +33,10 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
       a5: null,
       ipaddressOrPort: process.env.NEXT_PUBLIC_POS_PORT,
       log: 1,
-      posSelected: 1
+      posSelected: 1,
+      cashAccountId: null,
+      cashAccountRef: null,
+      cashAccountName: null
     },
     onSubmit: async obj => {}
   })
@@ -48,13 +53,25 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
       onClick: () => {}
     }
   ]
+  async function fillCashAccount() {
+    if (!cashAccountId) return
+
+    const res = await getRequest({
+      extension: CashBankRepository.CashAccount.get,
+      parameters: `_recordId=${cashAccountId}`
+    })
+    formik.setFieldValue('cashAccountId', cashAccountId)
+    formik.setFieldValue('cashAccountRef', res?.record?.reference)
+    formik.setFieldValue('cashAccountName', res?.record?.name)
+  }
   useEffect(() => {
     ;(async function () {
-      // const response = await getRequestFullEndPoint({
-      //   endPoint: 'checkDevice?_port=' + process.env.NEXT_PUBLIC_POS_PORT
-      // })
-      // if (response.data) {
-      // }
+      await fillCashAccount()
+
+      const response = await getRequestFullEndPoint({
+        endPoint: 'checkDevice?_port=' + process.env.NEXT_PUBLIC_POS_PORT
+      })
+      formik.setFieldValue('posSelected', response?.data ? 2 : 1)
     })()
   }, [])
 
@@ -101,25 +118,43 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
 
           <Grid item xs={12}>
             <RadioGroup row value={formik.values.posSelected} defaultValue={1}>
-              <FormControlLabel value={1} control={<Radio />} label={labels.manualPOS} />
-              <FormControlLabel value={2} control={<Radio />} label={labels.apiPOS} />
+              <FormControlLabel
+                value={1}
+                control={<Radio />}
+                label={labels.manualPOS}
+                disabled={formik.values.posSelected == 2}
+              />
+              <FormControlLabel
+                value={2}
+                control={<Radio />}
+                label={labels.apiPOS}
+                disabled={formik.values.posSelected == 2}
+              />
             </RadioGroup>
           </Grid>
           <Grid item xs={12}>
             <ResourceLookup
-              endpointId={SaleRepository.Client.snapshot}
+              endpointId={CashBankRepository.CashAccount.snapshot}
+              parameters={{
+                _type: 2
+              }}
               valueField='reference'
               displayField='name'
-              name='posAccountId'
+              name='cashAccountId'
               label={labels.posAccount}
               form={formik}
-              required
+              readOnly={formik.values.posSelected == 2}
               displayFieldWidth={6}
-              valueShow='posAccountRef'
-              secondValueShow='posAccountName'
+              valueShow='cashAccountRef'
+              secondValueShow='cashAccountName'
               editMode={true}
               maxAccess={maxAccess}
-              errorCheck={'posAccountId'}
+              errorCheck={'cashAccountId'}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('cashAccountId', newValue?.recordId)
+                formik.setFieldValue('cashAccountRef', newValue?.reference)
+                formik.setFieldValue('cashAccountName', newValue?.name)
+              }}
             />
           </Grid>
           <Grid item xs={12}>
@@ -138,6 +173,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
               label={labels?.posRef}
               value={formik?.posRef}
               maxAccess={maxAccess}
+              readOnly={formik.values.posSelected == 2}
               error={formik.touched.posRef && Boolean(formik.errors.posRef)}
             />
           </Grid>
