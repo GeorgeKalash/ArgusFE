@@ -109,10 +109,9 @@ const CorrespondentDispersal = () => {
               ]}
               values={formik.values}
               required
-              onClear={() => formik.setFieldValue('corId', 0)}
               onChange={(event, newValue) => {
                 getData(newValue?.recordId)
-                formik.setFieldValue('corId', newValue?.recordId || 0)
+                formik.setFieldValue('corId', newValue?.recordId || null)
               }}
             />
           </Grid>
