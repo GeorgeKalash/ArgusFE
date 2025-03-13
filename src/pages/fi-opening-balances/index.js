@@ -120,14 +120,9 @@ const FiOpeningBalance = () => {
     })
   }
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
-    refetch()
-  }
-
   return (
     <VertLayout>
-      <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'FIOBA'} />
+      <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'FIOBA'} />
       <Table
         columns={columns}
         gridData={data}

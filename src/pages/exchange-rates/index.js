@@ -118,15 +118,10 @@ const ExchangeRates = () => {
     })
   }
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'MCED'} />
+        <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'MCED'} />
       </Fixed>
       <Grow>
         <Table

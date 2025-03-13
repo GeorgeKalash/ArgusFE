@@ -38,8 +38,7 @@ const ProductionSheet = () => {
     refetch,
     access,
     invalidate,
-    filterBy,
-    clearFilter
+    filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.ProductionSheet.qry,
@@ -142,37 +141,10 @@ const ProductionSheet = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          onAdd={add}
-          labels={_labels}
-          maxAccess={access}
-          onApply={onApply}
-          reportName={'MFPST'}
-        />
+        <RPBGridToolbar onAdd={add} labels={_labels} maxAccess={access} reportName={'MFPST'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

@@ -35,7 +35,6 @@ export default function CurrencyTrading() {
   const {
     query: { data },
     filterBy,
-    clearFilter,
     labels: labels,
     access,
     paginationParameters,
@@ -94,25 +93,6 @@ export default function CurrencyTrading() {
     toast.success('Record Deleted Successfully')
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   const columns = [
     {
       field: 'date',
@@ -161,14 +141,7 @@ export default function CurrencyTrading() {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'FIRV'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'FIRV'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

@@ -26,7 +26,6 @@ const SalesQuotations = () => {
     query: { data },
     filterBy,
     refetch,
-    clearFilter,
     labels,
     access,
     paginationParameters,
@@ -168,36 +167,10 @@ const SalesQuotations = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'SAQT'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'SAQT'} />
       </Fixed>
       <Grow>
         <Table

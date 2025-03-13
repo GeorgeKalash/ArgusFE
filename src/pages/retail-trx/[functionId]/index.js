@@ -39,7 +39,6 @@ const RetailTrx = () => {
     query: { data },
     filterBy,
     refetch,
-    clearFilter,
     labels,
     access,
     paginationParameters,
@@ -196,25 +195,6 @@ const RetailTrx = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   async function fetchPOSInfo() {
     const posInfo = await getPOSUser()
     posObj.current = posInfo?.record
@@ -229,14 +209,7 @@ const RetailTrx = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'PSIVC'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'PSIVC'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
