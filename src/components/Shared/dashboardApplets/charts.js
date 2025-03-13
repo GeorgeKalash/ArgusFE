@@ -91,7 +91,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
         datasets: [
           {
             label,
-            data: data.map(value => (value / globalMax) * 100),
+            data: data,
             backgroundColor: color || 'rgb(88, 2, 1)',
             hoverBackgroundColor: hoverColor || 'rgb(113, 27, 26)',
             borderWidth: 1
@@ -100,12 +100,6 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
       },
       options: {
         indexAxis: 'y',
-        scales: {
-          x: {
-            suggestedMin: 0,
-            suggestedMax: 100
-          }
-        },
         plugins: {
           datalabels: {
             anchor: context => {
@@ -118,7 +112,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 50 ? 'center' : 'end'
+              return barWidth >= 65 ? 'center' : 'end'
             },
             align: context => {
               const chart = context.chart
@@ -130,7 +124,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 50 ? 'center' : 'right'
+              return barWidth >= 65 ? 'center' : 'right'
             },
             color: context => {
               const chart = context.chart
@@ -142,7 +136,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 50 ? '#fff' : '#000'
+              return barWidth >= 65 ? '#fff' : '#000'
             },
             offset: 0,
             font: {

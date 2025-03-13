@@ -6,6 +6,7 @@ import { HorizontalBarChartDark } from '../../components/Shared/dashboardApplets
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { debounce } from 'lodash'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Frame = styled.div`
   display: flex;
@@ -41,10 +42,10 @@ const Title = styled.h2`
 
 const DashboardLayout = () => {
   const { getRequest, LoadingOverlay } = useContext(RequestsContext)
+  const { defaultsData } = useContext(ControlContext)
   const [chartsData, setChartsData] = useState([])
   const [loading, setLoading] = useState(true)
   const { labels } = useResourceParams({ datasetId: ResourceIds.UserDashboard })
-
   const debouncedCloseLoading = debounce(() => setLoading(false), 500)
 
   useEffect(() => {
@@ -60,27 +61,31 @@ const DashboardLayout = () => {
         return {
           zoneName: zone.zoneName,
           volumes:
-            response?.record?.saleZoneOrderVolumeSummaries?.map(summary => ({
-              subZone: summary.zoneName ?? '',
-              volume: summary.volume ?? 0
-            })) ?? []
+            response?.record?.saleZoneOrderVolumeSummaries?.map(summary => {
+              return {
+                subZone: summary.zoneName ?? '',
+                volume: summary.volume
+              }
+            }) ?? []
         }
       })
 
       const allChartsData = await Promise.all(volumeRequests)
 
-      setChartsData(
-        allChartsData.map((chart, index) => ({
-          zoneName: rootResponse.list[index]?.name ?? 'Unknown Zone',
-          volumes: chart.volumes.filter(v => v.subZone && v.volume !== null && v.volume !== undefined)
-        }))
-      )
+      const minZoneVolumeDBObj = defaultsData?.list?.find(item => item.key === 'minZoneVolumeDB')
+      const minZoneVolumeDB = minZoneVolumeDBObj ? Number(minZoneVolumeDBObj.value) || 0 : 0
 
+      const filteredChartsData = allChartsData.map((chart, index) => ({
+        zoneName: rootResponse.list[index]?.name ?? 'Unknown Zone',
+        volumes: chart.volumes.filter(v => v.subZone).slice(0, minZoneVolumeDB)
+      }))
+
+      setChartsData(filteredChartsData)
       debouncedCloseLoading()
     }
 
     fetchData()
-  }, [])
+  }, [defaultsData])
 
   if (loading) return <LoadingOverlay />
 
