@@ -102,7 +102,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId }
     const { plantId, countryId, currencyId, plantName, countryName } = formik.values
     const dispersalModes = await getDispersalMode()
 
-    const resData = await fetchData(countryId, currencyId, plantId)?.list || []
+    const resData = (await fetchData(countryId, currencyId, plantId))?.list || []
 
     if (plantId && countryId && currencyId) {
       formik.setFieldValue(
@@ -169,8 +169,9 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId }
 
     if (countryId && !plantId && !currencyId) {
       const plants = await fetchPlants(plantId, plantName)
+      if (!plants.length) return
       const currencies = await fetchCurrencies(countryId)
-      if (!plants.length || !currencies.length) return
+      if (!currencies.length) return
 
       formik.setFieldValue(
         'items',
@@ -307,7 +308,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId }
     }
 
     if (plantId && !countryId && currencyId) {
-      const countries = await fetchCountries(countryId, countryName).filter(country => country.recordId)
+      const countries = (await fetchCountries(countryId, countryName)).filter(country => country.recordId)
       if (!countries.length) return
 
       formik.setFieldValue(
