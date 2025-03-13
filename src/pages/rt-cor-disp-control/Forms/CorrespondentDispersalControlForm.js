@@ -16,8 +16,9 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 import { CommonContext } from 'src/providers/CommonContext'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId }) => {
+const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, corName }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
@@ -484,14 +485,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId }
       props: {
         readOnly: true
       }
-    },
-    {
-      component: 'textfield',
-      name: 'corName',
-      label: labels.corName,
-      props: {
-        readOnly: true
-      }
     }
   ]
 
@@ -560,6 +553,15 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId }
                 formik.setFieldValue('plantName', newValue?.name || 0)
               }}
               error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+            />
+          </Grid>
+          <Grid item xs={2}>
+            <CustomTextField
+              name='corName'
+              label={labels.corName}
+              value={corName}
+              readOnly
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={2}>

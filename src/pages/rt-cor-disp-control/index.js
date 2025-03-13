@@ -44,13 +44,15 @@ const CorrespondentDispersal = () => {
     })
   }
 
-  function openForm(recordId, interfaceId) {
+  function openForm(obj) {
+    console.log(obj)
     stack({
       Component: CorrespondentDispersalForm,
       props: {
         labels: labels,
-        recordId,
-        interfaceId,
+        recordId: obj?.recordId,
+        interfaceId: obj?.interfaceId,
+        corName: obj?.name,
         maxAccess: access
       },
       width: 1200,
@@ -60,7 +62,7 @@ const CorrespondentDispersal = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId, obj?.interfaceId)
+    openForm(obj)
   }
 
   return (
