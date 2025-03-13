@@ -85,7 +85,7 @@ const DashboardLayout = () => {
     }
 
     fetchData()
-  }, [defaultsData])
+  }, [])
 
   if (loading) return <LoadingOverlay />
 
