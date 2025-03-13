@@ -45,7 +45,6 @@ const CorrespondentDispersal = () => {
   }
 
   function openForm(obj) {
-    console.log(obj)
     stack({
       Component: CorrespondentDispersalForm,
       props: {
