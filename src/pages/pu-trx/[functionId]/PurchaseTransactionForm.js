@@ -84,7 +84,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       functionId: functionId,
       recordId: null,
       dtId: documentType?.dtId,
-      reference: '',
+      reference: null,
       date: new Date(),
       dueDate: new Date(),
       plantId: null,
