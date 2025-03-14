@@ -52,7 +52,6 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, u
       onBlur={() => {
         typing.current = false
       }}
-      renderMouseLeave={true}
       handleButtonClick={handleIconClick}
       isPercentIcon={isPercentIcon}
       {...props}
