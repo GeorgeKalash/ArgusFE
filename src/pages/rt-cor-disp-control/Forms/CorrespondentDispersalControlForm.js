@@ -504,7 +504,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2} padding={2}>
+          <Grid container spacing={2}>
             <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={RemittanceBankInterface.Countries.qry}
@@ -587,9 +587,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
             columns={columns}
           />
         </Grow>
-        {/* <Fixed>
-          <WindowToolbar onSave={formik.handleSubmit} isSaved={true} smallBox={true} />
-        </Fixed> */}
       </VertLayout>
     </FormShell>
   )
