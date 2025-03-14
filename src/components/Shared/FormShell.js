@@ -88,8 +88,8 @@ export default function FormShell({
     : true
 
   useEffect(() => {
-    if (maxAccess) {
-      if (!loading && editMode && maxAccess) {
+    if (maxAccess || maxAccess === undefined) {
+      if (!loading && editMode) {
         const timer = setTimeout(() => {
           setShowOverlay(true)
         }, 100)
