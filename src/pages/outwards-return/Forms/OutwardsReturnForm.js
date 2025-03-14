@@ -105,6 +105,7 @@ export default function OutwardsReturnForm({
       corExRate: null,
       commission: null,
       vatAmount: null,
+      reasonId: null,
       tdAmount: null,
       amount: null,
       exRate: null,
@@ -131,6 +132,7 @@ export default function OutwardsReturnForm({
       dispersalName: yup.string().required(),
       vatAmount: yup.string().required(),
       settlementStatus: yup.number().required(),
+      reasonId: yup.number().required(),
       lcAmount: yup
         .string()
         .required()
@@ -661,19 +663,59 @@ export default function OutwardsReturnForm({
                       readOnly={isPosted || isClosed || isOpenOutwards}
                       maxAccess={maxAccess}
                       onChange={(event, newValue) => {
-                        const originalLcAmount = formik.values.originalLcAmount
-
                         formik.setFieldValue('requestedBy', newValue?.key)
+                      }}
+                      error={formik.touched.requestedBy && Boolean(formik.errors.requestedBy)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={RemittanceOutwardsRepository.OutwardReturnReason.qry}
+                      name='reasonId'
+                      label={labels.returnReason}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      filter={item => {
+                        const requestedByKey = formik.values.requestedBy
 
-                        if (newValue?.key === '1') {
-                          formik.setFieldValue('lcAmount', formik?.values?.amount)
+                        if (requestedByKey === '1') {
+                          return item.company
+                        } else if (requestedByKey === '2') {
+                          return item.correspondant
+                        } else if (requestedByKey === '3') {
+                          return item.client
+                        }
+
+                        return true
+                      }}
+                      values={formik.values}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('reasonId', newValue ? newValue?.recordId : '')
+                        
+                        if (newValue?.rateStatus == '1') {
+                          formik.setFieldValue('lcAmount', formik.values.amount)
                           getExRateChangeStatus(formik?.values?.amount, formik?.values?.amount)
-                        } else if (newValue?.key === '3') {
-                          formik.setFieldValue('lcAmount', originalLcAmount)
+                        } else if (newValue?.rateStatus == '2') {
+                          formik.setFieldValue('lcAmount', formik.values.derivedLcAmount)
+                          getExRateChangeStatus(formik?.values?.amount, formik?.values?.derivedLcAmount)
+                        } else if (newValue?.rateStatus == '3') {
+                          const originalLcAmount = formik.values.originalLcAmount
+
+                          formik.setFieldValue(
+                            'lcAmount',
+                            Math.min(formik.values.amount, formik.values.derivedLcAmount)
+                          )
                           getExRateChangeStatus(formik?.values?.amount, originalLcAmount)
                         }
                       }}
-                      error={formik.touched.requestedBy && Boolean(formik.errors.requestedBy)}
+                      required
+                      maxAccess={maxAccess}
+                      error={formik.touched.reasonId && Boolean(formik.errors.reasonId)}
+                      readOnly={isPosted || isClosed || isOpenOutwards || !formik.values.requestedBy}
                     />
                   </Grid>
                   <Grid item xs={12}>
