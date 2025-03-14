@@ -1,6 +1,12 @@
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function ResourceComboBoxEdit({ id, column: { props, field }, value, updateRow, update }) {
+export default function ResourceComboBoxEdit({ id, column: { props, field, variableParameters }, value, updateRow, update, data }) {
+  let dynamicParams = ''
+
+  if (variableParameters) {
+    dynamicParams = variableParameters.map(param => `_${param.key}=${data[param.value] || 0}`).join('&')
+  }
+
   let changes = props?.mapping
     ? props.mapping
         ?.map(({ from, to }) => ({
@@ -17,6 +23,7 @@ export default function ResourceComboBoxEdit({ id, column: { props, field }, val
       dataGrid={true}
       label={''}
       hasBorder={false}
+      dynamicParams={dynamicParams}
       onChange={(e, value) => {
         if (props?.mapping) {
           let changes = props.mapping

@@ -12,6 +12,7 @@ export default function ResourceComboBox({
   valueField = 'recordId',
   values = {},
   parameters = '_filter=',
+  dynamicParams,
   filter = () => true,
   dataGrid,
   value,
@@ -34,12 +35,15 @@ export default function ResourceComboBox({
   const finalItemsListRef = useRef([])
 
   const key = endpointId || datasetId
+  const noCache = Boolean(dynamicParams)
 
   function fetch({ datasetId, endpointId, parameters }) {
     if (endpointId) {
+      const fullParameters = dynamicParams ? parameters + '&' + dynamicParams : parameters
+
       return getRequest({
         extension: endpointId,
-        parameters,
+        parameters: fullParameters,
         disableLoading: true
       })
     } else if (datasetId) {
@@ -65,9 +69,9 @@ export default function ResourceComboBox({
       setIsLoading(true)
 
       const data =
-        cacheStore?.[key] && !refresh
+        !noCache && cacheStore?.[key] && !refresh
           ? cacheStore?.[key]
-          : cacheAvailable
+          : cacheAvailable && !noCache
           ? await fetchWithCache({
               queryKey: [datasetId || endpointId, parameters],
               queryFn: () => fetch({ datasetId, endpointId, parameters })
@@ -76,7 +80,7 @@ export default function ResourceComboBox({
 
       setApiResponse(!!datasetId ? { list: data } : data)
 
-      if (!cacheStore?.[key]) {
+      if (!cacheStore?.[key] || noCache) {
         endpointId ? updateCacheStore(endpointId, data.list) : updateCacheStore(datasetId, data)
       }
       if (typeof setData == 'function') setData(!!datasetId ? { list: data } : data)
@@ -84,7 +88,7 @@ export default function ResourceComboBox({
     }
   }
   let finalItemsList = data ? data : reducer(apiResponse)?.filter?.(filter)
-  finalItemsList = cacheStore?.[key] ? cacheStore?.[key] : finalItemsList
+  finalItemsList = cacheStore?.[key] && !noCache ? cacheStore?.[key] : finalItemsList
 
   finalItemsListRef.current = finalItemsList || []
 
