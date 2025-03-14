@@ -1240,10 +1240,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }
 
   const setDefaultFields = () => {
-    formik.setFieldValue('header.currencyId', defaultsDataState.currencyId)
-    formik.setFieldValue('header.plantId', userDefaultsDataState.plantId)
-    formik.setFieldValue('header.spId', userDefaultsDataState.spId)
-    formik.setFieldValue('header.siteId', userDefaultsDataState.siteId ?? null)
+    formik.setFieldValue('header.currencyId', defaultsDataState?.currencyId || null)
+    formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
+    formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
+    formik.setFieldValue('header.siteId', userDefaultsDataState?.siteId || null)
   }
 
   const getResourceId = functionId => {
