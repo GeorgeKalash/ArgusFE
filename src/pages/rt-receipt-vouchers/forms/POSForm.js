@@ -55,12 +55,12 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
     }
   ]
   async function onReceived() {
-    axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/start_PUR`, {
+    axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/start_PUR`, {
       record: JSON.stringify(formik.values)
     })
   }
   async function onCancel() {
-    await axios.get(`${process.env.NEXT_PUBLIC_POS_URL}/cancelTransaction`)
+    await axios.get(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/cancelTransaction`)
   }
 
   async function fillCashAccount() {
@@ -79,7 +79,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
       await fillCashAccount()
 
       const response = await getRequestFullEndPoint({
-        endPoint: `${process.env.NEXT_PUBLIC_POS_URL}/checkDevice?_port=${process.env.NEXT_PUBLIC_POS_PORT}`
+        endPoint: `${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/checkDevice?_port=${process.env.NEXT_PUBLIC_POS_PORT}`
       })
       formik.setFieldValue('posSelected', response?.data ? 2 : 1)
     })()
