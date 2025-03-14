@@ -61,13 +61,11 @@ const GenerateOutboundTransportation2 = () => {
     validateOnChange: true,
     validationSchema: yup.object({
       departureDate: yup.date().required(),
-      selectedTrucks: yup
-        .array()
-        .of(
-          yup.object().shape({
-            overloadMargins: yup.number().min(0).max(100)
-          })
-        )
+      selectedTrucks: yup.array().of(
+        yup.object().shape({
+          overloadMargins: yup.number().min(0).max(100)
+        })
+      )
     }),
     onSubmit: async obj => {
       const data = {
@@ -386,6 +384,9 @@ const GenerateOutboundTransportation2 = () => {
   }, [sortedZones])
 
   const onPreviewOutbounds = async szIds => {
+    if (formik.errors?.selectedTrucks?.length > 0) {
+      return
+    }
     const volumes = formik.values.selectedTrucks?.map(truck => truck.volume).join(',')
     const overloads = formik.values.selectedTrucks?.map(truck => truck?.overloadMargins || 0).join(',')
 
@@ -693,7 +694,6 @@ const GenerateOutboundTransportation2 = () => {
         </Grow>
         <Fixed>
           <Grid container spacing={2} mt={2}>
-            <Grid item xs={8.75}></Grid>
             <Grid item xs={0.65}>
               <CustomButton
                 onClick={() => resetForm()}
@@ -705,6 +705,16 @@ const GenerateOutboundTransportation2 = () => {
             </Grid>
             <Grid item xs={0.65}>
               <CustomButton
+                onClick={handleImport}
+                label={platformLabels.import}
+                tooltipText={platformLabels.import}
+                color='#231f20'
+                image={'import.png'}
+              />
+            </Grid>
+            <Grid item xs={8.75}></Grid>
+            <Grid item xs={0.65}>
+              <CustomButton
                 onClick={openForm}
                 tooltipText={labels.unallocatedOrders}
                 label={labels.unallocatedOrders}
@@ -714,15 +724,6 @@ const GenerateOutboundTransportation2 = () => {
               />
             </Grid>
 
-            <Grid item xs={0.65}>
-              <CustomButton
-                onClick={handleImport}
-                label={platformLabels.import}
-                tooltipText={platformLabels.import}
-                color='#231f20'
-                image={'import.png'}
-              />
-            </Grid>
             <Grid item xs={0.65}>
               <CustomButton
                 onClick={() => onPreviewOutbounds(sortedZoneIds)}
