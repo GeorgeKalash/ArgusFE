@@ -175,7 +175,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
       const plants = await fetchPlants(plantId, plantName)
       if (!plants.length) return
       const currencies = await fetchCurrencies(countryId)
-      if (!currencies.length) return
+      if (!currencies.length) return formik.setFieldValue('items', [])
 
       formik.setFieldValue(
         'items',
