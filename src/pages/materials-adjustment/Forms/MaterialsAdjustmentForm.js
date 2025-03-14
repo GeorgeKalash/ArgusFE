@@ -135,7 +135,6 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       }, 0)
       .toFixed(2)
   )
-
   async function onPost() {
     await postRequest({
       extension: InventoryRepository.MaterialsAdjustment.post,
