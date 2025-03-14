@@ -60,7 +60,14 @@ const GenerateOutboundTransportation2 = () => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      departureDate: yup.date().required()
+      departureDate: yup.date().required(),
+      selectedTrucks: yup
+        .array()
+        .of(
+          yup.object().shape({
+            overloadMargins: yup.number().min(0).max(100)
+          })
+        )
     }),
     onSubmit: async obj => {
       const data = {
@@ -198,39 +205,27 @@ const GenerateOutboundTransportation2 = () => {
       component: 'numberfield',
       name: 'no',
       label: labels.No,
-      flex: 1,
+      flex: 0.5,
       props: {
         readOnly: true
-      }
-    },
-    {
-      component: 'resourcecombobox',
-      label: labels.volume,
-      name: 'volume',
-      flex: 2,
-      props: {
-        endpointId: DeliveryRepository.AllocatedVolume.qry,
-        valueField: 'volume',
-        displayField: 'volume',
-        displayFieldWidth: 1,
-        mapping: [
-          { from: 'volume', to: 'volume' },
-          { from: 'count', to: 'count' }
-        ],
-        columnsInDropDown: [
-          { key: 'volume', value: 'volume' },
-          { key: 'count', value: 'count' }
-        ]
       }
     },
     {
       component: 'numberfield',
-      name: 'count',
-      label: labels.trucksCount,
-      flex: 1,
+      name: 'volume',
+      label: labels.allocatedVolume,
+      flex: 1
+    },
+    {
+      component: 'numberfield',
+      name: 'overloadMargins',
+      label: labels.overload,
       props: {
-        readOnly: true
-      }
+        allowNegative: false,
+        decimalScale: 0
+      },
+      defaultValue: 0,
+      flex: 1
     }
   ]
 
@@ -392,6 +387,7 @@ const GenerateOutboundTransportation2 = () => {
 
   const onPreviewOutbounds = async szIds => {
     const volumes = formik.values.selectedTrucks?.map(truck => truck.volume).join(',')
+    const overloads = formik.values.selectedTrucks?.map(truck => truck?.overloadMargins || 0).join(',')
 
     const orderIds = sortedZones
       .flatMap(zone => zone.orders.filter(order => order.checked))
@@ -400,7 +396,7 @@ const GenerateOutboundTransportation2 = () => {
 
     const items = await getRequest({
       extension: DeliveryRepository.GenerateTrip.previewTRP,
-      parameters: `_zones=${szIds || 0}&_orderIds=${orderIds || 0}&_volumes=${volumes}`
+      parameters: `_zones=${szIds || 0}&_volumes=${volumes}&_overloadMargins=${overloads}&_orderIds=${orderIds || 0}`
     })
 
     formik.setFieldValue('vehicleAllocations', { list: items?.record?.vehicleAllocations })
@@ -470,7 +466,8 @@ const GenerateOutboundTransportation2 = () => {
     const trucks = Array.from({ length: truckNo }, (_, index) => ({
       id: index + 1,
       no: index + 1,
-      volume: 0
+      volume: 0,
+      overloadMargins: 0
     }))
 
     formik.setFieldValue('selectedTrucks', trucks)
