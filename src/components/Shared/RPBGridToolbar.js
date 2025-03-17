@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { useWindow } from 'src/windows'
 import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 import { Grid } from '@mui/material'
+import { useError } from 'src/error'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const RPBGridToolbar = ({
   add,
@@ -14,17 +16,25 @@ const RPBGridToolbar = ({
   onClear,
   hasSearch = true,
   filterBy,
+  paramsRequired = false,
   ...rest
 }) => {
   const { stack } = useWindow()
   const [rpbParams, setRpbParams] = useState([])
   const [search, setSearch] = useState('')
+  const { stack: stackError } = useError()
+  const { platformLabels } = useContext(ControlContext)
 
   useEffect(() => {
     setRpbParams([])
   }, [reportName])
 
   const filters = (filter, params) => {
+    if (paramsRequired && !params) {
+      stackError({
+        message: platformLabels?.noParamsErrorMessage
+      })
+    }
     if (filter) filterBy('qry', filter?.replace(/\+/g, '%2B'))
     else filterBy('params', params)
   }

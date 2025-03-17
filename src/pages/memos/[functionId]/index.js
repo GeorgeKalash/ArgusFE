@@ -64,6 +64,7 @@ const Financial = () => {
     endpointId: FinancialRepository.FiMemo.page,
     datasetId: ResourceIds.CreditNote,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
+    queryFn: fetchGridData,
     filter: {
       filterFn: fetchWithSearch,
       default: { functionId }

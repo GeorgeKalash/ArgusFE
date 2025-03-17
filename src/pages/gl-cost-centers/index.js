@@ -48,8 +48,7 @@ const CostCenter = () => {
     refetch,
     access,
     filterBy,
-    invalidate,
-    clearFilter
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: GeneralLedgerRepository.CostCenter.page,

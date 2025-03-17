@@ -11,7 +11,6 @@ import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const SalesInquiries = () => {
   const { getRequest } = useContext(RequestsContext)
-  const [isQueryEnabled, setIsQueryEnabled] = useState(false)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -47,7 +46,7 @@ const SalesInquiries = () => {
     filter: {
       filterFn: fetchWithFilter
     },
-    enabled: isQueryEnabled
+    enabledOnApplyOnly: true
   })
 
   const columns = [
@@ -119,16 +118,10 @@ const SalesInquiries = () => {
     }
   ]
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
-    setIsQueryEnabled(true)
-    if (rpbParams) refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} labels={_labels} maxAccess={access} onApply={onApply} reportName={'SAII'} />
+        <RPBGridToolbar hasSearch={false} labels={_labels} maxAccess={access} reportName={'SAII'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

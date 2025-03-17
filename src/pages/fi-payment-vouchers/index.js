@@ -54,7 +54,6 @@ const FiPaymentVouchers = () => {
     query: { data },
     labels: _labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     refetch,
     access,

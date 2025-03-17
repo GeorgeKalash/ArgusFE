@@ -2,11 +2,21 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import useResourceParams from './useResourceParams'
 import { useState } from 'react'
 
-export function useResourceQuery({ endpointId, filter, datasetId, DatasetIdAccess, queryFn, search, enabled = true }) {
+export function useResourceQuery({
+  endpointId,
+  filter,
+  datasetId,
+  DatasetIdAccess,
+  queryFn,
+  search,
+  enabled = true,
+  enabledOnApplyOnly = false
+}) {
   const [searchValue, setSearchValue] = useState('')
   const [filters, setFilters] = useState(filter?.default || {})
   const [apiOption, setApiOption] = useState('')
   const isSearchMode = !!searchValue
+  const [isdisabled, setIsDisabled] = useState(enabledOnApplyOnly)
 
   const isFilterMode =
     Object.keys(filters).length > 0 &&
@@ -37,7 +47,7 @@ export function useResourceQuery({ endpointId, filter, datasetId, DatasetIdAcces
       : apiOption
       ? () => queryFn(apiOption)
       : () => queryFn(),
-    enabled: access?.record?.maxAccess > 0 && enabled
+    enabled: access?.record?.maxAccess > 0 && enabled && !isdisabled
   })
 
   return {
@@ -59,6 +69,7 @@ export function useResourceQuery({ endpointId, filter, datasetId, DatasetIdAcces
           [name]: value
         })
       }
+      if (isdisabled) setIsDisabled(false)
     },
     clearFilter(name) {
       setFilters(filters => {
