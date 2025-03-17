@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
+import { useSettings } from 'src/@core/hooks/useSettings'
 
 const getChartOptions = (label, type) => {
   const baseOptions = {
@@ -79,6 +80,10 @@ const getChartOptions = (label, type) => {
 }
 
 export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverColor }) => {
+  const { settings } = useSettings()
+
+  const { navCollapsed } = settings
+
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
 
@@ -96,7 +101,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
         datasets: [
           {
             label,
-            data: data,
+            data,
             backgroundColor: color || 'rgb(88, 2, 1)',
             hoverBackgroundColor: hoverColor || 'rgb(113, 27, 26)',
             borderWidth: 1
@@ -164,13 +169,20 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
     return () => {
       chartInstanceRef.current.destroy()
     }
-  }, [labels, data, label, color, hoverColor])
+  }, [id, labels, data, label, color, hoverColor])
 
   const baseHeight = 200
   const barHeight = 25
   const dynamicHeight = baseHeight + labels.length * barHeight
 
-  return <canvas ref={chartRef} width='600' height={dynamicHeight}></canvas>
+  return (
+    <canvas
+      id={id}
+      ref={chartRef}
+      width={navCollapsed ? window.innerWidth / 2 : window.innerWidth / 2.5}
+      height={dynamicHeight}
+    ></canvas>
+  )
 }
 
 export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {
