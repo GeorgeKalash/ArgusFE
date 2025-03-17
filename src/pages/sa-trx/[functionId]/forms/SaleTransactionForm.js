@@ -1513,10 +1513,10 @@ export default function SaleTransactionForm({
   }
 
   const setDefaultFields = () => {
-    if (!editMode) formik.setFieldValue('header.currencyId', defaultsDataState.currencyId)
-    formik.setFieldValue('header.plantId', userDefaultsDataState.plantId)
-    formik.setFieldValue('header.spId', userDefaultsDataState.spId)
-    formik.setFieldValue('header.siteId', userDefaultsDataState.siteId ?? null)
+    if (!editMode) formik.setFieldValue('header.currencyId', defaultsDataState?.currencyId || null)
+    formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
+    formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
+    formik.setFieldValue('header.siteId', userDefaultsDataState?.siteId || null)
   }
 
   async function previewBtnClicked() {
