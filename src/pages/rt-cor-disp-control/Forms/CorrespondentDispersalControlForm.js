@@ -424,12 +424,17 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
   }
 
+  const disableCondition = (data) => {
+    return !data?.corDeliveryModeName
+  }
+
   const columns = [
     {
       component: 'checkbox',
       label: labels.isActive,
       flex: 0.4,
-      name: 'isActive'
+      name: 'isActive',
+      disableCondition
     },
     {
       component: 'textfield',
