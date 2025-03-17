@@ -38,6 +38,9 @@ const Table = ({
   checkboxFlex = '',
   handleCheckboxChange = '',
   showSelectAll = true,
+  onSelectionChange,
+  rowDragManaged = false,
+  onRowDragEnd = false,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -512,6 +515,10 @@ const Table = ({
     const [tooltipOpen, setTooltipOpen] = useState(false)
 
     const handleClick = event => {
+      if (onSelectionChange) {
+        onSelectionChange(params.data)
+      }
+
       const range = document.createRange()
       range.selectNodeContents(event.currentTarget)
       const selection = window.getSelection()
@@ -707,6 +714,8 @@ const Table = ({
             rowHeight={35}
             onFirstDataRendered={onFirstDataRendered}
             gridOptions={gridOptions}
+            rowDragManaged={rowDragManaged}
+            onRowDragEnd={onRowDragEnd}
           />
         </Box>
       </Grow>

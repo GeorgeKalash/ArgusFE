@@ -97,8 +97,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     validateOnChange: true,
     validationSchema: yup.object({
       departureTime: yup.string().required(),
-      plantId: yup.number().required(),
-      vehicleId: yup.string().required()
+      plantId: yup.number().required()
     }),
     onSubmit: async obj => {
       const copy = { ...obj }
@@ -559,7 +558,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                       formik.setFieldValue('vehicleId', newValue ? newValue?.recordId : '')
                     }}
                     error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
-                    required
                   />
                 </Grid>
               </Grid>
