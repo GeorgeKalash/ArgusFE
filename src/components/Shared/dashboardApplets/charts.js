@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 
@@ -79,12 +79,17 @@ const getChartOptions = (label, type) => {
 }
 
 export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverColor }) => {
+  const chartRef = useRef(null)
+  const chartInstanceRef = useRef(null)
+
   useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.destroy()
+    }
 
-    const globalMax = Math.max(...data, 1)
+    const ctx = chartRef.current.getContext('2d')
 
-    const chart = new Chart(ctx, {
+    chartInstanceRef.current = new Chart(ctx, {
       type: 'bar',
       data: {
         labels,
@@ -100,6 +105,13 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
       },
       options: {
         indexAxis: 'y',
+        responsive: false,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            max: Math.max(...data) * 1.1
+          }
+        },
         plugins: {
           datalabels: {
             anchor: context => {
@@ -150,15 +162,15 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
     })
 
     return () => {
-      chart.destroy()
+      chartInstanceRef.current.destroy()
     }
-  }, [id, labels, data, label])
+  }, [labels, data, label, color, hoverColor])
 
   const baseHeight = 200
   const barHeight = 25
   const dynamicHeight = baseHeight + labels.length * barHeight
 
-  return <canvas id={id} style={{ width: '100%', height: `${dynamicHeight}px` }}></canvas>
+  return <canvas ref={chartRef} width='750' height={dynamicHeight}></canvas>
 }
 
 export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {
