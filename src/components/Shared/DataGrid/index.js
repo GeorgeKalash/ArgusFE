@@ -9,7 +9,6 @@ import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { ControlContext } from 'src/providers/ControlContext'
-import { SystemChecks } from 'src/resources/SystemChecks'
 
 export function DataGrid({
   name, // maxAccess
@@ -22,6 +21,7 @@ export function DataGrid({
   disabled = false,
   allowDelete = true,
   allowAddNewLine = true,
+  deleteHideCondition = '',
   onSelectionChange,
   rowSelectionModel,
   autoDelete,
@@ -34,8 +34,6 @@ export function DataGrid({
   const isDup = useRef(null)
 
   const { platformLabels } = useContext(ControlContext)
-  const { systemChecks } = useContext(ControlContext)
-  const viewDecimals = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
 
   const { stack } = useWindow()
 
@@ -417,13 +415,6 @@ export function DataGrid({
       process(params, oldRow, setData)
     }
 
-    const formatNumber = value => {
-      return !value ? '' : parseFloat(value).toString()
-    }
-
-    const formattedValue =
-      viewDecimals && column.colDef.component === 'numberfield' ? formatNumber(params.value) : params.value
-
     return (
       <Box
         sx={{
@@ -438,7 +429,7 @@ export function DataGrid({
             'center'
         }}
       >
-        <Component {...params} value={formattedValue} column={column.colDef} updateRow={updateRow} update={update} />
+        <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
       </Box>
     )
   }
@@ -534,6 +525,14 @@ export function DataGrid({
   }
 
   const ActionCellRenderer = params => {
+    if (deleteHideCondition) {
+      const shouldHide = Object.entries(deleteHideCondition).some(([key, value]) =>
+        Array.isArray(value) ? value.includes(params.data[key]) : params.data[key] === value
+      )
+
+      if (shouldHide) return null
+    }
+
     return (
       <Box
         sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}
@@ -691,10 +690,22 @@ export function DataGrid({
 
   const onCellEditingStopped = params => {
     const cellId = `${params.node.id}-${params.column.colId}`
+    const { data, colDef } = params
+    let value = params?.data[params.column.colId]
+
+    if (value?.toString()?.endsWith('.') && colDef.component === 'numberfield') {
+      value = value.slice(0, -1).replace(/,/g, '')
+
+      const changes = {
+        [colDef?.field]: value || undefined
+      }
+      setData(changes, params)
+      commit(changes)
+      if (colDef.updateOn != 'blur') process(params, data, setData)
+    }
 
     if (lastCellStopped.current == cellId) return
     lastCellStopped.current = cellId
-    const { data, colDef } = params
     if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
         stackDuplicate(params)

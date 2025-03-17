@@ -690,7 +690,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || formik.values.status == 3 || formik.values.deliveryStatus == 4
+      disabled: !(isClosed && formik.values.deliveryStatus == 1)
     },
     {
       key: 'Terminate',
@@ -1418,6 +1418,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                   formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                   formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
                   formik.setFieldValue('taxId', newValue?.taxId)
+                  setAddress({})
                   fillClientData(newValue?.recordId)
                 }}
                 errorCheck={'clientId'}

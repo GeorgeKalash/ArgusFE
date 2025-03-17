@@ -290,7 +290,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     postRequest,
     getIdentityRequest,
     getMicroRequest,
-    getRequestFullEndPoint
+    getRequestFullEndPoint,
+    LoadingOverlay
   }
 
   return (
