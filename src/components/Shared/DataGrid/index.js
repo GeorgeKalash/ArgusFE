@@ -304,10 +304,10 @@ export function DataGrid({
     }
   }
 
-  const nextColumn = (columnIndex) => {
+  const nextColumn = (columnIndex, data) => {
     let count = 0
     for (let i = columnIndex + 1; i < allColumns.length; i++) {
-      if (condition(i)) {
+      if (condition(i, data)) {
         count++
       }
     }
@@ -353,7 +353,7 @@ export function DataGrid({
       }
     }
 
-    const countColumn = nextColumn(nextCell.columnIndex)
+    const countColumn = nextColumn(nextCell.columnIndex, data)
 
     if (
       (currentColumnIndex === allColumns.length - 1 - skip || !countColumn) &&
