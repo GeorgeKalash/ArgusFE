@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
@@ -9,10 +9,16 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { ReportSAGeneratorRepository } from 'src/repositories/ReportSAGeneratorRepository'
+import { DataSets } from 'src/resources/DataSets'
+import { CommonContext } from 'src/providers/CommonContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const YearlyComparativeSales = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
+  const [fiscalYears, setFiscalYears] = useState([])
 
   const {
     query: { data },
@@ -25,79 +31,104 @@ const YearlyComparativeSales = () => {
     datasetId: ResourceIds.YearlyComparativeSales
   })
 
+  async function getMonths() {
+    return new Promise((resolve, reject) => {
+      getAllKvsByDataset({
+        _dataset: DataSets.MONTHS,
+        callback: result => {
+          if (result) resolve(result)
+          else reject()
+        }
+      })
+    })
+  }
+  async function getFiscalYears() {
+    const fiscalRes = await getRequest({
+      extension: SystemRepository.FiscalYears.qry,
+      parameters: '_filter='
+    })
+    setFiscalYears(fiscalRes?.list)
+  }
+
   const columns = [
     {
-      field: 'reference',
-      headerName: labels.reference,
-      flex: 1
-    },
-    {
-      field: 'statusName',
-      headerName: labels.status,
-      flex: 1
-    },
-    {
-      field: 'date',
-      headerName: labels.date,
-      flex: 1,
-      type: 'date'
-    },
-    {
-      field: 'clientName',
-      headerName: labels.client,
-      flex: 1
-    },
-    {
-      field: 'spRef',
-      headerName: labels.salesPerson,
-      flex: 1
-    },
-    {
-      field: 'szName',
-      headerName: labels.saleZone,
-      flex: 1
-    },
-    {
-      field: 'volume',
-      headerName: labels.volume,
+      field: 'year',
+      headerName: labels.year,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'amount',
-      headerName: labels.net,
+      field: 'total',
+      headerName: labels.total,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'dsName',
-      headerName: labels.deliveryStatus,
+      field: 'jan',
+      headerName: labels.january,
       flex: 1
     },
     {
-      field: 'rsName',
-      headerName: labels.releaseStatus,
+      field: 'feb',
+      headerName: labels.february,
       flex: 1
     },
     {
-      field: 'wipName',
-      headerName: labels.wip,
+      field: 'mar',
+      headerName: labels.march,
       flex: 1
     },
     {
-      field: 'printStatusName',
-      headerName: labels.printStatus,
+      field: 'april',
+      headerName: labels.april,
       flex: 1
     },
     {
-      field: 'description',
-      headerName: labels.description,
+      field: 'may',
+      headerName: labels.may,
+      flex: 1
+    },
+    {
+      field: 'jun',
+      headerName: labels.june,
+      flex: 1
+    },
+    {
+      field: 'jul',
+      headerName: labels.july,
+      flex: 1
+    },
+    {
+      field: 'aug',
+      headerName: labels.augest,
+      flex: 1
+    },
+    {
+      field: 'sep',
+      headerName: labels.september,
+      flex: 1
+    },
+    {
+      field: 'oct',
+      headerName: labels.october,
+      flex: 1
+    },
+    {
+      field: 'nov',
+      headerName: labels.november,
+      flex: 1
+    },
+    {
+      field: 'dec',
+      headerName: labels.december,
       flex: 1
     }
   ]
 
   async function fetchGridData(options = {}) {
     const { params = [] } = options
+    const months = await getMonths()
+    const years = await getFiscalYears()
 
     const response = await getRequest({
       extension: ReportSAGeneratorRepository.YearlyComparativeSale.SA503,
