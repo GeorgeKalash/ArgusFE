@@ -82,6 +82,8 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
   useEffect(() => {
     const ctx = document.getElementById(id).getContext('2d')
 
+    const globalMax = Math.max(...data, 1)
+
     const chart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -89,7 +91,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
         datasets: [
           {
             label,
-            data,
+            data: data,
             backgroundColor: color || 'rgb(88, 2, 1)',
             hoverBackgroundColor: hoverColor || 'rgb(113, 27, 26)',
             borderWidth: 1
@@ -110,7 +112,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 50 ? 'center' : 'end'
+              return barWidth >= 65 ? 'center' : 'end'
             },
             align: context => {
               const chart = context.chart
@@ -122,7 +124,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 50 ? 'center' : 'right'
+              return barWidth >= 65 ? 'center' : 'right'
             },
             color: context => {
               const chart = context.chart
@@ -134,7 +136,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 50 ? '#fff' : '#000'
+              return barWidth >= 65 ? '#fff' : '#000'
             },
             offset: 0,
             font: {
@@ -152,7 +154,11 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
     }
   }, [id, labels, data, label])
 
-  return <canvas id={id} style={{ width: '100%', height: '400px' }}></canvas>
+  const baseHeight = 200
+  const barHeight = 25
+  const dynamicHeight = baseHeight + labels.length * barHeight
+
+  return <canvas id={id} style={{ width: '100%', height: `${dynamicHeight}px` }}></canvas>
 }
 
 export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {
