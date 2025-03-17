@@ -29,7 +29,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DamageReturn,
-    access: access,
+    access,
     enabled: !recordId
   })
 
@@ -40,7 +40,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: recordId || '',
+      recordId,
       dtId: documentType?.dtId,
       reference: '',
       date: new Date(),
@@ -67,7 +67,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
           ? yup
               .number()
               .min(1)
-              .max(parent.maxPcs, ({ max }) => `Must be less than or equal to ${max}`)
+              .max(parent.maxPcs, ({ max }) => labels.max + ` ${max}`)
               .required()
           : yup.number().min(1).required()
       ),
@@ -76,7 +76,6 @@ export default function DamageReturnForm({ labels, access, recordId }) {
         .nullable()
         .test(function (value) {
           const { type } = this.parent
-          console.log('type', type, value)
 
           return type === '1' ? value != null && value.trim() !== '' : true
         })
@@ -86,7 +85,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
         extension: ManufacturingRepository.DamageReturn.set,
         record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date) })
       }).then(async res => {
-        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
+        toast.success(recordId ? platformLabels.Edited : platformLabels.Added)
         await refetchForm(res.recordId)
         invalidate()
       })
@@ -168,7 +167,6 @@ export default function DamageReturnForm({ labels, access, recordId }) {
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
-      disabledSavedClear={isPosted}
     >
       <VertLayout>
         <Grow>
@@ -326,7 +324,7 @@ export default function DamageReturnForm({ labels, access, recordId }) {
                     workCenterName: newValue?.wcName || '',
                     workCenterId: newValue?.workCenterId || null,
                     plantId: newValue?.plantId || null,
-                    maxPcs: null
+                    maxPcs: 32767
                   })
                 }}
                 errorCheck={'jobId'}
@@ -387,7 +385,6 @@ export default function DamageReturnForm({ labels, access, recordId }) {
                 label={labels.date}
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
-                editMode={editMode}
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', null)}
