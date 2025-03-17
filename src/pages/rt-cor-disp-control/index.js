@@ -48,7 +48,7 @@ const CorrespondentDispersal = () => {
     stack({
       Component: CorrespondentDispersalForm,
       props: {
-        labels: labels,
+        labels,
         recordId: obj?.recordId,
         interfaceId: obj?.interfaceId,
         corName: obj?.name,

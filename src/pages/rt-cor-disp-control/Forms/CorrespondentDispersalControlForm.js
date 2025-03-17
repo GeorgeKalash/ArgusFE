@@ -25,7 +25,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
   const { getAllKvsByDataset } = useContext(CommonContext)
 
   const initialValues = {
-    recordId,
     corId: recordId,
     countryId: 0,
     currencyId: 0,
@@ -36,7 +35,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
   const { formik } = useForm({
     initialValues,
     maxAccess,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     onSubmit: async obj => {
       const filteredObj = {
@@ -496,7 +495,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
   ]
 
-  const editMode = !!formik.values.recordId
+  const editMode = !!formik.values.corId
 
   return (
     <FormShell
@@ -567,7 +566,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId || 0)
-                  formik.setFieldValue('plantName', newValue?.name || 0)
+                  formik.setFieldValue('plantName', newValue?.name || '')
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
