@@ -269,8 +269,6 @@ export function DataGrid({
       (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
   )
 
-  console.log(allColumns)
-
   const condition = (i, data) => {
     return (
       ((!allColumns?.[i]?.props?.readOnly &&
