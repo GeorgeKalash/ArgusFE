@@ -1,7 +1,6 @@
 import { useState, useContext, useMemo, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -13,41 +12,36 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ReportPSGeneratorRepository } from 'src/repositories/ReportPSGeneratorRepository'
-import OutboundTranspForm from '../outbound-transportation/forms/OutboundTranspForm'
-import { useWindow } from 'src/windows'
-import ConfirmationDialog from 'src/components/ConfirmationDialog'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { DataSets } from 'src/resources/DataSets'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { CommonContext } from 'src/providers/CommonContext'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import ReactApexcharts from 'src/@core/components/react-apexcharts'
+import Box from '@mui/material/Box'
+import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
+import { useTheme } from '@mui/material/styles'
 
 const RetailCompFigures = () => {
-  const [selectedSaleZones, setSelectedSaleZones] = useState('')
-  const [reCalc, setReCalc] = useState(false)
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
-  const { stack } = useWindow()
-  const [fiscalYearStore, setFiscalYearStore] = useState([])
-  const [posAnalysisStore, setPosAnalysisStore] = useState([])
+  const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [columns, setColumns] = useState([])
+  const [totalRow, setTotalRow] = useState([])
   const [data, setData] = useState([])
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.POSComparativeFigures
   })
 
-  //const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
-
   const { formik } = useForm({
     initialValues: {
-      fiscalYear: '',
-      posAnalysis: '', // set initial
-      salesZones: { list: [] } // check
+      fiscalYear: new Date().getFullYear(),
+      posAnalysis: null
     },
     validationSchema: yup.object({
       fiscalYear: yup.number().required(),
@@ -59,8 +53,6 @@ const RetailCompFigures = () => {
   })
 
   const processGridData = async fiscalYear => {
-    console.log('fiscalYear', fiscalYear)
-
     const months = await new Promise((resolve, reject) => {
       getAllKvsByDataset({
         _dataset: DataSets.MONTHS,
@@ -71,8 +63,6 @@ const RetailCompFigures = () => {
       })
     })
 
-    console.log('months', months)
-
     await buildColumns(months)
 
     const monthsData = await getRequest({
@@ -81,8 +71,6 @@ const RetailCompFigures = () => {
     })
 
     if (!monthsData?.list) return
-
-    console.log('monthsData', monthsData)
 
     let sumTotal = months.map(() => 0)
     let processedData = []
@@ -125,12 +113,19 @@ const RetailCompFigures = () => {
       totalRow[month.key] = sumTotal[index]
     })
 
-    processedData.unshift(totalRow)
+    const sortedData = processedData.slice(1).sort((a, b) => b.total - a.total) // Sort rows not external!!
+    sortedData.unshift(totalRow)
+    console.log(totalRow)
+    setTotalRow(
+      Object.entries(totalRow)
+        .filter(([key]) => !isNaN(key))
+        .map(([, value]) => value)
+    )
 
-    console.log(processedData)
+    console.log('totalRow', totalRow)
     setData({
-      count: processedData?.length || 0,
-      list: processedData?.length ? processedData : []
+      count: sortedData?.length || 0,
+      list: sortedData?.length ? sortedData : []
     })
   }
 
@@ -141,18 +136,20 @@ const RetailCompFigures = () => {
       {
         field: 'posRef',
         headerName: labels.posRef,
-        width: 250
+        width: 200,
+        pinned: 'left'
       },
       {
         field: 'plantName',
         headerName: labels.plantName,
-        width: 350
+        width: 300,
+        pinned: 'left'
       },
       {
         field: 'total',
         headerName: labels.total,
         type: 'number',
-        width: 210
+        width: 180
       }
     ]
 
@@ -169,20 +166,8 @@ const RetailCompFigures = () => {
     setColumns(dynamicColumns)
   }
 
-  const fillFiscalYearStore = () => {
-    getRequest({
-      extension: SystemRepository.FiscalYears.qry,
-      parameters: ``
-    }).then(res => {
-      setFiscalYearStore(res.list)
-      const year = res.list?.filter(item => item.fiscalYear === new Date().getFullYear())[0]
-      console.log('year', year)
-      processGridData(year.fiscalYear)
-    })
-  }
-
-  async function fillPosAnalysisStore() {
-    return new Promise((resolve, reject) => {
+  const fillPosAnalysisStore = async () => {
+    const data = await new Promise((resolve, reject) => {
       getAllKvsByDataset({
         _dataset: DataSets.POS_ANALYSIS_SORT_LEVEL,
         callback: result => {
@@ -191,24 +176,97 @@ const RetailCompFigures = () => {
         }
       })
     })
+    setPosAnalysisStore(data)
+  }
+
+  const theme = useTheme()
+
+  const options = {
+    chart: {
+      parentHeightOffset: 0,
+      toolbar: { show: false }
+    },
+    grid: {
+      show: true,
+      borderColor: '#ccc'
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 0,
+        distributed: true,
+        columnWidth: '90%',
+        dataLabels: {
+          position: 'top',
+          orientation: 'vertical'
+        }
+      }
+    },
+    legend: { show: false },
+    dataLabels: {
+      enabled: true,
+      formatter: val => val?.toLocaleString(), // Format with commas
+      style: {
+        fontSize: '14px',
+        fontWeight: 'bold',
+        colors: ['black'] // Ensure contrast with bars
+      },
+      offsetY: -30 // Adjust label position },
+    },
+    fill: {
+      colors: [hexToRGBA('#007bff', 0.5)] // Set the bar color (blue)
+    },
+    states: {
+      hover: {
+        filter: { type: 'lighten' }
+      },
+      active: {
+        filter: { type: 'none' }
+      }
+    },
+    xaxis: {
+      categories: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
+      axisTicks: { show: true },
+      axisBorder: { show: true },
+      tickPlacement: 'on',
+      labels: {
+        style: {
+          fontSize: '12px',
+          fontWeight: 'bold',
+          colors: theme.palette.text.disabled
+        }
+      }
+    },
+    tooltip: {
+      y: {
+        formatter: function (val, { seriesIndex, dataPointIndex }) {
+          console.log('data', data[dataPointIndex])
+
+          const value = totalRow[dataPointIndex] // Access the value for the respective month
+
+          return value ? value.toLocaleString() : '0' // Return formatted value
+        }
+      }
+    },
+    yaxis: {
+      min: 0, // Ensure the axis starts at zero
+      max: Math.max(...totalRow) * 1.2, // Adjust max dynamically based on data
+      tickAmount: 13, // Adjust for better spacing
+      labels: {
+        formatter: val => val?.toLocaleString(), // Format with commas
+        style: {
+          fontSize: '12px',
+          colors: '#000'
+        }
+      }
+    }
   }
 
   useEffect(() => {
     ;(async function () {
-      fillFiscalYearStore()
-      setPosAnalysisStore(await fillPosAnalysisStore())
-
-      //processGridData()
+      //fillFiscalYearStore()
+      processGridData(formik?.values?.fiscalYear)
     })()
   }, [])
-
-  useEffect(() => {
-    console.log('Updated Data:', data)
-  }, [data])
-
-  useEffect(() => {
-    console.log('Updated Columns:', columns)
-  }, [columns])
 
   return (
     <FormShell
@@ -225,16 +283,15 @@ const RetailCompFigures = () => {
             <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={9}>
-                  <CustomComboBox
+                  <ResourceComboBox
+                    endpointId={SystemRepository.FiscalYears.qry}
                     name='fiscalYear'
                     label={labels.fiscalYear}
                     valueField='fiscalYear'
                     displayField='fiscalYear'
-                    store={fiscalYearStore}
-                    value={fiscalYearStore?.filter(item => item.fiscalYear === new Date().getFullYear())[0]}
+                    values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
-                      processGridData(newValue?.fiscalYear)
+                      formik.setFieldValue('fiscalYear', newValue?.fiscalYear || new Date().getFullYear())
                     }}
                     required
                     error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
@@ -243,7 +300,7 @@ const RetailCompFigures = () => {
                 </Grid>
                 <Grid item xs={2}>
                   <CustomButton
-                    onClick={() => fillTable()}
+                    onClick={() => processGridData(formik?.values?.fiscalYear)}
                     label={platformLabels.Preview}
                     image={'preview.png'}
                     color='#231f20'
@@ -253,15 +310,16 @@ const RetailCompFigures = () => {
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
+                datasetId={DataSets.POS_ANALYSIS_SORT_LEVEL}
                 name='posAnalysis'
                 label=''
                 valueField='key'
                 displayField='value'
-                store={posAnalysisStore}
-                value={posAnalysisStore?.[0]}
+                values={formik.values}
+                defaultIndex={0}
                 required
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('posAnalysis', newValue?.key)
+                  formik.setFieldValue('posAnalysis', newValue?.key) //FIX
                 }}
                 error={formik.touched.posAnalysis && Boolean(formik.errors.posAnalysis)}
                 maxAccess={access}
@@ -279,6 +337,57 @@ const RetailCompFigures = () => {
             name='compFigTable'
           />
         </Grow>
+        <Fixed>
+          <Card>
+            {/* <CardHeader
+                  title='Weekly Sales'
+                  subheader='Total 85.4k Sales'
+                  titleTypographyProps={{ sx: { lineHeight: '2rem !important', letterSpacing: '0.15px !important' } }}
+                  action={
+                    <OptionsMenu
+                      options={['Last 28 Days', 'Last Month', 'Last Year']}
+                      iconButtonProps={{ size: 'small', sx: { color: 'text.primary' } }}
+                    />
+                  }
+                /> */}
+            <CardContent sx={{ pt: `${theme.spacing(3)} !important` }}>
+              <ReactApexcharts type='bar' height={250} options={options} series={[{ data: totalRow }]} />
+              {/*   <Box sx={{ mt: 9.5, display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
+                <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+                  <CustomAvatar
+                    skin='light'
+                    variant='rounded'
+                    sx={{ mr: 4, width: 42, height: 42, '& svg': { color: 'primary.main' } }}
+                  >
+                    <Icon icon='mdi:trending-up' fontSize='1.875rem' />
+                  </CustomAvatar>
+                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <Typography sx={{ fontWeight: 600 }}>34.6k</Typography>
+                    <Typography variant='body2' sx={{ lineHeight: '1.313rem', letterSpacing: '0.25px' }}>
+                      Sales
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <CustomAvatar
+                    skin='light'
+                    color='success'
+                    variant='rounded'
+                    sx={{ mr: 4, width: 42, height: 42, '& svg': { color: 'success.main' } }}
+                  >
+                    <Icon icon='mdi:currency-usd' fontSize='1.875rem' />
+                  </CustomAvatar>
+                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <Typography sx={{ fontWeight: 600 }}>$482k</Typography>
+                    <Typography variant='body2' sx={{ lineHeight: '1.313rem', letterSpacing: '0.25px' }}>
+                      Total Profit
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box> */}
+            </CardContent>
+          </Card>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )
