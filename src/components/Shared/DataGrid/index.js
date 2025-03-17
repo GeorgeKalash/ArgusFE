@@ -269,28 +269,29 @@ export function DataGrid({
       (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
   )
 
-  const condition = i => {
+  const condition = (i, data) => {
     return (
-      (!allColumns?.[i]?.props?.readOnly &&
+      ((!allColumns?.[i]?.props?.readOnly &&
         accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED) ||
-      (allColumns?.[i]?.props?.readOnly &&
-        (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
-          accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))
+        (allColumns?.[i]?.props?.readOnly &&
+          (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
+            accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
+      (typeof allColumns?.[i]?.disableCondition !== 'function' || !allColumns?.[i]?.disableCondition(data))
     )
   }
 
-  const findNextEditableColumn = (columnIndex, rowIndex, direction) => {
+  const findNextEditableColumn = (columnIndex, rowIndex, direction, data) => {
     const limit = direction > 0 ? allColumns.length : -1
     const step = direction > 0 ? 1 : -1
 
     for (let i = columnIndex + step; i !== limit; i += step) {
-      if (condition(i)) {
+      if (condition(i, data)) {
         return { columnIndex: i, rowIndex }
       }
     }
 
     for (let i = direction > 0 ? 0 : allColumns.length - 1; i !== limit; i += step) {
-      if (condition(i)) {
+      if (condition(i, data)) {
         return {
           columnIndex: i,
           rowIndex: rowIndex + direction
@@ -362,13 +363,13 @@ export function DataGrid({
 
     const columns = gridApiRef.current.getColumnDefs()
     if (!event.shiftKey) {
-      const skipReadOnlyTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, 1)
+      const skipReadOnlyTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, 1, data)
       const { columnIndex, rowIndex } = skipReadOnlyTab(nextCell.columnIndex, nextCell.rowIndex)
 
       nextCell.columnIndex = columnIndex
       nextCell.rowIndex = rowIndex
     } else {
-      const skipReadOnlyShiftTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, -1)
+      const skipReadOnlyShiftTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, -1, data)
       const { columnIndex, rowIndex } = skipReadOnlyShiftTab(nextCell.columnIndex, nextCell.rowIndex)
 
       nextCell.columnIndex = columnIndex
