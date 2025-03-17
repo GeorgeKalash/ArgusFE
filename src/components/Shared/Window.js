@@ -164,7 +164,6 @@ const Window = React.memo(
                         onSave={onSave}
                         onClear={onClear}
                         onInfo={onInfo}
-                        onApply={onApply}
                         disabledSubmit={disabledSubmit}
                         disabledInfo={disabledInfo}
                         disabledApply={disabledApply}
