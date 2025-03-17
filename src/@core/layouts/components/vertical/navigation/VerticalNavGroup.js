@@ -88,22 +88,22 @@ const VerticalNavGroup = props => {
   //   setGroupActive([...openGroup])
   // }
 
-  const toggleActiveGroup = (item) => {
-    let openGroups = groupActive.slice(); // Create a copy of the active groups array
+  const toggleActiveGroup = item => {
+    let openGroups = groupActive.slice() // Create a copy of the active groups array
 
     // Check if the item's ID is already in the active groups
-    const index = openGroups.indexOf(item.id);
+    const index = openGroups.indexOf(item.id)
 
     if (index !== -1) {
       // If it's in the active groups, remove it to close the group
-      openGroups.splice(index, 1);
+      openGroups.splice(index, 1)
     } else {
       // If it's not in the active groups, add it to open the group
-      openGroups.push(item.id);
+      openGroups.push(item.id)
     }
 
-    setGroupActive([...openGroups]);
-  };
+    setGroupActive([...openGroups])
+  }
 
   // ** Menu Group Click
   const handleGroupClick = () => {
@@ -139,7 +139,7 @@ const VerticalNavGroup = props => {
     if (navCollapsed) {
       setGroupActive([])
     }
-    if ((navCollapsed) || (groupActive.length === 0 && !navCollapsed)) {
+    if (navCollapsed || (groupActive.length === 0 && !navCollapsed)) {
       setGroupActive([...currentActiveGroup])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -149,7 +149,7 @@ const VerticalNavGroup = props => {
       setGroupActive([])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ ])
+  }, [])
   const icon = parent && !item.icon ? themeConfig.navSubItemIcon : item.icon
   const menuGroupCollapsedStyles = navCollapsed ? { opacity: 0 } : { opacity: 1 }
 
