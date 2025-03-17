@@ -163,7 +163,6 @@ export default function DamageReturnForm({ labels, access, recordId }) {
       form={formik}
       maxAccess={maxAccess}
       previewReport={editMode}
-      isPosted={isPosted}
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
