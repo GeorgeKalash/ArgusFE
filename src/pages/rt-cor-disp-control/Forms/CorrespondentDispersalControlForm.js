@@ -510,7 +510,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={2}>
+            <Grid item xs={2.75}>
               <ResourceComboBox
                 endpointId={RemittanceBankInterface.Countries.qry}
                 parameters={`_interfaceId=${interfaceId || 0}`}
@@ -532,7 +532,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={2.75}>
               <ResourceComboBox
                 endpointId={RemittanceBankInterface.Currencies.qry}
                 parameters={`_interfaceId=${interfaceId || 0}&_countryId=${formik.values.countryId || 0}`}
@@ -553,7 +553,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={2.75}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
@@ -573,10 +573,10 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={2.75}>
               <CustomTextField name='corName' label={labels.corName} value={corName} readOnly maxAccess={maxAccess} />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={1}>
               <CustomButton onClick={onPreview} label={platformLabels.Preview} color='#231f20' />
             </Grid>
           </Grid>
