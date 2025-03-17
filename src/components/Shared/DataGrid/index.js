@@ -418,7 +418,7 @@ export function DataGrid({
     }
 
     const formatNumber = value => {
-      return !value ? '' : parseFloat(value).toString()
+      return !value ? '' : parseFloat(value.toString().replace(/,/g, '')).toString()
     }
 
     const formattedValue =
@@ -678,7 +678,7 @@ export function DataGrid({
 
   const setData = (changes, params) => {
     const id = params.node?.id
-
+    lastCellStopped.current = ''
     const rowNode = params.api.getRowNode(id)
     if (rowNode) {
       const currentData = rowNode.data
