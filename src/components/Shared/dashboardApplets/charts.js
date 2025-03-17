@@ -170,7 +170,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
   const barHeight = 25
   const dynamicHeight = baseHeight + labels.length * barHeight
 
-  return <canvas ref={chartRef} width='650' height={dynamicHeight}></canvas>
+  return <canvas ref={chartRef} width='600' height={dynamicHeight}></canvas>
 }
 
 export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {
