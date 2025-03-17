@@ -25,6 +25,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
   const { getAllKvsByDataset } = useContext(CommonContext)
 
   const initialValues = {
+    recordId,
     corId: recordId,
     countryId: 0,
     currencyId: 0,
@@ -496,7 +497,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
   ]
 
-  const editMode = !!formik.values.corId
+  const editMode = !!formik.values.recordId
 
   return (
     <FormShell
