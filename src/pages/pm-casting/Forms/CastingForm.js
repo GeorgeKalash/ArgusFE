@@ -21,10 +21,15 @@ import { ProductModelingRepository } from 'src/repositories/ProductModelingRepos
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
+import { useWindow } from 'src/windows'
+import { KVSRepository } from 'src/repositories/KVSRepository'
 
 export default function CastingForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
   const systemFunction = SystemFunction.ModellingCasting
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -48,7 +53,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       laborId: null,
       setPcs: null,
       weight: null,
-      rmQty: null,
+      notes: '',
       status: 1
     },
     maxAccess,
@@ -59,7 +64,6 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       threeDPId: yup.string().required(),
       productionLineId: yup.string().required(),
       laborId: yup.string().required(),
-      rmQty: yup.number().required(),
       setPcs: yup.number().nullable().min(0).max(1000)
     }),
     onSubmit: async values => {
@@ -76,6 +80,15 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       toast.success(!values.recordId ? platformLabels.Added : platformLabels.Edited)
     }
   })
+
+  async function getLabels(datasetId) {
+    const res = await getRequest({
+      extension: KVSRepository.getLabels,
+      parameters: `_dataset=${datasetId}`
+    })
+
+    return res.list ? Object.fromEntries(res.list.map(({ key, value }) => [key, value])) : {}
+  }
 
   const isPosted = formik.values.status === 3
   const editMode = !!formik.values.recordId
@@ -111,6 +124,24 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted
+    },
+    {
+      key: 'threeDPrinting',
+      condition: true,
+      onClick: async () => {
+        const threeDFormLabels = await getLabels(ResourceIds.Printing)
+        stack({
+          Component: ThreeDPrintForm,
+          props: {
+            recordId: formik.values?.threeDPId,
+            labels: threeDFormLabels
+          },
+          width: 750,
+          height: 650,
+          title: threeDFormLabels.ThreeDPrint
+        })
+      },
+      disabled: !formik.values.threeDPId
     }
   ]
 
@@ -189,7 +220,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
 
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={ProductModelingRepository.Printing.qry}
+                endpointId={ProductModelingRepository.Printing.snapshot}
                 valueField='reference'
                 name='threeDPId'
                 label={labels.threeDP}
@@ -288,18 +319,17 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomNumberField
-                name='rmQty'
-                label={labels.rmQty}
-                value={formik.values.rmQty}
-                maxAccess={maxAccess}
+              <CustomTextArea
+                name='notes'
+                type='text'
+                label={labels.notes}
+                value={formik.values.notes}
                 readOnly={isPosted}
-                required
-                maxLength={10}
-                decimalScale={2}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('rmQty', null)}
-                error={formik.touched.rmQty && Boolean(formik.errors.rmQty)}
+                rows={3}
+                maxAccess={maxAccess}
+                onChange={e => formik.setFieldValue('notes', e.target.value || null)}
+                onClear={() => formik.setFieldValue('notes', '')}
+                error={formik.touched.notes && Boolean(formik.errors.notes)}
               />
             </Grid>
           </Grid>

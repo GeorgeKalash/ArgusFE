@@ -399,6 +399,9 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     formik.setFieldValue('routingId', values?.routingId)
     formik.setFieldValue('lineId', values?.lineId)
     formik.setFieldValue('designPL', values?.lineId)
+    formik.setFieldValue('classId', values?.classId)
+    formik.setFieldValue('standardId', values?.standardId)
+    formik.setFieldValue('itemCategoryId', values?.itemCategoryId)
   }
   async function fillBillingInfo(values) {
     if (!values?.recordId) return

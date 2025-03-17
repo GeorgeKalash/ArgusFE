@@ -30,6 +30,7 @@ import InwardSettlementForm from '../inward-settlement/forms/InwardSettlementFor
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import OutwardsForm from '../outwards-order/Tabs/OutwardsForm'
 import SketchForm from '../pm-sketch/Forms/SketchForm'
+import ThreeDDesignForm from '../pm-3d-design/forms/ThreeDDesignForm'
 
 const DocumentsOnHold = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -232,6 +233,14 @@ const DocumentsOnHold = () => {
         windowHeight = 700
         title = labels.Sketch
         break
+      case SystemFunction.ThreeDDesign:
+        relevantComponent = ThreeDDesignForm
+        labels = await getLabels(ResourceIds.ThreeDDesign)
+        relevantAccess = await getAccess(ResourceIds.ThreeDDesign)
+
+        windowWidth = 800
+        windowHeight = 650
+        title = labels.ThreeDDesign
       default:
         // Handle default case if needed
         break

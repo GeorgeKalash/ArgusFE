@@ -134,7 +134,8 @@ const DraftSerialsReturns = () => {
       props: {
         labels,
         access,
-        recordId
+        recordId,
+        invalidate
       },
       width: 1300,
       height: 750,

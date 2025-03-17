@@ -23,12 +23,17 @@ import { ProductModelingRepository } from 'src/repositories/ProductModelingRepos
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
+import { KVSRepository } from 'src/repositories/KVSRepository'
+import ThreeDDesignForm from 'src/pages/pm-3d-design/forms/ThreeDDesignForm'
+import { useWindow } from 'src/windows'
 
 export default function ThreeDPrintForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
   const systemFunction = SystemFunction.ThreeDPrint
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: systemFunction,
@@ -125,12 +130,39 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
     invalidate()
   }
 
+  async function getLabels(datasetId) {
+    const res = await getRequest({
+      extension: KVSRepository.getLabels,
+      parameters: `_dataset=${datasetId}`
+    })
+
+    return res.list ? Object.fromEntries(res.list.map(({ key, value }) => [key, value])) : {}
+  }
+
   const actions = [
     {
       key: 'Post',
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted || !isReleased
+    },
+    {
+      key: 'threeDDesign',
+      condition: true,
+      onClick: async () => {
+        const threeDFormLabels = await getLabels(ResourceIds.ThreeDDesign)
+        stack({
+          Component: ThreeDDesignForm,
+          props: {
+            recordId: formik.values?.threeDDId,
+            labels: threeDFormLabels
+          },
+          width: 1200,
+          height: 700,
+          title: threeDFormLabels.ThreeDDesign
+        })
+      },
+      disabled: !formik.values.threeDDId
     },
     {
       key: 'Start',
@@ -239,7 +271,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
-                    endpointId={ProductModelingRepository.ThreeDDrawing.snapshot}
+                    endpointId={ProductModelingRepository.ThreeDDrawing.snapshot2}
                     valueField='reference'
                     displayField='reference'
                     secondDisplayField={false}
@@ -254,6 +286,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                       formik.setFieldValue('threeDDId', newValue?.recordId || null)
                       formik.setFieldValue('threeDDRef', newValue?.reference || '')
                       formik.setFieldValue('fileReference', newValue?.fileReference || '')
+                      formik.setFieldValue('productionClassId', newValue?.productionClassId || null)
                     }}
                     errorCheck={'threeDDId'}
                   />
@@ -273,7 +306,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomDatePicker
+                  <CustomDateTimePicker
                     name='startDate'
                     label={labels.startDate}
                     value={formik.values?.startDate}
@@ -281,7 +314,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomDatePicker name='endDate' label={labels.endDate} value={formik.values?.endDate} readOnly />
+                  <CustomDateTimePicker name='endDate' label={labels.endDate} value={formik.values?.endDate} readOnly />
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
@@ -352,6 +385,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     error={formik.touched.setPcs && Boolean(formik.errors.setPcs)}
                   />
                 </Grid>
+
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='weight'

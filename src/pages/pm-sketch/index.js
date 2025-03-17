@@ -25,9 +25,7 @@ const Sketch = () => {
 
     const response = await getRequest({
       extension: ProductModelingRepository.Sketch.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${
-        params || ''
-      }`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -41,7 +39,7 @@ const Sketch = () => {
     access,
     invalidate,
     filterBy,
-    clearFilter,
+    clearFilter
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ProductModelingRepository.Sketch.page,
@@ -114,7 +112,6 @@ const Sketch = () => {
     await proxyAction()
   }
 
-
   const edit = obj => {
     openForm(obj?.recordId)
   }
@@ -123,9 +120,7 @@ const Sketch = () => {
     stack({
       Component: SketchForm,
       props: {
-        labels,
-        recordId,
-        maxAccess: access
+        recordId
       },
       width: 700,
       height: 700,
