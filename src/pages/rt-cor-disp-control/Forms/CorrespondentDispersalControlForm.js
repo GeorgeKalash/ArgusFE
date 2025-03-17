@@ -100,10 +100,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     })
   }
 
-  const updateFormItems = items => {
-    formik.setFieldValue('items', items)
-  }
-
   const onPreview = async () => {
     const { plantId, countryId, currencyId, plantName, countryName } = formik.values
     const dispersalModes = await getDispersalMode()
@@ -111,7 +107,8 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     const resData = (await fetchData(countryId, currencyId, plantId))?.list || []
 
     if (plantId && countryId && currencyId) {
-      updateFormItems(
+      formik.setFieldValue(
+        'items',
         dispersalModes.map((mode, index) => {
           const existingItem = resData.find(item => parseInt(item.dispersalType) == mode.key)
 
@@ -135,7 +132,8 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
       const countries = await fetchCountries(countryId, countryName)
       if (!plants.length || !countries.length) return
 
-      updateFormItems([
+      formik.setFieldValue(
+        'items', [
         ...new Map(
           plants
             .flatMap(plant =>
@@ -178,7 +176,8 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
       const currencies = await fetchCurrencies(countryId)
       if (!currencies.length) return formik.setFieldValue('items', [])
 
-      updateFormItems(
+      formik.setFieldValue(
+        'items',
         plants.flatMap(plant =>
           currencies.flatMap(currency =>
             dispersalModes.map(mode => {
@@ -229,7 +228,8 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
 
       if (!currencies.length) return
 
-      updateFormItems(
+      formik.setFieldValue(
+        'items',
         countries.flatMap(country =>
           currencies
             .filter(currency => currency.countryId === country.recordId)
@@ -278,7 +278,8 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
       const currencies = currencyRes?.list || []
       if (!currencies.length) return
 
-      updateFormItems(
+      formik.setFieldValue(
+        'items',
         currencies.flatMap(currency =>
           dispersalModes.map(mode => {
             const existingItem = resData.find(
@@ -313,7 +314,8 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
       const countries = (await fetchCountries(countryId, countryName)).filter(country => country.recordId)
       if (!countries.length) return
 
-      updateFormItems(
+      formik.setFieldValue(
+        'items',
         countries.flatMap(country =>
           dispersalModes.map(mode => {
             const existingItem = resData.find(
@@ -347,7 +349,8 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
       const plants = await fetchPlants(plantId, plantName)
       if (!plants.length) return
 
-      updateFormItems(
+      formik.setFieldValue(
+        'items',
         plants.flatMap(plant =>
           dispersalModes.map(mode => {
             const existingItem = resData.find(
@@ -383,7 +386,8 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
         currenciesMap[country.recordId] = await fetchCurrencies(country.recordId)
       }
 
-      updateFormItems(
+      formik.setFieldValue(
+        'items',
         plants.flatMap(plant =>
           countries.flatMap(country =>
             (currenciesMap[country.recordId] || []).flatMap(currency =>
