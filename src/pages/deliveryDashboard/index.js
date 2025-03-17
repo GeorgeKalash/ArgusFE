@@ -73,7 +73,9 @@ const DashboardLayout = () => {
       const allChartsData = await Promise.all(volumeRequests)
 
       const minZoneVolumeDBObj = defaultsData?.list?.find(item => item.key === 'minZoneVolumeDB')
-      const minZoneVolumeDB = minZoneVolumeDBObj ? Number(minZoneVolumeDBObj.value) || 0 : 0
+
+      const minZoneVolumeDB =
+        minZoneVolumeDBObj && minZoneVolumeDBObj.value !== undefined ? Number(minZoneVolumeDBObj.value) || 0 : Infinity
 
       const filteredChartsData = allChartsData.map((chart, index) => ({
         zoneName: rootResponse.list[index]?.name ?? 'Unknown Zone',
