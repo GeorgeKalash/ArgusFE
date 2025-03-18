@@ -64,13 +64,15 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
   const getEndpoint = {
     [SystemFunction.RetailInvoice]: PointofSaleRepository.RetailInvoice.set2,
     [SystemFunction.RetailReturn]: PointofSaleRepository.RetailReturn.set2,
-    [SystemFunction.RetailPurchase]: PointofSaleRepository.RetailPurchase.set2
+    [SystemFunction.RetailPurchase]: PointofSaleRepository.RetailPurchase.set2,
+    [SystemFunction.RetailPurchaseReturn]: PointofSaleRepository.RetailPurchaseReturn.set2
   }
 
   const getResourceId = {
     [SystemFunction.RetailInvoice]: ResourceIds.RetailInvoice,
     [SystemFunction.RetailReturn]: ResourceIds.RetailInvoiceReturn,
-    [SystemFunction.RetailPurchase]: ResourceIds.RetailPurchase
+    [SystemFunction.RetailPurchase]: ResourceIds.RetailPurchase,
+    [SystemFunction.RetailPurchaseReturn]: ResourceIds.RetailPurchaseReturn
   }
 
   const { documentType, maxAccess } = useDocumentType({
@@ -952,7 +954,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
         tax = posInfo?.applyTaxRET ? posInfo?.taxId : null
         taxRef = posInfo?.applyTaxRET ? posInfo?.taxRef : null
         break
-      case SystemFunction.RetailPurchase:
+      case SystemFunction.RetailPurchase || SystemFunction.RetailPurchaseReturn:
         isVat = posInfo?.applyTaxPUR || false
         tax = posInfo?.applyTaxPUR ? posInfo?.taxId : null
         taxRef = posInfo?.applyTaxPUR ? posInfo?.taxRef : null
