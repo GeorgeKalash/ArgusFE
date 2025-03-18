@@ -53,6 +53,16 @@ const RPBGridToolbar = ({
     })
   }
 
+  const formatDataDictForApi = rpbParams => {
+    const formattedData = rpbParams.reduce((acc, { display }, index) => {
+      acc[index] = display || ''
+
+      return acc
+    }, {})
+
+    return formattedData
+  }
+
   const formatDataForApi = rpbParams => {
     let minValue = Infinity
 
@@ -88,7 +98,7 @@ const RPBGridToolbar = ({
         else
           onApply({
             rpbParams: reportParams,
-            paramsDict: reportParams,
+            paramsDict: formatDataDictForApi(rpbParams),
             search: search
           })
       },
