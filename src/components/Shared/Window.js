@@ -29,7 +29,6 @@ const Window = React.memo(
     editMode = false,
     disabledSubmit,
     disabledInfo,
-    onApply,
     disabledApply,
     spacing,
     ...props
