@@ -38,8 +38,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
       cashAccountId: null,
       cashAccountRef: null,
       cashAccountName: null
-    },
-    onSubmit: async obj => {}
+    }
   })
 
   const actions = [
@@ -55,9 +54,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
     }
   ]
   async function onReceived() {
-    axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/start_PUR`, {
-      record: JSON.stringify(formik.values)
-    })
+    axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/start_PUR`, formik.values)
   }
   async function onCancel() {
     await axios.get(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/cancelTransaction`)
@@ -132,13 +129,13 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
                 value={1}
                 control={<Radio />}
                 label={labels.manualPOS}
-                disabled={formik.values.posSelected == 2}
+                disabled={formik.values.posSelected == 1}
               />
               <FormControlLabel
                 value={2}
                 control={<Radio />}
                 label={labels.apiPOS}
-                disabled={formik.values.posSelected == 2}
+                disabled={formik.values.posSelected == 1}
               />
             </RadioGroup>
           </Grid>
