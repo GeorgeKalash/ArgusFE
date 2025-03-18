@@ -455,7 +455,7 @@ export function DataGrid({
       const oldRow = params.data
 
       const changes = {
-        [field]: value || undefined
+        [field]: value ?? column.colDef?.defaultValue ?? ''
       }
 
       setCurrentValue(changes)
