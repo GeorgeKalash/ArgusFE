@@ -15,7 +15,7 @@ import axios from 'axios'
 
 export default function POSForm({ labels, form, maxAccess, amount }) {
   const { getRequestFullEndPoint, getRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { userDefaultsData } = useContext(ControlContext)
   const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   const { formik } = useForm({
