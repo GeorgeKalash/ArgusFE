@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react'
 import styled from 'styled-components'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
-import { HorizontalBarChartDarkWithAllData } from '../../components/Shared/dashboardApplets/charts'
+import { HorizontalBarChartDark } from '../../components/Shared/dashboardApplets/charts'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { debounce } from 'lodash'
@@ -101,7 +101,7 @@ const DashboardLayout = () => {
             <Title>
               {labels.deliveryVolumes} - {chart.zoneName}
             </Title>
-            <HorizontalBarChartDarkWithAllData
+            <HorizontalBarChartDark
               id={`zonesVolumeChart-${index}`}
               labels={chart.volumes.map(v => v.subZone)}
               data={chart.volumes.map(v => v.volume)}
