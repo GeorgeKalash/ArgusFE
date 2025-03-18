@@ -29,6 +29,7 @@ const Window = React.memo(
     editMode = false,
     disabledSubmit,
     disabledInfo,
+    onApply,
     disabledApply,
     spacing,
     ...props
@@ -163,6 +164,7 @@ const Window = React.memo(
                         onSave={onSave}
                         onClear={onClear}
                         onInfo={onInfo}
+                        onApply={onApply}
                         disabledSubmit={disabledSubmit}
                         disabledInfo={disabledInfo}
                         disabledApply={disabledApply}
