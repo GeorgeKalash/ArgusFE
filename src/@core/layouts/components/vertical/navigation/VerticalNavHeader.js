@@ -38,7 +38,7 @@ const VerticalNavHeader = props => {
     menuLockedIcon: userMenuLockedIcon,
     navMenuBranding: userNavMenuBranding,
     menuUnlockedIcon: userMenuUnlockedIcon,
-    isArabic,
+    isArabic
   } = props
 
   const theme = useTheme()
@@ -56,30 +56,36 @@ const VerticalNavHeader = props => {
     }
   }
 
-
   return (
     <MenuHeaderWrapper
-    sx={{
-      pl: menuHeaderPaddingLeft(),
-      display:'flex',
-      backgroundColor:'#231f20',
-      flexDirection : navCollapsed ? 'column' : 'row'
-    }}>
-      <Box sx={{ minHeight: 40,width:'100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between !important' }}>
+      sx={{
+        pl: menuHeaderPaddingLeft(),
+        display: 'flex',
+        backgroundColor: '#231f20',
+        flexDirection: navCollapsed ? 'column' : 'row'
+      }}
+    >
+      <Box
+        sx={{
+          minHeight: 40,
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between !important'
+        }}
+      >
         {userNavMenuBranding ? (
           userNavMenuBranding(props)
         ) : (
           <LinkStyled href='/'>
             <img
-              src={
-                !navCollapsed ? '/images/logos/ArgusNewLogo2.png' : '/images/logos/WhiteA.png'
-              }
+              src={!navCollapsed ? '/images/logos/ArgusNewLogo2.png' : '/images/logos/WhiteA.png'}
               alt='Argus'
-              style={{ maxHeight: '25px'}}
+              style={{ maxHeight: '25px' }}
             />
           </LinkStyled>
         )}
-        {(!navCollapsed) && <UserDropdown settings={settings} />}
+        {!navCollapsed && <UserDropdown settings={settings} />}
       </Box>
     </MenuHeaderWrapper>
   )
