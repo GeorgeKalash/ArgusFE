@@ -29,7 +29,7 @@ export default function RebuildAgingForm({ _labels, access }) {
           'is-rebuild',
           'Value must be "rebuild"',
           value => typeof value === 'string' && value.toLowerCase() === 'rebuild'
-        )
+        ).required()
     }),
     onSubmit: async obj => {
       const { recordId, ...rest } = obj
@@ -77,9 +77,11 @@ export default function RebuildAgingForm({ _labels, access }) {
             <Grid item xs={12}>
               <CustomTextField
                 name='rebuild'
+                required
                 label={_labels.rebuild}
                 value={formik.values.rebuild}
                 onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('rebuild', '')}
                 error={formik.touched.rebuild && Boolean(formik.errors.rebuild)}
                 maxAccess={access}
               />
@@ -92,6 +94,7 @@ export default function RebuildAgingForm({ _labels, access }) {
                 valueField='reference'
                 displayField='name'
                 valueShow='accountRef'
+                displayFieldWidth={2}
                 secondValueShow='accountName'
                 form={formik}
                 onChange={(event, newValue) => {
