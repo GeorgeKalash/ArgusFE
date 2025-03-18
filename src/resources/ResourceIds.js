@@ -380,5 +380,6 @@ export const ResourceIds = {
   CorrespondentDispersal: 36136,
   Rubber: 48305,
   Modeling: 48304,
-  PostDraftReturns: 51316
+  PostDraftReturns: 51316,
+  DamageReturn: 42333
 }

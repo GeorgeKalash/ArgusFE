@@ -1003,5 +1003,16 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
+  },
+  [ResourceIds.Damages]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.Damage.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000&_jobId=0`,
+    valueField: 'recordId',
+    displayField: ['reference'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'jobRef', value: 'Job Order' }
+    ]
   }
 }
