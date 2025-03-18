@@ -15,6 +15,7 @@ export default function ResourceComboBox({
   filter = () => true,
   dataGrid,
   value,
+  defaultIndex,
   reducer = res => res?.list,
   refresh,
   setData,
@@ -112,6 +113,13 @@ export default function ResourceComboBox({
       rest.onChange('', finalItemsListRef.current[0])
     }
   }
+
+  useEffect(() => {
+    if (finalItemsListRef.current.length > 0 && typeof defaultIndex === 'number') {
+      rest.onChange('', finalItemsListRef.current[defaultIndex])
+    }
+
+  }, [defaultIndex, finalItemsListRef.current.length])
 
   return (
     <CustomComboBox
