@@ -31,8 +31,23 @@ const RetailCompFigures = () => {
   const { platformLabels } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [columns, setColumns] = useState([])
-  const [totalRow, setTotalRow] = useState([])
+  const [displayedRow, setDisplayedRow] = useState([])
   const [data, setData] = useState([])
+
+  const [categories, setCategories] = useState([
+    'JAN',
+    'FEB',
+    'MAR',
+    'APR',
+    'MAY',
+    'JUN',
+    'JUL',
+    'AUG',
+    'SEP',
+    'OCT',
+    'NOV',
+    'DEC'
+  ])
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.POSComparativeFigures
@@ -115,8 +130,7 @@ const RetailCompFigures = () => {
 
     const sortedData = processedData.slice(1).sort((a, b) => b.total - a.total) // Sort rows not external!!
     sortedData.unshift(totalRow)
-    console.log(totalRow)
-    setTotalRow(
+    setDisplayedRow(
       Object.entries(totalRow)
         .filter(([key]) => !isNaN(key))
         .map(([, value]) => value)
@@ -224,7 +238,7 @@ const RetailCompFigures = () => {
       }
     },
     xaxis: {
-      categories: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
+      categories: categories,
       axisTicks: { show: true },
       axisBorder: { show: true },
       tickPlacement: 'on',
@@ -241,7 +255,7 @@ const RetailCompFigures = () => {
         formatter: function (val, { seriesIndex, dataPointIndex }) {
           console.log('data', data[dataPointIndex])
 
-          const value = totalRow[dataPointIndex] // Access the value for the respective month
+          const value = displayedRow[dataPointIndex] // Access the value for the respective month
 
           return value ? value.toLocaleString() : '0' // Return formatted value
         }
@@ -249,7 +263,7 @@ const RetailCompFigures = () => {
     },
     yaxis: {
       min: 0, // Ensure the axis starts at zero
-      max: Math.max(...totalRow) * 1.2, // Adjust max dynamically based on data
+      //max: Math.max(...displayedRow) * 1.2, // Adjust max dynamically based on data
       tickAmount: 13, // Adjust for better spacing
       labels: {
         formatter: val => val?.toLocaleString(), // Format with commas
@@ -335,6 +349,24 @@ const RetailCompFigures = () => {
             maxAccess={access}
             pagination={false}
             name='compFigTable'
+            selectionMode={formik?.values?.posAnalysis == 1 ? 'row' : 'column'}
+            onSelectionChange={lineData => {
+              if (lineData) {
+                console.log('row', lineData)
+                if (formik?.values?.posAnalysis !== 1) {
+                  const firstColumnKey = Object.keys(data)[0] // Get the first column key
+                  const firstColumnValue = data[firstColumnKey] // Get the first column value
+                  console.log('firstColumnValue', firstColumnValue)
+                  setCategories([]) //POS
+                }
+
+                setDisplayedRow(
+                  Object.entries(lineData)
+                    .filter(([key]) => !isNaN(key))
+                    .map(([, value]) => value)
+                )
+              }
+            }}
           />
         </Grow>
         <Fixed>
@@ -351,7 +383,7 @@ const RetailCompFigures = () => {
                   }
                 /> */}
             <CardContent sx={{ pt: `${theme.spacing(3)} !important` }}>
-              <ReactApexcharts type='bar' height={250} options={options} series={[{ data: totalRow }]} />
+              <ReactApexcharts type='bar' height={250} options={options} series={[{ data: displayedRow }]} />
               {/*   <Box sx={{ mt: 9.5, display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                 <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
                   <CustomAvatar
