@@ -48,8 +48,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     endpointId: FinancialRepository.MetalTrx.page
   })
 
-  const plantId = !documentType?.dtId && parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const siteId = !documentType?.dtId && parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId },
@@ -432,10 +432,13 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         setMetal(metalRes.record)
         metalInfo = metalRes.record
       }
-      setDefaults(formik?.values?.dtId)
       if (recordId) refetchForm(recordId, metalInfo)
     })()
   }, [])
+
+  useEffect(() => {
+    setDefaults(formik?.values?.dtId)
+  }, [formik.values.dtId])
 
   return (
     <FormShell
@@ -465,7 +468,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 required
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
-                  await setDefaults(newValue?.recordId)
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
