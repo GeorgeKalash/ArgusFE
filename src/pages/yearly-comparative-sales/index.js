@@ -1,38 +1,38 @@
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
-import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { ControlContext } from 'src/providers/ControlContext'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ReportSAGeneratorRepository } from 'src/repositories/ReportSAGeneratorRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { Grid } from '@mui/material'
 
 const YearlyComparativeSales = () => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { getRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [fiscalYears, setFiscalYears] = useState([])
+  const [monthLabels, setMonthLabels] = useState([])
 
   const {
     query: { data },
     filterBy,
     labels,
-    access
+    access,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ReportSAGeneratorRepository.YearlyComparativeSale.SA503,
     datasetId: ResourceIds.YearlyComparativeSales
   })
 
-  async function getMonths() {
-    return new Promise((resolve, reject) => {
+  const loadMonths = async () => {
+    const monthsData = await new Promise((resolve, reject) => {
       getAllKvsByDataset({
         _dataset: DataSets.MONTHS,
         callback: result => {
@@ -41,21 +41,37 @@ const YearlyComparativeSales = () => {
         }
       })
     })
+
+    const monthNames = monthsData.reduce((acc, { key, value }) => {
+      acc[value] = value
+
+      return acc
+    }, {})
+
+    setMonthLabels(monthNames)
   }
+
   async function getFiscalYears() {
     const fiscalRes = await getRequest({
       extension: SystemRepository.FiscalYears.qry,
       parameters: '_filter='
     })
-    setFiscalYears(fiscalRes?.list)
+
+    if (fiscalRes?.list?.length > 0) {
+      const updatedList = fiscalRes.list.map((item, index, arr) => ({
+        year: item.fiscalYear,
+        checked: arr.length === 1 || index >= arr.length - 2
+      }))
+
+      return updatedList
+    }
   }
 
   const columns = [
     {
       field: 'year',
       headerName: labels.year,
-      flex: 1,
-      type: 'number'
+      flex: 1
     },
     {
       field: 'total',
@@ -64,78 +80,111 @@ const YearlyComparativeSales = () => {
       type: 'number'
     },
     {
-      field: 'jan',
-      headerName: labels.january,
-      flex: 1
+      field: 'salary1',
+      headerName: monthLabels.JAN,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'feb',
-      headerName: labels.february,
-      flex: 1
+      field: 'salary2',
+      headerName: monthLabels.FEB,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'mar',
-      headerName: labels.march,
-      flex: 1
+      field: 'salary3',
+      headerName: monthLabels.MAR,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'april',
-      headerName: labels.april,
-      flex: 1
+      field: 'salary4',
+      headerName: monthLabels.APR,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'may',
-      headerName: labels.may,
-      flex: 1
+      field: 'salary5',
+      headerName: monthLabels.MAY,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'jun',
-      headerName: labels.june,
-      flex: 1
+      field: 'salary6',
+      headerName: monthLabels.JUN,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'jul',
-      headerName: labels.july,
-      flex: 1
+      field: 'salary7',
+      headerName: monthLabels.JUL,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'aug',
-      headerName: labels.augest,
-      flex: 1
+      field: 'salary8',
+      headerName: monthLabels.AUG,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'sep',
-      headerName: labels.september,
-      flex: 1
+      field: 'salary9',
+      headerName: monthLabels.SEP,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'oct',
-      headerName: labels.october,
-      flex: 1
+      field: 'salary10',
+      headerName: monthLabels.OCT,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'nov',
-      headerName: labels.november,
-      flex: 1
+      field: 'salary11',
+      headerName: monthLabels.NOV,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'dec',
-      headerName: labels.december,
-      flex: 1
+      field: 'salary12',
+      headerName: monthLabels.DEC,
+      flex: 1,
+      type: 'number'
     }
   ]
 
   async function fetchGridData(options = {}) {
     const { params = [] } = options
-    const months = await getMonths()
-    const years = await getFiscalYears()
+    if (fiscalYears.length > 0) {
+      const checkedYears = fiscalYears.filter(yearObj => yearObj.checked).map(yearObj => yearObj.year)
 
-    const response = await getRequest({
-      extension: ReportSAGeneratorRepository.YearlyComparativeSale.SA503,
-      parameters: `years=&_params=${params}`
-    })
+      const response = await getRequest({
+        extension: ReportSAGeneratorRepository.YearlyComparativeSale.SA503,
+        parameters: `_years=${checkedYears.join(',')}&_params=${params}`
+      })
 
-    return { ...response, _startAt: _startAt }
+      const aggregatedData = response.list.reduce((acc, obj) => {
+        const { year, netSales = 0, month } = obj
+        const monthKey = `salary${month}`
+        if (!acc[year]) acc[year] = { year, total: 0 }
+        if (!acc[year][monthKey]) acc[year][monthKey] = 0
+        acc[year].total += netSales
+        acc[year][monthKey] = (acc[year][monthKey] || 0) + netSales
+
+        return acc
+      }, {})
+
+      const result = Object.values(aggregatedData).map(yearData => {
+        for (let month = 1; month <= 12; month++) {
+          const monthKey = `salary${month}`
+          if (!yearData[monthKey]) yearData[monthKey] = 0
+        }
+
+        return yearData
+      })
+
+      return { list: result }
+    }
   }
 
   const onApply = ({ search, rpbParams }) => {
@@ -148,6 +197,16 @@ const YearlyComparativeSales = () => {
     }
     refetch()
   }
+  useEffect(() => {
+    ;(async function () {
+      await loadMonths()
+      const years = await getFiscalYears()
+      setFiscalYears(years)
+    })()
+  }, [])
+  useEffect(() => {
+    if (fiscalYears.length > 0) refetch()
+  }, [fiscalYears])
 
   return (
     <VertLayout>
@@ -155,15 +214,38 @@ const YearlyComparativeSales = () => {
         <RPBGridToolbar maxAccess={access} onApply={onApply} reportName={'SA503'} />
       </Fixed>
       <Grow>
-        <Table
-          name='table'
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          isLoading={false}
-          maxAccess={access}
-          pagination={false}
-        />
+        <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
+          <Grid item xs={12} sx={{ display: 'flex', flex: 1 }}>
+            <Table
+              name='yearsTable'
+              columns={columns}
+              gridData={data}
+              rowId={['recordId']}
+              isLoading={false}
+              maxAccess={access}
+              pagination={false}
+            />
+          </Grid>
+          <Grid item xs={2} sx={{ display: 'flex', flex: 1, height: '50%' }}>
+            <Table
+              name='fiscalTable'
+              columns={[
+                {
+                  field: 'year',
+                  headerName: labels.year,
+                  flex: 1
+                }
+              ]}
+              gridData={{ list: fiscalYears }}
+              rowId={['year']}
+              showCheckboxColumn={true}
+              isLoading={false}
+              maxAccess={access}
+              pagination={false}
+            />
+          </Grid>
+          <Grid item xs={10} sx={{ display: 'flex', flex: 1, height: '50%' }}></Grid>
+        </Grid>
       </Grow>
     </VertLayout>
   )
