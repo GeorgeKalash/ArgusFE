@@ -136,7 +136,7 @@ const RetailCompFigures = () => {
         .map(([, value]) => value)
     )
 
-    console.log('totalRow', totalRow)
+    console.log('sortedData', sortedData)
     setData({
       count: sortedData?.length || 0,
       list: sortedData?.length ? sortedData : []
@@ -164,6 +164,8 @@ const RetailCompFigures = () => {
         headerName: labels.total,
         type: 'number',
         width: 180
+
+        //comparator: (valueA, valueB) => valueB - valueA,
       }
     ]
 
@@ -197,7 +199,7 @@ const RetailCompFigures = () => {
 
   const options = {
     chart: {
-      parentHeightOffset: 0,
+      type: 'bar',
       toolbar: { show: false }
     },
     grid: {
@@ -224,10 +226,10 @@ const RetailCompFigures = () => {
         fontWeight: 'bold',
         colors: ['black'] // Ensure contrast with bars
       },
-      offsetY: -30 // Adjust label position },
+      offsetY: -35 // Adjust label position },
     },
     fill: {
-      colors: [hexToRGBA('#007bff', 0.5)] // Set the bar color (blue)
+      colors: [hexToRGBA('#007bff', 0.5)] // Set the bar color (blue),
     },
     states: {
       hover: {
@@ -253,18 +255,16 @@ const RetailCompFigures = () => {
     tooltip: {
       y: {
         formatter: function (val, { seriesIndex, dataPointIndex }) {
-          console.log('data', data[dataPointIndex])
+          const value = displayedRow[dataPointIndex]
 
-          const value = displayedRow[dataPointIndex] // Access the value for the respective month
-
-          return value ? value.toLocaleString() : '0' // Return formatted value
+          return value ? value.toLocaleString() : '0'
         }
       }
     },
     yaxis: {
-      min: 0, // Ensure the axis starts at zero
+      //min: 0, // Ensure the axis starts at zero
       //max: Math.max(...displayedRow) * 1.2, // Adjust max dynamically based on data
-      tickAmount: 13, // Adjust for better spacing
+      //tickAmount: 13, // Adjust for better spacing
       labels: {
         formatter: val => val?.toLocaleString(), // Format with commas
         style: {
@@ -352,19 +352,22 @@ const RetailCompFigures = () => {
             selectionMode={formik?.values?.posAnalysis == 1 ? 'row' : 'column'}
             onSelectionChange={lineData => {
               if (lineData) {
-                console.log('row', lineData)
-                if (formik?.values?.posAnalysis !== 1) {
-                  const firstColumnKey = Object.keys(data)[0] // Get the first column key
-                  const firstColumnValue = data[firstColumnKey] // Get the first column value
-                  console.log('firstColumnValue', firstColumnValue)
-                  setCategories([]) //POS
+                if (formik?.values?.posAnalysis != 1) {
+                  const firstColumnValues = data?.list?.filter((_, index) => index !== 0).map(item => item.posRef)
+                  setCategories(firstColumnValues)
+                  setDisplayedRow(
+                    Object.entries(lineData?.filter((_, index) => index !== 0))
+                      .filter(([key]) => !isNaN(key))
+                      .map(([, value]) => value)
+                  )
+                } else {
+                  setCategories(['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'])
+                  setDisplayedRow(
+                    Object.entries(lineData)
+                      .filter(([key]) => !isNaN(key))
+                      .map(([, value]) => value)
+                  )
                 }
-
-                setDisplayedRow(
-                  Object.entries(lineData)
-                    .filter(([key]) => !isNaN(key))
-                    .map(([, value]) => value)
-                )
               }
             }}
           />
