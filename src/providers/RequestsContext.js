@@ -74,16 +74,16 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         }
       })
         .then(response => {
-          if (!disableLoading) debouncedCloseLoading()
           resolve(response.data)
         })
         .catch(error => {
-          debouncedCloseLoading()
           showError({
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
+
           if (throwError) reject(error)
+          else resolve(error)
         })
         .finally(() => {
           if (!disableLoading) decrementRequests()
