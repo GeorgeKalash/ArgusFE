@@ -39,7 +39,7 @@ export default function RebuildAgingForm({ _labels, access }) {
       const { recordId, ...rest } = obj
 
       const res = await postRequest({
-        extension: FinancialRepository.RebuildAging.rebuild,
+        extension: FinancialRepository.AgingDoc.rebuild,
         record: JSON.stringify(rest)
       })
 
@@ -58,17 +58,11 @@ export default function RebuildAgingForm({ _labels, access }) {
     }
   })
 
-  const rebuild = () => {
-    formik.handleSubmit()
-  }
-
   const actions = [
     {
       key: 'Rebuild',
       condition: true,
-      onClick: () => {
-        rebuild()
-      },
+      onClick: formik.handleSubmit,
       disabled: false
     }
   ]
