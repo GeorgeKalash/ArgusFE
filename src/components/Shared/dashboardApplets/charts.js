@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
+import { useSettings } from 'src/@core/hooks/useSettings'
 
 const getChartOptions = (label, type) => {
   const baseOptions = {
@@ -79,10 +80,21 @@ const getChartOptions = (label, type) => {
 }
 
 export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverColor }) => {
-  useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+  const { settings } = useSettings()
 
-    const chart = new Chart(ctx, {
+  const { navCollapsed } = settings
+
+  const chartRef = useRef(null)
+  const chartInstanceRef = useRef(null)
+
+  useEffect(() => {
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.destroy()
+    }
+
+    const ctx = chartRef.current.getContext('2d')
+
+    chartInstanceRef.current = new Chart(ctx, {
       type: 'bar',
       data: {
         labels,
@@ -98,6 +110,13 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
       },
       options: {
         indexAxis: 'y',
+        responsive: false,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            max: Math.max(...data) * 1.1
+          }
+        },
         plugins: {
           datalabels: {
             anchor: context => {
@@ -110,7 +129,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 50 ? 'center' : 'end'
+              return barWidth >= 65 ? 'center' : 'end'
             },
             align: context => {
               const chart = context.chart
@@ -122,7 +141,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 50 ? 'center' : 'right'
+              return barWidth >= 65 ? 'center' : 'right'
             },
             color: context => {
               const chart = context.chart
@@ -134,7 +153,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 50 ? '#fff' : '#000'
+              return barWidth >= 65 ? '#fff' : '#000'
             },
             offset: 0,
             font: {
@@ -148,11 +167,22 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
     })
 
     return () => {
-      chart.destroy()
+      chartInstanceRef.current.destroy()
     }
-  }, [id, labels, data, label])
+  }, [id, labels, data, label, color, hoverColor])
 
-  return <canvas id={id} style={{ width: '100%', height: '400px' }}></canvas>
+  const baseHeight = 200
+  const barHeight = 25
+  const dynamicHeight = baseHeight + labels.length * barHeight
+
+  return (
+    <canvas
+      id={id}
+      ref={chartRef}
+      width={navCollapsed ? window.innerWidth / 2 : window.innerWidth / 2.5}
+      height={dynamicHeight}
+    ></canvas>
+  )
 }
 
 export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {

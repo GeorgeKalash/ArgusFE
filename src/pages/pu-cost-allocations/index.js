@@ -90,13 +90,11 @@ const PuCostAllocations = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.CostAllocation,
-    action: async () => {
-      openForm()
-    },
+    action: openForm,
     hasDT: false
   })
 
-  const add = async () => {
+  const add = () => {
     proxyAction()
   }
 

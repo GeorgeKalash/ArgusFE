@@ -104,8 +104,6 @@ const Damages = () => {
     stack({
       Component: DamageForm,
       props: {
-        labels,
-        access,
         recordId
       },
       width: 850,

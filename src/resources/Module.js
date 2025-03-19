@@ -14,6 +14,7 @@ export const Module = {
   RepairAndServices: 45,
   Replenishment: 46,
   Foundry: 47,
+  ProductModeling: 48,
   Purchase: 50,
   Sales: 51, //continue + 40
   Delivery: 52,
@@ -25,5 +26,6 @@ export const Module = {
   TimeAttendance: 72,
   LeaveReq: 73,
   Loans: 74,
-  HR: 100
+  HR: 100,
+  ProductModeling: 48
 }
