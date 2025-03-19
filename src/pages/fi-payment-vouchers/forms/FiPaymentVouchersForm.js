@@ -459,6 +459,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 label={labels.accountReference}
                 valueField='reference'
                 displayField='name'
+                disabled={!formik.values.accountType}
                 valueShow='accountRef'
                 secondValueShow='accountName'
                 form={formik}
