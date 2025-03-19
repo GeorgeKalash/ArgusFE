@@ -377,7 +377,7 @@ export const ResourceIds = {
   ThreeDDesign: 48301,
   Casting: 48303,
   Printing: 48302,
-  SalesQuotations: 51301,
+  RebuildAging: 31502,
   CorrespondentDispersal: 36136,
   Rubber: 48305,
   Modeling: 48304,
