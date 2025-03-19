@@ -363,5 +363,6 @@ export const ResourceIds = {
   PostDraftSerials: 51315,
   AvailabilitiesCrossTab: 41227,
   Collections: 41119,
-  SalesQuotations: 51301
+  SalesQuotations: 51301,
+  RebuildAging: 31502
 }
