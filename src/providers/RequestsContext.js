@@ -32,7 +32,6 @@ function LoadingOverlay() {
 const RequestsProvider = ({ showLoading = false, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
   const errorModel = useError()
-  const [loading, setLoading] = useState(false)
   const [activeRequests, setActiveRequests] = useState(0)
 
   let isRefreshingToken = false
@@ -50,14 +49,9 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     setActiveRequests(prev => prev - 1)
   }
 
-  const debouncedCloseLoading = debounce(() => {
-    setLoading(false)
-  }, 500)
-
   const getRequest = async body => {
     const accessToken = await getAccessToken()
     const disableLoading = body.disableLoading || false
-    !disableLoading && !loading && setLoading(true)
 
     const throwError = body.throwError || false
 
@@ -83,7 +77,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
           })
 
           if (throwError) reject(error)
-          else resolve(error)
+          else if (error.response?.status) resolve(error)
         })
         .finally(() => {
           if (!disableLoading) decrementRequests()
@@ -93,9 +87,10 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
   const getRequestFullEndPoint = async body => {
     const disableLoading = body.disableLoading || false
-    !disableLoading && !loading && setLoading(true)
 
     const throwError = body.throwError || false
+
+    if (!disableLoading) incrementRequests()
 
     return new Promise(async (resolve, reject) => {
       axios({
@@ -106,25 +101,27 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         }
       })
         .then(response => {
-          if (!disableLoading) debouncedCloseLoading()
           resolve(response.data)
         })
         .catch(error => {
-          debouncedCloseLoading()
           showError({
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
           if (throwError) reject(error)
         })
+        .finally(() => {
+          if (!disableLoading) decrementRequests()
+        })
     })
   }
 
   const getMicroRequest = async body => {
     const disableLoading = body.disableLoading || false
-    !disableLoading && !loading && setLoading(true)
 
     const throwError = body.throwError || false
+
+    if (!disableLoading) incrementRequests()
 
     return new Promise(async (resolve, reject) => {
       return axios({
@@ -132,16 +129,17 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
       })
         .then(response => {
-          if (!disableLoading) debouncedCloseLoading()
           resolve(response.data)
         })
         .catch(error => {
-          debouncedCloseLoading()
           showError({
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
           if (throwError) reject(error)
+        })
+        .finally(() => {
+          if (!disableLoading) decrementRequests()
         })
     })
   }
@@ -169,8 +167,6 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   }
 
   const postRequest = async body => {
-    !loading && setLoading(true)
-
     const accessToken = await getAccessToken()
     const url = body.url ? body.url : apiUrl
 
@@ -178,9 +174,10 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     bodyFormData.append('record', body.record)
     body?.file && bodyFormData.append('file', body.file)
     const disableLoading = body.disableLoading || false
-    !disableLoading && !loading && setLoading(true)
 
     const throwError = body.throwError || false
+
+    if (!disableLoading) incrementRequests()
 
     return new Promise(async (resolve, reject) => {
       axios({
@@ -194,9 +191,6 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         data: bodyFormData
       })
         .then(response => {
-          if (!disableLoading) {
-            debouncedCloseLoading()
-          }
           if (body?.noHandleError) return resolve(response.data)
           resolve(response.data)
         })
@@ -204,7 +198,6 @@ const RequestsProvider = ({ showLoading = false, children }) => {
           if (body?.noHandleError) {
             return resolve(error.response.data)
           }
-          debouncedCloseLoading()
           showError({
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
@@ -212,6 +205,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
           if (throwError) reject(error)
         })
+    }).finally(() => {
+      if (!disableLoading) decrementRequests()
     })
   }
 
