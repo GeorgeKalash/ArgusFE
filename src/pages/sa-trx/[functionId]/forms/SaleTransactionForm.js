@@ -282,17 +282,24 @@ export default function SaleTransactionForm({
         },
         items: updatedRows,
         serials: serialsValues,
-        taxes: [
-          ...[
+        taxes: Object.values(
+          [
             ...obj.taxes,
             ...obj.items
-              .filter(({ taxDetails }) => taxDetails && taxDetails?.length > 0)
+              .filter(({ taxDetails }) => taxDetails && taxDetails.length > 0)
               .map(({ taxDetails, id }) => ({
                 seqNo: id,
                 ...taxDetails[0]
               }))
-          ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
-        ],
+          ].reduce((acc, tax) => {
+            if (obj.items.some(item => item.id === tax.seqNo)) {
+              acc[tax.seqNo] = tax
+            }
+
+            return acc
+          }, {})
+        ),
+
         ...(({ header, items, taxes, serials, ...rest }) => rest)(obj)
       }
 

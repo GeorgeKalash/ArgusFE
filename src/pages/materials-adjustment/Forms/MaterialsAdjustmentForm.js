@@ -25,6 +25,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { useWindow } from 'src/windows'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 export default function MaterialsAdjustmentForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -154,12 +155,15 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
 
-  const totalQty = formik.values?.rows?.reduce((qtySum, row) => {
-    const qtyValue = parseFloat(row.qty) || 0
+  const totalQty = getFormattedNumber(
+    formik.values?.rows
+      ?.reduce((qtySum, row) => {
+        const qtyValue = parseFloat(row.qty) || 0
 
-    return qtySum + qtyValue
-  }, 0)
-
+        return qtySum + qtyValue
+      }, 0)
+      .toFixed(2)
+  )
   async function onPost() {
     await postRequest({
       extension: InventoryRepository.MaterialsAdjustment.post,
@@ -217,7 +221,11 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     {
       component: 'numberfield',
       name: 'qty',
-      label: labels.qty
+      label: labels.qty,
+      props: {
+        maxLength: 11,
+        decimalScale: 3
+      }
     },
     {
       component: 'textfield',

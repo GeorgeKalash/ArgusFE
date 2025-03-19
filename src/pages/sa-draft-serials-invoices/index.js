@@ -117,8 +117,7 @@ const DraftSerialsInvoices = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.DraftSerialsIn,
-    action: openForm,
-    hasDT: false
+    action: openForm
   })
 
   const add = async () => {

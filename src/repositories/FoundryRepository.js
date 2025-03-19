@@ -16,9 +16,12 @@ export const FoundryRepository = {
   },
   Scrap: {
     qry: service + 'qryMSC',
-    set2: service + 'set2MSC',
+    set2: service + 'set2MSC'
   },
   JobWaxInquiry: {
     qry2: service + 'qry2WAJ'
+  },
+  Casting: {
+    qry: service + 'qryCAS'
   }
 }
