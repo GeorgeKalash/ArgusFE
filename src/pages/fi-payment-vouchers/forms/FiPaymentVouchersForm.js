@@ -426,6 +426,9 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountType', newValue?.key)
+                  formik.setFieldValue('accountId', null)
+                  formik.setFieldValue('accountRef', '')
+                  formik.setFieldValue('accountName', '')
                 }}
                 error={formik.touched.accountType && Boolean(formik.errors.accountType)}
               />
@@ -455,11 +458,10 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
-                readOnly={isPosted || isCancelled}
+                readOnly={isPosted || isCancelled || !formik.values.accountType}
                 label={labels.accountReference}
                 valueField='reference'
                 displayField='name'
-                disabled={!formik.values.accountType}
                 valueShow='accountRef'
                 secondValueShow='accountName'
                 form={formik}
