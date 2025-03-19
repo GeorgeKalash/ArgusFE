@@ -711,6 +711,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     formik.setValues({
       ...formik.values,
       recordId: puTrxHeader.recordId || null,
+      dtId: puTrxHeader.dtId || null,
       header: {
         ...formik.values.header,
         ...puTrxHeader,
@@ -1317,7 +1318,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 label={labels.date}
                 readOnly={isPosted}
                 value={formik?.values?.header?.date}
-                onChange={formik.setFieldValue}
+                onChange={(e, newValue) => formik.setFieldValue('header.date', newValue)}
                 editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('header.date', '')}
@@ -1394,7 +1395,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 label={labels.dueDate}
                 readOnly={isPosted}
                 value={formik?.values?.header?.dueDate}
-                onChange={formik.setFieldValue}
+                onChange={(e, newValue) => formik.setFieldValue('header.dueDate', newValue)}
                 editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('header.dueDate', '')}
