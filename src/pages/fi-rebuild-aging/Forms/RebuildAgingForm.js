@@ -12,10 +12,13 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { useWindow } from 'src/windows'
+import { ThreadProgress } from 'src/components/Shared/ThreadProgress'
 
 export default function RebuildAgingForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const { formik } = useForm({
     initialValues: { rebuild: '', accountId: 0, recordId: 'N/A' },
@@ -29,14 +32,26 @@ export default function RebuildAgingForm({ _labels, access }) {
           'is-rebuild',
           'Value must be "rebuild"',
           value => typeof value === 'string' && value.toLowerCase() === 'rebuild'
-        ).required()
+        )
+        .required()
     }),
     onSubmit: async obj => {
       const { recordId, ...rest } = obj
 
-      await postRequest({
+      const res = await postRequest({
         extension: FinancialRepository.RebuildAging.rebuild,
         record: JSON.stringify(rest)
+      })
+
+      stack({
+        Component: ThreadProgress,
+        props: {
+          recordId: res.recordId
+        },
+        width: 500,
+        height: 450,
+        closable: false,
+        title: platformLabels.Progress
       })
 
       toast.success(platformLabels.rebuild)
@@ -98,7 +113,7 @@ export default function RebuildAgingForm({ _labels, access }) {
                 secondValueShow='accountName'
                 form={formik}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('accountId', newValue?.recordId || null)
+                  formik.setFieldValue('accountId', newValue?.recordId || 0)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                 }}
