@@ -24,7 +24,8 @@ import CardContent from '@mui/material/CardContent'
 import ReactApexcharts from 'src/@core/components/react-apexcharts'
 import Box from '@mui/material/Box'
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
-import { useTheme } from '@mui/material/styles'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
+import Chart from 'chart.js/auto'
 
 const RetailCompFigures = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -195,85 +196,84 @@ const RetailCompFigures = () => {
     setPosAnalysisStore(data)
   }
 
-  const theme = useTheme()
+  useEffect(() => {
+    console.log('cate', displayedRow)
+    const ctx = document.getElementById('compFigChart').getContext('2d')
 
-  const options = {
-    chart: {
+    const chart = new Chart(ctx, {
       type: 'bar',
-      toolbar: { show: false }
-    },
-    grid: {
-      show: true,
-      borderColor: '#ccc'
-    },
-    plotOptions: {
-      bar: {
-        borderRadius: 0,
-        distributed: true,
-        columnWidth: '90%',
-        dataLabels: {
-          position: 'top',
-          orientation: 'vertical'
-        }
-      }
-    },
-    legend: { show: false },
-    dataLabels: {
-      enabled: true,
-      formatter: val => val?.toLocaleString(), // Format with commas
-      style: {
-        fontSize: '14px',
-        fontWeight: 'bold',
-        colors: ['black'] // Ensure contrast with bars
+      data: {
+        labels: categories,
+        datasets: [
+          {
+            data: displayedRow,
+            backgroundColor: 'rgba(0, 123, 255, 0.5)',
+            hoverBackgroundColor: 'rgb(255, 255, 0)',
+            borderWidth: 1
+          }
+        ]
       },
-      offsetY: -35 // Adjust label position },
-    },
-    fill: {
-      colors: [hexToRGBA('#007bff', 0.5)] // Set the bar color (blue),
-    },
-    states: {
-      hover: {
-        filter: { type: 'lighten' }
-      },
-      active: {
-        filter: { type: 'none' }
-      }
-    },
-    xaxis: {
-      categories: categories,
-      axisTicks: { show: true },
-      axisBorder: { show: true },
-      tickPlacement: 'on',
-      labels: {
-        style: {
-          fontSize: '12px',
-          fontWeight: 'bold',
-          colors: theme.palette.text.disabled
-        }
-      }
-    },
-    tooltip: {
-      y: {
-        formatter: function (val, { seriesIndex, dataPointIndex }) {
-          const value = displayedRow[dataPointIndex]
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          datalabels: {
+            anchor: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
 
-          return value ? value.toLocaleString() : '0'
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? 'center' : 'end'
+            },
+            align: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? 'center' : 'end'
+            },
+            color: 'black',
+            offset: 0,
+            rotation: -90,
+            font: { size: 14, weight: 'bold' },
+            formatter: val => val?.toLocaleString()
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: '#000'
+            },
+            grid: {
+              display: true,
+              color: 'rgba(255, 255, 255, 0.2)'
+            }
+          },
+          y: {
+            ticks: {
+              color: '#000'
+            }
+          }
         }
-      }
-    },
-    yaxis: {
-      //min: 0, // Ensure the axis starts at zero
-      //max: Math.max(...displayedRow) * 1.2, // Adjust max dynamically based on data
-      //tickAmount: 13, // Adjust for better spacing
-      labels: {
-        formatter: val => val?.toLocaleString(), // Format with commas
-        style: {
-          fontSize: '12px',
-          colors: '#000'
-        }
-      }
+      },
+      plugins: [ChartDataLabels]
+    })
+
+    return () => {
+      chart.destroy()
     }
-  }
+  }, [categories, displayedRow])
 
   useEffect(() => {
     ;(async function () {
@@ -373,55 +373,20 @@ const RetailCompFigures = () => {
           />
         </Grow>
         <Fixed>
-          <Card>
-            {/* <CardHeader
-                  title='Weekly Sales'
-                  subheader='Total 85.4k Sales'
-                  titleTypographyProps={{ sx: { lineHeight: '2rem !important', letterSpacing: '0.15px !important' } }}
-                  action={
-                    <OptionsMenu
-                      options={['Last 28 Days', 'Last Month', 'Last Year']}
-                      iconButtonProps={{ size: 'small', sx: { color: 'text.primary' } }}
-                    />
-                  }
-                /> */}
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Card sx={{ width: '100%', height: '300px' }}>
+                <CardContent sx={{ pb: '8px !important', pt: '8px !important', height: '100%' }}>
+                  <canvas id={'compFigChart'} style={{ width: '100% !important', height: '100%' }}></canvas>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+          {/* <Card>
             <CardContent sx={{ pt: `${theme.spacing(3)} !important` }}>
               <ReactApexcharts type='bar' height={250} options={options} series={[{ data: displayedRow }]} />
-              {/*   <Box sx={{ mt: 9.5, display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
-                <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
-                  <CustomAvatar
-                    skin='light'
-                    variant='rounded'
-                    sx={{ mr: 4, width: 42, height: 42, '& svg': { color: 'primary.main' } }}
-                  >
-                    <Icon icon='mdi:trending-up' fontSize='1.875rem' />
-                  </CustomAvatar>
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography sx={{ fontWeight: 600 }}>34.6k</Typography>
-                    <Typography variant='body2' sx={{ lineHeight: '1.313rem', letterSpacing: '0.25px' }}>
-                      Sales
-                    </Typography>
-                  </Box>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <CustomAvatar
-                    skin='light'
-                    color='success'
-                    variant='rounded'
-                    sx={{ mr: 4, width: 42, height: 42, '& svg': { color: 'success.main' } }}
-                  >
-                    <Icon icon='mdi:currency-usd' fontSize='1.875rem' />
-                  </CustomAvatar>
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography sx={{ fontWeight: 600 }}>$482k</Typography>
-                    <Typography variant='body2' sx={{ lineHeight: '1.313rem', letterSpacing: '0.25px' }}>
-                      Total Profit
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box> */}
             </CardContent>
-          </Card>
+          </Card> */}
         </Fixed>
       </VertLayout>
     </FormShell>
