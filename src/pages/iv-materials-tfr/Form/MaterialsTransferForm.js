@@ -669,9 +669,12 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       getDefaultFromSiteId()
-      getDTD(documentType?.dtId)
     })()
   }, [])
+
+  useEffect(() => {
+    if (documentType?.dtId) getDTD(documentType?.dtId)
+  }, [documentType?.dtId])
 
   useEffect(() => {
     ;(async function () {
@@ -748,7 +751,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     values={formik?.values}
                     onChange={async (event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || '')
-                      if (newValue?.recordId) await getDTD(newValue?.recordId)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
