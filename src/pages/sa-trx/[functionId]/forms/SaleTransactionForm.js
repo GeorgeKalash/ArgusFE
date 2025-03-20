@@ -98,12 +98,13 @@ export default function SaleTransactionForm({
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
       recordId: recordId || null,
       header: {
         dgId: functionId,
         recordId: null,
-        dtId: documentType?.dtId,
+        dtId: null,
         reference: '',
         date: new Date(),
         dueDate: new Date(),
@@ -1421,13 +1422,6 @@ export default function SaleTransactionForm({
     formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
-
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('header.dtId', documentType.dtId)
-      onChangeDtId(documentType.dtId)
-    }
-  }, [documentType?.dtId])
 
   useEffect(() => {
     if (reCal) {

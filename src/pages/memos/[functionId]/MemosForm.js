@@ -1,4 +1,4 @@
-import { Button, Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Button, Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -50,7 +50,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
-      dtId: documentType?.dtId || null,
+      dtId: null,
       reference: '',
       date: new Date(),
       plantId: '',
@@ -72,15 +72,16 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       dueDate: new Date()
     },
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      amount: yup.number().required(' '),
-      currencyId: yup.string().required(' '),
-      accountId: yup.string().required(' '),
-      subtotal: yup.number().required(' '),
-      date: yup.string().required(' '),
-      dueDate: yup.string().required(' ')
+      amount: yup.number().required(),
+      currencyId: yup.string().required(),
+      accountId: yup.string().required(),
+      subtotal: yup.number().required(),
+      date: yup.string().required(),
+      dueDate: yup.string().required()
     }),
     onSubmit: async obj => {
       if (!obj.recordId) {

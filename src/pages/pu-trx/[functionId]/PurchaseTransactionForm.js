@@ -78,7 +78,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const initialValues = {
     recordId: recordId,
-    dtId: documentType?.dtId,
+    dtId: null,
     header: {
       dgId: functionId,
       functionId: functionId,
@@ -1138,13 +1138,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
-
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
-      onChangeDtId(documentType.dtId)
-    }
-  }, [documentType?.dtId])
 
   useEffect(() => {
     if (reCal) {

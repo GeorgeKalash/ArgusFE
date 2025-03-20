@@ -47,6 +47,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
 
   const { formik } = useForm({
     maxAccess: maxAccess,
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
@@ -57,7 +58,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         reference: '',
         accountId: null,
         date: new Date(),
-        dtId: documentType?.dtId,
+        dtId: null,
         amount: null,
         owoId: null,
         owoRef: '',
