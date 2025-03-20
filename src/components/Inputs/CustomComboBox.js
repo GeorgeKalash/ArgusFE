@@ -8,6 +8,7 @@ import { checkAccess } from 'src/lib/maxAccess'
 const CustomComboBox = ({
   type = 'text',
   name,
+  fullName,
   label,
   value,
   valueField = 'key',
@@ -38,7 +39,7 @@ const CustomComboBox = ({
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
-    name,
+    fullName,
     props.maxAccess,
     required,
     readOnly,

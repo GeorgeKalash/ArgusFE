@@ -7,7 +7,6 @@ export const ResourceLookup = ({
   parameters,
   form,
   formObject = null,
-  name,
   firstValue,
   secondValue,
   valueShow,
@@ -51,6 +50,9 @@ export const ResourceLookup = ({
         })
     }
   }
+  const fieldPath = rest?.name?.split('.')
+  const [parent, child] = fieldPath
+  const name = child || rest?.name
 
   const _firstValue =
     firstValue ||
@@ -124,6 +126,7 @@ export const ResourceLookup = ({
           onFocus,
           onBlur,
           name,
+          fullName: rest.name,
           isLoading,
           renderOption,
           minChars,

@@ -14,6 +14,8 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useError } from 'src/error'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -52,7 +54,7 @@ const FiPaymentVouchers = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     filterBy,
     paginationParameters,
     refetch,
@@ -70,65 +72,65 @@ const FiPaymentVouchers = () => {
   const columns = [
     {
       field: 'date',
-      headerName: _labels.date,
+      headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'accountTypeName',
-      headerName: _labels.accountType,
+      headerName: labels.accountType,
       flex: 1
     },
     {
       field: 'accountRef',
-      headerName: _labels.account,
+      headerName: labels.account,
       flex: 1
     },
     {
       field: 'accountName',
-      headerName: _labels.accountName,
+      headerName: labels.accountName,
       flex: 1
     },
     {
       field: 'cashAccountName',
-      headerName: _labels.cashAccount,
+      headerName: labels.cashAccount,
       flex: 1
     },
     {
       field: 'amount',
-      headerName: _labels.amount,
+      headerName: labels.amount,
       flex: 1,
       type: 'number'
     },
     {
       field: 'currencyRef',
-      headerName: _labels.currency,
+      headerName: labels.currency,
       flex: 1
     },
     {
       field: 'notes',
-      headerName: _labels.notes,
+      headerName: labels.notes,
       flex: 1
     },
     {
       field: 'statusName',
-      headerName: _labels.status,
+      headerName: labels.status,
       flex: 1
     },
     {
       field: 'isVerified',
-      headerName: _labels.isVerified,
+      headerName: labels.isVerified,
       type: 'checkbox'
     }
   ]
 
-  const add = () => {
-    openForm()
+  const add = async () => {
+    await proxyAction()
   }
 
   const edit = obj => {
@@ -152,14 +154,14 @@ const FiPaymentVouchers = () => {
     stack({
       Component: FiPaymentVouchersForm,
       props: {
-        labels: _labels,
-        recordId: recordId,
-        plantId: plantId,
+        labels,
+        recordId,
+        plantId,
         maxAccess: access
       },
       width: 950,
       height: 550,
-      title: _labels.paymentVoucher
+      title: labels.paymentVoucher
     })
   }
 
@@ -167,6 +169,11 @@ const FiPaymentVouchers = () => {
     const plantId = await getPlantId()
     openOutWardsWindow(plantId, recordId)
   }
+
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.PaymentVoucher,
+    action: openForm
+  })
 
   const del = async obj => {
     await postRequest({
@@ -180,7 +187,7 @@ const FiPaymentVouchers = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar labels={_labels} onAdd={add} maxAccess={access} reportName={'FIPV'} filterBy={filterBy} />
+        <RPBGridToolbar labels={labels} onAdd={add} maxAccess={access} reportName={'FIPV'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
@@ -197,7 +204,7 @@ const FiPaymentVouchers = () => {
           refetch={refetch}
           maxAccess={access}
         />
-      </Grow>{' '}
+      </Grow>
     </VertLayout>
   )
 }
