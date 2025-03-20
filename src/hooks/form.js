@@ -68,15 +68,7 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
                 if (!maxAccessErrors[gridName]) {
                   maxAccessErrors[gridName] = []
                 }
-            if (Array.isArray(values?.[gridName])) {
-              ;(values?.[gridName] || [])?.forEach((row, index) => {
-                if (!maxAccessErrors[gridName]) {
-                  maxAccessErrors[gridName] = []
-                }
 
-                if (!maxAccessErrors[gridName][index]) {
-                  maxAccessErrors[gridName][index] = {}
-                }
                 if (!maxAccessErrors[gridName][index]) {
                   maxAccessErrors[gridName][index] = {}
                 }
@@ -85,15 +77,7 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
                   maxAccessErrors[gridName][index][fieldName] = `${fieldName} is required.`
                 } else {
                   if (maxAccessErrors[gridName][index][fieldName]) delete maxAccessErrors[gridName][index][fieldName]
-                if (!row[fieldName] || row[fieldName] == 0) {
-                  maxAccessErrors[gridName][index][fieldName] = `${fieldName} is required.`
-                } else {
-                  if (maxAccessErrors[gridName][index][fieldName]) delete maxAccessErrors[gridName][index][fieldName]
 
-                  if (Object.keys(maxAccessErrors[gridName][index])?.length === 0) {
-                    delete maxAccessErrors[gridName][index]
-                  }
-                }
                   if (Object.keys(maxAccessErrors[gridName][index])?.length === 0) {
                     delete maxAccessErrors[gridName][index]
                   }
