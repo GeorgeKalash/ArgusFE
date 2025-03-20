@@ -31,7 +31,7 @@ import { useWindow } from 'src/windows'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 
-export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId }) {
+export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -227,6 +227,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       toast.success(platformLabels.Posted)
       invalidate()
       await getData(formik.values.recordId)
+      window.close()
     }
   }
 

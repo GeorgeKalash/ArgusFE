@@ -9,13 +9,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import DraftForm from './forms/DraftForm'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import DamageReturnForm from './forms/DamageReturnForm'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
-const DraftSerialsInvoices = () => {
+const Damages = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -31,8 +31,8 @@ const DraftSerialsInvoices = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.DraftInvoice.page,
-    datasetId: ResourceIds.DraftSerialsInvoices,
+    endpointId: ManufacturingRepository.DamageReturn.page,
+    datasetId: ResourceIds.DamageReturn,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -51,46 +51,28 @@ const DraftSerialsInvoices = () => {
       type: 'date'
     },
     {
-      field: 'clientRef',
-      headerName: labels.clientRef,
+      field: 'typeName',
+      headerName: labels.type,
       flex: 1
     },
     {
-      field: 'clientName',
-      headerName: labels.client,
+      field: 'damageRef',
+      headerName: labels.damage,
       flex: 1
     },
     {
-      field: 'amount',
-      headerName: labels.amount,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'pcs',
-      headerName: labels.pcs,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'weight',
-      headerName: labels.totalWeight,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'description',
-      headerName: labels.description,
-      flex: 1
-    },
-    {
-      field: 'wipName',
-      headerName: labels.wip,
+      field: 'jobRef',
+      headerName: labels.jobRef,
       flex: 1
     },
     {
       field: 'statusName',
       headerName: labels.status,
+      flex: 1
+    },
+    {
+      field: 'notes',
+      headerName: labels.remarks,
       flex: 1
     }
   ]
@@ -99,24 +81,24 @@ const DraftSerialsInvoices = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: SaleRepository.DraftInvoice.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
+      extension: ManufacturingRepository.DamageReturn.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_jobId=0&filter=`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters.qry)
+    if (filters?.qry)
       return await getRequest({
-        extension: SaleRepository.DraftInvoice.snapshot,
-        parameters: `_filter=${filters.qry}&_status=0`
+        extension: ManufacturingRepository.DamageReturn.snapshot,
+        parameters: `_filter=${filters.qry}&_jobId=0`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.DraftSerialsIn,
+    functionId: SystemFunction.DamageReturn,
     action: openForm
   })
 
@@ -124,28 +106,27 @@ const DraftSerialsInvoices = () => {
     await proxyAction()
   }
 
-  const editDSI = obj => {
+  const edit = obj => {
     openForm(obj.recordId)
   }
 
   async function openForm(recordId) {
     stack({
-      Component: DraftForm,
+      Component: DamageReturnForm,
       props: {
         labels,
         access,
-        recordId,
-        invalidate
+        recordId
       },
-      width: 1300,
-      height: 750,
-      title: labels.draftSerInv
+      width: 850,
+      height: 680,
+      title: labels.damageReturn
     })
   }
 
-  const delDSI = async obj => {
+  const del = async obj => {
     await postRequest({
-      extension: SaleRepository.DraftInvoice.del,
+      extension: ManufacturingRepository.DamageReturn.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -180,17 +161,18 @@ const DraftSerialsInvoices = () => {
           onApply={onApply}
           onSearch={onSearch}
           onClear={onClear}
-          reportName={'SADFT'}
+          reportName={'MFDMR'}
         />
       </Fixed>
       <Grow>
         <Table
+          name='damageRetTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={editDSI}
+          onEdit={edit}
           refetch={refetch}
-          onDelete={delDSI}
+          onDelete={del}
           deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
@@ -203,4 +185,4 @@ const DraftSerialsInvoices = () => {
   )
 }
 
-export default DraftSerialsInvoices
+export default Damages
