@@ -1,19 +1,21 @@
 import { Checkbox } from '@mui/material'
 
-function CheckBoxComponent({ value, column: { field, props }, updateRow, isEditMode }) {
+function CheckBoxComponent({ value, column: { field, props, disableCondition }, updateRow, isEditMode, data }) {
   const handleCheckboxChange = event => {
     const changes = { [field]: event.target.checked }
 
     updateRow({ changes })
   }
 
+  const disabled = disableCondition(data)
+
   return (
     <Checkbox
       variant='rounded'
       name={field}
       autoFocus={isEditMode}
-      checked={value?.[field]}
-      disabled={(!value?.saved && field === 'select') || props?.disabled}
+      checked={disabled ? false : value?.[field]}
+      disabled={(!value?.saved && field === 'select') || props?.disabled || disabled}
       onClick={handleCheckboxChange}
     />
   )

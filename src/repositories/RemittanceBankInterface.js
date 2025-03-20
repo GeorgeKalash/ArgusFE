@@ -15,5 +15,14 @@ export const RemittanceBankInterface = {
   },
   InstantCashRates: {
     qry: service + 'qryICRates'
+  },
+  Currencies: {
+    qry: service + 'qryBICurrencies'
+  },
+  Countries: {
+    qry: service + 'qryBICountries'
+  },
+  DeliveryMode: {
+    qry: service + 'qryBIDVRow'
   }
 }
