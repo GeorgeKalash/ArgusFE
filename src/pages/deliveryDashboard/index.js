@@ -71,7 +71,6 @@ const DashboardLayout = () => {
       })
 
       const allChartsData = await Promise.all(volumeRequests)
-
       const minZoneVolumeDBObj = defaultsData?.list?.find(item => item.key === 'minZoneVolumeDB')
 
       const minZoneVolumeDB =
@@ -89,7 +88,7 @@ const DashboardLayout = () => {
     }
 
     fetchData()
-  }, [])
+  }, [defaultsData])
 
   if (loading) return <LoadingOverlay />
 
