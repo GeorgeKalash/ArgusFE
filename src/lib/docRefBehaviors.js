@@ -42,7 +42,6 @@ const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired, objectName) =>
       controls = maxAccess.record.controls.filter(obj => obj.controlId != 'reference')
     }
   }
-
   if (dcTypeRequired) {
     controls.push({
       sgId: 0,

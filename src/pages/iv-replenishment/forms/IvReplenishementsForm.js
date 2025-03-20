@@ -12,7 +12,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToISO } from 'src/lib/date-helper'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -66,9 +66,15 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
         })
     }),
     onSubmit: async obj => {
+      const data = {
+        ...obj,
+        dateTo: formatDateToISO(new Date(obj.dateTo)),
+        dateFrom: formatDateToISO(new Date(obj.dateFrom))
+      }
+
       const response = await postRequest({
         extension: IVReplenishementRepository.IvReplenishements.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify(data)
       })
 
       if (!obj.recordId) {
@@ -92,8 +98,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
 
     const defaultSiteId = defaultsData?.list?.find(({ key }) => key === 'de_siteId')
 
-    if (defaultSiteId?.value)
-      formik.setFieldValue('siteId', parseInt(defaultSiteId?.value || ''))
+    if (defaultSiteId?.value) formik.setFieldValue('siteId', parseInt(defaultSiteId?.value || ''))
   }
 
   useEffect(() => {
@@ -132,6 +137,12 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
       condition: true,
       onClick: 'onRecordRemarks',
       disabled: !editMode
+    },
+    {
+      key: 'generate',
+      condition: true,
+      onClick: onGenerate,
+      disabled: !editMode
     }
   ]
 
@@ -142,8 +153,6 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
       resourceId={ResourceIds.IvReplenishements}
       maxAccess={maxAccess}
       editMode={editMode}
-      onGenerate={onGenerate}
-      isGenerated={true}
     >
       <VertLayout>
         <Grow>
@@ -169,22 +178,22 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
                 onChange={formik.setFieldValue}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('dateFrom', '')}
+                onClear={() => formik.setFieldValue('dateFrom', null)}
                 error={formik.touched.dateFrom && Boolean(formik.errors.dateFrom)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomDatePicker
                 name='dateTo'
-                readOnly={editMode}
                 min={formik.values.dateFrom}
                 max={formik.values.date}
+                readOnly={editMode}
                 label={labels.dateTo}
                 value={formik.values.dateTo}
                 onChange={formik.setFieldValue}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('dateTo', '')}
+                onClear={() => formik.setFieldValue('dateTo', null)}
                 error={formik.touched.dateTo && Boolean(formik.errors.dateTo)}
               />
             </Grid>
@@ -198,7 +207,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
                 onChange={formik.setFieldValue}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>

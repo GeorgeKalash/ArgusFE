@@ -54,7 +54,8 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
         const { controlId, accessLevel } = obj
         if (accessLevel === MANDATORY)
           if (controlId?.indexOf('.') < 0) {
-            if (!values[controlId])
+            const keys = Object.keys(formik.initialValues)
+            if (!values[controlId] && keys?.indexOf(controlId) > -1)
               maxAccessErrors = {
                 ...maxAccessErrors,
                 [controlId]: `${controlId} is required.`
@@ -67,7 +68,15 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
                 if (!maxAccessErrors[gridName]) {
                   maxAccessErrors[gridName] = []
                 }
+            if (Array.isArray(values?.[gridName])) {
+              ;(values?.[gridName] || [])?.forEach((row, index) => {
+                if (!maxAccessErrors[gridName]) {
+                  maxAccessErrors[gridName] = []
+                }
 
+                if (!maxAccessErrors[gridName][index]) {
+                  maxAccessErrors[gridName][index] = {}
+                }
                 if (!maxAccessErrors[gridName][index]) {
                   maxAccessErrors[gridName][index] = {}
                 }
@@ -76,7 +85,15 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
                   maxAccessErrors[gridName][index][fieldName] = `${fieldName} is required.`
                 } else {
                   if (maxAccessErrors[gridName][index][fieldName]) delete maxAccessErrors[gridName][index][fieldName]
+                if (!row[fieldName] || row[fieldName] == 0) {
+                  maxAccessErrors[gridName][index][fieldName] = `${fieldName} is required.`
+                } else {
+                  if (maxAccessErrors[gridName][index][fieldName]) delete maxAccessErrors[gridName][index][fieldName]
 
+                  if (Object.keys(maxAccessErrors[gridName][index])?.length === 0) {
+                    delete maxAccessErrors[gridName][index]
+                  }
+                }
                   if (Object.keys(maxAccessErrors[gridName][index])?.length === 0) {
                     delete maxAccessErrors[gridName][index]
                   }
@@ -88,11 +105,19 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
               })
             } else {
               if (!maxAccessErrors[gridName]) {
-                maxAccessErrors[gridName] = {} // Ensure the object exists
+                maxAccessErrors[gridName] = {}
               }
 
-              if (!maxAccessErrors[gridName][fieldName]) {
-                maxAccessErrors[gridName][fieldName] = `${fieldName} is required.` // Assign value safely
+              if (
+                !maxAccessErrors[gridName][fieldName] &&
+                !formik.values[gridName][fieldName] &&
+                formik.values[gridName][fieldName] != 0
+              ) {
+                maxAccessErrors[gridName][fieldName] = `${fieldName} is required.`
+              }
+
+              if (maxAccessErrors[gridName] && Object.keys(maxAccessErrors[gridName]).length === 0) {
+                delete maxAccessErrors[gridName]
               }
             }
           }

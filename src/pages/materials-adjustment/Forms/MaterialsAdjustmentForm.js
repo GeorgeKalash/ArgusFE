@@ -21,6 +21,9 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 export default function MaterialsAdjustmentForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -43,6 +46,9 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     status: 1,
     wip: 1,
     rsStatus: '',
+    clientId: null,
+    clientName: '',
+    clientRef: '',
     rows: [
       {
         id: 1,
@@ -120,12 +126,15 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
 
-  const totalQty = formik.values?.rows?.reduce((qtySum, row) => {
-    const qtyValue = parseFloat(row.qty) || 0
+  const totalQty = getFormattedNumber(
+    formik.values?.rows
+      ?.reduce((qtySum, row) => {
+        const qtyValue = parseFloat(row.qty) || 0
 
-    return qtySum + qtyValue
-  }, 0)
-
+        return qtySum + qtyValue
+      }, 0)
+      .toFixed(2)
+  )
   async function onPost() {
     await postRequest({
       extension: InventoryRepository.MaterialsAdjustment.post,
@@ -158,7 +167,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       name: 'sku',
       props: {
         endpointId: InventoryRepository.Item.snapshot,
-        valueField: 'recordId',
+        valueField: 'sku',
         displayField: 'sku',
         mapping: [
           { from: 'recordId', to: 'itemId' },
@@ -183,7 +192,11 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     {
       component: 'numberfield',
       name: 'qty',
-      label: labels.qty
+      label: labels.qty,
+      props: {
+        maxLength: 11,
+        decimalScale: 3
+      }
     },
     {
       component: 'textfield',
@@ -313,6 +326,37 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                   />
                 </Grid>
                 <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={SaleRepository.Client.snapshot}
+                    valueField='reference'
+                    displayField='name'
+                    name='clientId'
+                    label={labels.client}
+                    form={formik}
+                    readOnly={isPosted}
+                    displayFieldWidth={3}
+                    valueShow='clientRef'
+                    secondValueShow='clientName'
+                    maxAccess={maxAccess}
+                    editMode={editMode}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' },
+                      { key: 'szName', value: 'Sales Zone' }
+                    ]}
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('clientId', newValue?.recordId || null)
+                      formik.setFieldValue('clientName', newValue?.name || '')
+                      formik.setFieldValue('clientRef', newValue?.reference || '')
+                    }}
+                    errorCheck={'clientId'}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
                     name='plantId'
@@ -332,10 +376,6 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                   />
                 </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={6}>
-              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
@@ -352,7 +392,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                     required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId)
+                      formik.setFieldValue('siteId', newValue?.recordId || null)
                     }}
                     error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                   />
@@ -362,7 +402,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                     name='description'
                     label={labels.description}
                     value={formik?.values?.description}
-                    rows={4}
+                    rows={2.5}
                     readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
@@ -374,7 +414,6 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             </Grid>
           </Grid>
         </Fixed>
-
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('rows', value)}
@@ -388,7 +427,6 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             disabled={isPosted}
           />
         </Grow>
-
         <Fixed>
           <Grid container xs={6}>
             <CustomTextField

@@ -21,6 +21,7 @@ export function DataGrid({
   disabled = false,
   allowDelete = true,
   allowAddNewLine = true,
+  deleteHideCondition = '',
   onSelectionChange,
   rowSelectionModel,
   autoDelete,
@@ -454,7 +455,7 @@ export function DataGrid({
       const oldRow = params.data
 
       const changes = {
-        [field]: value || undefined
+        [field]: value ?? column.colDef?.defaultValue ?? ''
       }
 
       setCurrentValue(changes)
@@ -524,6 +525,14 @@ export function DataGrid({
   }
 
   const ActionCellRenderer = params => {
+    if (deleteHideCondition) {
+      const shouldHide = Object.entries(deleteHideCondition).some(([key, value]) =>
+        Array.isArray(value) ? value.includes(params.data[key]) : params.data[key] === value
+      )
+
+      if (shouldHide) return null
+    }
+
     return (
       <Box
         sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}
@@ -668,7 +677,7 @@ export function DataGrid({
 
   const setData = (changes, params) => {
     const id = params.node?.id
-
+    lastCellStopped.current = ''
     const rowNode = params.api.getRowNode(id)
     if (rowNode) {
       const currentData = rowNode.data
@@ -681,9 +690,22 @@ export function DataGrid({
 
   const onCellEditingStopped = params => {
     const cellId = `${params.node.id}-${params.column.colId}`
+    const { data, colDef } = params
+    let value = params?.data[params.column.colId]
+
+    if (value?.toString()?.endsWith('.') && colDef.component === 'numberfield') {
+      value = value.slice(0, -1).replace(/,/g, '')
+
+      const changes = {
+        [colDef?.field]: value || undefined
+      }
+      setData(changes, params)
+      commit(changes)
+      if (colDef.updateOn != 'blur') process(params, data, setData)
+    }
+
     if (lastCellStopped.current == cellId) return
     lastCellStopped.current = cellId
-    const { data, colDef } = params
     if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
         stackDuplicate(params)

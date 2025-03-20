@@ -282,7 +282,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         endpointId: InventoryRepository.Item.snapshot,
         parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
         displayField: 'sku',
-        valueField: 'recordId',
+        valueField: 'sku',
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -459,6 +459,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       label: labels.unitPrice,
       name: 'unitPrice',
       updateOn: 'blur',
+      props: {
+        decimalScale: 5
+      },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
       }
@@ -687,7 +690,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || formik.values.status == 3 || formik.values.deliveryStatus == 4
+      disabled: !(isClosed && (formik.values.deliveryStatus == 1 || formik.values.deliveryStatus == 5))
     },
     {
       key: 'Terminate',
@@ -1398,7 +1401,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 form={formik}
                 required
                 readOnly={isClosed}
-                displayFieldWidth={2}
+                displayFieldWidth={6}
                 valueShow='clientRef'
                 secondValueShow='clientName'
                 maxAccess={maxAccess}
@@ -1415,6 +1418,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                   formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                   formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
                   formik.setFieldValue('taxId', newValue?.taxId)
+                  setAddress({})
                   fillClientData(newValue?.recordId)
                 }}
                 errorCheck={'clientId'}

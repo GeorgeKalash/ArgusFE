@@ -13,10 +13,12 @@ import { ControlContext } from 'src/providers/ControlContext'
 
 const VerticalNavItems = props => {
   const router = useRouter()
-  const { handleBookmark, setLastOpenedPage, setReloadOpenedPage } = useContext(MenuContext)
+
+  const { handleBookmark, setLastOpenedPage, setReloadOpenedPage, openTabs, setCurrentTabIndex, currentTabIndex } =
+    useContext(MenuContext)
   const { platformLabels } = useContext(ControlContext)
   const { verticalNavItems, settings, openFolders, setOpenFolders, navCollapsed, isArabic } = props
-  const { menu } = useContext(MenuContext)
+
   const [selectedNode, setSelectedNode] = useState(false)
 
   let theme = createTheme(themeOptions(settings, 'light'))
@@ -70,15 +72,20 @@ const VerticalNavItems = props => {
           className={`node ${isFolder ? 'folder' : 'file'} ${isOpen ? 'open' : ''}`}
           style={{ display: !isFolder && navCollapsed ? 'none' : 'flex' }}
           onClick={() => {
-            setReloadOpenedPage([])
             if (node.children) {
               toggleFolder(node.id)
             } else {
-              if (findNode(menu, node.path.replace(/\/$/, '')) + '/' === router.asPath) {
+              if (openTabs[currentTabIndex]?.route === node.path.replace(/\/$/, '') + '/') {
+                setReloadOpenedPage([])
                 setReloadOpenedPage(node)
+              } else if (openTabs.find(tab => tab.route === node.path.replace(/\/$/, '') + '/')) {
+                const index = openTabs.findIndex(tab => tab.route === node.path.replace(/\/$/, '') + '/')
+                setCurrentTabIndex(index)
+                window.history.replaceState(null, '', openTabs[index].route)
               } else {
                 router.push(node.path)
               }
+
               setLastOpenedPage(node)
             }
           }}

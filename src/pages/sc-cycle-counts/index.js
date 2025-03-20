@@ -13,13 +13,11 @@ import { SCRepository } from 'src/repositories/SCRepository'
 import CycleCountsWindow from './Windows/CycleCountsWindow'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getStorageData } from 'src/storage/storage'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const CycleCounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
@@ -125,17 +123,6 @@ const CycleCounts = () => {
     await proxyAction()
   }
 
-  const userId = getStorageData('userData').userId
-
-  const getPlantId = async () => {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userId}&_key=plantId`
-    })
-
-    return res.record.value
-  }
-
   async function openCycleCountsWindow(plantId, recordId) {
     stack({
       Component: CycleCountsWindow,
@@ -152,7 +139,7 @@ const CycleCounts = () => {
   }
 
   async function openForm(recordId) {
-    const plantId = await getPlantId()
+    const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
 
     openCycleCountsWindow(plantId, recordId)
   }
