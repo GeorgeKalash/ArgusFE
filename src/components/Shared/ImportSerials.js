@@ -31,9 +31,7 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
   })
 
   const handleSerialChange = inputSerials => {
-    const input = inputSerials
-
-    const lines = input.split('\n')
+    const lines = inputSerials.split('\n')
     const rowCountWithData = lines.filter(line => line.trim() !== '').length
 
     formik.setFieldValue('serialCount', rowCountWithData)
@@ -145,7 +143,10 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
                 formik.setFieldValue('serials', e.target.value)
                 handleSerialChange(e.target.value)
               }}
-              onClear={() => formik.setFieldValue('serials', '')}
+              onClear={() => {
+                formik.setFieldValue('serials', '')
+                formik.setFieldValue('serialCount', 0)
+              }}
               error={formik.touched.serials && Boolean(formik.errors.serials)}
               maxAccess={maxAccess}
             />
