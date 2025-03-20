@@ -78,12 +78,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const initialValues = {
     recordId: recordId,
-    dtId: null,
     header: {
+      dtId: null,
       dgId: functionId,
       functionId: functionId,
       recordId: null,
-      dtId: null,
       reference: '',
       date: new Date(),
       dueDate: new Date(),
