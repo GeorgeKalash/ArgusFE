@@ -294,6 +294,37 @@ export const LineChart = ({ id, labels, data, label }) => {
   return <canvas id={id}></canvas>
 }
 
+export const LineChartDark = ({ id, labels, data, label }) => {
+  useEffect(() => {
+    const ctx = document.getElementById(id).getContext('2d')
+
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label,
+            data,
+            fill: false,
+            borderColor: '#6673FD',
+            backgroundColor: '#6673FD',
+            borderWidth: 1,
+            tension: 0.1
+          }
+        ]
+      },
+      options: getChartOptions(label, 'line')
+    })
+
+    return () => {
+      chart.destroy()
+    }
+  }, [id, labels, data, label])
+
+  return <canvas id={id}></canvas>
+}
+
 export const PieChart = ({ id, labels, data, label }) => {
   useEffect(() => {
     const ctx = document.getElementById(id).getContext('2d')

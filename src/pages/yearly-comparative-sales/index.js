@@ -12,12 +12,14 @@ import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { Grid } from '@mui/material'
+import { LineChartDark } from 'src/components/Shared/dashboardApplets/charts'
 
 const YearlyComparativeSales = () => {
   const { getRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [fiscalYears, setFiscalYears] = useState([])
   const [monthLabels, setMonthLabels] = useState([])
+  const [chartData, setChartData] = useState([])
 
   const {
     query: { data },
@@ -208,6 +210,25 @@ const YearlyComparativeSales = () => {
     if (fiscalYears.length > 0) refetch()
   }, [fiscalYears])
 
+  useEffect(() => {
+    if (data?.list?.length > 0) {
+      const labels = Object.values(monthLabels)
+
+      const datasets = fiscalYears
+        .filter(year => year.checked)
+        .map(year => {
+          const yearData = data.list.find(d => d.year === year.year) || {}
+
+          return {
+            label: year.year,
+            data: labels.map((_, i) => yearData[`salary${i + 1}`] || 0)
+          }
+        })
+
+      setChartData({ labels, datasets })
+    }
+  }, [data, fiscalYears, monthLabels])
+
   return (
     <VertLayout>
       <Fixed>
@@ -244,7 +265,11 @@ const YearlyComparativeSales = () => {
               pagination={false}
             />
           </Grid>
-          <Grid item xs={10} sx={{ display: 'flex', flex: 1, height: '50%' }}></Grid>
+          <Grid item xs={10} sx={{ display: 'flex', flex: 1, height: '60%' }}>
+            {chartData.labels?.length > 0 && (
+              <LineChartDark id='yearlySalesChart' labels={chartData.labels} data={data.list} label='Yearly Sales' />
+            )}\
+          </Grid>
         </Grid>
       </Grow>
     </VertLayout>
