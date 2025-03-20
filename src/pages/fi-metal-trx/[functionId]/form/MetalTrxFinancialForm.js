@@ -282,7 +282,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           { from: 'recordId', to: 'metalId' },
           { from: 'purity', to: 'purity' },
           { from: 'purity', to: 'stdPurity' }
-        ],
+        ]
       },
       propsReducer({ row, props }) {
         return { ...props, readOnly: !!row.itemId }
@@ -312,11 +312,21 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       propsReducer({ row, props }) {
         return { ...props, store: filteredItems?.current }
       },
-      onChange: ({ row: { update, newRow } }) => {
+      onChange: async ({ row: { update, newRow } }) => {
         const purityValue = newRow.purity || newRow.stdPurity
+
+        const res = await getRequest({
+          extension: InventoryRepository.Items.get,
+          parameters: `_recordId=${newRow.itemId}`
+        })
+
         if (!purityValue) return
         const totalCredit = newRow.qty * newRow.creditAmount * (purityValue / newRow.stdPurity)
-        update({ purity: purityValue === newRow.stdPurity ? purityValue : purityValue * 1000, totalCredit })
+        update({
+          purity: purityValue === newRow.stdPurity ? purityValue : purityValue * 1000,
+          totalCredit,
+          trackBy: res.record.trackBy
+        })
       }
     },
     {
@@ -333,13 +343,16 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       label: labels.purity,
       defaultValue: 0,
       onChange: ({ row: { update, newRow } }) => {
-        const baseSalesMetalValue = (newRow.qty * newRow.purity) / (App.currentMetalPurity.getValue() * 1000)
+        const baseSalesMetalValue = (newRow.qty * newRow.purity) / (newRow.purity * 1000)
 
         const totalCredit = newRow.purity
           ? newRow.qty * newRow.creditAmount
           : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
 
         update({ baseSalesMetalValue, totalCredit })
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row.trackBy != 2 }
       }
     },
     {
