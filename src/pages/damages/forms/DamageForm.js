@@ -38,9 +38,10 @@ export default function DamageForm({ labels, access, recordId }) {
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: recordId || '',
-      dtId: documentType?.dtId,
+      dtId: null,
       reference: '',
       date: new Date(),
       plantId: null,
@@ -135,12 +136,6 @@ export default function DamageForm({ labels, access, recordId }) {
       refetchForm(recordId)
     }
   }, [])
-
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
-    }
-  }, [documentType?.dtId])
 
   return (
     <FormShell

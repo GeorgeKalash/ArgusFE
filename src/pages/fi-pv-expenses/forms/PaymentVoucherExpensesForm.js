@@ -63,7 +63,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     rateCalcMethod: 1,
     baseAmount: null,
     cashAccountId: null,
-    dtId: documentType?.dtId,
+    dtId: null,
     status: 1,
     releaseStatus: null,
     plantId: plantId,
@@ -97,6 +97,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     validationSchema: yup.object({
       accountType: yup.string().required(),
       currencyId: yup.number().required(),
