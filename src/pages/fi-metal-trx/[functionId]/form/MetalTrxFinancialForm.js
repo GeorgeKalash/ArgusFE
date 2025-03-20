@@ -323,9 +323,11 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       onChange: async ({ row: { update, newRow } }) => {
         const purityValue = newRow.purity || newRow.stdPurity
 
+        if (!newRow?.itemId) return
+
         const res = await getRequest({
           extension: InventoryRepository.Items.get,
-          parameters: `_recordId=${newRow.itemId}`
+          parameters: `_recordId=${newRow?.itemId}`
         })
 
         if (!purityValue) return
