@@ -52,6 +52,7 @@ const Window = React.memo(
     onApply,
     disabledApply,
     spacing,
+    isLoading = true,
     ...props
   }) => {
     const { settings } = useSettings()
@@ -189,7 +190,7 @@ const Window = React.memo(
                     ))}
                   </Tabs>
                 )}
-                {!showOverlay && LoadingOverlay()}
+                {!showOverlay && isLoading && LoadingOverlay()}
 
                 {!controlled ? (
                   <>
