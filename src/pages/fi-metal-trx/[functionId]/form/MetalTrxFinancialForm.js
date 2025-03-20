@@ -128,7 +128,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         creditAmount: item.creditAmount,
         purity: item.purity / 1000,
         totalCredit: item.totalCredit,
-        trackBy: item.trackBy || 0
+        trackBy: item.trackBy || 0,
+        baseSalesMetalValue: item.baseSalesMetalValue
       }))
 
       const payload = {
@@ -343,7 +344,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       label: labels.purity,
       defaultValue: 0,
       onChange: ({ row: { update, newRow } }) => {
-        const baseSalesMetalValue = (newRow.qty * newRow.purity) / (newRow.purity * 1000)
+        const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metal.purity * 1000)
 
         const totalCredit = newRow.purity
           ? newRow.qty * newRow.creditAmount
