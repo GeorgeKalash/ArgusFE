@@ -516,8 +516,9 @@ const Table = ({
     const [tooltipOpen, setTooltipOpen] = useState(false)
 
     const handleClick = event => {
+      console.log('lastSelectedColumn', params.rowIndex)
       if (selectionMode === 'row' && onSelectionChange) {
-        onSelectionChange(params.data)
+        onSelectionChange(params.data, params.rowIndex)
       } else if (selectionMode === 'column' && onSelectionChange) {
         const columnValues = params.api.getDisplayedRowCount()
           ? Array.from(
@@ -526,7 +527,7 @@ const Table = ({
             )
           : []
 
-        onSelectionChange(columnValues)
+        onSelectionChange(columnValues, params.colDef.field)
       }
 
       const range = document.createRange()

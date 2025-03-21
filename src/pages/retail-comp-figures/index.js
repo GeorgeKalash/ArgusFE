@@ -26,6 +26,9 @@ import Box from '@mui/material/Box'
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import Chart from 'chart.js/auto'
+import IconButton from '@mui/material/IconButton'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 
 const RetailCompFigures = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -34,6 +37,9 @@ const RetailCompFigures = () => {
   const [columns, setColumns] = useState([])
   const [displayedRow, setDisplayedRow] = useState([])
   const [data, setData] = useState([])
+  const [collapsed, setCollapsed] = useState(false)
+  const [prevRow, setPrevRow] = useState('')
+  const [prevCol, setPrevCol] = useState('')
 
   const [categories, setCategories] = useState([
     'JAN',
@@ -197,83 +203,167 @@ const RetailCompFigures = () => {
   }
 
   useEffect(() => {
-    console.log('cate', displayedRow)
-    const ctx = document.getElementById('compFigChart').getContext('2d')
+    if (!collapsed) {
+      console.log('displayedRow', displayedRow)
 
-    const chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: categories,
-        datasets: [
-          {
-            data: displayedRow,
-            backgroundColor: 'rgba(0, 123, 255, 0.5)',
-            hoverBackgroundColor: 'rgb(255, 255, 0)',
-            borderWidth: 1
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          datalabels: {
-            anchor: context => {
-              const chart = context.chart
-              const dataset = context.dataset
-              const value = dataset.data[context.dataIndex]
+      const ctx = document.getElementById('compFigChart').getContext('2d')
 
-              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-              const maxValue = chart.scales.y.max
-
-              const barHeight = (value / maxValue) * chartHeight
-
-              return barHeight >= 120 ? 'center' : 'end'
-            },
-            align: context => {
-              const chart = context.chart
-              const dataset = context.dataset
-              const value = dataset.data[context.dataIndex]
-
-              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-              const maxValue = chart.scales.y.max
-
-              const barHeight = (value / maxValue) * chartHeight
-
-              return barHeight >= 120 ? 'center' : 'end'
-            },
-            color: 'black',
-            offset: 0,
-            rotation: -90,
-            font: { size: 14, weight: 'bold' },
-            formatter: val => val?.toLocaleString()
-          }
+      const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: categories,
+          datasets: [
+            {
+              data: displayedRow,
+              backgroundColor: 'rgba(0, 123, 255, 0.5)',
+              hoverBackgroundColor: 'rgb(255, 255, 0)',
+              borderWidth: 1
+            }
+          ]
         },
-        scales: {
-          x: {
-            ticks: {
-              color: '#000'
-            },
-            grid: {
-              display: true,
-              color: 'rgba(255, 255, 255, 0.2)'
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            datalabels: {
+              anchor: context => {
+                const chart = context.chart
+                const dataset = context.dataset
+                const value = dataset.data[context.dataIndex]
+
+                const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+                const maxValue = chart.scales.y.max
+
+                const barHeight = (value / maxValue) * chartHeight
+
+                return barHeight >= 120 ? 'center' : 'end'
+              },
+              align: context => {
+                const chart = context.chart
+                const dataset = context.dataset
+                const value = dataset.data[context.dataIndex]
+
+                const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+                const maxValue = chart.scales.y.max
+
+                const barHeight = (value / maxValue) * chartHeight
+
+                return barHeight >= 120 ? 'center' : 'end'
+              },
+              color: 'black',
+              offset: 0,
+              rotation: -90,
+              font: { size: 14, weight: 'bold' },
+              formatter: val => val?.toLocaleString()
             }
           },
-          y: {
-            ticks: {
-              color: '#000'
+          scales: {
+            x: {
+              ticks: {
+                color: '#000'
+              },
+              grid: {
+                display: true,
+                color: 'rgba(255, 255, 255, 0.2)'
+              }
+            },
+            y: {
+              ticks: {
+                color: '#000'
+              }
             }
           }
-        }
-      },
-      plugins: [ChartDataLabels]
-    })
+        },
+        plugins: [ChartDataLabels]
+      })
 
-    return () => {
-      chart.destroy()
+      return () => {
+        chart.destroy()
+      }
     }
-  }, [categories, displayedRow])
+  }, [categories, displayedRow, collapsed])
+
+  const buildChart = (categories, displayedRow, collapsed) => {
+    if (!collapsed) {
+      console.log('cate', displayedRow)
+      const ctx = document.getElementById('compFigChart').getContext('2d')
+
+      const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: categories,
+          datasets: [
+            {
+              data: displayedRow,
+              backgroundColor: 'rgba(0, 123, 255, 0.5)',
+              hoverBackgroundColor: 'rgb(255, 255, 0)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            datalabels: {
+              anchor: context => {
+                const chart = context.chart
+                const dataset = context.dataset
+                const value = dataset.data[context.dataIndex]
+
+                const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+                const maxValue = chart.scales.y.max
+
+                const barHeight = (value / maxValue) * chartHeight
+
+                return barHeight >= 120 ? 'center' : 'end'
+              },
+              align: context => {
+                const chart = context.chart
+                const dataset = context.dataset
+                const value = dataset.data[context.dataIndex]
+
+                const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+                const maxValue = chart.scales.y.max
+
+                const barHeight = (value / maxValue) * chartHeight
+
+                return barHeight >= 120 ? 'center' : 'end'
+              },
+              color: 'black',
+              offset: 0,
+              rotation: -90,
+              font: { size: 14, weight: 'bold' },
+              formatter: val => val?.toLocaleString()
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: '#000'
+              },
+              grid: {
+                display: true,
+                color: 'rgba(255, 255, 255, 0.2)'
+              }
+            },
+            y: {
+              ticks: {
+                color: '#000'
+              }
+            }
+          }
+        },
+        plugins: [ChartDataLabels]
+      })
+
+      return () => {
+        chart.destroy()
+      }
+    }
+  }
 
   useEffect(() => {
     ;(async function () {
@@ -350,9 +440,12 @@ const RetailCompFigures = () => {
             pagination={false}
             name='compFigTable'
             selectionMode={formik?.values?.posAnalysis == 1 ? 'row' : 'column'}
-            onSelectionChange={lineData => {
+            onSelectionChange={(lineData, columnField) => {
               if (lineData) {
                 if (formik?.values?.posAnalysis != 1) {
+                  if (columnField === 'plantName' || columnField === 'posRef' || columnField === prevCol) {
+                    return
+                  }
                   const firstColumnValues = data?.list?.filter((_, index) => index !== 0).map(item => item.posRef)
                   setCategories(firstColumnValues)
                   setDisplayedRow(
@@ -360,13 +453,18 @@ const RetailCompFigures = () => {
                       .filter(([key]) => !isNaN(key))
                       .map(([, value]) => value)
                   )
+                  setPrevCol(columnField)
                 } else {
+                  if (columnField === prevRow) {
+                    return
+                  }
                   setCategories(['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'])
                   setDisplayedRow(
                     Object.entries(lineData)
                       .filter(([key]) => !isNaN(key))
                       .map(([, value]) => value)
                   )
+                  setPrevRow(columnField)
                 }
               }
             }}
@@ -375,18 +473,39 @@ const RetailCompFigures = () => {
         <Fixed>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <Card sx={{ width: '100%', height: '300px' }}>
-                <CardContent sx={{ pb: '8px !important', pt: '8px !important', height: '100%' }}>
-                  <canvas id={'compFigChart'} style={{ width: '100% !important', height: '100%' }}></canvas>
-                </CardContent>
+              <Card
+                sx={{
+                  width: '100%',
+                  height: collapsed ? '35px' : '300px',
+                  transition: 'all 0.4s ease',
+                  overflow: 'hidden'
+                }}
+              >
+                <IconButton
+                  onClick={() => setCollapsed(!collapsed)}
+                  sx={{
+                    position: 'absolute',
+                    right: 18,
+                    color: 'black',
+                    backgroundColor: '#f0f0f0', // Light grey background
+                    borderRadius: '30%', // Makes it circular
+                    padding: 1, // Adds padding for better visibility
+                    '&:hover': {
+                      backgroundColor: '#d9d9d9' // Darker background on hover
+                    }
+                  }}
+                  size='small'
+                >
+                  {collapsed ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
+                </IconButton>
+                {!collapsed && (
+                  <CardContent sx={{ pb: '8px !important', pt: '8px !important', height: '100%' }}>
+                    <canvas id={'compFigChart'} style={{ width: '100% !important', height: '100%' }}></canvas>
+                  </CardContent>
+                )}
               </Card>
             </Grid>
           </Grid>
-          {/* <Card>
-            <CardContent sx={{ pt: `${theme.spacing(3)} !important` }}>
-              <ReactApexcharts type='bar' height={250} options={options} series={[{ data: displayedRow }]} />
-            </CardContent>
-          </Card> */}
         </Fixed>
       </VertLayout>
     </FormShell>
