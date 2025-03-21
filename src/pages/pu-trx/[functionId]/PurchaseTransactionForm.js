@@ -1159,14 +1159,14 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       if (promotionTypes && promotionTypes.length > 0) {
         const initialType = promotionTypes[0]
         setInitialPromotionType(initialType)
-        formik.setValues({
-          ...formik.values,
-          items: formik.values.items.map(item => ({
-            ...item,
-            promotionTypeName: initialType.value,
-            promotionType: initialType.key
-          }))
-        })
+
+        const items = formik.values.items.map(item => ({
+          ...item,
+          promotionTypeName: initialType.value,
+          promotionType: initialType.key
+        }))
+
+        formik.setFieldValue(items)
       }
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
