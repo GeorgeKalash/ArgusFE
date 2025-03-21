@@ -36,7 +36,7 @@ const RPBGridToolbar = ({
       })
     }
     if (filter) filterBy('qry', filter?.replace(/\+/g, '%2B'), !!reportName)
-    else filterBy('params', params, true)
+    else filterBy('params', params)
   }
 
   const openRPB = () => {
