@@ -61,16 +61,11 @@ export function useResourceQuery({
         setSearchValue(value)
       }
     },
-    filterBy(name, value, report) {
+    filterBy(name, value) {
       if (value === filters[name]) {
         query.refetch()
-      } else if (report) {
-        setFilters({
-          [name]: value
-        })
       } else {
         setFilters({
-          ...filters,
           [name]: value
         })
       }
