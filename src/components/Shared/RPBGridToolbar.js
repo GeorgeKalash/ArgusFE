@@ -35,7 +35,7 @@ const RPBGridToolbar = ({
         message: platformLabels?.noParamsErrorMessage
       })
     }
-    if (filter) filterBy('qry', filter?.replace(/\+/g, '%2B'))
+    if (filter) filterBy('qry', filter?.replace(/\+/g, '%2B'), !!reportName)
     else filterBy('params', params)
   }
 
