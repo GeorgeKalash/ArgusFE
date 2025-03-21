@@ -199,8 +199,7 @@ const TabsProvider = ({ children }) => {
 
   useEffect(() => {
     if (openTabs[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
-
-    if (!initialLoadDone && router.asPath) {
+    if (menu.length === 0) {
       const newTabs = [
         {
           page: router.asPath === '/default/' ? children : null,
@@ -209,24 +208,35 @@ const TabsProvider = ({ children }) => {
           label: 'Home'
         }
       ]
-      if (menu.length > 0) {
-        if (router.asPath !== '/default/') {
-          newTabs.push({
-            page: children,
-            id: uuidv4(),
-            route: router.asPath,
-            label: lastOpenedPage
-              ? lastOpenedPage.name
-              : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
-          })
-
-          const index = newTabs.findIndex(tab => tab.route === router.asPath)
-
-          setCurrentTabIndex(index)
-        }
-      }
       setOpenTabs(newTabs)
-      setInitialLoadDone(true)
+    }
+
+    if (!initialLoadDone && router.asPath && menu.length > 0) {
+      const newTabs = [
+        {
+          page: router.asPath === '/default/' ? children : null,
+          id: uuidv4(),
+          route: '/default/',
+          label: 'Home'
+        }
+      ]
+      if (router.asPath !== '/default/') {
+        newTabs.push({
+          page: children,
+          id: uuidv4(),
+          route: router.asPath,
+          label: lastOpenedPage
+            ? lastOpenedPage.name
+            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
+        })
+
+        const index = newTabs.findIndex(tab => tab.route === router.asPath)
+
+        setCurrentTabIndex(index)
+
+        setOpenTabs(newTabs)
+        setInitialLoadDone(true)
+      }
     }
   }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
 
