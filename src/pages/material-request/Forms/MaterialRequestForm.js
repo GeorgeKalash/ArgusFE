@@ -75,11 +75,12 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
   }
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       functionId: SystemFunction.MaterialRequest,
       reference: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       siteId: null,
       siteName: '',
       date: new Date(),
@@ -482,9 +483,6 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       setMeasurements(muList?.list)
       getDefaultFromSiteId()
       await getDepartmentId()
-      if (documentType?.dtId) {
-        formik.setFieldValue('dtId', documentType.dtId)
-      }
     })()
   }, [])
 

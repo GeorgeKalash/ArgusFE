@@ -48,7 +48,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     recordId: null,
     functionId: SystemFunction.MaterialTransfer,
     reference: '',
-    dtId: documentType?.dtId,
+    dtId: null,
     oDocId: '',
     date: new Date(),
     closedDate: null,
@@ -133,6 +133,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   const { formik } = useForm({
     initialValues,
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -668,13 +669,12 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       getDefaultFromSiteId()
-
-      if (documentType?.dtId) {
-        formik.setFieldValue('dtId', documentType.dtId)
-        getDTD(documentType?.dtId)
-      }
     })()
   }, [])
+
+  useEffect(() => {
+    if (documentType?.dtId) getDTD(documentType?.dtId)
+  }, [documentType?.dtId])
 
   useEffect(() => {
     ;(async function () {
@@ -751,7 +751,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     values={formik?.values}
                     onChange={async (event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || '')
-                      if (newValue?.recordId) await getDTD(newValue?.recordId)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
