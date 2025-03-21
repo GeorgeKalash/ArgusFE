@@ -32,7 +32,8 @@ const RetailTrx = () => {
   const getResourceId = {
     [SystemFunction.RetailInvoice]: ResourceIds.RetailInvoice,
     [SystemFunction.RetailReturn]: ResourceIds.RetailInvoiceReturn,
-    [SystemFunction.RetailPurchase]: ResourceIds.RetailPurchase
+    [SystemFunction.RetailPurchase]: ResourceIds.RetailPurchase,
+    [SystemFunction.RetailPurchaseReturn]: ResourceIds.RetailPurchaseReturn
   }
 
   const {
@@ -164,6 +165,8 @@ const RetailTrx = () => {
       return labels.RetailReturn
     } else if (functionId === SystemFunction.RetailPurchase) {
       return labels.RetailPurchase
+    } else if (functionId === SystemFunction.RetailPurchaseReturn) {
+      return labels.RetailPurchaseReturn
     }
   }
 

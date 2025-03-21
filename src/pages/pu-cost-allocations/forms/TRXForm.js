@@ -82,11 +82,8 @@ export default function TRXForm({ labels, access, setStore, store }) {
           }))
           formik.setFieldValue('recordId', res.recordId)
           fetchData(res.recordId)
-
-          toast.success(platformLabels.Added)
-        } else {
-          toast.success(platformLabels.Edited)
         }
+        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
         invalidate()
       })
     }
@@ -321,7 +318,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
                 onChange={formik.setFieldValue}
                 editMode={editMode}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 readOnly={isClosed}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />

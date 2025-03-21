@@ -6,7 +6,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -22,18 +22,19 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function DamageForm({ labels, access, recordId }) {
+export default function DamageForm({ recordId, jobId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const { labels, access, invalidate } = useResourceQuery({
+    endpointId: ManufacturingRepository.Damage.page,
+    datasetId: ResourceIds.Damages
+  })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Damage,
     access: access,
     enabled: !recordId
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.Damage.page
   })
 
   const { formik } = useForm({
@@ -72,8 +73,7 @@ export default function DamageForm({ labels, access, recordId }) {
         extension: ManufacturingRepository.Damage.set,
         record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date) })
       }).then(async res => {
-        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
+        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
         await refetchForm(res.recordId)
         invalidate()
       })
@@ -85,19 +85,29 @@ export default function DamageForm({ labels, access, recordId }) {
       extension: ManufacturingRepository.Damage.get,
       parameters: `_recordId=${damageId}`
     }).then(async res => {
-      await getRequest({
-        extension: ManufacturingRepository.MFJobOrder.get,
-        parameters: `_recordId=${res?.record?.jobId}`
-      }).then(jobRes => {
-        formik.setValues({
-          ...res?.record,
-          date: formatDateFromApi(res?.record?.date),
-          sku: jobRes?.record?.sku,
-          itemName: jobRes?.record?.itemName,
-          designName: jobRes?.record?.designName,
-          designRef: jobRes?.record?.designRef,
-          maxPcs: jobRes.record.pcs
-        })
+      await refetchFormJob(res?.record?.jobId, res.record)
+    })
+  }
+
+  async function refetchFormJob(jobId, res) {
+    await getRequest({
+      extension: ManufacturingRepository.MFJobOrder.get,
+      parameters: `_recordId=${jobId}`
+    }).then(jobRes => {
+      formik.setValues({
+        ...formik.values,
+        ...res,
+        date: formatDateFromApi(jobRes?.record?.date),
+        sku: jobRes?.record?.sku,
+        itemName: jobRes?.record?.itemName,
+        designName: jobRes?.record?.designName,
+        designRef: jobRes?.record?.designRef,
+        jobRef: jobRes?.record?.reference,
+        jobId: jobRes?.record?.recordId,
+        workCenterName: jobRes?.record?.wcName,
+        workCenterRef: jobRes?.record?.wcRef,
+        workCenterId: jobRes?.record?.workCenterId,
+        maxPcs: jobRes.record.pcs
       })
     })
   }
@@ -134,6 +144,8 @@ export default function DamageForm({ labels, access, recordId }) {
   useEffect(() => {
     if (recordId) {
       refetchForm(recordId)
+    } else if (jobId) {
+      refetchFormJob(jobId)
     }
   }, [])
 
@@ -219,7 +231,7 @@ export default function DamageForm({ labels, access, recordId }) {
                     designRef: newValue?.designRef || '',
                     designName: newValue?.designName || '',
                     itemName: newValue?.itemName || '',
-                    wcName: newValue?.wcName || '',
+                    workCenterName: newValue?.wcName || '',
                     workCenterId: newValue?.workCenterId || null,
                     plantId: newValue?.plantId || null,
                     maxPcs: newValue?.pcs || 0
@@ -294,9 +306,9 @@ export default function DamageForm({ labels, access, recordId }) {
             <Grid item xs={7}></Grid>
             <Grid item xs={5}>
               <CustomTextField
-                name='wcName'
+                name='workCenterName'
                 label={labels.workCenter}
-                value={formik?.values?.wcName}
+                value={formik?.values?.workCenterName}
                 maxAccess={maxAccess}
                 readOnly
               />

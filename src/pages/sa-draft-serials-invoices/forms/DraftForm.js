@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -38,16 +38,24 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
-
-  const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
-  const [jumpToNextLine, setJumpToNextLine] = useState(false)
+  const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
     access: access,
     enabled: !recordId
   })
+
+  useEffect(() => {
+    if (documentType?.dtId) {
+      onChangeDtId(documentType.dtId)
+    }
+  }, [documentType?.dtId])
+
+  const defCurrencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const defplId = parseInt(defaultsData?.list?.find(obj => obj.key === 'plId')?.value)
+  const defspId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'spId')?.value)
+  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const { formik } = useForm({
     maxAccess,
@@ -61,9 +69,9 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       clientId: null,
       clientRef: '',
       clientName: '',
-      currencyId: null,
-      spId: null,
-      siteId: null,
+      currencyId: defCurrencyId || null,
+      spId: defspId || null,
+      siteId: defSiteId || null,
       description: '',
       status: 1,
       wip: 1,
@@ -72,7 +80,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       subtotal: 0,
       amount: 0,
       vatAmount: 0,
-      plId: null,
+      plId: defplId || null,
       ptId: null,
       weight: 0,
       disSkuLookup: false,
@@ -122,8 +130,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
             name: 'srlNo-first-row-check',
             test(value, context) {
               const { parent } = context
-              if (parent?.id == 1 && value) return true
-              if (parent?.id == 1 && !value) return true
+              if (parent?.id == 1) return true
               if (parent?.id > 1 && !value) return false
 
               return value
@@ -133,10 +140,13 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       )
     }),
     onSubmit: async obj => {
-      const copy = { ...obj }
-      copy.pcs = copy.serials.length
-      delete copy.serials
-      copy.date = formatDateToApi(copy.date)
+      const { serials, date, ...rest } = obj
+
+      const header = {
+        ...rest,
+        pcs: serials.length,
+        date: formatDateToApi(date)
+      }
 
       const updatedRows = formik.values.serials
         .filter(row => row.srlNo)
@@ -147,7 +157,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
         }))
 
       const DraftInvoicePack = {
-        header: copy,
+        header,
         items: updatedRows
       }
 
@@ -155,18 +165,17 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
         extension: SaleRepository.DraftInvoice.set2,
         record: JSON.stringify(DraftInvoicePack)
       }).then(async diRes => {
-        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
+        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
         await refetchForm(diRes.recordId)
         invalidate()
       })
     }
   })
 
-  async function refetchForm(recordId, plId) {
+  async function refetchForm(recordId) {
     const diHeader = await getDraftInv(recordId)
     const diItems = await getDraftInvItems(recordId)
-    await fillForm(diHeader, diItems, plId)
+    await fillForm(diHeader, diItems)
   }
 
   async function getDraftInv(diId) {
@@ -194,19 +203,6 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     })
 
     formik.setFieldValue('taxDetailsStore', taxDet?.list)
-  }
-
-  useEffect(() => {
-    getSysChecks()
-  }, [SystemChecks.POS_JUMP_TO_NEXT_LINE])
-
-  async function getSysChecks() {
-    const Jres = await getRequest({
-      extension: SystemRepository.SystemChecks.get,
-      parameters: `_checkId=${SystemChecks.POS_JUMP_TO_NEXT_LINE}&_scopeId=1&_masterId=0`
-    })
-
-    setJumpToNextLine(Jres?.record?.value)
   }
 
   function getItemPriceRow(newRow, dirtyField) {
@@ -244,21 +240,20 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     }
   }
 
+  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
 
   const assignStoreTaxDetails = serials => {
     if (serials.length) {
       const updatedSer = serials?.map(serial => {
-        if (serial.taxId != null) {
-          return {
-            ...serial,
-            extendedPrice: serial.unitPrice,
-            taxDetails: FilteredListByTaxId(formik?.values?.taxDetailsStore, serial.taxId)
-          }
-        }
-
-        return serial
+        return serial.taxId != null
+          ? {
+              ...serial,
+              extendedPrice: serial.unitPrice,
+              taxDetails: FilteredListByTaxId(formik?.values?.taxDetailsStore, serial.taxId)
+            }
+          : serial
       })
       formik.setFieldValue('serials', updatedSer)
     }
@@ -634,7 +629,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     assignStoreTaxDetails(modifiedList)
   }
 
-  async function fillForm(diHeader, diItems, plId) {
+  async function fillForm(diHeader, diItems) {
     const modifiedList = await Promise.all(
       diItems?.list?.map(async (item, index) => {
         const taxDetailsResponse = diHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
@@ -655,7 +650,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     await formik.setValues({
       ...formik.values,
       ...diHeader.record,
-      plId: plId || formik?.values?.plId,
+      plId: defplId || formik?.values?.plId,
       amount: parseFloat(diHeader?.record?.amount).toFixed(2),
       vatAmount: parseFloat(diHeader?.record?.vatAmount).toFixed(2),
       subtotal: parseFloat(diHeader?.record?.subtotal).toFixed(2),
@@ -697,37 +692,16 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     }
   }
 
-  function getDTD(dtId) {
-    return getRequest({
-      extension: SaleRepository.DocumentTypeDefault.get,
-      parameters: `_dtId=${dtId}`
-    })
-  }
-
-  async function getSiteRef(siteId) {
-    if (!siteId) return null
-
-    const res = await getRequest({
-      extension: InventoryRepository.Site.get,
-      parameters: `_recordId=${siteId}`
-    })
-
-    return res?.record?.reference
-  }
-
   async function onChangeDtId(recordId) {
     if (recordId) {
-      const dtd = await getDTD(recordId)
+      const dtd = await getRequest({
+        extension: SaleRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${recordId}`
+      })
 
-      formik.setFieldValue('plantId', dtd?.record?.plantId)
-      formik.setFieldValue('spId', dtd?.record?.spId || userDefaultsDataState?.spId)
-      formik.setFieldValue('siteId', dtd?.record?.siteId || userDefaultsDataState?.siteId)
-      formik.setFieldValue('siteRef', await getSiteRef(dtd?.record?.siteId))
-    } else {
-      formik.setFieldValue('siteId', null)
-      formik.setFieldValue('siteRef', null)
-      formik.setFieldValue('spId', null)
-      formik.setFieldValue('plantId', null)
+      formik.setFieldValue('plantId', dtd?.record?.plantId || null)
+      formik.setFieldValue('spId', dtd?.record?.spId || defspId || null)
+      formik.setFieldValue('siteId', dtd?.record?.siteId || defSiteId || null)
     }
   }
 
@@ -797,56 +771,17 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     formik.setFieldValue('amount', subtotal + vatAmount)
   }, [totalWeight, subtotal, vatAmount])
 
-  async function getUserDefaultsData() {
-    const myObject = {}
-
-    const filteredList = userDefaultsData?.list?.filter(obj => {
-      return obj.key === 'siteId' || obj.key === 'spId'
-    })
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setUserDefaultsDataState(myObject)
-
-    return myObject
-  }
-
-  async function getDefaultsData() {
-    const myObject = {}
-
-    const filteredList = defaultsData?.list?.filter(obj => {
-      return (
-        obj.key === 'draft_gc_vat' ||
-        obj.key === 'draft_gc_des' ||
-        obj.key === 'plId' ||
-        obj.key === 'draft_gc_lbr' ||
-        obj.key === 'draft_gc_txd' ||
-        obj.key === 'currencyId'
-      )
-    })
-    filteredList.forEach(obj => {
-      myObject[obj.key] =
-        obj.value === 'True' || obj.value === 'False' ? obj.value : obj.value ? parseInt(obj.value) : null
-    })
-
-    return myObject
-  }
-
   useEffect(() => {
     ;(async function () {
-      const myObject = await getDefaultsData()
-      getUserDefaultsData()
-
-      myObject?.plId
-        ? formik.setFieldValue('plId', myObject?.plId)
-        : stackError({
-            message: labels.noSelectedplId
-          })
+      if (!defplId)
+        stackError({
+          message: labels.noSelectedplId
+        })
 
       fillTaxStore()
 
       if (formik?.values?.recordId) {
-        await refetchForm(formik?.values?.recordId, myObject?.plId)
-      } else {
-        formik.setFieldValue('currencyId', parseInt(myObject?.currencyId))
+        await refetchForm(formik?.values?.recordId)
       }
     })()
   }, [])
@@ -883,9 +818,9 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
-                  onChangeDtId(newValue?.recordId)
+                  await onChangeDtId(newValue?.recordId)
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -909,10 +844,8 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 onChange={(event, newValue) => {
                   if (!newValue?.isInactive) {
                     formik.setFieldValue('siteId', newValue?.recordId)
-                    formik.setFieldValue('siteRef', newValue?.recordId)
                   } else {
                     formik.setFieldValue('siteId', null)
-                    formik.setFieldValue('siteRef', null)
                     stackError({
                       message: labels.inactiveSite
                     })
@@ -937,7 +870,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId)
+                  formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
@@ -990,7 +923,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('contactId', newValue ? newValue.recordId : null)
+                  formik.setFieldValue('contactId', newValue?.recordId || null)
                 }}
                 error={formik.touched.contactId && Boolean(formik.errors.contactId)}
               />
@@ -1024,7 +957,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 displayField='name'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('spId', newValue ? newValue.recordId : null)
+                  formik.setFieldValue('spId', newValue?.recordId || null)
                 }}
                 error={formik.touched.spId && Boolean(formik.errors.spId)}
               />
@@ -1076,12 +1009,12 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                       { key: 'cgName', value: 'Client Group' }
                     ]}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('clientId', newValue?.recordId)
                       formik.setFieldValue('clientName', newValue?.name)
                       formik.setFieldValue('clientRef', newValue?.reference)
                       formik.setFieldValue('accountId', newValue?.accountId)
                       formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                       formik.setFieldValue('taxId', newValue?.taxId)
+                      formik.setFieldValue('clientId', newValue?.recordId || null)
                     }}
                     errorCheck={'clientId'}
                   />
@@ -1131,90 +1064,86 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
             autoDelete={autoDelete}
           />
         </Grow>
-        <Fixed>
-          <Grid container spacing={16}>
-            <Grid item xs={8}>
-              <Grid container>
-                <Grid item xs={12} height={125} sx={{ display: 'flex', flex: 1 }}>
-                  <Table
-                    gridData={{ count: 1, list: formik?.values?.metalGridData }}
-                    maxAccess={access}
-                    columns={[
-                      { field: 'metal', headerName: labels.metal, flex: 1 },
-                      { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
-                      { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
-                    ]}
-                    rowId={['metal']}
-                    pagination={false}
-                  />
-                </Grid>
-                <Grid item xs={12} height={125} sx={{ display: 'flex', flex: 1 }}>
-                  <Table
-                    columns={[
-                      { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 1 },
-                      { field: 'sku', headerName: labels.sku, flex: 1 },
-                      { field: 'itemName', headerName: labels.itemDesc, flex: 2 },
-                      { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
-                      { field: 'weight', headerName: labels.weight, type: 'number', flex: 1 }
-                    ]}
-                    gridData={{ count: 1, list: formik?.values?.itemGridData }}
-                    rowId={['sku']}
-                    maxAccess={access}
-                    pagination={false}
-                  />
+        <Grid container spacing={3}>
+          <Grid item xs={9}>
+            <Grid container spacing={3}>
+              <Grid item xs={9} height={132} sx={{ display: 'flex', flex: 1 }}>
+                <Table
+                  gridData={{ count: 1, list: formik?.values?.metalGridData }}
+                  maxAccess={access}
+                  columns={[
+                    { field: 'metal', headerName: labels.metal, flex: 1 },
+                    { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
+                    { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
+                  ]}
+                  rowId={['metal']}
+                  pagination={false}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}></Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='subTotal'
+                      maxAccess={maxAccess}
+                      label={labels.subtotal}
+                      value={subtotal}
+                      readOnly
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='vatAmount'
+                      maxAccess={maxAccess}
+                      label={labels.vat}
+                      value={vatAmount}
+                      readOnly
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='total'
+                      maxAccess={maxAccess}
+                      label={labels.total}
+                      value={formik?.values?.amount || 0}
+                      readOnly
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
-            </Grid>
-            <Grid item xs={4}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='subTotal'
-                    maxAccess={maxAccess}
-                    label={labels.subtotal}
-                    value={subtotal}
-                    readOnly
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='vatAmount'
-                    maxAccess={maxAccess}
-                    label={labels.vat}
-                    value={vatAmount}
-                    readOnly
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='total'
-                    maxAccess={maxAccess}
-                    label={labels.total}
-                    value={formik?.values?.amount || 0}
-                    readOnly
-                  />
-                </Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='totalWeight'
-                    maxAccess={maxAccess}
-                    label={labels.totalWeight}
-                    value={totalWeight}
-                    readOnly
-                  />
-                </Grid>
+              <Grid item xs={12} height={132} sx={{ display: 'flex', flex: 1 }}>
+                <Table
+                  columns={[
+                    { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 1 },
+                    { field: 'sku', headerName: labels.sku, flex: 1 },
+                    { field: 'itemName', headerName: labels.itemDesc, flex: 2 },
+                    { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
+                    { field: 'weight', headerName: labels.weight, type: 'number', flex: 1 }
+                  ]}
+                  gridData={{ count: 1, list: formik?.values?.itemGridData }}
+                  rowId={['sku']}
+                  maxAccess={access}
+                  pagination={false}
+                />
               </Grid>
             </Grid>
           </Grid>
-        </Fixed>
+          <Grid item xs={2.5}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}></Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='totalWeight'
+                  maxAccess={maxAccess}
+                  label={labels.totalWeight}
+                  value={totalWeight}
+                  readOnly
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
       </VertLayout>
     </FormShell>
   )

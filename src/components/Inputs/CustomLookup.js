@@ -9,6 +9,7 @@ import { checkAccess } from 'src/lib/maxAccess'
 const CustomLookup = ({
   type = 'text',
   name,
+  fullName,
   label,
   firstValue,
   secondValue,
@@ -43,7 +44,7 @@ const CustomLookup = ({
   onFocus = () => {},
   ...props
 }) => {
-  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
+  const { _readOnly, _required, _hidden } = checkAccess(fullName, props.maxAccess, required, readOnly, hidden)
 
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
@@ -113,6 +114,8 @@ const CustomLookup = ({
             setInputValue(newValue ? newValue[valueField] : '')
             onChange(name, newValue)
             setAutoFocus(true)
+
+            valueHighlightedOption.current = ''
           }}
           onHighlightChange={(event, newValue) => {
             valueHighlightedOption.current = newValue

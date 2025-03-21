@@ -115,10 +115,9 @@ const SystemChecks = () => {
     await postRequest({
       extension: SystemRepository.SystemChecks.set,
       record: JSON.stringify(resultObject)
+    }).then(() => {
+      toast.success(platformLabels.Updated)
     })
-      .then(() => {})
-      .catch(e => {})
-    toast.success(platformLabels.Updated)
   }
 
   return (
@@ -134,7 +133,7 @@ const SystemChecks = () => {
                 setSearch('')
               }}
               onChange={handleSearchChange}
-              onSearch={(e) => setSearch(e)}
+              onSearch={e => setSearch(e)}
               search={true}
               height={35}
             />
