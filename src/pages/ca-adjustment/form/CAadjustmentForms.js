@@ -33,9 +33,11 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     access: access,
     enabled: !recordId
   })
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
 
   const { stack } = useWindow()
+  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -50,12 +52,12 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       reference: '',
       name: '',
       dtId: null,
-      plantId: '',
+      plantId,
       date: new Date(),
       currencyId: parseInt(getDefaultsData()?.currencyId),
       currencyName: '',
       status: 1,
-      cashAccountId: '',
+      cashAccountId,
       amount: '',
       baseAmount: '',
       exRate: 1,
@@ -154,6 +156,26 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
   }
+
+  async function getDTD(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: CashBankRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      formik.setFieldValue('cashAccountId', res?.record?.cashAccountId)
+      formik.setFieldValue('cashAccountRef', res?.record?.cashAccountRef)
+      formik.setFieldValue('cashAccountName', res?.record?.cashAccountName)
+      formik.setFieldValue('plantId', res?.record?.plantId)
+
+      return res
+    }
+  }
+
+  useEffect(() => {
+    getDTD(formik?.values?.dtId)
+  }, [formik.values.dtId])
 
   function getDefaultsData() {
     const myObject = {}
@@ -306,8 +328,8 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
+                  formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
-                  formik && formik.setFieldValue('dtId', newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
