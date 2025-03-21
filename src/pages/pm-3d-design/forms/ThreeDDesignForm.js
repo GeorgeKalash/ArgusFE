@@ -47,11 +47,12 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
   })
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       wip: 1,
       status: 1,
-      dtId: documentType?.dtId,
+      dtId: null,
       reference: '',
       sketchId: null,
       sketchRef: '',

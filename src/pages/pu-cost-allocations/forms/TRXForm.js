@@ -50,13 +50,14 @@ export default function TRXForm({ labels, access, setStore, store }) {
       baseAmount: 0.0,
       notes: '',
       wip: 1,
-      dtId: documentType?.dtId,
+      dtId: null,
       reference: '',
       status: 1,
       releaseStatus: null,
       date: new Date()
     },
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({

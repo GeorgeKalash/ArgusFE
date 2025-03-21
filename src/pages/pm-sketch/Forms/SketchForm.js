@@ -42,10 +42,11 @@ export default function SketchForm({ recordId }) {
   })
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       reference: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       date: new Date(),
       designerId: null,
       itemGroupId: null,
@@ -169,12 +170,6 @@ export default function SketchForm({ recordId }) {
       disabled: !editMode || isPosted
     }
   ]
-
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
-    }
-  }, [documentType?.dtId])
 
   useEffect(() => {
     ;(async function () {

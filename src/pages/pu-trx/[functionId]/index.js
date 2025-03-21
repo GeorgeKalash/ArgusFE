@@ -37,7 +37,6 @@ const PuTrx = () => {
     query: { data },
     filterBy,
     refetch,
-    clearFilter,
     labels: labels,
     access,
     paginationParameters,
@@ -216,35 +215,14 @@ const PuTrx = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
         <RPBGridToolbar
           onAdd={add}
           maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
           reportName={parseFloat(functionId) === SystemFunction.PurchaseInvoice ? 'PUIVC' : 'PUIVR'}
+          filterBy={filterBy}
         />
       </Fixed>
       <Grow>
