@@ -27,7 +27,7 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 export default function MaterialsAdjustmentForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.MaterialAdjustment,
@@ -35,12 +35,15 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     enabled: !recordId
   })
 
+  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+
   const initialValues = {
     recordId: recordId,
     dtId: null,
     reference: '',
-    plantId: '',
-    siteId: '',
+    plantId,
+    siteId,
     description: '',
     date: new Date(),
     status: 1,
@@ -160,6 +163,24 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     refetchForm(res?.recordId)
     invalidate()
   }
+
+  async function getDTD(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: InventoryRepository.DocumentTypeDefaults.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      formik.setFieldValue('siteId', res?.record?.siteId ? res?.record?.siteId : siteId)
+      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
+
+      return res
+    }
+  }
+
+  useEffect(() => {
+    getDTD(formik?.values?.dtId)
+  }, [formik.values.dtId])
 
   const columns = [
     {

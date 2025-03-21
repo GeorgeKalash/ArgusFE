@@ -33,9 +33,11 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     access: access,
     enabled: !recordId
   })
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
 
   const { stack } = useWindow()
+  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -50,12 +52,12 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       reference: '',
       name: '',
       dtId: null,
-      plantId: '',
+      plantId,
       date: new Date(),
       currencyId: parseInt(getDefaultsData()?.currencyId),
       currencyName: '',
       status: 1,
-      cashAccountId: '',
+      cashAccountId,
       amount: '',
       baseAmount: '',
       exRate: 1,
@@ -155,6 +157,40 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     }
   }
 
+  async function getDTD(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: CashBankRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      const cashAccountValue = res?.record?.cashAccountId ? res?.record?.cashAccountId : cashAccountId
+
+      formik.setFieldValue('cashAccountId', cashAccountValue)
+      getCashAccount(cashAccountValue)
+
+      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
+
+      return res
+    }
+  }
+
+  const getCashAccount = async cashAccountId => {
+    if (cashAccountId) {
+      const { record: cashAccountResult } = await getRequest({
+        extension: CashBankRepository.CbBankAccounts.get,
+        parameters: `_recordId=${cashAccountId}`
+      })
+
+      formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
+      formik.setFieldValue('cashAccountName', cashAccountResult.name)
+    }
+  }
+
+  useEffect(() => {
+    getDTD(formik?.values?.dtId)
+  }, [formik.values.dtId])
+
   function getDefaultsData() {
     const myObject = {}
 
@@ -179,6 +215,11 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
           ...res.record,
           date: formatDateFromApi(res.record.date)
         })
+      } else {
+        const cashAccountId = formik.values.cashAccountId
+        if (cashAccountId) {
+          getCashAccount(cashAccountId)
+        }
       }
       if (!editMode) getDefaultsData()
     })()
@@ -306,8 +347,8 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
+                  formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
-                  formik && formik.setFieldValue('dtId', newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
