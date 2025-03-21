@@ -164,12 +164,29 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('cashAccountId', res?.record?.cashAccountId)
-      formik.setFieldValue('cashAccountRef', res?.record?.cashAccountRef)
-      formik.setFieldValue('cashAccountName', res?.record?.cashAccountName)
+      if (res?.record?.cashAccountId) {
+        formik.setFieldValue('cashAccountId', res?.record?.cashAccountId)
+        getCashAccount(res?.record?.cashAccountId)
+      } else {
+        formik.setFieldValue('cashAccountId', '')
+        formik.setFieldValue('cashAccountRef', '')
+        formik.setFieldValue('cashAccountName', '')
+      }
       formik.setFieldValue('plantId', res?.record?.plantId)
 
       return res
+    }
+  }
+
+  const getCashAccount = async cashAccountId => {
+    if (cashAccountId) {
+      const { record: cashAccountResult } = await getRequest({
+        extension: CashBankRepository.CbBankAccounts.get,
+        parameters: `_recordId=${cashAccountId}`
+      })
+
+      formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
+      formik.setFieldValue('cashAccountName', cashAccountResult.name)
     }
   }
 
@@ -201,6 +218,11 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
           ...res.record,
           date: formatDateFromApi(res.record.date)
         })
+      } else {
+        const cashAccountId = formik.values.cashAccountId
+        if (cashAccountId) {
+          getCashAccount(cashAccountId)
+        }
       }
       if (!editMode) getDefaultsData()
     })()

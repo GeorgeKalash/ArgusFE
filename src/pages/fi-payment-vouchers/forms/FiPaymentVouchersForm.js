@@ -273,7 +273,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
         const cashAccountId = formik.values.cashAccountId
         if (cashAccountId) {
           getCashAccount(cashAccountId)
-         
         }
       }
       getDefaultsData()
