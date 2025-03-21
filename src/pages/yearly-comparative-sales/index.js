@@ -44,7 +44,9 @@ const YearlyComparativeSales = () => {
       })
     })
 
-    const monthNames = monthsData.reduce((acc, { key, value }) => {
+    const sortedMonthsData = monthsData.sort((a, b) => a.key - b.key)
+
+    const monthNames = sortedMonthsData.reduce((acc, { key, value }) => {
       acc[value] = value
 
       return acc
@@ -199,6 +201,19 @@ const YearlyComparativeSales = () => {
     }
     refetch()
   }
+
+  const transformData = data => {
+    return data.list.map((item, index) => {
+      const { year, netSales, ...salaries } = item
+
+      const values = Object.keys(salaries)
+        .sort((a, b) => a.match(/\d+/)[0] - b.match(/\d+/)[0])
+        .map(key => salaries[key])
+
+      return { [`dataset${index + 1}`]: year, values }
+    })
+  }
+
   useEffect(() => {
     ;(async function () {
       await loadMonths()
@@ -213,21 +228,11 @@ const YearlyComparativeSales = () => {
   useEffect(() => {
     if (data?.list?.length > 0) {
       const labels = Object.values(monthLabels)
+      console.log('check data ', transformData(data))
 
-      const datasets = fiscalYears
-        .filter(year => year.checked)
-        .map(year => {
-          const yearData = data.list.find(d => d.year === year.year) || {}
-
-          return {
-            label: year.year,
-            data: labels.map((_, i) => yearData[`salary${i + 1}`] || 0)
-          }
-        })
-
-      setChartData({ labels, datasets })
+      setChartData({ labels })
     }
-  }, [data, fiscalYears, monthLabels])
+  }, [data, monthLabels])
 
   return (
     <VertLayout>
@@ -267,8 +272,19 @@ const YearlyComparativeSales = () => {
           </Grid>
           <Grid item xs={10} sx={{ display: 'flex', flex: 1, height: '60%' }}>
             {chartData.labels?.length > 0 && (
-              <LineChartDark id='yearlySalesChart' labels={chartData.labels} data={data.list} label='Yearly Sales' />
-            )}\
+              <LineChartDark
+                id='yearlySalesChart'
+                labels={chartData.labels}
+                datasets={[
+                  [0, 0, 600000000, 0, 750000000, 720000000, 0, 880000000, 900000000, 0, 0, 970000000], // Dataset 1
+                  [1100000000, 1050000000, 0, 850000000, 0, 720000000, 0, 600000000, 550000000, 580000000, 0, 0], // Dataset 2
+                  [], // Dataset 3
+                  [], // Dataset 4
+                  [], // Dataset 5
+                  [] // Dataset 6
+                ]}
+              />
+            )}
           </Grid>
         </Grid>
       </Grow>
