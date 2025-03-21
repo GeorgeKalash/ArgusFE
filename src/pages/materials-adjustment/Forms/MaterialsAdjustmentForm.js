@@ -171,8 +171,8 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('siteId', res?.record?.siteId)
-      formik.setFieldValue('plantId', res?.record?.plantId)
+      formik.setFieldValue('siteId', res?.record?.siteId ? res?.record?.siteId : siteId)
+      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
 
       return res
     }

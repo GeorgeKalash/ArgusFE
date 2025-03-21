@@ -164,15 +164,12 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
         parameters: `_dtId=${dtId}`
       })
 
-      if (res?.record?.cashAccountId) {
-        formik.setFieldValue('cashAccountId', res?.record?.cashAccountId)
-        getCashAccount(res?.record?.cashAccountId)
-      } else {
-        formik.setFieldValue('cashAccountId', '')
-        formik.setFieldValue('cashAccountRef', '')
-        formik.setFieldValue('cashAccountName', '')
-      }
-      formik.setFieldValue('plantId', res?.record?.plantId)
+      const cashAccountValue = res?.record?.cashAccountId ? res?.record?.cashAccountId : cashAccountId
+
+      formik.setFieldValue('cashAccountId', cashAccountValue)
+      getCashAccount(cashAccountValue)
+
+      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
 
       return res
     }

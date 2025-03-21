@@ -136,10 +136,12 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('cashAccountId', res?.record?.cashAccountId)
-      formik.setFieldValue('cashAccountRef', res?.record?.cashAccountRef)
-      formik.setFieldValue('cashAccountName', res?.record?.cashAccountName)
-      formik.setFieldValue('plantId', res?.record?.plantId)
+      const cashAccountValue = res?.record?.cashAccountId ? res?.record?.cashAccountId : cashAccountId
+
+      formik.setFieldValue('cashAccountId', cashAccountValue)
+      getCashAccount(cashAccountValue)
+
+      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
 
       return res
     }

@@ -371,7 +371,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('plantId', res?.record?.plantId)
+      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
+
 
       return res
     }

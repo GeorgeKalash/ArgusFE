@@ -43,6 +43,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     access,
     enabled: !recordId
   })
+  const siteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
 
   const initialValues = {
     recordId: null,
@@ -107,10 +108,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
       return
     } else {
-      const defaultFromSiteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
-
-      if (defaultFromSiteId?.value && !formik.values.fromSiteId)
-        formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value || ''))
+      if (siteId?.value && !formik.values.fromSiteId)
+        formik.setFieldValue('fromSiteId', parseInt(siteId?.value || ''))
     }
   }
 
@@ -254,9 +253,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       })
 
       formik.setFieldValue('toSiteId', res?.record?.toSiteId)
-      formik.setFieldValue('fromSiteId', res?.record?.siteId)
+      formik.setFieldValue('fromSiteId', res?.record?.siteId ? res?.record?.siteId : siteId)
       formik.setFieldValue('carrierId', res?.record?.carrierId)
-      formik.setFieldValue('plantId', res?.record?.plantId)
+      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
 
       return res
     }
