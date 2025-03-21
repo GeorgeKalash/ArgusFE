@@ -332,6 +332,8 @@ export const ResourceIds = {
   OpeningBalances: 30301,
   RawMaterialCategory: 42123,
   FoWorkCenters: 47101,
+  FoWaxes: 47300,
+  FoMoulds: 47200,
   SettingsResources: 20121,
   ItemPromotion: 50606,
   CreditCard: 33104,
