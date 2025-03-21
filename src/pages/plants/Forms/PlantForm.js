@@ -1,7 +1,4 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
@@ -43,7 +40,7 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
       groupName: null,
       segmentName: null,
       flName: '',
-      locationUrl: '',
+      locationUrl: ''
     },
     enableReinitialize: false,
     validateOnChange: false,
@@ -92,20 +89,18 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
   ]
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SystemRepository.Plant.get,
-            parameters: `_recordId=${recordId}`
-          })
-          var result = res.record
-          formik.setValues(result)
-          setStore(prevStore => ({
-            ...prevStore,
-            plant: result
-          }))
-        }
-      } catch (error) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.Plant.get,
+          parameters: `_recordId=${recordId}`
+        })
+        var result = res.record
+        formik.setValues(result)
+        setStore(prevStore => ({
+          ...prevStore,
+          plant: result
+        }))
+      }
     })()
   }, [])
 

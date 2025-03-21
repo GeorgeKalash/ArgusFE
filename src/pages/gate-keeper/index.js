@@ -166,7 +166,7 @@ const GateKeeper = () => {
         <GridToolbar
           maxAccess={access}
           onSearch={value => {
-            filterBy('qry', value)
+            filterBy('qry', value?.replace(/\+/g, '%2B'))
           }}
           onSearchClear={() => {
             clearFilter('qry')
