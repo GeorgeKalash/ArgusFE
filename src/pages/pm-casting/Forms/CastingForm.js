@@ -43,10 +43,11 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
   })
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       reference: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       date: new Date(),
       threeDPId: null,
       productionLineId: null,
@@ -144,12 +145,6 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       disabled: !formik.values.threeDPId
     }
   ]
-
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
-    }
-  }, [documentType?.dtId])
 
   useEffect(() => {
     ;(async function () {
