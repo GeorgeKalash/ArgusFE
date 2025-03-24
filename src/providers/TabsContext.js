@@ -199,19 +199,8 @@ const TabsProvider = ({ children }) => {
 
   useEffect(() => {
     if (openTabs[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
-    if (menu.length === 0) {
-      const newTabs = [
-        {
-          page: router.asPath === '/default/' ? children : null,
-          id: uuidv4(),
-          route: '/default/',
-          label: 'Home'
-        }
-      ]
-      setOpenTabs(newTabs)
-    }
 
-    if (!initialLoadDone && router.asPath && menu.length > 0) {
+    if (!initialLoadDone && router.asPath && (menu.length > 0 || dashboardId)) {
       const newTabs = [
         {
           page: router.asPath === '/default/' ? children : null,
@@ -220,6 +209,7 @@ const TabsProvider = ({ children }) => {
           label: 'Home'
         }
       ]
+
       if (router.asPath !== '/default/') {
         newTabs.push({
           page: children,
@@ -233,10 +223,10 @@ const TabsProvider = ({ children }) => {
         const index = newTabs.findIndex(tab => tab.route === router.asPath)
 
         setCurrentTabIndex(index)
-
-        setOpenTabs(newTabs)
-        setInitialLoadDone(true)
       }
+
+      setOpenTabs(newTabs)
+      setInitialLoadDone(true)
     }
   }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
 
