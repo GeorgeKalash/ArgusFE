@@ -382,5 +382,6 @@ export const ResourceIds = {
   Modeling: 48304,
   PostDraftReturns: 51316,
   DamageReturn: 42333,
-  RebuildAging: 31502
+  RebuildAging: 31502,
+  PUDocumentTypeDefaults: 50103
 }
