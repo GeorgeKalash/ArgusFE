@@ -81,7 +81,6 @@ export default function PurchaseDTDForm({ labels, maxAccess, recordId, functionI
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      functionId={functionId}
     >
       <VertLayout>
         <Grow>
