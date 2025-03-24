@@ -1273,6 +1273,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     displayField='name'
                     values={formik.values}
                     displayFieldWidth={1.5}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('spId', newValue ? newValue.recordId : null)
                     }}
@@ -1485,6 +1486,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 readOnly={isClosed}
                 values={formik.values}
                 displayFieldWidth={1.5}
+                maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('szId', newValue ? newValue.recordId : null)
                 }}

@@ -92,9 +92,9 @@ export function useForm({ documentType = {}, maxAccess, validate = () => {}, ...
               if (!maxAccessErrors[gridName]) {
                 maxAccessErrors[gridName] = {}
               }
-
               if (
                 !maxAccessErrors[gridName][fieldName] &&
+                formik.values[gridName] &&
                 !formik.values[gridName][fieldName] &&
                 formik.values[gridName][fieldName] != 0
               ) {
