@@ -24,6 +24,50 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
+import { useRef } from 'react'
+import { useQuery } from '@tanstack/react-query'
+
+const DB_NAME = 'myAppDB'
+const STORE_NAME = 'myStore'
+const DB_VERSION = 1
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION)
+
+    request.onupgradeneeded = event => {
+      const db = event.target.result
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' }) // Key must be unique
+      }
+    }
+
+    request.onsuccess = () => resolve(request.result)
+    request.onerror = () => reject(request.error)
+  })
+}
+
+async function saveToDB(key, value) {
+  const db = await openDB()
+  const transaction = db.transaction(STORE_NAME, 'readwrite')
+  const store = transaction.objectStore(STORE_NAME)
+  store.put({ id: key, value }) // 'id' is the key
+
+  return transaction.complete
+}
+
+async function getFromDB(key) {
+  const db = await openDB()
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readonly')
+    const store = transaction.objectStore(STORE_NAME)
+    const request = store.get(key)
+
+    request.onsuccess = () => resolve(request.result ? request.result.value : null)
+    request.onerror = () => reject(request.error)
+  })
+}
 
 const Table = ({
   name,
@@ -56,6 +100,7 @@ const Table = ({
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
   const [focus, setFocus] = useState(false)
+  const gridRef = useRef(null)
 
   const columns = props?.columns
     .filter(
@@ -679,6 +724,44 @@ const Table = ({
     }
   }
 
+  const { data: savedState, refetch: invalidate } = useQuery({
+    queryKey: ['COLUMN_STATE_KEY'],
+    queryFn: () => getFromDB('COLUMN_STATE_KEY')
+  })
+
+  const onColumnMoved = params => {
+    if (params.columnApi) {
+      const columnState = params.columnApi.getColumnState()
+      saveToDB('COLUMN_STATE_KEY', columnState)
+      invalidate()
+    }
+  }
+
+  const onColumnResized = params => {
+    if (params?.source === 'uiColumnResized') {
+      const columnState = params.columnApi.getColumnState()
+      saveToDB('COLUMN_STATE_KEY', columnState)
+      invalidate()
+    }
+  }
+
+  const columnState = savedState
+
+  const updatedColumns = columnDefs.map(col => {
+    const savedCol = columnState?.find(c => c.colId === col.field)
+
+    return savedCol ? { ...col, width: savedCol?.width, flex: savedCol?.width ?? 'auto' } : col
+  })
+
+  const finalColumns = updatedColumns.sort((a, b) => {
+    const indexA = columnState?.findIndex(col => col.colId === a.field)
+    const indexB = columnState?.findIndex(col => col.colId === b.field)
+
+    return indexA - indexB
+  })
+
+  console.log('finalColumn', finalColumns)
+
   return (
     <VertLayout>
       <Grow>
@@ -706,7 +789,7 @@ const Table = ({
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
             enableRangeSelection={true}
-            columnDefs={columnDefs}
+            columnDefs={finalColumns}
             pagination={false}
             paginationPageSize={pageSize}
             rowSelection={'single'}
@@ -716,6 +799,8 @@ const Table = ({
             gridOptions={gridOptions}
             rowDragManaged={rowDragManaged}
             onRowDragEnd={onRowDragEnd}
+            onColumnMoved={onColumnMoved}
+            onColumnResized={onColumnResized}
           />
         </Box>
       </Grow>
