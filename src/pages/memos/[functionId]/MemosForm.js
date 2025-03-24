@@ -36,7 +36,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   })
 
   const { stack } = useWindow()
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const [defaultsDataState, setDefaultsDataState] = useState(null)
 
   const [initialVatPct, setInitialVatPct] = useState('')
@@ -47,13 +47,15 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     endpointId: FinancialRepository.FiMemo.page
   })
 
+  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
       dtId: null,
       reference: '',
       date: new Date(),
-      plantId: '',
+      plantId,
       currencyId: '',
       currencyName: '',
       status: '',
@@ -361,6 +363,24 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       title: _labels.MultiCurrencyRate
     })
   }
+
+  async function getDTD(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: FinancialRepository.FIDocTypeDefaults.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
+
+
+      return res
+    }
+  }
+
+  useEffect(() => {
+    getDTD(formik?.values?.dtId)
+  }, [formik.values.dtId])
 
   return (
     <FormShell
