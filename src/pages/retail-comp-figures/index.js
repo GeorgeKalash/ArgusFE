@@ -117,7 +117,7 @@ const RetailCompFigures = () => {
       totalRow[month.key] = sumTotal[index]
     })
 
-    const sortedData = processedData.slice(1).sort((a, b) => b.total - a.total)
+    const sortedData = processedData.sort((a, b) => b.total - a.total)
     sortedData.unshift(totalRow)
 
     setData({
@@ -128,7 +128,7 @@ const RetailCompFigures = () => {
     const monthsHeaders = [...months].sort((a, b) => Number(a.key) - Number(b.key))?.map(item => item.value)
     setMonthsHeaders(monthsHeaders)
 
-    if (formik?.values?.posAnalysis != 1) {
+    if (formik?.values?.posAnalysis == 2) {
       const totalColumnValues = sortedData?.filter((_, index) => index !== 0).map(item => item.total)
       const firstColumnValues = sortedData?.filter((_, index) => index !== 0).map(item => item.posRef)
       setCategories(firstColumnValues)
@@ -136,6 +136,7 @@ const RetailCompFigures = () => {
         Object.entries(totalColumnValues)
           .filter(([key]) => !isNaN(key))
           .map(([, value]) => value)
+          .sort((a, b) => b - a)
       )
     } else {
       setCategories(monthsHeaders)
@@ -344,7 +345,7 @@ const RetailCompFigures = () => {
             selectionMode={formik?.values?.posAnalysis == 1 ? 'row' : 'column'}
             onSelectionChange={(lineData, columnField) => {
               if (lineData) {
-                if (formik?.values?.posAnalysis != 1) {
+                if (formik?.values?.posAnalysis == 2) {
                   if (columnField === 'plantName' || columnField === 'posRef' || columnField === prevCol) {
                     return
                   }
@@ -354,6 +355,7 @@ const RetailCompFigures = () => {
                     Object.entries(lineData?.filter((_, index) => index !== 0))
                       .filter(([key]) => !isNaN(key))
                       .map(([, value]) => value)
+                      .sort((a, b) => b - a)
                   )
                   setPrevCol(columnField)
                 } else {
