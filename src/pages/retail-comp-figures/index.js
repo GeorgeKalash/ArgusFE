@@ -1,5 +1,4 @@
-import { useState, useContext, useMemo, useEffect } from 'react'
-import toast from 'react-hot-toast'
+import { useState, useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
@@ -16,14 +15,10 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ReportPSGeneratorRepository } from 'src/repositories/ReportPSGeneratorRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { DataSets } from 'src/resources/DataSets'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { CommonContext } from 'src/providers/CommonContext'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
-import ReactApexcharts from 'src/@core/components/react-apexcharts'
-import Box from '@mui/material/Box'
-import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import Chart from 'chart.js/auto'
 import IconButton from '@mui/material/IconButton'
@@ -35,26 +30,13 @@ const RetailCompFigures = () => {
   const { platformLabels } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [columns, setColumns] = useState([])
-  const [displayedRow, setDisplayedRow] = useState([])
   const [data, setData] = useState([])
+  const [displayedGraph, setDisplayedGraph] = useState([])
   const [collapsed, setCollapsed] = useState(false)
   const [prevRow, setPrevRow] = useState('')
   const [prevCol, setPrevCol] = useState('')
-
-  const [categories, setCategories] = useState([
-    'JAN',
-    'FEB',
-    'MAR',
-    'APR',
-    'MAY',
-    'JUN',
-    'JUL',
-    'AUG',
-    'SEP',
-    'OCT',
-    'NOV',
-    'DEC'
-  ])
+  const [monthsHeaders, setMonthsHeaders] = useState([])
+  const [categories, setCategories] = useState([])
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.POSComparativeFigures
@@ -70,7 +52,7 @@ const RetailCompFigures = () => {
       posAnalysis: yup.number().required()
     }),
     maxAccess: access,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true
   })
 
@@ -135,19 +117,34 @@ const RetailCompFigures = () => {
       totalRow[month.key] = sumTotal[index]
     })
 
-    const sortedData = processedData.slice(1).sort((a, b) => b.total - a.total) // Sort rows not external!!
+    const sortedData = processedData.slice(1).sort((a, b) => b.total - a.total)
     sortedData.unshift(totalRow)
-    setDisplayedRow(
-      Object.entries(totalRow)
-        .filter(([key]) => !isNaN(key))
-        .map(([, value]) => value)
-    )
 
-    console.log('sortedData', sortedData)
     setData({
       count: sortedData?.length || 0,
       list: sortedData?.length ? sortedData : []
     })
+
+    const monthsHeaders = [...months].sort((a, b) => Number(a.key) - Number(b.key))?.map(item => item.value)
+    setMonthsHeaders(monthsHeaders)
+
+    if (formik?.values?.posAnalysis != 1) {
+      const totalColumnValues = sortedData?.filter((_, index) => index !== 0).map(item => item.total)
+      const firstColumnValues = sortedData?.filter((_, index) => index !== 0).map(item => item.posRef)
+      setCategories(firstColumnValues)
+      setDisplayedGraph(
+        Object.entries(totalColumnValues)
+          .filter(([key]) => !isNaN(key))
+          .map(([, value]) => value)
+      )
+    } else {
+      setCategories(monthsHeaders)
+      setDisplayedGraph(
+        Object.entries(totalRow)
+          .filter(([key]) => !isNaN(key))
+          .map(([, value]) => value)
+      )
+    }
   }
 
   const buildColumns = months => {
@@ -156,13 +153,13 @@ const RetailCompFigures = () => {
     let dynamicColumns = [
       {
         field: 'posRef',
-        headerName: labels.posRef,
+        headerName: labels.POS,
         width: 200,
         pinned: 'left'
       },
       {
         field: 'plantName',
-        headerName: labels.plantName,
+        headerName: labels.plant,
         width: 300,
         pinned: 'left'
       },
@@ -189,23 +186,8 @@ const RetailCompFigures = () => {
     setColumns(dynamicColumns)
   }
 
-  const fillPosAnalysisStore = async () => {
-    const data = await new Promise((resolve, reject) => {
-      getAllKvsByDataset({
-        _dataset: DataSets.POS_ANALYSIS_SORT_LEVEL,
-        callback: result => {
-          if (result) resolve(result)
-          else reject()
-        }
-      })
-    })
-    setPosAnalysisStore(data)
-  }
-
   useEffect(() => {
     if (!collapsed) {
-      console.log('displayedRow', displayedRow)
-
       const ctx = document.getElementById('compFigChart').getContext('2d')
 
       const chart = new Chart(ctx, {
@@ -214,7 +196,7 @@ const RetailCompFigures = () => {
           labels: categories,
           datasets: [
             {
-              data: displayedRow,
+              data: displayedGraph,
               backgroundColor: 'rgba(0, 123, 255, 0.5)',
               hoverBackgroundColor: 'rgb(255, 255, 0)',
               borderWidth: 1
@@ -282,92 +264,10 @@ const RetailCompFigures = () => {
         chart.destroy()
       }
     }
-  }, [categories, displayedRow, collapsed])
-
-  const buildChart = (categories, displayedRow, collapsed) => {
-    if (!collapsed) {
-      console.log('cate', displayedRow)
-      const ctx = document.getElementById('compFigChart').getContext('2d')
-
-      const chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: categories,
-          datasets: [
-            {
-              data: displayedRow,
-              backgroundColor: 'rgba(0, 123, 255, 0.5)',
-              hoverBackgroundColor: 'rgb(255, 255, 0)',
-              borderWidth: 1
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            datalabels: {
-              anchor: context => {
-                const chart = context.chart
-                const dataset = context.dataset
-                const value = dataset.data[context.dataIndex]
-
-                const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-                const maxValue = chart.scales.y.max
-
-                const barHeight = (value / maxValue) * chartHeight
-
-                return barHeight >= 120 ? 'center' : 'end'
-              },
-              align: context => {
-                const chart = context.chart
-                const dataset = context.dataset
-                const value = dataset.data[context.dataIndex]
-
-                const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-                const maxValue = chart.scales.y.max
-
-                const barHeight = (value / maxValue) * chartHeight
-
-                return barHeight >= 120 ? 'center' : 'end'
-              },
-              color: 'black',
-              offset: 0,
-              rotation: -90,
-              font: { size: 14, weight: 'bold' },
-              formatter: val => val?.toLocaleString()
-            }
-          },
-          scales: {
-            x: {
-              ticks: {
-                color: '#000'
-              },
-              grid: {
-                display: true,
-                color: 'rgba(255, 255, 255, 0.2)'
-              }
-            },
-            y: {
-              ticks: {
-                color: '#000'
-              }
-            }
-          }
-        },
-        plugins: [ChartDataLabels]
-      })
-
-      return () => {
-        chart.destroy()
-      }
-    }
-  }
+  }, [categories, displayedGraph, collapsed])
 
   useEffect(() => {
     ;(async function () {
-      //fillFiscalYearStore()
       processGridData(formik?.values?.fiscalYear)
     })()
   }, [])
@@ -390,7 +290,7 @@ const RetailCompFigures = () => {
                   <ResourceComboBox
                     endpointId={SystemRepository.FiscalYears.qry}
                     name='fiscalYear'
-                    label={labels.fiscalYear}
+                    label={labels.year}
                     valueField='fiscalYear'
                     displayField='fiscalYear'
                     values={formik.values}
@@ -404,7 +304,9 @@ const RetailCompFigures = () => {
                 </Grid>
                 <Grid item xs={2}>
                   <CustomButton
-                    onClick={() => processGridData(formik?.values?.fiscalYear)}
+                    onClick={() => {
+                      processGridData(formik?.values?.fiscalYear)
+                    }}
                     label={platformLabels.Preview}
                     image={'preview.png'}
                     color='#231f20'
@@ -423,7 +325,7 @@ const RetailCompFigures = () => {
                 defaultIndex={0}
                 required
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('posAnalysis', newValue?.key) //FIX
+                  formik.setFieldValue('posAnalysis', newValue?.key)
                 }}
                 error={formik.touched.posAnalysis && Boolean(formik.errors.posAnalysis)}
                 maxAccess={access}
@@ -448,7 +350,7 @@ const RetailCompFigures = () => {
                   }
                   const firstColumnValues = data?.list?.filter((_, index) => index !== 0).map(item => item.posRef)
                   setCategories(firstColumnValues)
-                  setDisplayedRow(
+                  setDisplayedGraph(
                     Object.entries(lineData?.filter((_, index) => index !== 0))
                       .filter(([key]) => !isNaN(key))
                       .map(([, value]) => value)
@@ -458,8 +360,9 @@ const RetailCompFigures = () => {
                   if (columnField === prevRow) {
                     return
                   }
-                  setCategories(['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'])
-                  setDisplayedRow(
+                  console.log('data', data)
+                  setCategories(monthsHeaders)
+                  setDisplayedGraph(
                     Object.entries(lineData)
                       .filter(([key]) => !isNaN(key))
                       .map(([, value]) => value)
@@ -487,11 +390,11 @@ const RetailCompFigures = () => {
                     position: 'absolute',
                     right: 18,
                     color: 'black',
-                    backgroundColor: '#f0f0f0', // Light grey background
-                    borderRadius: '30%', // Makes it circular
-                    padding: 1, // Adds padding for better visibility
+                    backgroundColor: '#f0f0f0',
+                    borderRadius: '30%',
+                    padding: 1,
                     '&:hover': {
-                      backgroundColor: '#d9d9d9' // Darker background on hover
+                      backgroundColor: '#d9d9d9'
                     }
                   }}
                   size='small'
