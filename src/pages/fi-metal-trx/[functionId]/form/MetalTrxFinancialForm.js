@@ -357,6 +357,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
 
         update({ baseSalesMetalValue, totalCredit })
+        if (metal) {
+          const metalValue = Math.round((baseSalesMetalValue) * 100) / 100
+          update({ metalValue: metalValue })
+        }
       },
       propsReducer({ row, props }) {
         return { ...props, readOnly: row.trackBy != 2 }
