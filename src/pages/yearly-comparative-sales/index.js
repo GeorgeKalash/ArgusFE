@@ -204,10 +204,15 @@ const YearlyComparativeSales = () => {
 
   const transformData = data => {
     return data.list.map((item, index) => {
-      const { year, netSales, ...salaries } = item
+      const { year, total, ...salaries } = item
 
       const values = Object.keys(salaries)
-        .sort((a, b) => a.match(/\d+/)[0] - b.match(/\d+/)[0])
+        .sort((a, b) => {
+          const numA = a.match(/\d+/)?.[0] || '0'
+          const numB = b.match(/\d+/)?.[0] || '0'
+
+          return Number(numA) - Number(numB)
+        })
         .map(key => salaries[key])
 
       return { [`dataset${index + 1}`]: year, values }
@@ -228,9 +233,13 @@ const YearlyComparativeSales = () => {
   useEffect(() => {
     if (data?.list?.length > 0) {
       const labels = Object.values(monthLabels)
-      console.log('check data ', transformData(data))
+      const transformedData = transformData(data)
+      const datasets = transformedData.map(item => item.values.filter(value => value !== 0))
 
-      setChartData({ labels })
+      setChartData({
+        labels,
+        datasets
+      })
     }
   }, [data, monthLabels])
 
@@ -272,18 +281,7 @@ const YearlyComparativeSales = () => {
           </Grid>
           <Grid item xs={10} sx={{ display: 'flex', flex: 1, height: '60%' }}>
             {chartData.labels?.length > 0 && (
-              <LineChartDark
-                id='yearlySalesChart'
-                labels={chartData.labels}
-                datasets={[
-                  [0, 0, 600000000, 0, 750000000, 720000000, 0, 880000000, 900000000, 0, 0, 970000000], // Dataset 1
-                  [1100000000, 1050000000, 0, 850000000, 0, 720000000, 0, 600000000, 550000000, 580000000, 0, 0], // Dataset 2
-                  [], // Dataset 3
-                  [], // Dataset 4
-                  [], // Dataset 5
-                  [] // Dataset 6
-                ]}
-              />
+              <LineChartDark id='yearlySalesChart' labels={chartData.labels} datasets={chartData.datasets} />
             )}
           </Grid>
         </Grid>
