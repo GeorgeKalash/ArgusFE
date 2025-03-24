@@ -40,9 +40,10 @@ export default function ModellingForm({ labels, access, setStore, store }) {
   })
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId,
-      dtId: documentType?.dtId,
+      dtId: null,
       reference: null,
       date: new Date(),
       threeDPId: null,

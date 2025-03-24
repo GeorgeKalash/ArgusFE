@@ -66,7 +66,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
   const initialValues = {
     recordId: recordId,
-    dtId: documentType?.dtId,
+    dtId: null,
     reference: '',
     date: new Date(),
     dueDate: new Date(),
@@ -151,6 +151,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -690,7 +691,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || formik.values.status == 3 || formik.values.deliveryStatus == 4
+      disabled: !(isClosed && (formik.values.deliveryStatus == 1 || formik.values.deliveryStatus == 5))
     },
     {
       key: 'Terminate',
@@ -1165,10 +1166,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     formik.setFieldValue('subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('vatAmount', parseFloat(vatAmount).toFixed(2))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
-
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
 
   useEffect(() => {
     if (reCal) {

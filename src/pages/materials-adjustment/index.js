@@ -129,15 +129,10 @@ const MaterialsAdjustment = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} maxAccess={access} onAdd={add} onApply={onApply} reportName={'IVADJ'} />
+        <RPBGridToolbar hasSearch={false} maxAccess={access} onAdd={add} filterBy={filterBy} reportName={'IVADJ'} />
       </Fixed>
       <Grow>
         <Table

@@ -68,6 +68,7 @@ export const SystemFunction = {
   RetailInvoice: Module.PointOfSale * 100 + 0,
   RetailReturn: Module.PointOfSale * 100 + 1,
   RetailPurchase: Module.PointOfSale * 100 + 2,
+  RetailPurchaseReturn: Module.PointOfSale * 100 + 3,
   ChartOfAccounts: Module.GeneralLedger * 100 + 2,
   Assets: Module.FixedAssets * 100 + 0,
   AssetsDepreciation: Module.FixedAssets * 100 + 2,
@@ -115,7 +116,8 @@ export const SystemFunction = {
   ThreeDPrint: Module.ProductModeling * 100 + 3,
   ModellingCasting: Module.ProductModeling * 100 + 4,
   Sketch: Module.ProductModeling * 100 + 1,
-  Rubber: Module.ProductModeling * 100 + 6
+  Rubber: Module.ProductModeling * 100 + 6,
+  DamageReturn: Module.Manufacturing * 100 + 13
 }
 
 export const getSystemFunctionModule = functionId => {

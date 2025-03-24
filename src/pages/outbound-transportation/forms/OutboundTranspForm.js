@@ -24,13 +24,10 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTimePicker from 'src/components/Inputs/CustomTimePicker'
 import dayjs from 'dayjs'
-import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
-import { useWindow } from 'src/windows'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
-  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DeliveryTrip,
@@ -69,7 +66,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       arrivalTime: null,
       arrivalTimeField: null,
       notes: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       status: 1,
       statusName: '',
       printStatusName: '',
@@ -93,6 +90,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       ]
     },
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -393,10 +391,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
     invalidate()
   }
-
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
 
   return (
     <FormShell

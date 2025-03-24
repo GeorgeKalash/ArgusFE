@@ -46,10 +46,11 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
   })
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       reference: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       date: new Date(),
       threeDDId: null,
       fileReference: '',
@@ -187,11 +188,6 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
     getData(res.recordId)
   }
 
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
-    }
-  }, [documentType?.dtId])
 
   useEffect(() => {
     if (recordId) {
