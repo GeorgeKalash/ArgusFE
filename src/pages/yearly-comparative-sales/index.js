@@ -11,15 +11,17 @@ import { ReportSAGeneratorRepository } from 'src/repositories/ReportSAGeneratorR
 import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { Grid } from '@mui/material'
+import { Button, Grid } from '@mui/material'
 import { LineChartDark } from 'src/components/Shared/dashboardApplets/charts'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const YearlyComparativeSales = () => {
   const { getRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
+  const { platformLabels } = useContext(ControlContext)
   const [fiscalYears, setFiscalYears] = useState([])
-  const [monthLabels, setMonthLabels] = useState([])
-  const [chartData, setChartData] = useState([])
+  const [monthLabels, setTableMonths] = useState([])
+  const [chartInfo, setChartInfo] = useState([])
 
   const {
     query: { data },
@@ -52,7 +54,7 @@ const YearlyComparativeSales = () => {
       return acc
     }, {})
 
-    setMonthLabels(monthNames)
+    setTableMonths(monthNames)
   }
 
   async function getFiscalYears() {
@@ -178,6 +180,15 @@ const YearlyComparativeSales = () => {
         return acc
       }, {})
 
+      checkedYears.forEach(year => {
+        if (!aggregatedData[year]) {
+          aggregatedData[year] = { year, total: 0 }
+          for (let month = 1; month <= 12; month++) {
+            aggregatedData[year][`salary${month}`] = 0
+          }
+        }
+      })
+
       const result = Object.values(aggregatedData).map(yearData => {
         for (let month = 1; month <= 12; month++) {
           const monthKey = `salary${month}`
@@ -186,6 +197,12 @@ const YearlyComparativeSales = () => {
 
         return yearData
       })
+
+      checkedYears.map(String)
+      setChartInfo(prevState => ({
+        ...prevState,
+        datasetLabels: checkedYears.map(String)
+      }))
 
       return { list: result }
     }
@@ -226,6 +243,7 @@ const YearlyComparativeSales = () => {
       setFiscalYears(years)
     })()
   }, [])
+
   useEffect(() => {
     if (fiscalYears.length > 0) refetch()
   }, [fiscalYears])
@@ -233,13 +251,13 @@ const YearlyComparativeSales = () => {
   useEffect(() => {
     if (data?.list?.length > 0) {
       const labels = Object.values(monthLabels)
-      const transformedData = transformData(data)
-      const datasets = transformedData.map(item => item.values.filter(value => value !== 0))
+      const datasets = transformData(data).map(item => item.values.filter(value => value !== 0))
 
-      setChartData({
+      setChartInfo(prevState => ({
+        ...prevState,
         labels,
         datasets
-      })
+      }))
     }
   }, [data, monthLabels])
 
@@ -261,27 +279,41 @@ const YearlyComparativeSales = () => {
               pagination={false}
             />
           </Grid>
-          <Grid item xs={2} sx={{ display: 'flex', flex: 1, height: '50%' }}>
-            <Table
-              name='fiscalTable'
-              columns={[
-                {
-                  field: 'year',
-                  headerName: labels.year,
-                  flex: 1
-                }
-              ]}
-              gridData={{ list: fiscalYears }}
-              rowId={['year']}
-              showCheckboxColumn={true}
-              isLoading={false}
-              maxAccess={access}
-              pagination={false}
-            />
+          <Grid item xs={2} sx={{ display: 'flex', flex: 1 }}>
+            <Grid container sx={{ display: 'flex', flex: 1 }}>
+              <Grid item xs={12} sx={{ display: 'flex', flex: 1 }}>
+                <Table
+                  name='fiscalTable'
+                  columns={[
+                    {
+                      field: 'year',
+                      headerName: labels.year,
+                      flex: 1
+                    }
+                  ]}
+                  gridData={{ list: fiscalYears }}
+                  rowId={['year']}
+                  showCheckboxColumn={true}
+                  isLoading={false}
+                  maxAccess={access}
+                  pagination={false}
+                />
+              </Grid>
+              <Grid item xs={4} sx={{ p: 2 }}>
+                <Button variant='contained' size='small' onClick={() => refetch()}>
+                  <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
+                </Button>
+              </Grid>
+            </Grid>
           </Grid>
           <Grid item xs={10} sx={{ display: 'flex', flex: 1, height: '60%' }}>
-            {chartData.labels?.length > 0 && (
-              <LineChartDark id='yearlySalesChart' labels={chartData.labels} datasets={chartData.datasets} />
+            {chartInfo.labels?.length > 0 && (
+              <LineChartDark
+                id='yearlySalesChart'
+                labels={chartInfo.labels}
+                datasets={chartInfo.datasets}
+                datasetLabels={chartInfo.datasetLabels}
+              />
             )}
           </Grid>
         </Grid>

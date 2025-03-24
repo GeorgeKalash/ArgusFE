@@ -344,8 +344,8 @@ export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
       .map((data, index) => {
         if (data.length === 0) return null
 
-        const color = getColorForIndex(index) // Assign a color based on index
-        const label = datasetLabels && datasetLabels[index] ? datasetLabels[index] : `Dataset ${index + 1}` // Flexible label
+        const color = getColorForIndex(index)
+        const label = datasetLabels && datasetLabels[index] ? datasetLabels[index] : ``
 
         return {
           label,
@@ -364,14 +364,14 @@ export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
       type: 'line',
       data: {
         labels,
-        datasets: datasetConfig // Add datasets dynamically here
+        datasets: datasetConfig
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            display: datasetConfig.length > 0, // Only display legend if there are datasets
+            display: datasetConfig.length > 0,
             position: 'left'
           },
           tooltip: {
@@ -384,7 +384,7 @@ export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
           y: {
             beginAtZero: false,
             ticks: {
-              callback: value => value.toLocaleString() // Format large numbers
+              callback: value => value.toLocaleString()
             }
           }
         }
@@ -394,7 +394,7 @@ export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
     return () => {
       chart.destroy()
     }
-  }, [id, labels, datasets, datasetLabels]) // Update when datasets or labels change
+  }, [id, labels, datasets, datasetLabels])
 
   return <canvas id={id}></canvas>
 }
