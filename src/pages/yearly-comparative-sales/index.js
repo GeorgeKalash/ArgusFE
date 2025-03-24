@@ -32,7 +32,10 @@ const YearlyComparativeSales = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ReportSAGeneratorRepository.YearlyComparativeSale.SA503,
-    datasetId: ResourceIds.YearlyComparativeSales
+    datasetId: ResourceIds.YearlyComparativeSales,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const loadMonths = async () => {
@@ -77,93 +80,111 @@ const YearlyComparativeSales = () => {
     {
       field: 'year',
       headerName: labels.year,
-      flex: 1
+      width: 150,
+      pinned: 'left'
     },
     {
       field: 'total',
       headerName: labels.total,
-      flex: 1,
-      type: 'number'
+      width: 220,
+      type: 'number',
+      pinned: 'left'
     },
     {
       field: 'salary1',
       headerName: monthLabels.JAN,
-      flex: 1,
-      type: 'number'
+
+      type: 'number',
+      width: 170
     },
     {
       field: 'salary2',
       headerName: monthLabels.FEB,
-      flex: 1,
-      type: 'number'
+
+      type: 'number',
+      width: 170
     },
     {
       field: 'salary3',
       headerName: monthLabels.MAR,
-      flex: 1,
-      type: 'number'
+
+      type: 'number',
+      width: 170
     },
     {
       field: 'salary4',
       headerName: monthLabels.APR,
-      flex: 1,
-      type: 'number'
+
+      type: 'number',
+      width: 170
     },
     {
       field: 'salary5',
       headerName: monthLabels.MAY,
-      flex: 1,
-      type: 'number'
+
+      type: 'number',
+      width: 170
     },
     {
       field: 'salary6',
       headerName: monthLabels.JUN,
-      flex: 1,
-      type: 'number'
+
+      type: 'number',
+      width: 170
     },
     {
       field: 'salary7',
       headerName: monthLabels.JUL,
-      flex: 1,
-      type: 'number'
+
+      type: 'number',
+      width: 170
     },
     {
       field: 'salary8',
       headerName: monthLabels.AUG,
-      flex: 1,
-      type: 'number'
+
+      type: 'number',
+      width: 170
     },
     {
       field: 'salary9',
       headerName: monthLabels.SEP,
-      flex: 1,
-      type: 'number'
+
+      type: 'number',
+      width: 170
     },
     {
       field: 'salary10',
       headerName: monthLabels.OCT,
-      flex: 1,
-      type: 'number'
+
+      type: 'number',
+      width: 170
     },
     {
       field: 'salary11',
       headerName: monthLabels.NOV,
-      flex: 1,
-      type: 'number'
+
+      type: 'number',
+      width: 170
     },
     {
       field: 'salary12',
       headerName: monthLabels.DEC,
-      flex: 1,
-      type: 'number'
+
+      type: 'number',
+      width: 170
     }
   ]
 
   async function fetchGridData(options = {}) {
     const { params = [] } = options
-    if (fiscalYears.length > 0) {
-      const checkedYears = fiscalYears.filter(yearObj => yearObj.checked).map(yearObj => yearObj.year)
+    const checkedYears = fiscalYears.filter(yearObj => yearObj.checked).map(yearObj => yearObj.year)
+    setChartInfo(prevState => ({
+      ...prevState,
+      datasetLabels: checkedYears.map(String)
+    }))
 
+    if (checkedYears.length > 0) {
       const response = await getRequest({
         extension: ReportSAGeneratorRepository.YearlyComparativeSale.SA503,
         parameters: `_years=${checkedYears.join(',')}&_params=${params}`
@@ -198,25 +219,12 @@ const YearlyComparativeSales = () => {
         return yearData
       })
 
-      checkedYears.map(String)
-      setChartInfo(prevState => ({
-        ...prevState,
-        datasetLabels: checkedYears.map(String)
-      }))
-
       return { list: result }
     }
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
+  async function fetchWithFilter({ filters }) {
+    return fetchGridData({ params: filters?.params })
   }
 
   const transformData = data => {
@@ -264,7 +272,7 @@ const YearlyComparativeSales = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar maxAccess={access} onApply={onApply} reportName={'SA503'} />
+        <RPBGridToolbar maxAccess={access} reportName={'SA503'} filterBy={filterBy} hasSearch={false} />
       </Fixed>
       <Grow>
         <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
@@ -306,7 +314,7 @@ const YearlyComparativeSales = () => {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={10} sx={{ display: 'flex', flex: 1, height: '60%' }}>
+          <Grid item xs={10} sx={{ display: 'flex', height: '60%' }}>
             {chartInfo.labels?.length > 0 && (
               <LineChartDark
                 id='yearlySalesChart'

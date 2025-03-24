@@ -54,33 +54,6 @@ const getChartOptions = (label, type) => {
     }
   }
 
-  // if (type === 'darkLine') {
-  //   return {
-  //     ...baseOptions,
-  //     scales: {
-  //       y: {
-  //         beginAtZero: true,
-  //         ticks: {
-  //           color: '#f0f0f0'
-  //         },
-  //         grid: {
-  //           color: '#444',
-  //           borderColor: '#777'
-  //         }
-  //       },
-  //       x: {
-  //         ticks: {
-  //           color: '#f0f0f0'
-  //         },
-  //         grid: {
-  //           color: '#444',
-  //           borderColor: '#777'
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-
   return {
     ...baseOptions,
     scales: {
