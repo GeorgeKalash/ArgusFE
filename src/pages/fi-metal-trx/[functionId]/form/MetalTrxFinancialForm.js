@@ -259,7 +259,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       purity: item.purity && item.purity <= 1 ? item.purity * 1000 : item.purity,
       metalValue:
         metalInfo?.purity || metal.purity
-          ? Math.round(((item.qty * item.purity) / (metalInfo?.purity || metal.purity)) * 100) / 100
+          ? ((item.qty * item.purity) / (metalInfo?.purity || metal.purity)).toFixed(2)
           : null,
       totalCredit: item?.totalCredit || 0,
       creditAmount: item?.creditAmount || 0,
@@ -359,9 +359,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           ? newRow.qty * newRow.creditAmount
           : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
 
-        update({ baseSalesMetalValue, totalCredit: Math.round(totalCredit  * 100) / 100 })
+        update({ baseSalesMetalValue, totalCredit: totalCredit.toFixed(2) })
         if (metal) {
-          const metalValue = Math.round(baseSalesMetalValue * 100) / 100
+          const metalValue = baseSalesMetalValue.toFixed(2)
           update({ metalValue: metalValue })
         }
       },
@@ -381,9 +381,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         const totalCredit = newRow.purityFromItem
           ? newRow.qty * newRow.creditAmount
           : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
-        update({ baseSalesMetalValue, totalCredit: Math.round(totalCredit  * 100) / 100 })
+        update({ baseSalesMetalValue, totalCredit: totalCredit.toFixed(2) })
         if (metal) {
-          const metalValue = Math.round(((newRow.qty * newRow.purity) / (metal.purity * 1000)) * 100) / 100
+          const metalValue = ((newRow.qty * newRow.purity) / (metal.purity * 1000)).toFixed(2)
           update({ metalValue: metalValue })
         }
       }
