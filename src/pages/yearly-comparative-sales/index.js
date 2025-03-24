@@ -244,6 +244,12 @@ const YearlyComparativeSales = () => {
     })
   }
 
+  const handleCheck = (row, checked) => {
+    console.log('check val', row, checked)
+
+    //setFiscalYears(prev => prev.map(yearObj => (yearObj.year === row.year ? { ...yearObj, checked } : yearObj)))
+  }
+
   useEffect(() => {
     ;(async function () {
       await loadMonths()
@@ -305,10 +311,16 @@ const YearlyComparativeSales = () => {
                   isLoading={false}
                   maxAccess={access}
                   pagination={false}
+                  handleCheckboxChange={(row, checked) => handleCheck(row, checked)}
                 />
               </Grid>
               <Grid item xs={4} sx={{ p: 2 }}>
-                <Button variant='contained' size='small' onClick={() => refetch()}>
+                <Button
+                  variant='contained'
+                  size='small'
+                  onClick={() => refetch()}
+                  disabled={fiscalYears.filter(yearObj => yearObj.checked).map(yearObj => yearObj.year).length == 0}
+                >
                   <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
                 </Button>
               </Grid>
