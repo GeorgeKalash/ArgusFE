@@ -360,7 +360,6 @@ const RetailCompFigures = () => {
                   if (columnField === prevRow) {
                     return
                   }
-                  console.log('data', data)
                   setCategories(monthsHeaders)
                   setDisplayedGraph(
                     Object.entries(lineData)
