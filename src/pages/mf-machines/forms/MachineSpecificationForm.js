@@ -14,7 +14,7 @@ import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
-export default function MachineSpecificationForm({ labels, maxAccess, editMode, store }) {
+export default function MachineSpecificationForm({ labels, maxAccess, store }) {
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -27,8 +27,8 @@ export default function MachineSpecificationForm({ labels, maxAccess, editMode, 
       brand: null,
       activationDate: null,
       description: '',
-      lifeTimeHours: '',
-      productionYear: ''
+      lifeTimeHours: 0,
+      productionYear: 0
     },
     enableReinitialize: false,
     validateOnChange: false,
@@ -42,6 +42,7 @@ export default function MachineSpecificationForm({ labels, maxAccess, editMode, 
         extension: ManufacturingRepository.MachineSpecification.set,
         record: JSON.stringify({
           ...values,
+          machineId: recordId,
           activationDate: values.activationDate ? formatDateToApi(values.activationDate) : null
         })
       })
@@ -50,13 +51,10 @@ export default function MachineSpecificationForm({ labels, maxAccess, editMode, 
         formik.setFieldValue('recordId', response.recordId)
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
-
-      setStore(prevStore => ({
-        ...prevStore,
-        recordId: response.recordId
-      }))
     }
   })
+
+  const editMode = !!recordId
 
   useEffect(() => {
     ;(async function () {
@@ -69,6 +67,8 @@ export default function MachineSpecificationForm({ labels, maxAccess, editMode, 
         if (!res.record) return
         formik.setValues({
           ...res.record,
+          lifeTimeHours: res.record.lifeTimeHours ?? 0,
+          productionYear: res.record.productionYear ?? 0,
           activationDate: formatDateFromApi(res.record.activationDate)
         })
       }
@@ -82,6 +82,7 @@ export default function MachineSpecificationForm({ labels, maxAccess, editMode, 
       maxAccess={maxAccess}
       editMode={editMode}
       infoVisible={false}
+      isCleared={false}
     >
       <Grid container spacing={2}>
         <Grid item xs={12}>

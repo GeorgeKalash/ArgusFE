@@ -4,7 +4,7 @@ import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import MachinesForm from '../forms/MachinesForm'
 import MachineSpecificationForm from '../forms/MachineSpecificationForm'
 
-export default function MachinesWindow({ labels, access, recordId }) {
+export default function MachinesWindow({ labels, maxAccess, recordId }) {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -17,10 +17,10 @@ export default function MachinesWindow({ labels, access, recordId }) {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <MachinesForm labels={labels} maxAccess={access} setStore={setStore} store={store} editMode={store.recordId}/>
+        <MachinesForm labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <MachineSpecificationForm labels={labels} maxAccess={access} store={store} editMode={store.recordId}/>
+        <MachineSpecificationForm labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )

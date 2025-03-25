@@ -13,7 +13,7 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function MachinesForms({ labels, maxAccess, store, setStore, editMode }) {
+export default function MachinesForms({ labels, maxAccess, store, setStore }) {
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
 
@@ -35,9 +35,9 @@ export default function MachinesForms({ labels, maxAccess, store, setStore, edit
       operationName: '',
       laborId: null,
       laborName: '',
-      minLoadQty: null,
-      maxLoadQty: null,
-      defaultLoadQty: null,
+      minLoadQty: 0,
+      maxLoadQty: 0,
+      defaultLoadQty: 0,
       lineId: null
     },
     enableReinitialize: false,
@@ -55,7 +55,7 @@ export default function MachinesForms({ labels, maxAccess, store, setStore, edit
         extension: ManufacturingRepository.Machine.set,
         record: JSON.stringify(values)
       }).then(res => {
-        if (!editMode) {
+        if (!values.recordId) {
           formik.setFieldValue('recordId', res.recordId)
           toast.success(platformLabels.Added)
         } else toast.success(platformLabels.Edited)
@@ -69,6 +69,8 @@ export default function MachinesForms({ labels, maxAccess, store, setStore, edit
       })
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
