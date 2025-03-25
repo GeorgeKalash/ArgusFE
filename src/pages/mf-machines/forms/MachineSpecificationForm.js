@@ -42,7 +42,7 @@ export default function MachineSpecificationForm({ labels, maxAccess, editMode, 
         extension: ManufacturingRepository.MachineSpecification.set,
         record: JSON.stringify({
           ...values,
-          activationDate: formatDateToApi(values.activationDate)
+          activationDate: values.activationDate ? formatDateToApi(values.activationDate) : null
         })
       })
 
