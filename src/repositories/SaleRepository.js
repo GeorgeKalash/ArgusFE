@@ -262,5 +262,8 @@ export const SaleRepository = {
   },
   InvoiceReturnBalance: {
     balance: service + 'balanceRET'
+  },
+  SalesSyncTrx: {
+    sync: service + 'syncTRX'
   }
 }
