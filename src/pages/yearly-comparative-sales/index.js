@@ -19,9 +19,11 @@ const YearlyComparativeSales = () => {
   const { getRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const { platformLabels } = useContext(ControlContext)
+
   const [fiscalYears, setFiscalYears] = useState([])
   const [monthLabels, setTableMonths] = useState([])
   const [chartInfo, setChartInfo] = useState([])
+  const [disablePreview, setDisbalePreview] = useState(false)
 
   const {
     query: { data },
@@ -244,12 +246,6 @@ const YearlyComparativeSales = () => {
     })
   }
 
-  const handleCheck = (row, checked) => {
-    console.log('check val', row, checked)
-
-    //setFiscalYears(prev => prev.map(yearObj => (yearObj.year === row.year ? { ...yearObj, checked } : yearObj)))
-  }
-
   useEffect(() => {
     ;(async function () {
       await loadMonths()
@@ -282,12 +278,21 @@ const YearlyComparativeSales = () => {
       </Fixed>
       <Grow>
         <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
-          <Grid item xs={12} sx={{ display: 'flex', flex: 1 }}>
+          <Grid
+            item
+            xs={12}
+            sx={{
+              display: 'flex',
+              flex: 1,
+              height: 'auto', // Let the height adjust based on the content
+              overflowY: 'visible' // Prevent scrollbars
+            }}
+          >
             <Table
               name='yearsTable'
               columns={columns}
               gridData={data}
-              rowId={['recordId']}
+              rowId={['year']}
               isLoading={false}
               maxAccess={access}
               pagination={false}
@@ -311,16 +316,15 @@ const YearlyComparativeSales = () => {
                   isLoading={false}
                   maxAccess={access}
                   pagination={false}
-                  handleCheckboxChange={(row, checked) => handleCheck(row, checked)}
+                  handleCheckboxChange={() =>
+                    setDisbalePreview(
+                      fiscalYears.filter(yearObj => yearObj.checked).map(yearObj => yearObj.year).length == 0
+                    )
+                  }
                 />
               </Grid>
               <Grid item xs={4} sx={{ p: 2 }}>
-                <Button
-                  variant='contained'
-                  size='small'
-                  onClick={() => refetch()}
-                  disabled={fiscalYears.filter(yearObj => yearObj.checked).map(yearObj => yearObj.year).length == 0}
-                >
+                <Button variant='contained' size='small' onClick={() => refetch()} disabled={disablePreview}>
                   <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
                 </Button>
               </Grid>
