@@ -89,10 +89,12 @@ const TabsProvider = ({ children }) => {
   }
 
   const handleChange = (event, newValue) => {
-    if (newValue === 0) router.push(openTabs[newValue].route)
-
     setCurrentTabIndex(newValue)
-    window.history.replaceState(null, '', openTabs[newValue].route)
+    if (newValue === 0 && !openTabs[newValue].page) {
+      router.push(openTabs[newValue].route)
+    } else {
+      window.history.replaceState(null, '', openTabs[newValue].route)
+    }
   }
 
   const handleCloseAllTabs = () => {
