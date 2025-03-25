@@ -38,7 +38,6 @@ export default function PurchaseDTDForm({ labels, maxAccess, recordId, functionI
       updateDocDateOnPost: false
     },
     maxAccess,
-    enableReinitialize: false,
     validationSchema: yup.object({
       dtId: yup.string().required()
     }),
