@@ -36,7 +36,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
   const { formik } = useForm({
     initialValues,
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     onSubmit: async obj => {
       const filteredObj = {
@@ -525,7 +524,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
                 displayFieldWidth={1.75}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('countryId', newValue?.recordId || 0)
-                  formik.setFieldValue('countryName', newValue?.name || 0)
+                  formik.setFieldValue('countryName', newValue?.name || '')
                 }}
                 error={formik.touched.countryId && Boolean(formik.errors.countryId)}
                 maxAccess={maxAccess}
@@ -547,7 +546,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('currencyId', newValue?.recordId || 0)
-                  formik.setFieldValue('currencyName', newValue?.name || null)
+                  formik.setFieldValue('currencyName', newValue?.name || '')
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
