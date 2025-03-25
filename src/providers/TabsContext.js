@@ -89,6 +89,8 @@ const TabsProvider = ({ children }) => {
   }
 
   const handleChange = (event, newValue) => {
+    if (newValue === 0) router.push(openTabs[newValue].route)
+
     setCurrentTabIndex(newValue)
     window.history.replaceState(null, '', openTabs[newValue].route)
   }
@@ -226,7 +228,7 @@ const TabsProvider = ({ children }) => {
       }
 
       setOpenTabs(newTabs)
-      setInitialLoadDone(true)
+      menu.length > 0 && setInitialLoadDone(true)
     }
   }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
 
