@@ -40,7 +40,7 @@ export default function SyncSalesTransactionForm({ _labels, maxAccess }) {
         stackError({
           message: _labels.errorMessage
         })
-        
+
         return
       }
 
