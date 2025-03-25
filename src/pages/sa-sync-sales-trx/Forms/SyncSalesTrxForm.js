@@ -1,4 +1,5 @@
 import { Grid } from '@mui/material'
+import * as yup from 'yup'
 import { useContext } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -29,6 +30,10 @@ export default function SyncSalesTransactionForm({ _labels, maxAccess }) {
       syncPOS: false
     },
     maxAccess,
+    validationSchema: yup.object({
+      startDate: yup.date().required(),
+      endDate: yup.date().required()
+    }),
     onSubmit: async data => {
       const res = await postRequest({
         extension: SaleRepository.SATrx.sync,
@@ -87,6 +92,7 @@ export default function SyncSalesTransactionForm({ _labels, maxAccess }) {
                 label={_labels.startDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
+                required
                 onClear={() => formik.setFieldValue('startDate', null)}
                 value={formik.values?.startDate}
                 error={formik.errors?.startDate && Boolean(formik.errors?.startDate)}
@@ -98,6 +104,7 @@ export default function SyncSalesTransactionForm({ _labels, maxAccess }) {
                 label={_labels.endDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
+                required
                 onClear={() => formik.setFieldValue('endDate', null)}
                 value={formik.values?.endDate}
                 error={formik.errors?.endDate && Boolean(formik.errors?.endDate)}
