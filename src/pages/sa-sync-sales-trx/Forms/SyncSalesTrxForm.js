@@ -31,7 +31,7 @@ export default function SyncSalesTransactionForm({ _labels, maxAccess }) {
     maxAccess,
     onSubmit: async data => {
       const res = await postRequest({
-        extension: SaleRepository.SalesSyncTrx.sync,
+        extension: SaleRepository.SATrx.sync,
         record: JSON.stringify(data)
       })
 
