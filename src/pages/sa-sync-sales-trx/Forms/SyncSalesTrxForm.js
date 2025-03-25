@@ -29,6 +29,7 @@ export default function SyncSalesTransactionForm({ _labels, maxAccess }) {
       syncPOS: false
     },
     maxAccess,
+    enableReinitialize: true,
     onSubmit: async data => {
       const res = await postRequest({
         extension: SaleRepository.SalesSyncTrx.sync,
