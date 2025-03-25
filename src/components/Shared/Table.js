@@ -516,7 +516,6 @@ const Table = ({
     const [tooltipOpen, setTooltipOpen] = useState(false)
 
     const handleClick = event => {
-      console.log('lastSelectedColumn', params.rowIndex)
       if (selectionMode === 'row' && onSelectionChange) {
         onSelectionChange(params.data, params.rowIndex)
       } else if (selectionMode === 'column' && onSelectionChange) {
