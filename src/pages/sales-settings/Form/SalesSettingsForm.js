@@ -64,11 +64,9 @@ export default function SalesSettingsForm({ _labels, access }) {
           if (arrayAllow.includes(key)) {
             let processedValue = value
 
-            if (typeof value === 'string' && value.startsWith('on')) {
-              processedValue = Boolean(value)
-
+            if (Array.isArray(value)) {
+              processedValue = value.includes('on')
             }
-            
 
             const newObj = { key: key, value: processedValue }
             data.push(newObj)
