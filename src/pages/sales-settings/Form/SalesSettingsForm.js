@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useFormik } from 'formik'
+import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SaleRepository } from 'src/repositories/SaleRepository'
@@ -35,7 +35,7 @@ export default function SalesSettingsForm({ _labels, access }) {
     'salesTD'
   ]
 
-  const formik = useFormik({
+  const { formik } = useForm({
     initialValues: {
       plId: null,
       ptId: null,
