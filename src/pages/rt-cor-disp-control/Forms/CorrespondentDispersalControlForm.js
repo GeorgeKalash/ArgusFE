@@ -133,8 +133,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
       const countries = await fetchCountries(countryId, countryName)
       if (!plants.length || !countries.length) return
 
-      formik.setFieldValue(
-        'items', [
+      formik.setFieldValue('items', [
         ...new Map(
           plants
             .flatMap(plant =>
@@ -584,12 +583,14 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
 
         <Grow>
           <DataGrid
+            name={'cor-disp-control'}
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values.items}
             error={formik.errors.items}
             allowDelete={false}
             allowAddNewLine={false}
             columns={columns}
+            maxAccess={maxAccess}
           />
         </Grow>
       </VertLayout>
