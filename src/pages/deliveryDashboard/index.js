@@ -46,48 +46,52 @@ const DashboardLayout = () => {
   const [chartsData, setChartsData] = useState([])
   const [loading, setLoading] = useState(true)
   const { labels } = useResourceParams({ datasetId: ResourceIds.UserDashboard })
-  const debouncedCloseLoading = debounce(() => setLoading(false), 500)
+  const debouncedCloseLoading = debounce(() => setLoading(false), 200)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const rootResponse = await getRequest({ extension: DeliveryRepository.GenerateTrip.root })
+  const fetchData = async () => {
+    setLoading(true)
+    const rootResponse = await getRequest({ extension: DeliveryRepository.GenerateTrip.root })
 
-      const volumeRequests = rootResponse.list.map(async zone => {
-        const response = await getRequest({
-          extension: DeliveryRepository.Volume.vol,
-          parameters: `_parentId=${zone.recordId}`
-        })
-
-        return {
-          zoneName: zone.zoneName,
-          volumes:
-            response?.record?.saleZoneOrderVolumeSummaries?.map(summary => {
-              return {
-                subZone: summary.zoneName ?? '',
-                volume: summary.volume
-              }
-            }) ?? []
-        }
+    const volumeRequests = rootResponse.list.map(async zone => {
+      const response = await getRequest({
+        extension: DeliveryRepository.Volume.vol,
+        parameters: `_parentId=${zone.recordId}`
       })
 
-      const allChartsData = await Promise.all(volumeRequests)
-      const minZoneVolumeDBObj = defaultsData?.list?.find(item => item.key === 'minZoneVolumeDB')
+      return {
+        zoneName: zone.zoneName,
+        volumes:
+          response?.record?.saleZoneOrderVolumeSummaries?.map(summary => {
+            return {
+              subZone: summary.zoneName ?? '',
+              volume: summary.volume
+            }
+          }) ?? []
+      }
+    })
 
-      const minZoneVolumeDB =
-        minZoneVolumeDBObj && minZoneVolumeDBObj.value !== undefined
-          ? Number(minZoneVolumeDBObj.value) || Infinity
-          : Infinity
+    const allChartsData = await Promise.all(volumeRequests)
+    const minZoneVolumeDBObj = defaultsData?.list?.find(item => item.key === 'minZoneVolumeDB')
 
-      const filteredChartsData = allChartsData.map((chart, index) => ({
-        zoneName: rootResponse.list[index]?.name ?? 'Unknown Zone',
-        volumes: chart.volumes.filter(v => v.subZone).slice(0, minZoneVolumeDB)
-      }))
+    const minZoneVolumeDB =
+      minZoneVolumeDBObj && minZoneVolumeDBObj.value !== undefined
+        ? Number(minZoneVolumeDBObj.value) || Infinity
+        : Infinity
 
-      setChartsData(filteredChartsData)
-      debouncedCloseLoading()
-    }
+    const filteredChartsData = allChartsData.map((chart, index) => ({
+      zoneName: rootResponse.list[index]?.name ?? 'Unknown Zone',
+      volumes: chart.volumes.filter(v => v.subZone).slice(0, minZoneVolumeDB)
+    }))
 
+    setChartsData(filteredChartsData)
+    debouncedCloseLoading()
+  }
+
+  useEffect(() => {
     fetchData()
+    const interval = setInterval(fetchData, 300000)
+
+    return () => clearInterval(interval)
   }, [defaultsData])
 
   if (loading) return <LoadingOverlay />

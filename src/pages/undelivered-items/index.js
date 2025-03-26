@@ -17,7 +17,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { RGSaleRepository } from 'src/repositories/RGSaleRepository'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi } from 'src/lib/date-helper'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
@@ -43,9 +43,10 @@ const UndeliveredItems = () => {
   const { formik } = useForm({
     maxAccess: access,
     initialValues: {
+      recordId: null,
       dtId: null,
       groupId: 0,
-      plantId: null,
+      plantId: 0,
       siteId: 0,
       categoryId: 0,
       clientId: 0,
@@ -58,19 +59,15 @@ const UndeliveredItems = () => {
     },
     validateOnChange: true,
     onSubmit: async obj => {
-      const items = obj.items
+      const { clientId, siteId, notes, items, dtId, plantId } = obj
+
+      const itemValues = items
         .filter(item => item.isChecked)
-        .map(
-          item =>
-            item.isChecked && {
-              ...item,
-              date: formatDateToApi(item.date),
-              soId: obj.soId
-            }
-        )
+        .map(({ scheduledDate, functionId, id, isChecked, ...item }) => item)
+
       postRequest({
         extension: DeliveryRepository.DeliveriesOrders.gen,
-        record: JSON.stringify({ ...obj, items })
+        record: JSON.stringify({ clientId, siteId, notes, items: itemValues })
       }).then(res => {
         toast.success(platformLabels.Generated)
 
@@ -89,7 +86,9 @@ const UndeliveredItems = () => {
               labels: _labels,
               recordId: res.recordId,
               maxAccess,
-              refresh: false
+              refresh: false,
+              plantId,
+              dtId
             },
             width: 1300,
             height: 700,
@@ -109,7 +108,7 @@ const UndeliveredItems = () => {
   async function getData() {
     const result = await getRequest({
       extension: RGSaleRepository.SaSaleOrder.open,
-      parameters: `_categoryId=${categoryId}&_plantId=${plantId} &_siteId=${siteId}&_groupId=${groupId}&_clientId=${clientId}&_soId=${soId}`
+      parameters: `_categoryId=${categoryId}&_siteId=${siteId}&_groupId=${groupId}&_clientId=${clientId}&_soId=${soId}&_plantId=${plantId}`
     })
 
     const res = result?.list?.map((item, index) => ({
@@ -191,7 +190,7 @@ const UndeliveredItems = () => {
       props: { readOnly: true }
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.deliveredQty,
       name: 'deliveredQty',
       props: { readOnly: true }
@@ -359,7 +358,7 @@ const UndeliveredItems = () => {
                 ]}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue?.recordId)
+                  formik.setFieldValue('plantId', newValue?.recordId || 0)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                 maxAccess={access}

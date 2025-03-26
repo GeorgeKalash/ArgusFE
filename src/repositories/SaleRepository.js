@@ -182,7 +182,8 @@ export const SaleRepository = {
   SATrx: {
     qry: service + 'qryTRX',
     qry2: service + 'qryTRX2',
-    page: service + 'pageTRX'
+    page: service + 'pageTRX',
+    sync: service + 'syncTRX'
   },
   SalesTransaction: {
     qry: service + 'qryTR',

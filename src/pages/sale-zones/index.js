@@ -12,7 +12,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import SaleZoneForm from './forms/SaleZoneForm'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const SalesZone = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -154,14 +154,15 @@ const SalesZone = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
+        <GridToolbar
           onAdd={add}
           maxAccess={access}
           actions={actions}
           onTree={onTreeClick}
           onSearch={onSearch}
-          onClear={onClear}
+          onSearchClear={onClear}
           previewReport={ResourceIds.SalesZone}
+          inputSearch={true}
         />
       </Fixed>
       <Grow>

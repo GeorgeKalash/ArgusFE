@@ -31,7 +31,7 @@ import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
-export default function DeliveriesOrdersForm({ labels, maxAccess: access, recordId, refresh = true }) {
+export default function DeliveriesOrdersForm({ labels, maxAccess: access, recordId, refresh = true, ...props }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -43,20 +43,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     enabled: !recordId
   })
 
-  async function getDefaultData() {
-    const userKeys = ['plantId', 'siteId']
-
-    const userDefault = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
-      if (userKeys.includes(key)) {
-        acc[key] = value ? parseInt(value) : null
-      }
-
-      return acc
-    }, {})
-
-    formik.setFieldValue('plantId', parseInt(userDefault?.plantId))
-    formik.setFieldValue('siteId', parseInt(userDefault?.siteId))
-  }
+  const defPId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const invalidate = useInvalidate(
     refresh && {
@@ -80,7 +68,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       qty: null,
       pendingQty: null,
       placeHolder: null,
-      soRef: null,
       siteId: null,
       siteName: '',
       isEditMode: false,
@@ -98,7 +85,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     initialValues: {
       recordId: null,
       reference: '',
-      plantId: null,
+      plantId: defPId,
       saleOrderId: null,
       clientRef: '',
       clientName: '',
@@ -125,7 +112,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       spId: null,
       volume: null,
       qty: null,
-      siteId: null,
+      siteId: defSiteId,
       address: '',
       orders: ordersInitialValues
     },
@@ -237,6 +224,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
 
     formik.setValues({
       ...doHeader?.record,
+      plantId: props.plantId || doHeader?.record.plantId,
+      dtId: props.dtId || doHeader?.record.dtId,
       address: address,
       orders: ordersList
     })
@@ -280,7 +269,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
 
   useEffect(() => {
     ;(async function () {
-      getDefaultData()
       if (recordId) {
         await refetchForm(recordId)
       }
