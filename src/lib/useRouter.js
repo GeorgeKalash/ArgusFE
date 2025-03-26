@@ -8,3 +8,11 @@ export const Router = () => {
 
   return value
 }
+
+export const Route = () => {
+  const router = useRouter()
+
+  const [value, setValue] = useState(router)
+
+  return value
+}

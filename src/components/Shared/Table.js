@@ -24,50 +24,10 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
-import { useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
-
-const DB_NAME = 'myAppDB'
-const STORE_NAME = 'myStore'
-const DB_VERSION = 1
-
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION)
-
-    request.onupgradeneeded = event => {
-      const db = event.target.result
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' }) // Key must be unique
-      }
-    }
-
-    request.onsuccess = () => resolve(request.result)
-    request.onerror = () => reject(request.error)
-  })
-}
-
-async function saveToDB(key, value) {
-  const db = await openDB()
-  const transaction = db.transaction(STORE_NAME, 'readwrite')
-  const store = transaction.objectStore(STORE_NAME)
-  store.put({ id: key, value }) // 'id' is the key
-
-  return transaction.complete
-}
-
-async function getFromDB(key) {
-  const db = await openDB()
-
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readonly')
-    const store = transaction.objectStore(STORE_NAME)
-    const request = store.get(key)
-
-    request.onsuccess = () => resolve(request.result ? request.result.value : null)
-    request.onerror = () => reject(request.error)
-  })
-}
+import CachedIcon from '@mui/icons-material/Cached'
+import { Route } from 'src/lib/useRouter'
+import { getFromDB, saveToDB, deleteRowDB } from 'src/lib/indexDB'
 
 const Table = ({
   name,
@@ -100,7 +60,8 @@ const Table = ({
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
   const [focus, setFocus] = useState(false)
-  const gridRef = useRef(null)
+  const storeName = 'tableSettings'
+  const { asPath } = Route()
 
   const columns = props?.columns
     .filter(
@@ -301,52 +262,59 @@ const Table = ({
         }
 
         return (
-          <Box
-            sx={{
-              width: '100%',
-              backgroundColor: '#fff',
-              borderTop: '1px solid #ccc',
-              fontSize: '0.9rem',
-              bottom: 0
-            }}
-          >
-            <IconButton
-              onClick={goToFirstPage}
-              disabled={page === 1}
-              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Box
+              sx={{
+                width: '100%',
+                backgroundColor: '#fff',
+                borderTop: '1px solid #ccc',
+                fontSize: '0.9rem',
+                bottom: 0
+              }}
             >
-              <FirstPageIcon />
-            </IconButton>
-            <IconButton
-              onClick={decrementPage}
-              disabled={page === 1}
-              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-            >
-              <NavigateBeforeIcon />
-            </IconButton>
-            {platformLabels.Page}
-            <TextInput value={page} pageCount={pageCount} />
-            {platformLabels.Of} {pageCount}
-            <IconButton
-              onClick={incrementPage}
-              disabled={page === pageCount}
-              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-            >
-              <NavigateNextIcon />
-            </IconButton>
-            <IconButton
-              onClick={goToLastPage}
-              disabled={page === pageCount}
-              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-            >
-              <LastPageIcon />
-            </IconButton>
-            <IconButton onClick={refetch}>
-              <RefreshIcon />
-            </IconButton>
-            {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
-            {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
-            {platformLabels.Of} {totalRecords}
+              <IconButton
+                onClick={goToFirstPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
+                <FirstPageIcon />
+              </IconButton>
+              <IconButton
+                onClick={decrementPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
+                <NavigateBeforeIcon />
+              </IconButton>
+              {platformLabels.Page}
+              <TextInput value={page} pageCount={pageCount} />
+              {platformLabels.Of} {pageCount}
+              <IconButton
+                onClick={incrementPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
+                <NavigateNextIcon />
+              </IconButton>
+              <IconButton
+                onClick={goToLastPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
+                <LastPageIcon />
+              </IconButton>
+              <IconButton onClick={refetch}>
+                <RefreshIcon />
+              </IconButton>
+              {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
+              {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
+              {platformLabels.Of} {totalRecords}
+            </Box>
+            <Box>
+              <IconButton onClick={onReset}>
+                <CachedIcon />
+              </IconButton>
+            </Box>
           </Box>
         )
       } else {
@@ -411,51 +379,58 @@ const Table = ({
           }
 
           return (
-            <Box
-              sx={{
-                width: '100%',
-                backgroundColor: '#fff',
-                borderTop: '1px solid #ccc',
-                fontSize: '0.9rem',
-                bottom: 0
-              }}
-            >
-              {' '}
-              <IconButton
-                onClick={goToFirstPage}
-                disabled={page === 1}
-                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Box
+                sx={{
+                  width: '100%',
+                  backgroundColor: '#fff',
+                  borderTop: '1px solid #ccc',
+                  fontSize: '0.9rem',
+                  bottom: 0
+                }}
               >
-                <FirstPageIcon />
-              </IconButton>
-              <IconButton
-                onClick={decrementPage}
-                disabled={page === 1}
-                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-              >
-                <NavigateBeforeIcon />
-              </IconButton>
-              {platformLabels.Page} <TextInput value={page} pageCount={pageCount} /> {platformLabels.Of} {pageCount}
-              <IconButton
-                onClick={incrementPage}
-                disabled={page === pageCount}
-                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-              >
-                <NavigateNextIcon />
-              </IconButton>
-              <IconButton
-                onClick={goToLastPage}
-                disabled={page === pageCount}
-                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-              >
-                <LastPageIcon />
-              </IconButton>
-              <IconButton onClick={refetch}>
-                <RefreshIcon />
-              </IconButton>
-              {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
-              {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
-              {platformLabels.Of} {totalRecords}
+                {' '}
+                <IconButton
+                  onClick={goToFirstPage}
+                  disabled={page === 1}
+                  sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+                >
+                  <FirstPageIcon />
+                </IconButton>
+                <IconButton
+                  onClick={decrementPage}
+                  disabled={page === 1}
+                  sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+                >
+                  <NavigateBeforeIcon />
+                </IconButton>
+                {platformLabels.Page} <TextInput value={page} pageCount={pageCount} /> {platformLabels.Of} {pageCount}
+                <IconButton
+                  onClick={incrementPage}
+                  disabled={page === pageCount}
+                  sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+                >
+                  <NavigateNextIcon />
+                </IconButton>
+                <IconButton
+                  onClick={goToLastPage}
+                  disabled={page === pageCount}
+                  sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+                >
+                  <LastPageIcon />
+                </IconButton>
+                <IconButton onClick={refetch}>
+                  <RefreshIcon />
+                </IconButton>
+                {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
+                {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
+                {platformLabels.Of} {totalRecords}
+              </Box>
+              <Box>
+                <IconButton onClick={onReset}>
+                  <CachedIcon />
+                </IconButton>
+              </Box>
             </Box>
           )
         }
@@ -724,43 +699,61 @@ const Table = ({
     }
   }
 
-  const { data: savedState, refetch: invalidate } = useQuery({
-    queryKey: ['COLUMN_STATE_KEY'],
-    queryFn: () => getFromDB('COLUMN_STATE_KEY')
+  const tableName = asPath
+
+  const { data: tableSettings, refetch: invalidate } = useQuery({
+    queryKey: [tableName],
+
+    queryFn: () => getFromDB(storeName, tableName),
+    enabled: !!tableName
   })
 
   const onColumnMoved = params => {
-    if (params.columnApi) {
+    if (params.columnApi && tableName) {
       const columnState = params.columnApi.getColumnState()
-      saveToDB('COLUMN_STATE_KEY', columnState)
+      saveToDB(storeName, tableName, columnState)
       invalidate()
     }
   }
 
   const onColumnResized = params => {
-    if (params?.source === 'uiColumnResized') {
+    if (params?.source === 'uiColumnResized' && tableName) {
       const columnState = params.columnApi.getColumnState()
-      saveToDB('COLUMN_STATE_KEY', columnState)
+      saveToDB(storeName, tableName, columnState)
       invalidate()
     }
   }
 
-  const columnState = savedState
+  const onSortChanged = params => {
+    if (params.columnApi && tableName) {
+      const columnState = params.columnApi.getColumnState()
+      saveToDB(storeName, tableName, columnState)
+      invalidate()
+    }
+  }
+
+  const onReset = async () => {
+    await deleteRowDB(storeName, tableName)
+    invalidate()
+  }
 
   const updatedColumns = columnDefs.map(col => {
-    const savedCol = columnState?.find(c => c.colId === col.field)
+    const savedCol = tableSettings?.find(c => c.colId === col.field)
 
-    return savedCol ? { ...col, width: savedCol?.width, flex: savedCol?.width ?? 'auto' } : col
+    return {
+      ...col,
+      width: savedCol?.width ?? 'auto',
+      flex: savedCol?.width ?? 1,
+      sort: savedCol?.sort ?? null
+    }
   })
 
-  const finalColumns = updatedColumns.sort((a, b) => {
-    const indexA = columnState?.findIndex(col => col.colId === a.field)
-    const indexB = columnState?.findIndex(col => col.colId === b.field)
+  const finalColumns = updatedColumns?.sort((a, b) => {
+    const indexA = tableSettings?.findIndex(col => col.colId === a.field)
+    const indexB = tableSettings?.findIndex(col => col.colId === b.field)
 
     return indexA - indexB
   })
-
-  console.log('finalColumn', finalColumns)
 
   return (
     <VertLayout>
@@ -786,6 +779,7 @@ const Table = ({
           }}
         >
           <AgGridReact
+            key={finalColumns}
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
             enableRangeSelection={true}
@@ -801,6 +795,7 @@ const Table = ({
             onRowDragEnd={onRowDragEnd}
             onColumnMoved={onColumnMoved}
             onColumnResized={onColumnResized}
+            onSortChanged={onSortChanged}
           />
         </Box>
       </Grow>
