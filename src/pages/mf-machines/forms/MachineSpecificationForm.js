@@ -28,14 +28,14 @@ export default function MachineSpecificationForm({ labels, maxAccess, store }) {
       activationDate: null,
       description: '',
       lifeTimeHours: 0,
-      productionYear: 0
+      productionYear: null
     },
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       serialNo: yup.string().required(),
       lifeTimeHours: yup.number().min(0).max(9999),
-      productionYear: yup.number().min(0).max(9999)
+      productionYear: yup.number().max(9999).nullable()
     }),
     onSubmit: async values => {
       const response = await postRequest({
@@ -68,7 +68,6 @@ export default function MachineSpecificationForm({ labels, maxAccess, store }) {
         formik.setValues({
           ...res.record,
           lifeTimeHours: res.record.lifeTimeHours ?? 0,
-          productionYear: res.record.productionYear ?? 0,
           activationDate: formatDateFromApi(res.record.activationDate)
         })
       }

@@ -79,7 +79,12 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
           extension: ManufacturingRepository.Machine.get,
           parameters: `_recordId=${recordId}`
         })
-        formik.setValues(res.record)
+        formik.setValues({
+          ...res.record,
+          minLoadQty: res.record.minLoadQty ?? 0,
+          maxLoadQty: res.record.maxLoadQty ?? 0,
+          defaultLoadQty: res.record.defaultLoadQty ?? 0
+        })
       }
     })()
   }, [])
