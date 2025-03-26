@@ -203,37 +203,34 @@ const RetailCompFigures = () => {
       isCleared={false}
       isSaved={false}
       infoVisible={false}
+      isParentWindow={false}
     >
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={3}>
-              <Grid container spacing={2}>
-                <Grid item xs={9}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.FiscalYears.qry}
-                    name='fiscalYear'
-                    label={labels.year}
-                    valueField='fiscalYear'
-                    displayField='fiscalYear'
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      if (newValue?.fiscalYear) formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
-                    }}
-                    required
-                    error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
-                    maxAccess={access}
-                  />
-                </Grid>
-                <Grid item xs={2}>
-                  <CustomButton
-                    onClick={() => refetch()}
-                    label={platformLabels.Preview}
-                    image={'preview.png'}
-                    color='#231f20'
-                  />
-                </Grid>
-              </Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                endpointId={SystemRepository.FiscalYears.qry}
+                name='fiscalYear'
+                label={labels.year}
+                valueField='fiscalYear'
+                displayField='fiscalYear'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  if (newValue?.fiscalYear) formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
+                }}
+                required
+                error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
+                maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={1}>
+              <CustomButton
+                onClick={() => refetch()}
+                label={platformLabels.Preview}
+                image={'preview.png'}
+                color='#231f20'
+              />
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
@@ -252,6 +249,7 @@ const RetailCompFigures = () => {
                 maxAccess={access}
               />
             </Grid>
+            <Grid item xs={7}></Grid>
           </Grid>
         </Fixed>
         <Grow>
@@ -297,46 +295,42 @@ const RetailCompFigures = () => {
           />
         </Grow>
         <Fixed>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Card
-                sx={{
-                  width: '100%',
-                  height: collapsed ? '35px' : '300px',
-                  transition: 'all 0.4s ease',
-                  overflow: 'hidden'
-                }}
-              >
-                <IconButton
-                  onClick={() => setCollapsed(!collapsed)}
-                  sx={{
-                    position: 'absolute',
-                    right: 18,
-                    color: 'black',
-                    backgroundColor: '#f0f0f0',
-                    borderRadius: '30%',
-                    padding: 1,
-                    '&:hover': {
-                      backgroundColor: '#d9d9d9'
-                    }
-                  }}
-                  size='small'
-                >
-                  {collapsed ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
-                </IconButton>
-                {!collapsed && (
-                  <CardContent sx={{ pb: '8px !important', pt: '8px !important', height: '100%' }}>
-                    <CompBarChart
-                      id='compFigChart'
-                      labels={chartInfo.categories}
-                      datasets={chartInfo.displayedGraph}
-                      collapsed={collapsed}
-                    />
-                  </CardContent>
-                )}
-              </Card>
-            </Grid>
-          </Grid>
+          <Card
+            sx={{
+              my: 2,
+              width: '100%',
+              transition: 'all 0.4s ease'
+            }}
+          >
+            <IconButton
+              onClick={() => setCollapsed(!collapsed)}
+              sx={{
+                position: 'absolute',
+                right: 18,
+                bottom: collapsed && 5,
+                color: 'black',
+                backgroundColor: '#f0f0f0',
+                borderRadius: '30%',
+                padding: 1,
+                '&:hover': {
+                  backgroundColor: '#d9d9d9'
+                }
+              }}
+              size='small'
+            >
+              {collapsed ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
+            </IconButton>
+            {!collapsed && (
+              <CardContent sx={{ p: '8px !important' }}>
+                <CompBarChart
+                  id='compFigChart'
+                  labels={chartInfo.categories}
+                  datasets={chartInfo.displayedGraph}
+                  collapsed={collapsed}
+                />
+              </CardContent>
+            )}
+          </Card>
         </Fixed>
       </VertLayout>
     </FormShell>
