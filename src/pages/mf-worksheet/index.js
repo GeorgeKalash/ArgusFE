@@ -36,7 +36,6 @@ const MfWorksheet = () => {
     query: { data },
     filterBy,
     refetch,
-    clearFilter,
     labels: _labels,
     access,
     paginationParameters,
@@ -52,10 +51,10 @@ const MfWorksheet = () => {
 
   async function fetchWithFilter({ filters, pagination = {} }) {
     const { _startAt = 0, _size = 50 } = pagination
-    if (filters.page) {
+    if (filters.qry) {
       const response = await getRequest({
         extension: ManufacturingRepository.Worksheet.snapshot,
-        parameters: `_filter=${filters.page}&_startAt=${_startAt}&_size=${_size}`
+        parameters: `_filter=${filters.qry}&_startAt=${_startAt}&_size=${_size}`
       })
 
       return { ...response, _startAt: _startAt }
@@ -161,40 +160,10 @@ const MfWorksheet = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('page', search)
-    }
-    if (rpbParams) {
-      setParams(rpbParams)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('page', value)
-  }
-
-  const onClear = () => {
-    onApply({ search: '', rpbParams: params })
-    clearFilter('page')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'MFWST'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'MFWST'} />
       </Fixed>
       <Grow>
         <Table

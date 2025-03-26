@@ -60,7 +60,12 @@ const GenerateOutboundTransportation2 = () => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      departureDate: yup.date().required()
+      departureDate: yup.date().required(),
+      selectedTrucks: yup.array().of(
+        yup.object().shape({
+          overloadMargins: yup.number().min(0).max(100)
+        })
+      )
     }),
     onSubmit: async obj => {
       const data = {
@@ -198,39 +203,27 @@ const GenerateOutboundTransportation2 = () => {
       component: 'numberfield',
       name: 'no',
       label: labels.No,
-      flex: 1,
+      flex: 0.5,
       props: {
         readOnly: true
-      }
-    },
-    {
-      component: 'resourcecombobox',
-      label: labels.volume,
-      name: 'volume',
-      flex: 2,
-      props: {
-        endpointId: DeliveryRepository.AllocatedVolume.qry,
-        valueField: 'volume',
-        displayField: 'volume',
-        displayFieldWidth: 1,
-        mapping: [
-          { from: 'volume', to: 'volume' },
-          { from: 'count', to: 'count' }
-        ],
-        columnsInDropDown: [
-          { key: 'volume', value: 'volume' },
-          { key: 'count', value: 'count' }
-        ]
       }
     },
     {
       component: 'numberfield',
-      name: 'count',
-      label: labels.trucksCount,
-      flex: 1,
+      name: 'volume',
+      label: labels.allocatedVolume,
+      flex: 1
+    },
+    {
+      component: 'numberfield',
+      name: 'overloadMargins',
+      label: labels.overload,
       props: {
-        readOnly: true
-      }
+        allowNegative: false,
+        decimalScale: 0
+      },
+      defaultValue: 0,
+      flex: 1
     }
   ]
 
@@ -344,31 +337,35 @@ const GenerateOutboundTransportation2 = () => {
   ]
 
   const onSaleZoneChange = async szId => {
-    const response = await getRequest({
-      extension: DeliveryRepository.Volume.vol,
-      parameters: `_parentId=${szId || 0}`
-    })
+    if (szId) {
+      const response = await getRequest({
+        extension: DeliveryRepository.Volume.vol,
+        parameters: `_parentId=${szId}`
+      })
 
-    if (!response?.record?.saleZoneOrderVolumeSummaries) {
-      return
-    }
-
-    const { saleZoneOrderVolumeSummaries = [], orders = [] } = response.record
-
-    const updatedSalesZones = saleZoneOrderVolumeSummaries.map(zone => {
-      const zoneOrders = orders.filter(order => order.szId === zone.szId)
-
-      return {
-        ...zone,
-        name: zone.zoneName,
-        orders: zoneOrders
+      if (!response?.record?.saleZoneOrderVolumeSummaries) {
+        return
       }
-    })
 
-    formik.setFieldValue('salesZones', {
-      ...response.record,
-      list: updatedSalesZones
-    })
+      const { saleZoneOrderVolumeSummaries = [], orders = [] } = response.record
+
+      const updatedSalesZones = saleZoneOrderVolumeSummaries.map(zone => {
+        const zoneOrders = orders.filter(order => order.szId === zone.szId)
+
+        return {
+          ...zone,
+          name: zone.zoneName,
+          orders: zoneOrders
+        }
+      })
+
+      formik.setFieldValue('salesZones', {
+        ...response.record,
+        list: updatedSalesZones
+      })
+    } else {
+      formik.setFieldValue('salesZones', { list: [] })
+    }
   }
 
   const handleRowDragEnd = event => {
@@ -387,7 +384,11 @@ const GenerateOutboundTransportation2 = () => {
   }, [sortedZones])
 
   const onPreviewOutbounds = async szIds => {
+    if (formik.errors?.selectedTrucks?.length > 0) {
+      return
+    }
     const volumes = formik.values.selectedTrucks?.map(truck => truck.volume).join(',')
+    const overloads = formik.values.selectedTrucks?.map(truck => truck?.overloadMargins || 0).join(',')
 
     const orderIds = sortedZones
       .flatMap(zone => zone.orders.filter(order => order.checked))
@@ -396,7 +397,7 @@ const GenerateOutboundTransportation2 = () => {
 
     const items = await getRequest({
       extension: DeliveryRepository.GenerateTrip.previewTRP,
-      parameters: `_zones=${szIds || 0}&_orderIds=${orderIds || 0}&_volumes=${volumes}`
+      parameters: `_zones=${szIds || 0}&_volumes=${volumes}&_overloadMargins=${overloads}&_orderIds=${orderIds || 0}`
     })
 
     formik.setFieldValue('vehicleAllocations', { list: items?.record?.vehicleAllocations })
@@ -430,15 +431,25 @@ const GenerateOutboundTransportation2 = () => {
   const filteredData = formik?.values?.salesZones?.list.length > 0 ? filteredSalesZones : formik?.values?.salesZones
 
   const handleImport = async () => {
-    setSelectedSaleZones(() => {
-      const selectedRows = filteredData?.list
+    setSelectedSaleZones(prevState => {
+      const prevSelected = prevState?.list || []
+
+      const newlySelected = formik.values.salesZones.list
         .filter(item => item.checked)
         .map(item => ({
           ...item,
           orders: item.orders?.map(order => ({ ...order, checked: true }))
         }))
 
-      return { list: selectedRows }
+      const updatedPrevSelected = prevSelected.filter(prevItem =>
+        formik.values.salesZones.list.some(newItem => newItem.szId === prevItem.szId && newItem.checked)
+      )
+
+      const uniqueNewlySelected = newlySelected.filter(
+        newItem => !updatedPrevSelected.some(prevItem => prevItem.szId === newItem.szId)
+      )
+
+      return { list: [...updatedPrevSelected, ...uniqueNewlySelected] }
     })
   }
 
@@ -456,7 +467,8 @@ const GenerateOutboundTransportation2 = () => {
     const trucks = Array.from({ length: truckNo }, (_, index) => ({
       id: index + 1,
       no: index + 1,
-      volume: 0
+      volume: 0,
+      overloadMargins: 0
     }))
 
     formik.setFieldValue('selectedTrucks', trucks)
@@ -502,6 +514,7 @@ const GenerateOutboundTransportation2 = () => {
                   formik.setFieldValue('orders', { list: [] })
                   formik.setFieldValue('selectedTrucks', [])
                   formik.setFieldValue('vehicleAllocations', { list: [] })
+                  formik.setFieldValue('salesZones', { list: [] })
                   setFilteredOrders([])
                   setSelectedSaleZones([])
                 }}
@@ -681,7 +694,6 @@ const GenerateOutboundTransportation2 = () => {
         </Grow>
         <Fixed>
           <Grid container spacing={2} mt={2}>
-            <Grid item xs={8.75}></Grid>
             <Grid item xs={0.65}>
               <CustomButton
                 onClick={() => resetForm()}
@@ -693,6 +705,16 @@ const GenerateOutboundTransportation2 = () => {
             </Grid>
             <Grid item xs={0.65}>
               <CustomButton
+                onClick={handleImport}
+                label={platformLabels.import}
+                tooltipText={platformLabels.import}
+                color='#231f20'
+                image={'import.png'}
+              />
+            </Grid>
+            <Grid item xs={8.75}></Grid>
+            <Grid item xs={0.65}>
+              <CustomButton
                 onClick={openForm}
                 tooltipText={labels.unallocatedOrders}
                 label={labels.unallocatedOrders}
@@ -702,15 +724,6 @@ const GenerateOutboundTransportation2 = () => {
               />
             </Grid>
 
-            <Grid item xs={0.65}>
-              <CustomButton
-                onClick={handleImport}
-                label={platformLabels.import}
-                tooltipText={platformLabels.import}
-                color='#231f20'
-                image={'import.png'}
-              />
-            </Grid>
             <Grid item xs={0.65}>
               <CustomButton
                 onClick={() => onPreviewOutbounds(sortedZoneIds)}
@@ -731,7 +744,8 @@ const GenerateOutboundTransportation2 = () => {
                 color='#231f20'
                 tooltipText={platformLabels.Generate}
                 image={'generate.png'}
-                disabled={balance + 0.1 * totalTrucksVolume < 0}
+
+                //disabled={balance + 0.1 * totalTrucksVolume < 0}
               />
             </Grid>
           </Grid>

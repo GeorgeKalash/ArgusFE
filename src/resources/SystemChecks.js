@@ -27,6 +27,7 @@ export const SystemChecks = {
 
   // Delivery Orders
   ALLOW_DELIVERY_RETURN_OF_UNKNOWN_SKU: Module.Delivery * 100 + 1,
+  AUTO_POST_GENERATED_DELIVERY_ORDERS_FROM_MIDDLEWARE: Module.Delivery * 100 + 6,
 
   //Purchase
   ENABLE_PURCHASE_TAX: Module.Purchase * 100 + 1,

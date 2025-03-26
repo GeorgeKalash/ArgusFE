@@ -8,7 +8,6 @@ import { useCacheStoreContext } from 'src/providers/CacheStoreContext'
 export default function ResourceComboBox({
   endpointId,
   datasetId,
-  name,
   valueField = 'recordId',
   values = {},
   parameters = '_filter=',
@@ -91,6 +90,9 @@ export default function ResourceComboBox({
   finalItemsList = cacheStore?.[key] && !noCache ? cacheStore?.[key] : finalItemsList
 
   finalItemsListRef.current = finalItemsList || []
+  const fieldPath = rest?.name?.split('.')
+  const [parent, child] = fieldPath
+  const name = child || rest?.name
 
   const _value =
     (typeof values[name] === 'object'
@@ -124,6 +126,7 @@ export default function ResourceComboBox({
         refresh,
         fetchData,
         name,
+        fullName: rest.name,
         store: finalItemsList,
         valueField,
         value: _value,

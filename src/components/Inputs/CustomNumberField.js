@@ -14,7 +14,7 @@ const CustomNumberField = ({
   label,
   onChange = () => {},
   onMouseLeave = () => {},
-  renderMouseLeave = false,
+  onBlur = () => {},
   readOnly = false,
   allowClear = false,
   decimalScale = 2,
@@ -58,7 +58,7 @@ const CustomNumberField = ({
   }
 
   const handleNumberMouseLeave = e => {
-    if (!isEmptyFunction && !renderMouseLeave) {
+    if (!isEmptyFunction) {
       const value = formatNumber(e)
       if (value) e.target.value = value
       onMouseLeave(e)
@@ -66,10 +66,16 @@ const CustomNumberField = ({
   }
 
   const formatNumber = e => {
-    const inputValue = e?.target?.value
+    let inputValue = e?.target?.value
     if (typeof inputValue !== 'string') return inputValue
+    const regex = /^-?[0-9,]+(\.\d+)?$/
+    if (inputValue && regex.test(inputValue)) {
+      inputValue = inputValue.replace(/(?!^-)[^0-9.]/g, '')
 
-    return getNumberWithoutCommas(inputValue)
+      return getNumberWithoutCommas(inputValue)
+    }
+
+    return inputValue
   }
 
   const handleInput = e => {
@@ -111,10 +117,15 @@ const CustomNumberField = ({
       helperText={helperText}
       required={_required}
       onInput={handleInput}
-      onFocus={() => {
-        setIsFocused(true)
+      onFocus={() => setIsFocused(true)}
+      onBlur={e => {
+        onBlur(e)
+        if (e.target.value?.endsWith('.')) {
+          e.target.value = e.target.value.slice(0, -1)
+          handleNumberChangeValue(e)
+        }
+        setIsFocused(false)
       }}
-      onBlur={() => setIsFocused(false)}
       InputProps={{
         inputRef,
         autoFocus: false,

@@ -297,7 +297,7 @@ const DashboardLayout = () => {
               />
             </ChartCard>
           )}
-          {containsApplet(60107) && (
+          {containsApplet(60103) && (
             <ChartCard>
               <SummaryCard>
                 <Title>{labels.accRevenues}</Title>

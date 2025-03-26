@@ -41,6 +41,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
   })
 
   const { formik } = useForm({
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
       header: {
         recordId: '',
@@ -49,7 +50,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         siteId: null,
         status: 1,
         worksheetId: wsId,
-        dtId: documentType?.dtId,
+        dtId: null,
         currencyId: null,
         operationId: null,
         type: null,
