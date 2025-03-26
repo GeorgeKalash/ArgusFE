@@ -180,7 +180,9 @@ const YearlyComparativeSales = () => {
 
   async function fetchGridData(options = {}) {
     const { params = [] } = options
+
     const checkedYears = fiscalYears.filter(yearObj => yearObj.checked).map(yearObj => yearObj.year)
+
     setChartInfo(prevState => ({
       ...prevState,
       datasetLabels: checkedYears.map(String)
@@ -192,36 +194,23 @@ const YearlyComparativeSales = () => {
         parameters: `_years=${checkedYears.join(',')}&_params=${params}`
       })
 
-      const aggregatedData = response.list.reduce((acc, obj) => {
-        const { year, netSales = 0, month } = obj
-        const monthKey = `salary${month}`
-        if (!acc[year]) acc[year] = { year, total: 0 }
-        if (!acc[year][monthKey]) acc[year][monthKey] = 0
-        acc[year].total += netSales
-        acc[year][monthKey] = (acc[year][monthKey] || 0) + netSales
+      const aggregatedData = checkedYears.reduce((acc, year) => {
+        acc[year] = {
+          year,
+          total: 0,
+          ...Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`salary${i + 1}`, 0]))
+        }
 
         return acc
       }, {})
 
-      checkedYears.forEach(year => {
-        if (!aggregatedData[year]) {
-          aggregatedData[year] = { year, total: 0 }
-          for (let month = 1; month <= 12; month++) {
-            aggregatedData[year][`salary${month}`] = 0
-          }
-        }
+      response.list.forEach(({ year, netSales = 0, month }) => {
+        if (!aggregatedData[year]) return
+        aggregatedData[year].total += netSales
+        aggregatedData[year][`salary${month}`] += netSales
       })
 
-      const result = Object.values(aggregatedData).map(yearData => {
-        for (let month = 1; month <= 12; month++) {
-          const monthKey = `salary${month}`
-          if (!yearData[monthKey]) yearData[monthKey] = 0
-        }
-
-        return yearData
-      })
-
-      return { list: result }
+      return { list: Object.values(aggregatedData) }
     }
   }
 
@@ -241,9 +230,19 @@ const YearlyComparativeSales = () => {
           return Number(numA) - Number(numB)
         })
         .map(key => salaries[key])
+      const trimmedValues = removeTrailingZeros(values)
 
-      return { [`dataset${index + 1}`]: year, values }
+      return { [`dataset${index + 1}`]: year, values: trimmedValues }
     })
+  }
+
+  const removeTrailingZeros = arr => {
+    let lastNonZeroIndex = arr.length - 1
+    while (lastNonZeroIndex >= 0 && arr[lastNonZeroIndex] === 0) {
+      lastNonZeroIndex--
+    }
+
+    return arr.slice(0, lastNonZeroIndex + 1)
   }
 
   useEffect(() => {
@@ -261,8 +260,7 @@ const YearlyComparativeSales = () => {
   useEffect(() => {
     if (data?.list?.length > 0) {
       const labels = Object.values(monthLabels)
-      const datasets = transformData(data).map(item => item.values.filter(value => value !== 0))
-
+      const datasets = transformData(data).map(item => item.values)
       setChartInfo(prevState => ({
         ...prevState,
         labels,

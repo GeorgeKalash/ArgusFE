@@ -373,7 +373,7 @@ export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
 }
 
 const getColorForIndex = index => {
-  const colors = ['#808000', '#1F3BB3', '#00FF00', '#FF5733', '#FFC300', '#DAF7A6']
+  const colors = ['#808000', '#1F3BB3', '#00FF00', '#FF5733', '#FFC300', '#800080']
 
   return colors[index % colors.length]
 }
