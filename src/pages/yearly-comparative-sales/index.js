@@ -276,30 +276,22 @@ const YearlyComparativeSales = () => {
       <Fixed>
         <RPBGridToolbar maxAccess={access} reportName={'SA503'} filterBy={filterBy} hasSearch={false} />
       </Fixed>
+      <Fixed>
+        <Table
+          name='yearsTable'
+          columns={columns}
+          gridData={data}
+          rowId={['year']}
+          isLoading={false}
+          maxAccess={access}
+          pagination={false}
+          maxHeight={'300px'}
+        />
+      </Fixed>
       <Grow>
-        <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
-          <Grid
-            item
-            xs={12}
-            sx={{
-              display: 'flex',
-              flex: 1,
-              height: 'auto', // Let the height adjust based on the content
-              overflowY: 'visible' // Prevent scrollbars
-            }}
-          >
-            <Table
-              name='yearsTable'
-              columns={columns}
-              gridData={data}
-              rowId={['year']}
-              isLoading={false}
-              maxAccess={access}
-              pagination={false}
-            />
-          </Grid>
+        <Grid container sx={{ display: 'flex', flex: 1 }} spacing={2}>
           <Grid item xs={2} sx={{ display: 'flex', flex: 1 }}>
-            <Grid container sx={{ display: 'flex', flex: 1 }}>
+            <Grid container sx={{ display: 'flex', flex: 1 }} spacing={2}>
               <Grid item xs={12} sx={{ display: 'flex', flex: 1 }}>
                 <Table
                   name='fiscalTable'
@@ -323,14 +315,14 @@ const YearlyComparativeSales = () => {
                   }
                 />
               </Grid>
-              <Grid item xs={4} sx={{ p: 2 }}>
+              <Grid item xs={4}>
                 <Button variant='contained' size='small' onClick={() => refetch()} disabled={disablePreview}>
                   <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
                 </Button>
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={10} sx={{ display: 'flex', height: '60%' }}>
+          <Grid item xs={10} sx={{ display: 'flex', flex: 1, p: 2 }}>
             {chartInfo.labels?.length > 0 && (
               <LineChartDark
                 id='yearlySalesChart'
