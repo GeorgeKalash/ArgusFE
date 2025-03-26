@@ -118,6 +118,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
             dispersalType: mode.key,
             corDeliveryModeName: existingItem?.deliveryModeDescription,
             corDeliveryMode: existingItem?.deliveryMode,
+            isActive: existingItem?.deliveryModeDescription && false,
             ...formik.values,
             ...existingItem
           }
@@ -157,6 +158,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
                     dispersalType: mode.key,
                     corDeliveryModeName: existingItem?.deliveryModeDescription || null,
                     corDeliveryMode: existingItem?.deliveryMode || null,
+                    isActive: existingItem?.deliveryModeDescription && false,
                     ...existingItem
                   }
                 })
@@ -198,6 +200,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
                 dispersalType: mode.key,
                 corDeliveryModeName: existingItem?.deliveryModeDescription || null,
                 corDeliveryMode: existingItem?.deliveryMode || null,
+                isActive: existingItem?.deliveryModeDescription && false,
                 ...existingItem
               }
             })
@@ -257,6 +260,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
                     dispersalType: mode.key,
                     corDeliveryModeName: existingItem?.deliveryModeDescription || null,
                     corDeliveryMode: existingItem?.deliveryMode || null,
+                    isActive: existingItem?.deliveryModeDescription && false,
                     ...existingItem
                   }
                 })
@@ -302,6 +306,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
               dispersalType: mode.key,
               corDeliveryModeName: existingItem?.deliveryModeDescription || null,
               corDeliveryMode: existingItem?.deliveryMode || null,
+              isActive: existingItem?.deliveryModeDescription && false,
               ...existingItem
             }
           })
@@ -337,6 +342,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
               dispersalType: mode.key,
               corDeliveryModeName: existingItem?.deliveryModeDescription || null,
               corDeliveryMode: existingItem?.deliveryMode || null,
+              isActive: existingItem?.deliveryModeDescription && false,
               ...existingItem
             }
           })
@@ -365,6 +371,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
               dispersalType: mode.key,
               corDeliveryModeName: existingItem?.deliveryModeDescription || null,
               corDeliveryMode: existingItem?.deliveryMode || null,
+              isActive: existingItem?.deliveryModeDescription && false,
               ...existingItem
             }
           })
@@ -412,6 +419,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
                   dispersalType: mode.key,
                   corDeliveryModeName: existingItem?.deliveryModeDescription || null,
                   corDeliveryMode: existingItem?.deliveryMode || null,
+                  isActive: existingItem?.deliveryModeDescription && false,
                   ...existingItem
                 }
               })
@@ -460,6 +468,9 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
           { from: 'deliveryModeDescription', to: 'corDeliveryModeName' },
           { from: 'deliveryMode', to: 'corDeliveryMode' }
         ]
+      },
+      onChange: ({ row: { update, newRow } }) => {
+        update({ isActive: !newRow.corDeliveryModeName && false })
       }
     },
     {

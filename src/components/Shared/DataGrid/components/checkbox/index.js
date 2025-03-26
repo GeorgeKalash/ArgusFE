@@ -14,7 +14,7 @@ function CheckBoxComponent({ value, column: { field, props, disableCondition }, 
       variant='rounded'
       name={field}
       autoFocus={isEditMode}
-      checked={disabled ? false : value?.[field]}
+      checked={value?.[field]}
       disabled={(!value?.saved && field === 'select') || props?.disabled || disabled}
       onClick={handleCheckboxChange}
     />
