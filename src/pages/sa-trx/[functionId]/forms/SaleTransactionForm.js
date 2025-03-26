@@ -1464,6 +1464,16 @@ export default function SaleTransactionForm({
 
   useEffect(() => {
     ;(async function () {
+      if (!recordId) {
+        const dtInfo = await getDTD(documentType?.dtId)
+        formik.setFieldValue('header.commitItems', dtInfo?.record?.commitItems)
+        if (!dtInfo?.record?.commitItems) formik.setFieldValue('header.siteId', null)
+      }
+    })()
+  }, [documentType?.dtId])
+
+  useEffect(() => {
+    ;(async function () {
       if (recordId && measurements) {
         const transactionPack = await getSalesTransactionPack(recordId)
         const dtInfo = await getDTD(transactionPack.header.dtId)
