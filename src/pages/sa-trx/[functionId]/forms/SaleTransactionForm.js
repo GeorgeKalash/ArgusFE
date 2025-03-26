@@ -1451,6 +1451,9 @@ export default function SaleTransactionForm({
       const defaultObj = await getDefaultsData()
       getUserDefaultsData()
       if (!recordId) {
+        const dtInfo = await getDTD(documentType?.dtId)
+        formik.setFieldValue('header.commitItems', dtInfo?.record?.commitItems)
+        if (!dtInfo?.record?.commitItems) formik.setFieldValue('header.siteId', null)
         if (defaultObj.salesTD == 'True') {
           setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
           formik.setFieldValue('header.tdType', 2)
