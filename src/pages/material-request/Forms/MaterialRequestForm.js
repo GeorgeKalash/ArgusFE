@@ -75,11 +75,12 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
   }
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       functionId: SystemFunction.MaterialRequest,
       reference: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       siteId: null,
       siteName: '',
       date: new Date(),
@@ -230,7 +231,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       name: 'sku',
       props: {
         endpointId: InventoryRepository.Item.snapshot,
-        valueField: 'recordId',
+        valueField: 'sku',
         displayField: 'sku',
         mandatory: true,
         readOnly: isClosed || isCancelled,
@@ -262,7 +263,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
           const itemInfo = await getItem(newRow.itemId)
           getFilteredMU(newRow?.itemId)
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-          const onHandSite = await setOnHandSite(newRow?.itemId) ?? 0
+          const onHandSite = (await setOnHandSite(newRow?.itemId)) ?? 0
           update({
             msId: itemInfo?.msId,
             onHandSite: onHandSite,
@@ -482,9 +483,6 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       setMeasurements(muList?.list)
       getDefaultFromSiteId()
       await getDepartmentId()
-      if (documentType?.dtId) {
-        formik.setFieldValue('dtId', documentType.dtId)
-      }
     })()
   }, [])
 

@@ -31,7 +31,7 @@ import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
-export default function DeliveriesOrdersForm({ labels, maxAccess: access, recordId }) {
+export default function DeliveriesOrdersForm({ labels, maxAccess: access, recordId, refresh = true }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -58,9 +58,11 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     formik.setFieldValue('siteId', parseInt(userDefault?.siteId))
   }
 
-  const invalidate = useInvalidate({
-    endpointId: DeliveryRepository.DeliveriesOrders.qry
-  })
+  const invalidate = useInvalidate(
+    refresh && {
+      endpointId: DeliveryRepository.DeliveriesOrders.qry
+    }
+  )
 
   const ordersInitialValues = [
     {
@@ -92,6 +94,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
   ]
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       reference: '',
@@ -104,7 +107,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       driverId: null,
       date: new Date(),
       notes: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       status: 1,
       statusName: '',
       printStatusName: '',
@@ -454,10 +457,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
 
     invalidate()
   }
-
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
 
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {

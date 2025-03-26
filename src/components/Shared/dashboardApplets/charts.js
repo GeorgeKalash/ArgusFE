@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
 
 const getChartOptions = (label, type) => {
   const baseOptions = {
@@ -8,7 +9,7 @@ const getChartOptions = (label, type) => {
     plugins: {
       legend: {
         labels: {
-          color: '#f0f0f0' // Set legend text color to white
+          color: '#f0f0f0'
         }
       },
       title: {
@@ -18,7 +19,7 @@ const getChartOptions = (label, type) => {
           size: 20,
           weight: 'bold'
         },
-        color: '#f0f0f0' // Set title text color to white
+        color: '#f0f0f0'
       },
       tooltip: {
         enabled: true,
@@ -27,9 +28,9 @@ const getChartOptions = (label, type) => {
             return `${context.dataset.label}: ${context.raw}`
           }
         },
-        backgroundColor: '#f0f0f0', // Set tooltip background color to white
-        titleColor: '#231F20', // Set tooltip title color to match the background
-        bodyColor: '#231F20' // Set tooltip body text color to match the background
+        backgroundColor: '#f0f0f0',
+        titleColor: '#231F20',
+        bodyColor: '#231F20'
       }
     }
   }
@@ -40,13 +41,13 @@ const getChartOptions = (label, type) => {
       scales: {
         r: {
           pointLabels: {
-            color: '#f0f0f0' // Set radar chart point labels to white
+            color: '#f0f0f0'
           },
           grid: {
-            color: '#f0f0f0' // Set radar chart grid lines to white
+            color: '#f0f0f0'
           },
           angleLines: {
-            color: '#f0f0f0' // Set radar chart angle lines to white
+            color: '#f0f0f0'
           }
         }
       }
@@ -59,7 +60,7 @@ const getChartOptions = (label, type) => {
       y: {
         beginAtZero: true,
         ticks: {
-          color: '#f0f0f0' // Set y-axis text color to white
+          color: '#f0f0f0'
         },
         grid: {
           display: false
@@ -67,7 +68,7 @@ const getChartOptions = (label, type) => {
       },
       x: {
         ticks: {
-          color: '#f0f0f0' // Set x-axis text color to white
+          color: '#f0f0f0'
         },
         grid: {
           display: false
@@ -75,6 +76,177 @@ const getChartOptions = (label, type) => {
       }
     }
   }
+}
+
+export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverColor }) => {
+  const chartRef = useRef(null)
+  const chartInstanceRef = useRef(null)
+
+  useEffect(() => {
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.destroy()
+    }
+
+    const ctx = chartRef.current.getContext('2d')
+
+    chartInstanceRef.current = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label,
+            data,
+            backgroundColor: color || 'rgb(88, 2, 1)',
+            hoverBackgroundColor: hoverColor || 'rgb(113, 27, 26)',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: false,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            max: Math.max(...data) * 1.1
+          }
+        },
+        plugins: {
+          datalabels: {
+            anchor: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartWidth = chart.scales.x.right - chart.scales.x.left
+              const maxValue = chart.scales.x.max
+              const barWidth = (value / maxValue) * chartWidth
+
+              return barWidth >= 65 ? 'center' : 'end'
+            },
+            align: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartWidth = chart.scales.x.right - chart.scales.x.left
+              const maxValue = chart.scales.x.max
+              const barWidth = (value / maxValue) * chartWidth
+
+              return barWidth >= 65 ? 'center' : 'right'
+            },
+            color: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartWidth = chart.scales.x.right - chart.scales.x.left
+              const maxValue = chart.scales.x.max
+              const barWidth = (value / maxValue) * chartWidth
+
+              return barWidth >= 65 ? '#fff' : '#000'
+            },
+            offset: 0,
+            font: {
+              size: 14
+            },
+            formatter: value => value.toLocaleString()
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    })
+
+    return () => {
+      chartInstanceRef.current.destroy()
+    }
+  }, [id, labels, data, label, color, hoverColor])
+
+  const baseHeight = 200
+  const barHeight = 25
+  const dynamicHeight = baseHeight + labels.length * barHeight
+
+  return <canvas id={id} ref={chartRef} height={dynamicHeight} width={window.innerWidth / 2.5}></canvas>
+}
+
+export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {
+  useEffect(() => {
+    const ctx = document.getElementById(id).getContext('2d')
+
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label,
+            data,
+            backgroundColor: color || 'rgb(88, 2, 1)',
+            hoverBackgroundColor: hoverColor || 'rgb(113, 27, 26)',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        aspectRatio: ratio,
+        plugins: {
+          datalabels: {
+            anchor: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? 'center' : 'end'
+            },
+            align: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? 'center' : 'end'
+            },
+            color: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? '#fff' : '#000'
+            },
+            offset: 0,
+            rotation: -90,
+            font: {
+              size: 14
+            },
+            formatter: value => value.toLocaleString()
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    })
+
+    return () => {
+      chart.destroy()
+    }
+  }, [id, labels, data, label])
+
+  return <canvas id={id} style={{ width: '100%', height: '300px', position: 'relative' }}></canvas>
 }
 
 export const CompositeBarChart = ({ id, labels, data, label }) => {

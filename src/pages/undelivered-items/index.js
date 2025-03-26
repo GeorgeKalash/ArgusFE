@@ -21,21 +21,31 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { useWindow } from 'src/windows'
+import DeliveriesOrdersForm from '../delivery-orders/Forms/DeliveryOrdersForm'
 
 const UndeliveredItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { stack } = useWindow()
 
-  const { labels, access: maxAccess } = useResourceQuery({
+  const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.UndeliveredItems
   })
 
+  const { labels: _labels, access: maxAccess } = useResourceQuery({
+    datasetId: ResourceIds.DeliveriesOrders
+  })
+
+  const defaultVat = defaultsData?.list?.find(({ key }) => key === 'DEORDMaxVarPct')
+
   const { formik } = useForm({
-    maxAccess,
+    maxAccess: access,
     initialValues: {
-      dtId: 0,
+      dtId: null,
       groupId: 0,
-      plantId: 0,
+      plantId: null,
       siteId: 0,
       categoryId: 0,
       clientId: 0,
@@ -43,10 +53,10 @@ const UndeliveredItems = () => {
       clientName: '',
       soId: 0,
       items: [],
-      marginDefault: null
+      marginDefault: defaultVat?.value,
+      notes: ''
     },
     validateOnChange: true,
-
     onSubmit: async obj => {
       const items = obj.items
         .filter(item => item.isChecked)
@@ -62,7 +72,30 @@ const UndeliveredItems = () => {
         extension: DeliveryRepository.DeliveriesOrders.gen,
         record: JSON.stringify({ ...obj, items })
       }).then(res => {
-        toast.success(platformLabels.success)
+        toast.success(platformLabels.Generated)
+
+        if (res.recordId) {
+          const items = obj.items.map(({ isChecked, ...item }) => ({
+            ...item,
+            isChecked: false,
+            deliverNow: 0
+          }))
+
+          formik.setFieldValue('items', items)
+
+          stack({
+            Component: DeliveriesOrdersForm,
+            props: {
+              labels: _labels,
+              recordId: res.recordId,
+              maxAccess,
+              refresh: false
+            },
+            width: 1300,
+            height: 700,
+            title: _labels.deliveryOrder
+          })
+        }
       })
     }
   })
@@ -73,24 +106,13 @@ const UndeliveredItems = () => {
     getData()
   }, [clientId, categoryId, groupId])
 
-  useEffect(() => {
-    ;(async function () {
-      const res = await getRequest({
-        extension: SystemRepository.Default.get,
-        parameters: `_key=DEORDMaxVarPct`
-      })
-
-      formik.setFieldValue('marginDefault', res.record?.value)
-    })()
-  }, [])
-
   async function getData() {
     const result = await getRequest({
       extension: RGSaleRepository.SaSaleOrder.open,
       parameters: `_categoryId=${categoryId}&_plantId=${plantId} &_siteId=${siteId}&_groupId=${groupId}&_clientId=${clientId}&_soId=${soId}`
     })
 
-    const res = result.list.map((item, index) => ({
+    const res = result?.list?.map((item, index) => ({
       ...item,
       id: index + 1,
       date: formatDateFromApi(item.date),
@@ -110,7 +132,7 @@ const UndeliveredItems = () => {
       checkAll: {
         value: isCheckedAll,
         visible: true,
-        disabled: !clientId && !siteId,
+        disabled: !clientId || !siteId,
         onChange({ checked }) {
           const items = formik.values.items.map(({ isChecked, ...item }) => ({
             ...item,
@@ -230,10 +252,10 @@ const UndeliveredItems = () => {
                 displayField='name'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId || 0)
+                  formik.setFieldValue('dtId', newValue?.recordId || null)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                maxAccess={maxAccess}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -246,7 +268,7 @@ const UndeliveredItems = () => {
                 displayField={'name'}
                 displayFieldWidth={1}
                 values={formik?.values}
-                maxAccess={maxAccess}
+                maxAccess={access}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('categoryId', newValue?.recordId || 0)
                 }}
@@ -258,7 +280,7 @@ const UndeliveredItems = () => {
                 endpointId={InventoryRepository.Group.qry}
                 parameters='_startAt=0&_pageSize=1000'
                 name='groupId'
-                label={labels.plant}
+                label={labels.group}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -270,7 +292,7 @@ const UndeliveredItems = () => {
                   formik.setFieldValue('groupId', newValue?.recordId || 0)
                 }}
                 error={formik.touched.groupId && Boolean(formik.errors.groupId)}
-                maxAccess={maxAccess}
+                maxAccess={access}
               />
             </Grid>
           </Grid>
@@ -289,7 +311,7 @@ const UndeliveredItems = () => {
                 displayFieldWidth={2}
                 valueShow='clientRef'
                 secondValueShow='clientName'
-                maxAccess={maxAccess}
+                maxAccess={access}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Ref.' },
                   { key: 'name', value: 'Name' }
@@ -309,7 +331,7 @@ const UndeliveredItems = () => {
                 label={labels.site}
                 valueField='recordId'
                 displayField={['reference', 'name']}
-                maxAccess={maxAccess}
+                maxAccess={access}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -337,15 +359,15 @@ const UndeliveredItems = () => {
                 ]}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue?.recordId || 0)
+                  formik.setFieldValue('plantId', newValue?.recordId)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-                maxAccess={maxAccess}
+                maxAccess={access}
               />
             </Grid>
           </Grid>
-          <Grid item xs={4} container spacing={2} alignItems='center'>
-            <Grid item xs={9}>
+          <Grid item xs={3} container spacing={2}>
+            <Grid item xs={12}>
               <ResourceLookup
                 endpointId={SaleRepository.SalesOrder.snapshot}
                 parameters={{
@@ -360,7 +382,7 @@ const UndeliveredItems = () => {
                 required={formik.values.type === '2' || formik.values.type === 2}
                 valueShow='soRef'
                 secondDisplayField={false}
-                maxAccess={maxAccess}
+                maxAccess={access}
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('soId', newValue?.recordId || 0)
                   formik.setFieldValue('soRef', newValue?.reference || '')
@@ -368,7 +390,23 @@ const UndeliveredItems = () => {
                 errorCheck={'soId'}
               />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={12}>
+              <CustomTextArea
+                name='notes'
+                label={labels.notes}
+                value={formik.values.notes}
+                maxLength='100'
+                rows={2.5}
+                maxAccess={access}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('notes', '')}
+                error={formik.touched.notes && Boolean(formik.errors.notes)}
+              />
+            </Grid>
+          </Grid>
+
+          <Grid item xs={3} container spacing={2} alignItems='center'>
+            <Grid item xs={12}>
               <CustomButton
                 variant='contained'
                 image={'preview.png'}
@@ -389,7 +427,7 @@ const UndeliveredItems = () => {
           name='items'
           allowDelete={false}
           allowAddNewLine={false}
-          maxAccess={maxAccess}
+          maxAccess={access}
         />
       </Grow>
       <Fixed>

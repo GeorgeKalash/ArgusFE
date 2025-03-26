@@ -66,7 +66,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
   const initialValues = {
     recordId: recordId,
-    dtId: documentType?.dtId,
+    dtId: null,
     reference: '',
     date: new Date(),
     dueDate: new Date(),
@@ -151,6 +151,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -282,7 +283,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         endpointId: InventoryRepository.Item.snapshot,
         parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
         displayField: 'sku',
-        valueField: 'recordId',
+        valueField: 'sku',
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -459,6 +460,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       label: labels.unitPrice,
       name: 'unitPrice',
       updateOn: 'blur',
+      props: {
+        decimalScale: 5
+      },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
       }
@@ -687,7 +691,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || formik.values.status == 3 || formik.values.deliveryStatus == 4
+      disabled: !(isClosed && (formik.values.deliveryStatus == 1 || formik.values.deliveryStatus == 5))
     },
     {
       key: 'Terminate',
@@ -1164,10 +1168,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
-
-  useEffect(() => {
     if (reCal) {
       let currentTdAmount = (parseFloat(formik.values.tdPct) * parseFloat(subtotal)) / 100
       recalcGridVat(formik.values.tdType, formik.values.tdPct, currentTdAmount, formik.values.currentDiscount)
@@ -1273,6 +1273,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     displayField='name'
                     values={formik.values}
                     displayFieldWidth={1.5}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('spId', newValue ? newValue.recordId : null)
                     }}
@@ -1398,7 +1399,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 form={formik}
                 required
                 readOnly={isClosed}
-                displayFieldWidth={2}
+                displayFieldWidth={6}
                 valueShow='clientRef'
                 secondValueShow='clientName'
                 maxAccess={maxAccess}
@@ -1415,6 +1416,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                   formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                   formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
                   formik.setFieldValue('taxId', newValue?.taxId)
+                  setAddress({})
                   fillClientData(newValue?.recordId)
                 }}
                 errorCheck={'clientId'}
@@ -1484,6 +1486,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 readOnly={isClosed}
                 values={formik.values}
                 displayFieldWidth={1.5}
+                maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('szId', newValue ? newValue.recordId : null)
                 }}

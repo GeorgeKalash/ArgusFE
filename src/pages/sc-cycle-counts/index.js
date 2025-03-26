@@ -13,13 +13,11 @@ import { SCRepository } from 'src/repositories/SCRepository'
 import CycleCountsWindow from './Windows/CycleCountsWindow'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getStorageData } from 'src/storage/storage'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const CycleCounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
@@ -52,7 +50,6 @@ const CycleCounts = () => {
     invalidate,
     refetch,
     filterBy,
-    clearFilter,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -125,17 +122,6 @@ const CycleCounts = () => {
     await proxyAction()
   }
 
-  const userId = getStorageData('userData').userId
-
-  const getPlantId = async () => {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userId}&_key=plantId`
-    })
-
-    return res.record.value
-  }
-
   async function openCycleCountsWindow(plantId, recordId) {
     stack({
       Component: CycleCountsWindow,
@@ -152,42 +138,15 @@ const CycleCounts = () => {
   }
 
   async function openForm(recordId) {
-    const plantId = await getPlantId()
+    const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
 
     openCycleCountsWindow(plantId, recordId)
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          labels={_labels}
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          reportName={'SCHDR'}
-        />
+        <RPBGridToolbar labels={_labels} onAdd={add} maxAccess={access} reportName={'SCHDR'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

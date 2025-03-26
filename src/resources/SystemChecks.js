@@ -7,6 +7,7 @@ export const SystemChecks = {
   ALLOW_NAME_DUPLICATE: Module.System * 100 + 3,
   ALLOW_NO_CHILD_DATA: Module.System * 100 + 4,
   ALLOW_DOCUMENT_UNPOSTING: Module.System * 100 + 5,
+  HIDE_LEADING_ZERO_DECIMALS: Module.System * 100 + 9,
 
   // limit data access
   LIMIT_DATA_ACCESS_SYSTEM_PLANT: Module.System * 100 + 50,
@@ -26,6 +27,7 @@ export const SystemChecks = {
 
   // Delivery Orders
   ALLOW_DELIVERY_RETURN_OF_UNKNOWN_SKU: Module.Delivery * 100 + 1,
+  AUTO_POST_GENERATED_DELIVERY_ORDERS_FROM_MIDDLEWARE: Module.Delivery * 100 + 6,
 
   //Purchase
   ENABLE_PURCHASE_TAX: Module.Purchase * 100 + 1,

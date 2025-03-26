@@ -35,7 +35,6 @@ const IvItems = () => {
     query: { data },
     filterBy,
     refetch,
-    clearFilter,
     labels: _labels,
     access,
     paginationParameters,
@@ -147,40 +146,10 @@ const IvItems = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    if (rpbParams) {
-      setParams(rpbParams)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    onApply({ search: '', rpbParams: params })
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'IVIT'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'IVIT'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

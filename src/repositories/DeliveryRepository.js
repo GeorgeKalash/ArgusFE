@@ -27,6 +27,7 @@ export const DeliveryRepository = {
     unpost: service + 'unpostTRP',
     close: service + 'closeTRP',
     generate: service + 'generateTRP',
+    setTRP2: service + 'setTRP2',
     assign: service + 'assignTRP',
     unassign: service + 'unassignedTRP'
   },
@@ -71,12 +72,19 @@ export const DeliveryRepository = {
   GenerateTrip: {
     root: service + 'rootSZ',
     firstLevel: service + 'firstLevelSZ',
-    undelivered2: service + 'undeliveredSO2'
+    undelivered2: service + 'undeliveredSO2',
+    previewTRP: service + 'previewTRP'
   },
   DeliveryLeadTime: {
     get: service + 'getLDT',
     page: service + 'pageLDT',
     set: service + 'setLDT',
     del: service + 'delLDT'
+  },
+  Volume: {
+    vol: service + 'volZO'
+  },
+  AllocatedVolume: {
+    qry: service + 'qryVEH2'
   }
 }
