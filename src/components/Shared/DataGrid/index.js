@@ -25,6 +25,7 @@ export function DataGrid({
   onSelectionChange,
   rowSelectionModel,
   autoDelete,
+  initialValues,
   bg
 }) {
   const gridApiRef = useRef(null)
@@ -227,7 +228,8 @@ export function DataGrid({
 
     const newRow = {
       id: highestIndex,
-      ...defaultValues
+      ...defaultValues,
+      ...initialValues
     }
 
     const res = gridApiRef.current?.applyTransaction({ add: [newRow] })
@@ -451,7 +453,7 @@ export function DataGrid({
       maxAccess
     }
 
-    async function update({ field, value }) {
+    async function update({ field, value }, StopOnBlur = false) {
       const oldRow = params.data
 
       const changes = {
@@ -462,13 +464,13 @@ export function DataGrid({
 
       setData(changes, params)
 
-      if (column.colDef.updateOn !== 'blur') {
+      if (column.colDef.updateOn !== 'blur' || StopOnBlur) {
         commit(changes)
         process(params, oldRow, setData)
       }
     }
 
-    const updateRow = ({ changes }) => {
+    const updateRow = ({ changes }, StopOnBlur = false) => {
       const oldRow = params.data
 
       setCurrentValue(changes || '')
@@ -481,7 +483,7 @@ export function DataGrid({
         return
       }
 
-      if (column.colDef.updateOn !== 'blur') {
+      if (column.colDef.updateOn !== 'blur' || StopOnBlur) {
         commit(changes)
 
         process(params, oldRow, setData)
@@ -706,7 +708,7 @@ export function DataGrid({
 
     if (lastCellStopped.current == cellId) return
     lastCellStopped.current = cellId
-    if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
+    if (colDef.updateOn === 'blur' && data[colDef?.field] !== value?.[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
         stackDuplicate(params)
 

@@ -84,5 +84,26 @@ export const PurchaseRepository = {
   },
   ItemPromotion: {
     qry: service + 'qryIVIM'
+  },
+  PurchaseOrder: {
+    page: service + 'pageORD',
+    snapshot: service + 'snapshotORD',
+    set2: service + 'set2ORD',
+    get2: service + 'get2ORD',
+    post: service + 'postORD',
+    unpost: service + 'unpostORD',
+    close: service + 'closeORD',
+    reopen: service + 'reopenORD',
+    terminate: service + 'reopenORD',
+    transfer: service + 'transfer1ORD'
+  },
+  Request: {
+    snapshot: service + 'snapshotREQ'
+  },
+  Requisition: {
+    qry: service + 'qryREI'
+  },
+  QuotationItem: {
+    preview: service + 'previewQTI'
   }
 }

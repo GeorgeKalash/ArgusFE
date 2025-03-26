@@ -1285,7 +1285,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                       formik.setFieldValue('header.city', newValue?.name)
                       setAddressModified(true)
                     }}
-                    errorCheck={'header.cityId'}
+                    error={(formik.touched.header?.cityId || true) && Boolean(formik.errors.header?.cityId)}
                     maxAccess={maxAccess}
                   />
                 </Grid>

@@ -1,16 +1,19 @@
-import { useContext, useRef } from 'react'
+import { useContext, useRef, useState } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
 
-export default function NumberfieldEdit({ id, column: { props, field }, value, update, updateRow }) {
+export default function NumberfieldEdit({ id, column: { props, field }, value, data, update, updateRow }) {
   const { systemChecks } = useContext(ControlContext)
   const viewDecimals = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
-  const isPercentIcon = props?.gridData ? props?.gridData[id - 1]?.mdType === 1 : false
+  const [md, setMd] = useState(data?.mdType)
+  const isPercentIcon = md === 1 || false
+
   const typing = useRef(false)
 
   const handleIconClick = () => {
-    props?.iconsClicked(id, updateRow)
+    props?.iconsClicked(id, updateRow, { ...value, mdType: md === 1 ? 2 : 1 })
+    setMd(md === 1 ? 2 : 1)
   }
 
   const formatValue = val => {
