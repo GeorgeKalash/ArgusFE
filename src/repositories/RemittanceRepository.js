@@ -169,6 +169,10 @@ export const RemittanceSettingsRepository = {
     set: service + 'setCOU',
     del: service + 'delCOU'
   },
+  CorDispControl: {
+    qry: service + 'qryCDC',
+    set2: service + 'set2CDC'
+  },
   CorrespondentDispersal: {
     qry: service + 'qryCDM',
     get: service + 'getCDM',
