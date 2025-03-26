@@ -586,7 +586,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
               <CustomTextField name='corName' label={labels.corName} value={corName} readOnly maxAccess={maxAccess} />
             </Grid>
             <Grid item xs={1}>
-              <CustomButton onClick={onPreview} label={platformLabels.Preview} color='#231f20' />
+              <CustomButton onClick={onPreview} image='preview.png' label={platformLabels.Preview} color='#231f20' />
             </Grid>
           </Grid>
         </Fixed>
