@@ -383,5 +383,6 @@ export const ResourceIds = {
   PostDraftReturns: 51316,
   DamageReturn: 42333,
   RebuildAging: 31502,
+  PUDocumentTypeDefaults: 50103,
   SyncSalesTrx: 51603,
 }
