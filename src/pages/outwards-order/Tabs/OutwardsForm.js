@@ -308,7 +308,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }
 
   const fillOutwardsData = async data => {
-    console.log('check data', data)
     formik.setValues(prevValues => ({
       ...prevValues,
       ...data,
