@@ -3,7 +3,7 @@ import ConfirmationDialog from '../ConfirmationDialog'
 const SuccessDialog = ({ window, fullScreen, open, message }) => {
   return (
     <ConfirmationDialog
-      open={open[0] ? open[0] : false}
+      open={open}
       DialogText={message}
       okButtonAction={() => window.close()}
       fullScreen={fullScreen}

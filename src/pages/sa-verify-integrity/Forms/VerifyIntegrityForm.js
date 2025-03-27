@@ -34,11 +34,15 @@ export default function VerifyIntegrityForm({ _labels, maxAccess }) {
         }&_verifyIVC=${formik.values.verifyIVC ? 1 : 0}`
       })
 
+      if (res?.response?.data?.error) {
+        return
+      }
+
       if (!res.list) {
         stack({
           Component: SuccessDialog,
           props: {
-            open: [true, {}],
+            open: true,
             fullScreen: false,
             message: platformLabels.EverythingIsOk
           },
