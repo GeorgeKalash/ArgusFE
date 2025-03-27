@@ -273,7 +273,7 @@ export function DataGrid({
         (allColumns?.[i]?.props?.readOnly &&
           (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
             accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
-      (typeof allColumns?.[i]?.disableCondition !== 'function' || !allColumns?.[i]?.disableCondition(data))
+      (typeof allColumns?.[i]?.props?.disableCondition !== 'function' || !allColumns?.[i]?.props?.disableCondition(data))
     )
   }
 
