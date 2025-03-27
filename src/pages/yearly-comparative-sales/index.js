@@ -11,9 +11,10 @@ import { ReportSAGeneratorRepository } from 'src/repositories/ReportSAGeneratorR
 import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { LineChartDark } from 'src/components/Shared/dashboardApplets/charts'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomButton from 'src/components/Inputs/CustomButton'
 
 const YearlyComparativeSales = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -314,9 +315,12 @@ const YearlyComparativeSales = () => {
                 />
               </Grid>
               <Grid item xs={4}>
-                <Button variant='contained' size='small' onClick={() => refetch()} disabled={disablePreview}>
-                  <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
-                </Button>
+                <CustomButton
+                  onClick={refetch}
+                  disabled={disablePreview}
+                  image={'preview.png'}
+                  tooltipText={platformLabels.Preview}
+                />
               </Grid>
             </Grid>
           </Grid>
