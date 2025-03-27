@@ -282,18 +282,22 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }
 
   function handleSelectedProduct(selectedRowData, clearAmounts, data) {
-    formik.setFieldValue('bankType', selectedRowData?.interfaceId)
-    formik.setFieldValue('productId', selectedRowData?.productId)
-    formik.setFieldValue('commission', selectedRowData?.fees)
-    formik.setFieldValue('defaultCommission', selectedRowData?.fees)
-    formik.setFieldValue('dispersalId', selectedRowData?.dispersalId)
-    formik.setFieldValue('exRate', parseFloat(selectedRowData?.exRate).toFixed(5))
-    formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod)
-    formik.setFieldValue('corId', selectedRowData?.corId)
-    formik.setFieldValue('corRef', selectedRowData?.corRef)
-    formik.setFieldValue('corName', selectedRowData?.corName)
-    formik.setFieldValue('rateTypeId', selectedRowData?.rateTypeId)
+    formik.setFieldValue('bankType', selectedRowData?.interfaceId || data?.interfaceId)
+    formik.setFieldValue('productId', selectedRowData?.productId || data?.productId)
+    formik.setFieldValue('commission', selectedRowData?.fees || data?.commission)
+    formik.setFieldValue('defaultCommission', selectedRowData?.fees || data?.commission)
+    formik.setFieldValue('dispersalId', selectedRowData?.dispersalId || data?.dispersalId)
+    formik.setFieldValue(
+      'exRate',
+      selectedRowData?.exRate ? parseFloat(selectedRowData?.exRate).toFixed(5) : parseFloat(data?.exRate).toFixed(5)
+    )
+    formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod || data?.rateCalcMethod)
+    formik.setFieldValue('corId', selectedRowData?.corId || data?.corId)
+    formik.setFieldValue('corRef', selectedRowData?.corRef || data?.corRef)
+    formik.setFieldValue('corName', selectedRowData?.corName || data?.corName)
+    formik.setFieldValue('rateTypeId', selectedRowData?.rateTypeId || data?.rateTypeId)
     calculateValueDate(selectedRowData?.valueDays)
+    if (editMode) formik.setFieldValue('valueDate', formatDateFromApi(data?.valueDate))
     if (clearAmounts) {
       formik.setFieldValue('lcAmount', '')
       formik.setFieldValue('fcAmount', '')
@@ -304,6 +308,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }
 
   const fillOutwardsData = async data => {
+    console.log('check data', data)
     formik.setValues(prevValues => ({
       ...prevValues,
       ...data,
@@ -873,20 +878,33 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={
-                        formik.values.countryId &&
-                        formik.values.dispersalType &&
-                        RemittanceOutwardsRepository.Currency.qry
+                        editMode
+                          ? SystemRepository.Currency.qry
+                          : formik.values.countryId &&
+                            formik.values.dispersalType &&
+                            RemittanceOutwardsRepository.Currency.qry
                       }
-                      parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}`}
+                      parameters={
+                        !editMode
+                          ? `_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}`
+                          : undefined
+                      }
                       label={labels.Currency}
                       required
                       name='currencyId'
-                      displayField={['currencyRef', 'currencyName']}
-                      columnsInDropDown={[
-                        { key: 'currencyRef', value: 'Reference' },
-                        { key: 'currencyName', value: 'Name' }
-                      ]}
-                      valueField='currencyId'
+                      displayField={editMode ? ['reference', 'name'] : ['currencyRef', 'currencyName']}
+                      columnsInDropDown={
+                        editMode
+                          ? [
+                              { key: 'reference', value: 'Reference' },
+                              { key: 'name', value: 'Name' }
+                            ]
+                          : [
+                              { key: 'currencyRef', value: 'Reference' },
+                              { key: 'currencyName', value: 'Name' }
+                            ]
+                      }
+                      valueField={editMode ? 'recordId' : 'currencyId'}
                       values={formik.values}
                       readOnly={!formik.values.dispersalType || isClosed || isPosted || editMode}
                       onChange={(event, newValue) => {
