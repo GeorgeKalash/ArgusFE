@@ -48,7 +48,6 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
 
   useEffect(() => {
     if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
       onChangeDtId(documentType.dtId)
     }
   }, [documentType?.dtId])
@@ -60,9 +59,10 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: recordId || '',
-      dtId: documentType?.dtId,
+      dtId: null,
       reference: '',
       date: new Date(),
       plantId: null,

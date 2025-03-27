@@ -56,7 +56,6 @@ const FiPaymentVouchers = () => {
     query: { data },
     labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     refetch,
     access,
@@ -185,37 +184,10 @@ const FiPaymentVouchers = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          labels={labels}
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          reportName={'FIPV'}
-        />
+        <RPBGridToolbar labels={labels} onAdd={add} maxAccess={access} reportName={'FIPV'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

@@ -90,7 +90,11 @@ const TabsProvider = ({ children }) => {
 
   const handleChange = (event, newValue) => {
     setCurrentTabIndex(newValue)
-    window.history.replaceState(null, '', openTabs[newValue].route)
+    if (newValue === 0 && !openTabs[newValue].page) {
+      router.push(openTabs[newValue].route)
+    } else {
+      window.history.replaceState(null, '', openTabs[newValue].route)
+    }
   }
 
   const handleCloseAllTabs = () => {
@@ -200,7 +204,7 @@ const TabsProvider = ({ children }) => {
   useEffect(() => {
     if (openTabs[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
 
-    if (!initialLoadDone && router.asPath && menu.length > 0) {
+    if (!initialLoadDone && router.asPath && (menu.length > 0 || dashboardId)) {
       const newTabs = [
         {
           page: router.asPath === '/default/' ? children : null,
@@ -226,7 +230,7 @@ const TabsProvider = ({ children }) => {
       }
 
       setOpenTabs(newTabs)
-      setInitialLoadDone(true)
+      menu.length > 0 && setInitialLoadDone(true)
     }
   }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
 

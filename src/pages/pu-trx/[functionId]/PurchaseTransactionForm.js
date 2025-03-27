@@ -80,11 +80,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const initialValues = {
     recordId: recordId,
     header: {
+      dtId: null,
       dgId: functionId,
       functionId: functionId,
       recordId: null,
-      dtId: documentType?.dtId,
-      reference: null,
+      reference: '',
       date: new Date(),
       dueDate: new Date(),
       plantId: null,
@@ -188,6 +188,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -1141,13 +1142,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('header.dtId', documentType.dtId)
-      onChangeDtId(documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
-  useEffect(() => {
     if (reCal) {
       let currentTdAmount = (parseFloat(formik.values.header.tdPct) * parseFloat(subtotal)) / 100
       recalcGridVat(
@@ -1165,14 +1159,14 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       if (promotionTypes && promotionTypes.length > 0) {
         const initialType = promotionTypes[0]
         setInitialPromotionType(initialType)
-        formik.setValues({
-          ...formik.values,
-          items: formik.values.items.map(item => ({
-            ...item,
-            promotionTypeName: initialType.value,
-            promotionType: initialType.key
-          }))
-        })
+
+        const items = formik.values.items.map(item => ({
+          ...item,
+          promotionTypeName: initialType.value,
+          promotionType: initialType.key
+        }))
+
+        formik.setFieldValue(items)
       }
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)

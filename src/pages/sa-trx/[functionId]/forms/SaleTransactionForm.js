@@ -99,12 +99,13 @@ export default function SaleTransactionForm({
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
       recordId: recordId || null,
       header: {
         dgId: functionId,
         recordId: null,
-        dtId: documentType?.dtId,
+        dtId: null,
         reference: '',
         date: new Date(),
         dueDate: new Date(),
@@ -1431,13 +1432,6 @@ export default function SaleTransactionForm({
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('header.dtId', documentType.dtId)
-      onChangeDtId(documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
-  useEffect(() => {
     if (reCal) {
       let currentTdAmount = (parseFloat(formik.values.header.tdPct) * parseFloat(subtotal)) / 100
       recalcGridVat(
@@ -1457,6 +1451,9 @@ export default function SaleTransactionForm({
       const defaultObj = await getDefaultsData()
       getUserDefaultsData()
       if (!recordId) {
+        const dtInfo = await getDTD(documentType?.dtId)
+        formik.setFieldValue('header.commitItems', dtInfo?.record?.commitItems)
+        if (!dtInfo?.record?.commitItems) formik.setFieldValue('header.siteId', null)
         if (defaultObj.salesTD == 'True') {
           setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
           formik.setFieldValue('header.tdType', 2)

@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
-import { useSettings } from 'src/@core/hooks/useSettings'
 
 const getChartOptions = (label, type) => {
   const baseOptions = {
@@ -80,10 +79,6 @@ const getChartOptions = (label, type) => {
 }
 
 export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverColor }) => {
-  const { settings } = useSettings()
-
-  const { navCollapsed } = settings
-
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
 
@@ -126,7 +121,6 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const chartWidth = chart.scales.x.right - chart.scales.x.left
               const maxValue = chart.scales.x.max
-
               const barWidth = (value / maxValue) * chartWidth
 
               return barWidth >= 65 ? 'center' : 'end'
@@ -138,7 +132,6 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const chartWidth = chart.scales.x.right - chart.scales.x.left
               const maxValue = chart.scales.x.max
-
               const barWidth = (value / maxValue) * chartWidth
 
               return barWidth >= 65 ? 'center' : 'right'
@@ -150,7 +143,6 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const chartWidth = chart.scales.x.right - chart.scales.x.left
               const maxValue = chart.scales.x.max
-
               const barWidth = (value / maxValue) * chartWidth
 
               return barWidth >= 65 ? '#fff' : '#000'
@@ -175,14 +167,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
   const barHeight = 25
   const dynamicHeight = baseHeight + labels.length * barHeight
 
-  return (
-    <canvas
-      id={id}
-      ref={chartRef}
-      width={navCollapsed ? window.innerWidth / 2 : window.innerWidth / 2.5}
-      height={dynamicHeight}
-    ></canvas>
-  )
+  return <canvas id={id} ref={chartRef} height={dynamicHeight} width={window.innerWidth / 2.5}></canvas>
 }
 
 export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {

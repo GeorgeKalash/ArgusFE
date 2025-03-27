@@ -53,11 +53,12 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
   }
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       functionId: SystemFunction.ProductionSheet,
       reference: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       notes: '',
       status: 1,
       date: new Date(),
@@ -131,10 +132,6 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       invalidate()
     }
   })
-
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
 
   const onPost = async () => {
     const copy = { ...formik.values }

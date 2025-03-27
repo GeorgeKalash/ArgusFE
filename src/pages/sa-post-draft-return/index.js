@@ -27,7 +27,6 @@ const PostDraftReturn = () => {
     query: { data },
     filterBy,
     refetch,
-    clearFilter,
     labels,
     access,
     invalidate,
@@ -157,35 +156,10 @@ const PostDraftReturn = () => {
     }
   }
 
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'SADRE2'}
-        />
+        <RPBGridToolbar maxAccess={access} filterBy={filterBy} reportName={'SADRE2'} />
       </Fixed>
       <Grow>
         <Table

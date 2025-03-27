@@ -90,7 +90,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       recordId: recordId || null,
       date: new Date(),
       reference: null,
-      dtId: documentType?.dtId,
+      dtId: null,
       functionId: functionId,
       posId: parseInt(posUser?.posId),
       currencyId: null,
@@ -183,6 +183,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -1049,12 +1050,6 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
   }, [totalQty, amount, totalWeight, subtotal, vatAmount])
-
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('header.dtId', documentType.dtId)
-    }
-  }, [documentType?.dtId])
 
   useEffect(() => {
     ;(async function () {

@@ -1,8 +1,9 @@
 import { useFormik } from 'formik'
+import { useEffect } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import * as yup from 'yup'
 
-export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
+export function useForm({ documentType = {}, maxAccess, validate = () => {}, ...formikProps }) {
   function explode(str) {
     const parts = str.split('.')
 
@@ -91,9 +92,9 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
               if (!maxAccessErrors[gridName]) {
                 maxAccessErrors[gridName] = {}
               }
-
               if (
                 !maxAccessErrors[gridName][fieldName] &&
+                formik.values[gridName] &&
                 !formik.values[gridName][fieldName] &&
                 formik.values[gridName][fieldName] != 0
               ) {
@@ -115,6 +116,12 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
   })
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
+
+  const { key, value } = documentType
+
+  useEffect(() => {
+    if (key && value && formik.values[key] !== value) formik.setFieldValue(key, value)
+  }, [value])
 
   return { formik }
 }

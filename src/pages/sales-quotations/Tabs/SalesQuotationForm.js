@@ -66,7 +66,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
 
   const initialValues = {
     recordId: recordId,
-    dtId: documentType?.dtId,
+    dtId: null,
     reference: null,
     date: new Date(),
     expiryDate: null,
@@ -149,6 +149,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -1076,10 +1077,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     formik.setFieldValue('subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('vatAmount', parseFloat(vatAmount).toFixed(2))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
-
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
 
   useEffect(() => {
     if (reCal) {
