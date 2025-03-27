@@ -17,7 +17,9 @@ const CurrentCost = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.CurrentCost.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=itemId&_size=50&_params=${params || ''}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=itemId&_size=50&_params=${
+        params || ''
+      }`
     })
 
     return { ...response, _startAt: _startAt }
@@ -27,7 +29,6 @@ const CurrentCost = () => {
     query: { data },
     labels: _labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     access,
     refetch
@@ -86,35 +87,10 @@ const CurrentCost = () => {
     }
   ]
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'IVCOS'}
-        />
+        <RPBGridToolbar maxAccess={access} reportName={'IVCOS'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

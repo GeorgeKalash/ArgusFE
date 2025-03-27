@@ -22,13 +22,13 @@ export function useDocumentTypeProxy({ functionId, action, hasDT }) {
   }
 }
 
-export function useDocumentType({ functionId, access, hasDT, enabled = true }) {
+export function useDocumentType({ functionId, access, hasDT, enabled = true, objectName = '' }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const [nraId, setNraId] = useState()
 
   const queryFn = async nraId => {
-    const result = await documentType(getRequest, functionId, access, nraId, hasDT)
+    const result = await documentType(getRequest, functionId, access, nraId, hasDT, objectName)
     if (result.errorMessage) {
       stackError({ message: result?.errorMessage })
 

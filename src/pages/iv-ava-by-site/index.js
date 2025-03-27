@@ -181,15 +181,10 @@ const AvailabilitiesBySite = () => {
     })
   }
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} maxAccess={access} onApply={onApply} reportName={'IV403'} />
+        <RPBGridToolbar hasSearch={false} maxAccess={access} filterBy={filterBy} reportName={'IV403'} />
       </Fixed>
       <Grow>
         <Table

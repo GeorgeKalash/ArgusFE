@@ -31,7 +31,7 @@ import { useWindow } from 'src/windows'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 
-export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId }) {
+export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -59,6 +59,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     maxAccess: maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId,
       reference: '',
@@ -107,10 +108,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     }
   })
 
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
-
   async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
     if (currencyId && date && rateType) {
       const res = await getRequest({
@@ -131,6 +128,28 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
   }
+
+  async function getDTD(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: FinancialRepository.FIDocTypeDefaults.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      const cashAccountValue = res?.record?.cashAccountId ? res?.record?.cashAccountId : cashAccountId
+
+      formik.setFieldValue('cashAccountId', cashAccountValue)
+      getCashAccount(cashAccountValue)
+
+      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
+
+      return res
+    }
+  }
+
+  useEffect(() => {
+    getDTD(formik?.values?.dtId)
+  }, [formik.values.dtId])
 
   async function openMCRForm(data) {
     stack({
@@ -227,6 +246,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       toast.success(platformLabels.Posted)
       invalidate()
       await getData(formik.values.recordId)
+      window.close()
     }
   }
 

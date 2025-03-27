@@ -198,6 +198,7 @@ export const FinancialRepository = {
     snapshot: service + 'snapshotMTX'
   },
   AgingDoc: {
-    snapshot: service + 'snapshotAGD'
+    snapshot: service + 'snapshotAGD',
+    rebuild: service + 'rebuildAGD'
   }
 }

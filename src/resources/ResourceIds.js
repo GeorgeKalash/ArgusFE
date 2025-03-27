@@ -345,6 +345,7 @@ export const ResourceIds = {
   RetailInvoice: 54201,
   RetailInvoiceReturn: 54301,
   RetailPurchase: 54302,
+  RetailPurchaseReturn: 54306,
   Worksheet: 42303,
   MaterialReplenishment: 46301,
   GenerateTrip: 52308,
@@ -376,7 +377,14 @@ export const ResourceIds = {
   ThreeDDesign: 48301,
   Casting: 48303,
   Printing: 48302,
+  SalesQuotations: 51301,
+  CorrespondentDispersalControl: 36137,
+  CorrespondentDispersal: 36136,
   Rubber: 48305,
   Modeling: 48304,
-  PostDraftReturns: 51316
+  PostDraftReturns: 51316,
+  DamageReturn: 42333,
+  RebuildAging: 31502,
+  PUDocumentTypeDefaults: 50103,
+  SyncSalesTrx: 51603,
 }
