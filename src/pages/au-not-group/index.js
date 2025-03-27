@@ -1,29 +1,30 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import GridToolbar from 'src/components/Shared/GridToolbar'
-import MachinesWindow from './Windows/MachinesWindow'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import NotificationGroupForm from './Forms/NotificationGroup'
 
-const Machines = () => {
+const NotificationGroup = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: ManufacturingRepository.Machine.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      extension: AccessControlRepository.NotificationGroup.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -31,15 +32,15 @@ const Machines = () => {
 
   const {
     query: { data },
-    refetch,
     labels,
-    access,
+    refetch,
+    invalidate,
     paginationParameters,
-    invalidate
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.Machine.page,
-    datasetId: ResourceIds.Machines
+    endpointId: AccessControlRepository.NotificationGroup.page,
+    datasetId: ResourceIds.NotificationGroups
   })
 
   const columns = [
@@ -52,57 +53,38 @@ const Machines = () => {
       field: 'name',
       headerName: labels.name,
       flex: 1
-    },
-    {
-      field: 'workCenterName',
-      headerName: labels.workCenterName,
-      flex: 1
-    },
-    {
-      field: 'operationName',
-      headerName: labels.operationName,
-      flex: 1
-    },
-    {
-      field: 'laborName',
-      headerName: labels.laborName,
-      flex: 1
     }
   ]
-
-  function openForm(obj) {
-    stack({
-      Component: MachinesWindow,
-      props: {
-        labels,
-        recordId: obj?.recordId,
-        maxAccess: access
-      },
-      width: 700,
-      height: 500,
-      title: labels.Machines
-    })
-  }
-
-  const edit = obj => {
-    openForm(obj)
-  }
 
   const add = () => {
     openForm()
   }
 
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: NotificationGroupForm,
+      props: {
+        labels,
+        recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 270,
+      title: labels.NotificationGroup
+    })
+  }
+
   const del = async obj => {
     await postRequest({
-      extension: ManufacturingRepository.MachineSpecification.del,
-      record: JSON.stringify({ machineId: obj.recordId })
-    })
-    await postRequest({
-      extension: ManufacturingRepository.Machine.del,
+      extension: AccessControlRepository.NotificationGroup.del,
       record: JSON.stringify(obj)
     })
-    toast.success(platformLabels.Deleted)
     invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
@@ -112,7 +94,6 @@ const Machines = () => {
       </Fixed>
       <Grow>
         <Table
-          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
@@ -120,9 +101,9 @@ const Machines = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='api'
-          paginationParameters={paginationParameters}
           refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
@@ -130,4 +111,4 @@ const Machines = () => {
   )
 }
 
-export default Machines
+export default NotificationGroup
