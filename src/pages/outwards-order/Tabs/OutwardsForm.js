@@ -281,7 +281,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     handleSelectedProduct(selectedRowData)
   }
 
-  function handleSelectedProduct(selectedRowData, clearAmounts) {
+  function handleSelectedProduct(selectedRowData, clearAmounts, data) {
     formik.setFieldValue('bankType', selectedRowData?.interfaceId)
     formik.setFieldValue('productId', selectedRowData?.productId)
     formik.setFieldValue('commission', selectedRowData?.fees)
@@ -298,8 +298,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       formik.setFieldValue('lcAmount', '')
       formik.setFieldValue('fcAmount', '')
     } else {
-      formik.setFieldValue('lcAmount', formik.values.lcAmount || selectedRowData?.baseAmount)
-      formik.setFieldValue('fcAmount', formik.values.fcAmount || selectedRowData?.originAmount)
+      formik.setFieldValue('lcAmount', formik.values.lcAmount || selectedRowData?.baseAmount || data?.lcAmount)
+      formik.setFieldValue('fcAmount', formik.values.fcAmount || selectedRowData?.originAmount || data?.fcAmount)
     }
   }
 
@@ -600,7 +600,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     return res
   }
 
-  async function fillProducts(data) {
+  async function fillProducts(data, originalData) {
     try {
       if (!data.fcAmount && !data.lcAmount) {
         return
@@ -609,7 +609,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       if (plantId && data.countryId && data.currencyId && data.dispersalType) {
         formik.setFieldValue('products', [])
 
-        var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${
+        var parameters = `_plantId=${editMode ? data.plantId : plantId}&_countryId=${data.countryId}&_dispersalType=${
           data.dispersalType
         }&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}&_includingFees=${
           data.includingFees ? 1 : 0
@@ -626,7 +626,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           InstantCashProduct ? await mergeICRates(res.list, data) : await displayProduct(res.list, data.productId)
         } else {
           formik.setFieldValue('products', [])
-          handleSelectedProduct()
+          handleSelectedProduct(null, null, originalData)
         }
       }
     } catch (error) {
@@ -723,7 +723,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         const res = await refetchForm(recordId)
         const copy = { ...res.record }
         copy.lcAmount = 0
-        await fillProducts(copy)
+        await fillProducts(copy, res.record)
       }
       await getDefaultVAT()
     })()
@@ -923,7 +923,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             dispersalType: formik.values.dispersalType,
                             lcAmount: formik.values.lcAmount || 0,
                             fcAmount: formik.values.fcAmount || 0,
-                            includingFees: formik.values.includingFees
+                            includingFees: formik.values.includingFees,
+                            plantId: formik.values.plantId
                           })
                       }}
                       onClear={() => {
@@ -955,7 +956,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             dispersalType: formik.values.dispersalType,
                             lcAmount: formik.values.lcAmount || 0,
                             fcAmount: formik.values.fcAmount || 0,
-                            includingFees: formik.values.includingFees
+                            includingFees: formik.values.includingFees,
+                            plantId: formik.values.plantId
                           })
                       }}
                       onClear={() => {
