@@ -1,5 +1,5 @@
 import { Grid, FormControlLabel, RadioGroup, Radio } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -17,6 +17,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
   const { getRequestFullEndPoint, getRequest } = useContext(RequestsContext)
   const { userDefaultsData } = useContext(ControlContext)
   const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const [isSubmitting, setSubmitting] = useState(false)
 
   const { formik } = useForm({
     maxAccess: maxAccess,
@@ -45,7 +46,8 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
     {
       key: 'Received',
       condition: true,
-      onClick: onReceived
+      onClick: onReceived,
+      viewLoader: isSubmitting
     },
     {
       key: 'Cancel',
@@ -54,9 +56,11 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
     }
   ]
   async function onReceived() {
+    setSubmitting(true)
     axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/start_PUR`, formik.values)
   }
   async function onCancel() {
+    setSubmitting(false)
     await axios.get(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/cancelTransaction`)
   }
 
@@ -71,16 +75,17 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
     formik.setFieldValue('cashAccountRef', res?.record?.reference)
     formik.setFieldValue('cashAccountName', res?.record?.name)
   }
-  useEffect(() => {
-    ;(async function () {
-      await fillCashAccount()
 
-      const response = await getRequestFullEndPoint({
-        endPoint: `${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/checkDevice?_port=${process.env.NEXT_PUBLIC_POS_PORT}`
-      })
-      formik.setFieldValue('posSelected', response?.data ? 2 : 1)
-    })()
-  }, [])
+  // useEffect(() => {
+  //   ;(async function () {
+  //     await fillCashAccount()
+
+  //     const response = await getRequestFullEndPoint({
+  //       endPoint: `${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/checkDevice?_port=${process.env.NEXT_PUBLIC_POS_PORT}`
+  //     })
+  //     formik.setFieldValue('posSelected', response?.data ? 2 : 1)
+  //   })()
+  // }, [])
 
   return (
     <FormShell
