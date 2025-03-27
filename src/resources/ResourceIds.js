@@ -377,6 +377,8 @@ export const ResourceIds = {
   ThreeDDesign: 48301,
   Casting: 48303,
   Printing: 48302,
+  SalesQuotations: 51301,
+  CorrespondentDispersalControl: 36137,
   CorrespondentDispersal: 36136,
   Rubber: 48305,
   Modeling: 48304,
@@ -384,4 +386,6 @@ export const ResourceIds = {
   DamageReturn: 42333,
   RebuildAging: 31502,
   SAVerifyTransIntegrity: 51601,
+  PUDocumentTypeDefaults: 50103,
+  SyncSalesTrx: 51603,
 }
