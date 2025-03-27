@@ -956,6 +956,18 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
   const miscValue = formik.values.miscAmount == 0 ? 0 : parseFloat(formik.values.miscAmount)
 
+  console.log({
+    totalQty: 0,
+    totalWeight: 0,
+    totalVolume: 0,
+    totalUpo: 0,
+    sumVat: 0,
+    sumExtended: parseFloat(subTotal),
+    tdAmount: parseFloat(formik.values.tdAmount),
+    net: 0,
+    miscAmount: miscValue
+  })
+
   const _footerSummary = getFooterTotals(parsedItemsArray, {
     totalQty: 0,
     totalWeight: 0,

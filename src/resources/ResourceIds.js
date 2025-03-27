@@ -385,4 +385,5 @@ export const ResourceIds = {
   RebuildAging: 31502,
   PUDocumentTypeDefaults: 50103,
   SyncSalesTrx: 51603,
+  PurchaseTransactions: 50303
 }
