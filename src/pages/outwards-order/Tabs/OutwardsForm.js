@@ -281,29 +281,25 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     handleSelectedProduct(selectedRowData)
   }
 
-  function handleSelectedProduct(selectedRowData, clearAmounts, data) {
-    formik.setFieldValue('bankType', selectedRowData?.interfaceId || data?.interfaceId)
-    formik.setFieldValue('productId', selectedRowData?.productId || data?.productId)
-    formik.setFieldValue('commission', selectedRowData?.fees || data?.commission)
-    formik.setFieldValue('defaultCommission', selectedRowData?.fees || data?.commission)
-    formik.setFieldValue('dispersalId', selectedRowData?.dispersalId || data?.dispersalId)
-    formik.setFieldValue(
-      'exRate',
-      selectedRowData?.exRate ? parseFloat(selectedRowData?.exRate).toFixed(5) : parseFloat(data?.exRate).toFixed(5)
-    )
-    formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod || data?.rateCalcMethod)
-    formik.setFieldValue('corId', selectedRowData?.corId || data?.corId)
-    formik.setFieldValue('corRef', selectedRowData?.corRef || data?.corRef)
-    formik.setFieldValue('corName', selectedRowData?.corName || data?.corName)
-    formik.setFieldValue('rateTypeId', selectedRowData?.rateTypeId || data?.rateTypeId)
+  function handleSelectedProduct(selectedRowData, clearAmounts) {
+    formik.setFieldValue('bankType', selectedRowData?.interfaceId)
+    formik.setFieldValue('productId', selectedRowData?.productId)
+    formik.setFieldValue('commission', selectedRowData?.fees)
+    formik.setFieldValue('defaultCommission', selectedRowData?.fees)
+    formik.setFieldValue('dispersalId', selectedRowData?.dispersalId)
+    formik.setFieldValue('exRate', parseFloat(selectedRowData?.exRate).toFixed(5))
+    formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod)
+    formik.setFieldValue('corId', selectedRowData?.corId)
+    formik.setFieldValue('corRef', selectedRowData?.corRef)
+    formik.setFieldValue('corName', selectedRowData?.corName)
+    formik.setFieldValue('rateTypeId', selectedRowData?.rateTypeId)
     calculateValueDate(selectedRowData?.valueDays)
-    if (editMode) formik.setFieldValue('valueDate', formatDateFromApi(data?.valueDate))
     if (clearAmounts) {
       formik.setFieldValue('lcAmount', '')
       formik.setFieldValue('fcAmount', '')
     } else {
-      formik.setFieldValue('lcAmount', formik.values.lcAmount || selectedRowData?.baseAmount || data?.lcAmount)
-      formik.setFieldValue('fcAmount', formik.values.fcAmount || selectedRowData?.originAmount || data?.fcAmount)
+      formik.setFieldValue('lcAmount', formik.values.lcAmount || selectedRowData?.baseAmount)
+      formik.setFieldValue('fcAmount', formik.values.fcAmount || selectedRowData?.originAmount)
     }
   }
 
@@ -604,7 +600,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     return res
   }
 
-  async function fillProducts(data, originalData) {
+  async function fillProducts(data) {
     try {
       if (!data.fcAmount && !data.lcAmount) {
         return
@@ -630,12 +626,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           InstantCashProduct ? await mergeICRates(res.list, data) : await displayProduct(res.list, data.productId)
         } else {
           formik.setFieldValue('products', [])
-          handleSelectedProduct(null, null, originalData)
+          !editMode && handleSelectedProduct(null, null)
         }
       }
     } catch (error) {
       formik.setFieldValue('products', [])
-      handleSelectedProduct()
+      !editMode && handleSelectedProduct()
     }
   }
   async function mergeICRates(data, outwardsList) {
@@ -725,9 +721,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     ;(async function () {
       if (recordId) {
         const res = await refetchForm(recordId)
+
         const copy = { ...res.record }
         copy.lcAmount = 0
-        await fillProducts(copy, res.record)
+        await fillProducts(copy)
       }
       await getDefaultVAT()
     })()
