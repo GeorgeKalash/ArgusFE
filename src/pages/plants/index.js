@@ -122,6 +122,7 @@ const Plants = () => {
           onSearchClear={clear}
           labels={_labels}
           inputSearch={true}
+          previewReport={ResourceIds.Plants}
         />
       </Fixed>
       <Grow>

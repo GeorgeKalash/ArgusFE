@@ -387,5 +387,5 @@ export const ResourceIds = {
   RebuildAging: 31502,
   SAVerifyTransIntegrity: 51601,
   PUDocumentTypeDefaults: 50103,
-  SyncSalesTrx: 51603,
+  SyncSalesTrx: 51603
 }
