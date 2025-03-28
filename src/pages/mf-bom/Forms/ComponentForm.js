@@ -16,7 +16,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomId, msId }) {
+export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomId, msId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -25,6 +25,7 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
   })
 
   const { formik } = useForm({
+    maxAccess,
     initialValues: {
       recordId: null,
       costTypeId: null,
@@ -39,15 +40,15 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
     },
     validateOnChange: false,
     validationSchema: yup.object({
-      itemId: yup.string().required(),
+      itemId: yup.number().required(),
       qty: yup.number().required()
     }),
-    onSubmit: async obj => {
+    onSubmit: obj => {
       const data = {
         ...obj,
         baseQty: obj.qty
       }
-      await postRequest({
+      postRequest({
         extension: ManufacturingRepository.Component.set,
         record: JSON.stringify(data)
       }).then(res => {
@@ -58,6 +59,7 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
           toast.success(platformLabels.Edited)
         }
         invalidate()
+        window.close()
       })
     }
   })
@@ -85,7 +87,7 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
     if (itemId) {
       const res = await getRequest({
         extension: InventoryRepository.Cost.get,
-        parameters: '_itemId=' + itemId
+        parameters: `_itemId=${itemId}`
       })
 
       return res?.record?.currentCost
@@ -119,7 +121,7 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
                   { key: 'name', value: 'Name' }
                 ]}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('itemId', newValue?.recordId)
+                  formik.setFieldValue('itemId', newValue?.recordId || null)
                   formik.setFieldValue('itemName', newValue?.name)
                   formik.setFieldValue('sku', newValue?.sku)
                   formik.setFieldValue('msId', newValue?.msId)
@@ -148,6 +150,7 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
                 onChange={(event, newValue) => {
                   formik.setFieldValue('muId', newValue?.recordId || null)
                 }}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -179,8 +182,9 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('qty', 0)}
                 error={formik.touched.qty && Boolean(formik.errors.qty)}
-                decimalScale={5}
-                maxLength={12}
+                decimalScale={4}
+                allowNegative={false}
+                maxLength={11}
               />
             </Grid>
             <Grid item xs={12}>

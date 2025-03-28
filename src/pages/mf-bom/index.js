@@ -44,7 +44,6 @@ const BillOfMaterials = () => {
     endpointId: ManufacturingRepository.BillOfMaterials.page,
     datasetId: ResourceIds.BillOfMaterials,
     search: {
-      endpointId: ManufacturingRepository.BillOfMaterials.snapshot,
       searchFn: fetchWithSearch
     }
   })
@@ -143,7 +142,6 @@ const BillOfMaterials = () => {
       </Fixed>
       <Grow>
         <Table
-          name={'mf-bom'}
           columns={columns}
           gridData={data}
           rowId={['recordId']}

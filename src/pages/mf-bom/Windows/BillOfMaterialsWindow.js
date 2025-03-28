@@ -8,7 +8,7 @@ const BillOfMaterialsWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId: recordId || null
+    recordId
   })
 
   const tabs = [{ label: labels.BillOfMaterials }, { label: labels.Component, disabled: !store.recordId }]

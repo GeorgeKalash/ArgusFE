@@ -50,7 +50,7 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
       name: yup.string().required(),
       reference: yup.string().required(),
       type: yup.string().required(),
-      itemId: yup.string().required(),
+      itemId: yup.number().required(),
       activeStatus: yup.string().required(),
       version: yup.string().required(),
       date: yup.date().required(),
@@ -197,7 +197,7 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('activeStatus', newValue?.key)
+                  formik.setFieldValue('activeStatus', newValue?.key || null)
                 }}
                 error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
               />
