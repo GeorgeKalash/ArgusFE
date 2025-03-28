@@ -515,5 +515,5 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
     }
   }, [labels, datasets, collapsed])
 
-  return <canvas id={id} style={{ height: '300px', width: '100%' }}></canvas>
+  return <canvas id={id} style={{ height: '350px', width: '100%' }}></canvas>
 }

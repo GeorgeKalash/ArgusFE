@@ -305,10 +305,7 @@ const RetailCompFigures = () => {
             <Box
               sx={{
                 display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                width: '100%',
-                padding: '8px'
+                justifyContent: 'flex-end'
               }}
             >
               <IconButton
