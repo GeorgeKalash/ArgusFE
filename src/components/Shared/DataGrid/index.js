@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import { Box, IconButton } from '@mui/material'
+import { Box, Checkbox, Grid, IconButton } from '@mui/material'
 import components from './components'
 import { CacheStoreProvider } from 'src/providers/CacheStoreContext'
 import { GridDeleteIcon } from '@mui/x-data-grid'
@@ -189,15 +189,6 @@ export function DataGrid({
       setReady(false)
     }
   }, [ready, value])
-
-  useEffect(() => {
-    if (gridApiRef.current && rowSelectionModel) {
-      const rowNode = gridApiRef.current.getRowNode(rowSelectionModel)
-      if (rowNode) {
-        rowNode.setSelected(true)
-      }
-    }
-  }, [rowSelectionModel])
 
   useEffect(() => {
     if (gridApiRef.current && rowSelectionModel) {
@@ -560,6 +551,31 @@ export function DataGrid({
       sortable: false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
+      ...(column?.checkAll?.visible && {
+        headerComponent: params => {
+          const selectAll = e => {
+            if (column?.checkAll?.onChange) {
+              column?.checkAll?.onChange({ checked: e.target?.checked })
+            }
+          }
+
+          return (
+            <Grid container justifyContent='center' alignItems='center'>
+              <Checkbox
+                checked={column?.checkAll?.value}
+                onChange={e => {
+                  selectAll(e)
+                }}
+                sx={{
+                  width: '20%',
+                  height: '20%'
+                }}
+                disabled={column.checkAll?.disabled}
+              />
+            </Grid>
+          )
+        }
+      }),
       cellEditorParams: { maxAccess },
       cellStyle: getCellStyle,
       suppressKeyboardEvent: params => {
@@ -615,11 +631,12 @@ export function DataGrid({
   useEffect(() => {
     function handleBlur(event) {
       if (
-        gridContainerRef.current &&
-        !gridContainerRef.current.contains(event.target) &&
-        gridApiRef.current?.getEditingCells()?.length > 0 &&
-        !event.target.classList.contains('MuiBox-root') &&
-        !event.target.classList.contains('MuiAutocomplete-option')
+        (gridContainerRef.current &&
+          !gridContainerRef.current.contains(event.target) &&
+          gridApiRef.current?.getEditingCells()?.length > 0 &&
+          !event.target.classList.contains('MuiBox-root') &&
+          !event.target.classList.contains('MuiAutocomplete-option')) ||
+        event.target.closest('.ag-header-row')
       ) {
         gridApiRef.current?.stopEditing()
       } else {
