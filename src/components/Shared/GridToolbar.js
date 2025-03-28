@@ -1,9 +1,14 @@
 import { Box, Button, Grid, Tooltip, DialogActions } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ControlContext } from 'src/providers/ControlContext'
 import { getButtons } from './Buttons'
+import CustomComboBox from '../Inputs/CustomComboBox'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useWindow } from 'src/windows'
+import PreviewReport from './PreviewReport'
 
 const GridToolbar = ({
   onAdd,
@@ -17,13 +22,18 @@ const GridToolbar = ({
   onSearchChange,
   disableAdd = false,
   actions = [],
+  previewReport,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const addBtnVisible = onAdd && maxAccess > TrxType.GET
+  const { getRequest } = useContext(RequestsContext)
   const [searchValue, setSearchValue] = useState('')
   const { platformLabels } = useContext(ControlContext)
   const [tooltip, setTooltip] = useState('')
+  const { stack } = useWindow()
+  const [selectedReport, setSelectedReport] = useState(null)
+  const [reportStore, setReportStore] = useState([])
 
   function clear() {
     setSearchValue('')
@@ -38,6 +48,39 @@ const GridToolbar = ({
   const handleButtonMouseLeave = () => {
     setTooltip(null)
   }
+
+  const getReportLayout = () => {
+    setReportStore([])
+
+    getRequest({
+      extension: SystemRepository.ReportLayout,
+      parameters: `_resourceId=${previewReport}`
+    }).then(res => {
+      if (res?.list) {
+        const formattedReports = res.list.map(item => ({
+          api_url: item.api,
+          reportClass: item.instanceName,
+          parameters: item.parameters,
+          layoutName: item.layoutName,
+          assembly: 'ArgusRPT.dll'
+        }))
+        setReportStore(formattedReports)
+        if (formattedReports.length > 0) {
+          setSelectedReport(formattedReports[0])
+        }
+      }
+    })
+  }
+
+  useEffect(() => {
+    if (previewReport && reportStore.length > 0) {
+      setSelectedReport(reportStore[0])
+    }
+  }, [previewReport, reportStore])
+
+  useEffect(() => {
+    if (previewReport) getReportLayout()
+  }, [])
 
   const buttons = getButtons(platformLabels)
 
@@ -160,8 +203,57 @@ const GridToolbar = ({
             </Grid>
           </Grid>
         </Grid>
-        <Grid item>{rightSection}</Grid>
+        {previewReport && (
+          <Grid item>
+            <Grid item sx={{ display: 'flex', mr: 2 }}>
+              <CustomComboBox
+                label={platformLabels.SelectReport}
+                valueField='caption'
+                displayField='layoutName'
+                store={reportStore}
+                value={selectedReport}
+                onChange={(e, newValue) => setSelectedReport(newValue)}
+                sx={{ width: 250 }}
+                disableClearable
+              />
+              <Button
+                variant='contained'
+                disabled={!selectedReport}
+                onClick={() =>
+                  stack({
+                    Component: PreviewReport,
+                    props: {
+                      selectedReport: selectedReport,
+                      outerGrid: true,
+                      onSuccess: () => {}
+                    },
+                    width: 1000,
+                    height: 500,
+                    title: platformLabels.PreviewReport
+                  })
+                }
+                sx={{
+                  ml: 2,
+                  backgroundColor: '#231F20',
+                  '&:hover': {
+                    backgroundColor: '#231F20',
+                    opacity: 0.8
+                  },
+                  width: 'auto',
+                  height: '35px',
+                  objectFit: 'contain'
+                }}
+                size='small'
+              >
+                <Tooltip title={platformLabels.Preview}>
+                  <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
+                </Tooltip>
+              </Button>
+            </Grid>
+          </Grid>
+        )}
       </Grid>
+      <Grid item>{rightSection}</Grid>
       {bottomSection}
     </DialogActions>
   )
