@@ -39,6 +39,7 @@ const Table = ({
   handleCheckboxChange = '',
   showSelectAll = true,
   onSelectionChange,
+  selectionMode = 'row',
   rowDragManaged = false,
   onRowDragEnd = false,
   ...props
@@ -515,8 +516,17 @@ const Table = ({
     const [tooltipOpen, setTooltipOpen] = useState(false)
 
     const handleClick = event => {
-      if (onSelectionChange) {
-        onSelectionChange(params.data)
+      if (selectionMode === 'row' && onSelectionChange) {
+        onSelectionChange(params.data, params.rowIndex)
+      } else if (selectionMode === 'column' && onSelectionChange) {
+        const columnValues = params.api.getDisplayedRowCount()
+          ? Array.from(
+              { length: params.api.getDisplayedRowCount() },
+              (_, i) => params.api.getDisplayedRowAtIndex(i).data[params.colDef.field]
+            )
+          : []
+
+        onSelectionChange(columnValues, params.colDef.field)
       }
 
       const range = document.createRange()
