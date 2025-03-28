@@ -55,7 +55,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       rows: [
         {
           id: 1,
-          poId: null,
+          poId: recordId,
           sku: '',
           itemName: '',
           qty: null,
@@ -69,6 +69,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
+      notes: yup.string().required(),
       rows: yup
         .array()
         .of(
@@ -91,8 +92,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       const updatedRows = formik.values.rows.map((prodDetails, index) => {
         return {
           ...prodDetails,
-
-          poId: 0,
+          poId: recordId ?? 0,
           seqNo: index + 1
         }
       })
@@ -369,6 +369,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
                     label={labels.description}
                     value={formik?.values?.notes}
                     rows={2.5}
+                    required
                     readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
