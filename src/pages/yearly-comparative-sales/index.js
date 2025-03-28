@@ -289,9 +289,9 @@ const YearlyComparativeSales = () => {
       </Fixed>
       <Grow>
         <Grid container sx={{ display: 'flex', flex: 1 }} spacing={2}>
-          <Grid item xs={2} sx={{ display: 'flex', flex: 1 }}>
-            <Grid container sx={{ display: 'flex', flex: 1 }} spacing={2}>
-              <Grid item xs={12} sx={{ display: 'flex', flex: 1 }}>
+          <Grid item xs={2}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
                 <Table
                   name='fiscalTable'
                   columns={[
@@ -307,6 +307,7 @@ const YearlyComparativeSales = () => {
                   isLoading={false}
                   maxAccess={access}
                   pagination={false}
+                  height='300px'
                   handleCheckboxChange={() =>
                     setDisbalePreview(
                       fiscalYears.filter(yearObj => yearObj.checked).map(yearObj => yearObj.year).length == 0
