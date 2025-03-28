@@ -10,7 +10,6 @@ export const FoundryRepository = {
   },
   Wax: {
     page: service + 'pageWAX',
-    qry: service + 'qryWAX',
     snapshot: service + 'snapshotWAX',
     set: service + 'setWAX',
     set2: service + 'set2WAX',
