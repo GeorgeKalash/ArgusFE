@@ -309,6 +309,75 @@ export const LineChart = ({ id, labels, data, label }) => {
   return <canvas id={id}></canvas>
 }
 
+export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
+  useEffect(() => {
+    const ctx = document.getElementById(id).getContext('2d')
+
+    const datasetConfig = datasets
+      .map((data, index) => {
+        if (data.length === 0) return null
+
+        const color = getColorForIndex(index)
+        const label = datasetLabels && datasetLabels[index] ? datasetLabels[index] : ``
+
+        return {
+          label,
+          data,
+          fill: false,
+          borderColor: color,
+          backgroundColor: color,
+          borderWidth: 2,
+          pointRadius: 5,
+          tension: 0.2
+        }
+      })
+      .filter(Boolean)
+
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: datasetConfig
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: datasetConfig.length > 0,
+            position: 'left'
+          },
+          tooltip: {
+            enabled: true,
+            mode: 'index',
+            intersect: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            ticks: {
+              callback: value => value.toLocaleString()
+            }
+          }
+        }
+      }
+    })
+
+    return () => {
+      chart.destroy()
+    }
+  }, [id, labels, datasets, datasetLabels])
+
+  return <canvas id={id}></canvas>
+}
+
+const getColorForIndex = index => {
+  const colors = ['#808000', '#1F3BB3', '#00FF00', '#FF5733', '#FFC300', '#800080']
+
+  return colors[index % colors.length]
+}
+
 export const PieChart = ({ id, labels, data, label }) => {
   useEffect(() => {
     const ctx = document.getElementById(id).getContext('2d')
