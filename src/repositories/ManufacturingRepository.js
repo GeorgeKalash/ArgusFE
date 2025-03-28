@@ -233,5 +233,15 @@ export const ManufacturingRepository = {
     page: service + 'pageDMR',
     snapshot: service + 'snapshotDMR',
     post: service + 'postDMR'
+  },
+  Assembly: {
+    get: service + 'getASM',
+    set: service + 'setASM',
+    set2: service + 'set2ASM',
+    del: service + 'delASM',
+    page: service + 'pageASM',
+    snapshot: service + 'snapshotASM',
+    post: service + 'postASM',
+    unpost: service + 'unpostASM'
   }
 }
