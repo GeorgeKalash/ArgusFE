@@ -3,7 +3,7 @@ import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
-import { Grid } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -302,24 +302,33 @@ const RetailCompFigures = () => {
               transition: 'all 0.4s ease'
             }}
           >
-            <IconButton
-              onClick={() => setCollapsed(!collapsed)}
+            <Box
               sx={{
-                position: 'absolute',
-                right: 18,
-                bottom: collapsed && 5,
-                color: 'black',
-                backgroundColor: '#f0f0f0',
-                borderRadius: '30%',
-                padding: 1,
-                '&:hover': {
-                  backgroundColor: '#d9d9d9'
-                }
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                width: '100%',
+                padding: '8px'
               }}
-              size='small'
             >
-              {collapsed ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
-            </IconButton>
+              <IconButton
+                onClick={() => setCollapsed(!collapsed)}
+                sx={{
+                  display: 'flex',
+                  margin: 2,
+                  color: 'black',
+                  backgroundColor: '#f0f0f0',
+                  borderRadius: '30%',
+                  padding: 1,
+                  '&:hover': {
+                    backgroundColor: '#d9d9d9'
+                  }
+                }}
+                size='small'
+              >
+                {collapsed ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
+              </IconButton>
+            </Box>
             {!collapsed && (
               <CardContent sx={{ p: '8px !important' }}>
                 <CompBarChart
