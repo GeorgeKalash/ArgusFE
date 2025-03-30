@@ -8,7 +8,7 @@ import { useWindow } from 'src/windows'
 import POSForm from 'src/pages/rt-receipt-vouchers/forms/POSForm'
 
 export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
-  const { labels: labels } = useResourceQuery({
+  const { labels, access } = useResourceQuery({
     datasetId: ResourceIds?.POSPayment
   })
   const { stack } = useWindow()
@@ -27,7 +27,8 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
         paidAmount: 0,
         returnedAmount: 0,
         bankFees: '',
-        receiptRef: ''
+        receiptRef: '',
+        pos: true
       }
     ]
 
@@ -221,14 +222,17 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     },
     {
       component: 'button',
-      name: 'POS',
+      name: 'pos',
+      props: {
+        imgSrc: '/images/buttonsIcons/open-external.png'
+      },
       label: labels.pos,
       onClick: (e, row, update, updateRow) => {
         stack({
           Component: POSForm,
-          props: {},
+          props: { labels, form: rest.formik, amount: row?.amount, maxAccess: access },
           width: 700,
-          title: labels?.POS
+          title: labels?.pos
         })
       }
     }
