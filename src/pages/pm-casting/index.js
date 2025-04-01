@@ -38,8 +38,7 @@ const Casting = () => {
     refetch,
     access,
     invalidate,
-    filterBy,
-    clearFilter
+    filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ProductModelingRepository.Casting.page,
@@ -138,37 +137,10 @@ const Casting = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          labels={labels}
-          maxAccess={access}
-          onApply={onApply}
-          onAdd={add}
-          reportName={'PMCAS'}
-        />
+        <RPBGridToolbar labels={labels} maxAccess={access} filterBy={filterBy} onAdd={add} reportName={'PMCAS'} />
       </Fixed>
       <Grow>
         <Table

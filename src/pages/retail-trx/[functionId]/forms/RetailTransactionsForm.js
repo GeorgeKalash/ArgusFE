@@ -78,7 +78,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
   const { documentType, maxAccess } = useDocumentType({
     functionId: functionId,
     access: access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   const initialValues = {
@@ -89,7 +90,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       recordId: recordId || null,
       date: new Date(),
       reference: null,
-      dtId: documentType?.dtId,
+      dtId: null,
       functionId: functionId,
       posId: parseInt(posUser?.posId),
       currencyId: null,
@@ -182,6 +183,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -189,7 +191,6 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       header: yup.object({
         date: yup.string().required(),
         dtId: yup.string().required(),
-        spId: yup.string().required(),
         name: yup.string().test('Name-Required', 'Name is required when street1 or street2 has a value', function () {
           const { street1, street2, name, phone, cityId } = this.parent
 
@@ -267,7 +268,6 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       record: JSON.stringify(payload)
     })
   }
-
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
@@ -1052,12 +1052,6 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
   }, [totalQty, amount, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('header.dtId', documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
-  useEffect(() => {
     ;(async function () {
       if (recordId) {
         await refetchForm(recordId)
@@ -1097,7 +1091,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                         : response?.record?.documentTypes?.filter(item => item.activeStatus == 1)
                     }}
                     parameters={`_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`}
-                    name='dtId'
+                    name='header.dtId'
                     readOnly={formik?.values?.items?.some(item => item.sku)}
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -1111,24 +1105,24 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     onChange={async (_, newValue) => {
                       formik.setFieldValue('header.dtId', newValue?.recordId)
                     }}
-                    error={formik.errors?.dtId && Boolean(formik.errors?.header?.dtId)}
+                    error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='reference'
+                    name='header.reference'
                     label={labels.reference}
                     value={formik?.values?.header?.reference}
                     maxAccess={!editMode && maxAccess}
                     readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.reference', '')}
-                    error={formik.errors?.header?.reference && Boolean(formik.errors?.header?.reference)}
+                    error={formik.touched?.header?.reference && Boolean(formik.errors?.header?.reference)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
-                    name='date'
+                    name='header.date'
                     required
                     label={labels.date}
                     readOnly
@@ -1149,7 +1143,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                         : response?.record?.salesPeople?.filter(item => item.isInactive !== true)
                     }}
                     parameters={`_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`}
-                    name='spId'
+                    name='header.spId'
                     readOnly={isPosted}
                     label={labels.salesPerson}
                     columnsInDropDown={[
@@ -1169,7 +1163,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='KGmetalPrice'
+                    name='header.KGmetalPrice'
                     maxAccess={maxAccess}
                     label={labels.metalPrice}
                     value={formik.values.header.KGmetalPrice}
@@ -1177,7 +1171,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     readOnly={!formik.values.baseMetalCuId || isPosted}
                     hidden={(!editMode && !formik.values.baseMetalCuId) || (!editMode && formik.values.header.dtId)}
                     onClear={() => formik.setFieldValue('header.KGmetalPrice', '')}
-                    error={formik.errors?.header?.KGmetalPrice && Boolean(formik.errors?.header?.KGmetalPrice)}
+                    error={formik.touched?.header?.KGmetalPrice && Boolean(formik.errors?.header?.KGmetalPrice)}
                   />
                 </Grid>
               </Grid>
@@ -1187,7 +1181,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='name'
+                    name='header.name'
                     label={labels.Name}
                     value={formik?.values?.header?.name}
                     maxAccess={maxAccess}
@@ -1214,7 +1208,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='street1'
+                    name='header.street1'
                     label={labels.street}
                     value={formik?.values?.header?.street1}
                     maxAccess={maxAccess}
@@ -1241,7 +1235,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='street2'
+                    name='header.street2'
                     label={labels.street2}
                     value={formik?.values?.header?.street2}
                     maxAccess={maxAccess}
@@ -1263,7 +1257,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                       }))
                       setAddressModified(true)
                     }}
-                    error={formik.errors?.header?.street2 && Boolean(formik.errors?.header?.street2)}
+                    error={formik.touched?.header?.street2 && Boolean(formik.errors?.header?.street2)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1275,7 +1269,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     }}
                     valueField='name'
                     displayField='name'
-                    name='city'
+                    name='header.city'
                     label={labels.city}
                     readOnly={isPosted}
                     form={formik}
@@ -1297,7 +1291,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='phone'
+                    name='header.phone'
                     label={labels.phone}
                     value={formik.values.header.phone}
                     readOnly={isPosted}
@@ -1331,67 +1325,67 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='posRef'
+                    name='header.posRef'
                     label={labels.pos}
                     readOnly
                     value={formik?.values?.header?.posRef}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.posRef', '')}
-                    error={formik.errors?.header?.posRef && Boolean(formik.errors?.header?.posRef)}
+                    error={formik.touched?.header?.posRef && Boolean(formik.errors?.header?.posRef)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='plantName'
+                    name='header.plantName'
                     label={labels.plant}
                     value={formik?.values?.header?.plantName}
                     maxAccess={maxAccess}
                     readOnly
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.plantName', '')}
-                    error={formik.errors?.header?.plantName && Boolean(formik.errors?.header?.plantName)}
+                    error={formik.touched?.header?.plantName && Boolean(formik.errors?.header?.plantName)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='siteName'
+                    name='header.siteName'
                     label={labels.site}
                     value={formik?.values?.header?.siteName}
                     maxAccess={maxAccess}
                     readOnly
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.siteName', '')}
-                    error={formik.errors?.header?.siteName && Boolean(formik.errors?.header?.siteName)}
+                    error={formik.touched?.header?.siteName && Boolean(formik.errors?.header?.siteName)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='currencyName'
+                    name='header.currencyName'
                     label={labels.currency}
                     value={formik?.values?.header?.currencyName}
                     maxAccess={maxAccess}
                     readOnly
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.currencyName', '')}
-                    error={formik.errors?.header?.currencyName && Boolean(formik.errors?.header?.currencyName)}
+                    error={formik.touched?.header?.currencyName && Boolean(formik.errors?.header?.currencyName)}
                   />
                 </Grid>
                 <Grid item xs={10}>
                   <CustomTextField
-                    name='taxRef'
+                    name='header.taxRef'
                     label={labels.tax}
                     value={formik?.values?.header?.taxRef}
                     maxAccess={maxAccess}
                     readOnly
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.taxRef', '')}
-                    error={formik.errors?.header?.axName && Boolean(formik.errors?.header?.taxRef)}
+                    error={formik.touched?.header?.taxRef && Boolean(formik.errors?.header?.taxRef)}
                   />
                 </Grid>
                 <Grid item xs={2}>
                   <CustomCheckBox
-                    name='isVatable'
+                    name='header.isVatable'
                     value={formik.values?.header?.isVatable}
                     onChange={event => formik.setFieldValue('header.isVatable', event.target.checked)}
                     label={labels.vat}
@@ -1406,7 +1400,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomTextArea
-                    name='deliveryNotes'
+                    name='header.deliveryNotes'
                     label={labels.notes}
                     value={formik.values.header.deliveryNotes}
                     rows={3.5}
@@ -1477,7 +1471,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
               <Grid container item xs={6} direction='column' spacing={1} sx={{ mt: 1 }}>
                 <Grid item>
                   <CustomNumberField
-                    name='weight'
+                    name='header.weight'
                     maxAccess={maxAccess}
                     label={labels.totWeight}
                     value={totalWeight}
@@ -1485,13 +1479,19 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                   />
                 </Grid>
                 <Grid item>
-                  <CustomNumberField name='qty' maxAccess={maxAccess} label={labels.totQty} value={totalQty} readOnly />
+                  <CustomNumberField
+                    name='header.qty'
+                    maxAccess={maxAccess}
+                    label={labels.totQty}
+                    value={totalQty}
+                    readOnly
+                  />
                 </Grid>
               </Grid>
               <Grid container item xs={6} direction='column' spacing={1} sx={{ mt: 1 }}>
                 <Grid item>
                   <CustomNumberField
-                    name='subTotal'
+                    name='header.subTotal'
                     maxAccess={maxAccess}
                     label={labels.subtotal}
                     value={subtotal}
@@ -1500,7 +1500,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                 </Grid>
                 <Grid item>
                   <CustomNumberField
-                    name='vatAmount'
+                    name='header.vatAmount'
                     maxAccess={maxAccess}
                     label={labels.vat}
                     value={vatAmount}
@@ -1508,11 +1508,17 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                   />
                 </Grid>
                 <Grid item>
-                  <CustomNumberField name='amount' maxAccess={maxAccess} label={labels.net} value={amount} readOnly />
+                  <CustomNumberField
+                    name='header.amount'
+                    maxAccess={maxAccess}
+                    label={labels.net}
+                    value={amount}
+                    readOnly
+                  />
                 </Grid>
                 <Grid item>
                   <CustomNumberField
-                    name='balance'
+                    name='header.balance'
                     maxAccess={maxAccess}
                     label={labels.balance}
                     value={totBalance}

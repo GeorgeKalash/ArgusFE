@@ -48,7 +48,6 @@ const FiCashTransfers = () => {
     query: { data },
     labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     refetch,
     access,
@@ -144,37 +143,10 @@ const FiCashTransfers = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          labels={labels}
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          reportName={'CATFR'}
-        />
+        <RPBGridToolbar labels={labels} onAdd={add} maxAccess={access} reportName={'CATFR'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

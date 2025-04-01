@@ -66,7 +66,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
   const initialValues = {
     recordId: recordId,
-    dtId: documentType?.dtId,
+    dtId: null,
     reference: '',
     date: new Date(),
     dueDate: new Date(),
@@ -151,6 +151,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -1167,10 +1168,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
-
-  useEffect(() => {
     if (reCal) {
       let currentTdAmount = (parseFloat(formik.values.tdPct) * parseFloat(subtotal)) / 100
       recalcGridVat(formik.values.tdType, formik.values.tdPct, currentTdAmount, formik.values.currentDiscount)
@@ -1276,6 +1273,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     displayField='name'
                     values={formik.values}
                     displayFieldWidth={1.5}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('spId', newValue ? newValue.recordId : null)
                     }}
@@ -1488,6 +1486,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 readOnly={isClosed}
                 values={formik.values}
                 displayFieldWidth={1.5}
+                maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('szId', newValue ? newValue.recordId : null)
                 }}

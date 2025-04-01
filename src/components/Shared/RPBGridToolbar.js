@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { useWindow } from 'src/windows'
 import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 import { Grid } from '@mui/material'
+import { useError } from 'src/error'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const RPBGridToolbar = ({
   add,
@@ -13,15 +15,29 @@ const RPBGridToolbar = ({
   onSearch,
   onClear,
   hasSearch = true,
+  filterBy,
+  paramsRequired = false,
   ...rest
 }) => {
   const { stack } = useWindow()
   const [rpbParams, setRpbParams] = useState([])
   const [search, setSearch] = useState('')
+  const { stack: stackError } = useError()
+  const { platformLabels } = useContext(ControlContext)
 
   useEffect(() => {
     setRpbParams([])
   }, [reportName])
+
+  const filters = (filter, params) => {
+    if (paramsRequired && !params) {
+      stackError({
+        message: platformLabels?.noParamsErrorMessage
+      })
+    }
+    if (filter) filterBy('qry', filter?.replace(/\+/g, '%2B'), !!reportName)
+    else filterBy('params', params)
+  }
 
   const openRPB = () => {
     stack({
@@ -35,6 +51,16 @@ const RPBGridToolbar = ({
       height: 500,
       title: 'Report Parameters Browser'
     })
+  }
+
+  const formatDataDictForApi = rpbParams => {
+    const formattedData = rpbParams.reduce((acc, { display }, index) => {
+      acc[index] = display || ''
+
+      return acc
+    }, {})
+
+    return formattedData
   }
 
   const formatDataForApi = rpbParams => {
@@ -55,15 +81,7 @@ const RPBGridToolbar = ({
     return formattedData
   }
 
-  const formatDataDictForApi = rpbParams => {
-    const formattedData = rpbParams.reduce((acc, { display }, index) => {
-      acc[index] = display || ''
-
-      return acc
-    }, {})
-
-    return formattedData
-  }
+  const reportParams = formatDataForApi(rpbParams)
 
   const actions = [
     {
@@ -75,27 +93,29 @@ const RPBGridToolbar = ({
     {
       key: 'GO',
       condition: true,
-      onClick: () =>
-        onApply({
-          rpbParams: formatDataForApi(rpbParams),
-          paramsDict: formatDataDictForApi(rpbParams),
-          search: search
-        }),
+      onClick: () => {
+        if (typeof filterBy === 'function') filters(search, reportParams)
+        else
+          onApply({
+            rpbParams: reportParams,
+            paramsDict: formatDataDictForApi(rpbParams),
+            search: search
+          })
+      },
       disabled: false
     }
   ]
 
   return (
     <GridToolbar
-      onSearch={value => {
-        value != '' ? onSearch(value) : (setSearch(''), onClear())
-      }}
+      onSearch={value => filters(value, reportParams)}
       onSearchClear={() => {
         setSearch('')
-        onClear()
+        if (typeof filterBy === 'function') filterBy('params', reportParams)
+        else onClear(reportParams)
       }}
       onSearchChange={value => {
-        value != '' ? setSearch(value) : (setSearch(''), onClear())
+        value != '' ? setSearch(value) : setSearch('')
       }}
       inputSearch={hasSearch}
       actions={actions}

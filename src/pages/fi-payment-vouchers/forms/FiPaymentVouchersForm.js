@@ -32,7 +32,7 @@ import { RateDivision } from 'src/resources/RateDivision'
 
 export default function FiPaymentVouchersForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const [defaultsDataState, setDefaultsDataState] = useState(null)
   const { stack } = useWindow()
 
@@ -46,7 +46,10 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     endpointId: FinancialRepository.PaymentVouchers.page
   })
 
+  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       reference: '',
@@ -54,7 +57,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       accountType: '',
       currencyId: null,
       currencyName: '',
-      paymentMethod: 0,
+      paymentMethod: null,
       date: new Date(),
       glId: null,
       amount: null,
@@ -65,8 +68,8 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       exRate: 1,
       rateCalcMethod: 1,
       baseAmount: null,
-      cashAccountId: null,
-      dtId: documentType?.dtId,
+      cashAccountId,
+      dtId: null,
       status: 1,
       releaseStatus: null,
       plantId: parseInt(plantId),
@@ -125,6 +128,22 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       invalidate()
     }
   })
+
+  const getCashAccount = async cashAccountId => {
+    if (cashAccountId) {
+      const { record: cashAccountResult } = await getRequest({
+        extension: CashBankRepository.CbBankAccounts.get,
+        parameters: `_recordId=${cashAccountId}`
+      })
+
+      
+      formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
+      formik.setFieldValue('cashAccountName', cashAccountResult.name)
+      formik.setFieldValue('paymentMethod', 1)
+    } else {
+      formik.setFieldValue('paymentMethod', null)
+    }
+  }
 
   const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
     endpointId: MultiCurrencyRepository.Currency.get,
@@ -213,6 +232,28 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     }
   }
 
+  async function getDTD(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: FinancialRepository.FIDocTypeDefaults.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      const cashAccountValue = res?.record?.cashAccountId ? res?.record?.cashAccountId : cashAccountId
+
+      formik.setFieldValue('cashAccountId', cashAccountValue)
+      getCashAccount(cashAccountValue)
+
+      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
+
+      return res
+    }
+  }
+
+  useEffect(() => {
+    getDTD(formik?.values?.dtId)
+  }, [formik.values.dtId])
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -225,6 +266,11 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
           ...res.record,
           date: formatDateFromApi(res.record.date)
         })
+      } else {
+        const cashAccountId = formik.values.cashAccountId
+        if (cashAccountId) {
+          getCashAccount(cashAccountId)
+        }
       }
       getDefaultsData()
     })()
@@ -249,7 +295,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     })
 
     if (res?.recordId) {
-      toast.success('Record Cancelled Successfully')
+      toast.success(platformLabels.Cancelled)
       invalidate()
       const res2 = await getPaymentVouchers(res.recordId)
       res2.record.date = formatDateFromApi(res2.record.date)
@@ -426,6 +472,9 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountType', newValue?.key)
+                  formik.setFieldValue('accountId', null)
+                  formik.setFieldValue('accountRef', '')
+                  formik.setFieldValue('accountName', '')
                 }}
                 error={formik.touched.accountType && Boolean(formik.errors.accountType)}
               />
@@ -455,7 +504,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
-                readOnly={isPosted || isCancelled}
+                readOnly={isPosted || isCancelled || !formik.values.accountType}
                 label={labels.accountReference}
                 valueField='reference'
                 displayField='name'
@@ -478,7 +527,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 parameters={{
                   _type: 0
                 }}
-                name='cashAccountRef'
+                name='cashAccountId'
                 readOnly={isPosted || isCancelled}
                 label={labels.cash}
                 valueField='reference'
@@ -551,7 +600,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 readOnly={isPosted || isCancelled}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('paymentMethod', newValue?.key || null)
+                  formik.setFieldValue('paymentMethod', newValue?.key || '')
                   formik.setFieldValue('checkNo', '')
                   formik.setFieldValue('checkbookId', null)
                 }}

@@ -1,4 +1,4 @@
-import { Button, Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Button, Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -36,7 +36,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   })
 
   const { stack } = useWindow()
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const [defaultsDataState, setDefaultsDataState] = useState(null)
 
   const [initialVatPct, setInitialVatPct] = useState('')
@@ -47,13 +47,15 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     endpointId: FinancialRepository.FiMemo.page
   })
 
+  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
-      dtId: documentType?.dtId || null,
+      dtId: null,
       reference: '',
       date: new Date(),
-      plantId: '',
+      plantId,
       currencyId: '',
       currencyName: '',
       status: '',
@@ -72,15 +74,16 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       dueDate: new Date()
     },
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      amount: yup.number().required(' '),
-      currencyId: yup.string().required(' '),
-      accountId: yup.string().required(' '),
-      subtotal: yup.number().required(' '),
-      date: yup.string().required(' '),
-      dueDate: yup.string().required(' ')
+      amount: yup.number().required(),
+      currencyId: yup.string().required(),
+      accountId: yup.string().required(),
+      subtotal: yup.number().required(),
+      date: yup.string().required(),
+      dueDate: yup.string().required()
     }),
     onSubmit: async obj => {
       if (!obj.recordId) {
@@ -360,6 +363,24 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       title: _labels.MultiCurrencyRate
     })
   }
+
+  async function getDTD(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: FinancialRepository.FIDocTypeDefaults.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
+
+
+      return res
+    }
+  }
+
+  useEffect(() => {
+    getDTD(formik?.values?.dtId)
+  }, [formik.values.dtId])
 
   return (
     <FormShell

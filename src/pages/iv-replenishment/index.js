@@ -101,15 +101,10 @@ const IvReplenishements = () => {
     openForm(obj?.recordId)
   }
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} hasSearch={false} maxAccess={access} reportName={'IRHDR'} onApply={onApply} />
+        <RPBGridToolbar onAdd={add} hasSearch={false} maxAccess={access} reportName={'IRHDR'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

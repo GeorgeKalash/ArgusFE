@@ -48,7 +48,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
 
   const initialValues = {
     recordId: recordId || null,
-    dtId: documentType?.dtId,
+    dtId: null,
     reference: null,
     date: new Date(),
     plantId: null,
@@ -95,6 +95,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -457,9 +458,6 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     formik.setFieldValue('wcRef', res.list[0].workCenterRef)
     formik.setFieldValue('wcName', res.list[0].workCenterName)
   }
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
 
   useEffect(() => {
     ;(async function () {
