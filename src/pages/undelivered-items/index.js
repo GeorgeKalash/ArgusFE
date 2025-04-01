@@ -69,8 +69,6 @@ const UndeliveredItems = () => {
         extension: DeliveryRepository.DeliveriesOrders.gen,
         record: JSON.stringify({ clientId, siteId, notes, items: itemValues })
       }).then(res => {
-        toast.success(platformLabels.Generated)
-
         if (res.recordId) {
           const items = obj.items.map(({ isChecked, ...item }) => ({
             ...item,
@@ -94,6 +92,8 @@ const UndeliveredItems = () => {
             height: 700,
             title: _labels.deliveryOrder
           })
+
+          toast.success(platformLabels.Generated)
         }
       })
     }
@@ -131,7 +131,6 @@ const UndeliveredItems = () => {
       checkAll: {
         value: isCheckedAll,
         visible: true,
-        disabled: !clientId || !siteId,
         onChange({ checked }) {
           const items = formik.values.items.map(({ isChecked, ...item }) => ({
             ...item,
@@ -216,10 +215,8 @@ const UndeliveredItems = () => {
 
         if (deliverNow > balance) {
           const margin = (100 * (deliverNow - balance)) / qty
-
-          if (marginDefault == 0) value = balance
-          else if (margin < marginDefault) value = deliverNow
-          else value = balance
+          if (marginDefault && marginDefault == 0) value = balance
+          else if (marginDefault && margin < marginDefault) value = deliverNow
         } else if (deliverNow < 0) value = 0
 
         update({ deliverNow: value })
