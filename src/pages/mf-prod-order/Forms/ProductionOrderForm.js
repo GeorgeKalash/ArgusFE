@@ -125,30 +125,17 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     }, 0)
     .toFixed(2)
 
-  //   async function onPost() {
-  //     await postRequest({
-  //       extension: ManufacturingRepository.ProductionOrder.post,
-  //       record: JSON.stringify({
-  //         ...formik.values,
-  //         date: formatDateToApi(formik.values.date)
-  //       })
-  //     })
-  //     window.close()
-  //     invalidate()
-  //   }
-
-  //   const onUnpost = async () => {
-  //     const res = await postRequest({
-  //       extension: ManufacturingRepository.ProductionOrder.unpost,
-  //       record: JSON.stringify({
-  //         ...formik.values,
-  //         date: formatDateToApi(formik.values.date)
-  //       })
-  //     })
-  //     toast.success(platformLabels.Unposted)
-  //     refetchForm(res?.recordId)
-  //     invalidate()
-  //   }
+  async function onPost() {
+    await postRequest({
+      extension: ManufacturingRepository.ProductionOrder.post,
+      record: JSON.stringify({
+        ...formik.values,
+        date: formatDateToApi(formik.values.date)
+      })
+    })
+    window.close()
+    invalidate()
+  }
 
   async function getDTD(dtId) {
     if (dtId) {
@@ -259,21 +246,13 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       condition: true,
       onClick: 'onRecordRemarks',
       disabled: !editMode
+    },
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: isPosted || !editMode
     }
-
-    // {
-    //   key: 'Locked',
-    //   condition: isPosted,
-    //   onClick: 'onUnpostConfirmation',
-    //   onSuccess: onUnpost,
-    //   disabled: !editMode
-    // },
-    // {
-    //   key: 'Unlocked',
-    //   condition: !isPosted,
-    //   onClick: onPost,
-    //   disabled: !editMode
-    // }
   ]
 
   return (
