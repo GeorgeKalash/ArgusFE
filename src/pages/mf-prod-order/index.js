@@ -31,7 +31,7 @@ const ProductionOrder = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.ProductionOrder.page,
-    datasetId: ResourceIds.ProductionOrderItem,
+    datasetId: ResourceIds.ProductionOrder,
     filter: {
       filterFn: fetchWithFilter
     }
