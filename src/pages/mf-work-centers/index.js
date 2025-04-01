@@ -101,7 +101,7 @@ const WorkCenter = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} previewReport={ResourceIds.WorkCenters} />
       </Fixed>
       <Grow>
         <Table

@@ -149,6 +149,7 @@ const CbBankAccounts = () => {
           }}
           labels={labels}
           inputSearch={true}
+          previewReport={ResourceIds.CbBankAccounts}
         />
       </Fixed>
       <Grow>
