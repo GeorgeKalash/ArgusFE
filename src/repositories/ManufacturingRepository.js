@@ -235,17 +235,11 @@ export const ManufacturingRepository = {
     post: service + 'postDMR'
   },
   ProductionOrder: {
-    get: service + 'getPO',
     get2: service + 'get2PO',
-    qry: service + 'qryPO',
-    set: service + 'setPO',
     set2: service + 'set2PO',
     del: service + 'delPO',
     page: service + 'pagePO',
     snapshot: service + 'snapshotPO',
     post: service + 'postPO'
-  },
-  ProductionOrderDetail: {
-    qry: service + 'qryPOI'
-  },
+  }
 }
