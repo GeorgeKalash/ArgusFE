@@ -233,5 +233,13 @@ export const ManufacturingRepository = {
     page: service + 'pageDMR',
     snapshot: service + 'snapshotDMR',
     post: service + 'postDMR'
+  },
+  ProductionOrder: {
+    get2: service + 'get2PO',
+    set2: service + 'set2PO',
+    del: service + 'delPO',
+    page: service + 'pagePO',
+    snapshot: service + 'snapshotPO',
+    post: service + 'postPO'
   }
 }
