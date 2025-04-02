@@ -22,6 +22,7 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function ProductionOrderForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -50,8 +51,6 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       notes: '',
       date: new Date(),
       status: 1,
-      wip: 1,
-      rsStatus: '',
       rows: [
         {
           id: 1,
@@ -188,8 +187,8 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       name: 'qty',
       label: labels.qty,
       props: {
-        maxLength: 11,
-        decimalScale: 3
+        maxLength: 12,
+        decimalScale: 2
       }
     },
     {
@@ -375,7 +374,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
         </Grow>
         <Fixed>
           <Grid container xs={6}>
-            <CustomTextField
+            <CustomNumberField
               name='totalQty'
               label={labels.totalQty}
               maxAccess={maxAccess}
