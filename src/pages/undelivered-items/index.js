@@ -24,11 +24,13 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useWindow } from 'src/windows'
 import DeliveriesOrdersForm from '../delivery-orders/Forms/DeliveryOrdersForm'
+import { useError } from 'src/error'
 
 const UndeliveredItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.UndeliveredItems
@@ -64,6 +66,14 @@ const UndeliveredItems = () => {
       const itemValues = items
         .filter(item => item.isChecked)
         .map(({ scheduledDate, functionId, id, isChecked, ...item }) => item)
+
+      if (itemValues?.length < 1) {
+        stackError({
+          message: labels.checkItemsBeforeAppend
+        })
+
+        return
+      }
 
       postRequest({
         extension: DeliveryRepository.DeliveriesOrders.gen,

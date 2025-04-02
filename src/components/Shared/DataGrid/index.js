@@ -9,6 +9,7 @@ import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export function DataGrid({
   name, // maxAccess
@@ -264,7 +265,8 @@ export function DataGrid({
         (allColumns?.[i]?.props?.readOnly &&
           (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
             accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
-      (typeof allColumns?.[i]?.props?.disableCondition !== 'function' || !allColumns?.[i]?.props?.disableCondition(data))
+      (typeof allColumns?.[i]?.props?.disableCondition !== 'function' ||
+        !allColumns?.[i]?.props?.disableCondition(data))
     )
   }
 
@@ -561,14 +563,15 @@ export function DataGrid({
 
           return (
             <Grid container justifyContent='center' alignItems='center'>
-              <Checkbox
+              <CustomCheckBox
                 checked={column?.checkAll?.value}
                 onChange={e => {
                   selectAll(e)
                 }}
                 sx={{
                   width: '20%',
-                  height: '20%'
+                  height: '20%',
+                  marginLeft: '0px !important'
                 }}
                 disabled={column.checkAll?.disabled}
               />
