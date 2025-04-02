@@ -41,7 +41,7 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
     validateOnChange: false,
     validationSchema: yup.object({
       itemId: yup.number().required(),
-      qty: yup.number().required()
+      qty: yup.number().required().moreThan(0)
     }),
     onSubmit: obj => {
       const data = {
