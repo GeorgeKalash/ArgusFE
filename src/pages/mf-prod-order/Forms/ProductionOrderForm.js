@@ -68,7 +68,6 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      notes: yup.string().required(),
       rows: yup
         .array()
         .of(
@@ -347,7 +346,6 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
                     label={labels.description}
                     value={formik?.values?.notes}
                     rows={2.5}
-                    required
                     readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
