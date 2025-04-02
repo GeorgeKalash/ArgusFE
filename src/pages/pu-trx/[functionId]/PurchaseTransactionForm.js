@@ -166,16 +166,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         notes: ''
       }
     ],
-    serials: [
-      {
-        orderId: recordId || 0,
-        seqNo: 1,
-        componentSeqNo: 0,
-        srlSeqNo: null,
-        srlNo: null,
-        weight: null
-      }
-    ],
+    serials: [],
     lots: [],
     taxCodes: []
   }
@@ -248,6 +239,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         return {
           ...restDetails,
           seqNo: id,
+          invoiceId: formik.values.recordId || 0,
           applyVat: isVattable
         }
       })
@@ -1312,8 +1304,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             labels,
             row,
             siteId: formik?.values?.header.siteId,
-            siteName: formik?.values?.header.siteName,
-            siteRef: formik?.values?.header.siteRef,
             maxAccess,
             checkForSiteId: row.qty >= 0 ? false : true,
             updateRow

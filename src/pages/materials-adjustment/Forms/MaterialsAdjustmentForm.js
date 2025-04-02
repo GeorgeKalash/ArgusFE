@@ -29,7 +29,7 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 export default function MaterialsAdjustmentForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -70,16 +70,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         seqNo: ''
       }
     ],
-    serials: [
-      {
-        adjustmentId: recordId || 0,
-        seqNo: 1,
-        componentSeqNo: 0,
-        srlSeqNo: null,
-        srlNo: null,
-        weight: null
-      }
-    ]
+    serials: []
   }
 
   const invalidate = useInvalidate({
@@ -122,6 +113,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
           const updatedSerials = serials.map(serialDetail => {
             return {
               ...serialDetail,
+              seqNo: index + 1,
               srlSeqNo: 0,
               componentSeqNo: 0,
               adjustmentId: formik.values.recordId || 0
@@ -132,6 +124,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
 
         return {
           ...restDetails,
+          adjustmentId: formik.values.recordId || 0,
           qtyInBase: muQty * adjDetail.qty,
           seqNo: index + 1
         }
@@ -268,8 +261,6 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             labels,
             row,
             siteId: row.qty >= 0 ? null : formik?.values?.siteId,
-            siteName: row.qty >= 0 ? null : formik?.values?.siteName,
-            siteRef: row.qty >= 0 ? null : formik?.values?.siteRef,
             maxAccess,
             checkForSiteId: row.qty >= 0 ? false : true,
             updateRow

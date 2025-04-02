@@ -7,7 +7,7 @@ import ResourceComboBox from './ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
 import { useResourceQuery } from 'src/hooks/resource'
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import CustomNumberField from '../Inputs/CustomNumberField'
 import { ResourceLookup } from './ResourceLookup'
@@ -18,26 +18,28 @@ import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
 
-export const SerialsForm = ({ row, siteId, siteName, siteRef, checkForSiteId, window, updateRow }) => {
+export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow }) => {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { systemChecks } = useContext(ControlContext)
   const allowNegativeQty = systemChecks.some(check => check.checkId === SystemChecks.ALLOW_INVENTORY_NEGATIVE_QTY)
-  const [jumpToNextLine, setJumpToNextLine] = useState(false)
+  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
+
+  const { labels, maxAccess } = useResourceQuery({
+    datasetId: ResourceIds.Serial
+  })
 
   const { formik } = useForm({
+    maxAccess,
     initialValues: {
       sku: row?.sku,
       itemName: row?.itemName,
       itemId: row?.itemId,
       siteId,
-      siteName,
-      siteRef,
-      totalWeight: row?.qty ?? 0,
+      totalWeight: row?.qty || 0,
       pieces: null,
       items: row?.serials || []
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       items: yup
@@ -64,16 +66,12 @@ export const SerialsForm = ({ row, siteId, siteName, siteRef, checkForSiteId, wi
     }
   })
 
-  const { labels, maxAccess } = useResourceQuery({
-    datasetId: ResourceIds.Serial
-  })
-
   const weightAssigned = formik.values.items.reduce((weightSum, row) => {
     const weightValue = parseFloat(row.weight) || 0
 
     return weightSum + weightValue
   }, 0)
-  const balance = formik.values.totalWeight - weightAssigned ?? 0
+  const balance = formik.values.totalWeight - weightAssigned || 0
 
   const columns = [
     {
@@ -83,7 +81,11 @@ export const SerialsForm = ({ row, siteId, siteName, siteRef, checkForSiteId, wi
       jumpToNextLine: jumpToNextLine,
       updateOn: 'blur',
       onChange: async ({ row: { update, newRow } }) => {
-        await checkSerialNo(newRow.srlNo, newRow.id, update)
+        const weight = await checkSerialNo(newRow.srlNo, newRow.id, update)
+
+        if (weight) {
+          update({ weight })
+        }
       }
     },
     {
@@ -106,17 +108,6 @@ export const SerialsForm = ({ row, siteId, siteName, siteRef, checkForSiteId, wi
     formik.setFieldValue('items', updatedItems)
   }
 
-
-  useEffect(() => {
-    getSysChecks()
-  }, [systemChecks])
-
-  async function getSysChecks() {
-    const check = systemChecks.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)
-
-    setJumpToNextLine(check?.value)
-  }
-
   const checkSerialNo = async (srlNo, id, update) => {
     if (srlNo) {
       const result = await getRequest({
@@ -135,7 +126,7 @@ export const SerialsForm = ({ row, siteId, siteName, siteRef, checkForSiteId, wi
         })
 
         clearRow(id)
-      } else if (checkForSiteId == true && allowNegativeQty == false && formik.values.siteId) {
+      } else if (checkForSiteId && !allowNegativeQty && formik.values.siteId) {
         const res = await getRequest({
           extension: InventoryRepository.AvailabilitySerial.get,
           parameters: `_srlNo=${srlNo}&_siteId=${formik.values.siteId}`
@@ -148,10 +139,10 @@ export const SerialsForm = ({ row, siteId, siteName, siteRef, checkForSiteId, wi
 
           clearRow(id)
         } else {
-          update({ weight: result.record.weight })
+          return result.record.weight
         }
       } else {
-        update({ weight: result.record.weight })
+        return result.record.weight
       }
     }
   }

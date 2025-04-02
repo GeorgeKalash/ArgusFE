@@ -94,16 +94,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         details: false
       }
     ],
-    serials: [
-      {
-        transferId: recordId || 0,
-        seqNo: 1,
-        componentSeqNo: 0,
-        srlSeqNo: null,
-        srlNo: null,
-        weight: null
-      }
-    ]
+    serials: []
   }
 
   const invalidate = useInvalidate({
@@ -174,7 +165,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       const updatedRows = formik.values.transfers.map((transferDetails, index) => {
         const { serials, ...restDetails } = transferDetails
         if (serials) {
-          const updatedSerials = serials.map((serialDetail, index) => {
+          const updatedSerials = serials.map(serialDetail => {
             return {
               ...serialDetail,
               srlSeqNo: 0,
@@ -513,8 +504,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             labels,
             row,
             siteId: formik?.values?.fromSiteId,
-            siteName: formik?.values?.fromSiteName,
-            siteRef: formik?.values?.fromSiteRef,
             maxAccess: access,
             checkForSiteId: true,
             updateRow

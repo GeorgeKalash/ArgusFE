@@ -194,16 +194,7 @@ export default function SaleTransactionForm({
           taxDetailsButton: false
         }
       ],
-      serials: [
-        {
-          trxId: recordId || 0,
-          seqNo: 1,
-          componentSeqNo: 0,
-          srlSeqNo: null,
-          srlNo: null,
-          weight: null
-        }
-      ],
+      serials: [],
       lots: [],
       taxes: []
     },
@@ -751,8 +742,6 @@ export default function SaleTransactionForm({
             labels,
             row,
             siteId: formik?.values?.header.siteId,
-            siteName: formik?.values?.header.siteName,
-            siteRef: formik?.values?.header.siteRef,
             maxAccess,
             checkForSiteId: true,
             updateRow
@@ -915,10 +904,11 @@ export default function SaleTransactionForm({
   ]
 
   async function getSerials(recordId, seqNo) {
-    return await getRequest({
-      extension: SaleRepository.Serials.qry,
-      parameters: `_trxId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
-    })
+    if (recordId)
+      return await getRequest({
+        extension: SaleRepository.Serials.qry,
+        parameters: `_trxId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
+      })
   }
 
   async function fillForm(saTrxPack, dtInfo) {
