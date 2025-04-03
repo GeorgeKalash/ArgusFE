@@ -64,14 +64,12 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
           date: formatDateToApi(obj.date)
         })
       })
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', response.recordId)
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: response.recordId
-        }))
-      } else toast.success(platformLabels.Edited)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      formik.setFieldValue('recordId', response.recordId)
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: response.recordId
+      }))
 
       invalidate()
     }
@@ -178,8 +176,8 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
                 ]}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('itemId', newValue?.recordId || null)
-                  formik.setFieldValue('itemName', newValue?.name)
-                  formik.setFieldValue('sku', newValue?.sku)
+                  formik.setFieldValue('itemName', newValue?.name || null)
+                  formik.setFieldValue('sku', newValue?.sku || null)
                 }}
                 maxAccess={maxAccess}
                 errorCheck={'itemId'}
@@ -223,7 +221,7 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>

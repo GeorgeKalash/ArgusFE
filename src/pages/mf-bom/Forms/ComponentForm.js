@@ -52,12 +52,9 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
         extension: ManufacturingRepository.Component.set,
         record: JSON.stringify(data)
       }).then(res => {
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', res.recordId)
-        } else {
-          toast.success(platformLabels.Edited)
-        }
+        toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+        formik.setFieldValue('recordId', res.recordId)
+
         invalidate()
         window.close()
       })
@@ -167,7 +164,7 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('siteId', newValue?.recordId)
+                  formik.setFieldValue('siteId', newValue?.recordId || null)
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
