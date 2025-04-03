@@ -79,16 +79,14 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
           itemName: '',
           qty: null,
           pendingQty: null,
-          shipped: null,
-          shippedNow: null,
           shippedNowQty: null,
           shipmentId: null,
-          poSeqNo: null,
+          poSeqNo: 1,
           volume: null,
           weight: null,
           poId: recordId || 0,
           poRef: '',
-          siteId: '',
+          siteId: null,
           siteRef: '',
           siteName: '',
           status: null,
@@ -99,8 +97,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
           muId: null,
           muRef: '',
           msId: null,
-          baseQty: null,
-          muQty: null,
+          baseQty: 0,
+          muQty: 0,
           shipmentId: null,
           lotButton: true
         }
@@ -269,7 +267,6 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
   }
 
   async function openGenerateInvoiceForm() {
-
     stack({
       Component: GenerateInvoiceForm,
       props: {
@@ -282,7 +279,6 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       height: 550,
       title: platformLabels.GenerateInvoice
     })
-
   }
 
   const actions = [
@@ -455,9 +451,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
 
         //lot store
 
-        console.log('newRow', newRow)
         getFilteredMU(newRow?.itemId, newRow?.msId)
-        console.log('filteredMeasurements?.current?.[0]', filteredMeasurements?.current?.[0])
         update({
           muRef: filteredMeasurements?.current?.[0]?.reference || null,
           muId: filteredMeasurements?.current?.[0]?.recordId || null,
@@ -782,9 +776,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                 label={labels.totalQty}
                 maxAccess={maxAccess}
                 value={totalQty}
-                maxLength='30'
                 readOnly
-                error={formik.touched.header?.qty && Boolean(formik.errors.header?.qty)}
               />
             </Grid>
             <Grid item xs={3}>
@@ -793,9 +785,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                 label={labels.totalVolume}
                 maxAccess={maxAccess}
                 value={totalVolume}
-                maxLength='30'
                 readOnly
-                error={formik.touched.header?.volume && Boolean(formik.errors.header?.volume)}
               />
             </Grid>
             <Grid item xs={3}>
@@ -804,9 +794,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                 label={labels.totalWeight}
                 maxAccess={maxAccess}
                 value={totalWeight}
-                maxLength='30'
                 readOnly
-                error={formik.touched.header?.weight && Boolean(formik.errors.header?.weight)}
               />
             </Grid>
           </Grid>

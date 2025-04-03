@@ -17,7 +17,6 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { useError } from 'src/error'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 
 export default function GenerateInvoiceForm({ labels, maxAccess: access, recordId, form, window }) {
