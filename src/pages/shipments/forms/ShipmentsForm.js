@@ -26,6 +26,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -81,7 +82,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
           pendingQty: null,
           shippedNowQty: null,
           shipmentId: null,
-          poSeqNo: 1,
+          poSeqNo: null,
           volume: null,
           weight: null,
           poId: recordId || 0,
@@ -132,8 +133,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         },
         items: formik.values.items.map((item, index) => ({
           ...item,
-          poSeqNo: index + 1,
           id: index + 1,
+          seqNo: index + 1,
           qty: item.shippedNowQty,
           shipmentId: formik?.values?.recordId || 0
         }))
@@ -169,6 +170,12 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
     { totalQty: 0, totalVolume: 0, totalWeight: 0 }
   )
 
+  useEffect(() => {
+    formik.setFieldValue('header.qty', totalQty)
+    formik.setFieldValue('header.volume', totalVolume)
+    formik.setFieldValue('header.weight', totalWeight)
+  }, [totalWeight, totalVolume, totalQty])
+
   const isPosted = formik.values.header?.status === 3
   const editMode = !!formik.values.header?.recordId
 
@@ -203,6 +210,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
           return {
             ...item,
             id: index + 1,
+            seqNo: index + 1,
             date: formatDateFromApi(item.date),
             shippedNowQty: item.qty
           }
@@ -220,6 +228,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       },
       items: itemsList
     })
+
+    fillGridRefCombo(shipHeader.record.vendorId)
   }
 
   const onPost = async () => {
@@ -335,12 +345,16 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
   ]
 
   async function fillGridRefCombo(vendorId) {
-    await getRequest({
-      extension: PurchaseRepository.UnpostedOrderPack.get,
-      parameters: `_vendorId=${vendorId}`
-    }).then(res => {
-      unpostedOrders.current = res.record
-    })
+    if (vendorId) {
+      await getRequest({
+        extension: PurchaseRepository.UnpostedOrderPack.get,
+        parameters: `_vendorId=${vendorId}`
+      }).then(res => {
+        unpostedOrders.current = res.record
+      })
+    } else {
+      unpostedOrders.current = []
+    }
   }
 
   const filterByPoId = poId => {
@@ -504,8 +518,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       label: labels.qty,
       name: 'shippedNowQty',
       props: {
-        readOnly: isPosted,
-        allowNegative: false
+        readOnly: isPosted
       },
       async onChange({ row: { update, oldRow, newRow } }) {
         checkMaximum(newRow?.shippedNowQty, newRow, update) //test
@@ -771,8 +784,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         <Fixed>
           <Grid container spacing={2} mt={0.3}>
             <Grid item xs={3}>
-              <CustomTextField
-                name='header.qty'
+              <CustomNumberField
+                name='totalQty'
                 label={labels.totalQty}
                 maxAccess={maxAccess}
                 value={totalQty}
@@ -780,8 +793,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
               />
             </Grid>
             <Grid item xs={3}>
-              <CustomTextField
-                name='header.volume'
+              <CustomNumberField
+                name='totalVolume'
                 label={labels.totalVolume}
                 maxAccess={maxAccess}
                 value={totalVolume}
@@ -789,8 +802,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
               />
             </Grid>
             <Grid item xs={3}>
-              <CustomTextField
-                name='header.weight'
+              <CustomNumberField
+                name='totalWeight'
                 label={labels.totalWeight}
                 maxAccess={maxAccess}
                 value={totalWeight}
