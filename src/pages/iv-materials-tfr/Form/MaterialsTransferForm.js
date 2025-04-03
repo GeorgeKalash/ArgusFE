@@ -168,6 +168,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           const updatedSerials = serials.map(serialDetail => {
             return {
               ...serialDetail,
+              seqNo: index + 1,
               srlSeqNo: 0,
               componentSeqNo: 0,
               transferId: formik.values.recordId || 0

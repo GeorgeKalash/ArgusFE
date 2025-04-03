@@ -55,7 +55,9 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, di
       )
     }),
     onSubmit: async values => {
-      const serials = values.items.map((item, index) => ({
+      const validSerials = values.items.filter(serialDetail => serialDetail?.srlNo)
+
+      const serials = validSerials.map((item, index) => ({
         ...item,
         id: index + 1,
         srlSeqNo: index + 1,
@@ -117,7 +119,7 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, di
 
   const checkSerialNo = async (newRow, update, addRow) => {
     const { srlNo, id } = newRow
-    
+
     if (srlNo) {
       const result = await getRequest({
         extension: InventoryRepository.Serial.get,

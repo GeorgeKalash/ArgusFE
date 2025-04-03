@@ -228,6 +228,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           const updatedSerials = serials.map(serialDetail => {
             return {
               ...serialDetail,
+              seqNo: index + 1,
               srlSeqNo: 0,
               componentSeqNo: 0,
               invoiceId: formik.values.recordId || 0
