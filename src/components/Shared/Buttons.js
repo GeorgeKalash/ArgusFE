@@ -321,6 +321,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Run',
+    color: '#231F20',
+    label: platformLabels.Run,
+    image: 'rebuild.png',
+    main: false
+  },
+  {
     key: 'Cash Transaction',
     label: platformLabels.CashTransaction,
     color: '#231F20',
