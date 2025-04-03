@@ -137,26 +137,12 @@ const FiPaymentVouchers = () => {
     openForm(obj?.recordId)
   }
 
-  const getPlantId = async () => {
-    const userData = window.sessionStorage.getItem('userData')
-      ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null
-
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
-
-    return getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: parameters
-    }).then(res => res?.record?.value)
-  }
-
-  function openOutWardsWindow(plantId, recordId) {
+  function openOutWardsWindow(recordId) {
     stack({
       Component: FiPaymentVouchersForm,
       props: {
         labels,
         recordId,
-        plantId,
         maxAccess: access
       },
       width: 950,
@@ -166,8 +152,7 @@ const FiPaymentVouchers = () => {
   }
 
   async function openForm(recordId) {
-    const plantId = await getPlantId()
-    openOutWardsWindow(plantId, recordId)
+    openOutWardsWindow(recordId)
   }
 
   const { proxyAction } = useDocumentTypeProxy({

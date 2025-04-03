@@ -1126,7 +1126,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
     formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
     formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
-    formik.setFieldValue('header.siteId', dtd?.record?.siteId || userDefaultsDataState?.siteId || null)
+    formik.setFieldValue(
+      'header.siteId',
+      dtd?.record.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
+    )
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
   }
@@ -1195,12 +1198,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }, [recordId, measurements])
 
   useEffect(() => {
-    defaultsDataState && setDefaultFields()
-  }, [defaultsDataState])
-
-  useEffect(() => {
-    if (documentType?.dtId) onChangeDtId(documentType?.dtId)
-  }, [documentType?.dtId])
+    if (!recordId) {
+      defaultsDataState && setDefaultFields()
+      if (documentType?.dtId) onChangeDtId(documentType?.dtId)
+    }
+  }, [defaultsDataState, documentType?.dtId])
 
   async function getDefaultsData() {
     const myObject = {}
@@ -1408,14 +1410,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 displayFieldWidth={2}
-                readOnly={
-                  formik?.values?.header.dtId ||
-                  (formik?.values?.header.dtId && formik?.values?.header.commitItems == false) ||
-                  isPosted
-                }
+                readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
                 required={
-                  !formik?.values?.header.dtId ||
-                  (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
+                  !formik?.values?.header.dtId || (formik?.values?.header.dtId && formik?.values?.header.commitItems)
                 }
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.siteId', newValue ? newValue.recordId : null)

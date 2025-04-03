@@ -56,6 +56,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   const [address, setAddress] = useState({})
   const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
+  const [defaults, setDefaults] = useState(null)
   const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -1051,12 +1052,19 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       return acc
     }, {})
 
-    return {
+    setDefaults({
       userDefaultsList: userObject,
       systemDefaultsList: systemObject
-    }
+    })
   }
-
+  async function onChangeDtId(dtId) {
+    const res = await getRequest({
+      extension: SaleRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+    formik.setFieldValue('spId', res?.record?.spId || defaults.userDefaultsList.spId || null)
+    formik.setFieldValue('plantId', res?.record?.plantId || defaults.userDefaultsList.plantId || null)
+  }
   useEffect(() => {
     let shipAdd = ''
     const { name, street1, street2, city, phone, phone2, email1 } = address
@@ -1084,34 +1092,39 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       recalcGridVat(formik.values.tdType, formik.values.tdPct, currentTdAmount, formik.values.currentDiscount)
     }
   }, [subtotal])
+  useEffect(() => {
+    ;(async function () {
+      if (!recordId) {
+        if (defaults) {
+          const defaultSalesTD = defaults.systemDefaultsList.salesTD
+          if (defaultSalesTD) {
+            setCycleButtonState({ text: '%', value: 2 })
+            formik.setFieldValue('tdType', 2)
+          } else {
+            setCycleButtonState({ text: '123', value: 1 })
+            formik.setFieldValue('tdType', 1)
+          }
+          const userDefaultSite = defaults.userDefaultsList.siteId
+          const userDefaultSASite = defaults.systemDefaultsList.siteId
+          const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
+          const plant = defaults.userDefaultsList.plantId
+          const salesPerson = defaults.userDefaultsList.spId
+          formik.setFieldValue('siteId', parseInt(siteId))
+          formik.setFieldValue('spId', parseInt(salesPerson))
+          formik.setFieldValue('plantId', parseInt(plant))
+          formik.setFieldValue('plId', parseInt(defaults?.systemDefaultsList?.plId))
+        }
+        if (documentType?.dtId) onChangeDtId(documentType?.dtId)
+      }
+    })()
+  }, [defaults, documentType?.dtId])
 
   useEffect(() => {
     ;(async function () {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
-      const defaultObj = await getDefaultData()
-
-      if (recordId) {
-        await refetchForm(recordId)
-      } else {
-        const defaultSalesTD = defaultObj.systemDefaultsList.salesTD
-        if (defaultSalesTD) {
-          setCycleButtonState({ text: '%', value: 2 })
-          formik.setFieldValue('tdType', 2)
-        } else {
-          setCycleButtonState({ text: '123', value: 1 })
-          formik.setFieldValue('tdType', 1)
-        }
-        const userDefaultSite = defaultObj.userDefaultsList.siteId
-        const userDefaultSASite = defaultObj.systemDefaultsList.siteId
-        const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
-        const plant = defaultObj.userDefaultsList.plantId
-        const salesPerson = defaultObj.userDefaultsList.spId
-        formik.setFieldValue('siteId', parseInt(siteId))
-        formik.setFieldValue('spId', parseInt(salesPerson))
-        formik.setFieldValue('plantId', parseInt(plant))
-        formik.setFieldValue('plId', parseInt(defaultObj?.systemDefaultsList?.plId))
-      }
+      await getDefaultData()
+      if (recordId) await refetchForm(recordId)
     })()
   }, [])
 
@@ -1162,6 +1175,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     onChange={(event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId)
                       changeDT(newValue)
+                      onChangeDtId(newValue?.recordId)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />

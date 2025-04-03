@@ -1404,9 +1404,9 @@ export default function SaleTransactionForm({
       setmetalPriceVisibility(false)
     }
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
-    formik.setFieldValue('header.plantId', dtd?.record?.plantId ?? userDefaultsDataState?.plantId)
-    formik.setFieldValue('header.spId', dtd?.record?.spId ?? userDefaultsDataState?.spId)
-    formik.setFieldValue('header.siteId', dtd?.record?.siteId ?? userDefaultsDataState?.siteId)
+    formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
+    formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
+    formik.setFieldValue('header.siteId', dtd?.record?.siteId || userDefaultsDataState?.siteId || null)
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
     if (dtd?.record?.commitItems == false) formik.setFieldValue('header.siteId', null)
@@ -1448,29 +1448,28 @@ export default function SaleTransactionForm({
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       setMetalPriceOperations()
-      const defaultObj = await getDefaultsData()
-      getUserDefaultsData()
-      if (!recordId) {
-        if (defaultObj.salesTD == 'True') {
-          setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
-          formik.setFieldValue('header.tdType', 2)
-        } else {
-          setCycleButtonState({ text: '123', value: 1 })
-          formik.setFieldValue('header.tdType', 1)
-        }
-      }
+      await getDefaultsData()
+      await getUserDefaultsData()
     })()
   }, [])
 
   useEffect(() => {
     ;(async function () {
       if (!recordId) {
-        const dtInfo = await getDTD(documentType?.dtId)
-        formik.setFieldValue('header.commitItems', dtInfo?.record?.commitItems)
-        if (!dtInfo?.record?.commitItems) formik.setFieldValue('header.siteId', null)
+        if (defaultsDataState) {
+          setDefaultFields()
+          if (defaultsDataState.salesTD == 'True') {
+            setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
+            formik.setFieldValue('header.tdType', 2)
+          } else {
+            setCycleButtonState({ text: '123', value: 1 })
+            formik.setFieldValue('header.tdType', 1)
+          }
+        }
+        await onChangeDtId(documentType?.dtId)
       }
     })()
-  }, [documentType?.dtId])
+  }, [defaultsDataState, documentType?.dtId])
 
   useEffect(() => {
     ;(async function () {
@@ -1481,10 +1480,6 @@ export default function SaleTransactionForm({
       }
     })()
   }, [recordId, measurements])
-
-  useEffect(() => {
-    defaultsDataState && setDefaultFields()
-  }, [defaultsDataState])
 
   async function getDefaultsData() {
     const myObject = {}
@@ -1507,20 +1502,16 @@ export default function SaleTransactionForm({
         obj.value === 'True' || obj.value === 'False' ? obj.value : obj.value ? parseInt(obj.value) : null
     })
     setDefaultsDataState(myObject)
-
-    return myObject
   }
 
   async function getUserDefaultsData() {
     const myObject = {}
 
     const filteredList = userDefaultsData?.list?.filter(obj => {
-      return obj.key === 'plantId' || obj.key === 'siteId'
+      return obj.key === 'plantId' || obj.key === 'siteId' || obj.key === 'spId'
     })
     filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
     setUserDefaultsDataState(myObject)
-
-    return myObject
   }
 
   const setDefaultFields = () => {

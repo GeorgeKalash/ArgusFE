@@ -135,21 +135,20 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         extension: FinancialRepository.FIDocTypeDefaults.get,
         parameters: `_dtId=${dtId}`
       })
-
-      const cashAccountValue = res?.record?.cashAccountId ? res?.record?.cashAccountId : cashAccountId
-
-      formik.setFieldValue('cashAccountId', cashAccountValue)
-      getCashAccount(cashAccountValue)
-
-      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
-
-      return res
+      formik.setFieldValue('cashAccountId', res?.record?.cashAccountId || cashAccountId)
+      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+      getCashAccount(res?.record?.cashAccountId || cashAccountId)
     }
   }
 
   useEffect(() => {
-    getDTD(formik?.values?.dtId)
-  }, [formik.values.dtId])
+    if (!recordId) {
+      formik.setFieldValue('cashAccountId', cashAccountId)
+      formik.setFieldValue('plantId', plantId)
+      getCashAccount(cashAccountId)
+      if (documentType?.dtId) getDTD(documentType?.dtId)
+    }
+  }, [documentType?.dtId, cashAccountId, plantId])
 
   async function openMCRForm(data) {
     stack({
@@ -191,9 +190,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     ;(async function () {
       if (recordId) {
         await getData(recordId)
-      } else {
-        const cashAccountId = formik.values.cashAccountId
-        if (cashAccountId) getCashAccount(cashAccountId)
       }
     })()
   }, [])
@@ -330,6 +326,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
+                  getDTD(newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 maxAccess={maxAccess}
