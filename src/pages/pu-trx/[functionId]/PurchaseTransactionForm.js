@@ -1303,6 +1303,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           props: {
             labels,
             row,
+            disabled: isPosted,
             siteId: formik?.values?.header.siteId,
             maxAccess,
             checkForSiteId: row.qty >= 0 ? false : true,

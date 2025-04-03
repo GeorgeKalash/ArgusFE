@@ -503,6 +503,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           props: {
             labels,
             row,
+            disabled: isPosted || isClosed,
             siteId: formik?.values?.fromSiteId,
             maxAccess: access,
             checkForSiteId: true,

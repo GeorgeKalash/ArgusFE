@@ -259,6 +259,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
           Component: SerialsForm,
           props: {
             labels,
+            disabled: isPosted,
             row,
             siteId: row.qty >= 0 ? null : formik?.values?.siteId,
             maxAccess,

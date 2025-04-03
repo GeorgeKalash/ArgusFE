@@ -18,10 +18,10 @@ import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
 
-export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow }) => {
+export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, disabled }) => {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const { systemChecks } = useContext(ControlContext)
+  const { platformLabels, systemChecks } = useContext(ControlContext)
   const allowNegativeQty = systemChecks.some(check => check.checkId === SystemChecks.ALLOW_INVENTORY_NEGATIVE_QTY)
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
 
@@ -42,14 +42,17 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow }) 
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      items: yup
-        .array()
-        .of(
-          yup.object().shape({
-            srlNo: yup.string().required()
+      items: yup.array().of(
+        yup.object({
+          srlNo: yup.string().test(function (value) {
+            if (this.options.from[1]?.value?.items?.length === 1) {
+              return true
+            }
+
+            return !!value
           })
-        )
-        .required()
+        })
+      )
     }),
     onSubmit: async values => {
       const serials = values.items.map((item, index) => ({
@@ -80,11 +83,9 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow }) 
       label: labels.serialNo,
       jumpToNextLine: jumpToNextLine,
       updateOn: 'blur',
-      onChange: async ({ row: { update, newRow } }) => {
-        const weight = await checkSerialNo(newRow.srlNo, newRow.id, update)
-
-        if (weight) {
-          update({ weight })
+      onChange: async ({ row: { update, newRow, oldRow, addRow } }) => {
+        if (newRow.srlNo !== oldRow?.srlNo) {
+          await checkSerialNo(newRow, update, addRow)
         }
       }
     },
@@ -99,6 +100,12 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow }) 
   ]
 
   const clearRow = id => {
+    const updatedItems = formik.values.items.map(item => (item.id === id ? { ...item, srlNo: '', weight: '' } : item))
+
+    formik.setFieldValue('items', updatedItems)
+  }
+
+  const removeRow = id => {
     let updatedItems = formik.values.items.filter(item => item.id !== id)
 
     if (updatedItems.length === 0) {
@@ -108,7 +115,9 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow }) 
     formik.setFieldValue('items', updatedItems)
   }
 
-  const checkSerialNo = async (srlNo, id, update) => {
+  const checkSerialNo = async (newRow, update, addRow) => {
+    const { srlNo, id } = newRow
+    
     if (srlNo) {
       const result = await getRequest({
         extension: InventoryRepository.Serial.get,
@@ -117,12 +126,13 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow }) 
 
       if (!result.record) {
         stackError({
-          message: labels.unknownSerial
+          message: platformLabels.unknownSerial
         })
-        clearRow(id)
+
+        removeRow(id)
       } else if (result?.record?.itemId !== row?.itemId) {
         stackError({
-          message: labels.serialDoesNotBelongItem
+          message: platformLabels.serialDoesNotBelongItem
         })
 
         clearRow(id)
@@ -139,10 +149,26 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow }) 
 
           clearRow(id)
         } else {
-          return result.record.weight
+          update({ weight: result.record.weight })
+          addRow({
+            fieldName: 'srlNo',
+            changes: {
+              id: newRow.id,
+              srlNo: newRow.srlNo,
+              weight: result.record.weight
+            }
+          })
         }
       } else {
-        return result.record.weight
+        update({ weight: result.record.weight })
+        addRow({
+          fieldName: 'srlNo',
+          changes: {
+            id: newRow.id,
+            srlNo: newRow.srlNo,
+            weight: result.record.weight
+          }
+        })
       }
     }
   }
@@ -152,7 +178,7 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow }) 
       key: 'Ok',
       condition: true,
       onClick: () => formik.handleSubmit(),
-      disabled: false
+      disabled
     }
   ]
 
@@ -164,6 +190,7 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow }) 
       isInfo={false}
       isSaved={false}
       actions={actions}
+      maxAccess={maxAccess}
     >
       <VertLayout>
         <Fixed>
@@ -243,6 +270,8 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow }) 
             name='items'
             columns={columns}
             maxAccess={maxAccess}
+            allowDelete={!disabled}
+            allowAddNewLine={!disabled}
           />
         </Grow>
       </VertLayout>

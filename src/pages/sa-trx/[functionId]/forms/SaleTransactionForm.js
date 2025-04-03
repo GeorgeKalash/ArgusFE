@@ -712,7 +712,8 @@ export default function SaleTransactionForm({
           width: 1200,
           title: platformLabels.SalesTransactions
         })
-      }
+      },
+
     },
     {
       component: 'numberfield',
@@ -741,6 +742,7 @@ export default function SaleTransactionForm({
           props: {
             labels,
             row,
+            disabled: isPosted,
             siteId: formik?.values?.header.siteId,
             maxAccess,
             checkForSiteId: true,
