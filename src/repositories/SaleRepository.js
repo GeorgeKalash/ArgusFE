@@ -226,9 +226,6 @@ export const SaleRepository = {
     append: service + 'appendDFS',
     del: service + 'delDFS'
   },
-  Serials: {
-    qry: service + 'qrySRL'
-  },
   SalesQuotations: {
     page: service + 'pageQTN',
     qry: service + 'qryQTN',
@@ -262,7 +259,8 @@ export const SaleRepository = {
   },
   LastSerialInvoice: {
     get: service + 'lastSRL',
-    qry: service + 'importSRL'
+    import: service + 'importSRL',
+    qry: service + 'qrySRL'
   },
   InvoiceReturnBalance: {
     balance: service + 'balanceRET'

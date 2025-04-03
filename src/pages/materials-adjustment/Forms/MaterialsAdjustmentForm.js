@@ -204,6 +204,20 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     getDTD(formik?.values?.dtId)
   }, [formik.values.dtId])
 
+  const checkImage = row => {
+    if (row.trackBy === 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -216,13 +230,17 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'trackBy', to: 'trackBy' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
+      },
+      propsReducer({ row, props }) {
+        return { ...props, imgSrc: checkImage(row) }
       }
     },
     {
@@ -250,26 +268,28 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     {
       component: 'button',
       name: 'serials',
-      label: labels.currencyNotes,
+      label: platformLabels.serials,
       props: {
-        imgSrc: '/images/TableIcons/imgSerials.png'
+        checkImage
       },
       onClick: (e, row, update, updateRow) => {
-        stack({
-          Component: SerialsForm,
-          props: {
-            labels,
-            disabled: isPosted,
-            row,
-            siteId: row.qty >= 0 ? null : formik?.values?.siteId,
-            maxAccess,
-            checkForSiteId: row.qty >= 0 ? false : true,
-            updateRow
-          },
-          width: 500,
-          height: 700,
-          title: platformLabels.serials
-        })
+        if (row?.trackBy === 1) {
+          stack({
+            Component: SerialsForm,
+            props: {
+              labels,
+              disabled: isPosted,
+              row,
+              siteId: row.qty >= 0 ? null : formik?.values?.siteId,
+              maxAccess,
+              checkForSiteId: row.qty >= 0 ? false : true,
+              updateRow
+            },
+            width: 500,
+            height: 700,
+            title: platformLabels.serials
+          })
+        }
       }
     }
   ]

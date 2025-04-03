@@ -321,6 +321,20 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     filteredMeasurements.current = arrayMU
   }
 
+  const checkImage = row => {
+    if (row.trackBy === 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -347,6 +361,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           { key: 'name', value: 'Name' },
           { key: 'flName', value: 'flName' }
         ]
+      },
+      propsReducer({ row, props }) {
+        return { ...props, imgSrc: checkImage(row) }
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.itemId) {
@@ -495,24 +512,26 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       name: 'serials',
       label: platformLabels.serials,
       props: {
-        imgSrc: '/images/TableIcons/imgSerials.png'
+        checkImage
       },
       onClick: (e, row, update, updateRow) => {
-        stack({
-          Component: SerialsForm,
-          props: {
-            labels,
-            row,
-            disabled: isPosted || isClosed,
-            siteId: formik?.values?.fromSiteId,
-            maxAccess: access,
-            checkForSiteId: true,
-            updateRow
-          },
-          width: 500,
-          height: 700,
-          title: platformLabels.serials
-        })
+        if (row?.trackBy === 1) {
+          stack({
+            Component: SerialsForm,
+            props: {
+              labels,
+              row,
+              disabled: isPosted || isClosed,
+              siteId: formik?.values?.fromSiteId,
+              maxAccess: access,
+              checkForSiteId: true,
+              updateRow
+            },
+            width: 500,
+            height: 700,
+            title: platformLabels.serials
+          })
+        }
       }
     }
   ]

@@ -458,6 +458,20 @@ export default function SaleTransactionForm({
     }
   }
 
+  const checkImage = row => {
+    if (row.trackBy === 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
   const columns = [
     {
       component: 'textfield',
@@ -487,6 +501,7 @@ export default function SaleTransactionForm({
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
+          { from: 'trackBy', to: 'trackBy' },
           { from: 'msId', to: 'msId' }
         ],
         columnsInDropDown: [
@@ -502,6 +517,9 @@ export default function SaleTransactionForm({
         getFilteredMU(newRow?.itemId)
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
         await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
+      },
+      propsReducer({ row, props }) {
+        return { ...props, imgSrc: checkImage(row) }
       }
     },
     {
@@ -712,8 +730,7 @@ export default function SaleTransactionForm({
           width: 1200,
           title: platformLabels.SalesTransactions
         })
-      },
-
+      }
     },
     {
       component: 'numberfield',
@@ -734,24 +751,26 @@ export default function SaleTransactionForm({
       name: 'serials',
       label: platformLabels.serials,
       props: {
-        imgSrc: '/images/TableIcons/imgSerials.png'
+        checkImage
       },
       onClick: (e, row, update, updateRow) => {
-        stack({
-          Component: SerialsForm,
-          props: {
-            labels,
-            row,
-            disabled: isPosted,
-            siteId: formik?.values?.header.siteId,
-            maxAccess,
-            checkForSiteId: true,
-            updateRow
-          },
-          width: 500,
-          height: 700,
-          title: platformLabels.serials
-        })
+        if (row?.trackBy === 1) {
+          stack({
+            Component: SerialsForm,
+            props: {
+              labels,
+              row,
+              disabled: isPosted,
+              siteId: formik?.values?.header.siteId,
+              maxAccess,
+              checkForSiteId: true,
+              updateRow
+            },
+            width: 500,
+            height: 700,
+            title: platformLabels.serials
+          })
+        }
       }
     }
   ]
@@ -908,7 +927,7 @@ export default function SaleTransactionForm({
   async function getSerials(recordId, seqNo) {
     if (recordId)
       return await getRequest({
-        extension: SaleRepository.Serials.qry,
+        extension: SaleRepository.LastSerialInvoice.qry,
         parameters: `_trxId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
       })
   }

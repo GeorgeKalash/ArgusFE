@@ -334,6 +334,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
+          { from: 'trackBy', to: 'trackBy' },
           { from: 'msId', to: 'msId' }
         ],
         columnsInDropDown: [
@@ -359,6 +360,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             ? undefined
             : await getVendorPrice(newRow, formik.values.header)
         fillItemObject(update, phycialProperty, itemInfo, vendorPrice)
+      },
+      propsReducer({ row, props }) {
+        return { ...props, imgSrc: checkImage(row) }
       }
     },
     {
@@ -1289,30 +1293,46 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   }
 
+  const checkImage = row => {
+    if (row.trackBy === 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
   if (functionId == SystemFunction.PurchaseReturn) {
     columns.push({
       component: 'button',
       name: 'serials',
-      label: labels.currencyNotes,
+      label: platformLabels.serials,
       props: {
-        imgSrc: '/images/TableIcons/imgSerials.png'
+        checkImage
       },
       onClick: (e, row, update, updateRow) => {
-        stack({
-          Component: SerialsForm,
-          props: {
-            labels,
-            row,
-            disabled: isPosted,
-            siteId: formik?.values?.header.siteId,
-            maxAccess,
-            checkForSiteId: row.qty >= 0 ? false : true,
-            updateRow
-          },
-          width: 500,
-          height: 700,
-          title: platformLabels.serials
-        })
+        if (row?.trackBy === 1) {
+          stack({
+            Component: SerialsForm,
+            props: {
+              labels,
+              row,
+              disabled: isPosted,
+              siteId: formik?.values?.header.siteId,
+              maxAccess,
+              checkForSiteId: row.qty >= 0 ? false : true,
+              updateRow
+            },
+            width: 500,
+            height: 700,
+            title: platformLabels.serials
+          })
+        }
       }
     })
   }
