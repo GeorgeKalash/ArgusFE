@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -136,20 +136,38 @@ const GeneratePoductionOrder = () => {
     }
   ]
 
-  const fillSummaryORD = async clientId => {
+  const fillSummaryORD = async (clientId, initial) => {
     const response = await getRequest({
       extension: SaleRepository.SalesOrder.summaryORD,
       parameters: `_clientId=${clientId || 0}`
     })
 
-    formik.setFieldValue('itemSummaries', { list: response?.record?.itemSummaries })
-    formik.setFieldValue('orders', { list: response?.record?.orders })
-    formik.setFieldValue('ordersToGenerate', { list: response?.record?.ordersToGenerate })
+    const newlyItemSummaries = response?.record?.itemSummaries.map(item => ({
+      ...item,
+      initialSoQty: item.soQty, 
+      initialRemainingQty: item.remainingQty,
+      orders: response?.record?.orders
+        ?.filter(order => order.itemId === item.itemId)
+        .map(order => ({ ...order, checked: true }))
+    }))
+
+    formik.setFieldValue('itemSummaries', { list: newlyItemSummaries })
+
+    if (!initial) {
+      formik.setFieldValue('orders', { list: response?.record?.orders })
+      formik.setFieldValue('ordersToGenerate', { list: response?.record?.ordersToGenerate })
+    }
   }
 
   const resetForm = () => {
     formik.resetForm()
   }
+
+  useEffect(() => {
+    ;(async function () {
+      await fillSummaryORD(0, true)
+    })()
+  }, [])
 
   return (
     <FormShell
@@ -216,55 +234,90 @@ const GeneratePoductionOrder = () => {
                     showSelectAll={true}
                     onSelectionChange={row => {
                       if (row) {
-                        const filteredOrders = formik.values.orders.list
-                          .filter(item => row.itemId == item.itemId)
-                          .map(item => ({ ...item, checked: true }))
-
-                        setFilteredOrders({ list: filteredOrders })
-
-                        // setSelectedOrders(prevState => {
-                        //   console.log(formik.values.orders)
-                        //   const prevSelected = prevState?.list || []
-
-                        //   const newlySelected = formik.values.orders.list
-                        //     .filter(item => item.checked) // Ensure checked items exist
-                        //     .map(item => ({
-                        //       ...item,
-                        //       orders: item.orders?.map(order => ({ ...order, checked: true }))
-                        //     }))
-
-                        //   console.log('Newly Selected Orders:', newlySelected)
-
-                        //   const updatedPrevSelected = prevSelected.filter(prevItem =>
-                        //     formik.values.orders.list.some(
-                        //       newItem => newItem.orderId === prevItem.orderId && newItem.checked
-                        //     )
-                        //   )
-
-                        //   console.log('Updated Previous Selected Orders:', updatedPrevSelected)
-
-                        //   const uniqueNewlySelected = newlySelected.filter(
-                        //     newItem => !updatedPrevSelected.some(prevItem => prevItem.orderId === newItem.orderId)
-                        //   )
-
-                        //   console.log('Unique Newly Selected Orders:', uniqueNewlySelected)
-
-                        //   return { list: [...updatedPrevSelected, ...uniqueNewlySelected] }
-                        // })
+                        formik.setFieldValue('orders', {
+                          list: row.orders
+                        })
                       }
                     }}
+
+                    // onSelectionChange={row => {
+                    //   if (row) {
+                    //     const filteredOrders = formik.values.orders.list
+                    //       .filter(item => row.itemId == item.itemId)
+                    //       .map(item => ({ ...item, checked: true }))
+
+                    //     setFilteredOrders({ list: filteredOrders })
+
+                    //     // setSelectedOrders(prevState => {
+                    //     //   console.log(formik.values.orders)
+                    //     //   const prevSelected = prevState?.list || []
+
+                    //     //   const newlySelected = formik.values.orders.list
+                    //     //     .filter(item => item.checked) // Ensure checked items exist
+                    //     //     .map(item => ({
+                    //     //       ...item,
+                    //     //       orders: item.orders?.map(order => ({ ...order, checked: true }))
+                    //     //     }))
+
+                    //     //   console.log('Newly Selected Orders:', newlySelected)
+
+                    //     //   const updatedPrevSelected = prevSelected.filter(prevItem =>
+                    //     //     formik.values.orders.list.some(
+                    //     //       newItem => newItem.orderId === prevItem.orderId && newItem.checked
+                    //     //     )
+                    //     //   )
+
+                    //     //   console.log('Updated Previous Selected Orders:', updatedPrevSelected)
+
+                    //     //   const uniqueNewlySelected = newlySelected.filter(
+                    //     //     newItem => !updatedPrevSelected.some(prevItem => prevItem.orderId === newItem.orderId)
+                    //     //   )
+
+                    //     //   console.log('Unique Newly Selected Orders:', uniqueNewlySelected)
+
+                    //     //   return { list: [...updatedPrevSelected, ...uniqueNewlySelected] }
+                    //     // })
+                    //   }
+                    // }}
                   />
                 </Grid>
                 <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column' }}>
                   <Table
                     columns={columnsOrders}
-                    gridData={filteredOrders}
+                    gridData={formik?.values?.orders}
                     rowId={['recordId']}
                     isLoading={false}
                     pagination={false}
                     maxAccess={access}
                     showCheckboxColumn={true}
                     showSelectAll={false}
+                    handleCheckboxChange={() => {
+                      const selectedOrders = formik?.values?.orders?.list.filter(order => order.checked)
+
+                      const orderSumsByItem = selectedOrders.reduce((acc, order) => {
+                        const itemId = order.itemId
+                        if (!acc[itemId]) {
+                          acc[itemId] = { soQty: 0, remainingQty: 0 }
+                        }
+
+                        acc[itemId].soQty += order.soQty || 0
+                        acc[itemId].remainingQty += order.remainingQty || 0
+
+                        return acc
+                      }, {})
+
+                      const updatedItemSummaries = formik.values.itemSummaries.list.map(item => {
+                        const hasUpdate = orderSumsByItem[item.itemId]
+
+                        return {
+                          ...item,
+                          soQty: hasUpdate ? orderSumsByItem[item.itemId].soQty : item.soQty,
+                          remainingQty: hasUpdate ? orderSumsByItem[item.itemId].remainingQty : item.remainingQty
+                        }
+                      })
+
+                      formik.setFieldValue('itemSummaries', { list: updatedItemSummaries })
+                    }}
                   />
                 </Grid>
               </Grid>
