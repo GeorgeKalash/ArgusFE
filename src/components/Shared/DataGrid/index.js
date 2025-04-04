@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import { Box, IconButton } from '@mui/material'
+import { Box, Checkbox, Grid, IconButton } from '@mui/material'
 import components from './components'
 import { CacheStoreProvider } from 'src/providers/CacheStoreContext'
 import { GridDeleteIcon } from '@mui/x-data-grid'
@@ -9,6 +9,7 @@ import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export function DataGrid({
   name, // maxAccess
@@ -199,15 +200,6 @@ export function DataGrid({
     }
   }, [rowSelectionModel])
 
-  useEffect(() => {
-    if (gridApiRef.current && rowSelectionModel) {
-      const rowNode = gridApiRef.current.getRowNode(rowSelectionModel)
-      if (rowNode) {
-        rowNode.setSelected(true)
-      }
-    }
-  }, [rowSelectionModel])
-
   const addNewRow = () => {
     const highestIndex = Math.max(...value?.map(item => item.id), 0) + 1
 
@@ -273,7 +265,8 @@ export function DataGrid({
         (allColumns?.[i]?.props?.readOnly &&
           (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
             accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
-      (typeof allColumns?.[i]?.props?.disableCondition !== 'function' || !allColumns?.[i]?.props?.disableCondition(data))
+      (typeof allColumns?.[i]?.props?.disableCondition !== 'function' ||
+        !allColumns?.[i]?.props?.disableCondition(data))
     )
   }
 
@@ -560,6 +553,32 @@ export function DataGrid({
       sortable: false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
+      ...(column?.checkAll?.visible && {
+        headerComponent: params => {
+          const selectAll = e => {
+            if (column?.checkAll?.onChange) {
+              column?.checkAll?.onChange({ checked: e.target?.checked })
+            }
+          }
+
+          return (
+            <Grid container justifyContent='center' alignItems='center'>
+              <CustomCheckBox
+                checked={column?.checkAll?.value}
+                onChange={e => {
+                  selectAll(e)
+                }}
+                sx={{
+                  width: '20%',
+                  height: '20%',
+                  marginLeft: '0px !important'
+                }}
+                disabled={column.checkAll?.disabled}
+              />
+            </Grid>
+          )
+        }
+      }),
       cellEditorParams: { maxAccess },
       cellStyle: getCellStyle,
       suppressKeyboardEvent: params => {
@@ -615,11 +634,12 @@ export function DataGrid({
   useEffect(() => {
     function handleBlur(event) {
       if (
-        gridContainerRef.current &&
-        !gridContainerRef.current.contains(event.target) &&
-        gridApiRef.current?.getEditingCells()?.length > 0 &&
-        !event.target.classList.contains('MuiBox-root') &&
-        !event.target.classList.contains('MuiAutocomplete-option')
+        (gridContainerRef.current &&
+          !gridContainerRef.current.contains(event.target) &&
+          gridApiRef.current?.getEditingCells()?.length > 0 &&
+          !event.target.classList.contains('MuiBox-root') &&
+          !event.target.classList.contains('MuiAutocomplete-option')) ||
+        event.target.closest('.ag-header-row')
       ) {
         gridApiRef.current?.stopEditing()
       } else {
