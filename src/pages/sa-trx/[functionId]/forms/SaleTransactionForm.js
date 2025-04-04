@@ -459,7 +459,7 @@ export default function SaleTransactionForm({
     }
   }
 
-  const checkImage = row => {
+  const onCondition = row => {
     if (row.trackBy === 1) {
       return {
         imgSrc: '/images/TableIcons/imgSerials.png',
@@ -520,7 +520,7 @@ export default function SaleTransactionForm({
         await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
       },
       propsReducer({ row, props }) {
-        return { ...props, imgSrc: checkImage(row) }
+        return { ...props, imgSrc: onCondition(row) }
       }
     },
     {
@@ -752,7 +752,7 @@ export default function SaleTransactionForm({
       name: 'serials',
       label: platformLabels.serials,
       props: {
-        checkImage
+        onCondition
       },
       onClick: (e, row, update, updateRow) => {
         if (row?.trackBy === 1) {

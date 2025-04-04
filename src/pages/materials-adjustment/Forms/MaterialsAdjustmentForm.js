@@ -205,7 +205,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     getDTD(formik?.values?.dtId)
   }, [formik.values.dtId])
 
-  const checkImage = row => {
+  const onCondition = row => {
     if (row.trackBy === 1) {
       return {
         imgSrc: '/images/TableIcons/imgSerials.png',
@@ -241,7 +241,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         displayFieldWidth: 3
       },
       propsReducer({ row, props }) {
-        return { ...props, imgSrc: checkImage(row) }
+        return { ...props, imgSrc: onCondition(row) }
       }
     },
     {
@@ -271,7 +271,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       name: 'serials',
       label: platformLabels.serials,
       props: {
-        checkImage
+        onCondition
       },
       onClick: (e, row, update, updateRow) => {
         if (row?.trackBy === 1) {

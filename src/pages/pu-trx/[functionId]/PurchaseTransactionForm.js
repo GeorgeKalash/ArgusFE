@@ -364,7 +364,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         fillItemObject(update, phycialProperty, itemInfo, vendorPrice)
       },
       propsReducer({ row, props }) {
-        return { ...props, imgSrc: checkImage(row) }
+        return { ...props, imgSrc: onCondition(row) }
       }
     },
     {
@@ -1295,7 +1295,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   }
 
-  const checkImage = row => {
+  const onCondition = row => {
     if (row.trackBy === 1) {
       return {
         imgSrc: '/images/TableIcons/imgSerials.png',
@@ -1315,7 +1315,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       name: 'serials',
       label: platformLabels.serials,
       props: {
-        checkImage
+        onCondition
       },
       onClick: (e, row, update, updateRow) => {
         if (row?.trackBy === 1) {

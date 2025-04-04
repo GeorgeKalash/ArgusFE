@@ -323,7 +323,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     filteredMeasurements.current = arrayMU
   }
 
-  const checkImage = row => {
+  const onCondition = row => {
     if (row.trackBy === 1) {
       return {
         imgSrc: '/images/TableIcons/imgSerials.png',
@@ -365,7 +365,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         ]
       },
       propsReducer({ row, props }) {
-        return { ...props, imgSrc: checkImage(row) }
+        return { ...props, imgSrc: onCondition(row) }
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.itemId) {
@@ -514,7 +514,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       name: 'serials',
       label: platformLabels.serials,
       props: {
-        checkImage
+        onCondition
       },
       onClick: (e, row, update, updateRow) => {
         if (row?.trackBy === 1) {
