@@ -1098,7 +1098,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     }
   }, [subtotal])
   useEffect(() => {
-    if (formik.values?.dtId) onChangeDtId(formik.values?.dtId)
+    if (formik.values?.dtId && !recordId) onChangeDtId(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {
@@ -1176,6 +1176,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     onChange={(event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId)
                       changeDT(newValue)
+                      onChangeDtId(newValue?.recordId)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />

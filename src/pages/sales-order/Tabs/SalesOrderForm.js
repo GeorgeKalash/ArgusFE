@@ -1180,7 +1180,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }, [subtotal])
 
   useEffect(() => {
-    if (formik.values?.dtId) onChangeDtId(formik.values?.dtId)
+    if (formik.values?.dtId & !recordId) onChangeDtId(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {
@@ -1260,8 +1260,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       changeDT(newValue)
-                      formik.setFieldValue('dtId', newValue ? newValue.recordId : null)
                       onChangeDtId(newValue?.recordId)
+                      formik.setFieldValue('dtId', newValue ? newValue.recordId : null)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />

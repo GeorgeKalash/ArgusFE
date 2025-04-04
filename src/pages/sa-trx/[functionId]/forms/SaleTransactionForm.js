@@ -1463,8 +1463,8 @@ export default function SaleTransactionForm({
   }, [])
 
   useEffect(() => {
-    if (formik.values?.dtId) onChangeDtId(formik.values?.dtId)
-  }, [formik.values?.dtId])
+    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+  }, [formik.values?.header.dtId])
 
   useEffect(() => {
     ;(async function () {
@@ -1569,9 +1569,8 @@ export default function SaleTransactionForm({
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       const recordId = newValue ? newValue.recordId : null
-
                       await formik.setFieldValue('header.dtId', recordId)
-
+                      onChangeDtId(recordId)
                       if (!newValue) {
                         formik.setFieldValue('header.dtId', null)
                         formik.setFieldValue('header.siteId', null)

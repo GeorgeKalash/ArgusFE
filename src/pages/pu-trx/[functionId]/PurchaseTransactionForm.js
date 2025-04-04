@@ -1202,8 +1202,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }, [defaultsDataState])
 
   useEffect(() => {
-    if (formik.values?.dtId) onChangeDtId(dformik.values?.dtId)
-  }, [formik.values?.dtId])
+    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+  }, [formik.values?.header.dtId])
 
   async function getDefaultsData() {
     const myObject = {}
@@ -1244,9 +1244,15 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const setDefaultFields = () => {
     formik.setFieldValue('header.currencyId', defaultsDataState?.currencyId || null)
-    formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
-    formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
-    formik.setFieldValue('header.siteId', userDefaultsDataState?.siteId || null)
+    if (!formik.values.header.plantId) formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
+    if (!formik.values.header.spId) formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
+    if (!formik.values.header.siteId)
+      formik.setFieldValue(
+        'header.siteId',
+        !formik.values.header.dtId || (formik.values.header.dtId && formik.values.header.commitItems)
+          ? userDefaultsDataState?.siteId || null
+          : null
+      )
   }
 
   const getResourceId = functionId => {
@@ -1294,6 +1300,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
                   if (newValue) {
                     formik.setFieldValue('header.dtId', recordId)
+                    onChangeDtId(recordId)
                   } else {
                     formik.setFieldValue('header.dtId', null)
                     formik.setFieldValue('header.siteId', null)
@@ -1410,11 +1417,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 displayFieldWidth={2}
-                readOnly={
-                  formik?.values?.header.dtId ||
-                  (formik?.values?.header.dtId && formik?.values?.header.commitItems == false) ||
-                  isPosted
-                }
+                readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
                 required={
                   !formik?.values?.header.dtId ||
                   (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
