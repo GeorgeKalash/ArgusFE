@@ -99,8 +99,6 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
           max: res?.record?.max ?? null,
           items: res2?.list?.map((item, index) => ({
             ...item,
-            sku: item?.sku ?? sku,
-            itemName: item?.name ?? itemName,
             id: index + 1
           }))
         })
@@ -111,16 +109,16 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
   const columns = [
     {
       component: 'textfield',
-      label: labels.sku,
-      name: 'sku',
+      label: labels.siteRef,
+      name: 'siteRef',
       props: {
         readOnly: true
       }
     },
     {
       component: 'textfield',
-      label: labels.itemName,
-      name: 'itemName',
+      label: labels.siteName,
+      name: 'siteName',
       props: {
         readOnly: true
       }
@@ -171,8 +169,24 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
     }
   ]
 
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: false
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.SManagement} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.SManagement}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isCleared={false}
+      actions={actions}
+    >
       <VertLayout>
         <Grid container spacing={2}>
           <Grid item xs={4}>
