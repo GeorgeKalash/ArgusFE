@@ -11,7 +11,7 @@ import { Box, Grid, IconButton } from '@mui/material'
 import Image from 'next/image'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import SerialForm from './SerialForm'
+import SerialTable from './SerialTable'
 import LotForm from './LotForm'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
@@ -93,7 +93,7 @@ const AvailabilityList = ({ obj, labels, access }) => {
 
   function openSerialForm(obj) {
     stack({
-      Component: SerialForm,
+      Component: SerialTable,
       props: {
         labels,
         obj

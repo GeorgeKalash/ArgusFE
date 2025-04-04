@@ -273,7 +273,8 @@ export function DataGrid({
         (allColumns?.[i]?.props?.readOnly &&
           (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
             accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
-      (typeof allColumns?.[i]?.props?.disableCondition !== 'function' || !allColumns?.[i]?.props?.disableCondition(data))
+      (typeof allColumns?.[i]?.props?.disableCondition !== 'function' || !allColumns?.[i]?.props?.disableCondition(data)) &&
+      (typeof allColumns?.[i]?.props?.onCondition !== 'function' || !allColumns?.[i]?.props?.onCondition(data)?.hidden)
     )
   }
 
@@ -711,7 +712,7 @@ export function DataGrid({
 
     if (lastCellStopped.current == cellId) return
     lastCellStopped.current = cellId
-    if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
+    if (colDef.updateOn === 'blur' && data[colDef?.field] !== value?.[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
         stackDuplicate(params)
 
