@@ -249,9 +249,10 @@ export default function SaleTransactionForm({
         const { serials, ...restDetails } = rest
 
         if (serials) {
-          const updatedSerials = serials.map(serialDetail => ({
+          const updatedSerials = serials.map((serialDetail, idx) => ({
             ...serialDetail,
             srlSeqNo: 0,
+            id: idx,
             componentSeqNo: 0,
             trxId: formik.values.recordId || 0,
             seqNo: id

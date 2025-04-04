@@ -110,13 +110,14 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         let muQty = adjDetail.muQty || 1
 
         if (serials) {
-          const updatedSerials = serials.map(serialDetail => {
+          const updatedSerials = serials.map((serialDetail, idx) => {
             return {
               ...serialDetail,
               seqNo: index + 1,
               srlSeqNo: 0,
               componentSeqNo: 0,
-              adjustmentId: formik.values.recordId || 0
+              adjustmentId: formik.values.recordId || 0,
+              id: idx
             }
           })
           serialsValues.push(...updatedSerials)

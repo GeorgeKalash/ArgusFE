@@ -165,10 +165,11 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       const updatedRows = formik.values.transfers.map((transferDetails, index) => {
         const { serials, ...restDetails } = transferDetails
         if (serials) {
-          const updatedSerials = serials.map(serialDetail => {
+          const updatedSerials = serials.map((serialDetail, idx) => {
             return {
               ...serialDetail,
               seqNo: index + 1,
+              id: idx,
               srlSeqNo: 0,
               componentSeqNo: 0,
               transferId: formik.values.recordId || 0

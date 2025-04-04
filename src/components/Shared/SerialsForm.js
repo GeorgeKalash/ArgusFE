@@ -272,6 +272,7 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, di
             name='items'
             columns={columns}
             maxAccess={maxAccess}
+            disabled={disabled}
             allowDelete={!disabled}
             allowAddNewLine={!disabled}
           />

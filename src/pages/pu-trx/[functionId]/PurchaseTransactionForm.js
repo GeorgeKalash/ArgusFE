@@ -225,10 +225,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       const updatedRows = obj.items.map(({ id, isVattable, taxDetails, ...rest }) => {
         const { serials, ...restDetails } = rest
         if (serials) {
-          const updatedSerials = serials.map(serialDetail => {
+          const updatedSerials = serials.map((serialDetail, idx) => {
             return {
               ...serialDetail,
-              seqNo: index + 1,
+              id: idx + 1,
+              seqNo: id,
               srlSeqNo: 0,
               componentSeqNo: 0,
               invoiceId: formik.values.recordId || 0
