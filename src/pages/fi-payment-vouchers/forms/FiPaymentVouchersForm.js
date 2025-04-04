@@ -55,7 +55,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       reference: '',
       accountId: '',
       accountType: '',
-      currencyId: null,
+      currencyId: parseInt(currencyId),
       currencyName: '',
       paymentMethod: null,
       date: new Date(),
@@ -247,13 +247,8 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
   }
 
   useEffect(() => {
-    ;(async function () {
-      if (!recordId) {
-        formik.setFieldValue('plantId', plantId)
-        if (documentType?.dtId) getDTD(documentType?.dtId)
-      }
-    })()
-  }, [documentType?.dtId, plantId])
+    if (formik.values?.dtId) getDTD(formik.values?.dtId)
+  }, [formik.values?.dtId])
 
   useEffect(() => {
     ;(async function () {
@@ -378,7 +373,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || '')
                   changeDT(newValue)
-                  getDTD(newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 maxAccess={maxAccess}

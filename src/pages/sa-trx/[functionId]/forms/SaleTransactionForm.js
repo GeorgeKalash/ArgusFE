@@ -1448,28 +1448,23 @@ export default function SaleTransactionForm({
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       setMetalPriceOperations()
-      await getDefaultsData()
-      await getUserDefaultsData()
+      const defaultObj = await getDefaultsData()
+      getUserDefaultsData()
+      if (!recordId) {
+        if (defaultObj.salesTD == 'True') {
+          setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
+          formik.setFieldValue('header.tdType', 2)
+        } else {
+          setCycleButtonState({ text: '123', value: 1 })
+          formik.setFieldValue('header.tdType', 1)
+        }
+      }
     })()
   }, [])
 
   useEffect(() => {
-    ;(async function () {
-      if (!recordId) {
-        if (defaultsDataState) {
-          setDefaultFields()
-          if (defaultsDataState.salesTD == 'True') {
-            setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
-            formik.setFieldValue('header.tdType', 2)
-          } else {
-            setCycleButtonState({ text: '123', value: 1 })
-            formik.setFieldValue('header.tdType', 1)
-          }
-        }
-        await onChangeDtId(documentType?.dtId)
-      }
-    })()
-  }, [defaultsDataState, documentType?.dtId])
+    if (formik.values?.dtId) onChangeDtId(formik.values?.dtId)
+  }, [formik.values?.dtId])
 
   useEffect(() => {
     ;(async function () {
@@ -1480,6 +1475,10 @@ export default function SaleTransactionForm({
       }
     })()
   }, [recordId, measurements])
+
+  useEffect(() => {
+    defaultsDataState && setDefaultFields()
+  }, [defaultsDataState])
 
   async function getDefaultsData() {
     const myObject = {}
@@ -1502,6 +1501,8 @@ export default function SaleTransactionForm({
         obj.value === 'True' || obj.value === 'False' ? obj.value : obj.value ? parseInt(obj.value) : null
     })
     setDefaultsDataState(myObject)
+
+    return myObject
   }
 
   async function getUserDefaultsData() {
@@ -1512,6 +1513,8 @@ export default function SaleTransactionForm({
     })
     filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
     setUserDefaultsDataState(myObject)
+
+    return myObject
   }
 
   const setDefaultFields = () => {
@@ -1569,9 +1572,7 @@ export default function SaleTransactionForm({
 
                       await formik.setFieldValue('header.dtId', recordId)
 
-                      if (newValue) {
-                        onChangeDtId(recordId)
-                      } else {
+                      if (!newValue) {
                         formik.setFieldValue('header.dtId', null)
                         formik.setFieldValue('header.siteId', null)
                         formik.setFieldValue('header.metalPrice', 0)

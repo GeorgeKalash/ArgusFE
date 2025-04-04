@@ -1139,6 +1139,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       userDefaultsList: userObject,
       systemDefaultsList: systemObject
     }))
+
+    return { userDefaultsList: userObject, systemDefaultsList: systemObject }
   }
 
   async function onChangeDtId(dtId) {
@@ -1178,9 +1180,20 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }, [subtotal])
 
   useEffect(() => {
+    if (formik.values?.dtId) onChangeDtId(formik.values?.dtId)
+  }, [formik.values?.dtId])
+
+  useEffect(() => {
     ;(async function () {
-      if (!recordId) {
-        const defaultSalesTD = defaults.systemDefaultsList.salesTD
+      const muList = await getMeasurementUnits()
+      setMeasurements(muList?.list)
+      const defaultValues = await getDefaultData()
+      if (recordId) {
+        const soItems = await getSalesOrderItems(recordId)
+        const soHeader = await getSalesOrder(recordId)
+        await fillForm(soHeader, soItems)
+      } else {
+        const defaultSalesTD = defaultValues.systemDefaultsList.salesTD
         if (defaultSalesTD) {
           setCycleButtonState({ text: '%', value: 2 })
           formik.setFieldValue('tdType', 2)
@@ -1188,28 +1201,14 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           setCycleButtonState({ text: '123', value: 1 })
           formik.setFieldValue('tdType', 1)
         }
-        const userDefaultSite = defaults.userDefaultsList.siteId
-        const userDefaultSASite = defaults.systemDefaultsList.siteId
+        const userDefaultSite = defaultValues.userDefaultsList.siteId
+        const userDefaultSASite = defaultValues.systemDefaultsList.siteId
         const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
-        const plant = defaults.userDefaultsList.plantId
-        const salesPerson = defaults.userDefaultsList.spId
+        const plant = defaultValues.userDefaultsList.plantId
+        const salesPerson = defaultValues.userDefaultsList.spId
         formik.setFieldValue('siteId', parseInt(siteId))
         formik.setFieldValue('spId', parseInt(salesPerson))
         formik.setFieldValue('plantId', parseInt(plant))
-        if (documentType?.dtId) onChangeDtId(documentType?.dtId)
-      }
-    })()
-  }, [defaults, documentType?.dtId])
-
-  useEffect(() => {
-    ;(async function () {
-      const muList = await getMeasurementUnits()
-      setMeasurements(muList?.list)
-      await getDefaultData()
-      if (recordId) {
-        const soItems = await getSalesOrderItems(recordId)
-        const soHeader = await getSalesOrder(recordId)
-        await fillForm(soHeader, soItems)
       }
     })()
   }, [])

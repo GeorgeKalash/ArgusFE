@@ -1056,6 +1056,11 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       userDefaultsList: userObject,
       systemDefaultsList: systemObject
     })
+
+    return {
+      userDefaultsList: userObject,
+      systemDefaultsList: systemObject
+    }
   }
   async function onChangeDtId(dtId) {
     const res = await getRequest({
@@ -1093,38 +1098,34 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     }
   }, [subtotal])
   useEffect(() => {
-    ;(async function () {
-      if (!recordId) {
-        if (defaults) {
-          const defaultSalesTD = defaults.systemDefaultsList.salesTD
-          if (defaultSalesTD) {
-            setCycleButtonState({ text: '%', value: 2 })
-            formik.setFieldValue('tdType', 2)
-          } else {
-            setCycleButtonState({ text: '123', value: 1 })
-            formik.setFieldValue('tdType', 1)
-          }
-          const userDefaultSite = defaults.userDefaultsList.siteId
-          const userDefaultSASite = defaults.systemDefaultsList.siteId
-          const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
-          const plant = defaults.userDefaultsList.plantId
-          const salesPerson = defaults.userDefaultsList.spId
-          formik.setFieldValue('siteId', parseInt(siteId))
-          formik.setFieldValue('spId', parseInt(salesPerson))
-          formik.setFieldValue('plantId', parseInt(plant))
-          formik.setFieldValue('plId', parseInt(defaults?.systemDefaultsList?.plId))
-        }
-        if (documentType?.dtId) onChangeDtId(documentType?.dtId)
-      }
-    })()
-  }, [defaults, documentType?.dtId])
+    if (formik.values?.dtId) onChangeDtId(formik.values?.dtId)
+  }, [formik.values?.dtId])
 
   useEffect(() => {
     ;(async function () {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
-      await getDefaultData()
+      const defaultValues = await getDefaultData()
       if (recordId) await refetchForm(recordId)
+      else {
+        const defaultSalesTD = defaultValues.systemDefaultsList.salesTD
+        if (defaultSalesTD) {
+          setCycleButtonState({ text: '%', value: 2 })
+          formik.setFieldValue('tdType', 2)
+        } else {
+          setCycleButtonState({ text: '123', value: 1 })
+          formik.setFieldValue('tdType', 1)
+        }
+        const userDefaultSite = defaultValues.userDefaultsList.siteId
+        const userDefaultSASite = defaultValues.systemDefaultsList.siteId
+        const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
+        const plant = defaultValues.userDefaultsList.plantId
+        const salesPerson = defaultValues.userDefaultsList.spId
+        formik.setFieldValue('siteId', parseInt(siteId))
+        formik.setFieldValue('spId', parseInt(salesPerson))
+        formik.setFieldValue('plantId', parseInt(plant))
+        formik.setFieldValue('plId', parseInt(defaultValues?.systemDefaultsList?.plId))
+      }
     })()
   }, [])
 
@@ -1175,7 +1176,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     onChange={(event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId)
                       changeDT(newValue)
-                      onChangeDtId(newValue?.recordId)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />

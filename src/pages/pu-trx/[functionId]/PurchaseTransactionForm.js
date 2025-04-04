@@ -1198,11 +1198,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }, [recordId, measurements])
 
   useEffect(() => {
-    if (!recordId) {
-      defaultsDataState && setDefaultFields()
-      if (documentType?.dtId) onChangeDtId(documentType?.dtId)
-    }
-  }, [defaultsDataState, documentType?.dtId])
+    defaultsDataState && setDefaultFields()
+  }, [defaultsDataState])
+
+  useEffect(() => {
+    if (formik.values?.dtId) onChangeDtId(dformik.values?.dtId)
+  }, [formik.values?.dtId])
 
   async function getDefaultsData() {
     const myObject = {}
@@ -1293,7 +1294,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
                   if (newValue) {
                     formik.setFieldValue('header.dtId', recordId)
-                    onChangeDtId(recordId)
                   } else {
                     formik.setFieldValue('header.dtId', null)
                     formik.setFieldValue('header.siteId', null)
@@ -1410,9 +1410,14 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 displayFieldWidth={2}
-                readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
+                readOnly={
+                  formik?.values?.header.dtId ||
+                  (formik?.values?.header.dtId && formik?.values?.header.commitItems == false) ||
+                  isPosted
+                }
                 required={
-                  !formik?.values?.header.dtId || (formik?.values?.header.dtId && formik?.values?.header.commitItems)
+                  !formik?.values?.header.dtId ||
+                  (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
                 }
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.siteId', newValue ? newValue.recordId : null)
