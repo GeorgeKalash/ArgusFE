@@ -255,6 +255,7 @@ export default function SaleTransactionForm({
             id: idx,
             componentSeqNo: 0,
             trxId: formik.values.recordId || 0,
+            itemId: rest?.itemId,
             seqNo: id
           }))
 

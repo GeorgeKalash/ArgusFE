@@ -172,6 +172,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
               id: idx,
               srlSeqNo: 0,
               componentSeqNo: 0,
+              itemId: transferDetails?.itemId,
               transferId: formik.values.recordId || 0
             }
           })

@@ -116,6 +116,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
               seqNo: index + 1,
               srlSeqNo: 0,
               componentSeqNo: 0,
+              itemId: adjDetail?.itemId,
               adjustmentId: formik.values.recordId || 0,
               id: idx
             }

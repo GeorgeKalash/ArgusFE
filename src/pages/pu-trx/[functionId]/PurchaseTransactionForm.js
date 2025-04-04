@@ -232,7 +232,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
               seqNo: id,
               srlSeqNo: 0,
               componentSeqNo: 0,
-              invoiceId: formik.values.recordId || 0
+              invoiceId: formik.values.recordId || 0,
+              itemId: rest?.itemId
             }
           })
           serialsValues.push(...updatedSerials)
