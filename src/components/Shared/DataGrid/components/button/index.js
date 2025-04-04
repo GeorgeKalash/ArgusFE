@@ -1,9 +1,9 @@
 import { Button } from '@mui/material'
 
 function DataGridButton({ data, column: { props, ...column }, update, updateRow, isEditMode }) {
-  const checkImage = props?.onCondition && props?.onCondition(data)?.imgSrc
-  const imgSrc = !props?.imgSrc ? checkImage : props?.imgSrc
-  const hiddenButton = props?.onCondition && props?.onCondition(data)?.hidden
+  const checkImage = props?.onCondition && props?.onCondition(data)
+  const imgSrc = !props?.imgSrc ? checkImage?.imgSrc : props?.imgSrc
+  const hiddenButton = checkImage?.hidden || false
 
   return (
     !hiddenButton && (
