@@ -368,10 +368,10 @@ export const ResourceIds = {
   AvailabilitiesCrossTab: 41227,
   Collections: 41119,
   Designer: 48100,
-  Collections: 41119,
   Sketch: 48300,
   ProductionStandard: 42112,
   SalesQuotations: 51301,
+  POSComparativeFigures: 54403,
   ModelMaker: 48304,
   ThreeDPrint: 48302,
   ThreeDDesign: 48301,
@@ -382,5 +382,6 @@ export const ResourceIds = {
   Modeling: 48304,
   PostDraftReturns: 51316,
   DamageReturn: 42333,
-  RebuildAging: 31502
+  RebuildAging: 31502,
+  YearlyComparativeSales: 51550
 }
