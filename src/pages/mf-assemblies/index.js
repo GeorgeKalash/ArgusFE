@@ -46,6 +46,36 @@ const Assembly = () => {
       flex: 1
     },
     {
+      field: 'b',
+      headerName: labels.description,
+      flex: 1
+    },
+    {
+      field: 'description',
+      headerName: labels.description,
+      flex: 1
+    },
+    {
+      field: 'description',
+      headerName: labels.description,
+      flex: 1
+    },
+    {
+      field: 'description',
+      headerName: labels.description,
+      flex: 1
+    },
+    {
+      field: 'description',
+      headerName: labels.description,
+      flex: 1
+    },
+    {
+      field: 'description',
+      headerName: labels.description,
+      flex: 1
+    },
+    {
       field: 'date',
       headerName: labels.date,
       flex: 1,
@@ -104,17 +134,17 @@ const Assembly = () => {
   }
 
   async function openForm(recordId) {
-    stack({
-      Component: SalesOrderForm,
-      props: {
-        labels,
-        access,
-        recordId
-      },
-      width: 1300,
-      height: 730,
-      title: labels.salesOrder
-    })
+    // stack({
+    //   Component: SalesOrderForm,
+    //   props: {
+    //     labels,
+    //     access,
+    //     recordId
+    //   },
+    //   width: 1300,
+    //   height: 730,
+    //   title: labels.salesOrder
+    // })
   }
 
   const delASM = async obj => {
