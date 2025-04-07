@@ -689,12 +689,19 @@ const Table = ({
     }
   }
 
+  const height = gridData?.list?.length * 35 + 40 + 40
+
   return (
     <VertLayout>
       <Grow>
         <Box
           className='ag-theme-alpine'
-          style={{ flex: 1, width: '1000px !important', height: props?.height || 'auto' }}
+          style={{
+            flex: !props.maxHeight && !props.height && 1,
+            width: '1000px !important',
+            height: props?.maxHeight ? height : props?.height || 'auto',
+            maxHeight: props?.maxHeight || 'auto'
+          }}
           sx={{
             '.ag-header': {
               height: '40px !important',
