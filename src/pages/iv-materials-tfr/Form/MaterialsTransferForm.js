@@ -219,7 +219,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   const getWeightAndMetalId = async itemId => {
     const res = await getRequest({
       extension: InventoryRepository.Physical.get,
-      parameters: '_itemId=' + itemId
+      parameters: `_itemId=${itemId}`
     })
 
     return {
@@ -686,7 +686,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             ...item,
             id: item.seqNo,
             totalCost: calcTotalCost(item),
-            unitCost: item.unitCost ?? 0
+            unitCost: item.unitCost
           }
         })
 
@@ -946,7 +946,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                 <CustomTextField
                   name='totalQty'
                   maxAccess={maxAccess}
-                  value={getFormattedNumber(totalQty)}
+                  value={getFormattedNumber(Number(totalQty).toFixed(2))}
                   label={labels.totalQty}
                   readOnly
                 />
@@ -955,7 +955,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                 <CustomTextField
                   name='totalCost'
                   maxAccess={maxAccess}
-                  value={getFormattedNumber(totalCost)}
+                  value={getFormattedNumber(Number(totalCost).toFixed(2))}
                   label={labels.totalCost}
                   readOnly
                 />
