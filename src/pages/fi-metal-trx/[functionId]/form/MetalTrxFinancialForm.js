@@ -310,7 +310,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           { from: 'itemName', to: 'itemName' },
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'purity', to: 'purity' },
           { from: 'laborValuePerGram', to: 'creditAmount' }
         ],
         displayFieldWidth: 2
@@ -352,7 +351,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       label: labels.purity,
       defaultValue: 0,
       onChange: ({ row: { update, newRow } }) => {
-        const baseSalesMetalValue = newRow.qty * newRow.purity / (metal.purity * 1000)
+        const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metal.purity * 1000)
         update({ purityFromItem: false })
 
         const totalCredit = newRow.purityFromItem
@@ -376,7 +375,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       props: { allowNegative: false },
       defaultValue: 0,
       onChange: ({ row: { update, newRow } }) => {
-        const baseSalesMetalValue = newRow.qty * newRow.purity / (metal.purity * 1000)
+        const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metal.purity * 1000)
 
         const totalCredit = newRow.purityFromItem
           ? newRow.qty * newRow.creditAmount
