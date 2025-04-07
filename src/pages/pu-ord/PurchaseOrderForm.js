@@ -461,15 +461,17 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       flex: 2,
       props: {
         ShowDiscountIcons: true,
-        iconsClicked: (id, updateRow, value) => handleIconClick(id, updateRow, value),
+        iconsClicked: (id, updateRow, value, data) => handleIconClick(id, updateRow, value, data),
         type: 'numeric',
         concatenateWith: '%',
         defaultValue: 0
       },
-      async onChange({ row: { update, newRow } }) {
-        const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
-
-        update(data)
+      async onChange({ row: { update, newRow, oldRow } }) {
+        console.log('onchange', newRow, oldRow)
+        if (oldRow.mdAmount !== newRow.mdAmount) {
+          const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
+          update(data)
+        }
       }
     },
     {
@@ -489,7 +491,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
     }
   ]
 
-  async function handleIconClick(id, updateRow, value) {
+  async function handleIconClick(id, updateRow, value, data) {
     const index = formik.values.items.findIndex(item => item.id === id)
 
     if (index === -1) return
@@ -508,7 +510,14 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       mdType: value?.mdType
     }
 
-    updateRow({ id, changes: newRow }, true)
+    // console.log(data, value)
+    console.log('onchangeclick', { ...data, value })
+
+    const datas = getItemPriceRow({ ...data, ...value }, DIRTYFIELD_MDAMOUNT)
+
+    // updateRow(datas)
+
+    updateRow({ changes: datas })
   }
 
   const onWorkFlowClick = () => {

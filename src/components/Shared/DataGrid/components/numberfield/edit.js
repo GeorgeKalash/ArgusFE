@@ -12,7 +12,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
   const typing = useRef(false)
 
   const handleIconClick = () => {
-    props?.iconsClicked(id, updateRow, { ...value, mdType: md === 1 ? 2 : 1 })
+    props?.iconsClicked(id, updateRow, { ...value, mdType: md === 1 ? 2 : 1 }, data)
     setMd(md === 1 ? 2 : 1)
   }
 
