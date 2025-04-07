@@ -263,5 +263,8 @@ export const SaleRepository = {
   },
   InvoiceReturnBalance: {
     balance: service + 'balanceRET'
+  },
+  VerifyIntegrity: {
+    check: service + 'checkTRX'
   }
 }

@@ -321,6 +321,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Run',
+    color: '#231F20',
+    label: platformLabels.Run,
+    image: 'rebuild.png',
+    main: false
+  },
+  {
     key: 'Cash Transaction',
     label: platformLabels.CashTransaction,
     color: '#231F20',
@@ -547,6 +554,12 @@ export const getButtons = platformLabels => [
     label: platformLabels.threeDDesign,
     color: '#1f78b4',
     image: '3d-printer.png',
+    main: false
+  },
+  {
+    key: 'ORD',
+    label: platformLabels.ord,
+    color: '#231f20',
     main: false
   }
 ]

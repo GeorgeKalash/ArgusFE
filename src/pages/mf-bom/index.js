@@ -1,6 +1,7 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -10,19 +11,19 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import GridToolbar from 'src/components/Shared/GridToolbar'
-import MachinesWindow from './Windows/MachinesWindow'
+import BillOfMaterialsWindow from './Windows/BillOfMaterialsWindow'
 
-const Machines = () => {
+const BillOfMaterials = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: ManufacturingRepository.Machine.page,
+      extension: ManufacturingRepository.BillOfMaterials.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -31,16 +32,30 @@ const Machines = () => {
 
   const {
     query: { data },
-    refetch,
     labels,
-    access,
     paginationParameters,
+    refetch,
+    access,
+    search,
+    clear,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.Machine.page,
-    datasetId: ResourceIds.Machines
+    endpointId: ManufacturingRepository.BillOfMaterials.page,
+    datasetId: ResourceIds.BillOfMaterials,
+    search: {
+      searchFn: fetchWithSearch
+    }
   })
+
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: ManufacturingRepository.BillOfMaterials.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
 
   const columns = [
     {
@@ -54,65 +69,79 @@ const Machines = () => {
       flex: 1
     },
     {
-      field: 'workCenterName',
-      headerName: labels.workCenterName,
+      field: 'version',
+      headerName: labels.version,
       flex: 1
     },
     {
-      field: 'operationName',
-      headerName: labels.operationName,
+      field: 'itemName',
+      headerName: labels.item,
       flex: 1
     },
     {
-      field: 'laborName',
-      headerName: labels.laborName,
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'description',
+      headerName: labels.description,
       flex: 1
+    },
+    {
+      field: 'qty',
+      headerName: labels.qty,
+      flex: 1,
+      type: 'number'
     }
   ]
-
-  function openForm(obj) {
-    stack({
-      Component: MachinesWindow,
-      props: {
-        labels,
-        recordId: obj?.recordId,
-        maxAccess: access
-      },
-      width: 700,
-      height: 500,
-      title: labels.Machines
-    })
-  }
-
-  const edit = obj => {
-    openForm(obj)
-  }
 
   const add = () => {
     openForm()
   }
 
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: BillOfMaterialsWindow,
+      props: {
+        labels,
+        recordId,
+        maxAccess: access
+      },
+      width: 900,
+      height: 620,
+      title: labels.BillOfMaterials
+    })
+  }
+
   const del = async obj => {
     await postRequest({
-      extension: ManufacturingRepository.MachineSpecification.del,
-      record: JSON.stringify({ machineId: obj.recordId })
-    })
-    await postRequest({
-      extension: ManufacturingRepository.Machine.del,
+      extension: ManufacturingRepository.BillOfMaterials.del,
       record: JSON.stringify(obj)
     })
-    toast.success(platformLabels.Deleted)
     invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
-          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
@@ -120,9 +149,9 @@ const Machines = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='api'
-          paginationParameters={paginationParameters}
           refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
@@ -130,4 +159,4 @@ const Machines = () => {
   )
 }
 
-export default Machines
+export default BillOfMaterials
