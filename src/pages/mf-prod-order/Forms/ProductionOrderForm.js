@@ -105,7 +105,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
         record: JSON.stringify(resultObject)
       })
 
-      const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+      const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
       toast.success(actionMessage)
       invalidate()
       refetchForm(res?.recordId)
@@ -131,6 +131,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
         date: formatDateToApi(formik.values.date)
       })
     })
+    toast.success(platformLabels.Posted)
     window.close()
     invalidate()
   }
