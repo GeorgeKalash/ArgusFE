@@ -440,7 +440,9 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
       label: labels.isActive,
       flex: 0.4,
       name: 'isActive',
-      disableCondition
+      props: {
+        disableCondition
+      }
     },
     {
       component: 'textfield',
