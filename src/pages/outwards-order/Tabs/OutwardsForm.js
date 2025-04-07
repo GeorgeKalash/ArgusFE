@@ -731,10 +731,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }, [])
 
   useEffect(() => {
-    formik.setFieldValue(
-      'amount',
-      formik.values.lcAmount + (formik.values.commission + vatAmount - formik.values.tdAmount)
-    )
+    formik.setFieldValue('amount', amount)
   }, [amount])
 
   return (
