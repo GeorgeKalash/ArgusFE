@@ -144,7 +144,7 @@ const GeneratePoductionOrder = () => {
 
     const newlyItemSummaries = response?.record?.itemSummaries.map(item => ({
       ...item,
-      initialSoQty: item.soQty, 
+      initialSoQty: item.soQty,
       initialRemainingQty: item.remainingQty,
       orders: response?.record?.orders
         ?.filter(order => order.itemId === item.itemId)
@@ -292,14 +292,25 @@ const GeneratePoductionOrder = () => {
                     showCheckboxColumn={true}
                     showSelectAll={false}
                     handleCheckboxChange={() => {
-                      const selectedOrders = formik?.values?.orders?.list.filter(order => order.checked)
+                      const allOrders = formik?.values?.orders?.list || []
+                      const checkedOrders = allOrders.filter(order => order.checked)
 
-                      const orderSumsByItem = selectedOrders.reduce((acc, order) => {
+                      const allOrderSums = allOrders.reduce((acc, order) => {
                         const itemId = order.itemId
                         if (!acc[itemId]) {
                           acc[itemId] = { soQty: 0, remainingQty: 0 }
                         }
+                        acc[itemId].soQty += order.soQty || 0
+                        acc[itemId].remainingQty += order.remainingQty || 0
 
+                        return acc
+                      }, {})
+
+                      const checkedOrderSums = checkedOrders.reduce((acc, order) => {
+                        const itemId = order.itemId
+                        if (!acc[itemId]) {
+                          acc[itemId] = { soQty: 0, remainingQty: 0 }
+                        }
                         acc[itemId].soQty += order.soQty || 0
                         acc[itemId].remainingQty += order.remainingQty || 0
 
@@ -307,13 +318,19 @@ const GeneratePoductionOrder = () => {
                       }, {})
 
                       const updatedItemSummaries = formik.values.itemSummaries.list.map(item => {
-                        const hasUpdate = orderSumsByItem[item.itemId]
+                        const itemId = item.itemId
 
-                        return {
-                          ...item,
-                          soQty: hasUpdate ? orderSumsByItem[item.itemId].soQty : item.soQty,
-                          remainingQty: hasUpdate ? orderSumsByItem[item.itemId].remainingQty : item.remainingQty
+                        if (allOrderSums[itemId]) {
+                          const checked = checkedOrderSums[itemId] || { soQty: 0, remainingQty: 0 }
+
+                          return {
+                            ...item,
+                            soQty: checked.soQty,
+                            remainingQty: checked.remainingQty
+                          }
                         }
+
+                        return item
                       })
 
                       formik.setFieldValue('itemSummaries', { list: updatedItemSummaries })
