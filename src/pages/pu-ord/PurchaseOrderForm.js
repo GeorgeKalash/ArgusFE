@@ -511,7 +511,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
     updateRow({ id, changes: newRow }, true)
   }
 
-  async function onWorkFlowClick() {
+  const onWorkFlowClick = () => {
     stack({
       Component: WorkFlow,
       props: {
@@ -536,9 +536,80 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
     window.close()
   }
 
-  const isClosed = formik.values.header.wip === 2
+  const confirmation = () => {
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: platformLabels.terminateConfirmation,
+        okButtonAction: async () => {
+          await onTerminate()
+        },
+        fullScreen: false,
+        close: true
+      },
+      width: 500,
+      height: 150,
+      title: platformLabels.Confirmation
+    })
+  }
 
-  console.log(formik.values.header.deliveryStatus)
+  const toInvoice = async () => {
+    await postRequest({
+      extension: PurchaseRepository.PurchaseOrder.transfer,
+      record: JSON.stringify({
+        ...formik.values.header,
+        date: formatDateToApi(formik.values.header.date)
+      })
+    }).then(() => {
+      toast.success(platformLabels.Invoice)
+      invalidate()
+      refetchForm(formik?.values?.header.recordId)
+    })
+  }
+
+  const onTerminate = async () => {
+    await postRequest({
+      extension: PurchaseRepository.PurchaseOrder.terminate,
+      record: JSON.stringify({
+        ...formik.values.header,
+        date: formatDateToApi(formik.values.header.date)
+      })
+    }).then(() => {
+      toast.success(platformLabels.Closed)
+      invalidate()
+      refetchForm(formik?.values?.header.recordId)
+    })
+  }
+
+  const onClose = async () => {
+    await postRequest({
+      extension: PurchaseRepository.PurchaseOrder.close,
+      record: JSON.stringify({
+        ...formik.values.header,
+        date: formatDateToApi(formik.values.header.date)
+      })
+    }).then(() => {
+      toast.success(platformLabels.Closed)
+      invalidate()
+      refetchForm(formik?.values?.header.recordId)
+    })
+  }
+
+  const onReopen = async () => {
+    await postRequest({
+      extension: PurchaseRepository.PurchaseOrder.reopen,
+      record: JSON.stringify({
+        ...formik.values.header,
+        date: formatDateToApi(formik.values.header.date)
+      })
+    }).then(() => {
+      toast.success(platformLabels.Reopened)
+      invalidate()
+      refetchForm(formik?.values?.header.recordId)
+    })
+  }
+
+  const isClosed = formik.values.header.wip === 2
 
   const actions = [
     {
@@ -557,8 +628,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
     {
       key: 'Terminate',
       condition: true,
-      onClick: confirmation(platformLabels.CancelConf, platformLabels.Confirmation, onTerminate),
-
+      onClick: confirmation,
       disabled: !(
         (formik.values.header.deliveryStatus == 2 || formik.values.header.deliveryStatus == 1) &&
         formik.values.header.status == 4
@@ -568,7 +638,12 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       key: 'Invoice',
       condition: true,
       onClick: toInvoice,
-      disabled: !(formik.values.deliveryStatus === 1 && formik.values.status !== 3 && isClosed)
+      disabled: !(
+        formik.values.header.deliveryStatus === 1 &&
+        formik.values.header.status !== 3 &&
+        isClosed &&
+        formik.values.header.status === 4
+      )
     },
     {
       key: 'Close',
@@ -595,79 +670,6 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       disabled: !isClosed
     }
   ]
-
-  function confirmation(dialogText, titleText, event) {
-    stack({
-      Component: ConfirmationDialog,
-      props: {
-        DialogText: dialogText,
-        okButtonAction: async () => {
-          await event()
-        },
-        fullScreen: false,
-        close: true
-      },
-      width: 400,
-      height: 150,
-      title: titleText
-    })
-  }
-
-  async function onTerminate() {
-    await postRequest({
-      extension: PurchaseRepository.PurchaseOrder.terminate,
-      record: JSON.stringify({
-        ...formik.values.header,
-        date: formatDateToApi(formik.values.header.date)
-      })
-    }).then(() => {
-      toast.success(platformLabels.Closed)
-      invalidate()
-      refetchForm(formik?.values?.header.recordId)
-    })
-  }
-
-  async function toInvoice() {
-    await postRequest({
-      extension: PurchaseRepository.PurchaseOrder.transfer,
-      record: JSON.stringify({
-        ...formik.values.header,
-        date: formatDateToApi(formik.values.header.date)
-      })
-    }).then(() => {
-      toast.success(platformLabels.Invoice)
-      invalidate()
-      refetchForm(formik?.values?.header.recordId)
-    })
-  }
-
-  async function onClose() {
-    await postRequest({
-      extension: PurchaseRepository.PurchaseOrder.close,
-      record: JSON.stringify({
-        ...formik.values.header,
-        date: formatDateToApi(formik.values.header.date)
-      })
-    }).then(() => {
-      toast.success(platformLabels.Closed)
-      invalidate()
-      refetchForm(formik?.values?.header.recordId)
-    })
-  }
-
-  async function onReopen() {
-    await postRequest({
-      extension: PurchaseRepository.PurchaseOrder.reopen,
-      record: JSON.stringify({
-        ...formik.values.header,
-        date: formatDateToApi(formik.values.header.date)
-      })
-    }).then(() => {
-      toast.success(platformLabels.Reopened)
-      invalidate()
-      refetchForm(formik?.values?.header.recordId)
-    })
-  }
 
   async function fillForm(puTrxPack) {
     const puTrxHeader = puTrxPack?.header
