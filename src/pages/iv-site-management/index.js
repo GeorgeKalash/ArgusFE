@@ -20,7 +20,7 @@ const SiteManagement = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.Items.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=sku&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -93,7 +93,8 @@ const SiteManagement = () => {
     {
       field: 'volume',
       headerName: labels.volume,
-      flex: 1
+      flex: 1,
+      type:'number'
     }
   ]
 
@@ -102,9 +103,7 @@ const SiteManagement = () => {
       Component: SiteManagementForm,
       props: {
         labels,
-        recordId: record?.recordId,
-        itemName: record?.name,
-        sku: record?.sku,
+        record,
         maxAccess: access
       },
       width: 1200,

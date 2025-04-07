@@ -18,20 +18,21 @@ import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRep
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 
-export default function SiteManagementForm({ labels, maxAccess, recordId, itemName, sku }) {
+export default function SiteManagementForm({ labels, maxAccess, record }) {
   const { platformLabels } = useContext(ControlContext)
+  const { recordId, name, sku } = record
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Items.page
   })
-  
+
   const { formik } = useForm({
     initialValues: {
-      itemId: null,
+      itemId: recordId,
       recordId,
-      itemName,
+      itemName: name,
       sku,
       min: null,
       purchaseRequestFactor: '',
@@ -45,8 +46,47 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      min: yup.number().required(),
-      max: yup.number().required()
+      min: yup
+        .number()
+        .required()
+        .test(function (value) {
+          const { max } = this.parent
+
+          return value <= max
+        }),
+
+      max: yup
+        .number()
+        .required()
+        .test(function (value) {
+          const { min } = this.parent
+
+          return value >= min
+        }),
+      items: yup
+        .array()
+        .of(
+          yup.object().shape({
+            siteMin: yup
+              .number()
+              .required()
+              .test(function (value) {
+                const { siteMax } = this.parent
+
+                return value <= siteMax
+              }),
+
+            siteMax: yup
+              .number()
+              .required()
+              .test(function (value) {
+                const { siteMin } = this.parent
+
+                return value >= siteMin
+              })
+          })
+        )
+        .required()
     }),
     onSubmit: async obj => {
       const copy = { ...obj }
@@ -69,7 +109,7 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
         record: JSON.stringify(resultObject)
       })
 
-      formik.setFieldValue('recordId', res.recordId)
+      refetchForm(res.recordId)
       toast.success(platformLabels.Updated)
 
       invalidate()
@@ -77,39 +117,41 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
   })
   const editMode = !!formik.values.recordId
 
+  async function refetchForm(recordId) {
+    if (recordId) {
+      const res = await getRequest({
+        extension: InventoryRepository.Management.get,
+        parameters: `_itemId=${recordId}`
+      })
+
+      const res2 = await getRequest({
+        extension: InventoryRepository.SManagement.qry,
+        parameters: `_itemId=${recordId}`
+      })
+
+      formik.setValues({
+        ...res.record,
+        recordId: res?.record?.itemId,
+        min: res?.record?.min ?? null,
+        max: res?.record?.max ?? null,
+        items: res2?.list?.map((item, index) => ({
+          ...item,
+          id: index + 1
+        }))
+      })
+    }
+  }
+
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: InventoryRepository.Management.get,
-          parameters: `_itemId=${recordId}`
-        })
-
-        const res2 = await getRequest({
-          extension: InventoryRepository.SManagement.qry,
-          parameters: `_itemId=${recordId}`
-        })
-
-        formik.setValues({
-          ...res.record,
-          sku: res?.record?.sku ?? sku,
-          itemName: res?.record?.name ?? itemName,
-          recordId: res?.record?.itemId,
-          min: res?.record?.min ?? null,
-          max: res?.record?.max ?? null,
-          items: res2?.list?.map((item, index) => ({
-            ...item,
-            id: index + 1
-          }))
-        })
-      }
+      await refetchForm(recordId)
     })()
   }, [])
 
   const columns = [
     {
       component: 'textfield',
-      label: labels.siteRef,
+      label: labels.reference,
       name: 'siteRef',
       props: {
         readOnly: true
@@ -117,7 +159,7 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
     },
     {
       component: 'textfield',
-      label: labels.siteName,
+      label: labels.name,
       name: 'siteName',
       props: {
         readOnly: true
@@ -126,7 +168,15 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
     {
       component: 'checkbox',
       label: labels.locked,
-      name: 'isLocked'
+      name: 'isLocked',
+      props: {
+        disabled: !formik.values.manageByWH
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'firstBinLocation',
+      label: labels.bin
     },
     {
       component: 'numberfield',
@@ -205,6 +255,8 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
               label={labels.min}
               value={formik.values.min}
               maxAccess={maxAccess}
+              maxLength={11}
+              decimalScale={2}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('min', '')}
               error={formik.touched.min && Boolean(formik.errors.min)}
@@ -216,6 +268,8 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
               label={labels.purchaseRequestFactor}
               value={formik.values.purchaseRequestFactor}
               maxAccess={maxAccess}
+              maxLength={11}
+              decimalScale={2}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('purchaseRequestFactor', 0)}
               error={formik.touched.purchaseRequestFactor && Boolean(formik.errors.purchaseRequestFactor)}
@@ -237,6 +291,8 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
               label={labels.max}
               value={formik.values.max}
               required
+              maxLength={11}
+              decimalScale={2}
               maxAccess={maxAccess}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('max', '')}
@@ -250,6 +306,8 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
               label={labels.amcShortTerm}
               value={formik.values.amcShortTerm}
               maxAccess={maxAccess}
+              maxLength={11}
+              decimalScale={2}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('amcShortTerm', 0)}
               error={formik.touched.amcShortTerm && Boolean(formik.errors.amcShortTerm)}
@@ -270,6 +328,8 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
               label={labels.required}
               value={formik.values.required}
               maxAccess={maxAccess}
+              maxLength={11}
+              decimalScale={2}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('required', 0)}
               error={formik.touched.required && Boolean(formik.errors.required)}
@@ -281,6 +341,8 @@ export default function SiteManagementForm({ labels, maxAccess, recordId, itemNa
               label={labels.amcLongTerm}
               value={formik.values.amcLongTerm}
               maxAccess={maxAccess}
+              maxLength={12}
+              decimalScale={2}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('amcLongTerm', 0)}
               error={formik.touched.amcLongTerm && Boolean(formik.errors.amcLongTerm)}
