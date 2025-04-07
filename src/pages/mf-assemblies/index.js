@@ -11,16 +11,13 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { useError } from 'src/error'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import SalesOrderForm from '../sales-order/Tabs/SalesOrderForm'
 
 const Assembly = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const { stack: stackError } = useError()
 
   const {
     query: { data },
@@ -46,33 +43,33 @@ const Assembly = () => {
       flex: 1
     },
     {
-      field: 'b',
-      headerName: labels.description,
+      field: 'bomName',
+      headerName: labels.bomName,
       flex: 1
     },
     {
-      field: 'description',
-      headerName: labels.description,
+      field: 'bomRef',
+      headerName: labels.bomRef,
       flex: 1
     },
     {
-      field: 'description',
-      headerName: labels.description,
+      field: 'siteRef',
+      headerName: labels.site,
       flex: 1
     },
     {
-      field: 'description',
-      headerName: labels.description,
+      field: 'machineName',
+      headerName: labels.machine,
       flex: 1
     },
     {
-      field: 'description',
-      headerName: labels.description,
+      field: 'sku',
+      headerName: labels.sku,
       flex: 1
     },
     {
-      field: 'description',
-      headerName: labels.description,
+      field: 'itemName',
+      headerName: labels.itemName,
       flex: 1
     },
     {
@@ -104,7 +101,7 @@ const Assembly = () => {
 
     const response = await getRequest({
       extension: ManufacturingRepository.Assembly.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=&_params=${params}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
