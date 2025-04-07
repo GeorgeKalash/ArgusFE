@@ -18,6 +18,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
   const { userDefaultsData } = useContext(ControlContext)
   const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
   const [isSubmitting, setSubmitting] = useState(false)
+  console.log()
 
   const { formik } = useForm({
     maxAccess: maxAccess,
