@@ -555,5 +555,11 @@ export const getButtons = platformLabels => [
     color: '#1f78b4',
     image: '3d-printer.png',
     main: false
+  },
+  {
+    key: 'ORD',
+    label: platformLabels.ord,
+    color: '#231f20',
+    main: false
   }
 ]
