@@ -229,7 +229,6 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, di
                 maxAccess={maxAccess}
                 value={formik.values.totalWeight}
                 readOnly
-                error={formik.touched.totalWeight && Boolean(formik.errors.totalWeight)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -239,7 +238,6 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, di
                 maxAccess={maxAccess}
                 value={weightAssigned}
                 readOnly
-                error={formik.touched.weightAssigned && Boolean(formik.errors.weightAssigned)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -249,7 +247,6 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, di
                 maxAccess={maxAccess}
                 value={balance}
                 readOnly
-                error={formik.touched.balanceWeight && Boolean(formik.errors.balanceWeight)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -259,7 +256,6 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, di
                 maxAccess={maxAccess}
                 value={formik?.values?.items?.filter(item => item.srlNo !== undefined)?.length}
                 readOnly
-                error={formik.touched.pieces && Boolean(formik.errors.pieces)}
               />
             </Grid>
           </Grid>
