@@ -234,6 +234,20 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotDMR',
     post: service + 'postDMR'
   },
+  BillOfMaterials: {
+    get: service + 'getBMA',
+    set: service + 'setBMA',
+    del: service + 'delBMA',
+    page: service + 'pageBMA',
+    snapshot: service + 'snapshotBMA'
+  },
+  Component: {
+    get: service + 'getBMI',
+    qry: service + 'qryBMI',
+    del: service + 'delBMI',
+    set: service + 'setBMI',
+    set2: service + 'set2BMI'
+  },
   Assembly: {
     get: service + 'getASM',
     set: service + 'setASM',

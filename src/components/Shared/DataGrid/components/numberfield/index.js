@@ -9,7 +9,7 @@ export function View({ value }) {
   const viewDecimals = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
 
   const formatValue = val => {
-    if (!val) return ''
+    if (!val && val !== 0) return ''
     if (isNaN(val)) return val
 
     return String(val)
