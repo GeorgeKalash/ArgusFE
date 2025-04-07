@@ -12,13 +12,15 @@ import { useForm } from 'src/hooks/form'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import axios from 'axios'
+import { useWindow } from 'src/windows'
+import PopupDialog from 'src/components/Shared/PopupDialog'
 
-export default function POSForm({ labels, form, maxAccess, amount }) {
+export default function POSForm({ labels, form, maxAccess, amount, window }) {
   const { getRequestFullEndPoint, getRequest } = useContext(RequestsContext)
   const { userDefaultsData } = useContext(ControlContext)
   const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
   const [isSubmitting, setSubmitting] = useState(false)
-  console.log()
+  const { stack } = useWindow()
 
   const { formik } = useForm({
     maxAccess: maxAccess,
@@ -59,7 +61,20 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
   async function onReceived() {
     setSubmitting(true)
     const res = axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/start_PUR`, formik.values)
-    if (res.data) setSubmitting(false)
+    if (res.data) {
+      setSubmitting(false)
+      const formattedText = res.data.replace(/ /g, '\n')
+      stack({
+        Component: PopupDialog,
+        props: {
+          DialogText: formattedText
+        },
+        width: 600,
+        height: formattedText.length,
+        expandable: false,
+        closable: false
+      })
+    }
   }
   async function onCancel() {
     setSubmitting(false)
