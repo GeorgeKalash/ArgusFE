@@ -108,7 +108,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
       toast.success(actionMessage)
       invalidate()
-      refetchForm(res?.recordId)
+      await refetchForm(res?.recordId)
     }
   })
 
@@ -220,19 +220,20 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       parameters: `_recordId=${recordId}`
     })
 
-    const modifiedList = res?.record?.items?.map((item, index) => ({
-      ...item,
-      id: index + 1
-    }))
+    if (res.record.header) {
+      const modifiedList = res?.record?.items?.map((item, index) => ({
+        ...item,
+        id: index + 1
+      }))
 
-    res.record.header.date = formatDateFromApi(res?.record?.header?.date)
+      formik.setValues({
+        ...res.record.header,
+        date: formatDateFromApi(res?.record?.header?.date),
+        rows: modifiedList
+      })
 
-    formik.setValues({
-      ...res.record.header,
-      rows: modifiedList
-    })
-
-    return res?.record
+      return res?.record
+    }
   }
 
   useEffect(() => {
@@ -279,13 +280,14 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readOnly={isPosted}
+                    readOnly={editMode}
+                    required
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     values={formik.values}
-                    maxAccess={!editMode && maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId)
+                    maxAccess={maxAccess}
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
