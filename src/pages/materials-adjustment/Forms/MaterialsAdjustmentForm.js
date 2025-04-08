@@ -23,11 +23,14 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { useWindow } from 'src/windows'
+import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 export default function MaterialsAdjustmentForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.MaterialAdjustment,
@@ -66,7 +69,8 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         notes: '',
         seqNo: ''
       }
-    ]
+    ],
+    serials: []
   }
 
   const invalidate = useInvalidate({
@@ -96,13 +100,33 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     onSubmit: async obj => {
       const copy = { ...obj }
       delete copy.rows
+      delete copy.serials
       copy.date = formatDateToApi(copy.date)
 
+      const serialsValues = []
+
       const updatedRows = formik.values.rows.map((adjDetail, index) => {
+        const { serials, ...restDetails } = adjDetail
         let muQty = adjDetail.muQty || 1
 
+        if (serials) {
+          const updatedSerials = serials.map((serialDetail, idx) => {
+            return {
+              ...serialDetail,
+              seqNo: index + 1,
+              srlSeqNo: 0,
+              componentSeqNo: 0,
+              itemId: adjDetail?.itemId,
+              adjustmentId: formik.values.recordId || 0,
+              id: idx
+            }
+          })
+          serialsValues.push(...updatedSerials)
+        }
+
         return {
-          ...adjDetail,
+          ...restDetails,
+          adjustmentId: formik.values.recordId || 0,
           qtyInBase: muQty * adjDetail.qty,
           seqNo: index + 1
         }
@@ -111,7 +135,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       const resultObject = {
         header: copy,
         items: updatedRows,
-        serials: [],
+        serials: serialsValues,
         lots: []
       }
 
@@ -182,6 +206,20 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     getDTD(formik?.values?.dtId)
   }, [formik.values.dtId])
 
+  const onCondition = row => {
+    if (row.trackBy === 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -194,13 +232,17 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'trackBy', to: 'trackBy' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
+      },
+      propsReducer({ row, props }) {
+        return { ...props, imgSrc: onCondition(row) }
       }
     },
     {
@@ -224,8 +266,43 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       component: 'textfield',
       label: labels.notes,
       name: 'notes'
+    },
+    {
+      component: 'button',
+      name: 'serials',
+      label: platformLabels.serials,
+      props: {
+        onCondition
+      },
+      onClick: (e, row, update, updateRow) => {
+        if (row?.trackBy === 1) {
+          stack({
+            Component: SerialsForm,
+            props: {
+              labels,
+              disabled: isPosted,
+              row,
+              siteId: row.qty >= 0 ? null : formik?.values?.siteId,
+              maxAccess,
+              checkForSiteId: row.qty >= 0 ? false : true,
+              updateRow
+            },
+            width: 500,
+            height: 700,
+            title: platformLabels.serials
+          })
+        }
+      }
     }
   ]
+
+  async function getSerials(recordId, seqNo) {
+    return await getRequest({
+      extension: InventoryRepository.MaterialAdjustmentSerial.qry,
+      parameters: `_adjustmentId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
+    })
+  }
+
   async function refetchForm(recordId) {
     const res = await getRequest({
       extension: InventoryRepository.MaterialsAdjustment.get,
@@ -237,16 +314,28 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       parameters: `_filter=&_adjustmentId=${recordId}`
     })
 
-    const modifiedList = res2?.list?.map((item, index) => ({
-      ...item,
-      id: index + 1,
-      totalCost: item.unitCost * item.qty
-    }))
+    const updatedAdjustments = await Promise.all(
+      res2.list.map(async item => {
+        const serials = await getSerials(recordId, item.seqNo)
+
+        return {
+          ...item,
+          id: item.seqNo,
+          serials: serials.list.map((serialDetail, index) => {
+            return {
+              ...serialDetail,
+              id: index
+            }
+          }),
+          totalCost: item.unitCost * item.qty
+        }
+      })
+    )
 
     formik.setValues({
       ...res.record,
       date: formatDateFromApi(res.record.date),
-      rows: modifiedList
+      rows: updatedAdjustments
     })
 
     return res?.record
