@@ -617,6 +617,11 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 secondDisplayField={true}
                 firstValue={formik.values.accountRef}
                 secondValue={formik.values.accountName}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Account Ref' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'keywords', value: 'Keywords' }
+                ]}
                 displayFieldWidth={3}
                 maxAccess={maxAccess}
                 readOnly={isPosted}

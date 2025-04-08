@@ -511,6 +511,12 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 valueShow='accountRef'
                 secondValueShow='accountName'
                 form={formik}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Account Ref' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'keywords', value: 'Keywords' }
+                ]}
+                displayFieldWidth={2}
                 filter={{ type: formik.values.accountType }}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
