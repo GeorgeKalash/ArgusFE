@@ -209,6 +209,7 @@ export const InventoryRepository = {
   },
   AvailabilitySerial: {
     qry: service + 'qryAVS',
+    get: service + 'getAVS',
     page: service + 'pageAVS'
   },
   AvailabilityLot: {
@@ -263,7 +264,14 @@ export const InventoryRepository = {
   },
   Serial: {
     qry: service + 'qrySRL',
-    get2: service + 'get2SRL'
+    get2: service + 'get2SRL',
+    get: service + 'getSRL'
+  },
+  MaterialTransferSerial: {
+    qry: service + 'qryTFS'
+  },
+  MaterialAdjustmentSerial: {
+    qry: service + 'qryADS'
   },
   DraftTransfer: {
     page: service + 'pageDTF',

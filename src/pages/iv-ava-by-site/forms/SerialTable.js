@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react'
+import { useContext, useState } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -7,33 +7,23 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const SerialForm = ({ labels, itemId }) => {
+const SerialTable = ({ labels, itemId, siteId }) => {
   const { getRequest } = useContext(RequestsContext)
-  const [tableData, setTableData] = useState([])
+  const [data, setData] = useState([])
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
+  async function fetchGridData() {
     const response = await getRequest({
-      extension: InventoryRepository.AvailabilitySerial.page,
-      parameters: `_itemId=${itemId}&_siteId=0&_srlNo=0&_startAt=${_startAt}&_pageSize=${_pageSize}`
+      extension: InventoryRepository.AvailabilitySerial.qry,
+      parameters: `_itemId=${itemId}&_siteId=${siteId}&_srlNo=&_startAt=0&_pageSize=50`
     })
-
-    setTableData({ ...response, _startAt: _startAt })
-
-    return { ...response, _startAt: _startAt }
+    setData(response)
   }
 
-  const { refetch, paginationParameters } = useResourceQuery({
-    datasetId: ResourceIds.AvailabilitiesCrossTab,
+  const { refetch, access, paginationParameters } = useResourceQuery({
+    datasetId: ResourceIds.AvailabilitiesBySite,
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.AvailabilitySerial.page
+    endpointId: InventoryRepository.AvailabilitySerial.qry
   })
-
-  useEffect(() => {
-    setTableData([])
-    refetch()
-  }, [itemId])
 
   const columns = [
     {
@@ -44,12 +34,16 @@ const SerialForm = ({ labels, itemId }) => {
     {
       field: 'weight',
       headerName: labels.weight,
-      flex: 1,
-      type: 'number'
+      flex: 1
     },
     {
       field: 'siteRef',
       headerName: labels.site,
+      flex: 1
+    },
+    {
+      field: 'pcs',
+      headerName: labels.pieces,
       flex: 1
     }
   ]
@@ -59,18 +53,18 @@ const SerialForm = ({ labels, itemId }) => {
       <Grow>
         <Table
           columns={columns}
-          gridData={tableData}
-          rowId={['srlNo']}
-          isLoading={true}
+          gridData={data}
+          rowId={['sku']}
+          isLoading={false}
           pageSize={50}
           paginationType='api'
+          maxAccess={access}
           paginationParameters={paginationParameters}
           refetch={refetch}
-          name='avaSerial'
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default SerialForm
+export default SerialTable
