@@ -30,7 +30,7 @@ const Assembly = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.Assembly.page,
-    datasetId: ResourceIds.Assembly,
+    datasetId: ResourceIds.Assemblies,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -49,7 +49,7 @@ const Assembly = () => {
     },
     {
       field: 'bomRef',
-      headerName: labels.bomRef,
+      headerName: labels.BOM,
       flex: 1
     },
     {
@@ -69,7 +69,7 @@ const Assembly = () => {
     },
     {
       field: 'itemName',
-      headerName: labels.itemName,
+      headerName: labels.componentItem,
       flex: 1
     },
     {
@@ -79,8 +79,8 @@ const Assembly = () => {
       type: 'date'
     },
     {
-      field: 'description',
-      headerName: labels.description,
+      field: 'notes',
+      headerName: labels.notes,
       flex: 1
     },
     {
