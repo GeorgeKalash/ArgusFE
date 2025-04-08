@@ -58,7 +58,8 @@ export const ManufacturingRepository = {
     qry: service + 'qryMAC',
     set: service + 'setMAC',
     get: service + 'getMAC',
-    del: service + 'delMAC'
+    del: service + 'delMAC',
+    snapshot: service + 'snapshotMAC'
   },
   MachineSpecification: {
     page: service + 'pageMAS',
@@ -257,5 +258,8 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotASM',
     post: service + 'postASM',
     unpost: service + 'unpostASM'
+  },
+  AssemblyItems: {
+    qry: service + 'qryASC'
   }
 }

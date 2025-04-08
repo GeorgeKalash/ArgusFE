@@ -1,0 +1,654 @@
+import { Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
+import * as yup from 'yup'
+import FormShell from 'src/components/Shared/FormShell'
+import toast from 'react-hot-toast'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { useInvalidate } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import CustomButton from 'src/components/Inputs/CustomButton'
+
+export default function AssemblyForm({ labels, maxAccess: access, store, setStore }) {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+  const recordId = store?.recordId
+
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId: SystemFunction.Assembly,
+    access,
+    enabled: !recordId
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: ManufacturingRepository.Assembly.page
+  })
+
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      bomId: null,
+      bomName: null,
+      bomRef: null,
+      sku: null,
+      itemId: null,
+      itemName: null,
+      siteId: null,
+      qty: 0,
+      rmCost: 0,
+      notes: '',
+      dtId: null,
+      reference: null,
+      status: null,
+      releaseStatus: null,
+      date: new Date(),
+      plantId: null,
+      machineId: null,
+      machineName: null,
+      machineRef: null,
+      batches: null,
+      batchSize: null,
+      trackBy: null,
+      lotCategoryId: null,
+      labourId: null,
+      shiftId: null,
+      items: [
+        {
+          id: 1,
+          assemblyId: recordId || 0,
+          seqNo: null,
+          itemId: null,
+          itemName: null,
+          sku: null,
+          siteId: null,
+          designQty: null,
+          qty: 0,
+          baseQty: 0,
+          cost: 0,
+          diffQty: 0,
+          variationLimit: 0
+        }
+      ]
+    },
+    maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
+    enableReinitialize: false,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      date: yup.date().required(),
+      dtId: yup.string().required(),
+      items: yup
+        .array()
+        .of(
+          yup.object().shape({
+            sku: yup.string().required(),
+            itemName: yup.string().required(),
+            siteName: yup.string().required(),
+            siteRef: yup.string().required(),
+            qty: yup.number().required(),
+            diffQty: yup.number().required()
+          })
+        )
+        .required()
+    }),
+    onSubmit: async values => {
+      const updatedRows = formik?.values?.items.map((transferDetail, index) => {
+        return {
+          ...transferDetail,
+          seqNo: index + 1,
+          transferId: formik.values.recordId || 0,
+          unitCost: parseFloat(transferDetail.unitCost),
+          totalCost: parseFloat(transferDetail.totalCost)
+        }
+      })
+
+      const resultObject = {
+        header: { ...formik.values, date: formatDateToApi(formik.values.date) },
+        items: updatedRows
+      }
+
+      const res = await postRequest({
+        extension: ManufacturingRepository.Assembly.set2,
+        record: JSON.stringify(resultObject)
+      })
+      refetchForm(res.recordId)
+      const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+      toast.success(actionMessage)
+      invalidate()
+    }
+  })
+
+  const isPosted = formik.values.status === 3
+  const editMode = !!formik.values.recordId
+
+  const totalQty = formik.values.items.reduce((currentQty, row) => {
+    const qtyValue = parseFloat(row.qty?.toString().replace(/,/g, '')) || 0
+
+    return currentQty + qtyValue
+  }, 0)
+  const avgUnitCost = (formik.values.rmCost || 0 + totalQty || 0) / (formik.values.qty || 0)
+
+  const columns = [
+    {
+      component: 'resourcelookup',
+      label: labels.sku,
+      name: 'sku',
+      props: {
+        endpointId: InventoryRepository.Item.snapshot,
+        valueField: 'sku',
+        displayField: 'sku',
+        mandatory: true,
+        readOnly: isPosted,
+        displayFieldWidth: 3,
+        mapping: [
+          { from: 'recordId', to: 'itemId' },
+          { from: 'sku', to: 'sku' },
+          { from: 'name', to: 'itemName' }
+        ],
+        columnsInDropDown: [
+          { key: 'sku', value: 'SKU' },
+          { key: 'name', value: 'Name' }
+        ]
+      },
+      async onChange({ row: { update, newRow } }) {}
+    },
+    {
+      component: 'textfield',
+      label: labels.componentItem,
+      name: 'itemName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.siteRef,
+      name: 'siteRef',
+      props: {
+        endpointId: InventoryRepository.Site.qry,
+        displayField: 'reference',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'recordId', to: 'siteId' },
+          { from: 'reference', to: 'siteRef' },
+          { from: 'name', to: 'siteName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 3
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.siteName,
+      name: 'siteName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.designQty,
+      name: 'designQty',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.qty,
+      name: 'qty',
+      props: {
+        readOnly: isPosted
+      },
+      async onChange({ row: { update, newRow } }) {}
+    },
+    {
+      component: 'numberfield',
+      label: labels.diffQty,
+      name: 'diffQty',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.cost,
+      name: 'cost',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.variationLimit,
+      name: 'variationLimit',
+      props: {
+        readOnly: true
+      }
+    }
+  ]
+
+  async function getHeaderData(recordId) {
+    const res = await getRequest({
+      extension: ManufacturingRepository.Assembly.get,
+      parameters: `_recordId=${recordId}`
+    })
+
+    res.record.date = formatDateFromApi(res?.record?.date)
+
+    return res
+  }
+
+  async function getItemsData(recordId) {
+    return await getRequest({
+      extension: ManufacturingRepository.AssemblyItems.qry,
+      parameters: `_assemblyId=${recordId}`
+    })
+  }
+
+  async function refetchForm(recordId) {
+    const header = await getHeaderData(recordId)
+    const items = await getItemsData(recordId)
+    setStore(prevStore => ({
+      ...prevStore,
+      recordId: header.record.recordId
+    }))
+    formik.setValues({
+      ...header.record,
+
+      //diffQty: header.record.qty || 0 - header.record.designQty || 0,
+      items: items?.list?.map(item => ({
+        ...item,
+        id: item.seqNo,
+        diffQty: item.qty || 0 - item.designQty || 0
+      }))
+    })
+  }
+
+  const onPost = async () => {
+    // await postRequest({
+    //   extension: ManufacturingRepository.Assembly.post,
+    //   record: JSON.stringify(formik.values)
+    // })
+    // toast.success(platformLabels.Posted)
+    // invalidate()
+    // await refetchForm(formik.values.recordId)
+    setStore(prevStore => ({
+      ...prevStore,
+      isPosted: true
+    }))
+  }
+
+  const onUnpost = async () => {
+    // await postRequest({
+    //   extension: ManufacturingRepository.Assembly.unpost,
+    //   record: JSON.stringify(formik.values)
+    // })
+    // toast.success(platformLabels.Unposted)
+    // invalidate()
+    // await refetchForm(formik.values.recordId)
+    setStore(prevStore => ({
+      ...prevStore,
+      isPosted: false
+    }))
+  }
+
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      disabled: !editMode
+    },
+    {
+      key: 'IV',
+      condition: true,
+      onClick: 'onInventoryTransaction',
+      disabled: !editMode || !isPosted
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode || !isPosted || formik.values.isVerified
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode || !isPosted || formik.values.isVerified
+    }
+  ]
+
+  useEffect(() => {
+    if (recordId) refetchForm(recordId)
+  }, [])
+
+  return (
+    <FormShell
+      resourceId={ResourceIds.Assemblies}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      previewReport={editMode}
+      actions={actions}
+      functionId={SystemFunction.Assembly}
+      disabledSubmit={isPosted}
+    >
+      <VertLayout>
+        <Fixed>
+          <Grid container spacing={2}>
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.DocumentType.qry}
+                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Assembly}`}
+                    name='dtId'
+                    label={labels.docType}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={editMode}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('dtId', newValue?.recordId)
+                      changeDT(newValue)
+                    }}
+                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='reference'
+                    label={labels.reference}
+                    value={formik?.values?.reference}
+                    maxAccess={!editMode && maxAccess}
+                    readOnly={editMode}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('reference', null)}
+                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='date'
+                    required
+                    readOnly={isPosted}
+                    label={labels.date}
+                    value={formik?.values?.date}
+                    onChange={formik.setFieldValue}
+                    editMode={editMode}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('date', null)}
+                    error={formik.touched.date && Boolean(formik.errors.date)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='notes'
+                    label={labels.notes}
+                    value={formik.values.notes}
+                    rows={2.5}
+                    maxLength='100'
+                    readOnly={isPosted}
+                    disabled={formik.values.notes}
+                    maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('notes', e.target.value)}
+                    onClear={() => formik.setFieldValue('notes', null)}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={5}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={ManufacturingRepository.Machine.snapshot}
+                    parameters={
+                      {
+                        //   _functionId: SystemFunction.SalesQuotation,
+                        //   _startAt: 0,
+                        //   _pageSize: 1000,
+                        //   _sortBy: 'reference desc'
+                      }
+                    }
+                    valueField='reference'
+                    displayField='name'
+                    name='machineId'
+                    label={labels.machine}
+                    form={formik}
+                    readOnly={isPosted}
+                    displayFieldWidth={2}
+                    valueShow='machineRef'
+                    secondValueShow='machineName'
+                    maxAccess={maxAccess}
+                    editMode={editMode}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('machineId', newValue?.recordId)
+                      formik.setFieldValue('machineName', newValue?.name)
+                      formik.setFieldValue('machineRef', newValue?.reference)
+                    }}
+                    errorCheck={'machineId'}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={ManufacturingRepository.BillOfMaterials.snapshot}
+                    valueField='reference'
+                    displayField='name'
+                    name='bomId'
+                    label={labels.BOM}
+                    form={formik}
+                    readOnly={isPosted}
+                    displayFieldWidth={2}
+                    valueShow='bomRef'
+                    secondValueShow='bomName'
+                    maxAccess={maxAccess}
+                    editMode={editMode}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('bomId', newValue?.recordId)
+                      formik.setFieldValue('bomName', newValue?.name)
+                      formik.setFieldValue('bomRef', newValue?.reference)
+                    }}
+                    errorCheck={'bomId'}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={InventoryRepository.Item.snapshot}
+                    name='itemId'
+                    label={labels?.sku}
+                    valueField='recordId'
+                    displayField='sku'
+                    valueShow='sku'
+                    secondValueShow='itemName'
+                    displayFieldWidth={2}
+                    form={formik}
+                    readOnly={isPosted}
+                    columnsInDropDown={[
+                      { key: 'sku', value: 'SKU' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('itemId', newValue?.recordId)
+                      formik.setFieldValue('itemName', newValue?.name)
+                      formik.setFieldValue('sku', newValue?.sku)
+                    }}
+                    maxAccess={maxAccess}
+                    errorCheck={'itemId'}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Site.qry}
+                    name='siteId'
+                    label={labels.site}
+                    values={formik.values}
+                    displayField={['reference', 'name']}
+                    maxAccess={maxAccess}
+                    readOnly={isPosted}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('siteId', newValue?.recordId)
+                    }}
+                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='rmCost'
+                    label={labels.totalCost}
+                    value={formik?.values?.rmCost}
+                    maxAccess={maxAccess}
+                    readOnly={isPosted}
+                    onClear={() => formik.setFieldValue('rmCost', 0)}
+                    error={formik.touched.rmCost && Boolean(formik.errors.rmCost)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomButton onClick={() => {}} image={'preview.png'} tooltipText={platformLabels.Preview} />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='avgUnitCost'
+                    label={labels.unitCost}
+                    readOnly={isPosted}
+                    value={avgUnitCost}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('avgUnitCost', 0)}
+                    error={formik.touched.avgUnitCost && Boolean(formik.errors.avgUnitCost)}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={3}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='designQty'
+                    label={labels.designQty}
+                    readOnly={isPosted}
+                    value={formik?.values?.designQty}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('designQty', 0)}
+                    error={formik.touched.designQty && Boolean(formik.errors.designQty)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='qty'
+                    label={labels.qty}
+                    readOnly={isPosted}
+                    value={formik?.values?.qty}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('qty', 0)}
+                    error={formik.touched.qty && Boolean(formik.errors.qty)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='diffQty'
+                    label={labels.diffQty}
+                    readOnly={isPosted}
+                    value={formik?.values?.diffQty}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('diffQty', 0)}
+                    error={formik.touched.diffQty && Boolean(formik.errors.diffQty)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='totalRM'
+                    label={labels.totalRM}
+                    readOnly={isPosted}
+                    value={formik?.values?.totalRM}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('totalRM', 0)}
+                    error={formik.touched.totalRM && Boolean(formik.errors.totalRM)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='batchSize'
+                    label={labels.batchSize}
+                    readOnly={isPosted}
+                    value={formik?.values?.batchSize}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('batchSize', 0)}
+                    error={formik.touched.batchSize && Boolean(formik.errors.batchSize)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='batches'
+                    label={labels.batches}
+                    readOnly={isPosted}
+                    value={formik?.values?.batches}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('batches', 0)}
+                    error={formik.touched.batches && Boolean(formik.errors.batches)}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Fixed>
+
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values.items}
+            error={formik.errors.items}
+            columns={columns}
+            name='items'
+            maxAccess={maxAccess}
+            allowDelete={!isPosted}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
+  )
+}

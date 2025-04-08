@@ -13,6 +13,7 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import AssemblyWindow from './window/AssemblyWindow'
 
 const Assembly = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -118,8 +119,7 @@ const Assembly = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.Assembly,
-    action: openForm(),
-    hasDT: false
+    action: openForm
   })
 
   const add = async () => {
@@ -131,17 +131,17 @@ const Assembly = () => {
   }
 
   async function openForm(recordId) {
-    // stack({
-    //   Component: SalesOrderForm,
-    //   props: {
-    //     labels,
-    //     access,
-    //     recordId
-    //   },
-    //   width: 1300,
-    //   height: 730,
-    //   title: labels.salesOrder
-    // })
+    stack({
+      Component: AssemblyWindow,
+      props: {
+        labels,
+        access,
+        recordId
+      },
+      width: 1300,
+      height: 730,
+      title: labels.assembly
+    })
   }
 
   const delASM = async obj => {
