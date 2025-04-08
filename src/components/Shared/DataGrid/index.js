@@ -116,7 +116,8 @@ export function DataGrid({
           ...value.map(row => (row.id === updatedRow.id ? updatedRow : row)),
           {
             id: highestIndex,
-            ...defaultValues
+            ...defaultValues,
+            ...initialValues
           }
         ]
         onChange(rows)
@@ -451,7 +452,7 @@ export function DataGrid({
       maxAccess
     }
 
-    async function update({ field, value }, StopOnBlur = false) {
+    async function update({ field, value }) {
       const oldRow = params.data
 
       const changes = {
@@ -462,13 +463,13 @@ export function DataGrid({
 
       setData(changes, params)
 
-      if (column.colDef.updateOn !== 'blur' || StopOnBlur) {
+      if (column.colDef.updateOn !== 'blur') {
         commit(changes)
         process(params, oldRow, setData)
       }
     }
 
-    const updateRow = ({ changes }, StopOnBlur = false) => {
+    const updateRow = ({ changes }) => {
       const oldRow = params.data
 
       setCurrentValue(changes || '')
@@ -481,7 +482,7 @@ export function DataGrid({
         return
       }
 
-      if (column.colDef.updateOn !== 'blur' || StopOnBlur) {
+      if (column.colDef.updateOn !== 'blur') {
         commit(changes)
 
         process(params, oldRow, setData)

@@ -36,7 +36,8 @@ import {
   DIRTYFIELD_MDAMOUNT,
   DIRTYFIELD_MDTYPE,
   DIRTYFIELD_EXTENDED_PRICE,
-  MDTYPE_PCT
+  MDTYPE_PCT,
+  MDTYPE_AMOUNT
 } from 'src/utils/ItemPriceCalculator'
 
 import { getVatCalc } from 'src/utils/VatCalculator'
@@ -69,20 +70,8 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
   const functionId = SystemFunction.PurchaseOrder
   const { stack: stackError } = useError()
 
-  const defaultsValues = defaultsData?.list?.reduce((acc, obj) => {
-    if (obj.key === 'currencyId') acc.currencyId = parseInt(obj.value)
-
-    return acc
-  }, {})
-
-  const defaultsUserValues = userDefaultsData?.list?.reduce((acc, obj) => {
-    if (obj.key === 'plantId') acc.plantId = parseInt(obj.value)
-
-    return acc
-  }, {})
-
-  const defPlId = defaultsUserValues?.plantId
-  const defCurrencyId = defaultsValues?.currencyId
+  const defPlId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const defCurrencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
 
   const [cycleButtonState, setCycleButtonState] = useState({
     text: '%',
@@ -269,6 +258,12 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
 
     const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
     filteredMeasurements.current = arrayMU
+  }
+
+  const isPercentIcon = ({ value, data }) => {
+    const mdType = value?.mdType || data?.mdType
+
+    return mdType === MDTYPE_PCT ? true : false
   }
 
   const columns = [
@@ -461,13 +456,13 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       flex: 2,
       props: {
         ShowDiscountIcons: true,
-        iconsClicked: (id, updateRow, value, data) => handleIconClick(id, updateRow, value, data),
+        iconsClicked: handleIconClick,
         type: 'numeric',
         concatenateWith: '%',
+        isPercentIcon,
         defaultValue: 0
       },
       async onChange({ row: { update, newRow, oldRow } }) {
-        console.log('onchange', newRow, oldRow)
         if (oldRow.mdAmount !== newRow.mdAmount) {
           const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
           update(data)
@@ -491,33 +486,33 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
     }
   ]
 
-  async function handleIconClick(id, updateRow, value, data) {
-    const index = formik.values.items.findIndex(item => item.id === id)
+  function checkMinMaxAmount(amount, type, modType) {
+    let currentAmount = parseFloat(amount) || 0
 
-    if (index === -1) return
-
-    let currentMdAmount = parseFloat(value?.mdAmount)
-
-    if (value?.mdType === 1) {
-      if (currentMdAmount < 0 || currentMdAmount > 100) currentMdAmount = 0
+    if (type === modType) {
+      if (currentAmount < 0 || currentAmount > 100) currentAmount = 0
     } else {
-      if (currentMdAmount < 0) currentMdAmount = 0
+      if (currentAmount < 0) currentAmount = 0
     }
+
+    return currentAmount
+  }
+
+  async function handleIconClick({ updateRow, value, data }) {
+    const mdt = value?.mdType || data?.mdType
+
+    let mdType = mdt === MDTYPE_PCT ? MDTYPE_AMOUNT : MDTYPE_PCT
+
+    const currentMdAmount = checkMinMaxAmount(value?.mdAmount, mdType, MDTYPE_PCT)
 
     const newRow = {
       mdAmount: currentMdAmount,
-      mdAmountPct: value?.mdType,
-      mdType: value?.mdType
+      mdAmountPct: mdType,
+      mdType: mdType
     }
 
-    // console.log(data, value)
-    console.log('onchangeclick', { ...data, value })
-
-    const datas = getItemPriceRow({ ...data, ...value }, DIRTYFIELD_MDAMOUNT)
-
-    // updateRow(datas)
-
-    updateRow({ changes: datas })
+    const changes = getItemPriceRow({ ...data, ...newRow }, DIRTYFIELD_MDAMOUNT)
+    updateRow({ changes })
   }
 
   const onWorkFlowClick = () => {
@@ -725,7 +720,9 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       header: {
         ...formik.values.header,
         ...puTrxHeader,
-        amount: parseFloat(puTrxHeader?.amount).toFixed(2)
+        amount: parseFloat(puTrxHeader?.amount).toFixed(2),
+        date: formik.values?.header?.deliveryDate && formatDateFromApi(formik.values?.header?.date),
+        deliveryDate: formik.values?.header?.deliveryDate && formatDateFromApi(formik.values?.header?.deliveryDate)
       },
       items: modifiedList
     })
@@ -737,8 +734,8 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       parameters: `_poId=${transactionId}`
     })
 
-    res.record.header.date = formatDateFromApi(res?.record?.header?.date)
-    res.record.header.deliveryDate = formatDateFromApi(res?.record?.header?.deliveryDate)
+    // res.record.header.date = formatDateFromApi(res?.record?.header?.date)
+    // res.record.header.deliveryDate = formatDateFromApi(res?.record?.header?.deliveryDate)
 
     return res.record
   }
@@ -938,6 +935,8 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
   function getItemPriceRow(newRow, dirtyField, iconClicked) {
     !reCal && setReCal(true)
 
+    const mdAmount = checkMinMaxAmount(newRow?.mdAmount, newRow?.mdType, MDTYPE_PCT)
+
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
       basePrice: parseFloat(newRow?.basePrice || 0),
@@ -947,7 +946,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       upo: 0,
       qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
-      mdAmount: parseFloat(newRow?.mdAmount) || 0,
+      mdAmount: mdAmount,
       mdType: newRow?.mdType,
       mdValue: parseFloat(newRow?.mdValue),
       baseLaborPrice: newRow?.baseLaborPrice || 0,
@@ -1535,7 +1534,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
               if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
             value={formik?.values?.items}
-            initialValues={{ mdType: 1 }}
+            initialValues={{ mdType: MDTYPE_PCT }}
             error={formik.errors.items}
             name='items'
             columns={columns}

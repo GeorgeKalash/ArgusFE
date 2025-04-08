@@ -6,14 +6,11 @@ import { SystemChecks } from 'src/resources/SystemChecks'
 export default function NumberfieldEdit({ id, column: { props, field }, value, data, update, updateRow }) {
   const { systemChecks } = useContext(ControlContext)
   const viewDecimals = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
-  const [md, setMd] = useState(data?.mdType)
-  const isPercentIcon = md === 1 || false
 
   const typing = useRef(false)
 
   const handleIconClick = () => {
-    props?.iconsClicked(id, updateRow, { ...value, mdType: md === 1 ? 2 : 1 }, data)
-    setMd(md === 1 ? 2 : 1)
+    props?.iconsClicked({ updateRow, value, data })
   }
 
   const formatValue = val => {
@@ -56,8 +53,8 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
         typing.current = false
       }}
       handleButtonClick={handleIconClick}
-      isPercentIcon={isPercentIcon}
       {...props}
+      isPercentIcon={props?.isPercentIcon && props?.isPercentIcon({ value, data })}
     />
   )
 }
