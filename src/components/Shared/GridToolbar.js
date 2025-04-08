@@ -73,13 +73,14 @@ const GridToolbar = ({
   }
 
   useEffect(() => {
-    if (previewReport && reportStore.length > 0) {
-      setSelectedReport(reportStore[0])
+    const fetchReportLayout = async () => {
+      if (previewReport) {
+        await getReportLayout()
+        if (reportStore.length > 0) setSelectedReport(reportStore[0])
+      }
     }
-  }, [previewReport, reportStore])
 
-  useEffect(() => {
-    if (previewReport) getReportLayout()
+    fetchReportLayout()
   }, [])
 
   const buttons = getButtons(platformLabels)
