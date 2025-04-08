@@ -52,6 +52,8 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
         .test(function (value) {
           const { max } = this.parent
 
+          if (max == null || isNaN(max)) return true
+
           return value <= max
         }),
 
@@ -61,8 +63,11 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
         .test(function (value) {
           const { min } = this.parent
 
+          if (min == null || isNaN(min)) return true
+
           return value >= min
         }),
+      purchaseRequestFactor: yup.number().nullable().max(99),
       items: yup
         .array()
         .of(
@@ -143,9 +148,7 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
   }
 
   useEffect(() => {
-    ;(async function () {
-      await refetchForm(recordId)
-    })()
+    refetchForm(recordId)
   }, [])
 
   const columns = [
@@ -176,7 +179,11 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
     {
       component: 'numberfield',
       name: 'firstBinLocation',
-      label: labels.bin
+      label: labels.bin,
+      defaultValue: 0,
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'numberfield',
@@ -268,7 +275,7 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
               label={labels.purchaseRequestFactor}
               value={formik.values.purchaseRequestFactor}
               maxAccess={maxAccess}
-              maxLength={11}
+              maxLength={4}
               decimalScale={2}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('purchaseRequestFactor', 0)}
@@ -341,7 +348,7 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
               label={labels.amcLongTerm}
               value={formik.values.amcLongTerm}
               maxAccess={maxAccess}
-              maxLength={12}
+              maxLength={11}
               decimalScale={2}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('amcLongTerm', 0)}
