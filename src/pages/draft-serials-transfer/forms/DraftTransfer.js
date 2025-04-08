@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -36,6 +36,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
+  const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftTransfer,
@@ -298,6 +299,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
             }
           }
 
+          !reCal && setReCal(true)
           addRow(lineObj)
 
           const successSave = formik?.values?.recordId
@@ -471,6 +473,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
   ]
 
   async function fillGrids() {
+    const diHeader = await getDraftTransfer(formik?.values?.recordId)
     const diItems = await getDraftTransferItems(formik?.values?.recordId)
 
     const modifiedList = await Promise.all(
@@ -482,7 +485,11 @@ export default function DraftTransfer({ labels, access, recordId }) {
       })
     )
 
-    formik.setFieldValue('serials', modifiedList)
+    formik.setValues({
+      ...formik.values,
+      ...diHeader.record,
+      serials: modifiedList.length ? modifiedList : formik?.initialValues?.serials
+    })
   }
 
   async function fillForm(diHeader, diItems) {
@@ -510,7 +517,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
 
     formik.setFieldValue('carrierId', dtd?.record?.carrierId || null)
     formik.setFieldValue('fromSiteId', dtd?.record?.siteId || formik?.values?.fromSiteId || null)
-    formik.setFieldValue('toSiteId', dtd?.record?.toSiteId || null)
+    formik.setFieldValue('toSiteId', dtd?.record?.toSiteId || formik?.values?.toSiteId || null)
   }
 
   useEffect(() => {
@@ -562,7 +569,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
       const totWeight = parseFloat(row?.weight) || 0
 
       return {
-        totalWeight: acc?.totalWeight + totWeight
+        totalWeight: reCal ? acc?.totalWeight + totWeight : formik.values?.totalWeight || 0
       }
     },
     { totalWeight: 0 }
@@ -775,7 +782,10 @@ export default function DraftTransfer({ labels, access, recordId }) {
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('serials', value)}
+            onChange={(value, action) => {
+              formik.setFieldValue('serials', value)
+              action === 'delete' && setReCal(true)
+            }}
             value={formik.values.serials || []}
             error={formik.errors.serials}
             columns={serialsColumns}
