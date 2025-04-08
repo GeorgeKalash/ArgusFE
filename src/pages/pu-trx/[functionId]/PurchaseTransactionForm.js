@@ -55,6 +55,7 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import { CommonContext } from 'src/providers/CommonContext'
 import ItemPromotion from 'src/components/Shared/ItemPromotion'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { SerialsForm } from 'src/components/Shared/SerialsForm'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -219,17 +220,41 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         .required()
     }),
     onSubmit: async obj => {
+      const serialsValues = []
+
+      const updatedRows = obj.items.map(({ id, isVattable, taxDetails, ...rest }) => {
+        const { serials, ...restDetails } = rest
+        if (serials) {
+          const updatedSerials = serials.map((serialDetail, idx) => {
+            return {
+              ...serialDetail,
+              id: idx + 1,
+              seqNo: id,
+              srlSeqNo: 0,
+              componentSeqNo: 0,
+              invoiceId: formik.values.recordId || 0,
+              itemId: rest?.itemId
+            }
+          })
+          serialsValues.push(...updatedSerials)
+        }
+
+        return {
+          ...restDetails,
+          seqNo: id,
+          invoiceId: formik.values.recordId || 0,
+          applyVat: isVattable
+        }
+      })
+
       const payload = {
         header: {
           ...obj.header,
           date: formatDateToApi(obj.header.date),
           dueDate: formatDateToApi(obj.header.dueDate)
         },
-        items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
-          seqNo: id,
-          applyVat: isVattable,
-          ...rest
-        })),
+        items: updatedRows,
+        serials: serialsValues,
         taxCodes: [
           ...[
             ...obj.items
@@ -240,7 +265,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
               }))
           ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
         ],
-        ...(({ header, items, taxCodes, ...rest }) => rest)(obj)
+        ...(({ header, items, taxCodes, serials, ...rest }) => rest)(obj)
       }
 
       const puTrxRes = await postRequest({
@@ -312,6 +337,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
+          { from: 'trackBy', to: 'trackBy' },
           { from: 'msId', to: 'msId' }
         ],
         columnsInDropDown: [
@@ -337,6 +363,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             ? undefined
             : await getVendorPrice(newRow, formik.values.header)
         fillItemObject(update, phycialProperty, itemInfo, vendorPrice)
+      },
+      propsReducer({ row, props }) {
+        return { ...props, imgSrc: onCondition(row) }
       }
     },
     {
@@ -551,6 +580,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   ]
 
+  async function getSerials(recordId, seqNo) {
+    return await getRequest({
+      extension: PurchaseRepository.Serials.qry,
+      parameters: `_invoiceId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
+    })
+  }
+
   async function handleIconClick(id, updateRow) {
     const index = formik.values.items.findIndex(item => item.id === id)
 
@@ -685,6 +721,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const modifiedList = await Promise.all(
       puTrxItems?.map(async (item, index) => {
         const taxDetailsResponse = []
+        const serials = await getSerials(recordId, item.seqNo)
 
         const updatedpuTrxTaxes =
           puTrxTaxes?.map(tax => {
@@ -704,6 +741,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           puTrx: true,
+          serials: serials.list.map((serialDetail, index) => {
+            return {
+              ...serialDetail,
+              id: index
+            }
+          }),
           taxDetails: updatedpuTrxTaxes.filter(tax => tax.seqNo === item.seqNo)
         }
       })
@@ -1251,6 +1294,50 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       default:
         return null
     }
+  }
+
+  const onCondition = row => {
+    if (row.trackBy === 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
+  if (functionId == SystemFunction.PurchaseReturn) {
+    columns.push({
+      component: 'button',
+      name: 'serials',
+      label: platformLabels.serials,
+      props: {
+        onCondition
+      },
+      onClick: (e, row, update, updateRow) => {
+        if (row?.trackBy === 1) {
+          stack({
+            Component: SerialsForm,
+            props: {
+              labels,
+              row,
+              disabled: isPosted,
+              siteId: formik?.values?.header.siteId,
+              maxAccess,
+              checkForSiteId: row.qty >= 0 ? false : true,
+              updateRow
+            },
+            width: 500,
+            height: 700,
+            title: platformLabels.serials
+          })
+        }
+      }
+    })
   }
 
   return (
