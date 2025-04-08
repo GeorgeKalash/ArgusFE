@@ -59,7 +59,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
     toCAName: '',
     functionId: SystemFunction.CashTransfers,
     reference: '',
-    dtId: documentType?.dtId,
+    dtId: null,
     date: new Date(),
     status: 1,
     releaseStatus: 1,
@@ -88,6 +88,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
   const { formik } = useForm({
     initialValues,
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({

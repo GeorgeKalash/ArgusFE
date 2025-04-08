@@ -25,5 +25,14 @@ export const RemittanceBankInterface = {
   },
   Agents: {
     qry: service + 'qryAgents'
+  },
+  Currencies: {
+    qry: service + 'qryBICurrencies'
+  },
+  Countries: {
+    qry: service + 'qryBICountries'
+  },
+  DeliveryMode: {
+    qry: service + 'qryBIDVRow'
   }
 }

@@ -166,10 +166,6 @@ const AvailabilityCrossTab = () => {
     })
   }
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
-  }
-
   const updatedColumns = [
     ...columns,
     {
@@ -202,7 +198,7 @@ const AvailabilityCrossTab = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} maxAccess={access} onApply={onApply} reportName={'IV415'} />
+        <RPBGridToolbar hasSearch={false} maxAccess={access} filterBy={filterBy} reportName={'IV415'} />
       </Fixed>
       <Grow>
         <Table

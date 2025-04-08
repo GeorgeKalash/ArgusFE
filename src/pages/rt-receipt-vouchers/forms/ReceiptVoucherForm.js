@@ -38,7 +38,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
   const { documentType, maxAccess } = useDocumentType({
     functionId: SystemFunction.RemittanceReceiptVoucher,
     access: access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   const invalidate = useInvalidate({
@@ -47,6 +48,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
 
   const { formik } = useForm({
     maxAccess: maxAccess,
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
@@ -57,7 +59,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         reference: '',
         accountId: null,
         date: new Date(),
-        dtId: documentType?.dtId,
+        dtId: null,
         amount: null,
         owoId: null,
         owoRef: '',
@@ -344,7 +346,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <CustomTextField
-                    name='reference'
+                    name='header.reference'
                     label={labels.reference}
                     value={formik?.values?.header?.reference}
                     readOnly={editMode}
@@ -352,17 +354,17 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                     maxLength='30'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <CustomDatePicker
-                    name='date'
+                    name='header.date'
                     label={labels.date}
                     readOnly={true}
                     value={formik?.values?.header?.date}
                     maxAccess={maxAccess}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
+                    error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
                   />
                 </Grid>
               </Grid>
@@ -373,7 +375,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                   <ResourceLookup
                     endpointId={RemittanceOutwardsRepository.OutwardsOrder.snapshot}
                     valueField='reference'
-                    name='owoId'
+                    name='header.owoId'
                     label={labels.outwards}
                     form={formik}
                     secondDisplayField={false}
@@ -393,11 +395,12 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                       formik.setFieldValue('header.amount', newValue ? newValue.amount : '')
                       formik.setFieldValue('header.clientId', newValue ? newValue.clientId : '')
                     }}
+                    errorCheck={'header.owoId'}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <CustomNumberField
-                    name='amount'
+                    name='header.amount'
                     label={labels.amount}
                     value={formik?.values?.header?.amount}
                     readOnly={true}
@@ -410,7 +413,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                         formik.setFieldValue('header.products', [])
                       }
                     }}
-                    error={formik.touched.amount && Boolean(formik.errors.amount)}
+                    error={formik.touched.header?.amount && Boolean(formik.errors.header?.amount)}
                     maxLength={10}
                   />
                 </Grid>

@@ -16,6 +16,7 @@ const WindowToolbar = ({
   isSavedClear,
   isInfo,
   isCleared,
+  onORD,
   onGenerateReport,
   disabledSubmit,
   disabledSavedClear,
@@ -105,6 +106,7 @@ const WindowToolbar = ({
     isClosed,
     editMode,
     onSave,
+    onORD,
     onSaveClear,
     onClear,
     onInfo

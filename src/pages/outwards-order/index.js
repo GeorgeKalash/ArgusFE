@@ -101,25 +101,6 @@ const OutwardsOrder = () => {
     // }
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   const columns = [
     {
       field: 'reference',
@@ -206,13 +187,11 @@ const OutwardsOrder = () => {
         <RPBGridToolbar
           onAdd={addOutwards}
           maxAccess={access}
-          onSearch={onSearch}
-          onClear={onClear}
           reportName={'RTOWO'}
           labels={_labels}
           inputSearch={true}
-          onApply={onApply}
           refetch={refetch}
+          filterBy={filterBy}
         />
       </Fixed>
       <Grow>

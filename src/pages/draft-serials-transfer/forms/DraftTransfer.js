@@ -58,9 +58,10 @@ export default function DraftTransfer({ labels, access, recordId }) {
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId,
-      dtId: documentType?.dtId,
+      dtId: null,
       reference: '',
       date: new Date(),
       fromSiteId: defUserSiteId || defSiteId || null,
@@ -578,10 +579,15 @@ export default function DraftTransfer({ labels, access, recordId }) {
       } else {
         const defaultSiteId = defUserSiteId || defSiteId || null
         formik.setFieldValue('fromSiteId', defaultSiteId)
-        formik?.values?.dtId && onChangeDtId(formik?.values?.dtId)
       }
     })()
   }, [])
+
+  useEffect(() => {
+    if (formik?.values?.dtId) {
+      onChangeDtId(formik?.values?.dtId)
+    }
+  }, [formik?.values?.dtId])
 
   return (
     <FormShell
@@ -618,7 +624,6 @@ export default function DraftTransfer({ labels, access, recordId }) {
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId)
-                      newValue?.recordId && onChangeDtId(newValue?.recordId)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}

@@ -46,10 +46,11 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   })
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: recordId || null,
       reference: null,
-      dtId: documentType?.dtId,
+      dtId: null,
       date: new Date(),
       plantId: parseInt(plantId),
       notes: '',

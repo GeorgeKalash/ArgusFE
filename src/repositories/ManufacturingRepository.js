@@ -177,6 +177,7 @@ export const ManufacturingRepository = {
     qry: service + 'qryPSQ'
   },
   Damage: {
+    qry: service + 'qryDMG',
     get: service + 'getDMG',
     set: service + 'setDMG',
     del: service + 'delDMG',
@@ -224,5 +225,27 @@ export const ManufacturingRepository = {
   SamplePack: {
     qry: service + 'qrySPL',
     set2: service + 'set2SPL'
+  },
+  DamageReturn: {
+    get: service + 'getDMR',
+    set: service + 'setDMR',
+    del: service + 'delDMR',
+    page: service + 'pageDMR',
+    snapshot: service + 'snapshotDMR',
+    post: service + 'postDMR'
+  },
+  BillOfMaterials: {
+    get: service + 'getBMA',
+    set: service + 'setBMA',
+    del: service + 'delBMA',
+    page: service + 'pageBMA',
+    snapshot: service + 'snapshotBMA'
+  },
+  Component: {
+    get: service + 'getBMI',
+    qry: service + 'qryBMI',
+    del: service + 'delBMI',
+    set: service + 'setBMI',
+    set2: service + 'set2BMI'
   }
 }
