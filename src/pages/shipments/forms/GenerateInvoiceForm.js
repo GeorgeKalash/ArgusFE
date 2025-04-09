@@ -51,6 +51,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.number().required(),
+      dtId: yup.number().required(),
       date: yup.string().required()
     }),
     onSubmit: async obj => {
@@ -114,6 +115,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 maxAccess={maxAccess}
+                required
               />
             </Grid>
             <Grid item xs={12}>
@@ -153,6 +155,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
                 readOnly
                 valueShow='vendorRef'
                 secondValueShow='vendorName'
+                errorCheck={'vendorId'}
               />
             </Grid>
             <Grid item xs={12}>

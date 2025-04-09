@@ -682,7 +682,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={PurchaseRepository.Vendor.snapshot}
-                    filter={{ isInactive: false || null }}
+                    filter={{ isInactive: !true }}
                     valueField='reference'
                     displayField='name'
                     secondFieldLabel={labels.vendor}
