@@ -108,7 +108,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
       toast.success(actionMessage)
       invalidate()
-      await refetchForm(res?.recordId)
+      refetchForm(res?.recordId)
     }
   })
 
