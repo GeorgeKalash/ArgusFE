@@ -481,6 +481,7 @@ const Table = ({
           height: '100%'
         }}
         checked={params.value}
+        disabled={props?.disable && props?.disable(params?.data)}
         onChange={e => {
           const checked = e.target.checked
           if (rowSelection !== 'single') {

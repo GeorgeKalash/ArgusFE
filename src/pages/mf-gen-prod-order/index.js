@@ -169,6 +169,10 @@ const GeneratePoductionOrder = () => {
     })()
   }, [])
 
+  const disableCondition = data => {
+    return data?.deltaQty === 0
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.GenerateProductionOrder}
@@ -232,6 +236,7 @@ const GeneratePoductionOrder = () => {
                     disableSorting={true}
                     showCheckboxColumn={true}
                     showSelectAll={true}
+                    disable={disableCondition}
                     onSelectionChange={row => {
                       if (row) {
                         formik.setFieldValue('orders', {
@@ -322,11 +327,14 @@ const GeneratePoductionOrder = () => {
 
                         if (allOrderSums[itemId]) {
                           const checked = checkedOrderSums[itemId] || { soQty: 0, remainingQty: 0 }
+                          const deltaQty = item.onHand + item.inProduction - item.minQty - checked.remainingQty
 
                           return {
                             ...item,
                             soQty: checked.soQty,
-                            remainingQty: checked.remainingQty
+                            deltaQty,
+                            remainingQty: checked.remainingQty,
+                            produceNow: Math.abs(deltaQty)
                           }
                         }
 
