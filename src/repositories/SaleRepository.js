@@ -182,7 +182,8 @@ export const SaleRepository = {
   SATrx: {
     qry: service + 'qryTRX',
     qry2: service + 'qryTRX2',
-    page: service + 'pageTRX'
+    page: service + 'pageTRX',
+    sync: service + 'syncTRX'
   },
   SalesTransaction: {
     qry: service + 'qryTR',
@@ -258,9 +259,13 @@ export const SaleRepository = {
   },
   LastSerialInvoice: {
     get: service + 'lastSRL',
-    qry: service + 'importSRL'
+    import: service + 'importSRL',
+    qry: service + 'qrySRL'
   },
   InvoiceReturnBalance: {
     balance: service + 'balanceRET'
+  },
+  VerifyIntegrity: {
+    check: service + 'checkTRX'
   }
 }
