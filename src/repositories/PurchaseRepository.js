@@ -84,5 +84,8 @@ export const PurchaseRepository = {
   },
   ItemPromotion: {
     qry: service + 'qryIVIM'
+  },
+  Serials: {
+    qry: service + 'qrySRL'
   }
 }

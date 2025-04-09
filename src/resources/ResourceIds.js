@@ -359,6 +359,7 @@ export const ResourceIds = {
   OutboundAssignDriver: 52313,
   PriceListInquiry: 41432,
   MaterialTransferDTD: 41112,
+  Serial: 41603,
   DraftTransfer: 41228,
   DraftSerialReturns: 51314,
   MetalSettings: 47100,
@@ -391,5 +392,6 @@ export const ResourceIds = {
   PUDocumentTypeDefaults: 50103,
   SyncSalesTrx: 51603,
   ProductionOrder: 42337,
-  YearlyComparativeSales: 51550
+  YearlyComparativeSales: 51550,
+  SManagement: 41213,
 }

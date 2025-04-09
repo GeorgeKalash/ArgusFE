@@ -83,7 +83,7 @@ const MfProductionLines = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} previewReport={ResourceIds.ProductionLines} />
       </Fixed>
       <Grow>
         <Table
