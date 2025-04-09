@@ -221,7 +221,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
   }
 
   useEffect(() => {
-    if (formik.values?.dtId & !editMode) getDTD(formik.values?.dtId)
+    if (formik.values?.dtId && !recordId) getDTD(formik.values?.dtId)
   }, [formik.values?.dtId])
 
   useEffect(() => {
@@ -591,7 +591,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || '')
                   changeDT(newValue)
-                  getDTD(newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 maxAccess={maxAccess}

@@ -313,7 +313,6 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                     onChange={(event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId)
                       changeDT(newValue)
-                      getDTD(newValue?.recordId)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />

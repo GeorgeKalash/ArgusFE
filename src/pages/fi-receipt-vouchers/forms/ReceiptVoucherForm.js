@@ -321,7 +321,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
-                  getDTD(newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 maxAccess={maxAccess}

@@ -1570,7 +1570,6 @@ export default function SaleTransactionForm({
                     onChange={async (_, newValue) => {
                       const recordId = newValue ? newValue.recordId : null
                       await formik.setFieldValue('header.dtId', recordId)
-                      onChangeDtId(recordId)
                       if (!newValue) {
                         formik.setFieldValue('header.dtId', null)
                         formik.setFieldValue('header.siteId', null)

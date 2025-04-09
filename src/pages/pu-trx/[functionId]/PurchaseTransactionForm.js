@@ -1300,10 +1300,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
                   if (newValue) {
                     formik.setFieldValue('header.dtId', recordId)
-                    onChangeDtId(recordId)
                   } else {
                     formik.setFieldValue('header.dtId', null)
-                    formik.setFieldValue('header.siteId', null)
                     formik.setFieldValue('header.metalPrice', 0)
                     formik.setFieldValue('header.KGmetalPrice', 0)
                     setmetalPriceVisibility(false)

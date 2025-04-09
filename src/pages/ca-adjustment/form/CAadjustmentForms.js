@@ -349,7 +349,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 onChange={(event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
-                  getDTD(newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />

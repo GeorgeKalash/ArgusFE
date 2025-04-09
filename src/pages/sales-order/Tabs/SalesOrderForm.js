@@ -1144,6 +1144,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }
 
   async function onChangeDtId(dtId) {
+    if (!dtId) return
+
     const res = await getRequest({
       extension: SaleRepository.DocumentTypeDefault.get,
       parameters: `_dtId=${dtId}`
@@ -1260,8 +1262,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       changeDT(newValue)
-                      onChangeDtId(newValue?.recordId)
-                      formik.setFieldValue('dtId', newValue ? newValue.recordId : null)
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />

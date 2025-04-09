@@ -414,9 +414,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       changeDT(newValue)
-                      formik && formik.setFieldValue('dtId', newValue?.recordId || '')
-                      formik && formik.setFieldValue('status', newValue?.activeStatus)
-                      getDTD(newValue?.recordId)
+                      formik.setFieldValue('dtId', newValue?.recordId || '')
+                      formik.setFieldValue('status', newValue?.activeStatus)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />

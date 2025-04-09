@@ -1063,6 +1063,8 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     }
   }
   async function onChangeDtId(dtId) {
+    if (!dtId) return
+
     const res = await getRequest({
       extension: SaleRepository.DocumentTypeDefault.get,
       parameters: `_dtId=${dtId}`
@@ -1176,7 +1178,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     onChange={(event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId)
                       changeDT(newValue)
-                      onChangeDtId(newValue?.recordId)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />
