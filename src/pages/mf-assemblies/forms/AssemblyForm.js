@@ -25,11 +25,14 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomButton from 'src/components/Inputs/CustomButton'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { useWindow } from 'src/windows'
 
 export default function AssemblyForm({ labels, maxAccess: access, store, setStore }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = store?.recordId
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Assembly,
@@ -145,6 +148,28 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
   }, 0)
   const avgUnitCost = (formik.values.rmCost || 0 + totalQty || 0) / (formik.values.qty || 0)
 
+  const designQuantity = formik.values.items.reduce((currentQty, row) => {
+    const qtyValue = parseFloat(row.designQty?.toString().replace(/,/g, '')) || 0
+
+    return currentQty + qtyValue
+  }, 0)
+
+  const diffQuantity = formik.values.items.reduce((currentQty, row) => {
+    const qtyValue = parseFloat(row.diffQty?.toString().replace(/,/g, '')) || 0
+
+    return currentQty + qtyValue
+  }, 0)
+
+  const rawMaterialCost = formik.values.items.reduce((currentCost, row) => {
+    const costValue =
+      (parseFloat(row.cost?.toString().replace(/,/g, '')) || 0) *
+      (parseFloat(row.qty?.toString().replace(/,/g, '')) || 0)
+
+    return currentCost + costValue
+  }, 0)
+
+  const totalRawMaterial = designQuantity + diffQuantity
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -248,6 +273,26 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     }
   ]
 
+  async function getSiteInfo() {
+    if (!formik.values.siteId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Site.get,
+      parameters: `_recordId=${formik.values.siteId}`
+    })
+
+    return res.record
+  }
+  async function getBomInfo() {
+    if (!formik.values.bomId) return
+
+    const res = await getRequest({
+      extension: ManufacturingRepository.BillOfMaterials.get,
+      parameters: `_recordId=${formik.values.bomId}`
+    })
+
+    return res.record
+  }
   async function getHeaderData(recordId) {
     const res = await getRequest({
       extension: ManufacturingRepository.Assembly.get,
@@ -265,6 +310,39 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       parameters: `_assemblyId=${recordId}`
     })
   }
+  async function getBillItem() {
+    const res = await getRequest({
+      extension: ManufacturingRepository.Component.qry,
+      parameters: `_bomId=${formik.values.bomId}`
+    })
+    const site = await getSiteInfo()
+    const bomInfo = await getBomInfo()
+
+    const itemsList = res?.list?.map(item => ({
+      ...item,
+      id: item.seqNo,
+      cost: item.currentCost || 0,
+      designQty: (item.qty * (formik.values.qty || 0)) / parseFloat(bomInfo?.qty || 0),
+      qty: (item.qty * (formik.values.qty || 0)) / parseFloat(bomInfo?.qty || 0),
+      diffQty: 0,
+      baseQty: item.baseQty * (formik.values.qty || 0),
+      siteId: item.siteId || formik.values.siteId,
+      siteRef: item.siteRef || site.reference,
+      siteName: item.siteName || site.name
+    }))
+
+    formik.setFieldValue('items', itemsList)
+  }
+  async function fillItem(bomId) {
+    if (!bomId) return
+
+    const res = await getRequest({
+      extension: ManufacturingRepository.BillOfMaterials.get,
+      parameters: `_recordId=${bomId}`
+    })
+
+    return res?.record
+  }
 
   async function refetchForm(recordId) {
     const header = await getHeaderData(recordId)
@@ -275,12 +353,10 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     }))
     formik.setValues({
       ...header.record,
-
-      //diffQty: header.record.qty || 0 - header.record.designQty || 0,
       items: items?.list?.map(item => ({
         ...item,
         id: item.seqNo,
-        diffQty: item.qty || 0 - item.designQty || 0
+        diffQty: (item.qty || 0) - (item.designQty || 0)
       }))
     })
   }
@@ -436,14 +512,6 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={ManufacturingRepository.Machine.snapshot}
-                    parameters={
-                      {
-                        //   _functionId: SystemFunction.SalesQuotation,
-                        //   _startAt: 0,
-                        //   _pageSize: 1000,
-                        //   _sortBy: 'reference desc'
-                      }
-                    }
                     valueField='reference'
                     displayField='name'
                     name='machineId'
@@ -463,6 +531,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                       formik.setFieldValue('machineId', newValue?.recordId)
                       formik.setFieldValue('machineName', newValue?.name)
                       formik.setFieldValue('machineRef', newValue?.reference)
+                      formik.setFieldValue('batchSize', newValue?.batchSize)
                     }}
                     errorCheck={'machineId'}
                   />
@@ -489,6 +558,10 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                       formik.setFieldValue('bomId', newValue?.recordId)
                       formik.setFieldValue('bomName', newValue?.name)
                       formik.setFieldValue('bomRef', newValue?.reference)
+                      const item = await fillItem(newValue?.recordId)
+                      formik.setFieldValue('itemId', item?.itemId)
+                      formik.setFieldValue('itemName', item?.itemName)
+                      formik.setFieldValue('sku', item?.sku)
                     }}
                     errorCheck={'bomId'}
                   />
@@ -541,7 +614,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                   <CustomNumberField
                     name='rmCost'
                     label={labels.totalCost}
-                    value={formik?.values?.rmCost}
+                    value={rawMaterialCost}
                     maxAccess={maxAccess}
                     readOnly={isPosted}
                     onClear={() => formik.setFieldValue('rmCost', 0)}
@@ -549,7 +622,27 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  <CustomButton onClick={() => {}} image={'preview.png'} tooltipText={platformLabels.Preview} />
+                  <CustomButton
+                    onClick={() => {
+                      if (formik.values.items?.some(item => !!item.sku)) {
+                        stack({
+                          Component: ConfirmationDialog,
+                          props: {
+                            DialogText: labels.resetMsg,
+                            okButtonAction: getBillItem,
+                            fullScreen: false,
+                            close: true
+                          },
+                          width: 400,
+                          height: 150,
+                          title: platformLabels.Confirmation
+                        })
+                      } else getBillItem()
+                    }}
+                    image={'preview.png'}
+                    tooltipText={platformLabels.Preview}
+                    disabled={!formik.values.bomId}
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
@@ -571,7 +664,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     name='designQty'
                     label={labels.designQty}
                     readOnly={isPosted}
-                    value={formik?.values?.designQty}
+                    value={designQuantity}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('designQty', 0)}
                     error={formik.touched.designQty && Boolean(formik.errors.designQty)}
@@ -593,7 +686,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     name='diffQty'
                     label={labels.diffQty}
                     readOnly={isPosted}
-                    value={formik?.values?.diffQty}
+                    value={diffQuantity}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('diffQty', 0)}
                     error={formik.touched.diffQty && Boolean(formik.errors.diffQty)}
@@ -604,7 +697,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     name='totalRM'
                     label={labels.totalRM}
                     readOnly={isPosted}
-                    value={formik?.values?.totalRM}
+                    value={totalRawMaterial}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('totalRM', 0)}
                     error={formik.touched.totalRM && Boolean(formik.errors.totalRM)}
