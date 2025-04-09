@@ -59,8 +59,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         date: new Date(),
         dtId: null,
         status: 1,
-        plantId: defplantId || null,
-        siteId: defSiteId || null,
+        plantId: defplantId,
+        siteId: defSiteId,
         vendorId: null,
         volume: 0,
         qty: 0,
@@ -113,14 +113,14 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         plantId: yup.number().required(),
         date: yup.string().required(),
         siteId: yup.number().required(),
-        vendorId: yup.string().required()
+        vendorId: yup.number().required()
       }),
       items: yup.array().of(
         yup.object({
           poRef: yup.string().required(),
           sku: yup.string().required(),
           itemName: yup.string().required(),
-          shippedNowQty: yup.number().required().min(1),
+          shippedNowQty: yup.number().required(),
           siteName: yup.string().required()
         })
       )
@@ -188,17 +188,21 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
   }
 
   async function getShipment(recordId) {
-    return await getRequest({
-      extension: PurchaseRepository.Shipment.get,
-      parameters: `_recordId=${recordId}`
-    })
+    if (recordId) {
+      return await getRequest({
+        extension: PurchaseRepository.Shipment.get,
+        parameters: `_recordId=${recordId}`
+      })
+    }
   }
 
   const getItems = async data => {
-    return await getRequest({
-      extension: PurchaseRepository.ShipmentItem.qry,
-      parameters: `_shipmentId=${data.recordId}`
-    })
+    if (data.recordId) {
+      return await getRequest({
+        extension: PurchaseRepository.ShipmentItem.qry,
+        parameters: `_shipmentId=${data.recordId}`
+      })
+    }
   }
 
   async function fillForm(shipHeader, shipItems) {
@@ -220,8 +224,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
 
     formik.setValues({
       ...formik.values,
-      recordId: shipHeader.record.recordId || null,
-      dtId: shipHeader.record.dtId || null,
+      recordId: shipHeader.record.recordId,
+      dtId: shipHeader.record.dtId,
       header: {
         ...formik.values.header,
         ...shipHeader.record
@@ -433,6 +437,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         store: skuStore?.current,
         displayField: 'sku',
         valueField: 'sku',
+        readOnly: editMode,
         mapping: [
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -499,14 +504,13 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
-          if (!newRow.muId) {
-            update({
-              baseQty: 0
-            })
-          }
-          update({
-            baseQty: newRow?.qty * newRow?.muQty
-          })
+          !newRow.muId
+            ? update({
+                baseQty: 0
+              })
+            : update({
+                baseQty: newRow?.qty * newRow?.muQty
+              })
         }
       },
       propsReducer({ row, props }) {
@@ -521,7 +525,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         readOnly: isPosted
       },
       async onChange({ row: { update, oldRow, newRow } }) {
-        checkMaximum(newRow?.shippedNowQty, newRow, update) //test
+        checkMaximum(newRow?.shippedNowQty, newRow, update)
         if (newRow?.muQty)
           update({
             baseQty: newRow?.muQty * newRow?.shippedNowQty
@@ -678,7 +682,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={PurchaseRepository.Vendor.snapshot}
-                    filter={{ isInactive: false }}
+                    filter={{ isInactive: false || null }}
                     valueField='reference'
                     displayField='name'
                     secondFieldLabel={labels.vendor}
@@ -702,8 +706,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                       { key: 'flName', value: 'Foreign Language' }
                     ]}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('header.vendorName', newValue?.name || null)
-                      formik.setFieldValue('header.vendorRef', newValue?.reference || null)
+                      formik.setFieldValue('header.vendorName', newValue?.name || '')
+                      formik.setFieldValue('header.vendorRef', newValue?.reference || '')
                       fillGridRefCombo(newValue?.recordId)
                       if (!newValue?.recordId) {
                         formik.setFieldValue('items', formik?.initialValues?.items)
@@ -758,7 +762,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                     value={formik.values.header?.notes}
                     readOnly={isPosted}
                     maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('header.notes', e.target.value)}
+                    onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.notes', '')}
                     error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
                   />

@@ -88,7 +88,6 @@ export const PurchaseRepository = {
   },
   Shipment: {
     get: service + 'getSHP',
-    set: service + 'setSHP',
     set2: service + 'set2SHP',
     del: service + 'delSHP',
     page: service + 'pageSHP',

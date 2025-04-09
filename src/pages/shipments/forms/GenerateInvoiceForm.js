@@ -41,18 +41,16 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
       vendorName: form?.values?.header?.vendorName,
       date: new Date(),
       dtId: null,
-      currency: null,
+      currencyName: '',
       currencyId: defCurrencyId,
-      dtName: '',
       plantName: form?.values?.header?.plantName,
       description: '',
       shipments: [form?.values?.recordId]
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      plantId: yup.string().required(),
+      plantId: yup.number().required(),
       date: yup.string().required()
     }),
     onSubmit: async obj => {
@@ -111,7 +109,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
                 displayField='name'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId || '')
+                  formik.setFieldValue('dtId', newValue?.recordId || null)
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -125,7 +123,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
                 value={formik.values?.date}
                 required
                 onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
                 maxAccess={maxAccess}
               />
@@ -174,7 +172,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
                 label={labels.description}
                 value={formik.values.description}
                 maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('description', e.target.value)}
+                onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('description', '')}
                 error={formik.touched.description && Boolean(formik.errors.description)}
               />
