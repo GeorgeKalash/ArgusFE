@@ -136,7 +136,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
         parameters: `_recordId=${cashAccountId}`
       })
 
-      
       formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
       formik.setFieldValue('cashAccountName', cashAccountResult.name)
       formik.setFieldValue('paymentMethod', 1)
@@ -517,7 +516,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                   { key: 'keywords', value: 'Keywords' }
                 ]}
                 displayFieldWidth={2}
-                filter={{ type: formik.values.accountType }}
+                filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
                   formik.setFieldValue('accountRef', newValue?.reference || '')

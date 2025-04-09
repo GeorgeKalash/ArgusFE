@@ -624,6 +624,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 ]}
                 displayFieldWidth={3}
                 maxAccess={maxAccess}
+                filter={{
+                  isInactive: val => val !== true
+                }}
                 readOnly={isPosted}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId)
