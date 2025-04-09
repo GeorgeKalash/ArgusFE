@@ -69,7 +69,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       recordId: null,
       reference: '',
       releaseStatus: null,
-      siteId,
+      siteId: siteId || null,
       status: 1,
       items: [
         {
@@ -568,7 +568,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 maxAccess={maxAccess}
                 readOnly={isPosted}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('siteId', newValue?.recordId)
+                  formik.setFieldValue('siteId', newValue?.recordId || null)
                 }}
                 required
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
