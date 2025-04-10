@@ -327,8 +327,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       diffQty: 0,
       baseQty: item.baseQty * (formik.values.qty || 0),
       siteId: item.siteId || formik.values.siteId,
-      siteRef: item.siteRef || site.reference,
-      siteName: item.siteName || site.name
+      siteRef: item.siteId ? item.siteRef : site.reference,
+      siteName: item.siteId ? item.siteName : site.name
     }))
 
     formik.setFieldValue('items', itemsList)
