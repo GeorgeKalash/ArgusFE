@@ -192,15 +192,15 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       }
     },
     {
-      component: 'resourcecombobox',
+      component: 'resourcelookup',
       label: labels.design,
       name: 'designId',
       props: {
-        readOnly: isPosted,
-        endpointId: ManufacturingRepository.Design.qry,
-        parameters: '_startAt=0&_pageSize=1000&_params=',
         valueField: 'recordId',
         displayField: 'reference',
+        readOnly: isPosted,
+        displayFieldWidth: 2,
+        endpointId: ManufacturingRepository.Design.snapshot,
         mapping: [
           { from: 'recordId', to: 'designId' },
           { from: 'reference', to: 'designRef' },
@@ -209,8 +209,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
-        ],
-        displayFieldWidth: 2
+        ]
       }
     }
   ]
