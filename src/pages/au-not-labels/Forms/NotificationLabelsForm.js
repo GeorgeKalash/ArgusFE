@@ -18,7 +18,7 @@ export default function NotificationLabelsForm({ labels, maxAccess, recordId }) 
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: AccessControlRepository.NotificationLabel.qry
+    endpointId: AccessControlRepository.NotificationLabel.page
   })
 
   const { formik } = useForm({

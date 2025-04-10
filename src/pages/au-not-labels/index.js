@@ -23,7 +23,7 @@ const NotificationLabel = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: AccessControlRepository.NotificationLabel.qry,
+      extension: AccessControlRepository.NotificationLabel.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -39,7 +39,7 @@ const NotificationLabel = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: AccessControlRepository.NotificationLabel.qry,
+    endpointId: AccessControlRepository.NotificationLabel.page,
     datasetId: ResourceIds.NotificationLabels
   })
 
