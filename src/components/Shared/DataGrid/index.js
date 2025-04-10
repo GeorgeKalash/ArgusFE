@@ -115,11 +115,11 @@ export function DataGrid({
         rows = [
           ...value.map(row => (row.id === updatedRow.id ? updatedRow : row)),
           {
-            id: highestIndex,
-            ...defaultValues,
-            ...initialValues
+            ...initialValues,
+            id: highestIndex
           }
         ]
+
         onChange(rows)
 
         setTimeout(() => {
@@ -220,9 +220,8 @@ export function DataGrid({
       }, {})
 
     const newRow = {
-      id: highestIndex,
-      ...defaultValues,
-      ...initialValues
+      ...initialValues,
+      id: highestIndex
     }
 
     const res = gridApiRef.current?.applyTransaction({ add: [newRow] })

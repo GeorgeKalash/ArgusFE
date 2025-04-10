@@ -148,7 +148,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
         metalId: null,
         metalPurity: 0,
         basePrice: 0,
-        mdType: 1,
+        mdType: MDTYPE_PCT,
         mdValue: 0,
         mdAmount: 0,
         pieces: 0,
@@ -399,7 +399,6 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
     {
       component: 'button',
       name: 'costHistory',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png'
       },
@@ -429,7 +428,6 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
     {
       component: 'button',
       name: 'taxDetailsButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/tax-icon.png'
       },
@@ -459,8 +457,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
         iconsClicked: handleIconClick,
         type: 'numeric',
         concatenateWith: '%',
-        isPercentIcon,
-        defaultValue: 0
+        isPercentIcon
       },
       async onChange({ row: { update, newRow, oldRow } }) {
         if (oldRow.mdAmount !== newRow.mdAmount) {
@@ -721,8 +718,8 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
         ...formik.values.header,
         ...puTrxHeader,
         amount: parseFloat(puTrxHeader?.amount).toFixed(2),
-        date: formik.values?.header?.deliveryDate && formatDateFromApi(formik.values?.header?.date),
-        deliveryDate: formik.values?.header?.deliveryDate && formatDateFromApi(formik.values?.header?.deliveryDate)
+        date: formatDateFromApi(puTrxHeader?.date),
+        deliveryDate: puTrxHeader?.deliveryDate && formatDateFromApi(puTrxHeader?.deliveryDate)
       },
       items: modifiedList
     })
@@ -878,9 +875,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       extendedPrice: parseFloat('0').toFixed(2),
       mdValue: 0,
       taxId: rowTax,
-      taxDetails: rowTaxDetails,
-      costHistory: true,
-      taxDetailsButton: true
+      taxDetails: rowTaxDetails
     }
   }
 
@@ -1534,7 +1529,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
               if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
             value={formik?.values?.items}
-            initialValues={{ mdType: MDTYPE_PCT }}
+            initialValues={formik.initialValues.items[0]}
             error={formik.errors.items}
             name='items'
             columns={columns}
