@@ -819,7 +819,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     let updatedSerials = [...formik.values.serials]
 
     const res = await getRequest({
-      extension: SaleRepository.LastSerialInvoice.qry,
+      extension: SaleRepository.LastSerialInvoice.import,
       parameters: `_invoiceId=${formik?.values?.invoiceId}`
     })
 
