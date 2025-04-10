@@ -21,70 +21,52 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import { useWindow } from 'src/windows'
-import { SerialsForm } from 'src/components/Shared/SerialsForm'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function MaterialsAdjustmentForm({ labels, access, recordId, window }) {
+export default function ProductionOrderForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
-  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.MaterialAdjustment,
-    access: access,
+    functionId: SystemFunction.ProductionOrder,
+    access,
     enabled: !recordId
   })
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
-
-  const initialValues = {
-    recordId: recordId,
-    dtId: null,
-    reference: '',
-    plantId,
-    siteId,
-    description: '',
-    date: new Date(),
-    status: 1,
-    wip: 1,
-    rsStatus: '',
-    clientId: null,
-    clientName: '',
-    clientRef: '',
-    rows: [
-      {
-        id: 1,
-        itemId: '',
-        sku: '',
-        itemName: '',
-        qty: '',
-        totalCost: '',
-        totalQty: '',
-        muQty: '',
-        qtyInBase: '',
-        notes: '',
-        seqNo: ''
-      }
-    ],
-    serials: []
-  }
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.MaterialsAdjustment.page
+    endpointId: ManufacturingRepository.ProductionOrder.page
   })
 
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    initialValues,
-    enableReinitialize: false,
+    initialValues: {
+      recordId,
+      dtId: null,
+      reference: '',
+      plantId,
+      notes: '',
+      date: new Date(),
+      status: 1,
+      rows: [
+        {
+          id: 1,
+          poId: recordId,
+          sku: '',
+          itemName: '',
+          qty: null,
+          pcs: null,
+          designId: null,
+          notes: '',
+          seqNo: ''
+        }
+      ]
+    },
     validateOnChange: true,
     validationSchema: yup.object({
-      siteId: yup.string().required(),
       date: yup.date().required(),
       rows: yup
         .array()
@@ -98,53 +80,32 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         .required()
     }),
     onSubmit: async obj => {
-      const copy = { ...obj }
-      delete copy.rows
-      delete copy.serials
-      copy.date = formatDateToApi(copy.date)
+      const { rows, date, ...rest } = obj
 
-      const serialsValues = []
+      const header = {
+        ...rest,
+        date: formatDateToApi(date)
+      }
 
-      const updatedRows = formik.values.rows.map((adjDetail, index) => {
-        const { serials, ...restDetails } = adjDetail
-        let muQty = adjDetail.muQty || 1
-
-        if (serials) {
-          const updatedSerials = serials.map((serialDetail, idx) => {
-            return {
-              ...serialDetail,
-              seqNo: index + 1,
-              srlSeqNo: 0,
-              componentSeqNo: 0,
-              itemId: adjDetail?.itemId,
-              adjustmentId: formik.values.recordId || 0,
-              id: idx
-            }
-          })
-          serialsValues.push(...updatedSerials)
-        }
-
+      const updatedRows = formik.values.rows.map((prodDetails, index) => {
         return {
-          ...restDetails,
-          adjustmentId: formik.values.recordId || 0,
-          qtyInBase: muQty * adjDetail.qty,
+          ...prodDetails,
+          poId: recordId ?? 0,
           seqNo: index + 1
         }
       })
 
       const resultObject = {
-        header: copy,
-        items: updatedRows,
-        serials: serialsValues,
-        lots: []
+        header,
+        items: updatedRows
       }
 
       const res = await postRequest({
-        extension: InventoryRepository.MaterialsAdjustment.set2,
+        extension: ManufacturingRepository.ProductionOrder.set2,
         record: JSON.stringify(resultObject)
       })
 
-      const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+      const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
       toast.success(actionMessage)
       invalidate()
       refetchForm(res?.recordId)
@@ -154,37 +115,24 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
 
-  const totalQty = getFormattedNumber(
-    formik.values?.rows
-      ?.reduce((qtySum, row) => {
-        const qtyValue = parseFloat(row.qty) || 0
+  const totalQty = formik.values?.rows
+    ?.reduce((qtySum, row) => {
+      const qtyValue = parseFloat(row.qty) || 0
 
-        return qtySum + qtyValue
-      }, 0)
-      .toFixed(2)
-  )
+      return qtySum + qtyValue
+    }, 0)
+    .toFixed(2)
+
   async function onPost() {
     await postRequest({
-      extension: InventoryRepository.MaterialsAdjustment.post,
+      extension: ManufacturingRepository.ProductionOrder.post,
       record: JSON.stringify({
         ...formik.values,
         date: formatDateToApi(formik.values.date)
       })
     })
+    toast.success(platformLabels.Posted)
     window.close()
-    invalidate()
-  }
-
-  const onUnpost = async () => {
-    const res = await postRequest({
-      extension: InventoryRepository.MaterialsAdjustment.unpost,
-      record: JSON.stringify({
-        ...formik.values,
-        date: formatDateToApi(formik.values.date)
-      })
-    })
-    toast.success(platformLabels.Unposted)
-    refetchForm(res?.recordId)
     invalidate()
   }
 
@@ -195,30 +143,15 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('siteId', res?.record?.siteId || siteId)
-      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
 
       return res
     }
   }
 
   useEffect(() => {
-    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
+    getDTD(formik?.values?.dtId)
   }, [formik.values.dtId])
-
-  const onCondition = row => {
-    if (row.trackBy === 1) {
-      return {
-        imgSrc: '/images/TableIcons/imgSerials.png',
-        hidden: false
-      }
-    } else {
-      return {
-        imgSrc: '',
-        hidden: true
-      }
-    }
-  }
 
   const columns = [
     {
@@ -232,17 +165,13 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' },
-          { from: 'trackBy', to: 'trackBy' }
+          { from: 'name', to: 'itemName' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
-      },
-      propsReducer({ row, props }) {
-        return { ...props, imgSrc: onCondition(row) }
       }
     },
     {
@@ -258,87 +187,52 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       name: 'qty',
       label: labels.qty,
       props: {
-        maxLength: 11,
-        decimalScale: 3
+        maxLength: 12,
+        decimalScale: 2
       }
     },
     {
-      component: 'textfield',
-      label: labels.notes,
-      name: 'notes'
-    },
-    {
-      component: 'button',
-      name: 'serials',
-      label: platformLabels.serials,
+      component: 'resourcelookup',
+      label: labels.design,
+      name: 'designId',
       props: {
-        onCondition
-      },
-      onClick: (e, row, update, updateRow) => {
-        if (row?.trackBy === 1) {
-          stack({
-            Component: SerialsForm,
-            props: {
-              labels,
-              disabled: isPosted,
-              row,
-              siteId: row.qty >= 0 ? null : formik?.values?.siteId,
-              maxAccess,
-              checkForSiteId: row.qty >= 0 ? false : true,
-              updateRow
-            },
-            width: 500,
-            height: 700,
-            title: platformLabels.serials
-          })
-        }
+        valueField: 'recordId',
+        displayField: 'reference',
+        readOnly: isPosted,
+        displayFieldWidth: 2,
+        endpointId: ManufacturingRepository.Design.snapshot,
+        mapping: [
+          { from: 'recordId', to: 'designId' },
+          { from: 'reference', to: 'designRef' },
+          { from: 'name', to: 'designName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ]
       }
     }
   ]
-
-  async function getSerials(recordId, seqNo) {
-    return await getRequest({
-      extension: InventoryRepository.MaterialAdjustmentSerial.qry,
-      parameters: `_adjustmentId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
-    })
-  }
-
   async function refetchForm(recordId) {
     const res = await getRequest({
-      extension: InventoryRepository.MaterialsAdjustment.get,
+      extension: ManufacturingRepository.ProductionOrder.get2,
       parameters: `_recordId=${recordId}`
     })
 
-    const res2 = await getRequest({
-      extension: InventoryRepository.MaterialsAdjustmentDetail.qry,
-      parameters: `_filter=&_adjustmentId=${recordId}`
-    })
+    if (res.record.header) {
+      const modifiedList = res?.record?.items?.map((item, index) => ({
+        ...item,
+        id: index + 1
+      }))
 
-    const updatedAdjustments = await Promise.all(
-      res2.list.map(async item => {
-        const serials = await getSerials(recordId, item.seqNo)
-
-        return {
-          ...item,
-          id: item.seqNo,
-          serials: serials.list.map((serialDetail, index) => {
-            return {
-              ...serialDetail,
-              id: index
-            }
-          }),
-          totalCost: item.unitCost * item.qty
-        }
+      formik.setValues({
+        ...res.record.header,
+        date: formatDateFromApi(res?.record?.header?.date),
+        rows: modifiedList
       })
-    )
 
-    formik.setValues({
-      ...res.record,
-      date: formatDateFromApi(res.record.date),
-      rows: updatedAdjustments
-    })
-
-    return res?.record
+      return res?.record
+    }
   }
 
   useEffect(() => {
@@ -353,29 +247,20 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       disabled: !editMode
     },
     {
-      key: 'Locked',
-      condition: isPosted,
-      onClick: 'onUnpostConfirmation',
-      onSuccess: onUnpost,
-      disabled: !editMode
-    },
-    {
-      key: 'Unlocked',
-      condition: !isPosted,
+      key: 'Post',
+      condition: true,
       onClick: onPost,
-      disabled: !editMode
+      disabled: isPosted || !editMode
     }
   ]
 
   return (
     <FormShell
-      resourceId={ResourceIds.MaterialsAdjustment}
+      resourceId={ResourceIds.ProductionOrder}
       form={formik}
       maxAccess={maxAccess}
-      editMode={editMode}
-      isPosted={isPosted}
-      postVisible={true}
       actions={actions}
+      editMode={editMode}
       previewReport={editMode}
       disabledSubmit={isPosted}
     >
@@ -387,20 +272,20 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MaterialAdjustment}`}
+                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.ProductionOrder}`}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readOnly={isPosted}
+                    readOnly={editMode}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     values={formik.values}
-                    maxAccess={!editMode && maxAccess}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId)
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -432,33 +317,6 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                     error={formik.touched.date && Boolean(formik.errors.date)}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={SaleRepository.Client.snapshot}
-                    valueField='reference'
-                    displayField='name'
-                    name='clientId'
-                    label={labels.client}
-                    form={formik}
-                    readOnly={isPosted}
-                    displayFieldWidth={3}
-                    valueShow='clientRef'
-                    secondValueShow='clientName'
-                    maxAccess={maxAccess}
-                    editMode={editMode}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' },
-                      { key: 'szName', value: 'Sales Zone' }
-                    ]}
-                    onChange={async (event, newValue) => {
-                      formik.setFieldValue('clientId', newValue?.recordId || null)
-                      formik.setFieldValue('clientName', newValue?.name || '')
-                      formik.setFieldValue('clientRef', newValue?.reference || '')
-                    }}
-                    errorCheck={'clientId'}
-                  />
-                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={6}>
@@ -484,37 +342,16 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={InventoryRepository.Site.qry}
-                    name='siteId'
-                    readOnly={isPosted}
-                    label={labels.site}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik.values}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    required
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId || null)
-                    }}
-                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
                   <CustomTextArea
-                    name='description'
+                    name='notes'
                     label={labels.description}
-                    value={formik?.values?.description}
+                    value={formik?.values?.notes}
                     rows={2.5}
                     readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('description', '')}
-                    error={formik.touched.description && Boolean(formik.errors.description)}
+                    onClear={() => formik.setFieldValue('notes', '')}
+                    error={formik.touched.notes && Boolean(formik.errors.notes)}
                   />
                 </Grid>
               </Grid>
@@ -536,7 +373,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         </Grow>
         <Fixed>
           <Grid container xs={6}>
-            <CustomTextField
+            <CustomNumberField
               name='totalQty'
               label={labels.totalQty}
               maxAccess={maxAccess}

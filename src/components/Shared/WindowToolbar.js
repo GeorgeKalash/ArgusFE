@@ -86,10 +86,15 @@ const WindowToolbar = ({
     }
   }
   useEffect(() => {
-    if (resourceId) {
-      getReportLayout()
+    const fetchReportLayout = async () => {
+      if (previewReport) {
+        await getReportLayout()
+        if (reportStore.length > 0) setSelectedReport(reportStore[0])
+      }
     }
-  }, [resourceId])
+
+    fetchReportLayout()
+  }, [previewReport])
 
   const functionMapping = {
     actions,
@@ -113,12 +118,6 @@ const WindowToolbar = ({
   }
 
   const buttons = getButtons(platformLabels)
-
-  useEffect(() => {
-    if (previewReport && reportStore.length > 0) {
-      setSelectedReport(reportStore[0])
-    }
-  }, [previewReport, reportStore])
 
   return (
     <Box sx={{ padding: '8px !important' }}>
