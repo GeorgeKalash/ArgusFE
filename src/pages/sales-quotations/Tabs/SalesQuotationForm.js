@@ -56,7 +56,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   const [address, setAddress] = useState({})
   const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
-  const [defaults, setDefaults] = useState(null)
   const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -1052,26 +1051,12 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       return acc
     }, {})
 
-    setDefaults({
-      userDefaultsList: userObject,
-      systemDefaultsList: systemObject
-    })
-
     return {
       userDefaultsList: userObject,
       systemDefaultsList: systemObject
     }
   }
-  async function onChangeDtId(dtId) {
-    if (!dtId) return
 
-    const res = await getRequest({
-      extension: SaleRepository.DocumentTypeDefault.get,
-      parameters: `_dtId=${dtId}`
-    })
-    formik.setFieldValue('spId', res?.record?.spId || defaults.userDefaultsList.spId || null)
-    formik.setFieldValue('plantId', res?.record?.plantId || defaults.userDefaultsList.plantId || null)
-  }
   useEffect(() => {
     let shipAdd = ''
     const { name, street1, street2, city, phone, phone2, email1 } = address
@@ -1099,18 +1084,17 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       recalcGridVat(formik.values.tdType, formik.values.tdPct, currentTdAmount, formik.values.currentDiscount)
     }
   }, [subtotal])
-  useEffect(() => {
-    if (formik.values?.dtId && !recordId) onChangeDtId(formik.values?.dtId)
-  }, [formik.values?.dtId])
 
   useEffect(() => {
     ;(async function () {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
-      const defaultValues = await getDefaultData()
-      if (recordId) await refetchForm(recordId)
-      else {
-        const defaultSalesTD = defaultValues.systemDefaultsList.salesTD
+      const defaultObj = await getDefaultData()
+
+      if (recordId) {
+        await refetchForm(recordId)
+      } else {
+        const defaultSalesTD = defaultObj.systemDefaultsList.salesTD
         if (defaultSalesTD) {
           setCycleButtonState({ text: '%', value: 2 })
           formik.setFieldValue('tdType', 2)
@@ -1118,15 +1102,15 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           setCycleButtonState({ text: '123', value: 1 })
           formik.setFieldValue('tdType', 1)
         }
-        const userDefaultSite = defaultValues.userDefaultsList.siteId
-        const userDefaultSASite = defaultValues.systemDefaultsList.siteId
+        const userDefaultSite = defaultObj.userDefaultsList.siteId
+        const userDefaultSASite = defaultObj.systemDefaultsList.siteId
         const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
-        const plant = defaultValues.userDefaultsList.plantId
-        const salesPerson = defaultValues.userDefaultsList.spId
+        const plant = defaultObj.userDefaultsList.plantId
+        const salesPerson = defaultObj.userDefaultsList.spId
         formik.setFieldValue('siteId', parseInt(siteId))
         formik.setFieldValue('spId', parseInt(salesPerson))
         formik.setFieldValue('plantId', parseInt(plant))
-        formik.setFieldValue('plId', parseInt(defaultValues?.systemDefaultsList?.plId))
+        formik.setFieldValue('plId', parseInt(defaultObj?.systemDefaultsList?.plId))
       }
     })()
   }, [])

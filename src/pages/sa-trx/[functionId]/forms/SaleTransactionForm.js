@@ -1404,9 +1404,9 @@ export default function SaleTransactionForm({
       setmetalPriceVisibility(false)
     }
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
-    formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
-    formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
-    formik.setFieldValue('header.siteId', dtd?.record?.siteId || userDefaultsDataState?.siteId || null)
+    formik.setFieldValue('header.plantId', dtd?.record?.plantId ?? userDefaultsDataState?.plantId)
+    formik.setFieldValue('header.spId', dtd?.record?.spId ?? userDefaultsDataState?.spId)
+    formik.setFieldValue('header.siteId', dtd?.record?.siteId ?? userDefaultsDataState?.siteId)
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
     if (dtd?.record?.commitItems == false) formik.setFieldValue('header.siteId', null)
@@ -1463,8 +1463,14 @@ export default function SaleTransactionForm({
   }, [])
 
   useEffect(() => {
-    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
-  }, [formik.values?.header.dtId])
+    ;(async function () {
+      if (!recordId) {
+        const dtInfo = await getDTD(documentType?.dtId)
+        formik.setFieldValue('header.commitItems', dtInfo?.record?.commitItems)
+        if (!dtInfo?.record?.commitItems) formik.setFieldValue('header.siteId', null)
+      }
+    })()
+  }, [documentType?.dtId])
 
   useEffect(() => {
     ;(async function () {
@@ -1509,7 +1515,7 @@ export default function SaleTransactionForm({
     const myObject = {}
 
     const filteredList = userDefaultsData?.list?.filter(obj => {
-      return obj.key === 'plantId' || obj.key === 'siteId' || obj.key === 'spId'
+      return obj.key === 'plantId' || obj.key === 'siteId'
     })
     filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
     setUserDefaultsDataState(myObject)
@@ -1569,8 +1575,12 @@ export default function SaleTransactionForm({
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       const recordId = newValue ? newValue.recordId : null
+
                       await formik.setFieldValue('header.dtId', recordId)
-                      if (!newValue) {
+
+                      if (newValue) {
+                        onChangeDtId(recordId)
+                      } else {
                         formik.setFieldValue('header.dtId', null)
                         formik.setFieldValue('header.siteId', null)
                         formik.setFieldValue('header.metalPrice', 0)

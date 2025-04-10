@@ -18,11 +18,9 @@ import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
-
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -138,7 +136,20 @@ const FiPaymentVouchers = () => {
     openForm(obj?.recordId)
   }
 
-  function openOutWardsWindow(recordId) {
+  const getPlantId = async () => {
+    const userId = getStorageData('userData').userId
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userId}&_key=plantId`
+      })
+
+      return res.record.value
+    } catch (e) {}
+  }
+
+  function openOutWardsWindow(plantId, recordId) {
     stack({
       Component: FiPaymentVoucherExpensesForm,
       props: {
@@ -154,8 +165,10 @@ const FiPaymentVouchers = () => {
   }
 
   async function openForm(recordId) {
-    plantId
-      ? openOutWardsWindow(recordId)
+    const plantId = await getPlantId()
+
+    plantId !== ''
+      ? openOutWardsWindow(plantId, recordId)
       : stackError({
           message: platformLabels.noDefaultPlant
         })
