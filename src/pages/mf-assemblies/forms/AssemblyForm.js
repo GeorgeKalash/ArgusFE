@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -32,6 +32,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = store?.recordId
+  const currentItemId = useRef(null)
   const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -66,8 +67,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       machineId: null,
       machineName: null,
       machineRef: null,
-      batches: null,
-      batchSize: null,
+      batches: 0,
+      batchSize: 0,
       trackBy: null,
       lotCategoryId: null,
       labourId: null,
@@ -170,29 +171,61 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
 
   const totalRawMaterial = designQuantity + diffQuantity
 
+  const fetchLookup = async searchQry => {
+    if (!searchQry) return
+
+    const listRV = []
+
+    const [replacementsRes, itemRes] = await Promise.all([
+      getRequest({
+        extension: InventoryRepository.Replacement.qry,
+        parameters: `_itemId=${currentItemId.current}`
+      }),
+      getRequest({
+        extension: InventoryRepository.Item.get,
+        parameters: `_recordId=${currentItemId.current}`
+      })
+    ])
+
+    listRV.push({
+      replacementSKU: itemRes?.record?.sku,
+      replacementItemName: itemRes?.record?.name,
+      replacementId: currentItemId.current,
+      ivtItem: itemRes?.record?.ivtItem
+    })
+
+    replacementsRes?.list?.forEach(({ sku, name, recordId, ivtItem }) => {
+      listRV.push({
+        replacementSKU: sku,
+        replacementItemName: name,
+        replacementId: recordId,
+        ivtItem
+      })
+    })
+
+    return listRV
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
       label: labels.sku,
       name: 'sku',
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
-        valueField: 'sku',
+        onLookup: fetchLookup,
+        valueField: 'recordId',
         displayField: 'sku',
-        mandatory: true,
-        readOnly: isPosted,
         displayFieldWidth: 3,
         mapping: [
-          { from: 'recordId', to: 'itemId' },
+          { from: 'recordId', to: 'recordId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'itemName', to: 'itemName' }
         ],
         columnsInDropDown: [
-          { key: 'sku', value: 'SKU' },
-          { key: 'name', value: 'Name' }
+          { key: 'sku', value: 'sku' },
+          { key: 'itemName', value: 'itemName' }
         ]
-      },
-      async onChange({ row: { update, newRow } }) {}
+      }
     },
     {
       component: 'textfield',
@@ -426,7 +459,6 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
   useEffect(() => {
     if (recordId) refetchForm(recordId)
   }, [])
-
   return (
     <FormShell
       resourceId={ResourceIds.Assemblies}
@@ -544,12 +576,12 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     name='bomId'
                     label={labels.BOM}
                     form={formik}
-                    readOnly={isPosted}
                     displayFieldWidth={2}
                     valueShow='bomRef'
                     secondValueShow='bomName'
                     maxAccess={maxAccess}
                     editMode={editMode}
+                    readOnly={isPosted || formik.values.items?.some(item => !!item.sku)}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -641,7 +673,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     }}
                     image={'preview.png'}
                     tooltipText={platformLabels.Preview}
-                    disabled={!formik.values.bomId}
+                    disabled={!formik.values.bomId && !formik.values.siteId && !formik.values.qty}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -664,6 +696,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     name='designQty'
                     label={labels.designQty}
                     readOnly={isPosted}
+                    onChange={formik.handleChange}
                     value={designQuantity}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('designQty', 0)}
@@ -674,7 +707,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                   <CustomNumberField
                     name='qty'
                     label={labels.qty}
-                    readOnly={isPosted}
+                    readOnly={isPosted || formik.values.items?.some(item => !!item.sku)}
+                    onChange={formik.handleChange}
                     value={formik?.values?.qty}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('qty', 0)}
@@ -685,7 +719,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                   <CustomNumberField
                     name='diffQty'
                     label={labels.diffQty}
-                    readOnly={isPosted}
+                    readOnly={true}
                     value={diffQuantity}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('diffQty', 0)}
@@ -696,7 +730,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                   <CustomNumberField
                     name='totalRM'
                     label={labels.totalRM}
-                    readOnly={isPosted}
+                    readOnly={true}
                     value={totalRawMaterial}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('totalRM', 0)}
@@ -710,6 +744,12 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     readOnly={isPosted}
                     value={formik?.values?.batchSize}
                     maxAccess={maxAccess}
+                    onChange={e => {
+                      let batchSize = Number(e.target.value.replace(/,/g, ''))
+                      formik.setFieldValue('batchSize', batchSize)
+                      if (!batchSize) return
+                      formik.setFieldValue('qty', (formik.values.qty || 0) * batchSize)
+                    }}
                     onClear={() => formik.setFieldValue('batchSize', 0)}
                     error={formik.touched.batchSize && Boolean(formik.errors.batchSize)}
                   />
@@ -721,6 +761,12 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     readOnly={isPosted}
                     value={formik?.values?.batches}
                     maxAccess={maxAccess}
+                    onChange={e => {
+                      let batch = Number(e.target.value.replace(/,/g, ''))
+                      formik.setFieldValue('batches', batch)
+                      if (!batch) return
+                      formik.setFieldValue('qty', (formik.values.batchSize || 0) * batch)
+                    }}
                     onClear={() => formik.setFieldValue('batches', 0)}
                     error={formik.touched.batches && Boolean(formik.errors.batches)}
                   />
@@ -739,6 +785,9 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
             name='items'
             maxAccess={maxAccess}
             allowDelete={!isPosted}
+            onSelectionChange={(row, update, field) => {
+              if (field == 'sku') currentItemId.current = row?.itemId
+            }}
           />
         </Grow>
       </VertLayout>

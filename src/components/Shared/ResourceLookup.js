@@ -23,31 +23,37 @@ export const ResourceLookup = ({
   const [isLoading, setIsLoading] = useState(false)
   const [renderOption, setRenderOption] = useState(false)
 
-  const onLookup = searchQry => {
+  const onLookup = async searchQry => {
     setStore([])
     setRenderOption(false)
-    if (searchQry?.length >= minChars) {
-      setIsLoading(true)
-      getRequest({
-        extension: endpointId,
-        parameters: new URLSearchParams({ ...parameters, _filter: searchQry }),
-        disableLoading: true
-      })
-        .then(res => {
-          if (filter) {
-            res.list = res?.list?.filter(item => {
-              return Object.keys(filter).every(key => {
-                return parseInt(item[key]) == parseInt(filter[key]) || item[key] == filter[key]
+    if (!endpointId) {
+      const res = await rest?.onLookup(searchQry)
+      setStore(res)
+      setRenderOption(true)
+    } else {
+      if (searchQry?.length >= minChars) {
+        setIsLoading(true)
+        getRequest({
+          extension: endpointId,
+          parameters: new URLSearchParams({ ...parameters, _filter: searchQry }),
+          disableLoading: true
+        })
+          .then(res => {
+            if (filter) {
+              res.list = res?.list?.filter(item => {
+                return Object.keys(filter).every(key => {
+                  return parseInt(item[key]) == parseInt(filter[key]) || item[key] == filter[key]
+                })
               })
-            })
-          }
-          setStore(res.list)
-          setRenderOption(true)
-        })
-        .finally(() => {
-          setIsLoading(false)
-          setRenderOption(true)
-        })
+            }
+            setStore(res.list)
+            setRenderOption(true)
+          })
+          .finally(() => {
+            setIsLoading(false)
+            setRenderOption(true)
+          })
+      }
     }
   }
   const fieldPath = rest?.name?.split('.')
@@ -116,7 +122,6 @@ export const ResourceLookup = ({
     <>
       <CustomLookup
         {...{
-          onLookup,
           store,
           setStore,
           firstValue: _firstValue,
@@ -130,7 +135,8 @@ export const ResourceLookup = ({
           isLoading,
           renderOption,
           minChars,
-          ...rest
+          ...rest,
+          onLookup
         }}
       />
     </>

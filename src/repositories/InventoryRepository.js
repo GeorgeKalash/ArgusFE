@@ -294,5 +294,8 @@ export const InventoryRepository = {
     qry: service + 'qryCOL',
     del: service + 'delCOL',
     set: service + 'setCOL'
+  },
+  Replacement: {
+    qry: service + 'qryRPL'
   }
 }
