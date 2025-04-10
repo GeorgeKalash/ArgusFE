@@ -97,7 +97,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
-      siteId: yup.string().required(),
+      siteId: yup.number().required(),
       accountId: yup.string().required(),
       items: yup
         .array()
