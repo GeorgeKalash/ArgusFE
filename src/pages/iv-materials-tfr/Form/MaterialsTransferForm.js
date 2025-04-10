@@ -108,8 +108,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
       return
     } else {
-      if (siteId?.value && !formik.values.fromSiteId)
-        formik.setFieldValue('fromSiteId', parseInt(siteId?.value || ''))
+      if (siteId?.value && !formik.values.fromSiteId) formik.setFieldValue('fromSiteId', parseInt(siteId?.value || ''))
     }
   }
 
