@@ -67,7 +67,8 @@ export const PurchaseRepository = {
     snapshot: service + 'snapshotIVC',
     set2: service + 'set2IVC',
     post: service + 'postIVC',
-    unpost: service + 'unpostIVC'
+    unpost: service + 'unpostIVC',
+    generate: service + 'generateIVC'
   },
   Invoice: {
     snapshot: service + 'snapshotINV'
@@ -87,5 +88,20 @@ export const PurchaseRepository = {
   },
   Serials: {
     qry: service + 'qrySRL'
+  },
+  Shipment: {
+    get: service + 'getSHP',
+    set2: service + 'set2SHP',
+    del: service + 'delSHP',
+    page: service + 'pageSHP',
+    snapshot: service + 'snapshotSHP',
+    post: service + 'postSHP',
+    unpost: service + 'unpostSHP'
+  },
+  ShipmentItem: {
+    qry: service + 'qrySHI'
+  },
+  UnpostedOrderPack: {
+    get: service + 'openORD'
   }
 }

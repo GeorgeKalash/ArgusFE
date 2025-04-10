@@ -9,33 +9,22 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import FiPaymentVouchersForm from './forms/FiPaymentVouchersForm'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { useError } from 'src/error'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import { SystemFunction } from 'src/resources/SystemFunction'
-import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import ShipmentsForm from './forms/ShipmentsForm'
 
-const FiPaymentVouchers = () => {
+const Shipments = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack: stackError } = useError()
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.PaymentVouchers.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&filter=`
+      extension: PurchaseRepository.Shipment.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=recordId desc`
     })
-
-    if (response && response?.list) {
-      response.list = response?.list?.map(item => ({
-        ...item,
-        isVerified: item?.isVerified === null ? false : item?.isVerified
-      }))
-    }
 
     return { ...response, _startAt: _startAt }
   }
@@ -43,12 +32,10 @@ const FiPaymentVouchers = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FinancialRepository.PaymentVouchers.snapshot,
+        extension: PurchaseRepository.Shipment.snapshot,
         parameters: `_filter=${filters.qry}`
       })
-    } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-    }
+    } else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
@@ -61,8 +48,8 @@ const FiPaymentVouchers = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.PaymentVouchers.page,
-    datasetId: ResourceIds.PaymentVouchers,
+    endpointId: PurchaseRepository.Shipment.page,
+    datasetId: ResourceIds.Shipments,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -70,98 +57,69 @@ const FiPaymentVouchers = () => {
 
   const columns = [
     {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
       field: 'date',
       headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'vendorName',
+      headerName: labels.vendor,
       flex: 1
     },
     {
-      field: 'accountTypeName',
-      headerName: labels.accountType,
+      field: 'dtName',
+      headerName: labels.docType,
       flex: 1
     },
     {
-      field: 'accountRef',
-      headerName: labels.account,
+      field: 'siteRef',
+      headerName: labels.siteRef,
       flex: 1
     },
     {
-      field: 'accountName',
-      headerName: labels.accountName,
-      flex: 1
-    },
-    {
-      field: 'cashAccountName',
-      headerName: labels.cashAccount,
-      flex: 1
-    },
-    {
-      field: 'amount',
-      headerName: labels.amount,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'currencyRef',
-      headerName: labels.currency,
-      flex: 1
-    },
-    {
-      field: 'notes',
-      headerName: labels.notes,
+      field: 'siteName',
+      headerName: labels.siteName,
       flex: 1
     },
     {
       field: 'statusName',
       headerName: labels.status,
       flex: 1
-    },
-    {
-      field: 'isVerified',
-      headerName: labels.isVerified,
-      type: 'checkbox'
     }
   ]
 
-  const add = async () => {
-    await proxyAction()
+  const add = () => {
+    openForm()
   }
 
   const edit = obj => {
     openForm(obj?.recordId)
   }
 
-  function openOutWardsWindow(recordId) {
+  async function openForm(recordId) {
     stack({
-      Component: FiPaymentVouchersForm,
+      Component: ShipmentsForm,
       props: {
         labels,
         recordId,
-        maxAccess: access
+        maxAccess: access,
+        invalidate
       },
-      width: 950,
-      height: 550,
-      title: labels.paymentVoucher
+      width: 1300,
+      height: 700,
+      title: labels.shipment
     })
   }
 
-  async function openForm(recordId) {
-    openOutWardsWindow(recordId)
-  }
-
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.PaymentVoucher,
-    action: openForm
-  })
-
   const del = async obj => {
     await postRequest({
-      extension: FinancialRepository.PaymentVouchers.del,
+      extension: PurchaseRepository.Shipment.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -171,7 +129,7 @@ const FiPaymentVouchers = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar labels={labels} onAdd={add} maxAccess={access} reportName={'FIPV'} filterBy={filterBy} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'PUSHP'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
@@ -181,6 +139,7 @@ const FiPaymentVouchers = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           paginationType='api'
@@ -193,4 +152,4 @@ const FiPaymentVouchers = () => {
   )
 }
 
-export default FiPaymentVouchers
+export default Shipments
