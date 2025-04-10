@@ -51,6 +51,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     datasetId: ResourceIds.MultiCurrencyRate
   })
 
+  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
   const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
 
@@ -76,7 +77,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       printStatus: '',
       status: 1,
       paymentMethod: '1',
-      cashAccountId: null,
+      cashAccountId: cashAccountId,
       plantId: plantId,
       exRate: 1.0,
       rateCalcMethod: 1,
@@ -135,14 +136,19 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('cashAccountId', res?.record?.cashAccountId)
-      getCashAccount(res?.record?.cashAccountId)
-      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+      const cashAccountValue = res?.record?.cashAccountId ? res?.record?.cashAccountId : cashAccountId
+
+      formik.setFieldValue('cashAccountId', cashAccountValue)
+      getCashAccount(cashAccountValue)
+
+      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
+
+      return res
     }
   }
 
   useEffect(() => {
-    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
+    getDTD(formik?.values?.dtId)
   }, [formik.values.dtId])
 
   async function openMCRForm(data) {
@@ -185,6 +191,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     ;(async function () {
       if (recordId) {
         await getData(recordId)
+      } else {
+        const cashAccountId = formik.values.cashAccountId
+        if (cashAccountId) getCashAccount(cashAccountId)
       }
     })()
   }, [])
@@ -432,9 +441,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 required
                 values={formik.values}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('cashAccountId', null)
-                  formik.setFieldValue('cashAccountRef', null)
-                  formik.setFieldValue('cashAccountName', null)
+                  formik.setFieldValue('cashAccountId', newValue?.recordId)
+                  formik.setFieldValue('cashAccountRef', newValue?.reference || '')
+                  formik.setFieldValue('cashAccountName', newValue ? newValue.name : '')
                   formik.setFieldValue('paymentMethod', newValue?.key || null)
                 }}
                 error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}

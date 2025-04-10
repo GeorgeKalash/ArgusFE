@@ -188,7 +188,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   }
 
   useEffect(() => {
-    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
+    getDTD(formik?.values?.dtId)
   }, [formik.values.dtId])
 
   function getDefaultsData() {
