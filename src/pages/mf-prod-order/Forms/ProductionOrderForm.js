@@ -285,7 +285,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId)
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
