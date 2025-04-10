@@ -493,7 +493,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 values={formik.values}
                 required
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId)
+                  formik.setFieldValue('dtId', newValue?.recordId || null)
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
