@@ -387,11 +387,12 @@ export const ResourceIds = {
   PostDraftReturns: 51316,
   DamageReturn: 42333,
   RebuildAging: 31502,
+  Shipments: 50305,
   BillOfMaterials: 42201,
   SAVerifyTransIntegrity: 51601,
   PUDocumentTypeDefaults: 50103,
   SyncSalesTrx: 51603,
   ProductionOrder: 42337,
   YearlyComparativeSales: 51550,
-  SManagement: 41213,
+  SManagement: 41213
 }
