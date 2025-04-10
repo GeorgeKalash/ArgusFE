@@ -195,15 +195,15 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('siteId', res?.record?.siteId ? res?.record?.siteId : siteId)
-      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
+      formik.setFieldValue('siteId', res?.record?.siteId || siteId)
+      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
 
       return res
     }
   }
 
   useEffect(() => {
-    getDTD(formik?.values?.dtId)
+    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
   }, [formik.values.dtId])
 
   const onCondition = row => {
