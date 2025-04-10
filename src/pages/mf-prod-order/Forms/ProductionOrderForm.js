@@ -280,13 +280,12 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
                       { key: 'name', value: 'Name' }
                     ]}
                     readOnly={editMode}
-                    required
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={async (event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId || null)
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('dtId', newValue?.recordId)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
