@@ -137,6 +137,8 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
       formik.setValues({
         ...res.record,
         recordId: res?.record?.itemId,
+        sku: res?.record?.sku ?? sku,
+        itemName: res?.record?.itemName ?? name,
         min: res?.record?.min ?? null,
         max: res?.record?.max ?? null,
         items: res2?.list?.map((item, index) => ({
