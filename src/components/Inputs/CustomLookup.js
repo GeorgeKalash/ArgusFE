@@ -111,6 +111,9 @@ const CustomLookup = ({
             return typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option
           }}
           onChange={(event, newValue) => {
+            
+            //setInputValue(newValue?.[valueField] || '')
+
             onChange(name, newValue)
             setAutoFocus(true)
 
