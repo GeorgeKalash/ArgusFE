@@ -492,6 +492,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       label: labels.MU,
       name: 'muRef',
       props: {
+        readOnly: isPosted,
         store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
@@ -682,7 +683,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={PurchaseRepository.Vendor.snapshot}
-                    filter={{ isInactive: !true }}
+                    filter={item => !item.isInactive}
                     valueField='reference'
                     displayField='name'
                     secondFieldLabel={labels.vendor}
