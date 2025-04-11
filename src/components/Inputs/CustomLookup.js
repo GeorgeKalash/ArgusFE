@@ -111,8 +111,7 @@ const CustomLookup = ({
             return typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option
           }}
           onChange={(event, newValue) => {
-            
-            //setInputValue(newValue?.[valueField] || '')
+            setInputValue(newValue ? newValue[valueField] : '')
 
             onChange(name, newValue)
             setAutoFocus(true)
@@ -234,7 +233,7 @@ const CustomLookup = ({
               required={_required}
               onKeyUp={e => {
                 onKeyUp(e)
-                if (e.key !== 'Enter') e.target?.value?.length >= minChars ? setFreeSolo(false) : setFreeSolo(true)
+                if (e.key !== 'Enter') setFreeSolo(false)
               }}
               inputProps={{
                 ...params.inputProps,
