@@ -32,8 +32,8 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
     initialValues: {
       itemId: recordId,
       recordId,
-      itemName: name,
-      sku,
+      itemName: '',
+      sku: '',
       min: null,
       purchaseRequestFactor: '',
       amcShortTerm: '',
