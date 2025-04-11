@@ -27,7 +27,6 @@ export default function NotificationLabelsForm({ labels, maxAccess, recordId }) 
       label: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       label: yup.string().required()
