@@ -78,7 +78,8 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       productionStandardId: null,
       productionStandardRef: '',
       productionStandardName: '',
-      metalId: null
+      metalId: null,
+      collectionId: null
     },
     maxAccess,
     enableReinitialize: false,
@@ -319,6 +320,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                         productionStandardId: newValue?.productionStandardId || null,
                         productionStandardRef: newValue?.productionStandardRef || '',
                         productionStandardName: newValue?.productionStandardName || '',
+                        collectionId: newValue?.collectionId || null,
                         metalPurity: newValue?.metalPurity || null,
                         metalId: newValue?.metalId || null
                       })
