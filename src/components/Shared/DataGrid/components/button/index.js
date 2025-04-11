@@ -4,6 +4,7 @@ function DataGridButton({ data, column: { props, field, ...column }, update, upd
   const checkImage = props?.onCondition && props?.onCondition(data)
   const imgSrc = !props?.imgSrc ? checkImage?.imgSrc : props?.imgSrc
   const hiddenButton = checkImage?.hidden || false
+
   return (
     !hiddenButton && (
       <Button
