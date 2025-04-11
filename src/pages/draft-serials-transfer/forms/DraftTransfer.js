@@ -791,7 +791,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
             columns={serialsColumns}
             name='serials'
             maxAccess={maxAccess}
-            disabled={isPosted || !formik.values.fromSiteId || !formik.values.toSiteId}
+            disabled={isPosted || !formik.values.fromSiteId || !formik.values.toSiteId || !fomrik.values.dtId}
             allowDelete={!isPosted}
             autoDelete={autoDelete}
           />

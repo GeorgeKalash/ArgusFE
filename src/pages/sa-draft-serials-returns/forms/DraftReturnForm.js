@@ -1209,7 +1209,9 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             columns={serialsColumns}
             name='serials'
             maxAccess={maxAccess}
-            disabled={isClosed || !formik.values.clientId}
+            disabled={
+              isClosed || !formik.values.clientId || !formik.values.dtId || !formik.values.spId || !formik.values.siteId
+            }
             allowDelete={!isClosed}
             allowAddNewLine={!formik?.values?.search}
             autoDelete={autoDelete}
