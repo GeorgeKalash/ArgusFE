@@ -265,6 +265,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Lots',
+    label: platformLabels.Lot,
+    color: '#D3D3D3',
+    image: 'lot.png',
+    main: false
+  },
+  {
     key: 'GL',
     label: platformLabels.GL,
     color: '#231f20',

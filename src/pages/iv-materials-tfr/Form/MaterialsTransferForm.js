@@ -108,8 +108,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
       return
     } else {
-      if (siteId?.value && !formik.values.fromSiteId)
-        formik.setFieldValue('fromSiteId', parseInt(siteId?.value || ''))
+      if (siteId?.value && !formik.values.fromSiteId) formik.setFieldValue('fromSiteId', parseInt(siteId?.value || ''))
     }
   }
 
@@ -231,7 +230,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
   const getUnitCost = async itemId => {
     const res = await getRequest({
-      extension: InventoryRepository.Cost.get,
+      extension: InventoryRepository.CurrentCost.get,
       parameters: '_itemId=' + itemId
     })
 

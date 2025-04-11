@@ -27,13 +27,16 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { useWindow } from 'src/windows'
+import { useError } from 'src/error'
+import LotForm from './LotForm'
 
 export default function AssemblyForm({ labels, maxAccess: access, store, setStore }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const recordId = store?.recordId
   const currentItemId = useRef(null)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Assembly,
@@ -44,6 +47,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.Assembly.page
   })
+
+  const hiddenMuId = defaultsData?.list?.find(({ key }) => key === 'mf_mu')?.value == 1
 
   const { formik } = useForm({
     initialValues: {
@@ -73,23 +78,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       lotCategoryId: null,
       labourId: null,
       shiftId: null,
-      items: [
-        {
-          id: 1,
-          assemblyId: recordId || 0,
-          seqNo: null,
-          itemId: null,
-          itemName: null,
-          sku: null,
-          siteId: null,
-          designQty: null,
-          qty: 0,
-          baseQty: 0,
-          cost: 0,
-          diffQty: 0,
-          variationLimit: 0
-        }
-      ]
+      items: []
     },
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
@@ -113,13 +102,12 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
         .required()
     }),
     onSubmit: async values => {
-      const updatedRows = formik?.values?.items.map((transferDetail, index) => {
+      const updatedRows = formik?.values?.items.map((itemDetails, index) => {
         return {
-          ...transferDetail,
+          ...itemDetails,
           seqNo: index + 1,
           transferId: formik.values.recordId || 0,
-          unitCost: parseFloat(transferDetail.unitCost),
-          totalCost: parseFloat(transferDetail.totalCost)
+          baseQty: !hiddenMuId && itemDetails.muId ? itemDetails.qty * itemDetails.muQty : itemDetails.qty
         }
       })
 
@@ -175,6 +163,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     if (!searchQry) return
 
     const listRV = []
+    if (!currentItemId.current) return listRV
 
     const [replacementsRes, itemRes] = await Promise.all([
       getRequest({
@@ -186,19 +175,18 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
         parameters: `_recordId=${currentItemId.current}`
       })
     ])
-
     listRV.push({
-      replacementSKU: itemRes?.record?.sku,
-      replacementItemName: itemRes?.record?.name,
-      replacementId: currentItemId.current,
+      sku: itemRes?.record?.sku,
+      itemName: itemRes?.record?.name,
+      itemId: itemRes?.record?.recordId,
       ivtItem: itemRes?.record?.ivtItem
     })
 
-    replacementsRes?.list?.forEach(({ sku, name, recordId, ivtItem }) => {
+    replacementsRes?.list?.forEach(({ replacementSKU, replacementItemName, replacementId, ivtItem }) => {
       listRV.push({
-        replacementSKU: sku,
-        replacementItemName: name,
-        replacementId: recordId,
+        sku: replacementSKU,
+        itemName: replacementItemName,
+        itemId: replacementId,
         ivtItem
       })
     })
@@ -217,7 +205,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
         displayField: 'sku',
         displayFieldWidth: 3,
         mapping: [
-          { from: 'recordId', to: 'recordId' },
+          { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'itemName', to: 'itemName' }
         ],
@@ -225,6 +213,10 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
           { key: 'sku', value: 'sku' },
           { key: 'itemName', value: 'itemName' }
         ]
+      },
+      async onChange({ row: { update, oldRow, newRow } }) {
+        const currentCost = await getCost(newRow.itemId)
+        update({ cost: currentCost })
       }
     },
     {
@@ -268,24 +260,51 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       label: labels.designQty,
       name: 'designQty',
       props: {
-        readOnly: true
+        readOnly: true,
+        decimalScale: 3
+      }
+    },
+    !hiddenMuId && {
+      component: 'resourcecombobox',
+      label: labels.measurementUnit,
+      name: 'muRef',
+      props: {
+        endpointId: InventoryRepository.MeasurementUnit.qry,
+        parameters: `_msId=0&filter=`,
+        displayField: 'reference',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'reference', to: 'muRef' },
+          { from: 'qty', to: 'muQty' },
+          { from: 'recordId', to: 'muId' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 3
       }
     },
     {
       component: 'numberfield',
       label: labels.qty,
       name: 'qty',
+      updateOn: 'blur',
       props: {
-        readOnly: isPosted
+        readOnly: isPosted,
+        decimalScale: 3
       },
-      async onChange({ row: { update, newRow } }) {}
+      async onChange({ row: { update, newRow } }) {
+        await isValidQty(newRow?.designQty, newRow?.qty, newRow?.variationLimit, update)
+      }
     },
     {
       component: 'numberfield',
       label: labels.diffQty,
       name: 'diffQty',
       props: {
-        readOnly: true
+        readOnly: true,
+        decimalScale: 3
       }
     },
     {
@@ -293,7 +312,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       label: labels.cost,
       name: 'cost',
       props: {
-        readOnly: true
+        readOnly: true,
+        decimalScale: 3
       }
     },
     {
@@ -304,7 +324,40 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
         readOnly: true
       }
     }
-  ]
+  ].filter(Boolean)
+
+  async function isValidQty(designQty, qty, variationLimit, update) {
+    const diffQty = qty - designQty
+
+    if (!variationLimit) {
+      update({ diffQty })
+
+      return true
+    }
+
+    const allowedVariation = (variationLimit / 100) * designQty
+    if (Math.abs(diffQty) > allowedVariation) {
+      update({ qty: 0, diffQty: 0 })
+      stackError({ message: labels.inValidQty })
+
+      return false
+    }
+
+    update({ qty, diffQty })
+
+    return true
+  }
+
+  async function getCost(itemId) {
+    if (!itemId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.CurrentCost.get,
+      parameters: `_itemId=${itemId}`
+    })
+
+    return res?.record?.currentCost || 0
+  }
 
   async function getSiteInfo() {
     if (!formik.values.siteId) return
@@ -386,22 +439,23 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     }))
     formik.setValues({
       ...header.record,
-      items: items?.list?.map(item => ({
-        ...item,
-        id: item.seqNo,
-        diffQty: (item.qty || 0) - (item.designQty || 0)
-      }))
+      items:
+        items?.list?.map(item => ({
+          ...item,
+          id: item.seqNo,
+          diffQty: (item.qty || 0) - (item.designQty || 0)
+        })) || []
     })
   }
 
   const onPost = async () => {
-    // await postRequest({
-    //   extension: ManufacturingRepository.Assembly.post,
-    //   record: JSON.stringify(formik.values)
-    // })
-    // toast.success(platformLabels.Posted)
-    // invalidate()
-    // await refetchForm(formik.values.recordId)
+    await postRequest({
+      extension: ManufacturingRepository.Assembly.post,
+      record: JSON.stringify(formik.values)
+    })
+    toast.success(platformLabels.Posted)
+    invalidate()
+    await refetchForm(formik.values.recordId)
     setStore(prevStore => ({
       ...prevStore,
       isPosted: true
@@ -409,13 +463,13 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
   }
 
   const onUnpost = async () => {
-    // await postRequest({
-    //   extension: ManufacturingRepository.Assembly.unpost,
-    //   record: JSON.stringify(formik.values)
-    // })
-    // toast.success(platformLabels.Unposted)
-    // invalidate()
-    // await refetchForm(formik.values.recordId)
+    await postRequest({
+      extension: ManufacturingRepository.Assembly.unpost,
+      record: JSON.stringify(formik.values)
+    })
+    toast.success(platformLabels.Unposted)
+    invalidate()
+    await refetchForm(formik.values.recordId)
     setStore(prevStore => ({
       ...prevStore,
       isPosted: false
@@ -446,19 +500,38 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || !isPosted || formik.values.isVerified
+      disabled: !editMode
     },
     {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || !isPosted || formik.values.isVerified
+      disabled: !editMode
+    },
+    {
+      key: 'Lots',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: LotForm,
+          props: {
+            labels,
+            access,
+            recordId
+          },
+          width: 700,
+          height: 550,
+          title: labels.lot
+        })
+      },
+      disabled: !editMode || isPosted || formik.values.trackBy != 2
     }
   ]
 
   useEffect(() => {
     if (recordId) refetchForm(recordId)
   }, [])
+
   return (
     <FormShell
       resourceId={ResourceIds.Assemblies}
@@ -609,7 +682,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     secondValueShow='itemName'
                     displayFieldWidth={2}
                     form={formik}
-                    readOnly={isPosted}
+                    readOnly
                     columnsInDropDown={[
                       { key: 'sku', value: 'SKU' },
                       { key: 'name', value: 'Name' }
@@ -673,7 +746,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     }}
                     image={'preview.png'}
                     tooltipText={platformLabels.Preview}
-                    disabled={!formik.values.bomId && !formik.values.siteId && !formik.values.qty}
+                    disabled={isPosted || (!formik.values.bomId && !formik.values.siteId && !formik.values.qty)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -784,7 +857,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
             columns={columns}
             name='items'
             maxAccess={maxAccess}
-            allowDelete={!isPosted}
+            allowDelete={false}
             onSelectionChange={(row, update, field) => {
               if (field == 'sku') currentItemId.current = row?.itemId
             }}
