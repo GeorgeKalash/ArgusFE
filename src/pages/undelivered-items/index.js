@@ -80,14 +80,6 @@ const UndeliveredItems = () => {
         record: JSON.stringify({ clientId, siteId, notes, items: itemValues })
       }).then(res => {
         if (res.recordId) {
-          const items = obj.items.map(({ isChecked, ...item }) => ({
-            ...item,
-            isChecked: false,
-            deliverNow: 0
-          }))
-
-          formik.setFieldValue('items', items)
-
           stack({
             Component: DeliveriesOrdersForm,
             props: {
@@ -104,6 +96,14 @@ const UndeliveredItems = () => {
           })
 
           toast.success(platformLabels.Generated)
+
+          const items = obj.items.map(({ isChecked, ...item }) => ({
+            ...item,
+            isChecked: false,
+            deliverNow: 0
+          }))
+
+          formik.setFieldValue('items', items)
         }
       })
     }
@@ -220,9 +220,7 @@ const UndeliveredItems = () => {
       },
       async onChange({ row: { update, newRow } }) {
         const { deliverNow, balance, qty } = newRow
-
         let value = deliverNow
-
         if (deliverNow > balance) {
           const margin = (100 * (deliverNow - balance)) / qty
           if (marginDefault && marginDefault == 0) value = balance
@@ -234,11 +232,17 @@ const UndeliveredItems = () => {
     }
   ]
 
+  const handleSubmit = e => {
+    setTimeout(() => {
+      formik.handleSubmit()
+    }, 5)
+  }
+
   const actions = [
     {
       key: 'ORD',
       condition: true,
-      onClick: () => formik.handleSubmit(),
+      onClick: handleSubmit,
       disabled: !clientId || !siteId
     }
   ]

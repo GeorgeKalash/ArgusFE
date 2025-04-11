@@ -373,13 +373,12 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
       formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
 
-
       return res
     }
   }
 
   useEffect(() => {
-    getDTD(formik?.values?.dtId)
+    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
   }, [formik.values.dtId])
 
   return (
@@ -415,8 +414,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       changeDT(newValue)
-                      formik && formik.setFieldValue('dtId', newValue?.recordId || '')
-                      formik && formik.setFieldValue('status', newValue?.activeStatus)
+                      formik.setFieldValue('dtId', newValue?.recordId || '')
+                      formik.setFieldValue('status', newValue?.activeStatus)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />
