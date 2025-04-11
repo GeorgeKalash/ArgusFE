@@ -44,7 +44,6 @@ const OutboundTransp = () => {
     query: { data },
     labels: _labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     refetch,
     access,
@@ -150,37 +149,16 @@ const OutboundTransp = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
         <RPBGridToolbar
-          onSearch={onSearch}
-          onSearchClear={onClear}
           labels={_labels}
           onAdd={add}
           maxAccess={access}
           inputSearch={true}
-          onApply={onApply}
           reportName={'DETRP'}
+          filterBy={filterBy}
         />
       </Fixed>
       <Grow>

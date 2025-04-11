@@ -1,6 +1,8 @@
 const service = 'MF.asmx/'
 
 export const ManufacturingRepository = {
+  DesignRawMaterial: { qry2: service + 'qryDRM2' },
+  IssueOfMaterialsItems: { qry: service + 'qryIMI' },
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
     page: service + 'pageLBG',
@@ -12,6 +14,7 @@ export const ManufacturingRepository = {
   ProductionLine: {
     page: service + 'pageLIN',
     qry: service + 'qryLIN',
+    qry2: service + 'qry2LIN',
     set: service + 'setLIN',
     get: service + 'getLIN',
     del: service + 'delLIN'
@@ -24,7 +27,8 @@ export const ManufacturingRepository = {
     qry: service + 'qryWCT',
     set: service + 'setWCT',
     get: service + 'getWCT',
-    del: service + 'delWCT'
+    del: service + 'delWCT',
+    snapshot: service + 'snapshotWCT'
   },
   Routing: {
     page: service + 'pageRTN',
@@ -39,15 +43,15 @@ export const ManufacturingRepository = {
     page: service + 'pageOPR',
     set: service + 'setOPR',
     get: service + 'getOPR',
-    del: service + 'delOPR',
-    qry: service + 'qryOPR'
+    del: service + 'delOPR'
   },
   Labor: {
     page: service + 'pageLBR',
     qry: service + 'qryLBR',
     set: service + 'setLBR',
     get: service + 'getLBR',
-    del: service + 'delLBR'
+    del: service + 'delLBR',
+    snapshot: service + 'snapshotLBR'
   },
   Machine: {
     page: service + 'pageMAC',
@@ -114,7 +118,12 @@ export const ManufacturingRepository = {
     set: service + 'setJOB',
     get: service + 'getJOB',
     del: service + 'delJOB',
-    snapshot: service + 'snapshotJOB'
+    snapshot: service + 'snapshotJOB',
+    snapshot2: service + 'snapshotJOB2',
+    cancel: service + 'cancelJOB',
+    post: service + 'postJOB',
+    start: service + 'startJOB',
+    stop: service + 'stopJOB'
   },
   ProductionSheet: {
     page: service + 'pagePST',
@@ -147,15 +156,104 @@ export const ManufacturingRepository = {
     del: service + 'delRMC',
     page: service + 'pageRMC'
   },
+  Worksheet: {
+    snapshot: service + 'snapshotWST',
+    get: service + 'getWST',
+    set: service + 'setWST',
+    del: service + 'delWST',
+    page: service + 'pageWST',
+    summary: service + 'summaryWST',
+    post: service + 'postWST'
+  },
+  WorksheetMaterials: {
+    qry: service + 'qryIMA',
+    get: service + 'getIMA',
+    set: service + 'setIMA',
+    set2: service + 'set2IMA',
+    del: service + 'delIMA',
+    post: service + 'postIMA'
+  },
   ProductionSheetQueue: {
     qry: service + 'qryPSQ'
   },
   Damage: {
+    qry: service + 'qryDMG',
     get: service + 'getDMG',
     set: service + 'setDMG',
     del: service + 'delDMG',
     page: service + 'pageDMG',
     snapshot: service + 'snapshotDMG',
     post: service + 'postDMG'
+  },
+  JobCategory: {
+    qry: service + 'qryJCA'
+  },
+  JobRouting: {
+    qry: service + 'qryJRO',
+    get: service + 'getJRO',
+    set: service + 'setJRO',
+    set2: service + 'set2JRO',
+    del: service + 'delJRO'
+  },
+  Worksheet: {
+    snapshot: service + 'snapshotWST',
+    get: service + 'getWST',
+    set: service + 'setWST',
+    del: service + 'delWST',
+    page: service + 'pageWST',
+    summary: service + 'summaryWST',
+    post: service + 'postWST',
+    qry2: service + 'qryWST2'
+  },
+  JobOverhead: {
+    qry: service + 'qryJOH',
+    set2: service + 'set2JOH',
+    generate: service + 'generateJOH'
+  },
+  JobMaterial: {
+    qry: service + 'qryJMA'
+  },
+  JobItemSize: {
+    qry: service + 'qryJSZ',
+    set2: service + 'set2JSZ'
+  },
+  MFSerial: {
+    qry: service + 'qrySRL',
+    set2: service + 'set2SRL',
+    generate: service + 'generateSRL'
+  },
+  SamplePack: {
+    qry: service + 'qrySPL',
+    set2: service + 'set2SPL'
+  },
+  DamageReturn: {
+    get: service + 'getDMR',
+    set: service + 'setDMR',
+    del: service + 'delDMR',
+    page: service + 'pageDMR',
+    snapshot: service + 'snapshotDMR',
+    post: service + 'postDMR'
+  },
+  ProductionOrder: {
+    get2: service + 'get2PO',
+    set2: service + 'set2PO',
+    del: service + 'delPO',
+    page: service + 'pagePO',
+    snapshot: service + 'snapshotPO',
+    post: service + 'postPO'
+  },
+  BillOfMaterials: {
+    get: service + 'getBMA',
+    set: service + 'setBMA',
+    del: service + 'delBMA',
+    page: service + 'pageBMA',
+    snapshot: service + 'snapshotBMA'
+  },
+  Component: {
+    get: service + 'getBMI',
+    qry: service + 'qryBMI',
+    del: service + 'delBMI',
+    set: service + 'setBMI',
+    set2: service + 'set2BMI'
   }
 }

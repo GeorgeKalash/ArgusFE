@@ -1,5 +1,5 @@
 import { Button, Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -11,7 +11,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -35,8 +34,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
-  const [defaultsDataState, setDefaultsDataState] = useState(null)
   const { stack } = useWindow()
+  const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PaymentVoucher,
@@ -49,7 +48,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     reference: '',
     accountId: '',
     accountType: 3,
-    currencyId: null,
+    currencyId: parseInt(currencyId),
     currencyName: '',
     paymentMethod: '',
     date: new Date(),
@@ -63,10 +62,10 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     rateCalcMethod: 1,
     baseAmount: null,
     cashAccountId: null,
-    dtId: documentType?.dtId,
+    dtId: null,
     status: 1,
     releaseStatus: null,
-    plantId: plantId,
+    plantId: parseInt(plantId),
     contactId: null,
     isVerified: false,
     expenses: [
@@ -97,6 +96,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     validationSchema: yup.object({
       accountType: yup.string().required(),
       currencyId: yup.number().required(),
@@ -190,22 +190,39 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       await getExpenses(res2.record)
     } catch (exception) {}
   }
-  async function getDefaultsData() {
-    const myObject = {}
+  async function getDTD(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: FinancialRepository.FIDocTypeDefaults.get,
+        parameters: `_dtId=${dtId}`
+      })
 
-    const filteredList = defaultsData?.list?.filter(obj => {
-      return obj.key === 'currencyId'
-    })
+      formik.setFieldValue('cashAccountId', res?.record?.cashAccountId)
+      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+      const payment = await getCashAccountAndPayment(res?.record?.cashAccountId)
+      formik.setFieldValue('paymentMethod', res?.record?.paymentMethod || payment)
+    }
+  }
 
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setDefaultsDataState(myObject)
+  const getCashAccountAndPayment = async cashAccountId => {
+    if (cashAccountId) {
+      const { record: cashAccountResult } = await getRequest({
+        extension: CashBankRepository.CbBankAccounts.get,
+        parameters: `_recordId=${cashAccountId}`
+      })
 
-    return myObject
+      formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
+      formik.setFieldValue('cashAccountName', cashAccountResult.name)
+
+      return cashAccountResult.paymentMethod
+    } else {
+      return null
+    }
   }
 
   useEffect(() => {
-    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
-  }, [defaultsDataState])
+    if (formik.values?.dtId && !recordId) getDTD(formik.values?.dtId)
+  }, [formik.values?.dtId])
 
   useEffect(() => {
     ;(async function () {
@@ -216,7 +233,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
           await getExpenses(res.record)
         }
         await getDefaultVAT()
-        await getDefaultsData()
       } catch (e) {}
     })()
   }, [])
@@ -613,7 +629,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                     variant='contained'
                     size='small'
                     onClick={() => openMCRForm(formik.values)}
-                    disabled={!formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId}
+                    disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
                   >
                     <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                   </Button>

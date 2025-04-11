@@ -31,7 +31,7 @@ import { useWindow } from 'src/windows'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 
-export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId }) {
+export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -51,7 +51,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     datasetId: ResourceIds.MultiCurrencyRate
   })
 
-  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
   const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
 
@@ -59,6 +58,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     maxAccess: maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId,
       reference: '',
@@ -76,7 +76,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       printStatus: '',
       status: 1,
       paymentMethod: '1',
-      cashAccountId: cashAccountId,
+      cashAccountId: null,
       plantId: plantId,
       exRate: 1.0,
       rateCalcMethod: 1,
@@ -107,10 +107,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     }
   })
 
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
-
   async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
     if (currencyId && date && rateType) {
       const res = await getRequest({
@@ -131,6 +127,23 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
   }
+
+  async function getDTD(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: FinancialRepository.FIDocTypeDefaults.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      formik.setFieldValue('cashAccountId', res?.record?.cashAccountId)
+      getCashAccount(res?.record?.cashAccountId)
+      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+    }
+  }
+
+  useEffect(() => {
+    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
+  }, [formik.values.dtId])
 
   async function openMCRForm(data) {
     stack({
@@ -172,9 +185,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     ;(async function () {
       if (recordId) {
         await getData(recordId)
-      } else {
-        const cashAccountId = formik.values.cashAccountId
-        if (cashAccountId) getCashAccount(cashAccountId)
       }
     })()
   }, [])
@@ -227,6 +237,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       toast.success(platformLabels.Posted)
       invalidate()
       await getData(formik.values.recordId)
+      window.close()
     }
   }
 
@@ -378,6 +389,13 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 valueShow='accountRef'
                 secondValueShow='accountName'
                 form={formik}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Account Ref' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'keywords', value: 'Keywords' }
+                ]}
+                displayFieldWidth={2}
+                filter={{ isInactive: val => val !== true }}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue ? newValue.recordId : null)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
@@ -421,9 +439,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 required
                 values={formik.values}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue?.recordId)
-                  formik.setFieldValue('cashAccountRef', newValue?.reference || '')
-                  formik.setFieldValue('cashAccountName', newValue ? newValue.name : '')
+                  formik.setFieldValue('cashAccountId', null)
+                  formik.setFieldValue('cashAccountRef', null)
+                  formik.setFieldValue('cashAccountName', null)
                   formik.setFieldValue('paymentMethod', newValue?.key || null)
                 }}
                 error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}

@@ -43,6 +43,7 @@ const Table = ({
   handleCheckboxChange = '',
   showSelectAll = true,
   onSelectionChange,
+  selectionMode = 'row',
   rowDragManaged = false,
   onRowDragEnd = false,
   ...props
@@ -535,8 +536,17 @@ const Table = ({
     const [tooltipOpen, setTooltipOpen] = useState(false)
 
     const handleClick = event => {
-      if (onSelectionChange) {
-        onSelectionChange(params.data)
+      if (selectionMode === 'row' && onSelectionChange) {
+        onSelectionChange(params.data, params.rowIndex)
+      } else if (selectionMode === 'column' && onSelectionChange) {
+        const columnValues = params.api.getDisplayedRowCount()
+          ? Array.from(
+              { length: params.api.getDisplayedRowCount() },
+              (_, i) => params.api.getDisplayedRowAtIndex(i).data[params.colDef.field]
+            )
+          : []
+
+        onSelectionChange(columnValues, params.colDef.field)
       }
 
       const range = document.createRange()
@@ -699,6 +709,8 @@ const Table = ({
     }
   }
 
+  const height = gridData?.list?.length * 35 + 40 + 40
+
   const tableName = asPath
 
   const { data: tableSettings, refetch: invalidate } = useQuery({
@@ -760,7 +772,12 @@ const Table = ({
       <Grow>
         <Box
           className='ag-theme-alpine'
-          style={{ flex: 1, width: '1000px !important', height: props?.height || 'auto' }}
+          style={{
+            flex: !props.maxHeight && !props.height && 1,
+            width: '1000px !important',
+            height: props?.maxHeight ? height : props?.height || 'auto',
+            maxHeight: props?.maxHeight || 'auto'
+          }}
           sx={{
             '.ag-header': {
               height: '40px !important',

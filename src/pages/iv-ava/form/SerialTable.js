@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -7,23 +7,26 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const SerialForm = ({ labels, itemId, siteId }) => {
+const SerialTable = ({ labels, obj }) => {
   const { getRequest } = useContext(RequestsContext)
   const [data, setData] = useState([])
 
   async function fetchGridData() {
     const response = await getRequest({
       extension: InventoryRepository.AvailabilitySerial.qry,
-      parameters: `_itemId=${itemId}&_siteId=${siteId}&_srlNo=&_startAt=0&_pageSize=50`
+      parameters: `_itemId=${obj.itemId}&_siteId=${obj.siteId}&_srlNo=&_startAt=0&_pageSize=50`
     })
     setData(response)
   }
 
-  const { refetch, access, paginationParameters } = useResourceQuery({
-    datasetId: ResourceIds.AvailabilitiesBySite,
+  const { refetch, paginationParameters } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.AvailabilitySerial.qry
   })
+
+  useEffect(() => {
+    fetchGridData()
+  }, [])
 
   const columns = [
     {
@@ -37,8 +40,8 @@ const SerialForm = ({ labels, itemId, siteId }) => {
       flex: 1
     },
     {
-      field: 'siteRef',
-      headerName: labels.site,
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     },
     {
@@ -58,7 +61,6 @@ const SerialForm = ({ labels, itemId, siteId }) => {
           isLoading={false}
           pageSize={50}
           paginationType='api'
-          maxAccess={access}
           paginationParameters={paginationParameters}
           refetch={refetch}
         />
@@ -67,4 +69,4 @@ const SerialForm = ({ labels, itemId, siteId }) => {
   )
 }
 
-export default SerialForm
+export default SerialTable

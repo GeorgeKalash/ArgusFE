@@ -55,6 +55,7 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import { CommonContext } from 'src/providers/CommonContext'
 import ItemPromotion from 'src/components/Shared/ItemPromotion'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { SerialsForm } from 'src/components/Shared/SerialsForm'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -73,17 +74,17 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const { documentType, maxAccess } = useDocumentType({
     functionId: functionId,
     access: access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   const initialValues = {
     recordId: recordId,
-    dtId: documentType?.dtId,
     header: {
+      dtId: null,
       dgId: functionId,
       functionId: functionId,
       recordId: null,
-      dtId: documentType?.dtId,
       reference: '',
       date: new Date(),
       dueDate: new Date(),
@@ -188,6 +189,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -218,17 +220,41 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         .required()
     }),
     onSubmit: async obj => {
+      const serialsValues = []
+
+      const updatedRows = obj.items.map(({ id, isVattable, taxDetails, ...rest }) => {
+        const { serials, ...restDetails } = rest
+        if (serials) {
+          const updatedSerials = serials.map((serialDetail, idx) => {
+            return {
+              ...serialDetail,
+              id: idx + 1,
+              seqNo: id,
+              srlSeqNo: 0,
+              componentSeqNo: 0,
+              invoiceId: formik.values.recordId || 0,
+              itemId: rest?.itemId
+            }
+          })
+          serialsValues.push(...updatedSerials)
+        }
+
+        return {
+          ...restDetails,
+          seqNo: id,
+          invoiceId: formik.values.recordId || 0,
+          applyVat: isVattable
+        }
+      })
+
       const payload = {
         header: {
           ...obj.header,
           date: formatDateToApi(obj.header.date),
           dueDate: formatDateToApi(obj.header.dueDate)
         },
-        items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
-          seqNo: id,
-          applyVat: isVattable,
-          ...rest
-        })),
+        items: updatedRows,
+        serials: serialsValues,
         taxCodes: [
           ...[
             ...obj.items
@@ -239,7 +265,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
               }))
           ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
         ],
-        ...(({ header, items, taxCodes, ...rest }) => rest)(obj)
+        ...(({ header, items, taxCodes, serials, ...rest }) => rest)(obj)
       }
 
       const puTrxRes = await postRequest({
@@ -311,6 +337,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
+          { from: 'trackBy', to: 'trackBy' },
           { from: 'msId', to: 'msId' }
         ],
         columnsInDropDown: [
@@ -336,6 +363,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             ? undefined
             : await getVendorPrice(newRow, formik.values.header)
         fillItemObject(update, phycialProperty, itemInfo, vendorPrice)
+      },
+      propsReducer({ row, props }) {
+        return { ...props, imgSrc: onCondition(row) }
       }
     },
     {
@@ -550,6 +580,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   ]
 
+  async function getSerials(recordId, seqNo) {
+    return await getRequest({
+      extension: PurchaseRepository.Serials.qry,
+      parameters: `_invoiceId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
+    })
+  }
+
   async function handleIconClick(id, updateRow) {
     const index = formik.values.items.findIndex(item => item.id === id)
 
@@ -684,6 +721,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const modifiedList = await Promise.all(
       puTrxItems?.map(async (item, index) => {
         const taxDetailsResponse = []
+        const serials = await getSerials(recordId, item.seqNo)
 
         const updatedpuTrxTaxes =
           puTrxTaxes?.map(tax => {
@@ -703,6 +741,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           puTrx: true,
+          serials: serials.list.map((serialDetail, index) => {
+            return {
+              ...serialDetail,
+              id: index
+            }
+          }),
           taxDetails: updatedpuTrxTaxes.filter(tax => tax.seqNo === item.seqNo)
         }
       })
@@ -711,6 +755,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     formik.setValues({
       ...formik.values,
       recordId: puTrxHeader.recordId || null,
+      dtId: puTrxHeader.dtId || null,
       header: {
         ...formik.values.header,
         ...puTrxHeader,
@@ -1122,9 +1167,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       setmetalPriceVisibility(false)
     }
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
-    formik.setFieldValue('header.plantId', dtd?.record?.plantId ?? userDefaultsDataState?.plantId)
-    formik.setFieldValue('header.spId', dtd?.record?.spId ?? userDefaultsDataState?.spId)
-    formik.setFieldValue('header.siteId', dtd?.record?.siteId ?? userDefaultsDataState?.siteId ?? null)
+    formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
+    formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
+    formik.setFieldValue(
+      'header.siteId',
+      dtd?.record.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
+    )
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
   }
@@ -1138,14 +1186,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     formik.setFieldValue('header.subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('header.vatAmount', parseFloat(vatAmount).toFixed(2))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
-
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
-      formik.setFieldValue('header.dtId', documentType.dtId)
-      onChangeDtId(documentType.dtId)
-    }
-  }, [documentType?.dtId])
 
   useEffect(() => {
     if (reCal) {
@@ -1165,14 +1205,14 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       if (promotionTypes && promotionTypes.length > 0) {
         const initialType = promotionTypes[0]
         setInitialPromotionType(initialType)
-        formik.setValues({
-          ...formik.values,
-          items: formik.values.items.map(item => ({
-            ...item,
-            promotionTypeName: initialType.value,
-            promotionType: initialType.key
-          }))
-        })
+
+        const items = formik.values.items.map(item => ({
+          ...item,
+          promotionTypeName: initialType.value,
+          promotionType: initialType.key
+        }))
+
+        formik.setFieldValue(items)
       }
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
@@ -1203,6 +1243,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   useEffect(() => {
     defaultsDataState && setDefaultFields()
   }, [defaultsDataState])
+
+  useEffect(() => {
+    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+  }, [formik.values?.header.dtId])
 
   async function getDefaultsData() {
     const myObject = {}
@@ -1242,10 +1286,16 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }
 
   const setDefaultFields = () => {
-    formik.setFieldValue('header.currencyId', defaultsDataState.currencyId)
-    formik.setFieldValue('header.plantId', userDefaultsDataState.plantId)
-    formik.setFieldValue('header.spId', userDefaultsDataState.spId)
-    formik.setFieldValue('header.siteId', userDefaultsDataState.siteId ?? null)
+    formik.setFieldValue('header.currencyId', defaultsDataState?.currencyId || null)
+    if (!formik.values.header.plantId) formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
+    if (!formik.values.header.spId) formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
+    if (!formik.values.header.siteId)
+      formik.setFieldValue(
+        'header.siteId',
+        !formik.values.header.dtId || (formik.values.header.dtId && formik.values.header.commitItems)
+          ? userDefaultsDataState?.siteId || null
+          : null
+      )
   }
 
   const getResourceId = functionId => {
@@ -1257,6 +1307,50 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       default:
         return null
     }
+  }
+
+  const onCondition = row => {
+    if (row.trackBy === 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
+  if (functionId == SystemFunction.PurchaseReturn) {
+    columns.push({
+      component: 'button',
+      name: 'serials',
+      label: platformLabels.serials,
+      props: {
+        onCondition
+      },
+      onClick: (e, row, update, updateRow) => {
+        if (row?.trackBy === 1) {
+          stack({
+            Component: SerialsForm,
+            props: {
+              labels,
+              row,
+              disabled: isPosted,
+              siteId: formik?.values?.header.siteId,
+              maxAccess,
+              checkForSiteId: row.qty >= 0 ? false : true,
+              updateRow
+            },
+            width: 500,
+            height: 700,
+            title: platformLabels.serials
+          })
+        }
+      }
+    })
   }
 
   return (
@@ -1277,7 +1371,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
-                name='dtId'
+                name='header.dtId'
                 readOnly={editMode}
                 label={labels.documentType}
                 columnsInDropDown={[
@@ -1293,31 +1387,24 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
                   if (newValue) {
                     formik.setFieldValue('header.dtId', recordId)
-                    formik.setFieldValue('dtId', recordId)
-                    onChangeDtId(recordId)
                   } else {
-                    formik.setFieldValue('dtId', null)
                     formik.setFieldValue('header.dtId', null)
-                    formik.setFieldValue('header.siteId', null)
                     formik.setFieldValue('header.metalPrice', 0)
                     formik.setFieldValue('header.KGmetalPrice', 0)
                     setmetalPriceVisibility(false)
                   }
                 }}
-                error={
-                  (formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)) ||
-                  (formik.touched?.dtId && Boolean(formik.errors?.dtId))
-                }
+                error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
               />
             </Grid>
             <Grid item xs={2.4}>
               <CustomDatePicker
-                name='date'
+                name='header.date'
                 required
                 label={labels.date}
                 readOnly={isPosted}
                 value={formik?.values?.header?.date}
-                onChange={formik.setFieldValue}
+                onChange={(e, newValue) => formik.setFieldValue('header.date', newValue)}
                 editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('header.date', '')}
@@ -1327,7 +1414,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             <Grid item xs={2.4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
-                name='plantId'
+                name='header.plantId'
                 label={labels.plant}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -1342,13 +1429,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                   formik.setFieldValue('header.plantId', newValue ? newValue.recordId : null)
                 }}
                 displayFieldWidth={2}
-                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                error={formik.touched.header?.plantId && Boolean(formik.errors.header?.plantId)}
               />
             </Grid>
             <Grid item xs={2.4}>
               <ResourceComboBox
                 datasetId={DataSets.PAYMENT_METHOD}
-                name='paymentMethod'
+                name='header.paymentMethod'
                 readOnly={isPosted}
                 label={labels.paymentMethod}
                 valueField='key'
@@ -1357,13 +1444,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.paymentMethod', newValue ? newValue.key : null)
                 }}
-                error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
+                error={formik.touched.header?.paymentMethod && Boolean(formik.errors.header?.paymentMethod)}
                 maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={2.4}>
               <CustomTextField
-                name='vendorDocRef'
+                name='header.vendorDocRef'
                 label={labels.vendorDocRef}
                 value={formik?.values?.header?.vendorDocRef}
                 maxAccess={maxAccess}
@@ -1371,30 +1458,30 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 maxLength='15'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('header.vendorDocRef', '')}
-                error={formik.touched.vendorDocRef && Boolean(formik.errors.vendorDocRef)}
+                error={formik.touched.header?.vendorDocRef && Boolean(formik.errors.header?.vendorDocRef)}
               />
             </Grid>
 
             <Grid item xs={2.4}>
               <CustomTextField
-                name='reference'
+                name='header.reference'
                 label={labels.reference}
                 value={formik?.values?.header?.reference}
                 maxAccess={!editMode && maxAccess}
                 readOnly={editMode}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('header.reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
+                error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
               />
             </Grid>
             <Grid item xs={2.4}>
               <CustomDatePicker
-                name='dueDate'
+                name='header.dueDate'
                 required
                 label={labels.dueDate}
                 readOnly={isPosted}
                 value={formik?.values?.header?.dueDate}
-                onChange={formik.setFieldValue}
+                onChange={(e, newValue) => formik.setFieldValue('header.dueDate', newValue)}
                 editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('header.dueDate', '')}
@@ -1404,7 +1491,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             <Grid item xs={2.4}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
-                name='siteId'
+                name='header.siteId'
                 label={labels.site}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -1415,11 +1502,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 displayFieldWidth={2}
-                readOnly={
-                  formik?.values?.header.dtId ||
-                  (formik?.values?.header.dtId && formik?.values?.header.commitItems == false) ||
-                  isPosted
-                }
+                readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
                 required={
                   !formik?.values?.header.dtId ||
                   (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
@@ -1435,7 +1518,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             <Grid item xs={2.4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
-                name='currencyId'
+                name='header.currencyId'
                 label={labels.currency}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -1458,7 +1541,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             <Grid item xs={4.8}>
               <ResourceLookup
                 endpointId={PurchaseRepository.Vendor.snapshot}
-                name='vendorId'
+                name='header.vendorId'
                 label={labels.vendor}
                 valueField='reference'
                 displayField='name'
@@ -1499,7 +1582,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             <Grid item xs={2.4}>
               <ResourceComboBox
                 endpointId={FinancialRepository.TaxSchedules.qry}
-                name='taxId'
+                name='header.taxId'
                 label={labels.tax}
                 valueField='recordId'
                 displayField={['name']}
@@ -1511,14 +1594,14 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.taxId', newValue?.recordId || null)
                 }}
-                error={formik.touched.taxId && Boolean(formik.errors.taxId)}
+                error={formik.touched.header?.taxId && Boolean(formik.errors.header?.taxId)}
                 maxAccess={maxAccess}
               />
             </Grid>
 
             <Grid item xs={2.4}>
               <CustomNumberField
-                name='KGmetalPrice'
+                name='header.KGmetalPrice'
                 label={labels.metalPrice}
                 value={formik.values.header.KGmetalPrice}
                 readOnly
@@ -1550,7 +1633,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           <Grid container spacing={2} sx={{ mt: '5px' }}>
             <Grid item xs={6}>
               <CustomTextArea
-                name='description'
+                name='header.description'
                 label={labels.description}
                 value={formik.values.header.description}
                 rows={3}
@@ -1558,21 +1641,27 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.description', e.target.value)}
                 onClear={() => formik.setFieldValue('header.description', '')}
-                error={formik.touched.description && Boolean(formik.errors.description)}
+                error={formik.touched.header?.description && Boolean(formik.errors.header?.description)}
               />
             </Grid>
             <Grid item xs={3}>
               <Stack spacing={2}>
-                <CustomNumberField name='qty' maxAccess={maxAccess} label={labels.totQty} value={totalQty} readOnly />
                 <CustomNumberField
-                  name='volume'
+                  name='header.qty'
+                  maxAccess={maxAccess}
+                  label={labels.totQty}
+                  value={totalQty}
+                  readOnly
+                />
+                <CustomNumberField
+                  name='header.volume'
                   maxAccess={maxAccess}
                   label={labels.totVolume}
                   value={totalVolume}
                   readOnly
                 />
                 <CustomNumberField
-                  name='weight'
+                  name='header.weight'
                   maxAccess={maxAccess}
                   label={labels.totWeight}
                   value={totalWeight}
@@ -1583,14 +1672,14 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             <Grid item xs={3}>
               <Stack spacing={2}>
                 <CustomNumberField
-                  name='subTotal'
+                  name='header.subTotal'
                   maxAccess={maxAccess}
                   label={labels.subtotal}
                   value={subtotal}
                   readOnly
                 />
                 <CustomNumberField
-                  name='tdAmount'
+                  name='header.tdAmount'
                   maxAccess={maxAccess}
                   label={labels.discount}
                   value={formik.values.header.tdAmount}
@@ -1636,7 +1725,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                   }}
                 />
                 <CustomNumberField
-                  name='miscAmount'
+                  name='header.miscAmount'
                   maxAccess={maxAccess}
                   label={labels.misc}
                   value={formik.values.header.miscAmount}
@@ -1649,13 +1738,19 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                   onClear={() => formik.setFieldValue('header.miscAmount', 0)}
                 />
                 <CustomNumberField
-                  name='vatAmount'
+                  name='header.vatAmount'
                   maxAccess={maxAccess}
                   label={labels.VAT}
                   value={vatAmount}
                   readOnly
                 />
-                <CustomNumberField name='amount' maxAccess={maxAccess} label={labels.net} value={amount} readOnly />
+                <CustomNumberField
+                  name='header.amount'
+                  maxAccess={maxAccess}
+                  label={labels.net}
+                  value={amount}
+                  readOnly
+                />
               </Stack>
             </Grid>
           </Grid>

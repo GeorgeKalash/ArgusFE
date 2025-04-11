@@ -69,6 +69,7 @@ export const AccessControlRepository = {
     set2: service + 'set2USI'
   },
   NotificationLabel: {
+    page: service + 'pageNLB',
     qry: service + 'qryNLB',
     get: service + 'getNLB',
     set: service + 'setNLB',

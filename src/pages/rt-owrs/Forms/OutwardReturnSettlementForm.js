@@ -26,12 +26,19 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function OutwardReturnSettlementForm({ labels, access, recordId, cashAccountId, plantId, form, window }) {
+export default function OutwardReturnSettlementForm({
+  labels,
+  access,
+  recordId,
+  cashAccountId,
+  plantId,
+  form,
+  window
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const [formikSettings, setFormik] = useState({})
-  const [selectedReport, setSelectedReport] = useState(null)
 
   const { documentType, maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardReturnSettlement,
@@ -45,6 +52,7 @@ export default function OutwardReturnSettlementForm({ labels, access, recordId, 
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
@@ -53,7 +61,7 @@ export default function OutwardReturnSettlementForm({ labels, access, recordId, 
       reference: '',
       accountId: null,
       date: new Date(),
-      dtId: documentType?.dtId,
+      dtId: null,
       amount: null,
       returnId: null,
       owrRef: '',
@@ -75,7 +83,7 @@ export default function OutwardReturnSettlementForm({ labels, access, recordId, 
       items: formikSettings?.paymentValidation
     }),
     onSubmit: async obj => {
-      const copy = { ...formik.values, dtId: documentType?.dtId }
+      const copy = { ...formik.values }
       delete copy.items
 
       const items = formik.values.items.map((item, index) => ({

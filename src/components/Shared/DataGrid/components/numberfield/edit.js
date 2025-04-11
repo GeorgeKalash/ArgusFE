@@ -49,10 +49,9 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, u
           value: ''
         })
       }}
-      onMouseLeave={() => {
+      onBlur={() => {
         typing.current = false
       }}
-      renderMouseLeave={true}
       handleButtonClick={handleIconClick}
       isPercentIcon={isPercentIcon}
       {...props}

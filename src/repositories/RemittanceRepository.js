@@ -49,6 +49,7 @@ export const RemittanceSettingsRepository = {
   Correspondent: {
     page: service + 'pageCOR',
     qry: service + 'qryCOR',
+    qry2: service + 'qry2COR',
     get: service + 'getCOR',
     set: service + 'setCOR',
     del: service + 'delCOR',
@@ -167,5 +168,15 @@ export const RemittanceSettingsRepository = {
     get: service + 'getCOU',
     set: service + 'setCOU',
     del: service + 'delCOU'
+  },
+  CorDispControl: {
+    qry: service + 'qryCDC',
+    set2: service + 'set2CDC'
+  },
+  CorrespondentDispersal: {
+    qry: service + 'qryCDM',
+    get: service + 'getCDM',
+    del: service + 'delCDM',
+    set2: service + 'set2CDM'
   }
 }

@@ -8,7 +8,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import SerialForm from './forms/SerialForm'
+import SerialTable from './forms/SerialTable'
 import serialIcon from 'public/images/TableIcons/imgSerials.png'
 import lotIcon from 'public/images/TableIcons/lot.png'
 import { Box, IconButton } from '@mui/material'
@@ -140,7 +140,7 @@ const AvailabilityCrossTab = () => {
 
   function openSerialForm(itemId) {
     stack({
-      Component: SerialForm,
+      Component: SerialTable,
       props: {
         labels,
         itemId
@@ -164,10 +164,6 @@ const AvailabilityCrossTab = () => {
       height: 450,
       title: labels.lotAva
     })
-  }
-
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
   }
 
   const updatedColumns = [
@@ -202,7 +198,7 @@ const AvailabilityCrossTab = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} maxAccess={access} onApply={onApply} reportName={'IV415'} />
+        <RPBGridToolbar hasSearch={false} maxAccess={access} filterBy={filterBy} reportName={'IV415'} />
       </Fixed>
       <Grow>
         <Table

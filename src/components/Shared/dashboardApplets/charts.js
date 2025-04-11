@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 
@@ -79,10 +79,17 @@ const getChartOptions = (label, type) => {
 }
 
 export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverColor }) => {
-  useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+  const chartRef = useRef(null)
+  const chartInstanceRef = useRef(null)
 
-    const chart = new Chart(ctx, {
+  useEffect(() => {
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.destroy()
+    }
+
+    const ctx = chartRef.current.getContext('2d')
+
+    chartInstanceRef.current = new Chart(ctx, {
       type: 'bar',
       data: {
         labels,
@@ -98,6 +105,13 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
       },
       options: {
         indexAxis: 'y',
+        responsive: false,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            max: Math.max(...data) * 1.1
+          }
+        },
         plugins: {
           datalabels: {
             anchor: context => {
@@ -107,10 +121,9 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const chartWidth = chart.scales.x.right - chart.scales.x.left
               const maxValue = chart.scales.x.max
-
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 50 ? 'center' : 'end'
+              return barWidth >= 65 ? 'center' : 'end'
             },
             align: context => {
               const chart = context.chart
@@ -119,10 +132,9 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const chartWidth = chart.scales.x.right - chart.scales.x.left
               const maxValue = chart.scales.x.max
-
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 50 ? 'center' : 'right'
+              return barWidth >= 65 ? 'center' : 'right'
             },
             color: context => {
               const chart = context.chart
@@ -131,10 +143,9 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
               const chartWidth = chart.scales.x.right - chart.scales.x.left
               const maxValue = chart.scales.x.max
-
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 50 ? '#fff' : '#000'
+              return barWidth >= 65 ? '#fff' : '#000'
             },
             offset: 0,
             font: {
@@ -148,11 +159,15 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
     })
 
     return () => {
-      chart.destroy()
+      chartInstanceRef.current.destroy()
     }
-  }, [id, labels, data, label])
+  }, [id, labels, data, label, color, hoverColor])
 
-  return <canvas id={id} style={{ width: '100%', height: '400px' }}></canvas>
+  const baseHeight = 200
+  const barHeight = 25
+  const dynamicHeight = baseHeight + labels.length * barHeight
+
+  return <canvas id={id} ref={chartRef} height={dynamicHeight} width={window.innerWidth / 2.5}></canvas>
 }
 
 export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {
@@ -294,6 +309,75 @@ export const LineChart = ({ id, labels, data, label }) => {
   return <canvas id={id}></canvas>
 }
 
+export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
+  useEffect(() => {
+    const ctx = document.getElementById(id).getContext('2d')
+
+    const datasetConfig = datasets
+      .map((data, index) => {
+        if (data.length === 0) return null
+
+        const color = getColorForIndex(index)
+        const label = datasetLabels && datasetLabels[index] ? datasetLabels[index] : ``
+
+        return {
+          label,
+          data,
+          fill: false,
+          borderColor: color,
+          backgroundColor: color,
+          borderWidth: 2,
+          pointRadius: 5,
+          tension: 0.2
+        }
+      })
+      .filter(Boolean)
+
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: datasetConfig
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: datasetConfig.length > 0,
+            position: 'left'
+          },
+          tooltip: {
+            enabled: true,
+            mode: 'index',
+            intersect: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            ticks: {
+              callback: value => value.toLocaleString()
+            }
+          }
+        }
+      }
+    })
+
+    return () => {
+      chart.destroy()
+    }
+  }, [id, labels, datasets, datasetLabels])
+
+  return <canvas id={id}></canvas>
+}
+
+const getColorForIndex = index => {
+  const colors = ['#808000', '#1F3BB3', '#00FF00', '#FF5733', '#FFC300', '#800080']
+
+  return colors[index % colors.length]
+}
+
 export const PieChart = ({ id, labels, data, label }) => {
   useEffect(() => {
     const ctx = document.getElementById(id).getContext('2d')
@@ -402,4 +486,88 @@ export const PolarAreaChart = ({ id, labels, data, label }) => {
   }, [id, labels, data, label])
 
   return <canvas id={id}></canvas>
+}
+
+export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
+  useEffect(() => {
+    if (!collapsed) {
+      const ctx = document.getElementById(id).getContext('2d')
+
+      const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              data: datasets,
+              backgroundColor: 'rgba(0, 123, 255, 0.5)',
+              hoverBackgroundColor: 'rgb(255, 255, 0)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            datalabels: {
+              anchor: context => {
+                const chart = context.chart
+                const dataset = context.dataset
+                const value = dataset.data[context.dataIndex]
+
+                const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+                const maxValue = chart.scales.y.max
+
+                const barHeight = (value / maxValue) * chartHeight
+
+                return barHeight >= 120 ? 'center' : 'end'
+              },
+              align: context => {
+                const chart = context.chart
+                const dataset = context.dataset
+                const value = dataset.data[context.dataIndex]
+
+                const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+                const maxValue = chart.scales.y.max
+
+                const barHeight = (value / maxValue) * chartHeight
+
+                return barHeight >= 120 ? 'center' : 'end'
+              },
+              color: 'black',
+              offset: 0,
+              rotation: -90,
+              font: { size: 14, weight: 'bold' },
+              formatter: val => val?.toLocaleString()
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: '#000'
+              },
+              grid: {
+                display: true,
+                color: 'rgba(255, 255, 255, 0.2)'
+              }
+            },
+            y: {
+              ticks: {
+                color: '#000'
+              }
+            }
+          }
+        },
+        plugins: [ChartDataLabels]
+      })
+
+      return () => {
+        chart.destroy()
+      }
+    }
+  }, [labels, datasets, collapsed])
+
+  return <canvas id={id} style={{ height: '350px', width: '100%' }}></canvas>
 }

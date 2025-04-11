@@ -8,7 +8,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import SerialForm from './forms/SerialForm'
+import SerialTable from './forms/SerialTable'
 import serialIcon from '../../../public/images/TableIcons/imgSerials.png'
 import lotIcon from '../../../public/images/TableIcons/lot.png'
 import { Box, IconButton } from '@mui/material'
@@ -153,7 +153,7 @@ const AvailabilitiesBySite = () => {
 
   function openSerialForm(itemId, siteId) {
     stack({
-      Component: SerialForm,
+      Component: SerialTable,
       props: {
         labels,
         itemId,
@@ -181,15 +181,10 @@ const AvailabilitiesBySite = () => {
     })
   }
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} maxAccess={access} onApply={onApply} reportName={'IV403'} />
+        <RPBGridToolbar hasSearch={false} maxAccess={access} filterBy={filterBy} reportName={'IV403'} />
       </Fixed>
       <Grow>
         <Table

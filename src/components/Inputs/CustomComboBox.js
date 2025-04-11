@@ -8,6 +8,7 @@ import { checkAccess } from 'src/lib/maxAccess'
 const CustomComboBox = ({
   type = 'text',
   name,
+  fullName,
   label,
   value,
   valueField = 'key',
@@ -26,7 +27,6 @@ const CustomComboBox = ({
   readOnly = false,
   neverPopulate = false,
   displayFieldWidth = 1,
-  defaultIndex,
   sx,
   columnsInDropDown,
   editMode = false,
@@ -38,7 +38,7 @@ const CustomComboBox = ({
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
-    name,
+    fullName,
     props.maxAccess,
     required,
     readOnly,
@@ -50,12 +50,6 @@ const CustomComboBox = ({
 
   const [focus, setAutoFocus] = useState(autoFocus)
   const [isFocused, setIsFocused] = useState(false)
-
-  useEffect(() => {
-    if (!value && store?.length > 0 && typeof defaultIndex === 'number' && defaultIndex === 0) {
-      onChange(store?.[defaultIndex])
-    }
-  }, [defaultIndex])
 
   const autocompleteRef = useRef(null)
 
