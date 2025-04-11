@@ -15,7 +15,7 @@ import axios from 'axios'
 import { useWindow } from 'src/windows'
 import PopupDialog from 'src/components/Shared/PopupDialog'
 
-export default function POSForm({ labels, form, maxAccess, amount, window }) {
+export default function POSForm({ labels, form, maxAccess, amount }) {
   const { getRequestFullEndPoint, getRequest } = useContext(RequestsContext)
   const { userDefaultsData } = useContext(ControlContext)
   const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
