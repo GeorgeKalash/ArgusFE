@@ -15,7 +15,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 import { CommonContext } from 'src/providers/CommonContext'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
@@ -26,6 +25,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
 
   const initialValues = {
     recordId,
+    interfaceId,
     corId: recordId,
     countryId: 0,
     currencyId: 0,
@@ -76,7 +76,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
 
     const countryRes = await getRequest({
       extension: RemittanceBankInterface.Countries.qry,
-      parameters: `_interfaceId=${interfaceId || 0}`
+      parameters: `_interfaceId=${formik.values.interfaceId || 0}`
     })
 
     return countryRes?.list?.filter(country => country.recordId) || []
@@ -85,28 +85,203 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
   const fetchCurrencies = async countryId => {
     const currencyRes = await getRequest({
       extension: RemittanceBankInterface.Currencies.qry,
-      parameters: `_interfaceId=${interfaceId || 0}${countryId ? `&_countryId=${countryId}` : ''}`
+      parameters: `_interfaceId=${formik.values.interfaceId || 0}${countryId ? `&_countryId=${countryId}` : ''}`
     })
 
     return currencyRes?.list?.filter(currency => currency.recordId) || []
   }
 
   const fetchData = async (countryId, currencyId, plantId) => {
-    return await getRequest({
-      extension: RemittanceSettingsRepository.CorDispControl.qry,
-      parameters: `_corId=${recordId}&_countryId=${countryId || 0}&_currencyId=${currencyId || 0}&_plantId=${
-        plantId || 0
-      }`
+    if (formik.values.interfaceId === 2) {
+      return await getRequest({
+        extension: RemittanceSettingsRepository.CorDispControl.qry,
+        parameters: `_corId=${formik.values.corId}&_countryId=${countryId || 0}&_currencyId=${0}&_plantId=${
+          plantId || 0
+        }`
+      })
+    } else {
+      return await getRequest({
+        extension: RemittanceSettingsRepository.CorDispControl.qry,
+        parameters: `_corId=${formik.values.corId}&_countryId=${countryId || 0}&_currencyId=${
+          currencyId || 0
+        }&_plantId=${plantId || 0}`
+      })
+    }
+  }
+
+  const getDefaultCurrency = async (interfaceId, countryId) => {
+    const res = await getRequest({
+      extension: RemittanceBankInterface.Currencies.qry,
+      parameters: `_interfaceId=${interfaceId || 0}&_countryId=${countryId || 0}`
     })
+
+    return res?.list?.[0]
+  }
+
+  const onPreviewInterfaceIsTwo = async () => {
+    const { plantId, countryId, currencyId, plantName, countryName } = formik.values
+    const dispersalModes = await getDispersalMode()
+
+    const resData = (await fetchData(countryId, currencyId, plantId))?.list || []
+
+    const currency = await getDefaultCurrency(formik.values.interfaceId, countryId)
+
+    console.log(currency)
+
+    if (plantId && countryId) {
+      console.log('here plantId && countryId')
+      formik.setFieldValue(
+        'items',
+        dispersalModes.map((mode, index) => {
+          const existingItem = resData.find(item => parseInt(item.dispersalType) == mode.key)
+
+          return {
+            id: index + 1,
+            dispersalTypeName: mode.value,
+            dispersalType: mode.key,
+            corDeliveryModeName: existingItem?.deliveryModeDescription,
+            corDeliveryMode: existingItem?.deliveryMode,
+            isActive: existingItem?.deliveryModeDescription && false,
+            ...formik.values,
+            ...existingItem,
+            currencyId: currency?.recordId || 0,
+            currencyName: currency?.name || ''
+          }
+        })
+      )
+
+      return
+    }
+
+    if (!plantId && !countryId) {
+      console.log('here currencyId && !plantId && !countryId')
+      const plants = await fetchPlants(plantId, plantName)
+      const countries = await fetchCountries(countryId, countryName)
+      if (!plants.length || !countries.length) return
+
+      formik.setFieldValue('items', [
+        ...new Map(
+          plants
+            .flatMap(plant =>
+              countries.flatMap(country =>
+                dispersalModes.map(mode => {
+                  const existingItem = resData.find(
+                    item =>
+                      parseInt(item.dispersalType) == mode.key &&
+                      item.plantId == plant.recordId &&
+                      item.countryId == country.recordId
+                  )
+
+                  return {
+                    id: `${plant.recordId}-${country.recordId}-${mode.key}`,
+                    ...formik.values,
+                    plantId: plant.recordId,
+                    plantName: plant.name,
+                    countryId: country.recordId,
+                    countryName: country.name,
+                    dispersalTypeName: mode.value,
+                    dispersalType: mode.key,
+                    corDeliveryModeName: existingItem?.deliveryModeDescription || null,
+                    corDeliveryMode: existingItem?.deliveryMode || null,
+                    isActive: existingItem?.deliveryModeDescription && false,
+                    ...existingItem,
+                    currencyId: currency?.recordId || 0,
+                    currencyName: currency?.name || ''
+                  }
+                })
+              )
+            )
+            .map(i => [i.id, i])
+        ).values()
+      ])
+
+      return
+    }
+
+    if (countryId && !plantId) {
+      console.log('here countryId && !plantId && !currencyId')
+      const plants = await fetchPlants(plantId, plantName)
+      if (!plants.length) return
+
+      formik.setFieldValue(
+        'items',
+        plants.flatMap(plant =>
+          dispersalModes.map(mode => {
+            const existingItem = resData.find(
+              item => parseInt(item.dispersalType) == mode.key && item.plantId == plant.recordId
+            )
+
+            return {
+              id: `${plant.recordId}-${mode.key}`,
+              ...formik.values,
+              plantId: plant.recordId,
+              plantName: plant.name,
+              dispersalTypeName: mode.value,
+              dispersalType: mode.key,
+              corDeliveryModeName: existingItem?.deliveryModeDescription || null,
+              corDeliveryMode: existingItem?.deliveryMode || null,
+              isActive: existingItem?.deliveryModeDescription && false,
+              ...existingItem,
+              currencyId: currency?.recordId || 0,
+              currencyName: currency?.name || ''
+            }
+          })
+        )
+      )
+
+      return
+    }
+
+    if (plantId && !countryId) {
+      console.log('here plantId && !countryId && !currencyId')
+      const countries = await fetchCountries(countryId, countryName)
+      if (!countries.length) return
+
+      formik.setFieldValue(
+        'items',
+        countries.flatMap(country =>
+          dispersalModes
+            .map(mode => {
+              if (!country.recordId) return null
+
+              const existingItem = resData.find(
+                item => parseInt(item.dispersalType) == mode.key && item.countryId == country.recordId
+              )
+
+              return {
+                id: `${plantId}-${country.recordId}-${mode.key}`,
+                ...formik.values,
+                plantId,
+                plantName,
+                countryId: country.recordId,
+                countryName: country.name,
+                dispersalTypeName: mode.value,
+                dispersalType: mode.key,
+                corDeliveryModeName: existingItem?.deliveryModeDescription || null,
+                corDeliveryMode: existingItem?.deliveryMode || null,
+                isActive: existingItem?.deliveryModeDescription && false,
+                ...existingItem,
+                currencyId: currency?.recordId || 0,
+                currencyName: currency?.name || ''
+              }
+            })
+            .filter(Boolean)
+        )
+      )
+
+      return
+    }
   }
 
   const onPreview = async () => {
     const { plantId, countryId, currencyId, plantName, countryName } = formik.values
     const dispersalModes = await getDispersalMode()
 
+    console.log(formik.values.interfaceId)
     const resData = (await fetchData(countryId, currencyId, plantId))?.list || []
 
     if (plantId && countryId && currencyId) {
+      console.log('here plantId && countryId && currencyId')
       formik.setFieldValue(
         'items',
         dispersalModes.map((mode, index) => {
@@ -129,6 +304,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (currencyId && !plantId && !countryId) {
+      console.log('here currencyId && !plantId && !countryId')
       const plants = await fetchPlants(plantId, plantName)
       const countries = await fetchCountries(countryId, countryName)
       if (!plants.length || !countries.length) return
@@ -172,6 +348,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (countryId && !plantId && !currencyId) {
+      console.log('here countryId && !plantId && !currencyId')
       const plants = await fetchPlants(plantId, plantName)
       if (!plants.length) return
       const currencies = await fetchCurrencies(countryId)
@@ -212,6 +389,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (plantId && !countryId && !currencyId) {
+      console.log('here plantId && !countryId && !currencyId')
       const countries = await fetchCountries(countryId, countryName)
       if (!countries.length) return
 
@@ -273,9 +451,11 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (plantId && countryId && !currencyId) {
+      console.log('here plantId && countryId && !currencyId')
+
       const currencyRes = await getRequest({
         extension: RemittanceBankInterface.Currencies.qry,
-        parameters: `_interfaceId=${interfaceId || 0}&_countryId=${countryId}`
+        parameters: `_interfaceId=${formik.values.interfaceId || 0}&_countryId=${countryId}`
       })
 
       const currencies = currencyRes?.list || []
@@ -315,6 +495,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (plantId && !countryId && currencyId) {
+      console.log('plantId && !countryId && currencyId')
       const countries = (await fetchCountries(countryId, countryName)).filter(country => country.recordId)
       if (!countries.length) return
 
@@ -351,6 +532,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (!plantId && countryId && currencyId) {
+      console.log('!plantId && countryId && currencyId')
       const plants = await fetchPlants(plantId, plantName)
       if (!plants.length) return
 
@@ -382,6 +564,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (!plantId && !countryId && !currencyId) {
+      console.log('!plantId && !countryId && !currencyId')
       const plants = await fetchPlants(plantId, plantName)
       const countries = await fetchCountries(countryId, countryName)
 
@@ -463,7 +646,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
       ],
       props: {
         endpointId: RemittanceBankInterface.DeliveryMode.qry,
-        parameters: `_interfaceId=${interfaceId}&_corId=${recordId}`,
+        parameters: `_interfaceId=${formik.values.interfaceId}&_corId=${formik.values.corId}`,
         displayField: 'deliveryModeDescription',
         valueField: 'deliveryMode',
         mapping: [
@@ -510,6 +693,8 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
 
   const editMode = !!formik.values.recordId
 
+  console.log(formik.values)
+
   return (
     <FormShell
       resourceId={ResourceIds.CorrespondentDispersalControl}
@@ -524,7 +709,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
             <Grid item xs={2.75}>
               <ResourceComboBox
                 endpointId={RemittanceBankInterface.Countries.qry}
-                parameters={`_interfaceId=${interfaceId || 0}`}
+                parameters={`_interfaceId=${formik.values.interfaceId || 0}`}
                 name='countryId'
                 label={labels.country}
                 valueField='recordId'
@@ -535,35 +720,45 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
                 ]}
                 values={formik.values}
                 displayFieldWidth={1.75}
-                onChange={(event, newValue) => {
+                onChange={async (event, newValue) => {
                   formik.setFieldValue('countryId', newValue?.recordId || 0)
                   formik.setFieldValue('countryName', newValue?.name || '')
+                  if (formik.values.interfaceId === 2) {
+                    getDefaultCurrency(formik.values.interfaceId, newValue?.recordId).then(res => {
+                      formik.setFieldValue('currencyId', res?.recordId || 0)
+                      formik.setFieldValue('currencyName', res?.name || '')
+                    })
+                  }
                 }}
                 error={formik.touched.countryId && Boolean(formik.errors.countryId)}
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={2.75}>
-              <ResourceComboBox
-                endpointId={RemittanceBankInterface.Currencies.qry}
-                parameters={`_interfaceId=${interfaceId || 0}&_countryId=${formik.values.countryId || 0}`}
-                name='currencyId'
-                label={labels.currency}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId || 0)
-                  formik.setFieldValue('currencyName', newValue?.name || '')
-                }}
-                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-              />
-            </Grid>
+            {formik.values.interfaceId !== 2 && (
+              <Grid item xs={2.75}>
+                <ResourceComboBox
+                  endpointId={RemittanceBankInterface.Currencies.qry}
+                  parameters={`_interfaceId=${formik.values.interfaceId || 0}&_countryId=${
+                    formik.values.countryId || 0
+                  }`}
+                  name='currencyId'
+                  label={labels.currency}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('currencyId', newValue?.recordId || 0)
+                    formik.setFieldValue('currencyName', newValue?.name || '')
+                  }}
+                  error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                />
+              </Grid>
+            )}
             <Grid item xs={2.75}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
@@ -585,10 +780,33 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
               />
             </Grid>
             <Grid item xs={2.75}>
-              <CustomTextField name='corName' label={labels.corName} value={corName} readOnly maxAccess={maxAccess} />
+              <ResourceComboBox
+                endpointId={RemittanceSettingsRepository.Correspondent.qry2}
+                name='corId'
+                label={labels.corName}
+                valueField='recordId'
+                displayField={'name'}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('corId', newValue?.recordId || '')
+                  formik.setFieldValue('interfaceId', newValue?.interfaceId || '')
+                  formik.setFieldValue('corName', newValue.name || '')
+                  formik.setFieldValue('corRef', newValue.reference || '')
+                }}
+                error={formik.touched.corId && Boolean(formik.errors.corId)}
+              />
             </Grid>
+            {/* <Grid item xs={2.75}>
+              <CustomTextField name='corName' label={labels.corName} value={corName} readOnly maxAccess={maxAccess} />
+            </Grid> */}
             <Grid item xs={1}>
-              <CustomButton onClick={onPreview} image='preview.png' label={platformLabels.Preview} color='#231f20' />
+              <CustomButton
+                onClick={formik.values.interfaceId === 2 ? onPreviewInterfaceIsTwo : onPreview}
+                image='preview.png'
+                label={platformLabels.Preview}
+                color='#231f20'
+              />
             </Grid>
           </Grid>
         </Fixed>
