@@ -258,7 +258,7 @@ const OpenPurchaseOrder = () => {
     <VertLayout>
       <Fixed>
         <Grid container spacing={2} padding={2}>
-          <Grid item xs={3}>
+          <Grid item xs={4}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <ResourceComboBox
@@ -315,7 +315,7 @@ const OpenPurchaseOrder = () => {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={4}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <ResourceLookup
@@ -387,7 +387,7 @@ const OpenPurchaseOrder = () => {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={4}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <ResourceLookup
@@ -412,7 +412,7 @@ const OpenPurchaseOrder = () => {
                   maxAccess={access}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={10}>
                 <ResourceLookup
                   endpointId={PurchaseRepository.UnpostedOrderPack.snapshot}
                   valueField='reference'
@@ -437,17 +437,7 @@ const OpenPurchaseOrder = () => {
                   errorCheck={'poId'}
                 />
               </Grid>
-            </Grid>
-          </Grid>
-
-          <Grid item xs={3}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}></Grid>
-              <Grid item xs={12}></Grid>
-              <Grid item xs={12}></Grid>
-              <Grid item xs={12}></Grid>
-              <Grid item xs={12}></Grid>
-              <Grid item xs={12}>
+              <Grid item xs={2}>
                 <CustomButton
                   variant='contained'
                   image={'preview.png'}
