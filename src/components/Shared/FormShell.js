@@ -103,7 +103,7 @@ export default function FormShell({
         return () => clearTimeout(timer)
       }
     }
-  }, [loading, editMode])
+  }, [loading, editMode, maxAccess])
 
   actions?.filter(Boolean)?.forEach(action => {
     if (typeof action?.onClick !== 'function') {
