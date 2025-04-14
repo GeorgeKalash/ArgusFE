@@ -126,10 +126,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
 
     const currency = await getDefaultCurrency(formik.values.interfaceId, countryId)
 
-    console.log(currency)
-
     if (plantId && countryId) {
-      console.log('here plantId && countryId')
       formik.setFieldValue(
         'items',
         dispersalModes.map((mode, index) => {
@@ -154,7 +151,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (!plantId && !countryId) {
-      console.log('here currencyId && !plantId && !countryId')
       const plants = await fetchPlants(plantId, plantName)
       const countries = await fetchCountries(countryId, countryName)
       if (!plants.length || !countries.length) return
@@ -199,7 +195,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (countryId && !plantId) {
-      console.log('here countryId && !plantId && !currencyId')
       const plants = await fetchPlants(plantId, plantName)
       if (!plants.length) return
 
@@ -233,7 +228,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (plantId && !countryId) {
-      console.log('here plantId && !countryId && !currencyId')
       const countries = await fetchCountries(countryId, countryName)
       if (!countries.length) return
 
@@ -277,11 +271,9 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     const { plantId, countryId, currencyId, plantName, countryName } = formik.values
     const dispersalModes = await getDispersalMode()
 
-    console.log(formik.values.interfaceId)
     const resData = (await fetchData(countryId, currencyId, plantId))?.list || []
 
     if (plantId && countryId && currencyId) {
-      console.log('here plantId && countryId && currencyId')
       formik.setFieldValue(
         'items',
         dispersalModes.map((mode, index) => {
@@ -304,7 +296,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (currencyId && !plantId && !countryId) {
-      console.log('here currencyId && !plantId && !countryId')
       const plants = await fetchPlants(plantId, plantName)
       const countries = await fetchCountries(countryId, countryName)
       if (!plants.length || !countries.length) return
@@ -348,7 +339,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (countryId && !plantId && !currencyId) {
-      console.log('here countryId && !plantId && !currencyId')
       const plants = await fetchPlants(plantId, plantName)
       if (!plants.length) return
       const currencies = await fetchCurrencies(countryId)
@@ -389,7 +379,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (plantId && !countryId && !currencyId) {
-      console.log('here plantId && !countryId && !currencyId')
       const countries = await fetchCountries(countryId, countryName)
       if (!countries.length) return
 
@@ -451,7 +440,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (plantId && countryId && !currencyId) {
-      console.log('here plantId && countryId && !currencyId')
 
       const currencyRes = await getRequest({
         extension: RemittanceBankInterface.Currencies.qry,
@@ -495,7 +483,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (plantId && !countryId && currencyId) {
-      console.log('plantId && !countryId && currencyId')
       const countries = (await fetchCountries(countryId, countryName)).filter(country => country.recordId)
       if (!countries.length) return
 
@@ -532,7 +519,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (!plantId && countryId && currencyId) {
-      console.log('!plantId && countryId && currencyId')
       const plants = await fetchPlants(plantId, plantName)
       if (!plants.length) return
 
@@ -564,7 +550,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (!plantId && !countryId && !currencyId) {
-      console.log('!plantId && !countryId && !currencyId')
       const plants = await fetchPlants(plantId, plantName)
       const countries = await fetchCountries(countryId, countryName)
 
@@ -692,8 +677,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
   ]
 
   const editMode = !!formik.values.recordId
-
-  console.log(formik.values)
 
   return (
     <FormShell
