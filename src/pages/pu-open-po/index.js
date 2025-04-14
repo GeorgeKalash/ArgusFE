@@ -78,36 +78,36 @@ const OpenPurchaseOrder = () => {
         return
       }
 
-      postRequest({
+      const res = await postRequest({
         extension: PurchaseRepository.Shipment.gen,
         record: JSON.stringify({ vendorId, siteId, dtId, plantId: plantId === 0 ? null : plantId, items: itemValues })
-      }).then(res => {
-        if (res.recordId) {
-          const items = obj.items.map(({ isChecked, ...item }) => ({
-            ...item,
-            isChecked: false,
-            receiveNow: 0
-          }))
-
-          formik.setFieldValue('items', items)
-
-          stack({
-            Component: ShipmentsForm,
-            props: {
-              labels: _labels,
-              recordId: res.recordId,
-              maxAccess,
-              plantId,
-              dtId
-            },
-            width: 1300,
-            height: 700,
-            title: _labels.shipment
-          })
-
-          toast.success(platformLabels.Generated)
-        }
       })
+
+      if (res.recordId) {
+        const items = obj.items.map(({ isChecked, ...item }) => ({
+          ...item,
+          isChecked: false,
+          receiveNow: 0
+        }))
+
+        formik.setFieldValue('items', items)
+
+        stack({
+          Component: ShipmentsForm,
+          props: {
+            labels: _labels,
+            recordId: res.recordId,
+            maxAccess,
+            plantId,
+            dtId
+          },
+          width: 1300,
+          height: 700,
+          title: _labels.shipment
+        })
+
+        toast.success(platformLabels.Generated)
+      }
     }
   })
 
@@ -357,6 +357,7 @@ const OpenPurchaseOrder = () => {
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
+                  required
                   values={formik.values}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('siteId', newValue?.recordId || 0)
