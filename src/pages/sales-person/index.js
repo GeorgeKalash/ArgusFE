@@ -123,6 +123,7 @@ const SalesPerson = () => {
           }}
           labels={_labels}
           inputSearch={true}
+          previewReport={ResourceIds.SalesPerson}
         />
       </Fixed>
       <Grow>

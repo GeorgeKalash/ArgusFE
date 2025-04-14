@@ -259,7 +259,8 @@ export const SaleRepository = {
   },
   LastSerialInvoice: {
     get: service + 'lastSRL',
-    qry: service + 'importSRL'
+    import: service + 'importSRL',
+    qry: service + 'qrySRL'
   },
   InvoiceReturnBalance: {
     balance: service + 'balanceRET'

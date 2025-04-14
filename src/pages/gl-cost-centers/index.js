@@ -111,7 +111,13 @@ const CostCenter = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'GLCC'} filterBy={filterBy} />
+        <RPBGridToolbar
+          onAdd={add}
+          maxAccess={access}
+          reportName={'GLCC'}
+          filterBy={filterBy}
+          previewReport={ResourceIds.CostCenter}
+        />
       </Fixed>
       <Grow>
         <Table

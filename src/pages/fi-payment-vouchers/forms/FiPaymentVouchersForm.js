@@ -1,5 +1,5 @@
 import { Button, Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -30,10 +30,9 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import { RateDivision } from 'src/resources/RateDivision'
 
-export default function FiPaymentVouchersForm({ labels, maxAccess: access, recordId, plantId }) {
+export default function FiPaymentVouchersForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
-  const [defaultsDataState, setDefaultsDataState] = useState(null)
   const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -46,7 +45,8 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     endpointId: FinancialRepository.PaymentVouchers.page
   })
 
-  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
 
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId },
@@ -55,7 +55,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       reference: '',
       accountId: '',
       accountType: '',
-      currencyId: null,
+      currencyId: parseInt(currencyId),
       currencyName: '',
       paymentMethod: null,
       date: new Date(),
@@ -68,7 +68,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       exRate: 1,
       rateCalcMethod: 1,
       baseAmount: null,
-      cashAccountId,
+      cashAccountId: null,
       dtId: null,
       status: 1,
       releaseStatus: null,
@@ -129,19 +129,19 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     }
   })
 
-  const getCashAccount = async cashAccountId => {
+  const getCashAccountAndPayment = async cashAccountId => {
     if (cashAccountId) {
       const { record: cashAccountResult } = await getRequest({
         extension: CashBankRepository.CbBankAccounts.get,
         parameters: `_recordId=${cashAccountId}`
       })
 
-      
       formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
       formik.setFieldValue('cashAccountName', cashAccountResult.name)
-      formik.setFieldValue('paymentMethod', 1)
+
+      return cashAccountResult.paymentMethod
     } else {
-      formik.setFieldValue('paymentMethod', null)
+      return null
     }
   }
 
@@ -239,20 +239,16 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
         parameters: `_dtId=${dtId}`
       })
 
-      const cashAccountValue = res?.record?.cashAccountId ? res?.record?.cashAccountId : cashAccountId
-
-      formik.setFieldValue('cashAccountId', cashAccountValue)
-      getCashAccount(cashAccountValue)
-
-      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
-
-      return res
+      formik.setFieldValue('cashAccountId', res?.record?.cashAccountId)
+      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+      const payment = await getCashAccountAndPayment(res?.record?.cashAccountId)
+      formik.setFieldValue('paymentMethod', res?.record?.paymentMethod || payment)
     }
   }
 
   useEffect(() => {
-    getDTD(formik?.values?.dtId)
-  }, [formik.values.dtId])
+    if (formik.values?.dtId && !recordId) getDTD(formik.values?.dtId)
+  }, [formik.values?.dtId])
 
   useEffect(() => {
     ;(async function () {
@@ -266,13 +262,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
           ...res.record,
           date: formatDateFromApi(res.record.date)
         })
-      } else {
-        const cashAccountId = formik.values.cashAccountId
-        if (cashAccountId) {
-          getCashAccount(cashAccountId)
-        }
       }
-      getDefaultsData()
     })()
   }, [])
 
@@ -354,23 +344,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       disabled: !editMode
     }
   ]
-
-  async function getDefaultsData() {
-    const myObject = {}
-
-    const filteredList = defaultsData?.list?.filter(obj => {
-      return obj.key === 'currencyId'
-    })
-
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setDefaultsDataState(myObject)
-
-    return myObject
-  }
-
-  useEffect(() => {
-    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
-  }, [defaultsDataState])
 
   return (
     <FormShell
@@ -511,7 +484,13 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 valueShow='accountRef'
                 secondValueShow='accountName'
                 form={formik}
-                filter={{ type: formik.values.accountType }}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Account Ref' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'keywords', value: 'Keywords' }
+                ]}
+                displayFieldWidth={2}
+                filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
                   formik.setFieldValue('accountRef', newValue?.reference || '')
@@ -581,7 +560,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                     variant='contained'
                     size='small'
                     onClick={() => openMCRForm(formik.values)}
-                    disabled={!formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId}
+                    disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
                   >
                     <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                   </Button>
