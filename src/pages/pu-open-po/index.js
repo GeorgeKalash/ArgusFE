@@ -56,8 +56,7 @@ const OpenPurchaseOrder = () => {
       itemId: 0,
       poId: 0,
       items: [],
-      marginDefault: defaultVat?.value,
-      notes: ''
+      marginDefault: defaultVat?.value
     },
     validationSchema: yup.object({
       vendorId: yup.number().required(),
