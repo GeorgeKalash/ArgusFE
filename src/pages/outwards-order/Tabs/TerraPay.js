@@ -50,7 +50,7 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
             message: `Please assign iso code1 to ${res.record.name}`
           })
 
-        formik.setFieldValue('quotation.creditorReceivingCountry', res?.record?.isoCode1)
+        formik.setFieldValue('quotation.creditorReceivingCountry', res?.record?.isoCode1.trim())
       }
 
       if (outwardsData.currencyId) {
