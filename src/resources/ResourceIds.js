@@ -396,4 +396,5 @@ export const ResourceIds = {
   YearlyComparativeSales: 51550,
   SManagement: 41213,
   OpenPOs: 50312,
+  NotificationLabels: 23106
 }

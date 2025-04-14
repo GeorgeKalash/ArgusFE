@@ -32,8 +32,8 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
     initialValues: {
       itemId: recordId,
       recordId,
-      itemName: name,
-      sku,
+      itemName: '',
+      sku: '',
       min: null,
       purchaseRequestFactor: '',
       amcShortTerm: '',
@@ -94,8 +94,7 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
         .required()
     }),
     onSubmit: async obj => {
-      const copy = { ...obj }
-      delete copy.items
+      const { items, itemName, sku, ...copy } = obj;
 
       const updatedRows = formik?.values?.items.map((itemDetail, index) => {
         return {
@@ -137,6 +136,11 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
       formik.setValues({
         ...res.record,
         recordId: res?.record?.itemId,
+        sku: res?.record?.sku ?? sku,
+        itemId: res?.record?.itemId ?? recordId,
+        manageByWH: res?.record?.manageByWH ?? false,
+        required: res?.record?.required ?? 0.0,
+        itemName: res?.record?.itemName ?? name,
         min: res?.record?.min ?? null,
         max: res?.record?.max ?? null,
         items: res2?.list?.map((item, index) => ({
