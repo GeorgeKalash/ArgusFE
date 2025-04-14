@@ -91,7 +91,6 @@ export const InventoryRepository = {
     get: service + 'getITC',
     set: service + 'setITC'
   },
-
   MeasurementUnit: {
     qry: service + 'qryMU',
     get: service + 'getMU',
@@ -309,5 +308,9 @@ export const InventoryRepository = {
   },
   Replacement: {
     qry: service + 'qryRPL'
+  },
+  Lot: {
+    get: service + 'getLOT',
+    set: service + 'setLOT'
   }
 }

@@ -1,13 +1,11 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -15,52 +13,102 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
-export default function LotForm({ labels, maxAccess, recordId }) {
+export default function LotForm({ labels, maxAccess, form }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  const invalidate = useInvalidate({
-    endpointId: BusinessPartnerRepository.LegalStatus.page
-  })
+  const [validationSchema, setValidationSchema] = useState(() => yup.object({}))
+  const [dynamicLabels, setDynamicLabels] = useState({})
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId: form?.recordId,
+      lotId: 0,
       reference: '',
-      name: ''
+      name: '',
+      itemId: form?.itemId,
+      LSku: form?.sku,
+      LItem: form?.itemName,
+      LlotCategory: form?.lotCategoryName,
+      udd1: null,
+      udd2: null,
+      udt1: null,
+      udt2: null,
+      udn1: null,
+      udn2: null
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
-      udd1: yup.string().required(),
-      udd2: yup.string().required()
-    }),
+    validationSchema,
     onSubmit: async obj => {
-      //   const response = await postRequest({
-      //     extension: BusinessPartnerRepository.LegalStatus.set,
-      //     record: JSON.stringify(obj)
-      //   })
-      //   if (!obj.recordId) {
-      //     toast.success(platformLabels.Added)
-      //     formik.setFieldValue('recordId', response.recordId)
-      //   } else toast.success(platformLabels.Edited)
-      //   invalidate()
+      const res = await postRequest({
+        extension: InventoryRepository.Lot.set,
+        record: JSON.stringify(obj)
+      })
+
+      const { record: lotInfo } = await getRequest({
+        extension: InventoryRepository.Lot.get,
+        parameters: `_itemId=${form?.itemId}$_lotId=${res?.recordId}`
+      })
+
+      await postRequest({
+        extension: ManufacturingRepository.AssemblyLot.set,
+        record: JSON.stringify({ assemblyId: form.recordId, itemId: lotInfo.itemId, lotId: lotInfo.lotId })
+      })
+
+      toast.success(obj.lotId ? platformLabels.Edited : platformLabels.Added)
+      formik.setFieldValue('lotId', lotInfo?.lotId)
+      formik.setFieldValue('reference', lotInfo?.reference)
     }
   })
-
-  const editMode = !!recordId
-
+  const editMode = !!form.recordId
   useEffect(() => {
     ;(async function () {
-      //   if (recordId) {
-      //     const res = await getRequest({
-      //       extension: BusinessPartnerRepository.LegalStatus.get,
-      //       parameters: `_recordId=${recordId}`
-      //     })
-      //     formik.setValues(res.record)
-      //   }
+      if (!form.lotCategoryId) return
+
+      const { record: lotCategory } = await getRequest({
+        extension: InventoryRepository.LotCategory.get,
+        parameters: `_recordId=${form.lotCategoryId}`
+      })
+
+      setDynamicLabels({
+        udd1: lotCategory?.udd1 || 'N/A',
+        udd2: lotCategory?.udd2 || 'N/A',
+        udt1: lotCategory?.udt1 || 'N/A',
+        udt2: lotCategory?.udt2 || 'N/A',
+        udn1: lotCategory?.udn1 || 'N/A',
+        udn2: lotCategory?.udn2 || 'N/A'
+      })
+
+      const dynamicSchema = yup.object({
+        udd1: lotCategory?.udd1 ? yup.string().required('udd1 is required') : yup.string().nullable(),
+        udd2: lotCategory?.udd2 ? yup.string().required('udd2 is required') : yup.string().nullable(),
+        udt1: lotCategory?.udt1 ? yup.string().required('udt1 is required') : yup.string().nullable(),
+        udt2: lotCategory?.udt2 ? yup.string().required('udt2 is required') : yup.string().nullable(),
+        udn1: lotCategory?.udn1 ? yup.string().required('udn1 is required') : yup.string().nullable(),
+        udn2: lotCategory?.udn2 ? yup.string().required('udn2 is required') : yup.string().nullable()
+      })
+
+      setValidationSchema(dynamicSchema)
+
+      const { record: assemblyLot } = await getRequest({
+        extension: ManufacturingRepository.AssemblyLot.get,
+        parameters: `_assemblyId=${form.recordId}`
+      })
+
+      if (assemblyLot) {
+        const { record: lotInfo } = await getRequest({
+          extension: InventoryRepository.Lot.get,
+          parameters: `_itemId=${assemblyLot.itemId}$_lotId=${assemblyLot.lotId}`
+        })
+
+        formik.setValues({
+          ...formik.values,
+          ...(lotInfo || {})
+        })
+      }
     })()
   }, [])
 
@@ -84,6 +132,7 @@ export default function LotForm({ labels, maxAccess, recordId }) {
                 value={formik?.values?.LlotCategory}
                 maxAccess={maxAccess}
                 readOnly
+                onChange={formik.handleChange}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
@@ -103,9 +152,9 @@ export default function LotForm({ labels, maxAccess, recordId }) {
                 name='itemId'
                 label={labels?.sku}
                 valueField='recordId'
-                displayField='sku'
-                valueShow='sku'
-                secondValueShow='itemName'
+                displayField='LSku'
+                valueShow='LSku'
+                secondValueShow='LItem'
                 displayFieldWidth={2}
                 form={formik}
                 readOnly
@@ -117,11 +166,12 @@ export default function LotForm({ labels, maxAccess, recordId }) {
               <CustomDatePicker
                 name='udd1'
                 required
-                label={labels.startDate}
+                label={dynamicLabels.udd1}
                 value={formik?.values?.udd1}
                 onChange={formik.setFieldValue}
                 editMode={editMode}
                 maxAccess={maxAccess}
+                readOnly={dynamicLabels.udd1 == 'N/A'}
                 onClear={() => formik.setFieldValue('udd1', null)}
                 error={formik.touched.udd1 && Boolean(formik.errors.udd1)}
               />
@@ -130,8 +180,8 @@ export default function LotForm({ labels, maxAccess, recordId }) {
               <CustomDatePicker
                 name='udd2'
                 required
-                readOnly
-                label={labels.endDate}
+                readOnly={dynamicLabels.udd2 == 'N/A'}
+                label={dynamicLabels.udd2}
                 value={formik?.values?.udd2}
                 onChange={formik.setFieldValue}
                 editMode={editMode}
@@ -143,9 +193,9 @@ export default function LotForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <CustomTextField
                 name='udt1'
-                label={labels.notKnown}
+                label={dynamicLabels.udt1}
                 value={formik?.values?.udt1}
-                readOnly
+                readOnly={dynamicLabels.udt1 == 'N/A'}
                 maxAccess={maxAccess}
                 error={formik.touched.udt1 && Boolean(formik.errors.udt1)}
               />
@@ -153,29 +203,29 @@ export default function LotForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <CustomTextField
                 name='udt2'
-                label={labels.notKnown}
+                label={dynamicLabels.udt2}
                 value={formik?.values?.udt2}
                 maxAccess={maxAccess}
-                readOnly
+                readOnly={dynamicLabels.udt2 == 'N/A'}
                 error={formik.touched.udt2 && Boolean(formik.errors.udt2)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='udn1'
-                label={labels.notKnown}
+                label={dynamicLabels.udn1}
                 value={formik?.values?.udn1}
                 maxAccess={maxAccess}
-                readOnly
+                readOnly={dynamicLabels.udn1 == 'N/A'}
                 error={formik.touched.udn1 && Boolean(formik.errors.udn1)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='udn2'
-                label={labels.notKnown}
+                label={dynamicLabels.udn2}
                 value={formik?.values?.udn2}
-                readOnly
+                readOnly={dynamicLabels.udn2 == 'N/A'}
                 maxAccess={maxAccess}
                 error={formik.touched.udn2 && Boolean(formik.errors.udn2)}
               />

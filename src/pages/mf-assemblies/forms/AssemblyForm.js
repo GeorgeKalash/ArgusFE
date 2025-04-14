@@ -65,7 +65,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       notes: '',
       dtId: null,
       reference: null,
-      status: null,
+      status: 1,
       releaseStatus: null,
       date: new Date(),
       plantId: null,
@@ -170,10 +170,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
         extension: InventoryRepository.Replacement.qry,
         parameters: `_itemId=${currentItemId.current}`
       }),
-      getRequest({
-        extension: InventoryRepository.Item.get,
-        parameters: `_recordId=${currentItemId.current}`
-      })
+      getItem(currentItemId.current)
     ])
     listRV.push({
       sku: itemRes?.record?.sku,
@@ -359,6 +356,17 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     return res?.record?.currentCost || 0
   }
 
+  async function getItem(itemId) {
+    if (!itemId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Item.get,
+      parameters: `_recordId=${itemId}`
+    })
+
+    return res
+  }
+
   async function getSiteInfo() {
     if (!formik.values.siteId) return
 
@@ -413,8 +421,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       diffQty: 0,
       baseQty: item.baseQty * (formik.values.qty || 0),
       siteId: item.siteId || formik.values.siteId,
-      siteRef: item.siteId ? item.siteRef : site.reference,
-      siteName: item.siteId ? item.siteName : site.name
+      siteRef: item.siteId ? item.siteRef : site?.reference,
+      siteName: item.siteId ? item.siteName : site?.name
     }))
 
     formik.setFieldValue('items', itemsList)
@@ -433,6 +441,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
   async function refetchForm(recordId) {
     const header = await getHeaderData(recordId)
     const items = await getItemsData(recordId)
+
     setStore(prevStore => ({
       ...prevStore,
       recordId: header.record.recordId
@@ -517,7 +526,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
           props: {
             labels,
             access,
-            recordId
+            form: formik.values
           },
           width: 700,
           height: 550,
@@ -746,7 +755,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     }}
                     image={'preview.png'}
                     tooltipText={platformLabels.Preview}
-                    disabled={isPosted || (!formik.values.bomId && !formik.values.siteId && !formik.values.qty)}
+                    disabled={isPosted || !formik.values.bomId || !formik.values.siteId || !formik.values.qty}
                   />
                 </Grid>
                 <Grid item xs={12}>

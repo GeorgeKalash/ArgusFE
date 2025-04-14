@@ -269,5 +269,13 @@ export const ManufacturingRepository = {
   },
   AssemblyItems: {
     qry: service + 'qryASC'
+  },
+  AssemblyLot: {
+    get: service + 'getASL',
+    set: service + 'setASL'
+  },
+  AssemblyOverhead: {
+    qry: service + 'qryAOH',
+    set2: service + 'set2AOH'
   }
 }
