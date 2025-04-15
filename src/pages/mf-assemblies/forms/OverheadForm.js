@@ -200,13 +200,14 @@ export default function OverheadForm({ labels, maxAccess, store }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.MFJobOrders}
+      resourceId={ResourceIds.Assemblies}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
       isInfo={false}
       isSavedClear={false}
-      disabledSubmit={store?.isCancelled || store?.isPosted}
+      isCleared={false}
+      disabledSubmit={store?.isPosted}
     >
       <VertLayout>
         <Grow>
@@ -217,7 +218,8 @@ export default function OverheadForm({ labels, maxAccess, store }) {
             columns={columns}
             name='items'
             maxAccess={maxAccess}
-            allowDelete={!store?.isPosted && !store?.isCancelled}
+            disabled={store?.isPosted}
+            allowDelete={!store?.isPosted}
           />
         </Grow>
         <Fixed>

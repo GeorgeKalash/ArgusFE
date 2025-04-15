@@ -87,6 +87,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     validationSchema: yup.object({
       date: yup.date().required(),
       dtId: yup.string().required(),
+      siteId: yup.string().required(),
+      qty: yup.number().required(),
       items: yup
         .array()
         .of(
@@ -101,7 +103,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
         )
         .required()
     }),
-    onSubmit: async values => {
+    onSubmit: async () => {
       const updatedRows = formik?.values?.items.map((itemDetails, index) => {
         return {
           ...itemDetails,
@@ -158,6 +160,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
   }, 0)
 
   const totalRawMaterial = designQuantity + diffQuantity
+  const disablePreview = !formik.values.bomId || !formik.values.siteId || !formik.values.qty
 
   const fetchLookup = async searchQry => {
     if (!searchQry) return
@@ -170,7 +173,10 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
         extension: InventoryRepository.Replacement.qry,
         parameters: `_itemId=${currentItemId.current}`
       }),
-      getItem(currentItemId.current)
+      await getRequest({
+        extension: InventoryRepository.Item.get,
+        parameters: `_recordId=${currentItemId.current}`
+      })
     ])
     listRV.push({
       sku: itemRes?.record?.sku,
@@ -198,7 +204,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       name: 'sku',
       props: {
         onLookup: fetchLookup,
-        valueField: 'recordId',
+        valueField: 'sku',
         displayField: 'sku',
         displayFieldWidth: 3,
         mapping: [
@@ -356,17 +362,6 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     return res?.record?.currentCost || 0
   }
 
-  async function getItem(itemId) {
-    if (!itemId) return
-
-    const res = await getRequest({
-      extension: InventoryRepository.Item.get,
-      parameters: `_recordId=${itemId}`
-    })
-
-    return res
-  }
-
   async function getSiteInfo() {
     if (!formik.values.siteId) return
 
@@ -404,6 +399,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       parameters: `_assemblyId=${recordId}`
     })
   }
+
   async function getBillItem() {
     const res = await getRequest({
       extension: ManufacturingRepository.Component.qry,
@@ -427,6 +423,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
 
     formik.setFieldValue('items', itemsList)
   }
+
   async function fillItem(bomId) {
     if (!bomId) return
 
@@ -444,8 +441,10 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
 
     setStore(prevStore => ({
       ...prevStore,
-      recordId: header.record.recordId
+      recordId: header?.record.recordId,
+      isPosted: header?.record.status == 3
     }))
+
     formik.setValues({
       ...header.record,
       items:
@@ -631,7 +630,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     name='machineId'
                     label={labels.machine}
                     form={formik}
-                    readOnly={isPosted}
+                    readOnly={editMode}
                     displayFieldWidth={2}
                     valueShow='machineRef'
                     secondValueShow='machineName'
@@ -713,6 +712,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     values={formik.values}
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
+                    required
                     readOnly={isPosted}
                     columnsInDropDown={[
                       { key: 'reference', value: 'reference' },
@@ -730,7 +730,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     label={labels.totalCost}
                     value={rawMaterialCost}
                     maxAccess={maxAccess}
-                    readOnly={isPosted}
+                    readOnly
                     onClear={() => formik.setFieldValue('rmCost', 0)}
                     error={formik.touched.rmCost && Boolean(formik.errors.rmCost)}
                   />
@@ -755,14 +755,14 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     }}
                     image={'preview.png'}
                     tooltipText={platformLabels.Preview}
-                    disabled={isPosted || !formik.values.bomId || !formik.values.siteId || !formik.values.qty}
+                    disabled={isPosted || disablePreview}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='avgUnitCost'
                     label={labels.unitCost}
-                    readOnly={isPosted}
+                    readOnly
                     value={avgUnitCost}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('avgUnitCost', 0)}
@@ -777,7 +777,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                   <CustomNumberField
                     name='designQty'
                     label={labels.designQty}
-                    readOnly={isPosted}
+                    readOnly
                     onChange={formik.handleChange}
                     value={designQuantity}
                     maxAccess={maxAccess}
@@ -823,7 +823,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                   <CustomNumberField
                     name='batchSize'
                     label={labels.batchSize}
-                    readOnly={isPosted}
+                    readOnly={editMode}
                     value={formik?.values?.batchSize}
                     maxAccess={maxAccess}
                     onChange={e => {
@@ -840,7 +840,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                   <CustomNumberField
                     name='batches'
                     label={labels.batches}
-                    readOnly={isPosted}
+                    readOnly={editMode}
                     value={formik?.values?.batches}
                     maxAccess={maxAccess}
                     onChange={e => {
@@ -860,7 +860,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
 
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('items', value)}
+            onChange={value => formik.setFieldValue('items', disablePreview ? [] : value)}
             value={formik.values.items}
             error={formik.errors.items}
             columns={columns}
