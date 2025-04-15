@@ -791,9 +791,10 @@ export default function DraftTransfer({ labels, access, recordId }) {
             columns={serialsColumns}
             name='serials'
             maxAccess={maxAccess}
-            disabled={isPosted || !formik.values.fromSiteId || !formik.values.toSiteId || !fomrik.values.dtId}
+            disabled={isPosted}
             allowDelete={!isPosted}
             autoDelete={autoDelete}
+            form={formik}
           />
           <Grid container spacing={16}>
             <Grid item xs={8}>

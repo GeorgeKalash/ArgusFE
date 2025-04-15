@@ -1209,12 +1209,11 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             columns={serialsColumns}
             name='serials'
             maxAccess={maxAccess}
-            disabled={
-              isClosed || !formik.values.clientId || !formik.values.dtId || !formik.values.spId || !formik.values.siteId
-            }
+            disabled={isClosed}
             allowDelete={!isClosed}
             allowAddNewLine={!formik?.values?.search}
             autoDelete={autoDelete}
+            form={formik}
           />
         </Grow>
         <Grid container spacing={3}>

@@ -418,7 +418,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 ))
             }
 
-            addRow(lineObj)
+            await addRow(lineObj)
 
             const successSave = formik?.values?.recordId
               ? await autoSave(formik?.values?.recordId, lineObj.changes)
@@ -1072,12 +1072,11 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
             columns={serialsColumns}
             name='serials'
             maxAccess={maxAccess}
-            disabled={
-              isClosed || !formik.values.clientId || !formik.values.dtId || !formik.values.spId || !formik.values.siteId
-            }
+            disabled={isClosed}
             allowDelete={!isClosed}
             allowAddNewLine={!formik?.values?.search}
             autoDelete={autoDelete}
+            form={formik}
           />
         </Grow>
         <Grid container spacing={3}>
