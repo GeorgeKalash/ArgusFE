@@ -95,7 +95,7 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     if (formik.values.interfaceId === 2) {
       return await getRequest({
         extension: RemittanceSettingsRepository.CorDispControl.qry,
-        parameters: `_corId=${formik.values.corId}&_countryId=${countryId || 0}&_currencyId=${0}&_plantId=${
+        parameters: `_corId=${formik.values.corId}&_countryId=${countryId || 0}&_currencyId=${formik.values.currencyId || 0}&_plantId=${
           plantId || 0
         }`
       })
@@ -780,9 +780,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
                 error={formik.touched.corId && Boolean(formik.errors.corId)}
               />
             </Grid>
-            {/* <Grid item xs={2.75}>
-              <CustomTextField name='corName' label={labels.corName} value={corName} readOnly maxAccess={maxAccess} />
-            </Grid> */}
             <Grid item xs={1}>
               <CustomButton
                 onClick={formik.values.interfaceId === 2 ? onPreviewInterfaceIsTwo : onPreview}
