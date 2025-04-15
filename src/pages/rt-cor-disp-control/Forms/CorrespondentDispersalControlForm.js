@@ -92,21 +92,12 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
   }
 
   const fetchData = async (countryId, currencyId, plantId) => {
-    if (formik.values.interfaceId === 2) {
-      return await getRequest({
-        extension: RemittanceSettingsRepository.CorDispControl.qry,
-        parameters: `_corId=${formik.values.corId}&_countryId=${countryId || 0}&_currencyId=${formik.values.currencyId || 0}&_plantId=${
-          plantId || 0
-        }`
-      })
-    } else {
-      return await getRequest({
-        extension: RemittanceSettingsRepository.CorDispControl.qry,
-        parameters: `_corId=${formik.values.corId}&_countryId=${countryId || 0}&_currencyId=${
-          currencyId || 0
-        }&_plantId=${plantId || 0}`
-      })
-    }
+    return await getRequest({
+      extension: RemittanceSettingsRepository.CorDispControl.qry,
+      parameters: `_corId=${formik.values.corId}&_countryId=${countryId || 0}&_currencyId=${currencyId || 0}&_plantId=${
+        plantId || 0
+      }`
+    })
   }
 
   const getDefaultCurrency = async (interfaceId, countryId) => {
@@ -440,7 +431,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     }
 
     if (plantId && countryId && !currencyId) {
-
       const currencyRes = await getRequest({
         extension: RemittanceBankInterface.Currencies.qry,
         parameters: `_interfaceId=${formik.values.interfaceId || 0}&_countryId=${countryId}`
