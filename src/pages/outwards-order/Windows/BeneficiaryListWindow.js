@@ -1,5 +1,5 @@
 import Table from 'src/components/Shared/Table'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
@@ -9,6 +9,7 @@ import { useFormik } from 'formik'
 const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const [data, setData] = useState([])
+  const updateData = useRef([])
 
   const formik = useFormik({
     initialValues: { clientId: form.values.clientId },
@@ -16,7 +17,7 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: () => {
-      const checkedBeneficiary = data.list.find(ben => ben.checked)
+      const checkedBeneficiary = updateData.current.list.find(ben => ben.checked)
 
       form.setValues({
         ...form.values,
@@ -40,7 +41,7 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
 
       return item
     })
-
+    updateData.current = res ?? { list: [] }
     setData(res ?? { list: [] })
   }
 

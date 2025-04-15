@@ -281,6 +281,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                   title: platformLabels.PreviewReport
                 })
               }
+              resourceId={ResourceIds.OutwardsTransfer}
               setSelectedReport={setSelectedReport}
             />
           </Fixed>
