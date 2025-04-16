@@ -738,6 +738,7 @@ export function DataGrid({
 
         return
       }
+
       process(params, data, setData)
     }
   }
