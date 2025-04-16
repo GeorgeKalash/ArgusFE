@@ -392,6 +392,7 @@ export const ResourceIds = {
   SAVerifyTransIntegrity: 51601,
   PUDocumentTypeDefaults: 50103,
   SyncSalesTrx: 51603,
+  GenerateProductionOrder: 51416,
   ProductionOrder: 42337,
   YearlyComparativeSales: 51550,
   SManagement: 41213,
