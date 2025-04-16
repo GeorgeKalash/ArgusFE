@@ -1,229 +1,199 @@
-import { Box } from '@mui/material'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useContext, useState, useRef } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
-
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const RoutingSeqForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedRecordId }) => {
+const RoutingSeqForm = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [workCenterStore, setWorkCenterStore] = useState([])
-  const [operationStore, setOperationStore] = useState([])
+  const { platformLabels } = useContext(ControlContext)
+  const { recordId } = store
+  const editMode = !!recordId
+  const [operations, setOperations] = useState([])
 
-  const [isLoading, setIsLoading] = useState(false)
+  const filteredOperations = useRef([])
 
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.Routing.qry
-  })
+  function createRowValidation() {
+    return yup.mixed().test(function (value) {
+      const { seqNo, name, workCenterId, operationId } = this.parent
+      const isAnyFieldFilled = !!(seqNo || name || workCenterId || operationId)
 
-  const formik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      rows: yup.array().of(
-        yup.object({
-          seqNo: yup.string().required('Semi finished item is required'),
-          name: yup.string().required('Semi finished item is required'),
-          workCenterName: yup.string().required('Semi finished item is required'),
-          operationName: yup.string().required('Semi finished item is required')
-        })
-      )
-    }),
-    initialValues: {
-      rows: [
-        {
-          routingId: recordId || '',
-          seqNo: '',
-          name: '',
-          workCenterId: '',
-          operationId: '',
-          workCenterName: '',
-          workCenterRef: '',
-          operationName: ''
-        }
-      ]
-    },
-    onSubmit: async obj => {
-      const resultObject = {
-        routingId: recordId,
-        data: formik.values.rows
+      if (isAnyFieldFilled) {
+        return !!value
       }
 
-      console.log('rows ', resultObject)
+      return true
+    })
+  }
 
-      const response = await postRequest({
+  const rowValidationSchema = yup.object({
+    seqNo: createRowValidation(),
+    name: createRowValidation(),
+    workCenterId: createRowValidation(),
+    operationId: createRowValidation()
+  })
+
+  const { formik } = useForm({
+    enableReinitialize: false,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      data: yup.array().of(rowValidationSchema)
+    }),
+    initialValues: {
+      data: [{ id: 1, seqNo: 0 }]
+    },
+    onSubmit: async data => {
+      const updatedRows = data?.data
+        .map((itemDetails, index) => {
+          return {
+            ...itemDetails,
+            routingId: recordId
+          }
+        })
+        .filter(item => item.workCenterId || item.operationId)
+
+      await postRequest({
         extension: ManufacturingRepository.RoutingSequence.set2,
-        record: JSON.stringify(resultObject)
+        record: JSON.stringify({ routingId: recordId, data: updatedRows })
       })
 
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
-        })
-      } else toast.success('Record Edited Successfully')
-
-      invalidate()
+      toast.success(platformLabels.Edited)
     }
   })
 
-  useEffect(() => {
-    FillWorkCenter()
-  }, [])
-
-  useEffect(() => {
-    FillOperation()
-  }, [])
-
-  const FillWorkCenter = () => {
-    const defaultParams = `_filter=`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: ManufacturingRepository.WorkCenter.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setWorkCenterStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+  async function getFilteredOperations(workCenterId) {
+    const array = operations?.filter(item => item?.workCenterId == workCenterId) || []
+    filteredOperations.current = array
   }
 
-  const FillOperation = () => {
-    const defaultParams = `_filter=`
-    var parameters = defaultParams + '&_workCenterId=0'
-
-    getRequest({
+  const getOperations = async () => {
+    return await getRequest({
       extension: ManufacturingRepository.Operation.qry,
-      parameters: parameters
+      parameters: `_filter=&_workCenterId=0`
     })
-      .then(res => {
-        setOperationStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const columns = [
     {
-      field: 'numberfield',
-      header: labels.seqNo,
+      component: 'numberfield',
+      label: labels.seqNo,
       name: 'seqNo',
-      mandatory: false,
-      hidden: false,
-      readOnly: false
+      props: {
+        maxLength: 5,
+        decimalScale: 0
+      }
     },
     {
-      field: 'textfield',
-      header: labels.name,
-      name: 'name',
-      mandatory: true,
-      readOnly: false
+      component: 'textfield',
+      label: labels.name,
+      name: 'name'
     },
     {
-      field: 'combobox',
-      header: labels.workCenter,
-      nameId: 'workCenterId',
-      name: 'workCenterRef',
-      mandatory: true,
-      store: workCenterStore,
-      valueField: 'recordId',
-      displayField: 'reference',
-      widthDropDown: 200,
-
-      fieldsToUpdate: [{ from: 'name', to: 'workCenterName' }],
-      columnsInDropDown: [
-        { key: 'reference', value: 'Reference' },
-        { key: 'name', value: 'Name' }
-      ]
+      component: 'resourcecombobox',
+      label: labels.workCenter,
+      name: 'workCenterId',
+      props: {
+        endpointId: ManufacturingRepository.WorkCenter.qry,
+        parameters: `_filter=`,
+        displayField: 'name',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'recordId', to: 'workCenterId' },
+          { from: 'name', to: 'workCenterName' },
+          { from: 'reference', to: 'workCenterRef' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        getFilteredOperations(newRow?.workCenterId)
+      }
     },
     {
-      field: 'combobox',
-      header: labels.operation,
-      nameId: 'operationId',
-      name: 'operationName',
-      mandatory: true,
-      store: operationStore,
-      valueField: 'recordId',
-      displayField: 'name',
-      widthDropDown: 200,
-
-      fieldsToUpdate: [{ from: 'name', to: 'operationName' }],
-      columnsInDropDown: [{ key: 'name', value: 'Name' }]
+      component: 'resourcecombobox',
+      label: labels.operation,
+      name: 'operationId',
+      props: {
+        store: filteredOperations?.current,
+        displayField: 'name',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'recordId', to: 'operationId' },
+          { from: 'name', to: 'operationName' },
+          { from: 'reference', to: 'operationRef' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ]
+      },
+      propsReducer({ row, props }) {
+        return { ...props, store: filteredOperations?.current }
+      }
     }
   ]
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
+      if (recordId) {
+        const operationsList = await getOperations()
+        setOperations(operationsList?.list)
 
-          const res = await getRequest({
-            extension: ManufacturingRepository.RoutingSequence.qry,
-            parameters: `_routingId=${recordId}`
-          })
+        const res = await getRequest({
+          extension: ManufacturingRepository.RoutingSequence.qry,
+          parameters: `_routingId=${recordId}`
+        })
 
-          if (res.list.length > 0) {
-            formik.setValues({ rows: res.list })
-          } else {
-            formik.setValues({
-              rows: [
-                {
-                  routingId: recordId || '',
-                  seqNo: '',
-                  name: '',
-                  workCenterId: '',
-                  operationId: '',
-                  workCenterName: '',
-                  workCenterRef: '',
-                  operationName: ''
-                }
-              ]
-            })
-          }
-        }
-      } catch (error) {
-        setErrorMessage(error)
+        const updateItemsList =
+          res?.list?.length != 0
+            ? await Promise.all(
+                res?.list?.map(async (item, index) => {
+                  return {
+                    ...item,
+                    id: index + 1
+                  }
+                })
+              )
+            : [{ id: 1 }]
+        formik.setFieldValue('data', updateItemsList)
       }
-      setIsLoading(false)
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
     <>
-      <FormShell resourceId={ResourceIds.Routings} form={formik} height={300} editMode={true} maxAccess={maxAccess}>
-        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', marginTop: -5 }}>
-          <InlineEditGrid
-            gridValidation={formik}
-            maxAccess={maxAccess}
-            columns={columns}
-            defaultRow={{
-              routingId: recordId || '',
-              seqNo: '',
-              name: '',
-              workCenterId: '',
-              operationId: '',
-              workCenterName: '',
-              workCenterRef: '',
-              operationName: ''
-            }}
-            width={500}
-          />
-        </Box>
+      <FormShell
+        resourceId={ResourceIds.Routings}
+        form={formik}
+        editMode={editMode}
+        maxAccess={maxAccess}
+        isCleared={false}
+        isInfo={false}
+      >
+        <VertLayout>
+          <Grow>
+            <DataGrid
+              name='routingSequence'
+              maxAccess={maxAccess}
+              onChange={value => formik.setFieldValue('data', value)}
+              onSelectionChange={(row, update, field) => {
+                if (field == 'operationId') getFilteredOperations(row?.workCenterId)
+              }}
+              value={formik.values?.data}
+              error={formik.errors?.data}
+              columns={columns}
+            />
+          </Grow>
+        </VertLayout>
       </FormShell>
     </>
   )
