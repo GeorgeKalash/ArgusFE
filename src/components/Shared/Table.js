@@ -26,7 +26,8 @@ import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
-import { Route } from 'src/lib/useRouter'
+
+// import { Route } from 'src/lib/useRouter'
 import { getFromDB, saveToDB, deleteRowDB } from 'src/lib/indexDB'
 
 const Table = ({
@@ -62,7 +63,8 @@ const Table = ({
   const [checked, setChecked] = useState(false)
   const [focus, setFocus] = useState(false)
   const storeName = 'tableSettings'
-  const { asPath } = Route()
+
+  // const { asPath } = Route()
 
   const columns = props?.columns
     .filter(
@@ -711,7 +713,9 @@ const Table = ({
 
   const height = gridData?.list?.length * 35 + 40 + 40
 
-  const tableName = asPath
+  // const tableName = asPath
+
+  const tableName = name ? `${name}.${props?.maxAccess?.record?.resourceId}` : props?.maxAccess?.record?.resourceId
 
   const { data: tableSettings, refetch: invalidate } = useQuery({
     queryKey: [tableName],
@@ -752,11 +756,14 @@ const Table = ({
   const updatedColumns = columnDefs.map(col => {
     const savedCol = tableSettings?.find(c => c.colId === col.field)
 
+    console.log(savedCol?.width, col)
+
     return {
       ...col,
+
       width: savedCol?.width ?? 'auto',
-      flex: savedCol?.width ?? 1,
-      sort: savedCol?.sort ?? null
+      flex: savedCol?.width ? undefined : col.flex,
+      sort: savedCol?.sort ?? 0
     }
   })
 
@@ -816,9 +823,17 @@ const Table = ({
           />
         </Box>
       </Grow>
-      {pagination && (
+      {pagination ? (
         <Fixed>
           <CustomPagination />
+        </Fixed>
+      ) : (
+        <Fixed>
+          <Box display='flex' justifyContent='flex-end'>
+            <IconButton onClick={onReset}>
+              <CachedIcon />
+            </IconButton>
+          </Box>
         </Fixed>
       )}
     </VertLayout>

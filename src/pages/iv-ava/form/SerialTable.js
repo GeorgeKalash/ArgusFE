@@ -7,7 +7,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const SerialTable = ({ labels, obj }) => {
+const SerialTable = ({ labels, obj, access }) => {
   const { getRequest } = useContext(RequestsContext)
   const [data, setData] = useState([])
 
@@ -50,11 +50,13 @@ const SerialTable = ({ labels, obj }) => {
       flex: 1
     }
   ]
+  console.log(access)
 
   return (
     <VertLayout>
       <Grow>
         <Table
+          name='serial'
           columns={columns}
           gridData={data}
           rowId={['sku']}
@@ -62,6 +64,7 @@ const SerialTable = ({ labels, obj }) => {
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
+          maxAccess={access}
           refetch={refetch}
         />
       </Grow>

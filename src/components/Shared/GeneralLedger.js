@@ -633,6 +633,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
             </Grid>
             <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
               <Table
+                name='generalLedger'
                 columns={[
                   { field: 'currency', headerName: 'Currency', flex: 1 },
                   { field: 'debit', headerName: 'Debit', type: 'number', flex: 1 },
