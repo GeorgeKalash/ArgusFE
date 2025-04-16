@@ -18,7 +18,6 @@ export default function OverheadForm({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = store?.recordId
-  const editMode = !!recordId
 
   const { formik } = useForm({
     enableReinitialize: false,
@@ -28,7 +27,7 @@ export default function OverheadForm({ labels, maxAccess, store }) {
         {
           id: 1,
           assemblyId: recordId,
-          overheadId: '',
+          overheadId: null,
           seqNo: '',
           amount: 0,
           units: 0,
@@ -203,7 +202,7 @@ export default function OverheadForm({ labels, maxAccess, store }) {
       resourceId={ResourceIds.Assemblies}
       form={formik}
       maxAccess={maxAccess}
-      editMode={editMode}
+      editMode={true}
       isInfo={false}
       isSavedClear={false}
       isCleared={false}

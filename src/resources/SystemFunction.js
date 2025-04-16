@@ -117,8 +117,7 @@ export const SystemFunction = {
   ModellingCasting: Module.ProductModeling * 100 + 4,
   Sketch: Module.ProductModeling * 100 + 1,
   Rubber: Module.ProductModeling * 100 + 6,
-  DamageReturn: Module.Manufacturing * 100 + 13,
-  Assembly: Module.Manufacturing * 100 + 0
+  DamageReturn: Module.Manufacturing * 100 + 13
 }
 
 export const getSystemFunctionModule = functionId => {

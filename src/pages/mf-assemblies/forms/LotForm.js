@@ -132,8 +132,6 @@ export default function LotForm({ labels, maxAccess, form }) {
                 value={formik?.values?.LlotCategory}
                 maxAccess={maxAccess}
                 readOnly
-                onChange={formik.handleChange}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -143,7 +141,6 @@ export default function LotForm({ labels, maxAccess, form }) {
                 value={formik?.values?.reference}
                 maxAccess={maxAccess}
                 readOnly
-                error={formik.touched.name && Boolean(formik.errors.name)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -159,7 +156,6 @@ export default function LotForm({ labels, maxAccess, form }) {
                 form={formik}
                 readOnly
                 maxAccess={maxAccess}
-                errorCheck={'itemId'}
               />
             </Grid>
             <Grid item xs={12}>
