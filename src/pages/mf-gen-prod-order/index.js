@@ -1,4 +1,5 @@
-import { useState, useContext, useEffect } from 'react'
+import { useContext, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -69,6 +70,13 @@ const GeneratePoductionOrder = () => {
       })
 
       toast.success(platformLabels.Generated)
+
+      if (formik?.values?.clientId) {
+        await fillSummaryORD(formik?.values?.clientId, false)
+      } else {
+        await fillSummaryORD(0, true)
+      }
+      formik.setFieldValue('orders', { list: [] })
     }
   })
 
@@ -375,6 +383,7 @@ const GeneratePoductionOrder = () => {
                 label={platformLabels.Generate}
                 color='#231f20'
                 tooltipText={platformLabels.Generate}
+                disabled={!formik.values.itemSummaries?.list?.some(item => item.checked)}
                 image={'generate.png'}
               />
             </Grid>
