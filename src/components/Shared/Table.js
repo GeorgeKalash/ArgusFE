@@ -24,6 +24,11 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
+import { useQuery } from '@tanstack/react-query'
+import CachedIcon from '@mui/icons-material/Cached'
+
+// import { Route } from 'src/lib/useRouter'
+import { getFromDB, saveToDB, deleteRowDB } from 'src/lib/indexDB'
 
 const Table = ({
   name,
@@ -57,6 +62,9 @@ const Table = ({
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
   const [focus, setFocus] = useState(false)
+  const storeName = 'tableSettings'
+
+  // const { asPath } = Route()
 
   const columns = props?.columns
     .filter(
@@ -257,52 +265,59 @@ const Table = ({
         }
 
         return (
-          <Box
-            sx={{
-              width: '100%',
-              backgroundColor: '#fff',
-              borderTop: '1px solid #ccc',
-              fontSize: '0.9rem',
-              bottom: 0
-            }}
-          >
-            <IconButton
-              onClick={goToFirstPage}
-              disabled={page === 1}
-              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Box
+              sx={{
+                width: '100%',
+                backgroundColor: '#fff',
+                borderTop: '1px solid #ccc',
+                fontSize: '0.9rem',
+                bottom: 0
+              }}
             >
-              <FirstPageIcon />
-            </IconButton>
-            <IconButton
-              onClick={decrementPage}
-              disabled={page === 1}
-              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-            >
-              <NavigateBeforeIcon />
-            </IconButton>
-            {platformLabels.Page}
-            <TextInput value={page} pageCount={pageCount} />
-            {platformLabels.Of} {pageCount}
-            <IconButton
-              onClick={incrementPage}
-              disabled={page === pageCount}
-              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-            >
-              <NavigateNextIcon />
-            </IconButton>
-            <IconButton
-              onClick={goToLastPage}
-              disabled={page === pageCount}
-              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-            >
-              <LastPageIcon />
-            </IconButton>
-            <IconButton onClick={refetch}>
-              <RefreshIcon />
-            </IconButton>
-            {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
-            {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
-            {platformLabels.Of} {totalRecords}
+              <IconButton
+                onClick={goToFirstPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
+                <FirstPageIcon />
+              </IconButton>
+              <IconButton
+                onClick={decrementPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
+                <NavigateBeforeIcon />
+              </IconButton>
+              {platformLabels.Page}
+              <TextInput value={page} pageCount={pageCount} />
+              {platformLabels.Of} {pageCount}
+              <IconButton
+                onClick={incrementPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
+                <NavigateNextIcon />
+              </IconButton>
+              <IconButton
+                onClick={goToLastPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
+                <LastPageIcon />
+              </IconButton>
+              <IconButton onClick={refetch}>
+                <RefreshIcon />
+              </IconButton>
+              {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
+              {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
+              {platformLabels.Of} {totalRecords}
+            </Box>
+            <Box>
+              <IconButton onClick={onReset}>
+                <CachedIcon />
+              </IconButton>
+            </Box>
           </Box>
         )
       } else {
@@ -367,51 +382,58 @@ const Table = ({
           }
 
           return (
-            <Box
-              sx={{
-                width: '100%',
-                backgroundColor: '#fff',
-                borderTop: '1px solid #ccc',
-                fontSize: '0.9rem',
-                bottom: 0
-              }}
-            >
-              {' '}
-              <IconButton
-                onClick={goToFirstPage}
-                disabled={page === 1}
-                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Box
+                sx={{
+                  width: '100%',
+                  backgroundColor: '#fff',
+                  borderTop: '1px solid #ccc',
+                  fontSize: '0.9rem',
+                  bottom: 0
+                }}
               >
-                <FirstPageIcon />
-              </IconButton>
-              <IconButton
-                onClick={decrementPage}
-                disabled={page === 1}
-                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-              >
-                <NavigateBeforeIcon />
-              </IconButton>
-              {platformLabels.Page} <TextInput value={page} pageCount={pageCount} /> {platformLabels.Of} {pageCount}
-              <IconButton
-                onClick={incrementPage}
-                disabled={page === pageCount}
-                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-              >
-                <NavigateNextIcon />
-              </IconButton>
-              <IconButton
-                onClick={goToLastPage}
-                disabled={page === pageCount}
-                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-              >
-                <LastPageIcon />
-              </IconButton>
-              <IconButton onClick={refetch}>
-                <RefreshIcon />
-              </IconButton>
-              {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
-              {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
-              {platformLabels.Of} {totalRecords}
+                {' '}
+                <IconButton
+                  onClick={goToFirstPage}
+                  disabled={page === 1}
+                  sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+                >
+                  <FirstPageIcon />
+                </IconButton>
+                <IconButton
+                  onClick={decrementPage}
+                  disabled={page === 1}
+                  sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+                >
+                  <NavigateBeforeIcon />
+                </IconButton>
+                {platformLabels.Page} <TextInput value={page} pageCount={pageCount} /> {platformLabels.Of} {pageCount}
+                <IconButton
+                  onClick={incrementPage}
+                  disabled={page === pageCount}
+                  sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+                >
+                  <NavigateNextIcon />
+                </IconButton>
+                <IconButton
+                  onClick={goToLastPage}
+                  disabled={page === pageCount}
+                  sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+                >
+                  <LastPageIcon />
+                </IconButton>
+                <IconButton onClick={refetch}>
+                  <RefreshIcon />
+                </IconButton>
+                {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
+                {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
+                {platformLabels.Of} {totalRecords}
+              </Box>
+              <Box>
+                <IconButton onClick={onReset}>
+                  <CachedIcon />
+                </IconButton>
+              </Box>
             </Box>
           )
         }
@@ -691,6 +713,67 @@ const Table = ({
 
   const height = gridData?.list?.length * 35 + 40 + 40
 
+  // const tableName = asPath
+
+  const tableName = name ? `${name}.${props?.maxAccess?.record?.resourceId}` : props?.maxAccess?.record?.resourceId
+
+  const { data: tableSettings, refetch: invalidate } = useQuery({
+    queryKey: [tableName],
+
+    queryFn: () => getFromDB(storeName, tableName),
+    enabled: !!tableName
+  })
+
+  const onColumnMoved = params => {
+    if (params.columnApi && tableName) {
+      const columnState = params.columnApi.getColumnState()
+      saveToDB(storeName, tableName, columnState)
+      invalidate()
+    }
+  }
+
+  const onColumnResized = params => {
+    if (params?.source === 'uiColumnResized' && tableName) {
+      const columnState = params.columnApi.getColumnState()
+      saveToDB(storeName, tableName, columnState)
+      invalidate()
+    }
+  }
+
+  const onSortChanged = params => {
+    if (params.columnApi && tableName) {
+      const columnState = params.columnApi.getColumnState()
+      saveToDB(storeName, tableName, columnState)
+      invalidate()
+    }
+  }
+
+  const onReset = async () => {
+    await deleteRowDB(storeName, tableName)
+    invalidate()
+  }
+
+  const updatedColumns = columnDefs.map(col => {
+    const savedCol = tableSettings?.find(c => c.colId === col.field)
+
+    console.log(savedCol?.width, col)
+
+    return {
+      ...col,
+
+      width: savedCol?.width ?? 'auto',
+      flex: savedCol?.width ? undefined : col.flex,
+      sort: savedCol?.sort ?? 0
+    }
+  })
+
+  const finalColumns = updatedColumns?.sort((a, b) => {
+    const indexA = tableSettings?.findIndex(col => col.colId === a.field)
+    const indexB = tableSettings?.findIndex(col => col.colId === b.field)
+
+    return indexA - indexB
+  })
+
   return (
     <VertLayout>
       <Grow>
@@ -720,10 +803,11 @@ const Table = ({
           }}
         >
           <AgGridReact
+            key={finalColumns}
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
             enableRangeSelection={true}
-            columnDefs={columnDefs}
+            columnDefs={finalColumns}
             pagination={false}
             paginationPageSize={pageSize}
             rowSelection={'single'}
@@ -733,12 +817,23 @@ const Table = ({
             gridOptions={gridOptions}
             rowDragManaged={rowDragManaged}
             onRowDragEnd={onRowDragEnd}
+            onColumnMoved={onColumnMoved}
+            onColumnResized={onColumnResized}
+            onSortChanged={onSortChanged}
           />
         </Box>
       </Grow>
-      {pagination && (
+      {pagination ? (
         <Fixed>
           <CustomPagination />
+        </Fixed>
+      ) : (
+        <Fixed>
+          <Box display='flex' justifyContent='flex-end'>
+            <IconButton onClick={onReset}>
+              <CachedIcon />
+            </IconButton>
+          </Box>
         </Fixed>
       )}
     </VertLayout>
