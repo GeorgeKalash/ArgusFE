@@ -5,11 +5,42 @@ import CloseIcon from '@mui/icons-material/Close'
 import PropTypes from 'prop-types'
 import { MenuContext } from 'src/providers/MenuContext'
 import { v4 as uuidv4 } from 'uuid'
+import { RequestsContext } from './RequestsContext'
 
 const TabsContext = createContext()
 
+function LoadingOverlay() {
+  return (
+    <Box
+      style={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        left: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(250, 250, 250, 1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999
+      }}
+    ></Box>
+  )
+}
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props
+  const { loading } = useContext(RequestsContext)
+  const [showOverlay, setShowOverlay] = useState(false)
+
+  useEffect(() => {
+    if (!loading) {
+      const timer = setTimeout(() => {
+        setShowOverlay(true)
+      }, 10)
+
+      return () => clearTimeout(timer)
+    }
+  }, [loading])
 
   return (
     <Box
@@ -28,6 +59,7 @@ function CustomTabPanel(props) {
       }}
       {...other}
     >
+      {!showOverlay && LoadingOverlay()}
       {children}
     </Box>
   )

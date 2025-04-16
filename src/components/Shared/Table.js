@@ -26,7 +26,6 @@ import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
-import { Route } from 'src/lib/useRouter'
 import { getFromDB, saveToDB, deleteRowDB } from 'src/lib/indexDB'
 
 const Table = ({
@@ -62,7 +61,6 @@ const Table = ({
   const [checked, setChecked] = useState(false)
   const [focus, setFocus] = useState(false)
   const storeName = 'tableSettings'
-  const { asPath } = Route()
 
   const columns = props?.columns
     .filter(
@@ -711,7 +709,7 @@ const Table = ({
 
   const height = gridData?.list?.length * 35 + 40 + 40
 
-  const tableName = asPath
+  const tableName = name ? `${name}.${props?.maxAccess?.record?.resourceId}` : props?.maxAccess?.record?.resourceId
 
   const { data: tableSettings, refetch: invalidate } = useQuery({
     queryKey: [tableName],
@@ -721,7 +719,7 @@ const Table = ({
   })
 
   const onColumnMoved = params => {
-    if (params.columnApi && tableName) {
+    if (params.columnApi && tableName && params.source != 'gridOptionsChanged') {
       const columnState = params.columnApi.getColumnState()
       saveToDB(storeName, tableName, columnState)
       invalidate()
@@ -737,8 +735,10 @@ const Table = ({
   }
 
   const onSortChanged = params => {
-    if (params.columnApi && tableName) {
+    if (params.columnApi && tableName && params.source == 'uiColumnSorted') {
       const columnState = params.columnApi.getColumnState()
+      console.log(params?.source, columnState)
+
       saveToDB(storeName, tableName, columnState)
       invalidate()
     }
@@ -749,22 +749,29 @@ const Table = ({
     invalidate()
   }
 
-  const updatedColumns = columnDefs.map(col => {
-    const savedCol = tableSettings?.find(c => c.colId === col.field)
+  const totalWidth = tableSettings?.reduce((acc, col) => {
+    const width = parseFloat(col.width) || 0
 
-    return {
-      ...col,
-      width: savedCol?.width ?? 'auto',
-      flex: savedCol?.width ?? 1,
-      sort: savedCol?.sort ?? null
-    }
-  })
+    return acc + width
+  }, 0)
+
+  const updatedColumns = tableSettings
+    ? columnDefs.map((col, index) => {
+        const savedCol = tableSettings?.find(c => c.colId === col?.field)
+        const indexSort = tableSettings?.findIndex(c => c.colId === col?.field)
+        const lastColumn = tableSettings?.length === indexSort + 1
+
+        return {
+          ...col,
+          width: savedCol?.width ?? 'auto',
+          flex: savedCol?.width ?? totalWidth / tableSettings?.length,
+          sortColumn: lastColumn ? columnDefs?.length + 1 : indexSort > -1 ? indexSort : index
+        }
+      })
+    : columnDefs
 
   const finalColumns = updatedColumns?.sort((a, b) => {
-    const indexA = tableSettings?.findIndex(col => col.colId === a.field)
-    const indexB = tableSettings?.findIndex(col => col.colId === b.field)
-
-    return indexA - indexB
+    return (a.sortColumn ?? 0) - (b.sortColumn ?? 0)
   })
 
   return (
@@ -796,7 +803,7 @@ const Table = ({
           }}
         >
           <AgGridReact
-            key={finalColumns}
+            key={tableSettings}
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
             enableRangeSelection={true}
@@ -816,9 +823,17 @@ const Table = ({
           />
         </Box>
       </Grow>
-      {pagination && (
+      {pagination ? (
         <Fixed>
           <CustomPagination />
+        </Fixed>
+      ) : (
+        <Fixed>
+          <Box display='flex' justifyContent='flex-end'>
+            <IconButton onClick={onReset}>
+              <CachedIcon />
+            </IconButton>
+          </Box>
         </Fixed>
       )}
     </VertLayout>

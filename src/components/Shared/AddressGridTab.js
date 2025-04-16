@@ -6,15 +6,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
 
-const AddressGridTab = ({
-  addressGridData,
-  getAddressGridData,
-  addAddress,
-  delAddress,
-  editAddress,
-  maxAccess,
-  columns
-}) => {
+const AddressGridTab = ({ addressGridData, getAddressGridData, addAddress, delAddress, editAddress, columns }) => {
   const { labels: labels, access } = useResourceParams({
     datasetId: ResourceIds.Address
   })
@@ -60,7 +52,7 @@ const AddressGridTab = ({
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={addAddress} maxAccess={maxAccess} />
+        <GridToolbar onAdd={addAddress} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
@@ -71,7 +63,7 @@ const AddressGridTab = ({
           onEdit={editAddress}
           onDelete={delAddress}
           isLoading={false}
-          maxAccess={maxAccess}
+          maxAccess={access}
           pagination={false}
         />
       </Grow>
