@@ -13,15 +13,21 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import ProductionOrderForm from '../mf-prod-order/Forms/ProductionOrderForm'
+import { useWindow } from 'src/windows'
 
 const GeneratePoductionOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [filteredOrders, setFilteredOrders] = useState([])
-  const [selectedOrders, setSelectedOrders] = useState([])
+  const { stack } = useWindow()
 
   const { labels, access } = useResourceQuery({
-    datasetId: ResourceIds.GenerateTrip
+    datasetId: ResourceIds.GenerateProductionOrder
+  })
+
+  const { labels: _labels, access: maxAccess } = useResourceQuery({
+    datasetId: ResourceIds.ProductionOrder
   })
 
   const { formik } = useForm({
@@ -33,18 +39,36 @@ const GeneratePoductionOrder = () => {
     },
     maxAccess: access,
     enableReinitialize: true,
-    onSubmit: async obj => {
-      // const data = {
-      //   departureDate: formatDateToApi(obj.departureDate),
-      //   vehicleAllocations: obj.vehicleAllocations.list,
-      //   vehicleOrders: obj.vehicleOrders.list
-      // }
-      // await postRequest({
-      //   extension: DeliveryRepository.Trip.setTRP2,
-      //   record: JSON.stringify(data)
-      // })
-      // resetForm()
-      // toast.success(platformLabels.Generated)
+    onSubmit: async () => {
+      const data = {
+        items: formik?.values?.itemSummaries?.list
+          ?.filter(item => item.checked)
+          .map(item => ({
+            poId: 0,
+            seqNo: 0,
+            itemId: item.itemId,
+            qty: item.produceNow
+          }))
+      }
+
+      const res = await postRequest({
+        extension: ManufacturingRepository.ProductionOrder.gen,
+        record: JSON.stringify(data)
+      })
+
+      stack({
+        Component: ProductionOrderForm,
+        props: {
+          labels: _labels,
+          access: maxAccess,
+          recordId: res?.recordId
+        },
+        width: 850,
+        height: 680,
+        title: labels.ProductionOrder
+      })
+
+      toast.success(platformLabels.Generated)
     }
   })
 
@@ -142,13 +166,14 @@ const GeneratePoductionOrder = () => {
       parameters: `_clientId=${clientId || 0}`
     })
 
-    const newlyItemSummaries = response?.record?.itemSummaries.map(item => ({
+    const newlyItemSummaries = response?.record?.itemSummaries.map((item, index) => ({
       ...item,
+      id: index + 1,
       initialSoQty: item.soQty,
       initialRemainingQty: item.remainingQty,
       orders: response?.record?.orders
         ?.filter(order => order.itemId === item.itemId)
-        .map(order => ({ ...order, checked: true }))
+        .map((order, index) => ({ ...order, id: index + 1, checked: true }))
     }))
 
     formik.setFieldValue('itemSummaries', { list: newlyItemSummaries })
@@ -170,8 +195,22 @@ const GeneratePoductionOrder = () => {
   }, [])
 
   const disableCondition = data => {
-    return data?.deltaQty === 0
+    return data?.deltaQty >= 0
   }
+
+  useEffect(() => {
+    const list = formik?.values?.itemSummaries?.list || []
+
+    const updatedList = list.map(item =>
+      item.deltaQty >= 0 && item.checked !== false ? { ...item, checked: false } : item
+    )
+
+    const hasChanges = list.some((item, index) => item.checked !== updatedList[index].checked)
+
+    if (hasChanges) {
+      formik.setFieldValue('itemSummaries.list', updatedList)
+    }
+  }, [formik.values.itemSummaries?.list])
 
   return (
     <FormShell
@@ -230,7 +269,7 @@ const GeneratePoductionOrder = () => {
                   <Table
                     columns={columnsItemsSummary}
                     gridData={formik?.values?.itemSummaries}
-                    rowId={['orderId', 'itemId']}
+                    rowId={['itemId']}
                     pagination={false}
                     maxAccess={access}
                     disableSorting={true}
@@ -244,53 +283,13 @@ const GeneratePoductionOrder = () => {
                         })
                       }
                     }}
-
-                    // onSelectionChange={row => {
-                    //   if (row) {
-                    //     const filteredOrders = formik.values.orders.list
-                    //       .filter(item => row.itemId == item.itemId)
-                    //       .map(item => ({ ...item, checked: true }))
-
-                    //     setFilteredOrders({ list: filteredOrders })
-
-                    //     // setSelectedOrders(prevState => {
-                    //     //   console.log(formik.values.orders)
-                    //     //   const prevSelected = prevState?.list || []
-
-                    //     //   const newlySelected = formik.values.orders.list
-                    //     //     .filter(item => item.checked) // Ensure checked items exist
-                    //     //     .map(item => ({
-                    //     //       ...item,
-                    //     //       orders: item.orders?.map(order => ({ ...order, checked: true }))
-                    //     //     }))
-
-                    //     //   console.log('Newly Selected Orders:', newlySelected)
-
-                    //     //   const updatedPrevSelected = prevSelected.filter(prevItem =>
-                    //     //     formik.values.orders.list.some(
-                    //     //       newItem => newItem.orderId === prevItem.orderId && newItem.checked
-                    //     //     )
-                    //     //   )
-
-                    //     //   console.log('Updated Previous Selected Orders:', updatedPrevSelected)
-
-                    //     //   const uniqueNewlySelected = newlySelected.filter(
-                    //     //     newItem => !updatedPrevSelected.some(prevItem => prevItem.orderId === newItem.orderId)
-                    //     //   )
-
-                    //     //   console.log('Unique Newly Selected Orders:', uniqueNewlySelected)
-
-                    //     //   return { list: [...updatedPrevSelected, ...uniqueNewlySelected] }
-                    //     // })
-                    //   }
-                    // }}
                   />
                 </Grid>
                 <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column' }}>
                   <Table
                     columns={columnsOrders}
                     gridData={formik?.values?.orders}
-                    rowId={['recordId']}
+                    rowId={['itemId']}
                     isLoading={false}
                     pagination={false}
                     maxAccess={access}
@@ -341,7 +340,7 @@ const GeneratePoductionOrder = () => {
                         return item
                       })
 
-                      formik.setFieldValue('itemSummaries', { list: updatedItemSummaries })
+                      formik.setFieldValue(`itemSummaries`, { list: updatedItemSummaries })
                     }}
                   />
                 </Grid>
@@ -351,7 +350,7 @@ const GeneratePoductionOrder = () => {
         </Grow>
         <Fixed>
           <Grid container spacing={2} mt={2}>
-            <Grid item xs={0.65}>
+            <Grid item xs={1}>
               <CustomButton
                 onClick={() => resetForm()}
                 label={platformLabels.Clear}
@@ -361,9 +360,9 @@ const GeneratePoductionOrder = () => {
               />
             </Grid>
 
-            <Grid item xs={8.75}></Grid>
+            <Grid item xs={10.5}></Grid>
 
-            <Grid item xs={0.65}>
+            <Grid item xs={0.5}>
               <CustomButton
                 onClick={() => formik.handleSubmit()}
                 label={platformLabels.Generate}

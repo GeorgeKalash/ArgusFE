@@ -240,7 +240,8 @@ export const ManufacturingRepository = {
     del: service + 'delPO',
     page: service + 'pagePO',
     snapshot: service + 'snapshotPO',
-    post: service + 'postPO'
+    post: service + 'postPO',
+    gen: service + 'genPO'
   },
   BillOfMaterials: {
     get: service + 'getBMA',
@@ -255,5 +256,6 @@ export const ManufacturingRepository = {
     del: service + 'delBMI',
     set: service + 'setBMI',
     set2: service + 'set2BMI'
-  }
+  },
+
 }

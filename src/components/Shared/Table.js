@@ -57,6 +57,7 @@ const Table = ({
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
   const [focus, setFocus] = useState(false)
+  const hasRowId = gridData?.list?.[0]?.id
 
   const columns = props?.columns
     .filter(
@@ -725,6 +726,9 @@ const Table = ({
             enableClipboard={true}
             enableRangeSelection={true}
             columnDefs={columnDefs}
+            {...(hasRowId && {
+              getRowId: params => params?.data?.id
+            })}
             pagination={false}
             paginationPageSize={pageSize}
             rowSelection={'single'}
