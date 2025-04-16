@@ -54,6 +54,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       status: 1,
       dtId: null,
       reference: '',
+      source: null,
       sketchId: null,
       sketchRef: '',
       sketchName: '',
@@ -85,6 +86,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
+      source: yup.number().required(),
       designerId: yup.number().required(),
       sketchId: yup.number().required(),
       castingType: yup.number().required(),
@@ -292,6 +294,22 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                     readOnly={editMode}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    datasetId={DataSets.THREED_DESIGN_SOURCE}
+                    name='source'
+                    label={labels.source}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('source', newValue?.key || null)
+                    }}
+                    error={formik.touched.source && Boolean(formik.errors.source)}
                   />
                 </Grid>
                 <Grid item xs={12}>
