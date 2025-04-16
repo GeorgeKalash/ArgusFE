@@ -212,6 +212,14 @@ const GeneratePoductionOrder = () => {
     }
   }, [formik.values.itemSummaries?.list])
 
+  const setOrders = row => {
+    if (row) {
+      formik.setFieldValue('orders', {
+        list: row.orders
+      })
+    }
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.GenerateProductionOrder}
@@ -276,12 +284,11 @@ const GeneratePoductionOrder = () => {
                     showCheckboxColumn={true}
                     showSelectAll={true}
                     disable={disableCondition}
+                    handleCheckboxChange={row => {
+                      setOrders(row)
+                    }}
                     onSelectionChange={row => {
-                      if (row) {
-                        formik.setFieldValue('orders', {
-                          list: row.orders
-                        })
-                      }
+                      setOrders(row)
                     }}
                   />
                 </Grid>
