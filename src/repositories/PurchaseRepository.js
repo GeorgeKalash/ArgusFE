@@ -96,12 +96,14 @@ export const PurchaseRepository = {
     page: service + 'pageSHP',
     snapshot: service + 'snapshotSHP',
     post: service + 'postSHP',
-    unpost: service + 'unpostSHP'
+    unpost: service + 'unpostSHP',
+    gen: service + 'genSHP'
   },
   ShipmentItem: {
     qry: service + 'qrySHI'
   },
   UnpostedOrderPack: {
-    get: service + 'openORD'
+    get: service + 'openORD',
+    snapshot: service + 'snapshotORD'
   }
 }
