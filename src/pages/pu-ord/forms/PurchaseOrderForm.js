@@ -30,11 +30,8 @@ import {
   getIPR,
   DIRTYFIELD_QTY,
   DIRTYFIELD_BASE_PRICE,
-  DIRTYFIELD_BASE_LABOR_PRICE,
-  DIRTYFIELD_TWPG,
   DIRTYFIELD_UNIT_PRICE,
   DIRTYFIELD_MDAMOUNT,
-  DIRTYFIELD_MDTYPE,
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_PCT,
   MDTYPE_AMOUNT
@@ -79,8 +76,8 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
   })
 
   const { documentType, maxAccess } = useDocumentType({
-    functionId: functionId,
-    access: access,
+    functionId,
+    access,
     enabled: !recordId,
     objectName: 'header'
   })
@@ -185,18 +182,6 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
     endpointId: PurchaseRepository.PurchaseOrder.page
   })
 
-  const onClick = () => {
-    stack({
-      Component: ItemPromotion,
-      props: {
-        invoiceId: formik.values.header.recordId
-      },
-      width: 1330,
-      height: 720,
-      title: platformLabels.ItemPromotion
-    })
-  }
-
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
@@ -206,8 +191,8 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
     validationSchema: yup.object({
       header: yup.object({
         date: yup.date().required(),
-        currencyId: yup.string().required(),
-        vendorId: yup.string().required()
+        currencyId: yup.number().required(),
+        vendorId: yup.number().required()
       }),
       items: yup
         .array()
@@ -229,7 +214,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
           tdPct: obj.header.tdPct || 0,
           tdAmount: obj.header.tdAmount || 0
         },
-        items: obj.items.map(({ id, isVattable, taxDetails, ...rest }, index) => ({
+        items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
           ...rest,
           seqNo: id,
           applyVat: isVattable,
@@ -285,7 +270,8 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
-          { key: 'name', value: 'Item Name' }
+          { key: 'name', value: 'Name' },
+          { key: 'flName', value: 'full Name' }
         ],
         displayFieldWidth: 5,
         minChars: 2
@@ -477,6 +463,11 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       }
     },
     {
+      component: 'textfield',
+      label: labels.notes,
+      name: 'notes'
+    },
+    {
       component: 'date',
       label: labels.deliveryDate,
       name: 'deliveryDate'
@@ -525,18 +516,6 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
     })
   }
 
-  const onPost = async () => {
-    await postRequest({
-      extension: PurchaseRepository.PurchaseOrder.post,
-      record: JSON.stringify(formik.values.header)
-    })
-
-    toast.success(platformLabels.Posted)
-    await refetchForm(formik.values.recordId)
-    invalidate()
-    window.close()
-  }
-
   const confirmation = () => {
     stack({
       Component: ConfirmationDialog,
@@ -576,7 +555,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
         date: formatDateToApi(formik.values.header.date)
       })
     }).then(() => {
-      toast.success(platformLabels.Closed)
+      toast.success(platformLabels.Saved)
       invalidate()
       refetchForm(formik?.values?.header.recordId)
     })
@@ -639,12 +618,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       key: 'Invoice',
       condition: true,
       onClick: toInvoice,
-      disabled: !(
-        formik.values.header.deliveryStatus === 1 &&
-        formik.values.header.status !== 3 &&
-        isClosed &&
-        formik.values.header.status === 4
-      )
+      disabled: !(formik.values.header.status !== 3 && isClosed && formik.values.header.status === 4)
     },
     {
       key: 'Close',
@@ -656,7 +630,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || formik.values.header.status == 3 || !editMode
+      disabled: !isClosed || formik.values.header.deliveryStatus === 4 || formik.values.header.status == 3 || !editMode
     },
     {
       key: 'Attachment',
@@ -730,9 +704,6 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       extension: PurchaseRepository.PurchaseOrder.get2,
       parameters: `_poId=${transactionId}`
     })
-
-    // res.record.header.date = formatDateFromApi(res?.record?.header?.date)
-    // res.record.header.deliveryDate = formatDateFromApi(res?.record?.header?.deliveryDate)
 
     return res.record
   }
@@ -971,13 +942,13 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       baseQty: parseFloat(qtyInBase).toFixed(2),
       volume: parseFloat(itemPriceRow?.volume).toFixed(2),
       weight: parseFloat(itemPriceRow?.weight).toFixed(2),
-      basePrice: !newRow?.requestId ? parseFloat(itemPriceRow?.basePrice).toFixed(5) : 0,
+      basePrice: parseFloat(itemPriceRow?.basePrice).toFixed(5),
       unitPrice: parseFloat(itemPriceRow?.unitPrice).toFixed(3),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice).toFixed(2),
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
       mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),
-      vatAmount: !newRow?.requestId ? parseFloat(vatCalcRow?.vatAmount).toFixed(2) : 0
+      vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
     }
 
     return iconClicked ? { changes: commonData } : commonData
@@ -1064,8 +1035,8 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
   }
 
   async function refetchForm(recordId) {
-    const saTrxpack = await getPurchaseTransactionPack(recordId)
-    if (saTrxpack) fillForm(saTrxpack)
+    const puOrdPack = await getPurchaseTransactionPack(recordId)
+    if (puOrdPack) fillForm(puOrdPack)
   }
 
   useEffect(() => {
@@ -1221,7 +1192,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
       previewReport={editMode}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={isPosted}
+      disabledSubmit={isPosted || isClosed}
     >
       <VertLayout>
         <Fixed>
@@ -1244,7 +1215,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('header.dtId', newValue.recordId)
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
@@ -1289,7 +1260,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                     errorCheck={'header.vendorId'}
                     maxAccess={maxAccess}
                     required
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     displayFieldWidth={3}
                   />
                 </Grid>
@@ -1310,8 +1281,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                     }}
                     errorCheck={'requestId'}
                     maxAccess={maxAccess}
-                    required
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                   />
                 </Grid>
               </Grid>
@@ -1323,7 +1293,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                     name='header.date'
                     required
                     label={labels.date}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     value={formik?.values?.header?.date}
                     onChange={(e, newValue) => formik.setFieldValue('header.date', newValue)}
                     editMode={editMode}
@@ -1339,7 +1309,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                     label={labels.currency}
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -1387,7 +1357,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     values={formik.values.header}
                     valueField='recordId'
                     displayField={['reference', 'name']}
@@ -1403,7 +1373,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                   <ResourceComboBox
                     datasetId={DataSets.PAYMENT_METHOD}
                     name='header.paymentMethod'
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     label={labels.paymentMethod}
                     valueField='key'
                     displayField='value'
@@ -1440,7 +1410,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                     label={labels.vendorDocRef}
                     value={formik?.values?.header?.vendorDocRef}
                     maxAccess={maxAccess}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     maxLength='15'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.vendorDocRef', '')}
@@ -1455,7 +1425,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                   <CustomDatePicker
                     name='header.deliveryDate'
                     label={labels.deliveryDate}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     value={formik?.values?.header?.deliveryDate}
                     onChange={(e, newValue) => formik.setFieldValue('header.deliveryDate', newValue)}
                     editMode={editMode}
@@ -1469,6 +1439,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                     endpointId={PurchaseRepository.DeliveryMethods.qry}
                     name='header.deliveryMethodId'
                     label={labels.deliveryMethod}
+                    readOnly={isPosted || isClosed}
                     valueField='recordId'
                     displayField={['name']}
                     values={formik.values.header}
@@ -1484,6 +1455,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                     endpointId={PurchaseRepository.PaymentTerms.qry}
                     name='header.ptId'
                     label={labels.paymentTerms}
+                    readOnly={isPosted || isClosed}
                     valueField='recordId'
                     displayField={['name']}
                     values={formik.values.header}
@@ -1509,7 +1481,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                   <CustomCheckBox
                     name='header.exWorks'
                     value={formik.values?.header?.exWorks}
-                    onChange={event => formik.setFieldValue('header.exWork', event.target.checked)}
+                    onChange={event => formik.setFieldValue('header.exWorks', event.target.checked)}
                     label={labels.exWorks}
                     maxAccess={maxAccess}
                   />
@@ -1531,10 +1503,11 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
             value={formik?.values?.items}
             initialValues={formik.initialValues.items[0]}
             error={formik.errors.items}
+            allowDelete={!isClosed}
             name='items'
             columns={columns}
             maxAccess={maxAccess}
-            disabled={isPosted || !formik.values.header.vendorId || !formik.values.header.vendorId}
+            disabled={isPosted || isClosed || !formik.values.header.vendorId || !formik.values.header.vendorId}
           />
         </Grow>
 
@@ -1546,7 +1519,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                 label={labels.description}
                 value={formik.values.header.description}
                 rows={3}
-                editMode={editMode}
+                readOnly={isPosted || isClosed}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.description', e.target.value)}
                 onClear={() => formik.setFieldValue('header.description', '')}
@@ -1556,13 +1529,6 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
             <Grid item xs={3}>
               <Stack spacing={2}>
                 <CustomNumberField
-                  name='header.qty'
-                  maxAccess={maxAccess}
-                  label={labels.totQty}
-                  value={totalQty}
-                  readOnly
-                />
-                <CustomNumberField
                   name='header.volume'
                   maxAccess={maxAccess}
                   label={labels.totVolume}
@@ -1570,10 +1536,10 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                   readOnly
                 />
                 <CustomNumberField
-                  name='header.weight'
+                  name='header.qty'
                   maxAccess={maxAccess}
-                  label={labels.totWeight}
-                  value={totalWeight}
+                  label={labels.totQty}
+                  value={totalQty}
                   readOnly
                 />
               </Stack>
@@ -1595,7 +1561,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                   displayCycleButton={true}
                   cycleButtonLabel={cycleButtonState.text}
                   decimalScale={2}
-                  readOnly={isPosted}
+                  readOnly={isPosted || isClosed}
                   isPercentIcon={cycleButtonState.text === '%' ? true : false}
                   handleButtonClick={handleButtonClick}
                   ShowDiscountIcons={true}
@@ -1639,7 +1605,7 @@ export default function PurchaseOrderForm({ labels, access, recordId, window }) 
                   label={labels.misc}
                   value={formik.values.header.miscAmount}
                   decimalScale={2}
-                  readOnly={isPosted}
+                  readOnly={isPosted || isClosed}
                   onChange={e => formik.setFieldValue('header.miscAmount', e.target.value || 0)}
                   onBlur={async () => {
                     setReCal(true)

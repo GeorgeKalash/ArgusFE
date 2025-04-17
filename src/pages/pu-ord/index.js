@@ -1,6 +1,7 @@
 import { Grow } from '@mui/material'
 import React, { useContext } from 'react'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -10,7 +11,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import Table from 'src/components/Shared/Table'
-import PurchaseOrderForm from './PurchaseOrderForm'
+import PurchaseOrderForm from './forms/PurchaseOrderForm'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
@@ -74,7 +75,7 @@ const PuTrx = () => {
     },
     {
       field: 'qty',
-      headerName: labels.totQty,
+      headerName: labels.qty,
       flex: 1,
       type: 'number'
     },
