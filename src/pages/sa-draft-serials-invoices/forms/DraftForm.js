@@ -130,11 +130,9 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
           srlNo: yup.string().test({
             name: 'srlNo-first-row-check',
             test(value, context) {
-              const allRows = context.options?.from?.[1]?.value?.serials || []
               const { parent } = context
 
-              if (parent?.id == 1 && allRows.length == 1) return true
-              if (parent?.id == 1 && !value && allRows.length > 1) return false
+              if (parent?.id == 1) return true
               if (parent?.id > 1 && !value) return false
 
               return value
@@ -1077,7 +1075,11 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
             maxAccess={maxAccess}
             disabled={isClosed || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isClosed}
-            allowAddNewLine={!formik?.values?.search}
+            allowAddNewLine={
+              !formik?.values?.search &&
+              (formik.values?.serials?.length === 0 ||
+                !!formik.values?.serials?.[formik.values?.serials?.length - 1]?.srlNo)
+            }
             autoDelete={autoDelete}
             form={formik}
           />

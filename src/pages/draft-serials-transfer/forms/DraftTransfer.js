@@ -101,11 +101,9 @@ export default function DraftTransfer({ labels, access, recordId }) {
           srlNo: yup.string().test({
             name: 'srlNo-first-row-check',
             test(value, context) {
-              const allRows = context.options?.from?.[1]?.value?.serials || []
               const { parent } = context
 
-              if (parent?.id == 1 && allRows.length == 1) return true
-              if (parent?.id == 1 && !value && allRows.length > 1) return false
+              if (parent?.id == 1) return true
               if (parent?.id > 1 && !value) return false
 
               return value
@@ -796,6 +794,10 @@ export default function DraftTransfer({ labels, access, recordId }) {
             maxAccess={maxAccess}
             disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isPosted}
+            allowAddNewLine={
+              formik.values?.serials?.length === 0 ||
+              !!formik.values?.serials?.[formik.values?.serials?.length - 1]?.srlNo
+            }
             autoDelete={autoDelete}
             form={formik}
           />
