@@ -681,7 +681,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='toSiteId'
-                    readOnly={isPosted || formik?.values?.serials?.some(serial => serial.srlNo)}
+                    readOnly={isPosted}
                     label={labels.toSite}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
