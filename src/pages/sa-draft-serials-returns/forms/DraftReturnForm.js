@@ -135,8 +135,11 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           srlNo: yup.string().test({
             name: 'srlNo-first-row-check',
             test(value, context) {
+              const allRows = context.options?.from?.[1]?.value?.serials || []
               const { parent } = context
-              if (parent?.id == 1) return true
+
+              if (parent?.id == 1 && allRows.length == 1) return true
+              if (parent?.id == 1 && !value && allRows.length > 1) return false
               if (parent?.id > 1 && !value) return false
 
               return value
@@ -274,7 +277,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
   }
 
   const autoDelete = async row => {
-    if (!row?.itemName) return true
+    if (!row?.returnId) return true
 
     const LastSerPack = {
       returnId: formik?.values?.recordId,
@@ -1209,7 +1212,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             columns={serialsColumns}
             name='serials'
             maxAccess={maxAccess}
-            disabled={isClosed}
+            disabled={isClosed || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isClosed}
             allowAddNewLine={!formik?.values?.search}
             autoDelete={autoDelete}

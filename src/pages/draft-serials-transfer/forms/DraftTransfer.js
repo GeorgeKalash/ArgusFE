@@ -101,8 +101,11 @@ export default function DraftTransfer({ labels, access, recordId }) {
           srlNo: yup.string().test({
             name: 'srlNo-first-row-check',
             test(value, context) {
+              const allRows = context.options?.from?.[1]?.value?.serials || []
               const { parent } = context
-              if (parent?.id == 1) return true
+
+              if (parent?.id == 1 && allRows.length == 1) return true
+              if (parent?.id == 1 && !value && allRows.length > 1) return false
               if (parent?.id > 1 && !value) return false
 
               return value
@@ -180,7 +183,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
   const isPosted = formik.values.status === 3
 
   const autoDelete = async row => {
-    if (!row?.itemName) return true
+    if (!row?.draftTransferId) return true
 
     const LastSerPack = {
       draftId: formik?.values?.recordId,
@@ -791,7 +794,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
             columns={serialsColumns}
             name='serials'
             maxAccess={maxAccess}
-            disabled={isPosted}
+            disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isPosted}
             autoDelete={autoDelete}
             form={formik}
