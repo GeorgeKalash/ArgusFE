@@ -259,9 +259,9 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             <Grid item xs={4}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
@@ -505,15 +505,8 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <Grid container spacing={3}>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sx={{ marginTop: 20.5 }}>
                   <CustomDatePicker
                     name='date'
                     label={labels.date}
