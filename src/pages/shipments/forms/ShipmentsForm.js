@@ -435,11 +435,13 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       label: labels.sku,
       name: 'sku',
       flex: 1,
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !!row.shipmentId && !!row.poId && !!row.sku }
+      },
       props: {
         store: skuStore?.current,
         displayField: 'sku',
         valueField: 'sku',
-        readOnly: editMode,
         mapping: [
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -517,6 +519,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         }
       },
       propsReducer({ row, props }) {
+        getFilteredMU(row?.itemId, row?.msId)
+
         return { ...props, store: filteredMeasurements?.current }
       }
     },
