@@ -406,9 +406,8 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       'expectedQty',
       !values?.stdWeight || !formik.values.expectedPcs ? 0 : formik.values.expectedPcs * values?.stdWeight
     )
-    const routing = await getRouting(values?.routingId)
-
-    if (routing && routing?.record?.isInactive == true) {
+    const routing = getRouting(values?.routingId)
+    if (routing && routing.isInactive == true) {
       formik.setFieldValue('routingId', null)
       formik.setFieldValue('routingRef', null)
       formik.setFieldValue('routingName', null)
