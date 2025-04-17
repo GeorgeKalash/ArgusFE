@@ -406,8 +406,9 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       'expectedQty',
       !values?.stdWeight || !formik.values.expectedPcs ? 0 : formik.values.expectedPcs * values?.stdWeight
     )
-    const routing = getRouting(values?.routingId)
-    if (routing && routing.isInactive == true) {
+    const routing = await getRouting(values?.routingId)
+    console.log(routing?.record?.isInactive)
+    if (routing && routing?.record?.isInactive == true) {
       formik.setFieldValue('routingId', null)
       formik.setFieldValue('routingRef', null)
       formik.setFieldValue('routingName', null)
@@ -737,16 +738,6 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                         value={formik.values.lineId}
                         onChange={(event, newValue) => {
                           formik.setFieldValue('lineId', newValue?.recordId)
-                          const routing = getRouting(values?.routingId)
-                          if (routing && routing.isInactive == true) {
-                            formik.setFieldValue('routingId', null)
-                            formik.setFieldValue('routingRef', null)
-                            formik.setFieldValue('routingName', null)
-                          } else {
-                            formik.setFieldValue('routingId', newValue?.routingId)
-                            formik.setFieldValue('routingRef', newValue?.routingRef)
-                            formik.setFieldValue('routingName', newValue?.routingName)
-                          }
                         }}
                         error={formik.touched.lineId && Boolean(formik.errors.lineId)}
                       />
@@ -762,7 +753,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                         minChars={2}
                         firstValue={formik.values.routingRef}
                         secondValue={formik.values.routingName}
-                        errorCheck={'routing'}
+                        errorCheck={'routingId'}
                         maxAccess={maxAccess}
                         displayFieldWidth={2}
                         readOnly={isCancelled || isReleased || isPosted}
