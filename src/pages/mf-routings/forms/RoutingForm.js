@@ -126,6 +126,34 @@ export default function RoutingForm({ labels, maxAccess, setStore, store }) {
             maxAccess={maxAccess}
           />
         </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={ManufacturingRepository.ProductionLine.qry}
+            name='lineId'
+            label={labels.lineId}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            valueField='recordId'
+            displayField={['reference', 'name']}
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('lineId', newValue?.recordId || null)
+            }}
+            maxAccess={maxAccess}
+            error={formik.touched.lineId && Boolean(formik.errors.lineId)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomCheckBox
+            name='isInactive'
+            value={formik.values?.isInactive}
+            onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
+            label={labels.isInactive}
+            maxAccess={maxAccess}
+          />
+        </Grid>
       </Grid>
     </FormShell>
   )
