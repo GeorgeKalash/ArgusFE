@@ -145,7 +145,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         tripOrders: filteredOrders
       }
 
-      const response = await postRequest({
+      await postRequest({
         extension: DeliveryRepository.TripOrderPack2.set2,
         record: JSON.stringify(data)
       })
