@@ -68,7 +68,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         {
           id: 1,
           jobId: null,
-          waxId: recordId || null,
+          waxId: recordId,
           pieces: 0,
           jobPcs: 0,
           classId: null,
@@ -150,7 +150,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
   const suggestedWgt = Number(formik.values?.header.suggestedWgt || 0)
 
   const getHeaderData = async recordId => {
-    if (!recordId) return null
+    if (!recordId) return
 
     const response = await getRequest({
       extension: FoundryRepository.Wax.get,
@@ -164,7 +164,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
   }
 
   const getItems = async recordId => {
-    if (!recordId) return null
+    if (!recordId) return
 
     const response = await getRequest({
       extension: FoundryRepository.WaxJob.qry,
@@ -182,7 +182,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
   }
 
   const getDesign = async recordId => {
-    if (!recordId) return null
+    if (!recordId) return
 
     const response = await getRequest({
       extension: ManufacturingRepository.Design.get,
@@ -193,7 +193,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
   }
 
   const getJobRouting = async (recordId, seqNo) => {
-    if (!recordId) return null
+    if (!recordId) return
 
     const response = await getRequest({
       extension: ManufacturingRepository.JobRouting.get,
@@ -273,7 +273,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     const header = await getHeaderData(recordId)
     const items = await getItems(recordId)
     formik.setValues({
-      recordId: header.recordId || null,
+      recordId: header.recordId,
       header: header,
       items: items
     })
@@ -456,211 +456,221 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     >
       <VertLayout>
         <Fixed>
-          <Grid container>
-            <Grid container rowGap={2} xs={4} sx={{ px: 2 }}>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.DocumentType.qry}
-                  parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Wax}`}
-                  filter={!editMode ? item => item.activeStatus === 1 : undefined}
-                  name='header.dtId'
-                  label={labels.docType}
-                  readOnly={editMode}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  values={formik.values.header}
-                  onChange={async (event, newValue) => {
-                    formik.setFieldValue('header.dtId', newValue?.recordId)
-                    changeDT(newValue)
-                  }}
-                  error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
-                  maxAccess={maxAccess}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='header.reference'
-                  label={labels.reference}
-                  value={formik.values.header.reference}
-                  readOnly={editMode || !formik.values.header.dtId}
-                  maxAccess={!editMode && maxAccess}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('header.reference', '')}
-                  error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={FoundryRepository.Mould.qry}
-                  name='header.mouldId'
-                  parameters='_params=&_startAt=0&_pageSize=1000'
-                  label={labels.mould}
-                  required
-                  valueField='recordId'
-                  readOnly={isClosed}
-                  displayField={'reference'}
-                  values={formik.values.header}
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('header.mouldId', newValue?.recordId || null)
-                    formik.setFieldValue('header.mouldRef', newValue?.reference || null)
-                  }}
-                  error={formik.touched?.header?.mouldId && Boolean(formik.errors?.header?.mouldId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomDatePicker
-                  name='header.date'
-                  required
-                  readOnly={isClosed}
-                  label={labels.date}
-                  value={formik?.values?.header?.date}
-                  maxAccess={maxAccess}
-                  onChange={formik.setFieldValue}
-                  onClear={() => formik.setFieldValue('header.date', null)}
-                  error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
-                />
-              </Grid>
-            </Grid>
-            <Grid container rowGap={2} xs={4} sx={{ px: 2 }}>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.Plant.qry}
-                  name='header.plantId'
-                  readOnly={isClosed}
-                  label={labels.plant}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  values={formik.values.header}
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('header.plantId', newValue?.recordId || null)
-                  }}
-                  error={formik.touched.header?.plantId && Boolean(formik.errors.header?.plantId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={ManufacturingRepository.ProductionLine.qry}
-                  name='header.lineId'
-                  readOnly={isClosed || (formik.values.items.length > 0 && formik.values.items[0].jobId)}
-                  required
-                  label={labels.prodLine}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  values={formik.values.header}
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('header.lineId', newValue?.recordId || null)
-                  }}
-                  error={formik.touched?.header?.lineId && Boolean(formik.errors?.header?.lineId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={InventoryRepository.Metals.qry}
-                  name='header.metalId'
-                  readOnly={isClosed}
-                  required
-                  label={labels.metal}
-                  valueField='recordId'
-                  displayField={'reference'}
-                  values={formik.values.header}
-                  maxAccess={maxAccess}
-                  onChange={async (event, newValue) => {
-                    formik.setFieldValue('header.metalId', newValue?.recordId || null)
-                    const metalSetting = await getMetalSetting(newValue?.recordId, formik.values?.header?.metalColorId)
-                    formik.setFieldValue('header.factor', metalSetting?.rate || 0)
-                  }}
-                  error={formik.touched?.header?.metalId && Boolean(formik.errors?.header?.metalId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={InventoryRepository.MetalColor.qry}
-                  name='header.metalColorId'
-                  readOnly={isClosed}
-                  required
-                  label={labels.metalColor}
-                  valueField='recordId'
-                  displayField={'reference'}
-                  values={formik.values.header}
-                  maxAccess={maxAccess}
-                  onChange={async (event, newValue) => {
-                    formik.setFieldValue('header.metalColorId', newValue?.recordId || null)
-                    const metalSetting = await getMetalSetting(formik.values?.header?.metalId, newValue?.recordId)
-                    formik.setFieldValue('header.factor', metalSetting?.rate || 0)
-                  }}
-                  error={formik.touched?.header?.metalColorId && Boolean(formik.errors?.header?.metalColorId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={ManufacturingRepository.WorkCenter.qry}
-                  name='header.workCenterId'
-                  label={labels.workCenter}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  readOnly
-                  values={formik.values.header}
-                  maxAccess={maxAccess}
-                />
+          <Grid container spacing={3} xs={12}>
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.DocumentType.qry}
+                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Wax}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
+                    name='header.dtId'
+                    label={labels.docType}
+                    readOnly={editMode}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values.header}
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('header.dtId', newValue?.recordId)
+                      changeDT(newValue)
+                    }}
+                    error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='header.reference'
+                    label={labels.reference}
+                    value={formik.values.header.reference}
+                    readOnly={editMode || !formik.values.header.dtId}
+                    maxAccess={!editMode && maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('header.reference', '')}
+                    error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={FoundryRepository.Mould.qry}
+                    name='header.mouldId'
+                    parameters='_params=&_startAt=0&_pageSize=1000'
+                    label={labels.mould}
+                    required
+                    valueField='recordId'
+                    readOnly={isClosed}
+                    displayField={'reference'}
+                    values={formik.values.header}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('header.mouldId', newValue?.recordId || null)
+                      formik.setFieldValue('header.mouldRef', newValue?.reference || null)
+                    }}
+                    error={formik.touched?.header?.mouldId && Boolean(formik.errors?.header?.mouldId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='header.date'
+                    required
+                    readOnly={isClosed}
+                    label={labels.date}
+                    value={formik?.values?.header?.date}
+                    maxAccess={maxAccess}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('header.date', null)}
+                    error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
+                  />
+                </Grid>
               </Grid>
             </Grid>
-            <Grid container rowGap={2} xs={4} sx={{ px: 2 }}>
-              <Grid item xs={12}>
-                <CustomNumberField
-                  name='header.grossWgt'
-                  label={labels.grossWgt}
-                  required
-                  readOnly={isClosed}
-                  value={formik.values.header.grossWgt}
-                  maxAccess={maxAccess}
-                  onChange={e => formik.setFieldValue('header.grossWgt', e.target.value)}
-                  onClear={() => formik.setFieldValue('header.grossWgt', 0)}
-                  error={formik.touched?.header?.grossWgt && Boolean(formik.errors?.header?.grossWgt)}
-                />
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Plant.qry}
+                    name='header.plantId'
+                    readOnly={isClosed}
+                    label={labels.plant}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values.header}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('header.plantId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.header?.plantId && Boolean(formik.errors.header?.plantId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.ProductionLine.qry}
+                    name='header.lineId'
+                    readOnly={isClosed || (formik.values.items.length > 0 && formik.values.items[0].jobId)}
+                    required
+                    label={labels.prodLine}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values.header}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('header.lineId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched?.header?.lineId && Boolean(formik.errors?.header?.lineId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Metals.qry}
+                    name='header.metalId'
+                    readOnly={isClosed}
+                    required
+                    label={labels.metal}
+                    valueField='recordId'
+                    displayField={'reference'}
+                    values={formik.values.header}
+                    maxAccess={maxAccess}
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('header.metalId', newValue?.recordId || null)
+
+                      const metalSetting = await getMetalSetting(
+                        newValue?.recordId,
+                        formik.values?.header?.metalColorId
+                      )
+                      formik.setFieldValue('header.factor', metalSetting?.rate || 0)
+                    }}
+                    error={formik.touched?.header?.metalId && Boolean(formik.errors?.header?.metalId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.MetalColor.qry}
+                    name='header.metalColorId'
+                    readOnly={isClosed}
+                    required
+                    label={labels.metalColor}
+                    valueField='recordId'
+                    displayField={'reference'}
+                    values={formik.values.header}
+                    maxAccess={maxAccess}
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('header.metalColorId', newValue?.recordId || null)
+                      const metalSetting = await getMetalSetting(formik.values?.header?.metalId, newValue?.recordId)
+                      formik.setFieldValue('header.factor', metalSetting?.rate || 0)
+                    }}
+                    error={formik.touched?.header?.metalColorId && Boolean(formik.errors?.header?.metalColorId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.WorkCenter.qry}
+                    name='header.workCenterId'
+                    label={labels.workCenter}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    readOnly
+                    values={formik.values.header}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <CustomNumberField name='header.rmWgt' label={labels.rmWgt} required value={rmWgt} readOnly />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomNumberField
-                  name='header.mouldWgt'
-                  label={labels.mouldWgt}
-                  required
-                  value={formik.values.header.mouldWgt}
-                  maxAccess={maxAccess}
-                  readOnly={isClosed}
-                  onClear={() => formik.setFieldValue('header.mouldWgt', 0)}
-                  onChange={e => formik.setFieldValue('header.mouldWgt', e.target.value)}
-                  error={formik.touched?.header?.mouldWgt && Boolean(formik.errors?.header?.mouldWgt)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomNumberField name='header.netWgt' label={labels.netWgt} required value={netWgt} readOnly />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomNumberField
-                  name='header.suggestedWgt'
-                  label={labels.suggestedWgt}
-                  required
-                  maxAccess={maxAccess}
-                  value={suggestedWgt}
-                  readOnly
-                />
+            </Grid>
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.grossWgt'
+                    label={labels.grossWgt}
+                    required
+                    readOnly={isClosed}
+                    value={formik.values.header.grossWgt}
+                    maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('header.grossWgt', e.target.value)}
+                    onClear={() => formik.setFieldValue('header.grossWgt', 0)}
+                    error={formik.touched?.header?.grossWgt && Boolean(formik.errors?.header?.grossWgt)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField name='header.rmWgt' label={labels.rmWgt} required value={rmWgt} readOnly />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.mouldWgt'
+                    label={labels.mouldWgt}
+                    required
+                    value={formik.values.header.mouldWgt}
+                    maxAccess={maxAccess}
+                    readOnly={isClosed}
+                    onClear={() => formik.setFieldValue('header.mouldWgt', 0)}
+                    onChange={e => formik.setFieldValue('header.mouldWgt', e.target.value)}
+                    error={formik.touched?.header?.mouldWgt && Boolean(formik.errors?.header?.mouldWgt)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField name='header.netWgt' label={labels.netWgt} required value={netWgt} readOnly />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.suggestedWgt'
+                    label={labels.suggestedWgt}
+                    required
+                    maxAccess={maxAccess}
+                    value={suggestedWgt}
+                    readOnly
+                  />
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
