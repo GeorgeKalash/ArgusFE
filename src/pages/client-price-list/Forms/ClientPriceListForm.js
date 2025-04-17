@@ -139,7 +139,6 @@ const ClientPriceListForm = ({ labels, maxAccess, recordId, record }) => {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('itemId', newValue?.recordId || null)
                   formik.setFieldValue('itemName', newValue?.name || '')
-                  formik.setFieldValue('itemRef', newValue?.sku || '')
                   formik.setFieldValue('sku', newValue?.sku || '')
                 }}
                 errorCheck={'itemId'}
