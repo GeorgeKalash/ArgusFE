@@ -3,10 +3,76 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { Button } from '@mui/material'
+import { useWindow } from 'src/windows'
+import SelectAgent from '../Tabs/SelectAgent'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
+import { useError } from 'src/error'
 
-const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, editMode, window }) => {
+const ProductsWindow = ({
+  labels,
+  maxAccess,
+  onProductSubmit,
+  products,
+  editMode,
+  targetCurrency,
+  countryRef,
+  sysDefault,
+  defaultAgentCode,
+  fcAmount,
+  lcAmount,
+  productId,
+  window
+}) => {
   const [gridData, setGridData] = useState([])
+  const { stack } = useWindow()
+  const { getRequest } = useContext(RequestsContext)
+
+  const { stack: stackError } = useError()
+
+  const setData = async ({ productId, agentName, agentCode, payingCurrency, deliveryModeId }) => {
+    const targetAmount = fcAmount || 0
+    const srcAmount = lcAmount || 0
+
+    const getRates = await getRequest({
+      extension: RemittanceBankInterface.InstantCashRates.get,
+      parameters: `_deliveryMode=${deliveryModeId}&_sourceCurrency=${sysDefault.currencyRef}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_targetAmount=${targetAmount}&_originatingCountry=${sysDefault.countryRef}&_destinationCountry=${countryRef}`
+    })
+
+    const data = getRates.record
+
+    const change = await getRequest({
+      extension: RemittanceBankInterface.exchange.get,
+      parameters: `_settlementCurrency=${sysDefault.currencyRef}&_receivingAgent=${agentCode}&_payoutCurrency=${targetCurrency}&_destinationCountry=${countryRef}&_lcAmount=${srcAmount}&_fcAmount=${targetAmount}`
+    })
+
+    const result = change?.record
+    if (!result) {
+      stackError({ message: 'This agent is not available for use.' })
+
+      return
+    }
+
+    const updatedData = gridData?.list.map(row =>
+      row.productId === productId
+        ? {
+            ...row,
+            agentName: agentName || row?.agentName,
+            agentCode: agentCode,
+            originAmount: result?.originalAmount,
+            baseAmount: result?.baseAmount,
+            fees: data?.charge,
+            exRate: result.settlementRate,
+            deliveryModeId: deliveryModeId,
+            payingCurrency: payingCurrency
+          }
+        : row
+    )
+
+    setGridData({ list: updatedData })
+  }
 
   const columns = [
     {
@@ -20,6 +86,51 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, editMode
       flex: 1
     },
     {
+      field: 'agentName',
+      headerName: labels.Agent,
+      flex: 1
+    },
+    {
+      field: '',
+      headerName: '',
+      flex: 1,
+      cellRenderer: params => {
+        return (
+          <Button
+            variant='contained'
+            size='small'
+            style={{ height: 25 }}
+            onClick={() =>
+              stack({
+                Component: SelectAgent,
+                props: {
+                  setData,
+                  productId: params.data?.productId,
+                  agentId: params.data?.agentId,
+                  baseAmount: params.data?.baseAmount,
+                  originAmount: params.data?.originAmount,
+                  receivingCountry: countryRef,
+                  deliveryModeId: params.data?.deliveryModeId,
+                  defaultAgentCode,
+                  targetCurrency: targetCurrency,
+                  payingCurrency: params.data?.payingCurrency,
+                  agentCode: params.data?.agentCode,
+                  agentDeliveryMode: params.data?.agentDeliveryMode,
+                  labels,
+                  maxAccess
+                },
+                width: 500,
+                height: 200,
+                title: params.data?.productName
+              })
+            }
+          >
+            {labels.select}
+          </Button>
+        )
+      }
+    },
+    {
       field: 'fees',
       headerName: labels.Fees,
       flex: 1
@@ -27,11 +138,18 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, editMode
     {
       field: 'originAmount',
       headerName: labels.originAmount,
-      flex: 1
+      flex: 1,
+      type: { field: 'number', decimal: 2 }
     },
     {
       field: 'baseAmount',
       headerName: labels.BaseAmount,
+      flex: 1,
+      type: { field: 'number', decimal: 2 }
+    },
+    {
+      field: 'dispersalName',
+      headerName: labels.extraInfo,
       flex: 1
     }
   ]
@@ -39,7 +157,18 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, editMode
   useEffect(() => {
     ;(async function () {
       try {
-        setGridData({ list: products })
+        setGridData({
+          list: products.map(item => ({
+            ...item,
+            defaultAgentCode: item.agentCode,
+            defaultAgentName: item.agentName,
+            payingCurrency: item.agentPayingCurrency,
+            defaultPayoutCurrency: item.payingCurrency,
+            checked: item.productId === productId ? true : false,
+            originAmount: item.originAmount,
+            baseAmount: item.baseAmount
+          }))
+        })
       } catch (error) {}
     })()
   }, [])
