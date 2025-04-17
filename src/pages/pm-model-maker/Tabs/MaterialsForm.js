@@ -94,9 +94,18 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
         ],
         mapping: [
           { from: 'recordId', to: 'itemId' },
+          { from: 'name', to: 'itemName' },
           { from: 'sku', to: 'sku' }
         ],
         displayFieldWidth: 2
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.itemName,
+      name: 'itemName',
+      props: {
+        readOnly: true
       }
     },
     {
