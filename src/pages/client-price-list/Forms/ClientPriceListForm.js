@@ -91,7 +91,7 @@ const ClientPriceListForm = ({ labels, maxAccess, recordId, record }) => {
     <FormShell form={formik} resourceId={ResourceIds.ClientPriceLists} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={SaleRepository.Client.snapshot}

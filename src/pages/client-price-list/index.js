@@ -121,7 +121,7 @@ const ClientPriceList = () => {
         maxAccess: access
       },
       width: 600,
-      height: 500,
+      height: 450,
       title: labels.ClientPriceList
     })
   }
