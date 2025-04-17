@@ -150,6 +150,7 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
               formik.setFieldValue('transaction.bankName', newValue.bankName || '')
               formik.setFieldValue('transaction.creditorBankSubCode', newValue.bankCode || '')
               formik.setFieldValue('transaction.providerCode', newValue.providerCode || '')
+              formik.setFieldValue('transaction.creditorOrganisationid', newValue.bankName || '')
 
               const result = await getRequest({
                 extension: RemittanceBankInterface.Combos.terrapayAccountStatus,

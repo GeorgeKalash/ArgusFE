@@ -124,7 +124,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
   const isOTPVerified = formik?.values?.header?.otpVerified
 
   function viewOTP(result) {
-    const recordId = result.recordId || formik.values.header.recordId
+    const recordId = result?.recordId || formik.values.header.recordId
     stack({
       Component: OTPPhoneVerification,
       props: {
@@ -283,6 +283,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                   title: platformLabels.PreviewReport
                 })
               }
+              resourceId={ResourceIds.OutwardsTransfer}
               setSelectedReport={setSelectedReport}
             />
           </Fixed>
@@ -316,7 +317,9 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
     {
       key: 'OTP',
       condition: true,
-      onClick: viewOTP,
+      onClick: () => {
+        viewOTP(null)
+      },
       disabled: !editMode
     },
     {

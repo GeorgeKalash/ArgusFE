@@ -183,6 +183,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         creditorSortCode: '0001',
         creditorBankSubCode: '',
         creditorAccounttype: 'Savings',
+        creditorOrganisationid: '',
         senderKyc: {
           nationality: '',
           dateOfBirth: '',
