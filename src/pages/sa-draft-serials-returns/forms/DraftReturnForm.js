@@ -894,6 +894,20 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     }
   }
 
+  async function onValidationRequired() {
+    if (Object.keys(await formik.validateForm()).length) {
+      const errors = await formik.validateForm()
+
+      const touchedFields = Object.keys(errors).reduce((acc, key) => {
+        acc[key] = true
+
+        return acc
+      }, {})
+
+      formik.setTouched(touchedFields, true)
+    }
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.DraftSerialReturns}
@@ -1218,7 +1232,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 !!formik.values?.serials?.[formik.values?.serials?.length - 1]?.srlNo)
             }
             autoDelete={autoDelete}
-            form={formik}
+            onValidationRequired={onValidationRequired}
           />
         </Grow>
         <Grid container spacing={3}>

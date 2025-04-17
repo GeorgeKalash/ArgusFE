@@ -26,7 +26,7 @@ export function DataGrid({
   rowSelectionModel,
   autoDelete,
   bg,
-  form = null
+  onValidationRequired
 }) {
   const gridApiRef = useRef(null)
 
@@ -585,19 +585,7 @@ export function DataGrid({
   }
 
   const onCellClicked = async params => {
-    if (form && Object.keys(await form.validateForm()).length) {
-      const errors = await form.validateForm()
-
-      const touchedFields = Object.keys(errors).reduce((acc, key) => {
-        acc[key] = true
-
-        return acc
-      }, {})
-
-      form.setTouched(touchedFields, true)
-
-      return
-    }
+    if (typeof onValidationRequired === 'function') onValidationRequired()
 
     const { colDef, rowIndex, api } = params
 
@@ -730,7 +718,6 @@ export function DataGrid({
       process(params, data, setData)
     }
   }
-
 
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>

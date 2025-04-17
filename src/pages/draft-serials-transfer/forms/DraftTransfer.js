@@ -597,6 +597,20 @@ export default function DraftTransfer({ labels, access, recordId }) {
     }
   }, [formik?.values?.dtId])
 
+  async function onValidationRequired() {
+    if (Object.keys(await formik.validateForm()).length) {
+      const errors = await formik.validateForm()
+
+      const touchedFields = Object.keys(errors).reduce((acc, key) => {
+        acc[key] = true
+
+        return acc
+      }, {})
+
+      formik.setTouched(touchedFields, true)
+    }
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.DraftTransfer}
@@ -799,7 +813,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
               !!formik.values?.serials?.[formik.values?.serials?.length - 1]?.srlNo
             }
             autoDelete={autoDelete}
-            form={formik}
+            onValidationRequired={onValidationRequired}
           />
           <Grid container spacing={16}>
             <Grid item xs={8}>
