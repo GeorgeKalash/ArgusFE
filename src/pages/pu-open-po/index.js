@@ -228,17 +228,26 @@ const OpenPurchaseOrder = () => {
       },
       async onChange({ row: { update, newRow } }) {
         const { receiveNow, balance, qty } = newRow
-
         let value = receiveNow
+        const maxValue = balance
 
-        if (receiveNow > balance) {
-          const margin = (100 * (receiveNow - balance)) / qty
-          if (marginDefault && marginDefault == 0) value = balance
-          else if (marginDefault && margin < marginDefault) value = receiveNow
-          else if (marginDefault && marginDefault > 0) {
-            value = balance + marginDefault
+        if (value > maxValue) {
+          const margin = (100 * (value - balance)) / qty
+
+          if (marginDefault == 0 || marginDefault == null) {
+            value = maxValue
+          } else {
+            if (margin < marginDefault) {
+              value = receiveNow
+            } else {
+              value = maxValue
+            }
           }
-        } else if (receiveNow < 0) value = 0
+        } else if (value < 0) {
+          value = 0
+        } else {
+          value = receiveNow
+        }
 
         update({ receiveNow: value })
       }
@@ -284,6 +293,10 @@ const OpenPurchaseOrder = () => {
                   label={labels.category}
                   valueField='recordId'
                   displayField={'name'}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
                   displayFieldWidth={1}
                   values={formik?.values}
                   maxAccess={access}
@@ -394,10 +407,10 @@ const OpenPurchaseOrder = () => {
                 <ResourceLookup
                   endpointId={InventoryRepository.Item.snapshot}
                   name='itemId'
-                  label={labels?.sku}
-                  valueField='recordId'
-                  displayField='sku'
-                  valueShow='sku'
+                  label={labels.sku}
+                  valueField='sku'
+                  displayField='name'
+                  valueShow='itemRef'
                   secondValueShow='itemName'
                   form={formik}
                   columnsInDropDown={[
@@ -407,6 +420,7 @@ const OpenPurchaseOrder = () => {
                   onChange={(event, newValue) => {
                     formik.setFieldValue('itemId', newValue?.recordId || 0)
                     formik.setFieldValue('itemName', newValue?.name || '')
+                    formik.setFieldValue('itemRef', newValue?.sku || '')
                     formik.setFieldValue('sku', newValue?.sku || '')
                   }}
                   displayFieldWidth={2}
