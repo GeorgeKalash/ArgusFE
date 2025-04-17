@@ -11,7 +11,6 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
 
   const formik = useFormik({
     initialValues: { clientId: form.values.clientId, benList: [] },
-    enableReinitialize: false,
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: values => {
