@@ -161,7 +161,9 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
   }, 0)
 
   const totalRawMaterial = designQuantity + diffQuantity
-  const disablePreview = !formik.values.bomId || !formik.values.siteId || !formik.values.qty
+
+  const disablePreview =
+    !formik.values.bomId || !formik.values.siteId || formik.values.qty == null || formik.values.qty === ''
 
   const fetchLookup = async searchQry => {
     if (!searchQry) return
@@ -608,7 +610,6 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     label={labels.date}
                     value={formik?.values?.date}
                     onChange={formik.setFieldValue}
-                    editMode={editMode}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('date', null)}
                     error={formik.touched.date && Boolean(formik.errors.date)}
@@ -645,7 +646,6 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     valueShow='machineRef'
                     secondValueShow='machineName'
                     maxAccess={maxAccess}
-                    editMode={editMode}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -671,7 +671,6 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     valueShow='bomRef'
                     secondValueShow='bomName'
                     maxAccess={maxAccess}
-                    editMode={editMode}
                     filter={{ activeStatus: 1 }}
                     readOnly={isPosted || editMode || formik.values.items?.some(item => !!item.sku)}
                     columnsInDropDown={[
