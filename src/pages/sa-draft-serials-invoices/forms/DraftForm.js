@@ -806,12 +806,16 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       const errors = await formik.validateForm()
 
       const touchedFields = Object.keys(errors).reduce((acc, key) => {
-        acc[key] = true
+        if (!formik.touched[key]) {
+          acc[key] = true
+        }
 
         return acc
       }, {})
 
-      formik.setTouched(touchedFields, true)
+      if (Object.keys(touchedFields).length) {
+        formik.setTouched(touchedFields, true)
+      }
     }
   }
 
