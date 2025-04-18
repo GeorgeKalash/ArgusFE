@@ -25,7 +25,8 @@ export function DataGrid({
   onSelectionChange,
   rowSelectionModel,
   autoDelete,
-  bg
+  bg,
+  onValidationRequired
 }) {
   const gridApiRef = useRef(null)
 
@@ -583,7 +584,9 @@ export function DataGrid({
     onChange(updatedGridData)
   }
 
-  const onCellClicked = params => {
+  const onCellClicked = async params => {
+    if (typeof onValidationRequired === 'function') onValidationRequired()
+
     const { colDef, rowIndex, api } = params
 
     api.startEditingCell({
@@ -706,7 +709,7 @@ export function DataGrid({
 
     if (lastCellStopped.current == cellId) return
     lastCellStopped.current = cellId
-    if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
+    if (colDef.updateOn === 'blur' && data[colDef?.field] !== value?.[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
         stackDuplicate(params)
 
