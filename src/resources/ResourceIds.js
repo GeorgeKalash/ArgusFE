@@ -394,6 +394,7 @@ export const ResourceIds = {
   SyncSalesTrx: 51603,
   ProductionOrder: 42337,
   YearlyComparativeSales: 51550,
+  PurchaseTransactions: 50303,
   SManagement: 41213,
   NotificationLabels: 23106,
   ClientPriceLists: 51208,

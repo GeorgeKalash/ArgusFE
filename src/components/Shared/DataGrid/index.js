@@ -26,6 +26,7 @@ export function DataGrid({
   onSelectionChange,
   rowSelectionModel,
   autoDelete,
+  initialValues,
   bg,
   onValidationRequired
 }) {
@@ -115,10 +116,11 @@ export function DataGrid({
         rows = [
           ...value.map(row => (row.id === updatedRow.id ? updatedRow : row)),
           {
-            id: highestIndex,
-            ...defaultValues
+            ...initialValues,
+            id: highestIndex
           }
         ]
+
         onChange(rows)
 
         setTimeout(() => {
@@ -219,8 +221,8 @@ export function DataGrid({
       }, {})
 
     const newRow = {
-      id: highestIndex,
-      ...defaultValues
+      ...initialValues,
+      id: highestIndex
     }
 
     const res = gridApiRef.current?.applyTransaction({ add: [newRow] })
