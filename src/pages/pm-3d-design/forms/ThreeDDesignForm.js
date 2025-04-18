@@ -54,6 +54,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       status: 1,
       dtId: null,
       reference: '',
+      source: null,
       sketchId: null,
       sketchRef: '',
       sketchName: '',
@@ -78,12 +79,14 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       productionStandardId: null,
       productionStandardRef: '',
       productionStandardName: '',
-      metalId: null
+      metalId: null,
+      collectionId: null
     },
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
+      source: yup.number().required(),
       designerId: yup.number().required(),
       sketchId: yup.number().required(),
       castingType: yup.number().required(),
@@ -256,9 +259,9 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             <Grid item xs={4}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
@@ -294,6 +297,22 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
+                  <ResourceComboBox
+                    datasetId={DataSets.THREED_DESIGN_SOURCE}
+                    name='source'
+                    label={labels.source}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('source', newValue?.key || null)
+                    }}
+                    error={formik.touched.source && Boolean(formik.errors.source)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={ProductModelingRepository.Sketch.snapshot2}
                     name='sketchRef'
@@ -319,6 +338,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                         productionStandardId: newValue?.productionStandardId || null,
                         productionStandardRef: newValue?.productionStandardRef || '',
                         productionStandardName: newValue?.productionStandardName || '',
+                        collectionId: newValue?.collectionId || null,
                         metalPurity: newValue?.metalPurity || null,
                         metalId: newValue?.metalId || null
                       })
@@ -485,15 +505,8 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <Grid container spacing={3}>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sx={{ marginTop: 20.5 }}>
                   <CustomDatePicker
                     name='date'
                     label={labels.date}
