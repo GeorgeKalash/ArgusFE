@@ -36,7 +36,8 @@ export const ManufacturingRepository = {
     set: service + 'setRTN',
     get: service + 'getRTN',
     del: service + 'delRTN',
-    snapshot2: service + 'snapshot2RTN'
+    snapshot2: service + 'snapshot2RTN',
+    snapshot: service + 'snapshotRTN'
   },
   Operation: {
     snapshot: service + 'snapshotOPR',
@@ -59,7 +60,8 @@ export const ManufacturingRepository = {
     qry: service + 'qryMAC',
     set: service + 'setMAC',
     get: service + 'getMAC',
-    del: service + 'delMAC'
+    del: service + 'delMAC',
+    snapshot: service + 'snapshotMAC'
   },
   MachineSpecification: {
     page: service + 'pageMAS',
@@ -256,5 +258,25 @@ export const ManufacturingRepository = {
     del: service + 'delBMI',
     set: service + 'setBMI',
     set2: service + 'set2BMI'
+  },
+  Assembly: {
+    get: service + 'getASM',
+    set2: service + 'set2ASM',
+    del: service + 'delASM',
+    page: service + 'pageASM',
+    snapshot: service + 'snapshotASM',
+    post: service + 'postASM',
+    unpost: service + 'unpostASM'
+  },
+  AssemblyItems: {
+    qry: service + 'qryASC'
+  },
+  AssemblyLot: {
+    get: service + 'getASL',
+    set: service + 'setASL'
+  },
+  AssemblyOverhead: {
+    qry: service + 'qryAOH',
+    set2: service + 'set2AOH'
   }
 }
