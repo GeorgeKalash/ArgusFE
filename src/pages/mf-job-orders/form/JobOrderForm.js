@@ -763,6 +763,11 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                           { key: 'name', value: 'Name' }
                         ]}
                         onChange={(event, newValue) => {
+                          if (!newValue) {
+                            formik.setFieldValue('routingId', null)
+                            formik.setFieldValue('routingRef', null)
+                            formik.setFieldValue('routingName', null)
+                          }
                           updateWC(newValue?.recordId)
                         }}
                       />
