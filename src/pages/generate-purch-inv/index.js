@@ -27,7 +27,7 @@ import toast from 'react-hot-toast'
 
 const GeneratePurchaseInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, DefaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
 
   const { labels, access } = useResourceQuery({
@@ -38,19 +38,18 @@ const GeneratePurchaseInvoice = () => {
     datasetId: ResourceIds.PurchaseInvoice
   })
 
-  const defCurrencyId = parseInt(DefaultsData?.list?.find(({ key }) => key === 'PUCurrencyId')?.value)
+  const defCurrencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'PUCurrencyId')?.value)
 
   const basicValidation = yup.object({
-    vendorId: yup.number().required('Vendor is required'),
-    currencyId: yup.number().required('Currency is required')
+    vendorId: yup.number().required(),
+    currencyId: yup.number().required()
   })
 
   const fullValidation = yup.object({
-    vendorId: yup.number().required('Vendor is required'),
-    currencyId: yup.number().required('Currency is required'),
-    amount: yup.number().required('Amount is required').min(1),
-    dtId: yup.number().required('DT is required'),
-    plantId: yup.number().required('Plant is required')
+    vendorId: yup.number().required(),
+    currencyId: yup.number().required(),
+    dtId: yup.number().required(),
+    plantId: yup.number().required()
   })
 
   const [validationMode, setValidationMode] = useState(basicValidation)
@@ -70,15 +69,14 @@ const GeneratePurchaseInvoice = () => {
     },
     validationSchema: validationMode,
     maxAccess: access,
-    enableReinitialize: false,
     validateOnChange: true,
     onSubmit: async obj => {
-      const { data, amount, vendorRef, vendorName, ...rest } = obj
+      const { data, amount, vendorRef, vendorName, date, ...rest } = obj
 
       const genData = {
         ...rest,
-        date: formatDateToApi(obj.date),
-        shipments: data?.list?.filter(item => item.checked)?.map(item => parseInt(item.shipmentId))
+        date: formatDateToApi(date || new Date()),
+        shipments: data?.list?.filter(item => item.checked)?.map(item => parseInt(item.shipmentId)) || []
       }
 
       const res = await postRequest({
@@ -132,7 +130,7 @@ const GeneratePurchaseInvoice = () => {
         .reduce((amountSum, row) => {
           let amountValue = 0
           if (row.checked) {
-            amountValue = parseFloat(row?.amountBeforeVat?.toString().replace(/,/g, '')) || 0
+            amountValue = parseFloat(row?.amountAfterVat?.toString().replace(/,/g, '')) || 0
           }
 
           return amountSum + amountValue
@@ -149,13 +147,13 @@ const GeneratePurchaseInvoice = () => {
     {
       field: 'shipmentDate',
       headerName: labels.shipmentDate,
-      type: 'date',
+      type: { field: 'date' },
       flex: 1
     },
     {
       field: 'qty',
       headerName: labels.qty,
-      type: 'number',
+      type: { field: 'number', decimal: 2 },
       flex: 1
     },
     {
@@ -167,24 +165,24 @@ const GeneratePurchaseInvoice = () => {
       field: 'poDate',
       headerName: labels.poDate,
       flex: 1,
-      type: 'date'
+      type: { field: 'date' }
     },
     {
       field: 'amountBeforeVat',
       headerName: labels.amountBeforeVat,
-      type: 'number',
+      type: { field: 'number', decimal: 2 },
       flex: 1
     },
     {
       field: 'vatAmount',
       headerName: labels.vatAmount,
-      type: 'number',
+      type: { field: 'number', decimal: 2 },
       flex: 1
     },
     {
       field: 'amountAfterVat',
       headerName: labels.amountAfterVat,
-      type: 'number',
+      type: { field: 'number', decimal: 2 },
       flex: 1
     }
   ]
@@ -238,7 +236,7 @@ const GeneratePurchaseInvoice = () => {
   async function onChangeDtId(recordId) {
     if (recordId) {
       const dtd = await getRequest({
-        extension: SaleRepository.DocumentTypeDefault.get,
+        extension: PurchaseRepository.DocumentTypeDefault.get,
         parameters: `_dtId=${recordId}`
       })
 
@@ -263,7 +261,7 @@ const GeneratePurchaseInvoice = () => {
                 endpointId={PurchaseRepository.Vendor.snapshot}
                 valueField='reference'
                 displayField='name'
-                secondFieldLabel={labels.vendor}
+                secondFieldLabel={labels.name}
                 name='vendorId'
                 label={labels.vendor}
                 form={formik}
@@ -273,9 +271,6 @@ const GeneratePurchaseInvoice = () => {
                 secondValueShow='vendorName'
                 maxAccess={maxAccess}
                 secondFieldName={'vendorName'}
-                onSecondValueChange={(name, value) => {
-                  formik.setFieldValue('vendorName', value)
-                }}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' },
@@ -328,7 +323,7 @@ const GeneratePurchaseInvoice = () => {
             <Table
               columns={columns}
               gridData={formik?.values?.data}
-              rowId={['recordId']}
+              rowId={['shipmentId']}
               isLoading={false}
               pagination={false}
               maxAccess={access}
@@ -340,7 +335,7 @@ const GeneratePurchaseInvoice = () => {
         </Grow>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={3.5}>
+            <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PurchaseInvoice}`}
@@ -356,13 +351,13 @@ const GeneratePurchaseInvoice = () => {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId)
+                  formik.setFieldValue('dtId', newValue?.recordId || null)
                   await onChangeDtId(newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={2.5}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
@@ -385,9 +380,7 @@ const GeneratePurchaseInvoice = () => {
             <Grid item xs={0.25}></Grid>
             <Grid item>
               <CustomButton
-                onClick={() => {
-                  openPUDetailsForm()
-                }}
+                onClick={openPUDetailsForm}
                 label={labels.edit}
                 color='#231f20'
                 tooltipText=''
@@ -396,9 +389,7 @@ const GeneratePurchaseInvoice = () => {
             </Grid>
             <Grid item xs={0.25}>
               <CustomButton
-                onClick={() => {
-                  onGeneratePI()
-                }}
+                onClick={onGeneratePI}
                 label={platformLabels.Generate}
                 color='#231f20'
                 tooltipText={platformLabels.Generate}

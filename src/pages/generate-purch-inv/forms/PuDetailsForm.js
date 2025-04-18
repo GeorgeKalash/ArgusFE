@@ -15,7 +15,6 @@ export default function PuDetailsForm({ labels, access, form, window }) {
       description: form?.values?.description || ''
     },
     access,
-    enableReinitialize: false,
     validateOnChange: true,
 
     validationSchema: yup.object({
