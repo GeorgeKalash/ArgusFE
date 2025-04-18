@@ -36,6 +36,7 @@ export const ManufacturingRepository = {
     set: service + 'setRTN',
     get: service + 'getRTN',
     del: service + 'delRTN',
+    snapshot2: service + 'snapshot2RTN',
     snapshot: service + 'snapshotRTN'
   },
   Operation: {
