@@ -135,7 +135,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       }
 
       filteredOrders =
-        filteredOrders[0].soId !== null && filteredOrders[0].soRef !== null
+        filteredOrders?.length > 0 && filteredOrders[0]?.soId !== null && filteredOrders?.[0]?.soRef !== null
           ? filteredOrders.map((order, index) => ({
               ...order,
               tripId: headerResponse.recordId || 0,
