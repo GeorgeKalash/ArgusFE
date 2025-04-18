@@ -587,6 +587,34 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     })
   }
 
+  async function onValidationRequired() {
+    const errors = await formik.validateForm()
+
+    if (Object.keys(errors).length) {
+      const touchedFields = Object.keys(errors?.header || {}).reduce((acc, key) => {
+        const touchedHeader = formik.touched.header || {}
+
+        if (!touchedHeader[key]) {
+          acc[key] = true
+        }
+
+        return acc
+      }, {})
+
+      console.log(touchedFields)
+
+      if (Object.keys(touchedFields).length) {
+        formik.setTouched(
+          {
+            ...formik.touched,
+            header: touchedFields
+          },
+          true
+        )
+      }
+    }
+  }
+
   const isClosed = formik.values.header.wip === 2
 
   const actions = [
@@ -900,7 +928,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
       basePrice: parseFloat(newRow?.basePrice || 0),
-      volume: parseFloat(newRow?.volume),
+      volume: parseFloat(newRow?.volume) || 0,
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
       upo: 0,
@@ -1097,6 +1125,12 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
   }
 
   const importItems = async () => {
+    onValidationRequired()
+
+    if (Object.entries(formik?.errors.header || {}).filter(([key]) => key).length > 0) {
+      return
+    }
+
     if (!formik.values.header.vendorId) {
       formik.setFieldTouched('header.vendorId', true)
 
@@ -1207,6 +1241,9 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
+                      if (newValue?.recordId) {
+                        formik.setFieldTouched('header.dtId', false)
+                      }
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
@@ -1499,7 +1536,13 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
             name='items'
             columns={columns}
             maxAccess={maxAccess}
-            disabled={isClosed || !formik.values.header.vendorId || !formik.values.header.vendorId}
+            disabled={
+              isClosed ||
+              !formik.values.header.vendorId ||
+              !formik.values.header.vendorId ||
+              Object.entries(formik?.errors || {}).filter(([key]) => key !== 'items').length > 0
+            }
+            onValidationRequired={onValidationRequired}
           />
         </Grow>
 
