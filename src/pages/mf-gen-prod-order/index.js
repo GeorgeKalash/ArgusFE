@@ -256,11 +256,14 @@ const GeneratePoductionOrder = () => {
                   { key: 'name', value: 'Name' }
                 ]}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('clientId', newValue?.recordId)
-                  formik.setFieldValue('clientName', newValue?.name)
-                  formik.setFieldValue('clientRef', newValue?.reference)
-
-                  fillSummaryORD(newValue?.recordId)
+                  formik.setFieldValue('clientId', newValue?.recordId || null)
+                  formik.setFieldValue('clientName', newValue?.name || '')
+                  formik.setFieldValue('clientRef', newValue?.reference || '')
+                  if (newValue?.recordId) {
+                    fillSummaryORD(newValue?.recordId, false)
+                  } else {
+                    fillSummaryORD(0, true)
+                  }
                 }}
                 secondField={{
                   name: 'clientName',
