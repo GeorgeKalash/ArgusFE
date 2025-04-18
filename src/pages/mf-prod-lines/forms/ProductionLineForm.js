@@ -75,6 +75,7 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
                 label={labels.reference}
                 value={formik.values.reference}
                 required
+                maxLength='4'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}

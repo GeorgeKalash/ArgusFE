@@ -31,7 +31,7 @@ const MfProductionLines = () => {
 
   const {
     query: { data },
-    labels: labels,
+    labels,
     paginationParameters,
     refetch,
     access,

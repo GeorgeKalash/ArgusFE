@@ -356,6 +356,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       parameters: `_recordId=${recordId}`
     })
   }
+
   async function fillItemInfo(values) {
     if (!values?.recordId) {
       currentItem.current = { itemId: null, sku: null, itemName: null }
@@ -406,8 +407,8 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       'expectedQty',
       !values?.stdWeight || !formik.values.expectedPcs ? 0 : formik.values.expectedPcs * values?.stdWeight
     )
-    const routing = getRouting(values?.routingId)
-    if (routing && routing.isInactive == true) {
+    const routing = await getRouting(values?.routingId)
+    if (routing?.record?.isInactive) {
       formik.setFieldValue('routingId', null)
       formik.setFieldValue('routingRef', null)
       formik.setFieldValue('routingName', null)
@@ -749,6 +750,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                         name='routingId'
                         label={labels.routing}
                         form={formik}
+                        required
                         minChars={2}
                         firstValue={formik.values.routingRef}
                         secondValue={formik.values.routingName}
