@@ -913,7 +913,6 @@ export default function SaleTransactionForm({
     },
     {
       key: 'Unlocked',
-      key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode
