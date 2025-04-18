@@ -147,7 +147,7 @@ const GeneratePurchaseInvoice = () => {
     {
       field: 'shipmentDate',
       headerName: labels.shipmentDate,
-      type: { field: 'date' },
+      type: 'date',
       flex: 1
     },
     {
@@ -165,7 +165,7 @@ const GeneratePurchaseInvoice = () => {
       field: 'poDate',
       headerName: labels.poDate,
       flex: 1,
-      type: { field: 'date' }
+      type: 'date'
     },
     {
       field: 'amountBeforeVat',
