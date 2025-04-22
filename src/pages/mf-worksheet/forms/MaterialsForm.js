@@ -375,7 +375,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                 async onChange({ row: { update, newRow } }) {
                   if (newRow?.itemId) {
                     const unitCost = await getRequest({
-                      extension: InventoryRepository.Cost.get,
+                      extension: InventoryRepository.CurrentCost.get,
                       parameters: `_itemId=${newRow?.itemId}`
                     })
                     update({

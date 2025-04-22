@@ -235,7 +235,7 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: false
+      disabled: !editMode
     }
   ]
 
