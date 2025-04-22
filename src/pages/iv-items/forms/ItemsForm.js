@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState, useRef } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -17,6 +17,8 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 import { MasterSource } from 'src/resources/MasterSource'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial }) {
   const { platformLabels } = useContext(ControlContext)
@@ -67,13 +69,13 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       categoryName: '',
       defSaleMUId: '',
       pgId: '',
-      isInactive: false,
-      rmItem: false
+      productionLevel: '',
+      collectionId: null,
+      isInactive: false
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
-
     validationSchema: yup.object({
       categoryId: yup.string().required(),
       name: yup.string().required(),
@@ -159,7 +161,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           parameters: `_recordId=${res?.record?.categoryId}`
         })
 
-        res.record.rmItem = res.record.rmItem || false
         res.record.isInactive = res.record.isInactive || false
 
         setFormikInitial(res.record)
@@ -286,7 +287,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     displayField='value'
                     displayFieldWidth={1}
                     required
-                    maxAccess={!editMode && maxAccess}
+                    maxAccess={maxAccess}
                     onChange={(e, newValue) => {
                       formik.setFieldValue('priceType', newValue?.key || null)
                     }}
@@ -296,9 +297,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                 <Grid item xs={6}>
                   <CustomTextField
                     name='sku'
+                    required
                     label={labels.reference}
                     value={formik.values.sku}
-                    maxAccess={maxAccess}
+                    maxAccess={access}
                     readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('sku', '')}
@@ -332,7 +334,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.procurementMethod && formik.errors.procurementMethod}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomTextField
                     name='name'
@@ -345,7 +346,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.name && formik.errors.name}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomTextField
                     name='flName'
@@ -356,7 +356,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onClear={() => formik.setFieldValue('flName', '')}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomTextField
                     name='shortName'
@@ -367,7 +366,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onClear={() => formik.setFieldValue('shortName', '')}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
@@ -392,7 +390,25 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.groupId && formik.errors.groupId}
                   />
                 </Grid>
-
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Collections.qry}
+                    name='collectionId'
+                    label={labels.collection}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    maxAccess={maxAccess}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('collectionId', newValue?.recordId)
+                    }}
+                    error={formik.touched.collectionId && Boolean(formik.errors.collectionId)}
+                  />
+                </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
@@ -454,16 +470,12 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='isInactive'
-                        checked={formik.values.isInactive}
-                        onChange={formik.handleChange}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='isInactive'
+                    value={formik.values?.isInactive}
+                    onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                     label={labels.isInactive}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
@@ -475,76 +487,60 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   <ImageUpload ref={imageUploadRef} resourceId={ResourceIds.Items} seqNo={0} recordId={recordId} />
                 </Grid>
                 <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='ivtItem'
-                        checked={formik.values.ivtItem}
-                        onChange={formik.handleChange}
-                        disabled={formik.values.kitItem}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='ivtItem'
+                    value={formik.values?.ivtItem}
+                    onChange={event => formik.setFieldValue('ivtItem', event.target.checked)}
                     label={labels.inventory}
+                    maxAccess={maxAccess}
+                    disabled={formik.values.kitItem}
                   />
                 </Grid>
                 <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='salesItem'
-                        checked={formik.values.salesItem}
-                        onChange={formik.handleChange}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='salesItem'
+                    value={formik.values?.salesItem}
+                    onChange={event => formik.setFieldValue('salesItem', event.target.checked)}
                     label={labels.sales}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
 
                 <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='purchaseItem'
-                        checked={formik.values.purchaseItem}
-                        onChange={formik.handleChange}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='purchaseItem'
+                    value={formik.values?.purchaseItem}
+                    onChange={event => formik.setFieldValue('purchaseItem', event.target.checked)}
                     label={labels.purchase}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
 
                 <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='kitItem'
-                        checked={formik.values.kitItem}
-                        onChange={formik.handleChange}
-                        disabled={editMode}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='kitItem'
+                    value={formik.values?.kitItem}
+                    onChange={event => formik.setFieldValue('kitItem', event.target.checked)}
                     label={labels.kitItem}
+                    disabled={editMode}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
-
-                <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='rmItem'
-                        checked={formik.values.rmItem}
-                        onChange={formik.handleChange}
-                        maxAccess={maxAccess}
-                      />
-                    }
-                    label={labels.rmItem}
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    datasetId={DataSets.PRODUCTION_LEVEL}
+                    name='productionLevel'
+                    label={labels.productionLevel}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('productionLevel', newValue?.key || '')
+                    }}
+                    maxAccess={maxAccess}
+                    error={formik.touched.productionLevel && Boolean(formik.errors.productionLevel)}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomTextField
                     name='unitPrice'

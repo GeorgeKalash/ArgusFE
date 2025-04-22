@@ -70,7 +70,8 @@ const FiOpeningBalance = () => {
     {
       field: 'amount',
       headerName: _labels.amount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'plantRef',
@@ -85,7 +86,8 @@ const FiOpeningBalance = () => {
     {
       field: 'baseAmount',
       headerName: _labels.baseAmount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     }
   ]
 
@@ -120,14 +122,9 @@ const FiOpeningBalance = () => {
     })
   }
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
-    refetch()
-  }
-
   return (
     <VertLayout>
-      <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'FIOBA'} />
+      <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'FIOBA'} />
       <Table
         columns={columns}
         gridData={data}

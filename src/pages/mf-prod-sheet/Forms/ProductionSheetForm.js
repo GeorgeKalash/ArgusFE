@@ -22,8 +22,8 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
 import { useWindow } from 'src/windows'
+import ProductionSheetQueue from './ProductionSheetQueue'
 
 export default function ProductionSheetForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -53,11 +53,12 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
   }
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       functionId: SystemFunction.ProductionSheet,
       reference: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       notes: '',
       status: 1,
       date: new Date(),
@@ -131,10 +132,6 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       invalidate()
     }
   })
-
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
 
   const onPost = async () => {
     const copy = { ...formik.values }
@@ -212,9 +209,24 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       condition: true,
       onClick: 'onInventoryTransaction',
       disabled: !editMode || !isPosted
+    },
+    {
+      key: 'Production',
+      condition: true,
+      onClick: openProductionSheetQueue,
+      disabled: !isPosted
     }
   ]
 
+  function openProductionSheetQueue() {
+    stack({
+      Component: ProductionSheetQueue,
+      props: { recordId: formik.values.recordId, maxAccess, labels },
+      width: 850,
+      height: 580,
+      title: labels.productionSheetQueue
+    })
+  }
 
   const columns = [
     {
@@ -223,7 +235,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       name: 'sku',
       props: {
         endpointId: InventoryRepository.Item.snapshot,
-        valueField: 'recordId',
+        valueField: 'sku',
         displayField: 'sku',
         mandatory: true,
         displayFieldWidth: 2,
@@ -245,12 +257,12 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       flex: 3,
       props: {
         readOnly: true
-      },
+      }
     },
     {
       component: 'numberfield',
       label: labels.qty,
-      name: 'qty',
+      name: 'qty'
     },
     {
       component: 'numberfield',
@@ -258,15 +270,15 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       name: 'orderedQty',
       props: {
         readOnly: true
-      },
+      }
     },
     {
       component: 'textfield',
       label: labels.notes,
-      name: 'notes',
+      name: 'notes'
     }
-  ];
-  
+  ]
+
   async function getData(recordId) {
     return await getRequest({
       extension: ManufacturingRepository.ProductionSheet.get,
@@ -398,7 +410,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
           </Grid>
           <DataGrid
             onChange={value => {
-              const data = value?.map((item) => {
+              const data = value?.map(item => {
                 return {
                   ...item,
                   orderedQty: 0

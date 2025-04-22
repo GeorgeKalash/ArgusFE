@@ -24,7 +24,6 @@ const ProductMaster = () => {
     paginationParameters,
     invalidate,
     filterBy,
-    clearFilter,
     refetch,
     access
   } = useResourceQuery({
@@ -96,12 +95,10 @@ const ProductMaster = () => {
     postRequest({
       extension: RemittanceSettingsRepository.ProductMaster.del,
       record: JSON.stringify(obj)
+    }).then(res => {
+      toast.success(platformLabels.Deleted)
+      invalidate()
     })
-      .then(res => {
-        toast.success(platformLabels.Deleted)
-        invalidate()
-      })
-      .catch(error => {})
   }
 
   const add = () => {
@@ -126,40 +123,14 @@ const ProductMaster = () => {
     openForm(obj?.recordId)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          labels={_labels}
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          reportName={'RTPRO'}
-        />
+        <RPBGridToolbar labels={_labels} onAdd={add} maxAccess={access} reportName={'RTPRO'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

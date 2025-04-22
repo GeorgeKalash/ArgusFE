@@ -37,7 +37,6 @@ const InventoryOpeningQtys = () => {
     labels: _labels,
     paginationParameters,
     filterBy,
-    clearFilter,
     invalidate,
     refetch,
     access
@@ -122,24 +121,14 @@ const InventoryOpeningQtys = () => {
     } catch (error) {}
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} onApply={onApply} reportName={'IVOQ'} hasSearch={false} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'IVOQ'} hasSearch={false} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['year', 'itemId', 'siteId']}

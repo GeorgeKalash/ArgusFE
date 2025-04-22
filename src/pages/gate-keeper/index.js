@@ -10,124 +10,135 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import cancelIcon from '../../../public/images/TableIcons/cancel.png'
 import Image from 'next/image'
-import { Box, IconButton } from '@mui/material'
+import { Box, Grid, IconButton } from '@mui/material'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import CancelDialog from 'src/components/Shared/CancelDialog'
 import { useWindow } from 'src/windows'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
 
 const GateKeeper = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_status=2`
-    var parameters = defaultParams
-
-    const response = await getRequest({
-      extension: ManufacturingRepository.LeanProductionPlanning.preview2,
-      parameters: parameters
-    })
-
-    if (response && response?.list) {
-      response.list = response?.list?.map(item => ({
-        ...item,
-        balance: item.qty - (item.qtyProduced ?? 0)
-      }))
-    }
-
-    return { ...response, _startAt: _startAt }
-  }
-
   const {
     query: { data },
-    labels: _labels,
+    labels,
     refetch,
-    search,
-    clear,
     access,
-    invalidate
+    filterBy,
+    filters,
+    clearFilter
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.LeanProductionPlanning.preview2,
-    datasetId:  ResourceIds.GateKeeper,
-    search: {
-      searchFn: fetchWithSearch
-    },
+    endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
+    datasetId: ResourceIds.GateKeeper,
+    filter: {
+      endpointId: ManufacturingRepository.LeanProductionPlanning.snapshot,
+      filterFn: fetchWithFilter
+    }
   })
 
-  async function fetchWithSearch({ qry }) {
+  async function fetchGridData() {
     const response = await getRequest({
-      extension: ManufacturingRepository.LeanProductionPlanning.snapshot,
-      parameters: `_filter=${qry}`
+      extension: ManufacturingRepository.LeanProductionPlanning.preview,
+      parameters: `_status=2`
     })
+
+    response.list = response?.list?.map(item => ({
+      ...item,
+      balance: item.qty - (item.qtyProduced ?? 0)
+    }))
 
     return response
   }
 
+  async function fetchWithFilter({ filters }) {
+    const res = await getRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.snapshot,
+      parameters: `_filter=${filters.qry ?? ''}&_status=${filters.status ?? 2}`
+    })
+    res.list = res?.list?.map(item => ({
+      ...item,
+      balance: item.qty - (item.qtyProduced ?? 0)
+    }))
+
+    return res
+  }
+
   const columns = [
     {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 2
+    },
+    {
+      field: 'functionName',
+      headerName: labels.function,
+      flex: 2
+    },
+    {
       field: 'sku',
-      headerName: _labels[1],
-      flex: 1
+      headerName: labels.sku,
+      flex: 2
     },
     {
       field: 'qty',
-      headerName: _labels[2],
-      flex: 1
+      headerName: labels.qty,
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'qtyProduced',
-      headerName: _labels.produced,
+      headerName: labels.produced,
       flex: 1,
       type: 'number'
     },
     {
       field: 'balance',
-      headerName: _labels.balance,
+      headerName: labels.balance,
       flex: 1,
       type: 'number'
     },
     {
       field: 'itemName',
-      headerName: _labels.itemName,
+      headerName: labels.itemName,
       flex: 2
     },
     {
       field: 'date',
-      label: _labels[6],
+      label: labels[6],
       flex: 2,
       type: 'date'
     },
-    {
+    (!filters?.status || filters?.status == 2) && {
       flex: 0.5,
       headerName: 'Cancel',
       cellRenderer: row => {
         const { data } = row
 
+        if (data.qty == data.producedQty) return
+
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             <IconButton size='small' onClick={() => openCancel(data)}>
-              <Image src={cancelIcon} width={18} height={18} alt={_labels.cancel} />
+              <Image src={cancelIcon} width={18} height={18} alt={labels.cancel} />
             </IconButton>
           </Box>
         )
       }
     }
-  ]
+  ].filter(Boolean)
 
-  const del = async data => {
+  const onCancel = async data => {
     await postRequest({
       extension: ManufacturingRepository.LeanProductionPlanning.cancel,
       record: JSON.stringify(data)
-    }).then(res => {
-      if (res) {
-        invalidate()
-        toast.success(platformLabels.Cancelled)
-      }
     })
+    refetch()
+    toast.success(platformLabels.Cancelled)
   }
 
   function openCancel(data) {
@@ -136,7 +147,7 @@ const GateKeeper = () => {
       props: {
         open: [true, {}],
         fullScreen: false,
-        onConfirm: () => del(data)
+        onConfirm: () => onCancel(data)
       },
       width: 450,
       height: 170,
@@ -144,10 +155,42 @@ const GateKeeper = () => {
     })
   }
 
+  const onChange = value => {
+    if (value) filterBy('status', value)
+    else clearFilter('status')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true}/>
+        <GridToolbar
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value?.replace(/\+/g, '%2B'))
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={labels}
+          inputSearch={true}
+          leftSection={
+            <Grid item sx={{ display: 'flex', width: '300px' }}>
+              <ResourceComboBox
+                datasetId={DataSets.LEAN_STATUS}
+                name='status'
+                label={labels.status}
+                valueField='key'
+                displayField='value'
+                values={{
+                  status: filters?.status || 2
+                }}
+                onChange={(event, newValue) => {
+                  onChange(newValue?.key)
+                }}
+              />
+            </Grid>
+          }
+        />
       </Fixed>
       <Grow>
         <Table
@@ -155,7 +198,8 @@ const GateKeeper = () => {
           gridData={data}
           rowId={['recordId']}
           isLoading={false}
-          pagination={false}
+          pageSize={2000}
+          paginationType='client'
           refetch={refetch}
           maxAccess={access}
         />

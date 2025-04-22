@@ -1,7 +1,6 @@
-import { useContext } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import Tree from 'src/components/Shared/Tree'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useWindow } from 'src/windows'
@@ -13,23 +12,31 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import SaleZoneForm from './forms/SaleZoneForm'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const SalesZone = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const [dataTree, setDataTree] = useState([])
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    try {
-      const response = await getRequest({
-        extension: SaleRepository.SalesZone.page,
-        parameters: `_pageSize=${_pageSize}&_startAt=${_startAt}&_filter=&_sortField=`
-      })
+    const response = await getRequest({
+      extension: SaleRepository.SalesZone.page,
+      parameters: `_pageSize=${_pageSize}&_startAt=${_startAt}&_filter=&_sortField=`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
+  }
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: SaleRepository.SalesZone.snapshot,
+        parameters: `_filter=${filters.qry}&_sortField=`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0 })
   }
 
   const {
@@ -38,12 +45,27 @@ const SalesZone = () => {
     refetch,
     invalidate,
     paginationParameters,
-    access
+    access,
+    filterBy,
+    clearFilter
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SaleRepository.SalesZone.page,
-    datasetId: ResourceIds.SalesZone
+    datasetId: ResourceIds.SalesZone,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
+
+  useEffect(() => {
+    ;(async () => {
+      const response = await getRequest({
+        extension: SaleRepository.SalesZone.page,
+        parameters: `_pageSize=1000&_startAt=0&_filter=&_sortField=`
+      })
+      setDataTree(response)
+    })()
+  }, [])
 
   const columns = [
     {
@@ -74,14 +96,12 @@ const SalesZone = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SaleRepository.SalesZone.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: SaleRepository.SalesZone.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
@@ -102,7 +122,7 @@ const SalesZone = () => {
     stack({
       Component: Tree,
       props: {
-        data: data
+        data: dataTree
       },
       width: 500,
       height: 400,
@@ -123,6 +143,14 @@ const SalesZone = () => {
     openForm(obj?.recordId)
   }
 
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
@@ -131,7 +159,10 @@ const SalesZone = () => {
           maxAccess={access}
           actions={actions}
           onTree={onTreeClick}
+          onSearch={onSearch}
+          onSearchClear={onClear}
           previewReport={ResourceIds.SalesZone}
+          inputSearch={true}
         />
       </Fixed>
       <Grow>

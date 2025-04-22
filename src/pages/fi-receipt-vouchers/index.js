@@ -35,7 +35,6 @@ export default function CurrencyTrading() {
   const {
     query: { data },
     filterBy,
-    clearFilter,
     labels: labels,
     access,
     paginationParameters,
@@ -63,14 +62,13 @@ export default function CurrencyTrading() {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    try {
-      const response = await getRequest({
-        extension: FinancialRepository.ReceiptVouchers.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=recordId desc`
-      })
 
-      return { ...response, _startAt: _startAt }
-    } catch (e) {}
+    const response = await getRequest({
+      extension: FinancialRepository.ReceiptVouchers.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=recordId desc`
+    })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -87,33 +85,12 @@ export default function CurrencyTrading() {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: FinancialRepository.ReceiptVouchers.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success('Record Deleted Successfully')
-    } catch (e) {}
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
+    await postRequest({
+      extension: FinancialRepository.ReceiptVouchers.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
 
   const columns = [
@@ -141,10 +118,11 @@ export default function CurrencyTrading() {
     {
       field: 'amount',
       headerName: labels.amount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'currency',
+      field: 'currencyName',
       headerName: labels.currency,
       flex: 1
     },
@@ -163,17 +141,11 @@ export default function CurrencyTrading() {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'FIRV'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'FIRV'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           onEdit={edit}
           onDelete={del}

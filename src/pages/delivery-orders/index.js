@@ -42,7 +42,6 @@ const DeliveryOrders = () => {
     query: { data },
     labels: _labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     refetch,
     access,
@@ -148,39 +147,14 @@ const DeliveryOrders = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-      <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'DEORD'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'DEORD'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

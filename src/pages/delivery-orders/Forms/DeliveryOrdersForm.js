@@ -29,6 +29,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function DeliveriesOrdersForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -91,6 +92,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
   ]
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       reference: '',
@@ -103,7 +105,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       driverId: null,
       date: new Date(),
       notes: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       status: 1,
       statusName: '',
       printStatusName: '',
@@ -454,10 +456,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     invalidate()
   }
 
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
-
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
       formik.setFieldValue(key, value)
@@ -645,18 +643,14 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                   />
                 </Grid>
                 <Grid item xs={8}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='exWorks'
-                        readOnly
-                        disabled={true}
-                        checked={formik.values?.exWorks}
-                        onChange={formik.handleChange}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='exWorks'
+                    value={formik.values?.exWorks}
+                    onChange={event => formik.setFieldValue('exWorks', event.target.checked)}
                     label={labels.exWorks}
+                    maxAccess={maxAccess}
+                    readOnly
+                    disabled={true}
                   />
                 </Grid>
                 <Grid item xs={4}>

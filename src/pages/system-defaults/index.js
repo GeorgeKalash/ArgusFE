@@ -1,5 +1,5 @@
-import { useEffect, useState, useContext } from 'react'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { useEffect, useContext } from 'react'
+import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
@@ -14,6 +14,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import FormShell from 'src/components/Shared/FormShell'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const SystemDefaults = () => {
   const { postRequest } = useContext(RequestsContext)
@@ -40,7 +41,7 @@ const SystemDefaults = () => {
       )
     })
     filteredList?.forEach(obj => {
-      if (obj.key === 'dateFormat' || obj.key === 'backofficeEmail') {
+      if (obj.key === 'dateFormat' || obj.key === 'backofficeEmail' || obj.key === 'enableHijri') {
         myObject[obj.key] = obj.value || null
       } else {
         myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
@@ -224,18 +225,12 @@ const SystemDefaults = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='enableHijri'
-                    maxAccess={access}
-                    checked={formik.values?.enableHijri}
-                    onChange={event => {
-                      formik.setFieldValue('enableHijri', event.target.checked)
-                    }}
-                  />
-                }
+              <CustomCheckBox
+                name='enableHijri'
+                value={formik.values?.enableHijri}
+                onChange={event => formik.setFieldValue('enableHijri', event.target.checked)}
                 label={_labels.enableHijri}
+                maxAccess={access}
               />
             </Grid>
           </Grid>

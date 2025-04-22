@@ -13,26 +13,23 @@ import { SCRepository } from 'src/repositories/SCRepository'
 import CycleCountsWindow from './Windows/CycleCountsWindow'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getStorageData } from 'src/storage/storage'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const CycleCounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    try {
-      const response = await getRequest({
-        extension: SCRepository.StockCount.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
-      })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    const response = await getRequest({
+      extension: SCRepository.StockCount.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
+    })
+
+    return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithFilter({ filters, pagination }) {
@@ -53,8 +50,7 @@ const CycleCounts = () => {
     invalidate,
     refetch,
     filterBy,
-    clearFilter,
-    paginationParameters,
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SCRepository.StockCount.qry,
@@ -100,7 +96,7 @@ const CycleCounts = () => {
       field: 'clientName',
       headerName: _labels.client,
       flex: 1
-    },
+    }
   ]
 
   const edit = obj => {
@@ -108,14 +104,12 @@ const CycleCounts = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SCRepository.StockCount.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
+    await postRequest({
+      extension: SCRepository.StockCount.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -126,21 +120,6 @@ const CycleCounts = () => {
 
   const add = async () => {
     await proxyAction()
-  }
-
-  const userId = getStorageData('userData').userId
-
-  const getPlantId = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userId}&_key=plantId`
-      })
-
-      return res.record.value
-    } catch (e) {
-      return ''
-    }
   }
 
   async function openCycleCountsWindow(plantId, recordId) {
@@ -159,45 +138,19 @@ const CycleCounts = () => {
   }
 
   async function openForm(recordId) {
-    const plantId = await getPlantId()
+    const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
 
     openCycleCountsWindow(plantId, recordId)
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear} 
-          labels={_labels} 
-          onAdd={add}
-          maxAccess={access} 
-          onApply={onApply}
-          reportName={'SCHDR'}
-        />
+        <RPBGridToolbar labels={_labels} onAdd={add} maxAccess={access} reportName={'SCHDR'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

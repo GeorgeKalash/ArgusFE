@@ -28,10 +28,10 @@ const ClientsWindow = ({ height, recordId, labels, maxAccess }) => {
         <ClientsForm store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
-        <SalesForm store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
+        <SalesForm store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={2} value={activeTab}>
-        <AddressTab store={store} labels={labels} maxAccess={maxAccess} />
+        <AddressTab store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={3} value={activeTab}>
         <PriceTab store={store} labels={labels} maxAccess={maxAccess} />

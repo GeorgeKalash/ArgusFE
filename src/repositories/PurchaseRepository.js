@@ -69,6 +69,9 @@ export const PurchaseRepository = {
     post: service + 'postIVC',
     unpost: service + 'unpostIVC'
   },
+  Invoice: {
+    snapshot: service + 'snapshotINV'
+  },
   PurchaseReturnHeader: {
     qry: service + 'qryIVR',
     snapshot: service + 'snapshotIVR'
@@ -77,7 +80,7 @@ export const PurchaseRepository = {
     get: service + 'getPRI'
   },
   ItemCostHistory: {
-    qry: service + 'qryIPH',
+    qry: service + 'qryIPH'
   },
   ItemPromotion: {
     qry: service + 'qryIVIM'

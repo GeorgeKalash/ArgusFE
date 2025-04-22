@@ -25,6 +25,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { useWindow } from 'src/windows'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function CycleCountsForm({ labels, maxAccess: access, setStore, store, plantId }) {
   const { recordId } = store
@@ -45,10 +46,11 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   })
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: recordId || null,
       reference: null,
-      dtId: documentType?.dtId,
+      dtId: null,
       date: new Date(),
       plantId: parseInt(plantId),
       notes: '',
@@ -443,17 +445,12 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='disableItemDuplicate'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.disableItemDuplicate}
-                    onChange={formik.handleChange}
-                    disabled={isClosed}
-                  />
-                }
+              <CustomCheckBox
+                name='disableItemDuplicate'
+                value={formik.values?.disableItemDuplicate}
+                onChange={event => formik.setFieldValue('disableItemDuplicate', event.target.checked)}
                 label={labels.disableItemDuplicate}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

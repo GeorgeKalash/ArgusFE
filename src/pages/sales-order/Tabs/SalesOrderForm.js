@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -43,6 +43,8 @@ import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import TaxDetails from 'src/components/Shared/TaxDetails'
 
 export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -51,7 +53,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
-  const [filteredMu, setFilteredMU] = useState([])
+  const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
@@ -62,9 +64,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     enabled: !recordId
   })
 
-  const [initialValues, setInitialData] = useState({
-    recordId: recordId || null,
-    dtId: documentType?.dtId,
+  const initialValues = {
+    recordId: recordId,
+    dtId: null,
     reference: '',
     date: new Date(),
     dueDate: new Date(),
@@ -137,10 +139,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         applyVat: false,
         taxId: '',
         taxDetails: null,
+        taxDetailsButton: false,
         notes: ''
       }
     ]
-  })
+  }
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.SalesOrder.page
@@ -148,8 +151,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
@@ -260,6 +264,15 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
 
+  async function getFilteredMU(itemId) {
+    if (!itemId) return
+
+    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
+
+    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    filteredMeasurements.current = arrayMU
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -270,7 +283,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         endpointId: InventoryRepository.Item.snapshot,
         parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
         displayField: 'sku',
-        valueField: 'recordId',
+        valueField: 'sku',
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -323,7 +336,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         }
 
         const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-        setFilteredMU(filteredMeasurements)
+        getFilteredMU(newRow?.itemId)
 
         update({
           volume: parseFloat(itemPhysProp?.volume) || 0,
@@ -345,7 +358,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           mdType: 1,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
-          saTrx: true
+          saTrx: true,
+          taxDetailsButton: true
         })
 
         formik.setFieldValue('mdAmount', formik.values.currentDiscount ? formik.values.currentDiscount : 0)
@@ -385,7 +399,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       label: labels.measurementUnit,
       name: 'muRef',
       props: {
-        store: filteredMu,
+        store: filteredMeasurements?.current,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -395,10 +409,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
         update({
           baseQty: newRow?.qty * filteredItems?.qty
         })
+      },
+      propsReducer({ row, props }) {
+        return { ...props, store: filteredMeasurements?.current }
       }
     },
     {
@@ -443,6 +460,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       label: labels.unitPrice,
       name: 'unitPrice',
       updateOn: 'blur',
+      props: {
+        decimalScale: 5
+      },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
       }
@@ -465,9 +485,26 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       }
     },
     {
-      component: 'numberfield',
+      component: 'button',
+      name: 'taxDetailsButton',
+      defaultValue: true,
+      props: {
+        imgSrc: '/images/buttonsIcons/tax-icon.png'
+      },
       label: labels.tax,
-      name: 'tax'
+      onClick: (e, row) => {
+        if (row?.taxId) {
+          stack({
+            Component: TaxDetails,
+            props: {
+              taxId: row?.taxId,
+              obj: row
+            },
+            width: 1000,
+            title: platformLabels.TaxDetails
+          })
+        }
+      }
     },
     {
       component: 'numberfield',
@@ -523,26 +560,30 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   ]
 
   async function handleIconClick(id, updateRow) {
-    let currentMdType
-    let currenctMdAmount = parseFloat(formik.values.items[id - 1].mdAmount)
-    const maxClientAmountDiscount = formik.values.items[id - 1].unitPrice * (formik.values?.maxDiscount / 100)
+    const index = formik.values.items.findIndex(item => item.id === id)
 
-    if (formik.values.items[id - 1].mdType == 2) {
+    if (index === -1) return
+
+    let currentMdType
+    let currenctMdAmount = parseFloat(formik.values.items[index].mdAmount)
+    const maxClientAmountDiscount = formik.values.items[index].unitPrice * (formik.values?.maxDiscount / 100)
+
+    if (formik.values.items[index].mdType == 2) {
       if (currenctMdAmount < 0 || currenctMdAmount > 100) currenctMdAmount = 0
-      formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 1)
-      formik.setFieldValue(`items[${id - 1}].mdType`, 1)
+      formik.setFieldValue(`items[${index}].mdAmountPct`, 1)
+      formik.setFieldValue(`items[${index}].mdType`, 1)
       currentMdType = 1
-      formik.setFieldValue(`items[${id - 1}].mdAmount`, parseFloat(currenctMdAmount).toFixed(2))
+      formik.setFieldValue(`items[${index}].mdAmount`, parseFloat(currenctMdAmount).toFixed(2))
     } else {
       if (currenctMdAmount < 0 || currenctMdAmount > maxClientAmountDiscount) currenctMdAmount = 0
-      formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 2)
-      formik.setFieldValue(`items[${id - 1}].mdType`, 2)
+      formik.setFieldValue(`items[${index}].mdAmountPct`, 2)
+      formik.setFieldValue(`items[${index}].mdType`, 2)
       currentMdType = 2
-      formik.setFieldValue(`items[${id - 1}].mdAmount`, parseFloat(currenctMdAmount).toFixed(2))
+      formik.setFieldValue(`items[${index}].mdAmount`, parseFloat(currenctMdAmount).toFixed(2))
     }
 
     const newRow = {
-      ...formik.values.items[id - 1],
+      ...formik.values.items[index],
       mdAmount: currenctMdAmount,
       mdType: currentMdType
     }
@@ -650,7 +691,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || formik.values.status == 3 || formik.values.deliveryStatus == 4
+      disabled: !(isClosed && (formik.values.deliveryStatus == 1 || formik.values.deliveryStatus == 5))
     },
     {
       key: 'Terminate',
@@ -733,7 +774,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }
 
   async function getAddress(addressId) {
-    if (!addressId) return null
+    if (!addressId) return
 
     const res = await getRequest({
       extension: SystemRepository.Address.format,
@@ -805,7 +846,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         message: labels.noCurrency
       })
 
-      return -1
+      return
     }
 
     const res = await getRequest({
@@ -1033,6 +1074,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         labels,
         shipment: clickShip,
         bill: clickBill,
+        checkedAddressId: clickShip ? formik.values?.shipToAddressId : formik.values?.billToAddressId,
         form: formik.values,
         handleAddressValues: setAddressValues
       },
@@ -1051,7 +1093,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         isSavedClear: false
       },
       width: 850,
-      height: 620,
+      height: 550,
       title: labels.address
     })
   }
@@ -1064,7 +1106,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }
 
   async function getSiteRef(siteId) {
-    if (!siteId) return null
+    if (!siteId) return
 
     const res = await getRequest({
       extension: InventoryRepository.Site.get,
@@ -1124,10 +1166,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     formik.setFieldValue('subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('vatAmount', parseFloat(vatAmount).toFixed(2))
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
-
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
 
   useEffect(() => {
     if (reCal) {
@@ -1235,6 +1273,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     displayField='name'
                     values={formik.values}
                     displayFieldWidth={1.5}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('spId', newValue ? newValue.recordId : null)
                     }}
@@ -1316,25 +1355,10 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <CustomTextArea
-                    name='billAddress'
-                    label={labels.billTo}
-                    value={formik.values.billAddress}
-                    rows={3.5}
-                    maxLength='100'
-                    readOnly={isClosed}
-                    maxAccess={maxAccess}
-                    viewDropDown={formik.values.clientId}
-                    onChange={e => formik.setFieldValue('BillAddress', e.target.value)}
-                    onClear={() => formik.setFieldValue('BillAddress', '')}
-                    onDropDown={() => openAddressFilterForm(false, true)}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <CustomTextArea
                     name='shipAddress'
                     label={labels.shipTo}
                     value={formik.values.shipAddress}
-                    rows={3.5}
+                    rows={2.5}
                     maxLength='100'
                     readOnly
                     disabled={formik.values.exWorks}
@@ -1345,6 +1369,21 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     onClear={() => formik.setFieldValue('shipAddress', '')}
                     onDropDown={() => openAddressFilterForm(true, false)}
                     handleAddAction={() => openAddressForm()}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextArea
+                    name='billAddress'
+                    label={labels.billTo}
+                    value={formik.values.billAddress}
+                    rows={2.5}
+                    maxLength='100'
+                    readOnly={isClosed}
+                    maxAccess={maxAccess}
+                    viewDropDown={formik.values.clientId}
+                    onChange={e => formik.setFieldValue('BillAddress', e.target.value)}
+                    onClear={() => formik.setFieldValue('BillAddress', '')}
+                    onDropDown={() => openAddressFilterForm(false, true)}
                   />
                 </Grid>
               </Grid>
@@ -1360,7 +1399,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 form={formik}
                 required
                 readOnly={isClosed}
-                displayFieldWidth={2}
+                displayFieldWidth={6}
                 valueShow='clientRef'
                 secondValueShow='clientName'
                 maxAccess={maxAccess}
@@ -1377,22 +1416,20 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                   formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                   formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
                   formik.setFieldValue('taxId', newValue?.taxId)
+                  setAddress({})
                   fillClientData(newValue?.recordId)
                 }}
                 errorCheck={'clientId'}
               />
             </Grid>
             <Grid item xs={1}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isVattable'
-                    checked={formik.values?.isVattable}
-                    disabled={formik.values.items[0]?.itemId}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='isVattable'
+                value={formik.values?.isVattable}
+                onChange={event => formik.setFieldValue('isVattable', event.target.checked)}
                 label={labels.VAT}
+                disabled={formik.values.items[0]?.itemId}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={2}>
@@ -1444,12 +1481,12 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
                 name='szId'
                 label={labels.saleZone}
-                columnsInDropDown={[{ key: 'name', value: 'Name' }]}
                 valueField='recordId'
                 displayField='name'
                 readOnly={isClosed}
                 values={formik.values}
                 displayFieldWidth={1.5}
+                maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('szId', newValue ? newValue.recordId : null)
                 }}
@@ -1457,22 +1494,19 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
               />
             </Grid>
             <Grid item xs={2}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='exWorks'
-                    disabled={isClosed}
-                    checked={formik.values?.exWorks}
-                    onChange={event => {
-                      const { name, checked } = event.target
-                      formik.setFieldValue(name, checked)
-                      if (checked) {
-                        formik.setFieldValue('shipAddress', '')
-                      }
-                    }}
-                  />
-                }
+              <CustomCheckBox
+                name='exWorks'
+                value={formik.values?.exWorks}
+                onChange={event => {
+                  const { name, checked } = event.target
+                  formik.setFieldValue(name, checked)
+                  if (checked) {
+                    formik.setFieldValue('shipAddress', '')
+                  }
+                }}
                 label={labels.exWorks}
+                maxAccess={maxAccess}
+                disabled={isClosed}
               />
             </Grid>
           </Grid>
@@ -1482,6 +1516,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
               action === 'delete' && setReCal(true)
+            }}
+            onSelectionChange={(row, update, field) => {
+              if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
             value={formik.values.items}
             error={formik.errors.items}
@@ -1511,9 +1548,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={<Checkbox name='overdraft' checked={formik.values?.overdraft} readOnly />}
+                  <CustomCheckBox
+                    name='overdraft'
+                    value={formik.values?.overdraft}
+                    onChange={event => formik.setFieldValue('overdraft', event.target.checked)}
+                    readOnly
                     label={labels.overdraft}
+                    maxAccess={access}
                   />
                 </Grid>
               </Grid>

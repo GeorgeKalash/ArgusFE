@@ -11,11 +11,9 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CAadjustmentForm from '../form/CAadjustmentForms'
-import { formatDateDefault } from 'src/lib/date-helper'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
-import { useRouter } from 'next/router'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
+import { Router } from 'src/lib/useRouter'
 
 const CAadjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,8 +21,7 @@ const CAadjustment = () => {
 
   const { stack } = useWindow()
 
-  const router = useRouter()
-  const { functionId } = router.query
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const {
@@ -147,6 +144,7 @@ const CAadjustment = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

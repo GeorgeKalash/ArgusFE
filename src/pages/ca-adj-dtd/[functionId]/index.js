@@ -9,10 +9,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import { useRouter } from 'next/router'
 import { ControlContext } from 'src/providers/ControlContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import AdjDocTypeDefaultsForm from './form/AdjDocTypeDefaultsForm'
+import { Router } from 'src/lib/useRouter'
 
 const CaDocTypeDefaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -20,8 +20,7 @@ const CaDocTypeDefaults = () => {
 
   const { stack } = useWindow()
 
-  const router = useRouter()
-  const { functionId } = router.query
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const {
