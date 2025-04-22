@@ -30,31 +30,27 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
     },
     onSubmit: async obj => {
       try {
+        const items = data.list.filter(item => item.checked)
         await postRequest({
           extension: SystemRepository.UserFunction.set,
           record: JSON.stringify({ userId: obj.userId, functionId: obj.functionId, dtId: obj.dtId || null })
         })
-        data.list.map(async obj => {
-          if (obj.checked) {
-            await postRequest({
-              extension: AccessControlRepository.RowAccessUserView.set,
-              record: JSON.stringify({
-                userId: storeRecordId,
-                resourceId: ResourceIds.DocumentTypes,
-                recordId: obj.recordId
-              })
-            })
-          } else {
-            await postRequest({
-              extension: AccessControlRepository.RowAccessUserView.del,
-              record: JSON.stringify({
-                userId: storeRecordId,
-                resourceId: ResourceIds.DocumentTypes,
-                recordId: obj.recordId
-              })
-            })
-          }
+
+        const accessPayload = {
+          userId: storeRecordId,
+          resourceId: ResourceIds.DocumentTypes,
+          items: items.map(item => ({
+            userId: storeRecordId,
+            resourceId: ResourceIds.DocumentTypes,
+            recordId: item.recordId
+          }))
+        }
+
+        await postRequest({
+          extension: AccessControlRepository.RowAccessUserView.set2,
+          record: JSON.stringify(accessPayload)
         })
+
         toast.success(platformLabels.Updated)
         window.close()
         invalidate()
