@@ -30,7 +30,7 @@ import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
 import LotForm from './LotForm'
 
-export default function AssemblyForm({ labels, maxAccess: access, store, setStore }) {
+export default function AssemblyForm({ labels, maxAccess: access, store, setStore, totalOverhead }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const recordId = store?.recordId
@@ -133,12 +133,17 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
   const isPosted = formik.values.status === 3
   const editMode = !!formik.values.recordId
 
-  const totalQty = formik.values.items.reduce((currentQty, row) => {
-    const qtyValue = parseFloat(row.qty?.toString().replace(/,/g, '')) || 0
+  const totalCost = formik.values.items
+    .reduce((currentCost, row) => {
+      const totalCostValue =
+        (parseFloat(row.qty?.toString().replace(/,/g, '')) || 0) *
+        (parseFloat(row.cost?.toString().replace(/,/g, '')) || 0)
 
-    return currentQty + qtyValue
-  }, 0)
-  const avgUnitCost = (formik.values.rmCost || 0 + totalQty || 0) / (formik.values.qty || 0)
+      return currentCost + totalCostValue
+    }, 0)
+    .toFixed(2)
+
+  const avgUnitCost = ((Number(totalCost) || 0) + (Number(totalOverhead) || 0)) / (Number(formik.values.qty) || 0)
 
   const designQuantity = formik.values.items.reduce((currentQty, row) => {
     const qtyValue = parseFloat(row.designQty?.toString().replace(/,/g, '')) || 0
@@ -176,7 +181,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
         extension: InventoryRepository.Replacement.qry,
         parameters: `_itemId=${currentItemId.current}`
       }),
-      await getRequest({
+      getRequest({
         extension: InventoryRepository.Item.get,
         parameters: `_recordId=${currentItemId.current}`
       })
@@ -197,18 +202,22 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       })
     })
 
-    return listRV
+    return listRV.filter(
+      item =>
+        item.sku?.toLowerCase().includes(searchQry.toLowerCase()) ||
+        item.itemName?.toLowerCase().includes(searchQry.toLowerCase())
+    )
   }
 
   const columns = [
     {
       component: 'resourcelookup',
-      label: labels.sku,
+      label: labels.componentItem,
       name: 'sku',
       props: {
         onLookup: fetchLookup,
-        valueField: 'sku',
-        displayField: 'sku',
+        valueField: 'itemName',
+        displayField: 'itemName',
         displayFieldWidth: 3,
         mapping: [
           { from: 'itemId', to: 'itemId' },
@@ -220,15 +229,20 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
           { key: 'itemName', value: 'itemName' }
         ]
       },
-      async onChange({ row: { update, newRow } }) {
+      async onChange({ row: { update, newRow, oldRow } }) {
+        if (!newRow.itemId) {
+          update(oldRow)
+
+          return
+        }
         const currentCost = await getCost(newRow.itemId)
         update({ cost: currentCost })
       }
     },
     {
       component: 'textfield',
-      label: labels.componentItem,
-      name: 'itemName',
+      label: labels.sku,
+      name: 'sku',
       props: {
         readOnly: true
       }
@@ -415,8 +429,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       ...item,
       id: item.seqNo,
       cost: item.currentCost || 0,
-      designQty: (item.qty * (formik.values.qty || 0)) / parseFloat(bomInfo?.qty || 0),
-      qty: (item.qty * (formik.values.qty || 0)) / parseFloat(bomInfo?.qty || 0),
+      designQty: ((item.qty * (formik.values.qty || 0)) / parseFloat(bomInfo?.qty || 0)).toFixed(3),
+      qty: ((item.qty * (formik.values.qty || 0)) / parseFloat(bomInfo?.qty || 0)).toFixed(3),
       diffQty: 0,
       baseQty: item.baseQty * (formik.values.qty || 0),
       siteId: item.siteId || formik.values.siteId,
@@ -454,7 +468,9 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
         items?.list?.map(item => ({
           ...item,
           id: item.seqNo,
-          diffQty: (item.qty || 0) - (item.designQty || 0)
+          diffQty: ((item.qty || 0) - (item.designQty || 0)).toFixed(3),
+          designQty: (item.designQty || 0).toFixed(3),
+          qty: (item.qty || 0).toFixed(3)
         })) || []
     })
   }
