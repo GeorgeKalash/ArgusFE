@@ -52,8 +52,6 @@ const SystemFunction = () => {
           sfName: '',
           nraId: '',
           nraRef: '',
-          batchNRAId: '',
-          batchNRARef: '',
           integrationLevel: '',
           integrationLevelName: ''
         }
