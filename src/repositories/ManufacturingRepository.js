@@ -247,6 +247,7 @@ export const ManufacturingRepository = {
   },
   BillOfMaterials: {
     get: service + 'getBMA',
+    qry2: service + 'qry2BMA',
     set: service + 'setBMA',
     del: service + 'delBMA',
     page: service + 'pageBMA',
