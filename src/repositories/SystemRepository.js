@@ -186,7 +186,11 @@ export const SystemRepository = {
     get: service + 'getTZN'
   },
   Batch: {
-    snapshot: service + 'snapshotBAT'
+    snapshot: service + 'snapshotBAT',
+    get: service + 'getBAT',
+    set: service + 'setBAT',
+    del: service + 'delBAT',
+    page: service + 'pageBAT',
   },
   ETL: {
     get: service + 'getETL'
