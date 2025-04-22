@@ -70,8 +70,7 @@ const PhysicalCountItem = () => {
 
     formik.setFieldValue('totalCostPrice', sumCost)
     formik.setFieldValue('totalWeight', sumWeight)
-
-    setData(res ?? { list: [] })
+    setData(res || { list: [] })
 
     handleClick(res.list)
   }
@@ -263,7 +262,6 @@ const PhysicalCountItem = () => {
             columns={columns}
             gridData={data ?? { list: [] }}
             rowId={['recordId']}
-            setData={setData}
             isLoading={false}
             pageSize={50}
             refetch={refetch}

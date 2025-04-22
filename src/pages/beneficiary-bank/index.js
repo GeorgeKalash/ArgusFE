@@ -167,6 +167,7 @@ const BeneficiaryBank = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['beneficiaryId', 'clientId', 'seqNo']}

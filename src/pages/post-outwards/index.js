@@ -5,7 +5,6 @@ import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutward
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
 import { Grid } from '@mui/material'
-import * as yup from 'yup'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -20,7 +19,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const Postoutwards = () => {
-  const [data, setData] = useState([])
+  const [dataFilter, setDataFilter] = useState({})
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -35,33 +34,37 @@ const Postoutwards = () => {
     return `${month}-${day}-${year}`
   }
 
-  const fetchRemittanceData = () => {
+  const fetchRemittanceData = async status => {
     const formattedFromDate = formatDate(formik.values.fromDate)
 
     const formattedToDate =
       formatDate(formik.values.toDate) === '1-1-1970' ? '1-1-2050' : formatDate(formik.values.toDate)
 
-    getRequest({
+    const response = await getRequest({
       extension: RemittanceOutwardsRepository.Postoutwards.qry,
       parameters: `_countryId=${formik.values.countryId}&_currencyId=${formik.values.currencyId || 0}&_corId=${
         formik.values.corId || 0
       }&_dispersalType=${formik.values.dispersalType || 0}&_fromAmount=${formik.values.fromAmount || 0}&_toAmount=${
         formik.values.toAmount || 0
       }&_fromDate=${formattedFromDate}&_todate=${formattedToDate}`
-    }).then(response => {
-      setData(response.list || [])
     })
+
+    if (status) setDataFilter(response)
+    else return response
   }
 
   const {
     labels: _labels,
     access,
+    query: { data },
     refetch
   } = useResourceQuery({
     queryFn: fetchRemittanceData,
     endpointId: RemittanceOutwardsRepository.Postoutwards.qry,
     datasetId: ResourceIds.PostOutwards
   })
+
+  const dataTable = dataFilter || data
 
   const { formik } = useForm({
     initialValues: {
@@ -79,14 +82,14 @@ const Postoutwards = () => {
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async values => {
-      const checkedOwoIds = data.filter(row => row.checked).map(row => row.recordId)
+      const checkedOwoIds = dataTable.list?.filter(row => row.checked).map(row => row.recordId)
       if (checkedOwoIds.length > 0) {
         await postRequest({
           extension: RemittanceOutwardsRepository.Postoutwards.post2,
           record: JSON.stringify({ ids: checkedOwoIds })
         })
       }
-      fetchRemittanceData()
+      fetchRemittanceData(true)
       toast.success(platformLabels.Posted)
     }
   })
@@ -148,7 +151,7 @@ const Postoutwards = () => {
   ]
 
   useEffect(() => {
-    fetchRemittanceData()
+    fetchRemittanceData(true)
     formik.setFieldValue('totalAm', 0)
     formik.setFieldValue('totalFc', 0)
   }, [
@@ -161,10 +164,11 @@ const Postoutwards = () => {
     formik.values.fromAmount,
     formik.values.toAmount
   ])
+
   function calcFc() {
     const totalFc =
       formik.values.countryId && formik.values.currencyId
-        ? data?.reduce((sumAmount, row) => {
+        ? dataTable?.list?.reduce((sumAmount, row) => {
             let curValue = 0
             if (row.checked) curValue = parseFloat(row.fcAmount.toString().replace(/,/g, '')) || 0
 
@@ -172,7 +176,7 @@ const Postoutwards = () => {
           }, 0)
         : 0
 
-    const totalAm = data?.reduce((sumAmount, row) => {
+    const totalAm = dataTable?.list?.reduce((sumAmount, row) => {
       let curValue = 0
       if (row.checked) curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
 
@@ -225,7 +229,6 @@ const Postoutwards = () => {
                     error={formik.touched.countryId && Boolean(formik.errors.countryId)}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <ResourceComboBox
                     endpointId={RemittanceOutwardsRepository.AssignedCurrency.assigned}
@@ -249,7 +252,6 @@ const Postoutwards = () => {
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <ResourceComboBox
                     endpointId={RemittanceOutwardsRepository.AssignedDispersalType.assigned}
@@ -268,7 +270,6 @@ const Postoutwards = () => {
                     }}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <ResourceLookup
                     endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
@@ -288,7 +289,6 @@ const Postoutwards = () => {
                     }}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <CustomNumberField
                     name='fromAmount'
@@ -299,7 +299,6 @@ const Postoutwards = () => {
                     decimalScale={2}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <CustomNumberField
                     name='toAmount'
@@ -310,7 +309,6 @@ const Postoutwards = () => {
                     decimalScale={2}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <CustomDatePicker
                     name='fromDate'
@@ -322,7 +320,6 @@ const Postoutwards = () => {
                     error={false}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <CustomDatePicker
                     name='toDate'
@@ -341,8 +338,7 @@ const Postoutwards = () => {
         <Grow>
           <Table
             columns={rowColumns}
-            gridData={{ list: data }}
-            setData={setData}
+            gridData={dataTable}
             rowId={['recordId']}
             pageSize={50}
             pagination={true}

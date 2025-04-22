@@ -27,6 +27,7 @@ export const SystemChecks = {
 
   // Delivery Orders
   ALLOW_DELIVERY_RETURN_OF_UNKNOWN_SKU: Module.Delivery * 100 + 1,
+  AUTO_POST_GENERATED_DELIVERY_ORDERS_FROM_MIDDLEWARE: Module.Delivery * 100 + 6,
 
   //Purchase
   ENABLE_PURCHASE_TAX: Module.Purchase * 100 + 1,
@@ -39,5 +40,8 @@ export const SystemChecks = {
   ENABLE_RETAIL_SCALE_BARCODE: Module.PointOfSale * 100 + 6,
 
   CT_YAKEEN_INFORMATION: Module.CurrencyTrading * 100 + 5,
-  CT_DISABLE_MOBILE_VERIFICATION: Module.CurrencyTrading * 100 + 4
+  CT_DISABLE_MOBILE_VERIFICATION: Module.CurrencyTrading * 100 + 4,
+
+  //Sales
+  SRLNO_TEXT_CHECK: Module.Sales * 100 + 2
 }

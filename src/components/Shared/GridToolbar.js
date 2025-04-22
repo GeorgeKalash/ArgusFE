@@ -15,6 +15,7 @@ const GridToolbar = ({
   onSearch,
   onSearchClear,
   onSearchChange,
+  disableAdd = false,
   actions = [],
   ...props
 }) => {
@@ -78,6 +79,7 @@ const GridToolbar = ({
                     onClick={onAdd}
                     variant='contained'
                     style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
+                    disabled={disableAdd}
                     sx={{
                       mr: 1,
                       '&:hover': {

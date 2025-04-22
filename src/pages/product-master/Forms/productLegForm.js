@@ -151,48 +151,46 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
       const defaultParams = `_productId=${pId}&_seqNo=${_seqNo}`
       const parameters = defaultParams
 
-      try {
-        const allCommissionFees = await getRequest({
-          extension: RemittanceSettingsRepository.ProductScheduleFees.qry, //qryPSF
-          parameters: `_productId=${pId}&_seqNo=${_seqNo}&_rangeSeqNo=${0}`
-        })
+      const allCommissionFees = await getRequest({
+        extension: RemittanceSettingsRepository.ProductScheduleFees.qry, //qryPSF
+        parameters: `_productId=${pId}&_seqNo=${_seqNo}&_rangeSeqNo=${0}`
+      })
 
-        const res = await getRequest({
-          extension: RemittanceSettingsRepository.ProductScheduleRanges.qry,
-          parameters: parameters
-        })
+      const res = await getRequest({
+        extension: RemittanceSettingsRepository.ProductScheduleRanges.qry,
+        parameters: parameters
+      })
 
-        const productLegsPromises = res?.list?.map(async (item, index) => {
-          const commissionFees = await allCommissionFees?.list?.filter(value => value.rangeSeqNo === item.rangeSeqNo)
+      const productLegsPromises = res?.list?.map(async (item, index) => {
+        const commissionFees = await allCommissionFees?.list?.filter(value => value.rangeSeqNo === item.rangeSeqNo)
 
-          try {
-            const commissionFeesMap = commissionFees.reduce((acc, fee) => {
-              acc[fee?.commissionId] = fee?.commission
+        try {
+          const commissionFeesMap = commissionFees.reduce((acc, fee) => {
+            acc[fee?.commissionId] = fee?.commission
 
-              return acc
-            }, {})
+            return acc
+          }, {})
 
-            const rows = commission.map(commissionType => {
-              return {
-                [commissionType?.name]: commissionFeesMap[commissionType?.name] || ''
-              }
-            })
-
+          const rows = commission.map(commissionType => {
             return {
-              id: index + 1,
-              saved: true,
-              ...item,
-              ...Object.assign({}, ...rows)
+              [commissionType?.name]: commissionFeesMap[commissionType?.name] || ''
             }
-          } catch (error) {
-            return
+          })
+
+          return {
+            id: index + 1,
+            saved: true,
+            ...item,
+            ...Object.assign({}, ...rows)
           }
-        })
+        } catch (error) {
+          return
+        }
+      })
 
-        const productScheduleRanges = await Promise.all(productLegsPromises)
+      const productScheduleRanges = await Promise.all(productLegsPromises)
 
-        formik.setFieldValue('productRanges', productScheduleRanges)
-      } catch (error) {}
+      formik.setFieldValue('productRanges', productScheduleRanges)
     }
   }
 

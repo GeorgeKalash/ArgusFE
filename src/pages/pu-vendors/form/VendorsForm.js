@@ -18,6 +18,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DataSets } from 'src/resources/DataSets'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { useFieldBehavior } from 'src/hooks/useFieldBehaviors'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function VendorsForm({ labels, maxAccess: access, recordId, setStore }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -219,16 +220,12 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isTaxable'
-                    checked={formik.values?.isTaxable}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='isTaxable'
+                value={formik.values?.isTaxable}
+                onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
                 label={labels.tax}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -290,16 +287,12 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isInactive'
-                    checked={formik.values?.isInactive}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values?.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                 label={labels.inactive}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

@@ -18,6 +18,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useInvalidate } from 'src/hooks/resource'
 import { useBarcodeFieldBehaviours } from 'src/hooks/useBarcodeFieldBehaviours'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function BarcodesForm({ labels, access, store, recordId, msId, barcode }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -54,12 +55,18 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      itemId: yup.string().required()
+      itemId: yup.string().required(),
+      barcode: yup.string().required()
     }),
     onSubmit: async values => {
+      const data = {
+        ...values,
+        recordId: parseInt(recordId)
+      }
+
       const res = await postRequest({
         extension: InventoryRepository.Barcodes.set,
-        record: JSON.stringify(values)
+        record: JSON.stringify(data)
       })
 
       if (imageUploadRef.current) {
@@ -70,7 +77,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
 
       if (!values.recordId) {
         toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', parseInt(res?.recordId))
+        formik.setFieldValue('recordId', formik.values.barcode)
       } else toast.success(platformLabels.Edited)
       invalidate()
     }
@@ -92,7 +99,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
 
         return
       }
-      if (barcode) {
+      if (barcode && recordId) {
         const res = await getRequest({
           extension: InventoryRepository.Barcodes.get,
           parameters: `_barcode=${barcode}`
@@ -102,7 +109,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
           ...res.record,
           scaleDescription: res.record.scaleDescription,
           posDescription: res.record.posDescription,
-          recordId: parseInt(res?.record.recordId)
+          recordId: res?.record.barcode
         })
       }
     })()
@@ -154,6 +161,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
                     value={formik?.values?.barcode}
                     maxLength='20'
                     readOnly={editMode}
+                    required
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('barcode', '')}
@@ -227,16 +235,12 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isInactive'
-                    maxAccess={access}
-                    checked={formik.values?.isInactive}
-                    onChange={event => formik.setFieldValue('isInactive', event.target.checked ? true : false)}
-                  />
-                }
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values?.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                 label={labels?.isInactive}
+                maxAccess={access}
               />
             </Grid>
           </Grid>

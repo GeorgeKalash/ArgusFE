@@ -16,6 +16,10 @@ const MenuProvider = ({ children }) => {
   const [reloadOpenedPage, setReloadOpenedPage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const [openTabs, setOpenTabs] = useState([])
+
+  const [currentTabIndex, setCurrentTabIndex] = useState(0)
+
   const getMenu = async () => {
     var parameters = '_filter='
     getRequest({
@@ -135,7 +139,11 @@ const MenuProvider = ({ children }) => {
     lastOpenedPage,
     setLastOpenedPage,
     reloadOpenedPage,
-    setReloadOpenedPage
+    setReloadOpenedPage,
+    openTabs,
+    setOpenTabs,
+    currentTabIndex,
+    setCurrentTabIndex
   }
 
   return (

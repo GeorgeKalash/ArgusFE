@@ -47,14 +47,14 @@ const ProfessionGroups = () => {
 
   const columns = [
     {
-        field: 'reference',
-        headerName: _labels.reference,
-        flex: 1
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
     },
     {
-        field: 'name',
-        headerName: _labels.name,
-        flex: 1
+      field: 'name',
+      headerName: _labels.name,
+      flex: 1
     }
   ]
 
@@ -96,6 +96,7 @@ const ProfessionGroups = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

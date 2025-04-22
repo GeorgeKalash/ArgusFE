@@ -90,6 +90,7 @@ export const FinancialRepository = {
     get: service + 'getMEM',
     del: service + 'delMEM',
     post: service + 'postMEM',
+    unpost: service + 'unpostMEM',
     cancel: service + 'cancelMEM',
     snapshot: service + 'snapshotMEM'
   },
@@ -150,7 +151,7 @@ export const FinancialRepository = {
     post: service + 'postPV',
     cancel: service + 'cancelPV',
     snapshot: service + 'snapshotPV',
-    unpost: service + 'unpostPV',
+    unpost: service + 'unpostPV'
   },
   AgingProfile: {
     qry: service + 'qryAGP',
@@ -179,5 +180,25 @@ export const FinancialRepository = {
   },
   AgingLeg: {
     qry: service + 'qryAGL'
+  },
+  MetalReceiptVoucher: {
+    set2: service + 'set2MRV',
+    qry: service + 'qryMTI'
+  },
+  MetalPaymentVoucher: {
+    set2: service + 'set2MPV'
+  },
+  MetalTrx: {
+    get: service + 'getMTX',
+    del: service + 'delMTX',
+    post: service + 'postMTX ',
+    unpost: service + 'unpostMTX',
+    qry: service + 'qryMTX',
+    page: service + 'pageMTX',
+    snapshot: service + 'snapshotMTX'
+  },
+  AgingDoc: {
+    snapshot: service + 'snapshotAGD',
+    rebuild: service + 'rebuildAGD'
   }
 }

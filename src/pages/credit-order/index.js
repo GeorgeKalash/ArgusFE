@@ -137,6 +137,7 @@ const CreditOrder = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={[
             {
               field: 'reference',

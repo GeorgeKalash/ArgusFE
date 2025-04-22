@@ -22,6 +22,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -536,42 +537,33 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                           />
                         </Grid>
                         <Grid item xs={12}>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                name='trading'
-                                disabled={editMode && true}
-                                checked={formik.values?.trading}
-                                onChange={formik.handleChange}
-                              />
-                            }
+                          <CustomCheckBox
+                            name='trading'
+                            value={formik.values?.trading}
+                            onChange={event => formik.setFieldValue('trading', event.target.checked)}
                             label={_labels?.trading}
+                            maxAccess={maxAccess}
+                            disabled={editMode && true}
                           />
                         </Grid>
                         <Grid item xs={12}>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                name='inward'
-                                disabled={editMode && true}
-                                checked={formik.values?.inward}
-                                onChange={formik.handleChange}
-                              />
-                            }
+                          <CustomCheckBox
+                            name='inward'
+                            value={formik.values?.inward}
+                            onChange={event => formik.setFieldValue('inward', event.target.checked)}
                             label={_labels?.inward}
+                            maxAccess={maxAccess}
+                            disabled={editMode && true}
                           />
                         </Grid>
                         <Grid item xs={12}>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                name='outward'
-                                disabled={editMode && true}
-                                checked={formik.values?.outward}
-                                onChange={formik.handleChange}
-                              />
-                            }
+                          <CustomCheckBox
+                            name='outward'
+                            value={formik.values?.outward}
+                            onChange={event => formik.setFieldValue('outward', event.target.checked)}
                             label={_labels?.outward}
+                            maxAccess={maxAccess}
+                            disabled={editMode && true}
                           />
                         </Grid>
                       </Grid>
@@ -590,17 +582,14 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                 />
               </FieldSet>
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='OTPVerified'
-                      disabled={true}
-                      readOnly={editMode && true}
-                      checked={formik.values?.OTPVerified}
-                      onChange={formik.handleChange}
-                    />
-                  }
+                <CustomCheckBox
+                  name='OTPVerified'
+                  value={formik.values?.OTPVerified}
+                  onChange={event => formik.setFieldValue('OTPVerified', event.target.checked)}
                   label={_labels?.OTPVerified}
+                  maxAccess={maxAccess}
+                  disabled={true}
+                  readOnly={editMode && true}
                 />
               </Grid>
             </Grid>

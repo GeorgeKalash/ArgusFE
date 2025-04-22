@@ -26,6 +26,7 @@ import { useWindow } from 'src/windows'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import FieldSet from 'src/components/Shared/FieldSet'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function OutwardsReturnForm({
   labels,
@@ -104,6 +105,7 @@ export default function OutwardsReturnForm({
       corExRate: null,
       commission: null,
       vatAmount: null,
+      reasonId: null,
       tdAmount: null,
       amount: null,
       exRate: null,
@@ -111,7 +113,7 @@ export default function OutwardsReturnForm({
       lcAmount: '',
       releaseStatus: null,
       otpVerified: false,
-      settlementStatus: 1,
+      settlementStatus: null,
       interfaceId: null,
       attemptNo: 1
     },
@@ -130,7 +132,15 @@ export default function OutwardsReturnForm({
       dispersalName: yup.string().required(),
       vatAmount: yup.string().required(),
       settlementStatus: yup.number().required(),
-      lcAmount: yup.string().required(),
+      reasonId: yup.number().required(),
+      lcAmount: yup
+        .string()
+        .required()
+        .test(function (value) {
+          const { amount } = this.parent
+
+          return parseFloat(value) <= parseFloat(amount || 0)
+        }),
       exRate: yup.string().required(),
       commission: yup.string().required(),
       amount: yup.string().required()
@@ -615,17 +625,13 @@ export default function OutwardsReturnForm({
                     />
                   </Grid>
                   <Grid item xs={6}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          name='otpVerified'
-                          checked={formik.values?.otpVerified}
-                          disabled={true}
-                          onChange={formik.handleChange}
-                          maxAccess={access}
-                        />
-                      }
+                    <CustomCheckBox
+                      name='otpVerified'
+                      value={formik.values?.otpVerified}
+                      onChange={event => formik.setFieldValue('otpVerified', event.target.checked)}
                       label={labels.otpVerified}
+                      disabled={true}
+                      maxAccess={access}
                     />
                   </Grid>
                   <Grid item xs={6}>
@@ -657,25 +663,59 @@ export default function OutwardsReturnForm({
                       readOnly={isPosted || isClosed || isOpenOutwards}
                       maxAccess={maxAccess}
                       onChange={(event, newValue) => {
-                        const originalLcAmount = formik.values.originalLcAmount
-
                         formik.setFieldValue('requestedBy', newValue?.key)
+                      }}
+                      error={formik.touched.requestedBy && Boolean(formik.errors.requestedBy)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={RemittanceOutwardsRepository.OutwardReturnReason.qry}
+                      name='reasonId'
+                      label={labels.returnReason}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      filter={item => {
+                        const requestedByKey = formik.values.requestedBy
 
-                        if (newValue?.key === '1' || newValue?.key === '2') {
-                          const amount =
-                            originalLcAmount +
-                            (formik?.values?.commission || 0) +
-                            (formik?.values?.vatAmount || 0) -
-                            (formik?.values?.tdAmount || 0)
+                        if (requestedByKey === '1') {
+                          return item.company
+                        } else if (requestedByKey === '2') {
+                          return item.correspondant
+                        } else if (requestedByKey === '3') {
+                          return item.client
+                        }
 
-                          formik.setFieldValue('lcAmount', amount)
-                          getExRateChangeStatus(formik?.values?.amount, amount)
-                        } else if (newValue?.key === '3') {
-                          formik.setFieldValue('lcAmount', originalLcAmount)
+                        return true
+                      }}
+                      values={formik.values}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('reasonId', newValue ? newValue?.recordId : '')
+                        
+                        if (newValue?.rateStatus == '1') {
+                          formik.setFieldValue('lcAmount', formik.values.amount)
+                          getExRateChangeStatus(formik?.values?.amount, formik?.values?.amount)
+                        } else if (newValue?.rateStatus == '2') {
+                          formik.setFieldValue('lcAmount', formik.values.derivedLcAmount)
+                          getExRateChangeStatus(formik?.values?.amount, formik?.values?.derivedLcAmount)
+                        } else if (newValue?.rateStatus == '3') {
+                          const originalLcAmount = formik.values.originalLcAmount
+
+                          formik.setFieldValue(
+                            'lcAmount',
+                            Math.min(formik.values.amount, formik.values.derivedLcAmount)
+                          )
                           getExRateChangeStatus(formik?.values?.amount, originalLcAmount)
                         }
                       }}
-                      error={formik.touched.requestedBy && Boolean(formik.errors.requestedBy)}
+                      required
+                      maxAccess={maxAccess}
+                      error={formik.touched.reasonId && Boolean(formik.errors.reasonId)}
+                      readOnly={isPosted || isClosed || isOpenOutwards || !formik.values.requestedBy}
                     />
                   </Grid>
                   <Grid item xs={12}>

@@ -15,6 +15,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -36,7 +37,15 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      dtId: yup.string().required()
+      dtId: yup.string().required(),
+      allocateBy: yup
+        .string()
+        .when('commitItems', {
+          is: true,
+          then: (schema) =>
+            schema.required(),
+          otherwise: (schema) => schema.notRequired()
+        })
     }),
 
     onSubmit: async obj => {
@@ -139,16 +148,12 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    maxAccess={maxAccess}
-                    name='commitItems'
-                    checked={formik.values?.commitItems}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='commitItems'
+                value={formik.values?.commitItems}
+                onChange={event => formik.setFieldValue('commitItems', event.target.checked)}
                 label={labels.commitItems}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -163,20 +168,17 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
                 onChange={(event, newValue) => {
                   formik.setFieldValue('allocateBy', newValue?.key)
                 }}
+                required={formik.values?.commitItems}
                 error={formik.touched.allocateBy && Boolean(formik.errors.allocateBy)}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    maxAccess={maxAccess}
-                    name='disableSKULookup'
-                    checked={formik.values?.disableSKULookup}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='disableSKULookup'
+                value={formik.values?.disableSKULookup}
+                onChange={event => formik.setFieldValue('disableSKULookup', event.target.checked)}
                 label={labels.dsl}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

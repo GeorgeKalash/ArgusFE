@@ -14,6 +14,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, maxAccess, getGridData, window, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -43,14 +44,15 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
     }),
     onSubmit: async obj => {
       try {
-        const res2 = await fetchData();
-    
+        const res2 = await fetchData()
+
         const updatedList = obj?.seqNo
-          ? res2?.list?.map(item => 
-              item?.seqNo === obj?.seqNo ? obj : item
-            )
-          : [...res2?.list, { ...obj, seqNo: res2?.list?.length > 0 ? res2.list[res2?.list?.length - 1]?.seqNo + 1 : 1 }];
-    
+          ? res2?.list?.map(item => (item?.seqNo === obj?.seqNo ? obj : item))
+          : [
+              ...res2?.list,
+              { ...obj, seqNo: res2?.list?.length > 0 ? res2.list[res2?.list?.length - 1]?.seqNo + 1 : 1 }
+            ]
+
         const dataToSave = {
           ilId,
           details: updatedList
@@ -215,16 +217,12 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isCostElement'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isCostElement}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='isCostElement'
+                value={formik.values?.isCostElement}
+                onChange={event => formik.setFieldValue('isCostElement', event.target.checked)}
                 label={labels.isCostElement}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

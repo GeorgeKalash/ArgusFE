@@ -1,6 +1,6 @@
 import { Grow } from '@mui/material'
 import { useRouter } from 'next/router'
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
@@ -17,14 +17,15 @@ import { useResourceQuery } from 'src/hooks/resource'
 import Table from 'src/components/Shared/Table'
 import toast from 'react-hot-toast'
 import NormalDialog from 'src/components/Shared/NormalDialog'
+import { Router } from 'src/lib/useRouter'
 
 const SaTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
-  const router = useRouter()
-  const { functionId } = router.query
+
+  const { functionId } = Router()
 
   const getResourceId = functionId => {
     switch (functionId) {
@@ -251,39 +252,14 @@ const SaTrx = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'SATR'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'SATR'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

@@ -21,7 +21,6 @@ const SwipeableDrawer = styled(MuiSwipeableDrawer)({
 })
 
 const Drawer = props => {
-  
   const {
     hidden,
     children,
@@ -50,7 +49,7 @@ const Drawer = props => {
   const DesktopDrawerProps = {
     open: true,
     onOpen: () => null,
-    onClose: () => null,
+    onClose: () => null
   }
   let userNavMenuStyle = {}
   let userNavMenuPaperStyle = {}

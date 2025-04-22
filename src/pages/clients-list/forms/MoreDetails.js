@@ -3,6 +3,8 @@ import React, { useContext, useEffect, useState } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -86,197 +88,197 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
 
   return (
     <FormShell form={formik} infoVisible={false} isCleared={false} disabledSubmit={editMode}>
-      <Grid container xs={12} spacing={2} sx={{ p: 5 }}>
-        <Grid item xs={12}>
-          <CustomNumberField
-            name='trxCountPerYear'
-            readOnly={editMode || readOnly}
-            onChange={formik.handleChange}
-            label={labels.trxCountPerYear}
-            onClear={() => formik.setFieldValue('trxCountPerYear', '')}
-            value={formik.values.trxCountPerYear}
-            error={formik.touched.trxCountPerYear && Boolean(formik.errors.trxCountPerYear)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomNumberField
-            name='trxAmountPerYear'
-            readOnly={editMode || readOnly}
-            label={labels.trxAmountPerYear}
-            onChange={formik.handleChange}
-            value={formik.values.trxAmountPerYear}
-            onClear={() => formik.setFieldValue('trxAmountPerYear', '')}
-            error={formik.touched.trxAmountPerYear && Boolean(formik.errors.trxAmountPerYear)}
-          />
-        </Grid>
-
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={CurrencyTradingSettingsRepository.RiskLevel.qry}
-            name='riskLevel'
-            label={labels.riskLevel}
-            readOnly={(editMode && !allowEdit) || readOnly}
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('riskLevel', newValue?.recordId)
-              } else {
-                formik.setFieldValue('riskLevel', null)
-              }
-            }}
-            error={formik.touched.riskLevel && Boolean(formik.errors.riskLevel)}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.CIVIL_STATUS}
-            name='civilStatus'
-            label={labels.civilStatus}
-            valueField='key'
-            displayField='value'
-            values={formik.values}
-            readOnly={(editMode && !allowEdit) || readOnly}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('civilStatus', newValue?.key)
-              } else {
-                formik.setFieldValue('civilStatus', newValue?.key)
-              }
-            }}
-            error={formik.touched.civilStatus && Boolean(formik.errors.civilStatus)}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-
-        <Grid item xs={12}>
-          <CustomTextField
-            name='oldReference'
-            label={labels.oldReference}
-            value={formik.values?.oldReference}
-            readOnly={editMode || readOnly}
-            onChange={formik.handleChange}
-            maxLength='10'
-            onClear={() => formik.setFieldValue('oldReference', '')}
-            error={formik.touched.oldReference && Boolean(formik.errors.oldReference)}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.TITLE}
-            name='title'
-            label={labels.title}
-            valueField='key'
-            displayField='value'
-            readOnly={(editMode && !allowEdit) || readOnly}
-            values={formik.values}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('title', newValue?.key)
-              } else {
-                formik.setFieldValue('title', null)
-              }
-            }}
-            error={formik.touched.title && Boolean(formik.errors.title)}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomNumberField
-            name='extraIncome'
-            maxLength={12}
-            decimalScale={0}
-            readOnly={editMode || readOnly}
-            onChange={formik.handleChange}
-            label={labels.extraIncome}
-            value={formik.values.extraIncome}
-            error={formik.touched.extraIncome && Boolean(formik.errors.extraIncome)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={RemittanceSettingsRepository.ExtraIncome.qry}
-            name='extraIncomeId'
-            label={labels.extraIncomeType}
-            readOnly={editMode || readOnly}
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('extraIncomeId', newValue?.recordId || '')
-            }}
-            error={formik.touched.extraIncomeId && Boolean(formik.errors.extraIncomeId)}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={countryId && CashBankRepository.CbBank.qry2}
-            parameters={countryId && `_countryId=${countryId}`}
-            name='bankId'
-            label={labels.bank}
-            readOnly={editMode || readOnly}
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('bankId', newValue?.recordId || '')
-            }}
-            error={formik.touched.bankId && Boolean(formik.errors.bankId)}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='iban'
-            label={labels.iban}
-            value={formik.values?.iban}
-            readOnly={editMode || readOnly}
-            onChange={formik.handleChange}
-            maxLength='10'
-            onClear={() => formik.setFieldValue('iban', '')}
-            error={formik.touched.iban && Boolean(formik.errors.iban)}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs='12'>
-          <ResourceComboBox
-            datasetId={DataSets.EDUCATION_LEVEL}
-            name='educationLevel'
-            label={labels.educationLevel}
-            valueField='key'
-            displayField='value'
-            readOnly={editMode && !allowEdit && true}
-            values={formik.values}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('educationLevel', newValue?.key)
-              } else {
-                formik.setFieldValue('educationLevel', null)
-              }
-            }}
-            error={formik.touched.educationLevel && Boolean(formik.errors.educationLevel)}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-      </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container xs={12} spacing={2}>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='trxCountPerYear'
+                readOnly={editMode || readOnly}
+                onChange={formik.handleChange}
+                label={labels.trxCountPerYear}
+                onClear={() => formik.setFieldValue('trxCountPerYear', '')}
+                value={formik.values.trxCountPerYear}
+                error={formik.touched.trxCountPerYear && Boolean(formik.errors.trxCountPerYear)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='trxAmountPerYear'
+                readOnly={editMode || readOnly}
+                label={labels.trxAmountPerYear}
+                onChange={formik.handleChange}
+                value={formik.values.trxAmountPerYear}
+                onClear={() => formik.setFieldValue('trxAmountPerYear', '')}
+                error={formik.touched.trxAmountPerYear && Boolean(formik.errors.trxAmountPerYear)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={CurrencyTradingSettingsRepository.RiskLevel.qry}
+                name='riskLevel'
+                label={labels.riskLevel}
+                readOnly={(editMode && !allowEdit) || readOnly}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('riskLevel', newValue?.recordId)
+                  } else {
+                    formik.setFieldValue('riskLevel', null)
+                  }
+                }}
+                error={formik.touched.riskLevel && Boolean(formik.errors.riskLevel)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.CIVIL_STATUS}
+                name='civilStatus'
+                label={labels.civilStatus}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                readOnly={(editMode && !allowEdit) || readOnly}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('civilStatus', newValue?.key)
+                  } else {
+                    formik.setFieldValue('civilStatus', newValue?.key)
+                  }
+                }}
+                error={formik.touched.civilStatus && Boolean(formik.errors.civilStatus)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='oldReference'
+                label={labels.oldReference}
+                value={formik.values?.oldReference}
+                readOnly={editMode || readOnly}
+                onChange={formik.handleChange}
+                maxLength='10'
+                onClear={() => formik.setFieldValue('oldReference', '')}
+                error={formik.touched.oldReference && Boolean(formik.errors.oldReference)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.TITLE}
+                name='title'
+                label={labels.title}
+                valueField='key'
+                displayField='value'
+                readOnly={(editMode && !allowEdit) || readOnly}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('title', newValue?.key)
+                  } else {
+                    formik.setFieldValue('title', null)
+                  }
+                }}
+                error={formik.touched.title && Boolean(formik.errors.title)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='extraIncome'
+                maxLength={12}
+                decimalScale={0}
+                readOnly={editMode || readOnly}
+                onChange={formik.handleChange}
+                label={labels.extraIncome}
+                value={formik.values.extraIncome}
+                error={formik.touched.extraIncome && Boolean(formik.errors.extraIncome)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={RemittanceSettingsRepository.ExtraIncome.qry}
+                name='extraIncomeId'
+                label={labels.extraIncomeType}
+                readOnly={editMode || readOnly}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('extraIncomeId', newValue?.recordId || '')
+                }}
+                error={formik.touched.extraIncomeId && Boolean(formik.errors.extraIncomeId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={countryId && CashBankRepository.CbBank.qry2}
+                parameters={countryId && `_countryId=${countryId}`}
+                name='bankId'
+                label={labels.bank}
+                readOnly={editMode || readOnly}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('bankId', newValue?.recordId || '')
+                }}
+                error={formik.touched.bankId && Boolean(formik.errors.bankId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='iban'
+                label={labels.iban}
+                value={formik.values?.iban}
+                readOnly={editMode || readOnly}
+                onChange={formik.handleChange}
+                maxLength='10'
+                onClear={() => formik.setFieldValue('iban', '')}
+                error={formik.touched.iban && Boolean(formik.errors.iban)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs='12'>
+              <ResourceComboBox
+                datasetId={DataSets.EDUCATION_LEVEL}
+                name='educationLevel'
+                label={labels.educationLevel}
+                valueField='key'
+                displayField='value'
+                readOnly={editMode && !allowEdit && true}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('educationLevel', newValue?.key)
+                  } else {
+                    formik.setFieldValue('educationLevel', null)
+                  }
+                }}
+                error={formik.touched.educationLevel && Boolean(formik.errors.educationLevel)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

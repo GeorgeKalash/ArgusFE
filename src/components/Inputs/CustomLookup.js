@@ -9,13 +9,13 @@ import { checkAccess } from 'src/lib/maxAccess'
 const CustomLookup = ({
   type = 'text',
   name,
+  fullName,
   label,
   firstValue,
   secondValue,
   secondDisplayField = true,
   columnsInDropDown,
-  onSecondValueChange,
-  secondFieldName = '',
+  secondField = { name: '', editable: false, onChange: () => {} },
   store = [],
   setStore,
   onKeyUp,
@@ -44,7 +44,7 @@ const CustomLookup = ({
   onFocus = () => {},
   ...props
 }) => {
-  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
+  const { _readOnly, _required, _hidden } = checkAccess(fullName, props.maxAccess, required, readOnly, hidden)
 
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
@@ -114,6 +114,8 @@ const CustomLookup = ({
             setInputValue(newValue ? newValue[valueField] : '')
             onChange(name, newValue)
             setAutoFocus(true)
+
+            valueHighlightedOption.current = ''
           }}
           onHighlightChange={(event, newValue) => {
             valueHighlightedOption.current = newValue
@@ -305,7 +307,7 @@ const CustomLookup = ({
                 },
                 '& .MuiInputLabel-root': {
                   fontSize: '0.90rem',
-                  top: isFocused || inputValue ? '0px' : '-3px'
+                  top: isFocused || firstValue ? '0px' : '-3px'
                 },
                 '& .MuiInputBase-input': {
                   fontSize: '0.90rem',
@@ -329,15 +331,15 @@ const CustomLookup = ({
             value={secondValue ? secondValue : ''}
             required={_required}
             onChange={e => {
-              if (onSecondValueChange && secondFieldName) {
-                onSecondValueChange(secondFieldName, e.target.value)
+              if (secondField?.onChange && secondField?.name) {
+                secondField?.onChange(secondField?.name, e.target.value)
               }
             }}
             InputProps={{
               inputProps: {
-                tabIndex: _readOnly || secondFieldName === '' ? -1 : 0 // Prevent focus on the input field
+                tabIndex: _readOnly || secondField?.editable === '' ? -1 : 0 // Prevent focus on the input field
               },
-              readOnly: !!secondFieldName && !_readOnly ? false : true
+              readOnly: secondField ? !secondField?.editable : _readOnly
             }}
             error={error}
             helperText={helperText}

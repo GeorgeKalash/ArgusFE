@@ -30,6 +30,7 @@ export const BusinessPartnerRepository = {
   },
   MasterData: {
     qry: service + 'qryMAS',
+    qry2: service + 'qryMAS2',
     get: service + 'getMAS',
     set: service + 'setMAS',
     del: service + 'delMAS',

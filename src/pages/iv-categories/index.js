@@ -23,7 +23,6 @@ const Category = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
-
   const [reportStore, setReportStore] = useState([])
   const [dataTree, setDataTree] = useState([])
 
@@ -63,10 +62,19 @@ const Category = () => {
       extension: InventoryRepository.Category.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_name=`
     })
-    setDataTree(response)
 
     return { ...response, _startAt: _startAt }
   }
+
+  useEffect(() => {
+    ;(async () => {
+      const response = await getRequest({
+        extension: InventoryRepository.Category.page,
+        parameters: `_pageSize=1000&_startAt=0&_name=`
+      })
+      setDataTree(response)
+    })()
+  }, [])
 
   const columns = [
     {
@@ -107,14 +115,12 @@ const Category = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: InventoryRepository.Category.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: InventoryRepository.Category.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
@@ -153,23 +159,21 @@ const Category = () => {
     getRequest({
       extension: SystemRepository.ReportLayout,
       parameters: `_resourceId=${ResourceIds.Category}`
-    })
-      .then(res => {
-        if (res?.list) {
-          const formattedReports = res.list.map(item => ({
-            api_url: item.api,
-            reportClass: item.instanceName,
-            parameters: item.parameters,
-            layoutName: item.layoutName,
-            assembly: 'ArgusRPT.dll'
-          }))
-          setReportStore(formattedReports)
-          if (formattedReports.length > 0) {
-            setSelectedReport(formattedReports[0])
-          }
+    }).then(res => {
+      if (res?.list) {
+        const formattedReports = res.list.map(item => ({
+          api_url: item.api,
+          reportClass: item.instanceName,
+          parameters: item.parameters,
+          layoutName: item.layoutName,
+          assembly: 'ArgusRPT.dll'
+        }))
+        setReportStore(formattedReports)
+        if (formattedReports.length > 0) {
+          setSelectedReport(formattedReports[0])
         }
-      })
-      .catch(error => {})
+      }
+    })
   }
 
   function onTreeClick() {

@@ -54,7 +54,7 @@ const RetailForm = ({ store, maxAccess }) => {
           parameters: `&_itemId=${store.recordId}&_count=${recordNum}`
         })
 
-        const updatedData = data.map(row => {
+        const updatedData = data?.map(row => {
           const match = response.list.find(item => item.idx === parseInt(row.key))
 
           return match ? { ...row, checked: match.flag } : row

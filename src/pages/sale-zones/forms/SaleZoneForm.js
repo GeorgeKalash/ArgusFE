@@ -26,50 +26,48 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
   })
 
   const { formik } = useForm({
+    maxAccess,
     initialValues: {
       recordId: null,
-      name: '',
-      szRef: '',
-      countryId: '',
-      productionOrderLevel: '',
-      parentId: ''
+      name: null,
+      szRef: null,
+      countryId: null,
+      productionOrderLevel: null,
+      parentId: null,
+      parentRef: '',
+      parentName: null
     },
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
+      szRef: yup.string().required(),
       countryId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: SaleRepository.SalesZone.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: SaleRepository.SalesZone.set,
+        record: JSON.stringify(obj)
+      })
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else toast.success(platformLabels.Edited)
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else toast.success(platformLabels.Edited)
-
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SaleRepository.SalesZone.get,
-            parameters: `_recordId=${recordId}`
-          })
-
-          formik.setValues(res.record)
-        }
-      } catch (error) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: SaleRepository.SalesZone.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 
@@ -83,6 +81,7 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
                 name='szRef'
                 label={labels.reference}
                 value={formik.values.szRef}
+                required
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('szRef', '')}
@@ -141,23 +140,29 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
                 endpointId={SaleRepository.SalesZone.qry}
                 parameters={{
                   _startAt: 0,
-                  _pageSize: 100,
+                  _pageSize: 3000,
                   _sortField: 'recordId',
                   _filter: ''
                 }}
+                valueField='szRef'
+                displayField='name'
                 name='parentId'
                 label={labels.parent}
-                valueField='parentRef'
-                displayField='name'
+                form={formik}
                 valueShow='parentRef'
                 secondValueShow='parentName'
-                form={formik}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('parentId', newValue?.recordId || '')
-                  formik.setFieldValue('parentName', newValue?.parentName || '')
-                  formik.setFieldValue('parentRef', newValue?.parentRef || '')
-                }}
+                columnsInDropDown={[
+                  { key: 'szRef', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 maxAccess={maxAccess}
+                displayFieldWidth={2}
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('parentId', newValue?.recordId)
+                  formik.setFieldValue('parentName', newValue?.name)
+                  formik.setFieldValue('parentRef', newValue?.szRef || '')
+                }}
+                errorCheck={'parentId'}
               />
             </Grid>
           </Grid>

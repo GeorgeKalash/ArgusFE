@@ -5,6 +5,7 @@ export const SystemRepository = {
   getLabels: service + 'qryLBL',
   KeyValueStore: service + 'qryKVS',
   ParameterDefinition: service + 'qryRP',
+  DynamicDashboard: service + 'qryUDB',
   ReportLayout: service + 'qryRL',
   ReportLayoutObject: { qry: service + 'qryRLO', set2: service + 'set2RLO' },
   ReportTemplate: { qry: service + 'qryRT', set2: service + 'set2RT' },
@@ -173,11 +174,6 @@ export const SystemRepository = {
     get: service + 'getCOM',
     set: service + 'setCOM'
   },
-  Attachment: {
-    get: service + 'getAT',
-    set: service + 'setAT',
-    del: service + 'delAT'
-  },
   SystemChecks: {
     qry: service + 'qryCHK',
     get: service + 'getCHK',
@@ -241,5 +237,11 @@ export const SystemRepository = {
   Rules: {
     qry: service + 'qryADR',
     set2: service + 'set2ADR'
+  },
+  Attachment: {
+    qry: service + 'qryAT',
+    set: service + 'setAT',
+    get: service + 'getAT',
+    del: service + 'delAT'
   }
 }

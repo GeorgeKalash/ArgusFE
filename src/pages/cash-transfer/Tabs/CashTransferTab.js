@@ -533,13 +533,11 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                     return
                   }
                   if (newRow.currencyId) {
-                    try {
-                      const result = await getCurrencyApi(newRow?.currencyId)
-                      update({
-                        exRate: result.record.exRate,
-                        rateCalcMethod: result.record.rateCalcMethod
-                      })
-                    } catch (error) {}
+                    const result = await getCurrencyApi(newRow?.currencyId)
+                    update({
+                      exRate: result.record.exRate,
+                      rateCalcMethod: result.record.rateCalcMethod
+                    })
                   }
                 }
               },

@@ -1,16 +1,12 @@
 import React, { useContext, useState } from 'react'
 import CustomTextField from '../Inputs/CustomTextField'
 import WindowToolbar from './WindowToolbar'
-import { useResourceQuery } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { Grid } from '@mui/material'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const StrictDeleteConfirmation = ({ window, action }) => {
   const [confirmationText, setConfirmationText] = useState('')
-
-  const { labels: _labels } = useResourceQuery({
-    datasetId: ResourceIds.SmsTemplates
-  })
+  const { platformLabels } = useContext(ControlContext)
 
   const handleChange = event => {
     const value = event.target.value
@@ -39,11 +35,11 @@ const StrictDeleteConfirmation = ({ window, action }) => {
     <Grid container spacing={2}>
       <Grid item xs={12}>
         <p style={{ fontWeight: 'bold', paddingLeft: '2rem' }}>
-          {_labels.areYouSure}
+          {platformLabels.areYouSure}
           <br />
-          {_labels.youAreAbout}
+          {platformLabels.youAreAbout}
         </p>
-        <p style={{ paddingLeft: '2rem' }}>{_labels.typeDelete}</p>
+        <p style={{ paddingLeft: '2rem' }}>{platformLabels.typeDelete}</p>
       </Grid>
       <Grid item xs={12} marginLeft={'1rem'} marginRight={'1rem'}>
         <CustomTextField
@@ -51,7 +47,7 @@ const StrictDeleteConfirmation = ({ window, action }) => {
           value={confirmationText}
           onChange={handleChange}
           onClear={handleClear}
-          placeholder={_labels.placeHolder}
+          placeholder={platformLabels.placeHolder}
         />
       </Grid>
       <Grid item xs={12}>

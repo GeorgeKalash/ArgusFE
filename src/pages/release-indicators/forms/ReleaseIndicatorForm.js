@@ -14,6 +14,7 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -57,7 +58,7 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
     }
   })
 
-  const editMode = !!recordId || (recordId === 0)
+  const editMode = !!recordId || recordId === 0
 
   useEffect(() => {
     ;(async function () {
@@ -140,16 +141,12 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
             </Grid>
 
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isReleased'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isReleased}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='isReleased'
+                value={formik.values?.isReleased}
+                onChange={event => formik.setFieldValue('isReleased', event.target.checked)}
                 label={labels.isReleased}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

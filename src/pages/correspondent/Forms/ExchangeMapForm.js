@@ -93,44 +93,38 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
       getRequest({
         extension: SystemRepository.Plant.qry,
         parameters: parameters
-      })
-        .then(result => {
-          const defaultParams = `_corId=${corId}&_currencyId=${currencyId}&_countryId=${countryId}`
-          const parameters = defaultParams
-          getRequest({
-            extension: RemittanceSettingsRepository.CorrespondentExchangeMap.qry,
-            parameters: parameters
+      }).then(result => {
+        const defaultParams = `_corId=${corId}&_currencyId=${currencyId}&_countryId=${countryId}`
+        const parameters = defaultParams
+        getRequest({
+          extension: RemittanceSettingsRepository.CorrespondentExchangeMap.qry,
+          parameters: parameters
+        }).then(values => {
+          const valuesMap = values.list.reduce((acc, fee) => {
+            acc[fee.plantId] = fee
+
+            return acc
+          }, {})
+
+          const plants = result.list.map((plant, index) => {
+            const value = valuesMap[plant?.recordId] || 0
+
+            return {
+              id: index,
+              corId: corId,
+              currencyId: currencyId,
+              countryId: countryId,
+              plantId: plant.recordId,
+              plantName: plant.name,
+              plantRef: plant.reference,
+              exchangeName: value?.exchangeName,
+              exchangeRef: value.exchangeRef ? value.exchangeRef : '',
+              exchangeId: value?.exchangeId
+            }
           })
-            .then(values => {
-              const valuesMap = values.list.reduce((acc, fee) => {
-                acc[fee.plantId] = fee
-
-                return acc
-              }, {})
-
-              const plants = result.list.map((plant, index) => {
-                const value = valuesMap[plant?.recordId] || 0
-
-                return {
-                  id: index,
-                  corId: corId,
-                  currencyId: currencyId,
-                  countryId: countryId,
-                  plantId: plant.recordId,
-                  plantName: plant.name,
-                  plantRef: plant.reference,
-                  exchangeName: value?.exchangeName,
-                  exchangeRef: value.exchangeRef ? value.exchangeRef : '',
-                  exchangeId: value?.exchangeId
-                }
-              })
-              formik.setFieldValue('plants', plants)
-            })
-            .catch(error => {})
+          formik.setFieldValue('plants', plants)
         })
-        .catch(error => {})
-
-    //step 3: merge both
+      })
   }
 
   const postExchangeMaps = async obj => {
@@ -143,12 +137,10 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
     await postRequest({
       extension: RemittanceSettingsRepository.CorrespondentExchangeMap.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      if (!res.recordId) toast.success(platformLabels.Added)
+      else toast.success(platformLabels.Edited)
     })
-      .then(res => {
-        if (!res.recordId) toast.success(platformLabels.Added)
-        else toast.success(platformLabels.Edited)
-      })
-      .catch(error => {})
   }
 
   return (

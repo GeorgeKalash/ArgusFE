@@ -236,12 +236,10 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
   // useEffect(() => {
   //   async function fetchCurrencyExchangeRate() {
   //     if (formValues.currencyId) {
-  //       try {
   //         const res = await getCurrencyApi(formValues.currencyId)
   //         if (res && res.record) {
   //           setExRateValue(res.record.exRate)
   //         }
-  //       } catch (error) {
   //         console.error('Failed to fetch currency exchange rate:', error)
   //       }
   //     }
@@ -492,30 +490,28 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
                     return
                   }
 
-                  try {
-                    const result = await getCurrencyApi(newRow?.currencyId)
-                    const result2 = result?.record
-                    const exRate = result2?.exRate
-                    const rateCalcMethod = result2?.rateCalcMethod
+                  const result = await getCurrencyApi(newRow?.currencyId)
+                  const result2 = result?.record
+                  const exRate = result2?.exRate
+                  const rateCalcMethod = result2?.rateCalcMethod
 
-                    if (newRow?.amount) {
-                      const amount =
-                        rateCalcMethod === 1
-                          ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
-                          : rateCalcMethod === 2
-                          ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
-                          : 0
-                      update({
-                        baseAmount: amount
-                      })
-                    }
-
+                  if (newRow?.amount) {
+                    const amount =
+                      rateCalcMethod === 1
+                        ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
+                        : rateCalcMethod === 2
+                        ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
+                        : 0
                     update({
-                      currencyId: newRow.currencyId,
-                      exRate: exRate,
-                      rateCalcMethod: rateCalcMethod
+                      baseAmount: amount
                     })
-                  } catch (error) {}
+                  }
+
+                  update({
+                    currencyId: newRow.currencyId,
+                    exRate: exRate,
+                    rateCalcMethod: rateCalcMethod
+                  })
                 }
               },
               {

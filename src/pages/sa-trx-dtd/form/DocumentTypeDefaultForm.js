@@ -16,6 +16,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId, functionId }) {
   const { platformLabels } = useContext(ControlContext)
@@ -186,21 +187,17 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId, f
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    maxAccess={maxAccess}
-                    name='commitItems'
-                    checked={formik.values?.commitItems}
-                    onChange={event => {
-                      formik.handleChange(event)
-                      if (!event.target.checked) {
-                        formik.setFieldValue('allocateBy', '')
-                      }
-                    }}
-                  />
-                }
+              <CustomCheckBox
+                name='commitItems'
+                value={formik.values?.commitItems}
+                onChange={event => {
+                  formik.handleChange(event)
+                  if (!event.target.checked) {
+                    formik.setFieldValue('allocateBy', '')
+                  }
+                }}
                 label={labels.commitItems}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -221,29 +218,21 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId, f
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    maxAccess={maxAccess}
-                    name='postMetalToFinancials'
-                    checked={formik.values?.postMetalToFinancials}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='postMetalToFinancials'
+                value={formik.values?.postMetalToFinancials}
+                onChange={event => formik.setFieldValue('postMetalToFinancials', event.target.checked)}
                 label={labels.postMetalToFinancials}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    maxAccess={maxAccess}
-                    name='disableSKULookup'
-                    checked={formik.values?.disableSKULookup}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='disableSKULookup'
+                value={formik.values?.disableSKULookup}
+                onChange={event => formik.setFieldValue('disableSKULookup', event.target.checked)}
                 label={labels.dsl}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

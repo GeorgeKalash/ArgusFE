@@ -32,23 +32,21 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
       accessLevel: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        if (resourceId == ResourceIds.SecurityGroup) {
-          await postRequest({
-            extension: AccessControlRepository.ModuleClass.set,
-            record: JSON.stringify(obj)
-          })
-        }
-        if (resourceId == ResourceIds.GlobalAuthorization) {
-          await postRequest({
-            extension: AccessControlRepository.AuthorizationResourceGlobal.set,
-            record: JSON.stringify(obj)
-          })
-        }
-        toast.success('Record Edited Successfully')
-        invalidate()
-        window.close()
-      } catch (error) {}
+      if (resourceId == ResourceIds.SecurityGroup) {
+        await postRequest({
+          extension: AccessControlRepository.ModuleClass.set,
+          record: JSON.stringify(obj)
+        })
+      }
+      if (resourceId == ResourceIds.GlobalAuthorization) {
+        await postRequest({
+          extension: AccessControlRepository.AuthorizationResourceGlobal.set,
+          record: JSON.stringify(obj)
+        })
+      }
+      toast.success('Record Edited Successfully')
+      invalidate()
+      window.close()
     }
   })
 

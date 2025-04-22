@@ -17,13 +17,13 @@ const TaxDetails = props => {
   const vatAmount = (taxDetail, taxItem) => {
     switch (taxDetail.taxBase) {
       case 1:
-        return (taxItem.extendedPrice * taxDetail.amount) / 100
+        return ((taxItem.extendedPrice * taxDetail.amount) / 100).toFixed(2)
       case 2:
-        return taxItem.qty * taxDetail.amount
+        return (taxItem.qty * taxDetail.amount).toFixed(2)
       case 3:
-        return taxItem.basePrice != null ? (taxItem.basePrice * taxItem.qty * taxDetail.amount) / 100 : 0
+        return (taxItem.basePrice != null ? (taxItem.basePrice * taxItem.qty * taxDetail.amount) / 100 : 0).toFixed(2)
       case 4:
-        return taxItem.baseLaborPrice != null ? (taxItem.baseLaborPrice * taxItem.qty * taxDetail.amount) / 100 : 0
+        return (taxItem.baseLaborPrice != null ? (taxItem.baseLaborPrice * taxItem.qty * taxDetail.amount) / 100 : 0).toFixed(2)
       default:
         return null
     }

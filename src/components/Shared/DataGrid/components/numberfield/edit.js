@@ -15,11 +15,14 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, u
 
   const formatValue = val => {
     if (!val) return ''
+    if (typeof val === 'string') {
+      val = val.replace(/,/g, '')
+    }
     if (isNaN(val)) return val
 
-    return String(val)
-      .replace(/\.0+$/, '')
-      .replace(/(\.\d*?[1-9])0+$/, '$1')
+    let num = Number(val).toString()
+
+    return num.replace(/\.0+$/, '').replace(/(\.\d*?[1-9])0+$/, '$1')
   }
 
   return (
@@ -46,7 +49,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, u
           value: ''
         })
       }}
-      onMouseLeave={() => {
+      onBlur={() => {
         typing.current = false
       }}
       handleButtonClick={handleIconClick}

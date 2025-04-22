@@ -20,6 +20,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import FieldSet from 'src/components/Shared/FieldSet'
 import Table from 'src/components/Shared/Table'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -371,16 +372,12 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='isInactive'
-                        maxAccess={maxAccess}
-                        checked={formik.values?.isInactive}
-                        onChange={formik.handleChange}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='isInactive'
+                    value={formik.values?.isInactive}
+                    onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                     label={labels.isInactive}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>

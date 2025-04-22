@@ -18,6 +18,7 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function PVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -160,16 +161,12 @@ export default function PVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='disableExpenseGrid'
-                    checked={formik.values?.disableExpenseGrid}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='disableExpenseGrid'
+                value={formik.values?.disableExpenseGrid}
+                onChange={event => formik.setFieldValue('disableExpenseGrid', event.target.checked)}
                 label={labels.disableExpenseGrid}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

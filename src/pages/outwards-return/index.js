@@ -50,7 +50,6 @@ const OutwardsReturn = () => {
     labels: _labels,
     paginationParameters,
     filterBy,
-    clearFilter,
     refetch,
     access
   } = useResourceQuery({
@@ -103,7 +102,7 @@ const OutwardsReturn = () => {
       field: 'wipName',
       headerName: _labels.wip,
       flex: 1
-    },
+    }
   ]
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -169,44 +168,17 @@ const OutwardsReturn = () => {
         extension: SystemRepository.UserFunction.get,
         parameters: `_userId=${userId}&_functionId=${SystemFunction.OutwardsReturn}`
       })
-  
+
       return res?.record?.dtId
     } catch (error) {
       return ''
     }
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={onSearch}
-          onClear={onClear}
-          labels={_labels}
-          onApply={onApply}
-          reportName={'RTOWR'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} labels={_labels} reportName={'RTOWR'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

@@ -1,11 +1,11 @@
-import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { Button, Grid } from '@mui/material'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
@@ -22,14 +22,20 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { useWindow } from 'src/windows'
 import ExpensesCostCenters from 'src/components/Shared/ExpensesCostCenters'
+import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { RateDivision } from 'src/resources/RateDivision'
+import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const [defaultsDataState, setDefaultsDataState] = useState(null)
   const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -44,6 +50,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     accountId: '',
     accountType: 3,
     currencyId: null,
+    currencyName: '',
     paymentMethod: '',
     date: new Date(),
     glId: null,
@@ -56,7 +63,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     rateCalcMethod: 1,
     baseAmount: null,
     cashAccountId: null,
-    dtId: documentType?.dtId,
+    dtId: null,
     status: 1,
     releaseStatus: null,
     plantId: plantId,
@@ -90,6 +97,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     validationSchema: yup.object({
       accountType: yup.string().required(),
       currencyId: yup.number().required(),
@@ -147,6 +155,11 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     }
   })
 
+  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
+    endpointId: MultiCurrencyRepository.Currency.get,
+    datasetId: ResourceIds.MultiCurrencyRate
+  })
+
   const totalAmount = formik.values?.expenses?.reduce((amount, row) => {
     const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
 
@@ -178,6 +191,22 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       await getExpenses(res2.record)
     } catch (exception) {}
   }
+  async function getDefaultsData() {
+    const myObject = {}
+
+    const filteredList = defaultsData?.list?.filter(obj => {
+      return obj.key === 'currencyId'
+    })
+
+    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+    setDefaultsDataState(myObject)
+
+    return myObject
+  }
+
+  useEffect(() => {
+    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
+  }, [defaultsDataState])
 
   useEffect(() => {
     ;(async function () {
@@ -188,6 +217,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
           await getExpenses(res.record)
         }
         await getDefaultVAT()
+        await getDefaultsData()
       } catch (e) {}
     })()
   }, [])
@@ -465,6 +495,59 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     return amount + amountValue
   }, 0)
 
+  async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
+    if (currencyId && date && rateType) {
+      const res = await getRequest({
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
+      })
+
+      const updatedRateRow = getRate({
+        amount: amount === 0 ? 0 : amount ?? formik.values.amount,
+        exRate: res.record?.exRate,
+        baseAmount: 0,
+        rateCalcMethod: res.record?.rateCalcMethod,
+        dirtyField: DIRTYFIELD_RATE
+      })
+
+      formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('exRate', res.record?.exRate)
+      formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
+    }
+  }
+  useEffect(() => {
+    ;(async function () {
+      await getMultiCurrencyFormData(
+        formik.values.currencyId,
+        formatDateForGetApI(formik.values.date),
+        RateDivision.FINANCIALS
+      )
+    })()
+  }, [])
+
+  function openMCRForm(data) {
+    stack({
+      Component: MultiCurrencyRateForm,
+      props: {
+        labels: _labels,
+        maxAccess: MRCMaxAccess,
+        data: {
+          ...data,
+          amount: amountSum
+        },
+        onOk: childFormikValues => {
+          formik.setValues(prevValues => ({
+            ...prevValues,
+            ...childFormikValues
+          }))
+        }
+      },
+      width: 500,
+      height: 500,
+      title: _labels.MultiCurrencyRate
+    })
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.PaymentVoucherExpenses}
@@ -477,8 +560,8 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       disabledSubmit={isPosted || isCancelled}
     >
       <VertLayout>
-        <Grow>
-          <Grid container spacing={4}>
+        <Fixed>
+          <Grid container spacing={2}>
             <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -499,24 +582,44 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
               />
             </Grid>
             <Grid item xs={3}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Currency.qry}
-                name='currencyId'
-                label={labels.currency}
-                valueField='recordId'
-                required
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                readOnly={isPosted || isCancelled}
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue ? newValue?.recordId : null)
-                }}
-                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-              />
+              <Grid container spacing={1} alignItems='center'>
+                <Grid item xs={8}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Currency.qry}
+                    name='currencyId'
+                    label={labels.currency}
+                    valueField='recordId'
+                    required
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={isPosted || isCancelled}
+                    values={formik.values}
+                    onChange={async (event, newValue) => {
+                      await getMultiCurrencyFormData(
+                        newValue?.recordId,
+                        formatDateForGetApI(formik.values.date),
+                        RateDivision.FINANCIALS
+                      )
+                      formik.setFieldValue('currencyId', newValue ? newValue?.recordId : null)
+                      formik.setFieldValue('currencyName', newValue?.name)
+                    }}
+                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <Button
+                    variant='contained'
+                    size='small'
+                    onClick={() => openMCRForm(formik.values)}
+                    disabled={!formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId}
+                  >
+                    <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
+                  </Button>
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={3}>
               <ResourceComboBox
@@ -555,7 +658,14 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                 label={labels.date}
                 value={formik.values?.date}
                 required={true}
-                onChange={formik.setFieldValue}
+                onChange={async (e, newValue) => {
+                  formik.setFieldValue('date', newValue)
+                  await getMultiCurrencyFormData(
+                    formik.values.currencyId,
+                    formatDateForGetApI(newValue),
+                    RateDivision.FINANCIALS
+                  )
+                }}
                 onClear={() => formik.setFieldValue('date', '')}
                 readOnly={isPosted || isCancelled}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -660,8 +770,22 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                 value={amountSum}
                 readOnly
                 maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('amount', '')}
+                thousandSeparator={false}
+                onChange={async e => {
+                  formik.setFieldValue('amount', e.target.value)
+
+                  const updatedRateRow = getRate({
+                    amount: e.target.value ?? 0,
+                    exRate: formik.values?.exRate,
+                    baseAmount: 0,
+                    rateCalcMethod: formik.values?.rateCalcMethod,
+                    dirtyField: DIRTYFIELD_RATE
+                  })
+                  formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                }}
+                onClear={async () => {
+                  formik.setFieldValue('amount', 0)
+                }}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
               />
             </Grid>
@@ -681,9 +805,12 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                 form={formik}
                 required
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : null)
-                  formik.setFieldValue('cashAccountRef', newValue ? newValue.reference : null)
-                  formik.setFieldValue('cashAccounName', newValue ? newValue.name : null)
+                  formik.setValues({
+                    ...formik.values,
+                    cashAccountId: newValue?.recordId || '',
+                    cashAccountRef: newValue?.reference || '',
+                    cashAccountName: newValue?.name || ''
+                  })
                 }}
                 errorCheck={'cashAccountId'}
                 maxAccess={maxAccess}
@@ -704,17 +831,17 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
               />
             </Grid>
           </Grid>
-          <DataGrid
-            onChange={value => {
-              formik.setFieldValue('expenses', value)
-            }}
-            value={formik?.values?.expenses}
-            error={formik?.errors?.expenses}
-            columns={columns}
-            allowDelete={!isPosted && !isCancelled}
-            allowAddNewLine={!isPosted && !isCancelled}
-          />
-        </Grow>
+        </Fixed>
+        <DataGrid
+          onChange={value => {
+            formik.setFieldValue('expenses', value)
+          }}
+          value={formik?.values?.expenses}
+          error={formik?.errors?.expenses}
+          columns={columns}
+          allowDelete={!isPosted && !isCancelled}
+          allowAddNewLine={!isPosted && !isCancelled}
+        />
       </VertLayout>
     </FormShell>
   )

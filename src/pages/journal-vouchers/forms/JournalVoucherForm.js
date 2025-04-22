@@ -35,13 +35,14 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
   })
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     maxAccess,
     initialValues: {
       recordId: null,
       reference: '',
       date: new Date(),
       notes: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       status: 1
     },
     validateOnChange: true,

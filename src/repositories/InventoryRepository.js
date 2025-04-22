@@ -200,13 +200,16 @@ export const InventoryRepository = {
     get: service + 'getITR'
   },
   ItemSizes: {
+    qry: service + 'qrySIZ',
+    snapshot: service + 'snapshotSIZ',
     get: service + 'getSIZ',
     set: service + 'setSIZ',
     del: service + 'delSIZ',
     page: service + 'pageSIZ'
   },
   AvailabilitySerial: {
-    qry: service + 'qryAVS'
+    qry: service + 'qryAVS',
+    page: service + 'pageAVS'
   },
   AvailabilityLot: {
     qry: service + 'qryLOA'
@@ -222,6 +225,8 @@ export const InventoryRepository = {
     qry: service + 'qryOC'
   },
   Transaction: {
+    snapshot: service + 'snapshotTRX',
+    page: service + 'pageTRX',
     qry2: service + 'qry2TRX',
     qry3: service + 'qry3TRX'
   },
@@ -251,6 +256,43 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotPRT'
   },
   DocumentTypeDefaults: {
-    get: service + 'getDTD'
+    get: service + 'getDTD',
+    page: service + 'pageDTD',
+    del: service + 'delDTD',
+    set: service + 'setDTD'
+  },
+  Serial: {
+    qry: service + 'qrySRL',
+    get2: service + 'get2SRL'
+  },
+  DraftTransfer: {
+    page: service + 'pageDTF',
+    del: service + 'delDTF',
+    get: service + 'getDTF',
+    set2: service + 'set2DTF',
+    snapshot: service + 'snapshotDTF',
+    post: service + 'postDTF',
+    clone: service + 'cloneDTF'
+  },
+  DraftTransferSerial: {
+    qry: service + 'qryDTI',
+    del: service + 'delDTI',
+    append: service + 'appendDTI'
+  },
+  BatchDraftTransferSerial: {
+    batch: service + 'batchDTS'
+  },
+  RMSKU: {
+    snapshot: service + 'snapshotRM'
+  },
+  SFSKU: {
+    snapshot: service + 'snapshotSF'
+  },
+  Collections: {
+    get: service + 'getCOL',
+    page: service + 'pageCOL',
+    qry: service + 'qryCOL',
+    del: service + 'delCOL',
+    set: service + 'setCOL'
   }
 }
