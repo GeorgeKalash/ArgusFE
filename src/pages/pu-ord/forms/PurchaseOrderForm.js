@@ -199,8 +199,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
           yup.object({
             sku: yup.string().required(),
             itemName: yup.string().required(),
-            qty: yup.number().required().min(1),
-            unitPrice: yup.number().required()
+            qty: yup.number().required().min(1)
           })
         )
         .required()
@@ -225,12 +224,26 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         extension: PurchaseRepository.PurchaseOrder.set2,
         record: JSON.stringify(payload)
       })
-      const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
+
+      toast.success(obj?.recordId ? platformLabels.Edited : platformLabels.Added)
       await refetchForm(puTrxRes.recordId)
       invalidate()
     }
   })
+
+  function getDTD(dtId) {
+    const res = getRequest({
+      extension: PurchaseRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    return res
+  }
+
+  async function onChangeDtId(recordId) {
+    const dtd = await getDTD(recordId)
+    formik.setFieldValue('header.plantId', dtd?.record?.plantId || defPlId)
+  }
 
   const editMode = !!formik.values.header.recordId
 
@@ -258,6 +271,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       props: {
         endpointId: InventoryRepository.Item.snapshot,
         parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
+        filter: { purchaseItem: true },
         displayField: 'sku',
         valueField: 'sku',
         mapping: [
@@ -269,7 +283,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Name' },
-          { key: 'flName', value: 'full Name' }
+          { key: 'flName', value: 'FL Name' }
         ],
         displayFieldWidth: 5,
         minChars: 2
@@ -587,6 +601,32 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     })
   }
 
+  async function onValidationRequired() {
+    const errors = await formik.validateForm()
+
+    if (Object.keys(errors).length) {
+      const touchedFields = Object.keys(errors?.header || {}).reduce((acc, key) => {
+        const touchedHeader = formik.touched.header || {}
+
+        if (!touchedHeader[key]) {
+          acc[key] = true
+        }
+
+        return acc
+      }, {})
+
+      if (Object.keys(touchedFields).length) {
+        formik.setTouched(
+          {
+            ...formik.touched,
+            header: touchedFields
+          },
+          true
+        )
+      }
+    }
+  }
+
   const isClosed = formik.values.header.wip === 2
 
   const actions = [
@@ -647,7 +687,6 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
   async function fillForm(puTrxPack) {
     const puTrxHeader = puTrxPack?.header
     const puTrxItems = puTrxPack?.items
-    const puTrxTaxes = puTrxPack?.taxCodes
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -655,28 +694,18 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
 
     const modifiedList = await Promise.all(
       puTrxItems?.map(async (item, index) => {
-        const taxDetailsResponse = []
-
-        const updatedpuTrxTaxes =
-          puTrxTaxes?.map(tax => {
-            const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
-
-            return {
-              ...tax,
-              taxBase: matchingTaxDetail ? matchingTaxDetail.taxBase : tax.taxBase
-            }
-          }) || null
+        const puTrxTaxes = item?.taxId && (await getTaxDetails(item.taxId))
 
         return {
           ...item,
           id: index + 1,
-          basePrice: parseFloat(item.basePrice).toFixed(5),
-          unitPrice: parseFloat(item.unitPrice).toFixed(3),
-          vatAmount: parseFloat(item.vatAmount).toFixed(2),
-          extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+          basePrice: parseFloat(item.basePrice)?.toFixed(5) || 0,
+          unitPrice: parseFloat(item.unitPrice)?.toFixed(3) || 0,
+          vatAmount: parseFloat(item.vatAmount)?.toFixed(2) || 0,
+          extendedPrice: parseFloat(item.extendedPrice)?.toFixed(2) || 0,
           deliveryDate: formatDateFromApi(item.deliveryDate),
           puTrx: true,
-          taxDetails: updatedpuTrxTaxes?.filter(tax => tax.seqNo === item.seqNo)
+          taxDetails: puTrxTaxes
         }
       })
     )
@@ -867,6 +896,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     let currentPctAmount
     let currentDiscountAmount
     const currentDiscount = formik.values.currentDiscount
+
     if (cycleButtonState.value == 1) {
       currentPctAmount = currentDiscount < 0 || currentDiscount > 100 ? 0 : currentDiscount
       currentTdAmount = (parseFloat(currentPctAmount) * parseFloat(subtotal)) / 100
@@ -879,10 +909,12 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       currentTdAmount = currentDiscount < 0 || subtotal < currentDiscount ? 0 : currentDiscount
       currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(subtotal)) * 100
       currentDiscountAmount = currentTdAmount
+
       formik.setFieldValue('header.tdPct', currentPctAmount)
       formik.setFieldValue('header.tdAmount', currentTdAmount)
       formik.setFieldValue('currentDiscount', currentTdAmount)
     }
+
     setCycleButtonState(prevState => {
       const newState = prevState.text === '%' ? { text: '123', value: 1 } : { text: '%', value: 2 }
       formik.setFieldValue('tdType', newState.value)
@@ -900,7 +932,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
       basePrice: parseFloat(newRow?.basePrice || 0),
-      volume: parseFloat(newRow?.volume),
+      volume: parseFloat(newRow?.volume) || 0,
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
       upo: 0,
@@ -1062,6 +1094,10 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
   }, [])
 
   useEffect(() => {
+    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+  }, [formik.values?.header.dtId])
+
+  useEffect(() => {
     ;(async function () {
       if (recordId && measurements) {
         const transactionPack = await getPurchaseTransactionPack(recordId)
@@ -1097,6 +1133,12 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
   }
 
   const importItems = async () => {
+    onValidationRequired()
+
+    if (Object.entries(formik?.errors.header || {}).filter(([key]) => key).length > 0) {
+      return
+    }
+
     if (!formik.values.header.vendorId) {
       formik.setFieldTouched('header.vendorId', true)
 
@@ -1207,6 +1249,9 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
+                      if (newValue?.recordId) {
+                        formik.setFieldTouched('header.dtId', false)
+                      }
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
@@ -1332,7 +1377,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
                     onClick={() => previewItems()}
                     color='#3D6186'
                     tooltipText={platformLabels.Preview}
-                    disabled={!formik.values.import}
+                    disabled={!formik.values.import || !formik.values.requestId}
                     image={'quotation-icon.png'}
                   />
                 </Grid>
@@ -1475,6 +1520,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
                     value={formik.values?.header?.exWorks}
                     onChange={event => formik.setFieldValue('header.exWorks', event.target.checked)}
                     label={labels.exWorks}
+                    disabled={isClosed}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -1494,12 +1540,18 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
             }}
             value={formik?.values?.items}
             initialValues={formik.initialValues.items[0]}
-            error={formik.errors.items}
+            error={formik.touched.items && formik.errors.items}
             allowDelete={!isClosed}
             name='items'
             columns={columns}
             maxAccess={maxAccess}
-            disabled={isClosed || !formik.values.header.vendorId || !formik.values.header.vendorId}
+            disabled={
+              isClosed ||
+              !formik.values.header.vendorId ||
+              !formik.values.header.vendorId ||
+              Object.entries(formik?.errors || {}).filter(([key]) => key !== 'items').length > 0
+            }
+            onValidationRequired={onValidationRequired}
           />
         </Grow>
 
