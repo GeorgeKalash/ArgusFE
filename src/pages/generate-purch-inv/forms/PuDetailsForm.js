@@ -14,15 +14,18 @@ export default function PuDetailsForm({ labels, access, form, window }) {
       date: form?.values?.date || new Date(),
       description: form?.values?.description || ''
     },
-    access,
+    maxAccess: access,
     validateOnChange: true,
 
     validationSchema: yup.object({
       date: yup.string().required()
     }),
     onSubmit: async obj => {
-      form.setFieldValue('date', obj.date)
-      form.setFieldValue('description', obj.description)
+      form.setValues({
+        ...form.values,
+        date: obj.date,
+        description: obj.description
+      })
 
       window.close()
     }
@@ -33,13 +36,12 @@ export default function PuDetailsForm({ labels, access, form, window }) {
       resourceId={ResourceIds.GeneratePUInvoices}
       form={formik}
       maxAccess={access}
-      isSavedClear={false}
       isCleared={false}
       isInfo={false}
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomDatePicker
                 name='date'

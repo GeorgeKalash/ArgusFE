@@ -310,7 +310,7 @@ const GeneratePurchaseInvoice = () => {
             <Grid item xs={0.5}></Grid>
             <Grid item xs={1}>
               <CustomButton
-                onClick={() => onPreviewShipments()}
+                onClick={onPreviewShipments}
                 tooltipText={platformLabels.Preview}
                 image={'preview.png'}
                 color='#231f20'
@@ -379,13 +379,7 @@ const GeneratePurchaseInvoice = () => {
             </Grid>
             <Grid item xs={0.25}></Grid>
             <Grid item>
-              <CustomButton
-                onClick={openPUDetailsForm}
-                label={labels.edit}
-                color='#231f20'
-                tooltipText=''
-                image={'notes.png'}
-              />
+              <CustomButton onClick={openPUDetailsForm} label={labels.edit} color='#231f20' image={'notes.png'} />
             </Grid>
             <Grid item xs={0.25}>
               <CustomButton
