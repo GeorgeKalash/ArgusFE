@@ -14,7 +14,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function OverheadForm({ labels, maxAccess, store }) {
+export default function OverheadForm({ labels, maxAccess, store, setTotalOverhead }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = store?.recordId
@@ -190,6 +190,9 @@ export default function OverheadForm({ labels, maxAccess, store }) {
 
     formik.setFieldValue('items', updateItemsList)
   }
+  useEffect(() => {
+    if (totAmount) setTotalOverhead(totAmount)
+  }, [totAmount])
 
   useEffect(() => {
     ;(async function () {
