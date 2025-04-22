@@ -57,9 +57,7 @@ const AuthProvider = ({ children }) => {
     const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
     const accountName = accountOnPrem ? accountOnPrem : matchHostname ? matchHostname[1] : 'neg-deploy'
-    console.log('accountOnPrem, ', accountOnPrem)
-    console.log('matchHostname, ', matchHostname)
-    console.log('accountName, ', accountName)
+
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
 
