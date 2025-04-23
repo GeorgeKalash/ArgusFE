@@ -52,8 +52,7 @@ export default function BatchesForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(res)
       })
 
-      !obj.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
-
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       await getData(response.recordId)
       invalidate()
     }
@@ -121,7 +120,7 @@ export default function BatchesForm({ labels, maxAccess, recordId }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('functionId', null)}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('functionId', newValue?.key || null)
                 }}
                 error={formik.touched.functionId && Boolean(formik.errors.functionId)}
