@@ -347,6 +347,16 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       isCancelled: res?.record.status == -1
     }))
   }
+
+  async function getRouting(recordId) {
+    if (!recordId) return
+
+    return await getRequest({
+      extension: ManufacturingRepository.Routing.get,
+      parameters: `_recordId=${recordId}`
+    })
+  }
+
   async function fillItemInfo(values) {
     if (!values?.recordId) {
       currentItem.current = { itemId: null, sku: null, itemName: null }
@@ -397,7 +407,16 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       'expectedQty',
       !values?.stdWeight || !formik.values.expectedPcs ? 0 : formik.values.expectedPcs * values?.stdWeight
     )
-    formik.setFieldValue('routingId', values?.routingId)
+    const routing = await getRouting(values?.routingId)
+    if (routing?.record?.isInactive) {
+      formik.setFieldValue('routingId', null)
+      formik.setFieldValue('routingRef', null)
+      formik.setFieldValue('routingName', null)
+    } else {
+      formik.setFieldValue('routingId', values?.routingId)
+      formik.setFieldValue('routingRef', values?.routingRef)
+      formik.setFieldValue('routingName', values?.routingName)
+    }
     formik.setFieldValue('lineId', values?.lineId)
     formik.setFieldValue('designPL', values?.lineId)
     formik.setFieldValue('classId', values?.classId)
@@ -454,9 +473,9 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       parameters: `_routingId=${routingId}`
     })
 
-    formik.setFieldValue('workCenterId', res.list[0].workCenterId)
-    formik.setFieldValue('wcRef', res.list[0].workCenterRef)
-    formik.setFieldValue('wcName', res.list[0].workCenterName)
+    formik.setFieldValue('workCenterId', res?.list[0]?.workCenterId)
+    formik.setFieldValue('wcRef', res?.list[0]?.workCenterRef)
+    formik.setFieldValue('wcName', res?.list[0]?.workCenterName)
   }
 
   useEffect(() => {
@@ -719,31 +738,38 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                         value={formik.values.lineId}
                         onChange={(event, newValue) => {
                           formik.setFieldValue('lineId', newValue?.recordId)
-                          formik.setFieldValue('routingId', newValue?.routingId)
                         }}
                         error={formik.touched.lineId && Boolean(formik.errors.lineId)}
                       />
                     </Grid>
                     <Grid item>
-                      <ResourceComboBox
-                        endpointId={ManufacturingRepository.Routing.qry}
-                        parameters={`_params=`}
+                      <ResourceLookup
+                        endpointId={ManufacturingRepository.Routing.snapshot2}
+                        valueField='reference'
+                        displayField='name'
                         name='routingId'
                         label={labels.routing}
-                        valueField='recordId'
-                        displayField={['reference', 'name']}
+                        form={formik}
+                        required
+                        minChars={2}
+                        firstValue={formik.values.routingRef}
+                        secondValue={formik.values.routingName}
+                        errorCheck={'routingId'}
+                        maxAccess={maxAccess}
+                        displayFieldWidth={2}
+                        readOnly={isCancelled || isReleased || isPosted}
                         columnsInDropDown={[
                           { key: 'reference', value: 'Reference' },
                           { key: 'name', value: 'Name' }
                         ]}
-                        readOnly={isCancelled || isReleased || isPosted}
-                        required
-                        values={formik.values}
-                        onChange={async (event, newValue) => {
-                          formik.setFieldValue('routingId', newValue?.recordId)
-                          await updateWC(newValue?.recordId)
+                        onChange={(event, newValue) => {
+                          if (!newValue) {
+                            formik.setFieldValue('routingId', null)
+                            formik.setFieldValue('routingRef', null)
+                            formik.setFieldValue('routingName', null)
+                          }
+                          updateWC(newValue?.recordId)
                         }}
-                        error={formik.touched.routingId && Boolean(formik.errors.routingId)}
                       />
                     </Grid>
                     <Grid item>
