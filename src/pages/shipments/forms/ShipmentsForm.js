@@ -519,9 +519,14 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         }
       },
       propsReducer({ row, props }) {
-        getFilteredMU(row?.itemId, row?.msId)
+        let store = []
+        if (row?.itemId) {
+          getFilteredMU(row?.itemId, row?.msId)
 
-        return { ...props, store: filteredMeasurements?.current }
+          store = filteredMeasurements?.current
+        }
+
+        return { ...props, store }
       }
     },
     {
