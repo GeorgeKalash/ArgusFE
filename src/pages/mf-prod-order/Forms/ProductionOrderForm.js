@@ -23,10 +23,13 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { useWindow } from 'src/windows'
 
 export default function ProductionOrderForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ProductionOrder,
@@ -134,6 +137,31 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     toast.success(platformLabels.Posted)
     window.close()
     invalidate()
+  }
+
+  async function onGenerateAssembly() {
+    const res = await postRequest({
+      extension: ManufacturingRepository.Assembly.generate,
+      record: JSON.stringify({
+        poId: formik.values.recordId
+      })
+    })
+    console.log(res)
+    const title = res?.recordId ? platformLabels.Success : platformLabels.Error
+    const content = res?.recordId || platformLabels.Error
+
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: content,
+        fullScreen: false,
+        close: true,
+        okButtonAction: () => window.close()
+      },
+      width: 500,
+      height: 150,
+      title: title
+    })
   }
 
   async function getDTD(dtId) {
@@ -251,6 +279,12 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       condition: true,
       onClick: onPost,
       disabled: isPosted || !editMode
+    },
+    {
+      key: 'generate',
+      condition: true,
+      onClick: onGenerateAssembly,
+      disabled: !editMode
     }
   ]
 

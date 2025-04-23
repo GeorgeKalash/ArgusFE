@@ -268,7 +268,8 @@ export const ManufacturingRepository = {
     page: service + 'pageASM',
     snapshot: service + 'snapshotASM',
     post: service + 'postASM',
-    unpost: service + 'unpostASM'
+    unpost: service + 'unpostASM',
+    generate: service + 'genASM'
   },
   AssemblyItems: {
     qry: service + 'qryASC'
