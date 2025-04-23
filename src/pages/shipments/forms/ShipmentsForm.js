@@ -674,6 +674,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                     values={formik.values.header}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.plantId', newValue?.recordId || null)
+                      formik.setFieldValue('header.plantIdTouched', newValue?.recordId ? true : false)
+                      formik.setFieldValue('header.siteId', null)
                     }}
                     error={formik.touched?.header?.plantId && Boolean(formik.errors?.header?.plantId)}
                     required
@@ -732,7 +734,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                       { key: 'name', value: 'Name' }
                     ]}
                     filter={
-                      formik?.values?.header?.plantId
+                      formik.values?.header?.plantIdTouched
                         ? item => Number(item.plantId) === Number(formik?.values?.header?.plantId)
                         : undefined
                     }
