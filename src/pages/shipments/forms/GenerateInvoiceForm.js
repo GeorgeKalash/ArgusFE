@@ -41,7 +41,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
       vendorName: form?.values?.header?.vendorName,
       date: new Date(),
       dtId: null,
-      currencyName: '',
+      currencyName: null,
       currencyId: defCurrencyId,
       plantName: form?.values?.header?.plantName,
       description: '',
@@ -52,7 +52,8 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
     validationSchema: yup.object({
       plantId: yup.number().required(),
       dtId: yup.number().required(),
-      date: yup.string().required()
+      date: yup.string().required(),
+      currencyName: yup.string().required()
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -161,9 +162,11 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
             <Grid item xs={12}>
               <CustomTextField
                 name='currencyName'
+                required
                 label={labels.currency}
                 value={formik.values.currencyName}
                 readOnly
+                error={formik.touched.currencyName && Boolean(formik.errors.currencyName)}
               />
             </Grid>
             <Grid item xs={12}>
