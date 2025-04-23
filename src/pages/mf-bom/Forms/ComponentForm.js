@@ -83,7 +83,7 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
   const getUnitCost = async itemId => {
     if (itemId) {
       const res = await getRequest({
-        extension: InventoryRepository.Cost.get,
+        extension: InventoryRepository.CurrentCost.get,
         parameters: `_itemId=${itemId}`
       })
 

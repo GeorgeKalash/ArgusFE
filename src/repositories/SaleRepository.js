@@ -268,5 +268,11 @@ export const SaleRepository = {
   },
   VerifyIntegrity: {
     check: service + 'checkTRX'
+  },
+  ClientPriceList: {
+    page: service + 'pagePRC',
+    get: service + 'getPRC',
+    set: service + 'setPRC',
+    del: service + 'delPRC',
   }
 }
