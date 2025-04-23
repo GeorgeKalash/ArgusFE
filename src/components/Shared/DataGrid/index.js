@@ -26,7 +26,8 @@ export function DataGrid({
   onSelectionChange,
   rowSelectionModel,
   autoDelete,
-  bg
+  bg,
+  onValidationRequired
 }) {
   const gridApiRef = useRef(null)
 
@@ -608,7 +609,9 @@ export function DataGrid({
     onChange(updatedGridData)
   }
 
-  const onCellClicked = params => {
+  const onCellClicked = async params => {
+    if (typeof onValidationRequired === 'function') onValidationRequired()
+
     const { colDef, rowIndex, api } = params
 
     api.startEditingCell({
@@ -738,6 +741,7 @@ export function DataGrid({
 
         return
       }
+
       process(params, data, setData)
     }
   }
