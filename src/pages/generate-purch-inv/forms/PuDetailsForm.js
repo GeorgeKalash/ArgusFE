@@ -16,7 +16,6 @@ export default function PuDetailsForm({ labels, access, form, window }) {
     },
     maxAccess: access,
     validateOnChange: true,
-
     validationSchema: yup.object({
       date: yup.string().required()
     }),

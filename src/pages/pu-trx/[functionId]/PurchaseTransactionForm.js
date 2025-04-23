@@ -200,12 +200,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         currencyId: yup.string().required(),
         vendorId: yup.string().required(),
         siteId: yup.number().test('', function (value) {
-          const { dtId } = this.parent
+          const { dtId, commitItems } = this.parent
+
           if (dtId == null) {
             return !!value
           }
 
-          return true
+          return dtId && commitItems === true ? false : true
         })
       }),
       items: yup

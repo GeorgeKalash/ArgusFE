@@ -210,7 +210,7 @@ const GeneratePurchaseInvoice = () => {
     })
 
     formik.setFieldValue('data', { list: res?.list || [] })
-    totalAmountFromChecked()
+    formik.setFieldValue('amount', 0)
   }
 
   const onGeneratePI = async () => {
@@ -372,7 +372,7 @@ const GeneratePurchaseInvoice = () => {
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue?.recordId)
+                  formik.setFieldValue('plantId', newValue?.recordId || null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
