@@ -346,7 +346,7 @@ const OpenPurchaseOrder = () => {
                   form={formik}
                   required
                   secondDisplayField={false}
-                  displayFieldWidth={2}
+                  displayFieldWidth={1}
                   valueShow='vendorRef'
                   maxAccess={maxAccess}
                   columnsInDropDown={[
