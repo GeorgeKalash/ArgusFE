@@ -28,7 +28,7 @@ import GenerateInvoiceForm from './GenerateInvoiceForm'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate, ...props }) {
+export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate, plantId, dtId, siteId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -228,9 +228,10 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       dtId: shipHeader.record.dtId,
       header: {
         ...formik.values.header,
-        plantId: props.plantId || formik?.values?.header?.plantId,
-        dtId: props.dtId || formik?.values?.header?.dtId,
-        ...shipHeader.record
+        plantId: plantId || formik?.values?.header?.plantId,
+        dtId: dtId || formik?.values?.header?.dtId,
+        ...shipHeader.record,
+        siteId: siteId || formik?.values?.header?.siteId
       },
       items: itemsList
     })

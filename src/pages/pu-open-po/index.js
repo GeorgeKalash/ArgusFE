@@ -99,6 +99,7 @@ const OpenPurchaseOrder = () => {
             recordId: res.recordId,
             maxAccess,
             plantId,
+            siteId,
             dtId
           },
           width: 1300,
@@ -107,6 +108,7 @@ const OpenPurchaseOrder = () => {
         })
 
         toast.success(platformLabels.Generated)
+        getData()
       }
     }
   })
@@ -115,7 +117,7 @@ const OpenPurchaseOrder = () => {
 
   useEffect(() => {
     getData()
-  }, [vendorId, categoryId, groupId, poId])
+  }, [vendorId, categoryId, groupId, poId, itemId])
 
   async function getData() {
     const result = await getRequest({
@@ -223,6 +225,7 @@ const OpenPurchaseOrder = () => {
       label: labels.genQty,
       name: 'receiveNow',
       updateOn: 'blur',
+      defaultValue: 0,
       propsReducer({ row, props }) {
         return { ...props, readOnly: !row.isChecked }
       },
@@ -249,16 +252,22 @@ const OpenPurchaseOrder = () => {
           value = receiveNow
         }
 
-        update({ receiveNow: value })
+        update({ receiveNow: value || 0 })
       }
     }
   ]
+
+  const handleSubmit = e => {
+    setTimeout(() => {
+      formik.handleSubmit()
+    }, 5)
+  }
 
   const actions = [
     {
       key: 'SHP',
       condition: true,
-      onClick: () => formik.handleSubmit(),
+      onClick: handleSubmit,
       disabled: !vendorId || !siteId
     }
   ]
@@ -293,10 +302,6 @@ const OpenPurchaseOrder = () => {
                   label={labels.category}
                   valueField='recordId'
                   displayField={'name'}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
                   displayFieldWidth={1}
                   values={formik?.values}
                   maxAccess={access}
@@ -338,7 +343,6 @@ const OpenPurchaseOrder = () => {
                   displayField='name'
                   name='vendorId'
                   label={labels.vendor}
-                  formObject={formik.values}
                   form={formik}
                   required
                   secondDisplayField={false}
@@ -353,7 +357,7 @@ const OpenPurchaseOrder = () => {
                   onChange={async (event, newValue) => {
                     formik.setFieldValue('vendorName', newValue?.name || '')
                     formik.setFieldValue('vendorRef', newValue?.reference || '')
-                    formik.setFieldValue('vendorId', newValue?.recordId || null)
+                    formik.setFieldValue('vendorId', newValue?.recordId || 0)
                   }}
                   errorCheck={'vendorId'}
                 />
@@ -374,8 +378,6 @@ const OpenPurchaseOrder = () => {
                   values={formik.values}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('siteId', newValue?.recordId || 0)
-                    formik.setFieldValue('siteRef', newValue?.reference || '')
-                    formik.setFieldValue('siteName', newValue?.name || '')
                   }}
                   error={formik.touched.sitId && Boolean(formik.errors.sitId)}
                 />
@@ -434,7 +436,6 @@ const OpenPurchaseOrder = () => {
                   displayField='name'
                   name='poId'
                   label={labels.ref}
-                  formObject={formik.values}
                   form={formik}
                   secondDisplayField={false}
                   displayFieldWidth={2}
