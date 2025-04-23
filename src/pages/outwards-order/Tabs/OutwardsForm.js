@@ -145,7 +145,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       date: new Date(),
       isVerified: null,
       recordId: recordId || null,
-      includingFees: false //test
+      includingFees: false, //test,
+      branchCode: ''
     },
 
     bankType: '',
@@ -641,7 +642,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
             currencyRef: formik.values.header.currencyRef
           },
           beneficiary: {
-            beneficiaryName: formik.values.header.beneficiaryName
+            beneficiaryName: formik.values.header.beneficiaryName,
+            branchCode: formik.values.header.branchCode
           }
         },
         width: 700,
@@ -1527,6 +1529,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       formik.setFieldValue('header.beneficiaryId', newValue?.beneficiaryId)
                       formik.setFieldValue('header.beneficiaryName', newValue?.name)
                       formik.setFieldValue('header.beneficiarySeqNo', newValue?.seqNo)
+                      formik.setFieldValue('header.branchCode', newValue?.branchCode)
                       formik.setFieldValue('terraPayDetails.quotation.creditorMSIDSN', newValue?.cellPhone)
                       formik.setFieldValue('terraPayDetails.quotation.creditorBankAccount', newValue?.IBAN)
                     }}

@@ -69,6 +69,8 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
     })()
   }, [])
 
+  console.log(beneficiary)
+
   return (
     <FormShell
       isInfo={false}
@@ -147,10 +149,10 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
             values={formik.values.transaction.creditorBankSubCode}
             required
             onChange={async (event, newValue) => {
-              formik.setFieldValue('transaction.bankName', newValue.bankName || '')
-              formik.setFieldValue('transaction.creditorBankSubCode', newValue.bankCode || '')
-              formik.setFieldValue('transaction.providerCode', newValue.providerCode || '')
-              formik.setFieldValue('transaction.creditorOrganisationid', newValue.bankName || '')
+              formik.setFieldValue('transaction.bankName', newValue?.bankName || '')
+              formik.setFieldValue('transaction.creditorBankSubCode', newValue?.bankCode || '')
+              formik.setFieldValue('transaction.providerCode', newValue?.providerCode || '')
+              formik.setFieldValue('transaction.creditorOrganisationid', newValue?.bankName || '')
 
               const result = await getRequest({
                 extension: RemittanceBankInterface.Combos.terrapayAccountStatus,
@@ -160,9 +162,7 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
                   formik.values.quotation?.creditorMSIDSN
                 }&_beneficiaryName=${beneficiary?.beneficiaryName}&_provider=${
                   formik.values?.transaction?.providerCode
-                }&_bankCode=${
-                  formik.values?.transaction?.creditorBankSubCode
-                }&_bankSubCode=090100378&_accountType=${'checking'}`
+                }&_bankCode=${beneficiary?.branchCode}&_bankSubCode=null&_accountType=${'checking'}`
               })
 
               if (result?.record?.status) {
