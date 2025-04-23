@@ -393,9 +393,6 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     formik.setFieldValue('itemWeight', ItemPhysProp?.record?.weight)
     formik.setFieldValue('itemsPL', ItemProduction?.record?.lineId)
     formik.setFieldValue('lineId', ItemProduction?.record?.lineId)
-    formik.setFieldValue('designId', ItemProduction?.record?.designId || formik.values?.designId)
-    formik.setFieldValue('designRef', ItemProduction?.record?.designRef || formik.values?.designRef)
-    formik.setFieldValue('designName', ItemProduction?.record?.designName || formik.values?.designName)
   }
   async function fillDesignInfo(values) {
     if (values?.itemId) {
