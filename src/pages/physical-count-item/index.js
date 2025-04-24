@@ -186,7 +186,7 @@ const PhysicalCountItem = () => {
       actions={actions}
       maxAccess={access}
       resourceId={ResourceIds.IVPhysicalCountItem}
-      filteredItems={filteredItems}
+      metalFormItems={filteredItems}
       previewReport={editMode}
     >
       <VertLayout>

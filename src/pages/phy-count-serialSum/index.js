@@ -230,7 +230,7 @@ const PhysicalCountSerial = () => {
       isSavedClear={false}
       maxAccess={maxAccess}
       resourceId={ResourceIds.PhysicalCountSerialSummary}
-      filteredItems={filteredItems}
+      metalFormItems={filteredItems}
       previewReport={editMode}
     >
       <VertLayout>

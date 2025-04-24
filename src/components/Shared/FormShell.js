@@ -68,7 +68,7 @@ export default function FormShell({
   setIDInfoAutoFilled,
   visibleClear,
   actions,
-  filteredItems = [],
+  metalFormItems = [],
   isParentWindow = true
 }) {
   const { stack } = useWindow()
@@ -344,7 +344,7 @@ export default function FormShell({
             stack({
               Component: MetalSummary,
               props: {
-                filteredItems
+                filteredItems: metalFormItems
               },
               width: 600,
               height: 550,
@@ -378,20 +378,6 @@ export default function FormShell({
               width: 1000,
               height: 620,
               title: platformLabels.Aging
-            })
-          }
-          break
-        case 'onClickMetal':
-          action.onClick = () => {
-            stack({
-              Component: MetalSummary,
-              props: {
-                filteredItems
-              },
-              width: 600,
-              height: 550,
-              title: platformLabels.Metals,
-              expandable: false
             })
           }
           break

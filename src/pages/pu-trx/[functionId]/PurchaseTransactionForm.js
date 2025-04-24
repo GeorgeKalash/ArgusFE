@@ -70,6 +70,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const [defaultsDataState, setDefaultsDataState] = useState(null)
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
+  const [metalFormItems, setMetalFormItems] = useState([])
 
   const { documentType, maxAccess } = useDocumentType({
     functionId: functionId,
@@ -668,6 +669,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       condition: true,
       onClick: onWorkFlowClick,
       disabled: !editMode
+    },
+    {
+      key: 'Metals',
+      condition: true,
+      onClick: 'onClickMetal'
     },
     {
       key: 'Locked',
@@ -1353,6 +1359,26 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     })
   }
 
+  useEffect(() => {
+    formik.values?.items?.length > 0 ? handleClick(formik.values.items) : setMetalFormItems([])
+  }, [formik.values.items])
+
+  const handleClick = async dataList => {
+    setMetalFormItems([])
+
+    const metalItemsList = dataList
+      .filter(item => item.metalId && item.metalId.toString().trim() !== '')
+      .map(item => ({
+        qty: item.qty,
+        metalRef: null,
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+    setMetalFormItems(metalItemsList)
+  }
+
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
@@ -1363,6 +1389,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
+      metalFormItems={metalFormItems}
     >
       <VertLayout>
         <Fixed>
