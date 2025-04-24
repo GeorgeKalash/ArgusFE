@@ -104,13 +104,14 @@ export default function ResourceComboBox({
     value ||
     ''
 
-  const onBlur = (e, HighlightedOption, options) => {
-    finalItemsListRef.current = options || finalItemsListRef.current
-
-    if (HighlightedOption) {
-      rest.onChange('', HighlightedOption)
-    } else if (finalItemsListRef.current?.[0]) {
-      selectFirstOption()
+  const onBlur = (e, HighlightedOption, options, allowSelect) => {
+    if (allowSelect) {
+      finalItemsListRef.current = options || finalItemsListRef.current
+      if (HighlightedOption) {
+        rest.onChange('', HighlightedOption)
+      } else if (finalItemsListRef.current?.[0]) {
+        selectFirstOption()
+      }
     }
   }
 
@@ -124,7 +125,6 @@ export default function ResourceComboBox({
     if (finalItemsListRef.current.length > 0 && typeof defaultIndex === 'number') {
       rest.onChange('', finalItemsListRef.current[defaultIndex])
     }
-
   }, [defaultIndex, finalItemsListRef.current.length])
 
   return (
