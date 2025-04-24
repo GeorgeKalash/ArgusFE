@@ -42,7 +42,7 @@ const PuTrx = () => {
     action: async () => {
       openForm()
     },
-    hasDT: false
+    hasDT: true
   })
 
   const columns = [

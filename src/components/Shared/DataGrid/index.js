@@ -110,9 +110,6 @@ export function DataGrid({
           ? value.reduce((max, current) => (max.id > current.id ? max : current)).id + 1
           : 1
 
-        const defaultValues = Object.fromEntries(
-          columns?.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
-        )
         rows = [
           ...value.map(row => (row.id === updatedRow.id ? updatedRow : row)),
           {
@@ -205,20 +202,6 @@ export function DataGrid({
 
   const addNewRow = () => {
     const highestIndex = Math.max(...value?.map(item => item.id), 0) + 1
-
-    const defaultValues = allColumns
-      .filter(({ name }) => name !== 'id')
-      .reduce((acc, { name, defaultValue }) => {
-        if (typeof defaultValue === 'object' && defaultValue !== null) {
-          Object.entries(defaultValue).forEach(([key, value]) => {
-            acc[key] = value
-          })
-        } else {
-          acc[name] = defaultValue
-        }
-
-        return acc
-      }, {})
 
     const newRow = {
       ...initialValues,

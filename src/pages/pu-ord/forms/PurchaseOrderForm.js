@@ -262,6 +262,20 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     return mdType === MDTYPE_PCT ? true : false
   }
 
+  const onCondition = row => {
+    if (row.taxId) {
+      return {
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -425,9 +439,9 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     },
     {
       component: 'button',
-      name: 'taxDetailsButton',
+      name: 'taxDetails',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        onCondition
       },
       label: labels.tax,
       onClick: (e, row) => {
@@ -553,7 +567,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         date: formatDateToApi(formik.values.header.date)
       })
     }).then(() => {
-      toast.success(platformLabels.Invoice)
+      toast.success(platformLabels.Posted)
       invalidate()
       refetchForm(formik?.values?.header.recordId)
     })
@@ -699,10 +713,10 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         return {
           ...item,
           id: index + 1,
-          basePrice: parseFloat(item.basePrice)?.toFixed(5) || 0,
-          unitPrice: parseFloat(item.unitPrice)?.toFixed(3) || 0,
-          vatAmount: parseFloat(item.vatAmount)?.toFixed(2) || 0,
-          extendedPrice: parseFloat(item.extendedPrice)?.toFixed(2) || 0,
+          basePrice: item.basePrice ? parseFloat(item.basePrice).toFixed(5) : 0,
+          unitPrice: item.unitPrice ? parseFloat(item.unitPrice).toFixed(3) : 0,
+          vatAmount: item.vatAmount ? parseFloat(item.vatAmount).toFixed(2) : 0,
+          extendedPrice: item.extendedPrice ? parseFloat(item.extendedPrice).toFixed(2) : 0,
           deliveryDate: formatDateFromApi(item.deliveryDate),
           puTrx: true,
           taxDetails: puTrxTaxes
@@ -964,17 +978,17 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
 
     let commonData = {
       id: newRow?.id,
-      qty: parseFloat(itemPriceRow?.qty).toFixed(2),
-      baseQty: parseFloat(qtyInBase).toFixed(2),
-      volume: parseFloat(itemPriceRow?.volume).toFixed(2),
-      weight: parseFloat(itemPriceRow?.weight).toFixed(2),
-      basePrice: parseFloat(itemPriceRow?.basePrice).toFixed(5),
-      unitPrice: parseFloat(itemPriceRow?.unitPrice).toFixed(3),
-      extendedPrice: parseFloat(itemPriceRow?.extendedPrice).toFixed(2),
+      qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
+      baseQty: qtyInBase ? parseFloat(qtyInBase).toFixed(2) : 0,
+      volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
+      weight: itemPriceRow?.weight ? parseFloat(itemPriceRow.weight).toFixed(2) : 0,
+      basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
+      unitPrice: itemPriceRow?.unitPrice ? parseFloat(itemPriceRow.unitPrice).toFixed(3) : 0,
+      extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
-      mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),
-      vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
+      mdAmount: itemPriceRow?.mdAmount ? parseFloat(itemPriceRow.mdAmount).toFixed(2) : 0,
+      vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0
     }
 
     return iconClicked ? { changes: commonData } : commonData
@@ -1076,7 +1090,11 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
 
   useEffect(() => {
     if (reCal) {
-      let currentTdAmount = (parseFloat(formik.values.header.tdPct) * parseFloat(subtotal)) / 100
+      let currentTdAmount =
+        formik.values.header.tdType === 2
+          ? (parseFloat(formik.values.header.tdPct) * parseFloat(subtotal)) / 100
+          : parseFloat(formik.values.header.tdAmount)
+
       recalcGridVat(
         formik.values.header.tdType,
         formik.values.header.tdPct,
@@ -1297,7 +1315,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
                     errorCheck={'header.vendorId'}
                     maxAccess={maxAccess}
                     required
-                    readOnly={isClosed}
+                    readOnly={isClosed || (formik?.values?.items?.length > 0 && formik?.values?.items[0]?.sku)}
                     displayFieldWidth={3}
                   />
                 </Grid>
