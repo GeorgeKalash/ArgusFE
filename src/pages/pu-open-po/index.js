@@ -59,7 +59,6 @@ const OpenPurchaseOrder = () => {
       marginDefault: defaultVat?.value
     },
     validationSchema: yup.object({
-      vendorId: yup.number().required(),
       siteId: yup.number().required()
     }),
     validateOnChange: true,
@@ -344,7 +343,6 @@ const OpenPurchaseOrder = () => {
                   name='vendorId'
                   label={labels.vendor}
                   form={formik}
-                  required
                   displayFieldWidth={2}
                   valueShow='vendorRef'
                   secondValueShow='vendorName'
