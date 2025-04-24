@@ -19,6 +19,7 @@ const ImageUpload = forwardRef(
       customWidth,
       customHeight,
       rerender,
+      pictureResourceId,
       disabled = false
     },
     ref
@@ -45,7 +46,9 @@ const ImageUpload = forwardRef(
     async function getData() {
       const result = await getRequest({
         extension: SystemRepository.Attachment.get,
-        parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${rerender || uniqueRecord}`
+        parameters: `_resourceId=${pictureResourceId || resourceId}&_seqNo=${seqNo}&_recordId=${
+          rerender || uniqueRecord
+        }`
       })
       setInitialData(result?.record)
     }

@@ -37,10 +37,9 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
-  const currentItem = useRef({ itemId: '', sku: '', itemName: '' })
   const [plStore, setPlStore] = useState([])
   const recordId = store?.recordId
-  const [disableImage, setDisableImage] = useState(false)
+  const [imageSource, setImageSource] = useState(null)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrder,
@@ -343,7 +342,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       startingDT: formatDateFromApi(res?.record?.startingDT),
       deliveryDate: formatDateFromApi(res?.record?.deliveryDate)
     })
-    currentItem.current = { itemId: res?.record?.itemId, sku: res?.record?.sku, itemName: res?.record?.itemName }
+
     setStore(prevStore => ({
       ...prevStore,
       recordId: res?.record.recordId,
@@ -363,22 +362,12 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
 
   async function fillItemInfo(values) {
     if (!values?.recordId) {
-      currentItem.current = { itemId: null, sku: null, itemName: null }
       formik.setFieldValue('itemsPL', null)
       formik.setFieldValue('itemWeight', null)
       formik.setFieldValue('itemCategoryId', null)
       formik.setFieldValue('itemFromDesign', false)
 
       return
-    }
-    const shouldUpdateCurrentItem = !currentItem.current.itemId || formik.values.itemFromDesign
-
-    if (shouldUpdateCurrentItem) {
-      currentItem.current = { itemId: values?.recordId, sku: values?.sku, itemName: values?.name }
-
-      if (formik.values.itemFromDesign) {
-        formik.setFieldValue('itemFromDesign', false)
-      }
     }
 
     const ItemPhysProp = await getRequest({
@@ -390,16 +379,15 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       extension: InventoryRepository.ItemProduction.get,
       parameters: `_recordId=${values?.recordId}`
     })
+    formik.setFieldValue('itemId', values?.recordId)
+    formik.setFieldValue('itemName', values?.name)
+    formik.setFieldValue('sku', values?.sku)
     formik.setFieldValue('itemCategoryId', values?.categoryId)
     formik.setFieldValue('itemWeight', ItemPhysProp?.record?.weight)
     formik.setFieldValue('itemsPL', ItemProduction?.record?.lineId)
     formik.setFieldValue('lineId', ItemProduction?.record?.lineId)
   }
   async function fillDesignInfo(values) {
-    if (values?.itemId) {
-      currentItem.current = { itemId: values?.itemId, sku: values?.sku, itemName: values?.itemName }
-      formik.setFieldValue('itemFromDesign', true)
-    }
     formik.setFieldValue('designId', values?.recordId)
     formik.setFieldValue('designRef', values?.reference)
     formik.setFieldValue('designName', values?.name)
@@ -427,6 +415,9 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     formik.setFieldValue('threeDDRef', values?.threeDDRef)
     formik.setFieldValue('rubberId', values?.rubberId)
     formik.setFieldValue('rubberRef', values?.rubberRef)
+    formik.setFieldValue('itemId', values?.itemId)
+    formik.setFieldValue('itemName', values?.itemName)
+    formik.setFieldValue('sku', values?.sku)
   }
   async function fillBillingInfo(values) {
     if (!values?.recordId) return
@@ -482,15 +473,24 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     formik.setFieldValue('wcRef', res?.list[0]?.workCenterRef)
     formik.setFieldValue('wcName', res?.list[0]?.workCenterName)
   }
+  function getImageResourceId() {
+    if (editMode) return null
+
+    switch (imageSource) {
+      case 1:
+        return ResourceIds.Design
+      case 2:
+        return ResourceIds.Items
+      default:
+        return null
+    }
+  }
 
   useEffect(() => {
     ;(async function () {
-      formik.setFieldValue('itemId', currentItem?.current?.itemId)
-      formik.setFieldValue('itemName', currentItem?.current?.itemName)
-      formik.setFieldValue('sku', currentItem?.current?.sku)
-      !currentItem?.current?.itemId ? await getAllLines() : await getFilteredLines(currentItem?.current?.itemId)
+      !formik.values.itemId ? await getAllLines() : await getFilteredLines(formik.values.itemId)
     })()
-  }, [currentItem.current.itemId, formik.values.designId])
+  }, [formik.values.designId])
 
   useEffect(() => {
     ;(async function () {
@@ -498,7 +498,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
         extension: SystemRepository.Defaults.get,
         parameters: `_filter=&_key=mf_jo_pic_source`
       })
-      setDisableImage(res?.record?.value != 3)
+      setImageSource(res?.record?.value)
       if (recordId) await refetchForm(recordId)
       else await getAllLines()
     })()
@@ -850,13 +850,22 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
               <Grid item>
                 <ImageUpload
                   ref={imageUploadRef}
-                  resourceId={ResourceIds.Design}
+                  resourceId={ResourceIds.JobOrder}
+                  pictureResourceId={
+                    !editMode
+                      ? imageSource === 1
+                        ? ResourceIds.Design
+                        : imageSource === 2
+                        ? ResourceIds.Items
+                        : null
+                      : null
+                  }
                   seqNo={0}
                   recordId={formik.values.recordId}
                   customWidth={300}
                   customHeight={180}
-                  rerender={formik.values.designId}
-                  disabled={disableImage}
+                  rerender={imageSource == 1 ? formik.values.designId : imageSource == 2 ? formik.values.itemId : null}
+                  disabled={imageSource != 3}
                 />
               </Grid>
 
