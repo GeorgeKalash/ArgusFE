@@ -217,6 +217,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
+                readOnly={isPosted}
                 onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
@@ -230,6 +231,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
                 displayField='value'
                 values={formik.values}
                 required
+                readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('type', newValue?.key || null)
@@ -246,6 +248,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
                 onChange={e => formik.setFieldValue('amount', e.target.value)}
                 onClear={() => formik.setFieldValue('amount', null)}
                 required
+                readOnly={isPosted}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
                 maxLength={12}
                 decimalScale={3}
@@ -266,6 +269,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
                 ]}
                 values={formik.values}
                 maxAccess={maxAccess}
+                readOnly={isPosted}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('plId', newValue?.recordId || '')
                 }}
@@ -285,6 +289,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
+                readOnly={isPosted}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('groupId', newValue?.recordId || null)
                 }}
@@ -325,6 +330,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
                 displayFieldWidth={1}
                 values={formik?.values}
                 maxAccess={access}
+                readOnly={isPosted}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('categoryId', newValue?.recordId || null)
                 }}
@@ -337,12 +343,12 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
                 name='currencyId'
                 label={labels.currency}
                 valueField='recordId'
+                readOnly={isPosted}
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                readOnly={editMode}
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
@@ -359,6 +365,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
                 label={labels.priceGroup}
                 valueField='recordId'
                 displayField='name'
+                readOnly={isPosted}
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
