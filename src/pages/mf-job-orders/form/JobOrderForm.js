@@ -40,6 +40,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
   const currentItem = useRef({ itemId: '', sku: '', itemName: '' })
   const [plStore, setPlStore] = useState([])
   const recordId = store?.recordId
+  const [disableImage, setDisableImage] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrder,
@@ -493,9 +494,13 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        await refetchForm(recordId)
-      } else await getAllLines()
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=mf_jo_pic_source`
+      })
+      setDisableImage(res?.record?.value != 3)
+      if (recordId) await refetchForm(recordId)
+      else await getAllLines()
     })()
   }, [])
 
@@ -851,6 +856,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                   customWidth={300}
                   customHeight={180}
                   rerender={formik.values.designId}
+                  disabled={disableImage}
                 />
               </Grid>
 

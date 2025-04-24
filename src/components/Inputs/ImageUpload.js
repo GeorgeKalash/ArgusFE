@@ -8,7 +8,21 @@ import CustomButton from './CustomButton'
 import { ControlContext } from 'src/providers/ControlContext'
 
 const ImageUpload = forwardRef(
-  ({ resourceId, error, seqNo, recordId, width = 140, height = 140, customWidth, customHeight, rerender }, ref) => {
+  (
+    {
+      resourceId,
+      error,
+      seqNo,
+      recordId,
+      width = 140,
+      height = 140,
+      customWidth,
+      customHeight,
+      rerender,
+      disabled = false
+    },
+    ref
+  ) => {
     const hiddenInputRef = useRef()
     const { getRequest, postRequest } = useContext(RequestsContext)
     const { platformLabels } = useContext(ControlContext)
@@ -37,7 +51,7 @@ const ImageUpload = forwardRef(
     }
 
     const handleClick = () => {
-      hiddenInputRef.current.click()
+      if (!disabled) hiddenInputRef.current.click()
     }
 
     const handleInputImageChange = event => {
@@ -81,6 +95,8 @@ const ImageUpload = forwardRef(
     }
 
     const submit = () => {
+      if (disabled) return
+
       if (formik.values?.file) {
         const obj = { ...formik.values, recordId: ref.current.value || recordId }
 
@@ -129,12 +145,14 @@ const ImageUpload = forwardRef(
             ref={hiddenInputRef}
             onChange={handleInputImageChange}
             accept='image/png, image/jpeg, image/jpg'
+            disabled={disabled}
           />
           <CustomButton
             onClick={handleInputImageReset}
             label={platformLabels.Clear}
             color='#F44336'
             image='clear.png'
+            disabled={disabled}
           />
         </Box>
       </Box>
