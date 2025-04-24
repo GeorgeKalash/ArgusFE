@@ -218,7 +218,7 @@ const OpenPurchaseOrder = () => {
       component: 'numberfield',
       label: labels.balance,
       name: 'balance',
-      props: { readOnly: true }
+      props: { readOnly: true, decimalScale: 2 }
     },
     {
       component: 'numberfield',
@@ -345,9 +345,9 @@ const OpenPurchaseOrder = () => {
                   label={labels.vendor}
                   form={formik}
                   required
-                  secondDisplayField={false}
-                  displayFieldWidth={1}
+                  displayFieldWidth={2}
                   valueShow='vendorRef'
+                  secondValueShow='vendorName'
                   maxAccess={maxAccess}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
