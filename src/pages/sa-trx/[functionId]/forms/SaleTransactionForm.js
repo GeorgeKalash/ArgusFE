@@ -191,7 +191,7 @@ export default function SaleTransactionForm({
           taxDetails: null,
           notes: '',
           saTrx: true,
-          taxDetailsButton: false
+          taxDetailsButton: true
         }
       ],
       serials: [],
@@ -675,7 +675,6 @@ export default function SaleTransactionForm({
     {
       component: 'button',
       name: 'taxDetailsButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/tax-icon.png'
       },
@@ -715,7 +714,6 @@ export default function SaleTransactionForm({
     {
       component: 'button',
       name: 'saTrx',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png'
       },
@@ -1961,6 +1959,7 @@ export default function SaleTransactionForm({
             }}
             value={formik?.values?.items}
             error={formik.errors.items}
+            initialValues={formik?.initialValues?.items[0]}
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId)
             }}

@@ -337,7 +337,6 @@ const PhysicalCountItemDe = () => {
       component: 'numberfield',
       label: _labels.metalPurity,
       name: 'metalPurity',
-      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -346,7 +345,6 @@ const PhysicalCountItemDe = () => {
       component: 'numberfield',
       label: _labels.weight,
       name: 'weight',
-      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -609,6 +607,7 @@ const PhysicalCountItemDe = () => {
             }}
             value={formik.values.controllerId && typeof disSkuLookup === 'boolean' ? formik.values?.rows : []}
             error={formik.errors?.rows}
+            initialValues={formik?.initialValues?.rows?.[0]}
             columns={columns}
             disabled={formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3}
             allowDelete={formik.values?.SCStatus != 3 && formik.values?.SCWIP != 2 && formik.values?.status != 3}

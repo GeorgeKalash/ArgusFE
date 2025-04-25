@@ -139,7 +139,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         applyVat: false,
         taxId: '',
         taxDetails: null,
-        taxDetailsButton: false,
+        taxDetailsButton: true,
         notes: ''
       }
     ]
@@ -487,7 +487,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     {
       component: 'button',
       name: 'taxDetailsButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/tax-icon.png'
       },
@@ -1530,6 +1529,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
             }}
             value={formik.values.items}
             error={formik.errors.items}
+            initialValues={formik?.initialValues?.items?.[0]}            
             columns={columns}
             name='items'
             maxAccess={maxAccess}

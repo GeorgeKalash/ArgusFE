@@ -156,7 +156,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
         taxId: null,
         taxId_base: null,
         taxId_amount: null,
-        taxDetailsButton: false
+        taxDetailsButton: true
       }
     ],
     cash: [
@@ -751,7 +751,6 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     {
       component: 'button',
       name: 'taxDetailsButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/tax-icon.png'
       },
@@ -1438,6 +1437,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
             }}
             value={formik?.values?.items}
             error={formik.errors.items}
+            initialValues={formik.initialValues.items[0]}
             name='items'
             columns={columns}
             maxAccess={maxAccess}

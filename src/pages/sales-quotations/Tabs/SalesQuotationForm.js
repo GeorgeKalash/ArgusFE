@@ -138,7 +138,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         applyVat: false,
         taxId: null,
         taxDetails: null,
-        taxDetailsButton: false,
+        taxDetailsButton: true,
         notes: null
       }
     ]
@@ -423,7 +423,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     {
       component: 'button',
       name: 'taxDetailsButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/tax-icon.png'
       },
@@ -1484,6 +1483,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
+            initialValues={formik?.initialValues?.items?.[0]}            
             value={formik.values.items}
             error={formik.errors.items}
             columns={columns}

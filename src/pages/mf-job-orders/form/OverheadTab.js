@@ -146,7 +146,6 @@ export default function OverheadTab({ labels, maxAccess, store }) {
       component: 'numberfield',
       label: labels.units,
       name: 'units',
-      defaultValue: 0,
       async onChange({ row: { update, newRow } }) {
         update({ amount: newRow?.units * newRow?.unitCost || 0 })
       }
@@ -155,7 +154,6 @@ export default function OverheadTab({ labels, maxAccess, store }) {
       component: 'numberfield',
       label: labels.unitCost,
       name: 'unitCost',
-      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -164,7 +162,6 @@ export default function OverheadTab({ labels, maxAccess, store }) {
       component: 'numberfield',
       label: labels.amount,
       name: 'amount',
-      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -233,6 +230,7 @@ export default function OverheadTab({ labels, maxAccess, store }) {
             value={formik.values.items}
             error={formik.errors.items}
             columns={columns}
+            initialValues={formik?.initialValues?.items?.[0]}
             name='items'
             maxAccess={maxAccess}
             allowDelete={!store?.isPosted && !store?.isCancelled}

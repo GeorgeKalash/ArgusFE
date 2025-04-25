@@ -159,10 +159,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         applyVat: false,
         taxId: null,
         taxDetails: null,
-        promotionTypeName: '',
-        promotionType: null,
-        costHistory: false,
-        taxDetailsButton: false,
+        promotionTypeName: initialPromotionType?.value,
+        promotionType: initialPromotionType?.key,
+        costHistory: true,
+        taxDetailsButton: true,
         notes: ''
       }
     ],
@@ -186,6 +186,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       title: platformLabels.ItemPromotion
     })
   }
+
+  console.log(initialValues, 'initialValues')
 
   const { formik } = useForm({
     maxAccess,
@@ -308,7 +310,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       component: 'resourcecombobox',
       name: 'promotionTypeName',
       label: labels.promotionType,
-      hidden: true,
       props: {
         datasetId: DataSets.PROMOTION_TYPE,
         valueField: 'key',
@@ -317,10 +318,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           { from: 'key', to: 'promotionType' },
           { from: 'value', to: 'promotionTypeName' }
         ]
-      },
-      defaultValue: {
-        promotionType: initialPromotionType?.key,
-        promotionTypeName: initialPromotionType?.value
       }
     },
     {
@@ -496,7 +493,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     {
       component: 'button',
       name: 'costHistory',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png'
       },
@@ -526,7 +522,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     {
       component: 'button',
       name: 'taxDetailsButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/tax-icon.png'
       },
@@ -556,8 +551,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         iconsClicked: (id, updateRow) => handleIconClick(id, updateRow),
         gridData: formik.values.items,
         type: 'numeric',
-        concatenateWith: '%',
-        defaultValue: 0
+        concatenateWith: '%'
       },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)
@@ -1206,14 +1200,19 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         const initialType = promotionTypes[0]
         setInitialPromotionType(initialType)
 
-        const items = formik.values.items.map(item => ({
-          ...item,
-          promotionTypeName: initialType.value,
-          promotionType: initialType.key
-        }))
-
-        formik.setFieldValue(items)
+        formik.setFieldValue('items', [
+          {
+            ...formik.values.items[0],
+            promotionType: initialType.key,
+            promotionTypeName: initialType.value
+          }
+        ])
       }
+    })()
+  }, [])
+
+  useEffect(() => {
+    ;(async function () {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       setMetalPriceOperations()
@@ -1620,6 +1619,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
+            initialValues={initialValues.items[0]}
             value={formik?.values?.items}
             error={formik.errors.items}
             name='items'
