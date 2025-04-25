@@ -398,5 +398,7 @@ export const ResourceIds = {
   OpenPOs: 50312,
   NotificationLabels: 23106,
   ClientPriceLists: 51208,
-  Assemblies: 42301
+  Assemblies: 42301,
+  GenerateInvoices: 52302,
+  GeneratePUInvoices: 50307
 }
