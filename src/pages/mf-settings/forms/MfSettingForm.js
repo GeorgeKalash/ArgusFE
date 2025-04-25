@@ -74,7 +74,11 @@ const MfSettingForm = () => {
               name='mf_fg_siteId'
               label={labels.finishedGoodSites}
               valueField='recordId'
-              displayField='name'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('mf_fg_siteId', newValue?.recordId || null)
@@ -88,7 +92,11 @@ const MfSettingForm = () => {
               name='mf_ava_siteId'
               label={labels.rawMaterialsSite}
               valueField='recordId'
-              displayField='name'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('mf_ava_siteId', newValue?.recordId || null)
@@ -102,7 +110,11 @@ const MfSettingForm = () => {
               name='mf_rm_siteId'
               label={labels.availabilitySite}
               valueField='recordId'
-              displayField='name'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('mf_rm_siteId', newValue?.recordId || null)
