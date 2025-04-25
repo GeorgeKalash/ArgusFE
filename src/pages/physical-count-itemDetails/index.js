@@ -458,6 +458,7 @@ const PhysicalCountItemDe = () => {
       key: 'Metals',
       condition: true,
       onClick: 'onClickMetal',
+      metalFormItems: filteredItems,
       disabled: formik.values.controllerId == null
     },
     {
@@ -510,7 +511,6 @@ const PhysicalCountItemDe = () => {
       actions={actions}
       maxAccess={access}
       resourceId={ResourceIds.IVPhysicalCountItemDetails}
-      metalFormItems={filteredItems}
       previewReport={editMode}
     >
       <VertLayout>

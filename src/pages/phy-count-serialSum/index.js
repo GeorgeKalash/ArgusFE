@@ -25,7 +25,6 @@ const PhysicalCountSerial = () => {
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
   const [siteStore, setSiteStore] = useState([])
-  const [filteredItems, setFilteredItems] = useState([])
   const [editMode, setEditMode] = useState(false)
   const { stack } = useWindow()
 
@@ -95,7 +94,6 @@ const PhysicalCountSerial = () => {
     formik.setFieldValue('totalVarianceWeight', sumVarianceWght)
 
     setData({ list: updatedList })
-    handleClick(updatedList)
   }
 
   const fillSiteStore = stockCountId => {
@@ -181,7 +179,6 @@ const PhysicalCountSerial = () => {
           formik.resetForm()
           setData({ list: [] })
           setSiteStore([])
-          setFilteredItems([])
           setEditMode(false)
         }
       },
@@ -189,23 +186,6 @@ const PhysicalCountSerial = () => {
       height: 170,
       title: platformLabels.Clear
     })
-  }
-
-  const handleClick = async dataList => {
-    setFilteredItems([])
-
-    const filteredItemsList = dataList
-      .filter(item => item.metalId && item.metalId.toString().trim() !== '')
-      .map(item => ({
-        qty: item.countedQty,
-        metalRef: null,
-        metalId: item.metalId,
-        metalPurity: item.metalPurity,
-        weight: item.weight,
-        priceType: item.priceType
-      }))
-    setFilteredItems(filteredItemsList)
-    setEditMode(dataList.length > 0)
   }
 
   const filtered = useMemo(
@@ -230,7 +210,6 @@ const PhysicalCountSerial = () => {
       isSavedClear={false}
       maxAccess={maxAccess}
       resourceId={ResourceIds.PhysicalCountSerialSummary}
-      metalFormItems={filteredItems}
       previewReport={editMode}
     >
       <VertLayout>
@@ -256,7 +235,6 @@ const PhysicalCountSerial = () => {
 
                   if (!newValue) {
                     setSiteStore([])
-                    setFilteredItems([])
                     formik.setFieldValue('date', '')
                     formik.setFieldValue('reference', '')
                     openClear()

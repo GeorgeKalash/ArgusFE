@@ -68,7 +68,6 @@ export default function FormShell({
   setIDInfoAutoFilled,
   visibleClear,
   actions,
-  metalFormItems = [],
   isParentWindow = true
 }) {
   const { stack } = useWindow()
@@ -344,7 +343,7 @@ export default function FormShell({
             stack({
               Component: MetalSummary,
               props: {
-                filteredItems: metalFormItems
+                filteredItems: action?.metalFormItems
               },
               width: 600,
               height: 550,

@@ -908,7 +908,8 @@ export default function SaleTransactionForm({
     {
       key: 'Metals',
       condition: true,
-      onClick: 'onClickMetal'
+      onClick: 'onClickMetal',
+      metalFormItems
     },
     {
       key: 'Locked',
@@ -1657,7 +1658,6 @@ export default function SaleTransactionForm({
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
-      metalFormItems={metalFormItems}
     >
       <VertLayout>
         <Fixed>

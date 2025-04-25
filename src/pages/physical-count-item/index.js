@@ -172,7 +172,8 @@ const PhysicalCountItem = () => {
     {
       key: 'Metals',
       condition: true,
-      onClick: 'onClickMetal'
+      onClick: 'onClickMetal',
+      metalFormItems: filteredItems
     }
   ]
 
@@ -186,7 +187,6 @@ const PhysicalCountItem = () => {
       actions={actions}
       maxAccess={access}
       resourceId={ResourceIds.IVPhysicalCountItem}
-      metalFormItems={filteredItems}
       previewReport={editMode}
     >
       <VertLayout>

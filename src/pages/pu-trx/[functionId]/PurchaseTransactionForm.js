@@ -673,7 +673,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     {
       key: 'Metals',
       condition: true,
-      onClick: 'onClickMetal'
+      onClick: 'onClickMetal',
+      metalFormItems
     },
     {
       key: 'Locked',
@@ -1389,7 +1390,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
-      metalFormItems={metalFormItems}
     >
       <VertLayout>
         <Fixed>
