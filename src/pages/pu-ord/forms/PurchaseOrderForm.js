@@ -629,11 +629,22 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         return acc
       }, {})
 
-      if (Object.keys(touchedFields).length) {
+      const touchedFieldItems = errors?.items?.reduce((acc, _, index) => {
+        const touchedItems = formik.touched.items || []
+
+        if (!touchedItems[index]) {
+          acc[index] = true
+        }
+
+        return acc
+      }, {})
+
+      if (Object.keys(touchedFields).length || Object.keys(touchedFieldItems).length) {
         formik.setTouched(
           {
             ...formik.touched,
-            header: touchedFields
+            header: touchedFields,
+            items: touchedFieldItems
           },
           true
         )
