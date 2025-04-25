@@ -399,6 +399,7 @@ export const ResourceIds = {
   NotificationLabels: 23106,
   ClientPriceLists: 51208,
   Assemblies: 42301,
+  Batches: 20205,
   GenerateInvoices: 52302,
   GeneratePUInvoices: 50307
 }
