@@ -7,16 +7,23 @@ import OverheadForm from '../forms/OverheadForm'
 const AssemblyWindow = ({ recordId, access, labels }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [store, setStore] = useState({ recordId, isPosted: false })
+  const [totalOverhead, setTotalOverhead] = useState(0)
   const tabs = [{ label: labels.assembly }, { label: labels.overhead, disabled: !store.recordId }]
 
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <AssemblyForm store={store} setStore={setStore} labels={labels} maxAccess={access} />
+        <AssemblyForm
+          store={store}
+          setStore={setStore}
+          labels={labels}
+          maxAccess={access}
+          totalOverhead={totalOverhead}
+        />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <OverheadForm store={store} labels={labels} maxAccess={access} />
+        <OverheadForm store={store} labels={labels} maxAccess={access} setTotalOverhead={setTotalOverhead} />
       </CustomTabPanel>
     </>
   )
