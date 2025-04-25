@@ -718,7 +718,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   ]
 
-  async function fillForm(puTrxPack) {
+  async function fillForm(puTrxPack, recordId) {
     const puTrxHeader = puTrxPack?.header
     const puTrxItems = puTrxPack?.items
     const puTrxTaxes = puTrxPack?.taxCodes
@@ -1153,7 +1153,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   async function refetchForm(recordId) {
     const saTrxpack = await getPurchaseTransactionPack(recordId)
-    await fillForm(saTrxpack)
+    await fillForm(saTrxpack, recordId)
   }
 
   function getDTD(dtId) {
