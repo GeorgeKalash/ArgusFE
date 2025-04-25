@@ -163,7 +163,8 @@ const Table = ({
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
 
   useEffect(() => {
-    const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
+    const areAllValuesTrue =
+      props?.gridData?.list?.length > 0 && props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
     if (typeof setData === 'function') {
       onSelectionChanged()

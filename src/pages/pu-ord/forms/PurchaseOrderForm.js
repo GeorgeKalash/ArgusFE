@@ -619,7 +619,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     const errors = await formik.validateForm()
 
     if (Object.keys(errors).length) {
-      const touchedFields = Object.keys(errors?.header || {}).reduce((acc, key) => {
+      const touchedFieldHeader = Object.keys(errors?.header || {}).reduce((acc, key) => {
         const touchedHeader = formik.touched.header || {}
 
         if (!touchedHeader[key]) {
@@ -639,11 +639,11 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         return acc
       }, {})
 
-      if (Object.keys(touchedFields).length || Object.keys(touchedFieldItems).length) {
+      if (Object.keys(touchedFieldHeader).length || Object.keys(touchedFieldItems).length) {
         formik.setTouched(
           {
             ...formik.touched,
-            header: touchedFields,
+            header: touchedFieldHeader,
             items: touchedFieldItems
           },
           true
