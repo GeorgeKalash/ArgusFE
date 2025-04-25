@@ -148,7 +148,7 @@ const ReturnOnInvoice = () => {
       },
       width: 1300,
       height: 730,
-      title: labels.ReturnOnInvoice
+      title: labels.returnOnInvoice
     })
   }
 
