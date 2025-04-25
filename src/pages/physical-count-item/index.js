@@ -22,7 +22,6 @@ const PhysicalCountItem = () => {
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
   const [siteStore, setSiteStore] = useState([])
-  const [filteredItems, setFilteredItems] = useState([])
   const [editMode, setEditMode] = useState(false)
   const { stack } = useWindow()
 
@@ -72,7 +71,7 @@ const PhysicalCountItem = () => {
     formik.setFieldValue('totalWeight', sumWeight)
     setData(res || { list: [] })
 
-    handleClick(res.list)
+    setEditMode(res?.list?.length > 0)
   }
 
   const fillSiteStore = stockCountId => {
@@ -141,7 +140,6 @@ const PhysicalCountItem = () => {
           formik.resetForm()
           setData({ list: [] })
           setSiteStore([])
-          setFilteredItems([])
           setEditMode(false)
         }
       },
@@ -151,21 +149,23 @@ const PhysicalCountItem = () => {
     })
   }
 
-  const handleClick = async dataList => {
-    setFilteredItems([])
+  const handleMetalClick = async () => {
+    let metalItemsList = []
 
-    const filteredItemsList = dataList
-      .filter(item => item.metalId && item.metalId.toString().trim() !== '')
-      .map(item => ({
-        qty: item.countedQty,
-        metalRef: null,
-        metalId: item.metalId,
-        metalPurity: item.metalPurity,
-        weight: item.weight,
-        priceType: item.priceType
-      }))
-    setFilteredItems(filteredItemsList)
-    setEditMode(dataList.length > 0)
+    if (data?.list?.length > 0) {
+      metalItemsList = data?.list
+        ?.filter(item => item.metalId && item.metalId.toString().trim() !== '')
+        .map(item => ({
+          qty: item.countedQty,
+          metalRef: null,
+          metalId: item.metalId,
+          metalPurity: item.metalPurity,
+          weight: item.weight,
+          priceType: item.priceType
+        }))
+    }
+
+    return metalItemsList
   }
 
   const actions = [
@@ -173,7 +173,7 @@ const PhysicalCountItem = () => {
       key: 'Metals',
       condition: true,
       onClick: 'onClickMetal',
-      metalFormItems: filteredItems
+      handleMetalClick
     }
   ]
 
@@ -210,7 +210,6 @@ const PhysicalCountItem = () => {
 
                   if (!newValue) {
                     setSiteStore([])
-                    setFilteredItems([])
                   } else {
                     fillSiteStore(newValue?.recordId)
                   }

@@ -343,7 +343,7 @@ export default function FormShell({
             stack({
               Component: MetalSummary,
               props: {
-                filteredItems: action?.metalFormItems
+                handleMetalClick: action?.handleMetalClick
               },
               width: 600,
               height: 550,

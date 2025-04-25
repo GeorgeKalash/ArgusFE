@@ -28,7 +28,6 @@ const PhysicalCountItemDe = () => {
   const { platformLabels } = useContext(ControlContext)
   const [siteStore, setSiteStore] = useState([])
   const [controllerStore, setControllerStore] = useState([])
-  const [filteredItems, setFilteredItems] = useState([])
   const [editMode, setEditMode] = useState(false)
   const [disSkuLookup, setDisSkuLookup] = useState('')
   const [jumpToNextLine, setJumpToNextLine] = useState(false)
@@ -125,8 +124,6 @@ const PhysicalCountItemDe = () => {
       toast.success(platformLabels.Edited)
       setEditMode(items.length > 0)
       checkPhyStatus(obj.controllerId)
-
-      handleClick(items)
     }
   })
 
@@ -151,7 +148,6 @@ const PhysicalCountItemDe = () => {
       }
 
       setEditMode(res.list.length > 0)
-      handleClick(res.list)
     })
   }
 
@@ -163,7 +159,6 @@ const PhysicalCountItemDe = () => {
     if (!formik.values.stockCountId) {
       setSiteStore([])
       setControllerStore([])
-      setFilteredItems([])
       setEditMode(false)
     }
   }, [formik.values.stockCountId])
@@ -356,25 +351,26 @@ const PhysicalCountItemDe = () => {
   const clearGrid = () => {
     formik.setFieldValue('rows', formik.initialValues.rows)
 
-    setFilteredItems([])
     setEditMode(false)
   }
 
-  const handleClick = async dataList => {
-    setFilteredItems([])
+  const handleMetalClick = async () => {
+    let metalItemsList = []
 
-    const filteredItemsList = dataList
-      .filter(item => item.metalId && item.metalId.toString().trim() !== '')
-      .map(item => ({
-        qty: item.countedQty,
-        metalRef: null,
-        metalId: item.metalId,
-        metalPurity: item.metalPurity,
-        weight: item.weight,
-        priceType: item.priceType
-      }))
-    setFilteredItems(filteredItemsList)
-    setEditMode(dataList.length > 0)
+    if (formik.values?.rows?.length > 0) {
+      metalItemsList = formik?.values?.rows
+        ?.filter(item => item.metalId && item.metalId.toString().trim() !== '')
+        .map(item => ({
+          qty: item.countedQty,
+          metalRef: null,
+          metalId: item.metalId,
+          metalPurity: item.metalPurity,
+          weight: item.weight,
+          priceType: item.priceType
+        }))
+    }
+
+    return metalItemsList
   }
 
   const isPosted = formik.values.status === 3
@@ -442,7 +438,6 @@ const PhysicalCountItemDe = () => {
           formik.resetForm()
           formik.setFieldValue('rows', [])
 
-          setFilteredItems([])
           setEditMode(false)
         },
         dialogText: platformLabels.ClearFormGrid
@@ -458,7 +453,7 @@ const PhysicalCountItemDe = () => {
       key: 'Metals',
       condition: true,
       onClick: 'onClickMetal',
-      metalFormItems: filteredItems,
+      handleMetalClick,
       disabled: formik.values.controllerId == null
     },
     {
@@ -534,7 +529,6 @@ const PhysicalCountItemDe = () => {
 
                   if (!newValue) {
                     setSiteStore([])
-                    setFilteredItems([])
                     clearGrid()
                     formik.setFieldValue('SCStatus', null)
                     formik.setFieldValue('SCWIP', null)
@@ -569,7 +563,6 @@ const PhysicalCountItemDe = () => {
 
                   if (!newValue) {
                     setControllerStore([])
-                    setFilteredItems([])
                     clearGrid()
                     formik.setFieldValue('EndofSiteStatus', null)
                   } else {

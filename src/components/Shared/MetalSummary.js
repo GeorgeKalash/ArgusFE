@@ -7,11 +7,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-const MetalSummary = ({ filteredItems }) => {
+const MetalSummary = ({ handleMetalClick }) => {
   const { getRequest } = useContext(RequestsContext)
   const [gridData, setGridData] = useState({})
 
   async function fetchGridData() {
+    let filteredItems = await handleMetalClick()
+
     var parameters = ``
     getRequest({
       extension: InventoryRepository.Metals.qry,
@@ -19,7 +21,7 @@ const MetalSummary = ({ filteredItems }) => {
     }).then(res => {
       const metalsStoreList = res.list
 
-      const updatedData = filteredItems.map(item => {
+      const updatedData = filteredItems?.map(item => {
         const matchedMetal = metalsStoreList.find(metalStoreItem => item.metalId === metalStoreItem.recordId)
 
         if (matchedMetal) {
@@ -42,7 +44,7 @@ const MetalSummary = ({ filteredItems }) => {
 
   const processMetalsList = metalsList => {
     // Update weight based on priceType
-    const updatedList = metalsList.map(line => {
+    const updatedList = metalsList?.map(line => {
       let updatedLine = { ...line }
       if (line.priceType === 1) {
         updatedLine.weight = line.qty
@@ -53,27 +55,22 @@ const MetalSummary = ({ filteredItems }) => {
       return updatedLine
     })
 
-    // Group by metalId
-    const groupedMetals = updatedList.reduce((acc, item) => {
+    const groupedMetals = updatedList?.reduce((acc, item) => {
       acc[item.metalId] = acc[item.metalId] || []
       acc[item.metalId].push(item)
 
       return acc
     }, {})
 
-    // Calculate total qty and weight for each group
-    const groups = Object.values(groupedMetals).map(group => {
+    const groups = Object?.values(groupedMetals).map(group => {
       const totalQty = group.reduce((sum, item) => sum + item.qty, 0)
       const totalWeight = group.filter(item => item.qty > 0).reduce((sum, item) => sum + item.weight, 0)
 
-      // Update the first item of the group
       const firstItem = { ...group[0], qty: totalQty, weight: totalWeight }
 
-      // Return updated group
       return [firstItem, ...group.slice(1)]
     })
 
-    // Extract distinct metals (first item of each group)
     const distinctMetalsArr = groups.map(group => group[0])
 
     return distinctMetalsArr
@@ -81,7 +78,7 @@ const MetalSummary = ({ filteredItems }) => {
 
   useEffect(() => {
     fetchGridData()
-  }, [filteredItems])
+  }, [])
 
   const { labels: labels, access } = useResourceQuery({
     datasetId: ResourceIds.FE_MetalSummaryControl
@@ -95,16 +92,31 @@ const MetalSummary = ({ filteredItems }) => {
     },
     {
       field: 'qty',
+      type: {
+        field: 'number',
+        decimal: 2,
+        round: true
+      },
       headerName: labels.qty,
       flex: 1
     },
     {
       field: 'metalPurity',
+      type: {
+        field: 'number',
+        decimal: 2,
+        round: true
+      },
       headerName: labels.purity,
       flex: 1
     },
     {
       field: 'weight',
+      type: {
+        field: 'number',
+        decimal: 2,
+        round: true
+      },
       headerName: labels.weight,
       flex: 1
     }

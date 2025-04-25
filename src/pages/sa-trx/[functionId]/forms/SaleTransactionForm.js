@@ -81,7 +81,6 @@ export default function SaleTransactionForm({
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
   const filteredMeasurements = useRef([])
-  const [metalFormItems, setMetalFormItems] = useState([])
 
   const { documentType, maxAccess } = useDocumentType({
     functionId: functionId,
@@ -867,6 +866,25 @@ export default function SaleTransactionForm({
     })
   }
 
+  const handleMetalClick = async () => {
+    let metalItemsList = []
+
+    if (formik.values?.items?.length > 0) {
+      metalItemsList = formik?.values?.items
+        ?.filter(item => item.metalId && item.metalId.toString().trim() !== '')
+        .map(item => ({
+          qty: item.qty,
+          metalRef: null,
+          metalId: item.metalId,
+          metalPurity: item.metalPurity,
+          weight: item.weight,
+          priceType: item.priceType
+        }))
+
+      return metalItemsList
+    }
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -909,7 +927,7 @@ export default function SaleTransactionForm({
       key: 'Metals',
       condition: true,
       onClick: 'onClickMetal',
-      metalFormItems
+      handleMetalClick
     },
     {
       key: 'Locked',
@@ -1625,26 +1643,6 @@ export default function SaleTransactionForm({
     })
 
     invalidate()
-  }
-
-  useEffect(() => {
-    formik.values?.items?.length > 0 ? handleClick(formik.values.items) : setMetalFormItems([])
-  }, [formik.values.items])
-
-  const handleClick = async dataList => {
-    setMetalFormItems([])
-
-    const metalItemsList = dataList
-      .filter(item => item.metalId && item.metalId.toString().trim() !== '')
-      .map(item => ({
-        qty: item.qty,
-        metalRef: null,
-        metalId: item.metalId,
-        metalPurity: item.metalPurity,
-        weight: item.weight,
-        priceType: item.priceType
-      }))
-    setMetalFormItems(metalItemsList)
   }
 
   return (

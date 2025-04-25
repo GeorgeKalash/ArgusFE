@@ -14,7 +14,7 @@ export function handleChangeNumber(inputValue, digitsBeforePoint, digitsAfterPoi
   setPosition(newCursorPosition)
 }
 
-const getFormattedNumber = (value, decimal) => {
+const getFormattedNumber = (value, decimal, round = false) => {
   if (!value && value !== 0) return
 
   const sanitizedValue = value.toString().replace(/[^0-9.-]/g, '')
@@ -27,7 +27,9 @@ const getFormattedNumber = (value, decimal) => {
 
   if (decimalPart !== undefined) {
     if (decimal !== undefined) {
-      formattedDecimalPart = `.${decimalPart.slice(0, decimal)}`
+      round == false
+        ? (formattedDecimalPart = `.${decimalPart.slice(0, decimal)}`)
+        : (formattedDecimalPart = `.${parseFloat(`0.${decimalPart}`).toFixed(decimal).split('.')[1]}`)
     } else {
       formattedDecimalPart = `.${decimalPart}`
     }
