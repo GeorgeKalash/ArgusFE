@@ -453,7 +453,7 @@ export function DataGrid({
       }
     }
 
-    const updateRow = ({ changes }) => {
+    const updateRow = ({ changes, commitOnBlur }) => {
       const oldRow = params.data
 
       setCurrentValue(changes || '')
@@ -466,7 +466,7 @@ export function DataGrid({
         return
       }
 
-      if (column.colDef.updateOn !== 'blur') {
+      if (column.colDef.updateOn !== 'blur' || commitOnBlur) {
         commit(changes)
 
         process(params, oldRow, setData)
