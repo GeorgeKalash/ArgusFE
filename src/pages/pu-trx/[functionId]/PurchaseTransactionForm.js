@@ -590,10 +590,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   ]
 
   async function getSerials(recordId, seqNo) {
-    return await getRequest({
-      extension: PurchaseRepository.Serials.qry,
-      parameters: `_invoiceId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
-    })
+    if (recordId)
+      return await getRequest({
+        extension: PurchaseRepository.Serials.qry,
+        parameters: `_invoiceId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
+      })
   }
 
   async function handleIconClick(id, updateRow) {
