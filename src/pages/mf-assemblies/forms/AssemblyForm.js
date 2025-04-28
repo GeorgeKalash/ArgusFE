@@ -167,8 +167,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
 
   const totalRawMaterial = designQuantity + diffQuantity
 
-  const disablePreview =
-    !formik.values.bomId || !formik.values.siteId || formik.values.qty == null || formik.values.qty === ''
+  const disablePreview = !formik.values.bomId || !formik.values.siteId || !Number(formik.values.qty)
 
   const fetchLookup = async searchQry => {
     if (!searchQry) return
@@ -800,6 +799,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                   <CustomNumberField
                     name='qty'
                     label={labels.qty}
+                    allowNegative={false}
                     readOnly={isPosted || editMode || formik.values.items?.some(item => !!item.sku)}
                     onChange={formik.handleChange}
                     value={formik?.values?.qty}
@@ -831,6 +831,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     name='batchSize'
                     label={labels.batchSize}
                     readOnly={editMode}
+                    allowNegative={false}
                     value={formik?.values?.batchSize}
                     maxAccess={maxAccess}
                     onChange={e => {
@@ -850,6 +851,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     readOnly={editMode}
                     value={formik?.values?.batches}
                     maxAccess={maxAccess}
+                    allowNegative={false}
                     onChange={e => {
                       let batch = Number(e.target.value.replace(/,/g, ''))
                       formik.setFieldValue('batches', batch)
