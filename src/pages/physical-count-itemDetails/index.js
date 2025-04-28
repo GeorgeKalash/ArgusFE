@@ -443,7 +443,6 @@ const PhysicalCountItemDe = () => {
         onConfirm: () => {
           formik.resetForm()
           formik.setFieldValue('rows', [])
-          rowsUpdate.current = []
 
           setEditMode(false)
         },
