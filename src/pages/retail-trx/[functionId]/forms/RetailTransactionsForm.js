@@ -33,7 +33,8 @@ import {
   DIRTYFIELD_MDAMOUNT,
   DIRTYFIELD_MDTYPE,
   DIRTYFIELD_EXTENDED_PRICE,
-  MDTYPE_PCT
+  MDTYPE_PCT,
+  MDTYPE_AMOUNT
 } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
 import { getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
@@ -282,7 +283,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     return res?.list
   }
 
-  async function barcodeSkuSelection(update, row, setItemInfo) {
+  async function barcodeSkuSelection(update, row) {
     const itemRetail = await getItemRetail(row?.itemId)
     const itemPhysical = await getItemPhysical(row?.itemId)
     const itemConvertPrice = await getItemConvertPrice(row?.itemId)
@@ -317,8 +318,12 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       taxDetailsButton: true
     }
     update(result)
-    const result2 = await getItemPriceRow(update, result, DIRTYFIELD_UNIT_PRICE)
-    if (row?.qty > 0) await getItemPriceRow(update, result2, DIRTYFIELD_QTY)
+    const result2 = getItemPriceRow(result, DIRTYFIELD_UNIT_PRICE)
+    update(result2)
+    if (row?.qty > 0) {
+      const result3 = getItemPriceRow(result2, DIRTYFIELD_QTY)
+      update(result3)
+    }
   }
 
   async function getItemRetail(itemId) {
@@ -348,6 +353,19 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
 
     return res?.record
   }
+
+  function checkMinMaxAmount(amount, type, modType) {
+    let currentAmount = parseFloat(amount) || 0
+
+    if (type === modType) {
+      if (currentAmount < 0 || currentAmount > 100) currentAmount = 0
+    } else {
+      if (currentAmount < 0) currentAmount = 0
+    }
+
+    return currentAmount
+  }
+
   function calculateBankFees(ccId) {
     if (!ccId || !amount) return
     const arrayCC = cashGridData?.creditCardFees?.filter(({ creditCardId }) => parseInt(creditCardId) === ccId) ?? []
@@ -359,38 +377,21 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     return isPct ? (amount * commissionFees) / 100 : commissionFees
   }
 
-  async function handleIconClick(id, updateRow) {
-    const index = formik.values.items.findIndex(item => item.id === id)
+  async function handleIconClick({ updateRow, value, data }) {
+    const mdt = value?.mdType || data?.mdType
 
-    if (index === -1) return
+    let mdType = mdt === MDTYPE_PCT ? MDTYPE_AMOUNT : MDTYPE_PCT
 
-    let currentMdType
-    let currentMdAmount = parseFloat(formik.values.items[index].mdAmount)
-    const maxClientAmountDiscount = formik.values.items[index].unitPrice * (formik.values?.header.maxDiscount / 100)
-
-    if (formik.values.items[index].mdType === 2) {
-      if (currentMdAmount < 0 || currentMdAmount > 100) currentMdAmount = 0
-
-      formik.setFieldValue(`items[${index}].mdAmountPct`, 1)
-      formik.setFieldValue(`items[${index}].mdType`, 1)
-      currentMdType = 1
-      formik.setFieldValue(`items[${index}].mdAmount`, parseFloat(currentMdAmount).toFixed(2))
-    } else {
-      if (currentMdAmount < 0 || currentMdAmount > maxClientAmountDiscount) currentMdAmount = 0
-
-      formik.setFieldValue(`items[${index}].mdAmountPct`, 2)
-      formik.setFieldValue(`items[${index}].mdType`, 2)
-      currentMdType = 2
-      formik.setFieldValue(`items[${index}].mdAmount`, parseFloat(currentMdAmount).toFixed(2))
-    }
+    const currentMdAmount = checkMinMaxAmount(value?.mdAmount, mdType, MDTYPE_PCT)
 
     const newRow = {
-      ...formik.values.items[index],
       mdAmount: currentMdAmount,
-      mdType: currentMdType
+      mdAmountPct: mdType,
+      mdType: mdType
     }
 
-    await getItemPriceRow(updateRow, newRow, DIRTYFIELD_MDTYPE, true)
+    const changes = getItemPriceRow({ ...data, ...newRow }, DIRTYFIELD_MDAMOUNT)
+    updateRow({ changes })
   }
 
   const onPost = async () => {
@@ -529,19 +530,21 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     })
   }
 
-  async function getItemPriceRow(update, newRow, dirtyField, iconClicked) {
+  function getItemPriceRow(newRow, dirtyField, iconClicked) {
     !reCal && setReCal(true)
+
+    const mdAmount = checkMinMaxAmount(newRow?.mdAmount, newRow?.mdType, MDTYPE_PCT)
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
       basePrice: parseFloat(newRow?.basePrice || 0),
-      volume: parseFloat(newRow?.volume),
+      volume: parseFloat(newRow?.volume) || 0,
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
       upo: 0,
       qty: parseFloat(newRow?.qty) || 0,
       extendedPrice: parseFloat(newRow?.extendedPrice),
-      mdAmount: parseFloat(newRow?.mdAmount) || 0,
+      mdAmount: mdAmount,
       mdType: newRow?.mdType || 1,
       baseLaborPrice: newRow?.baseLaborPrice || 0,
       totalWeightPerG: newRow?.TotPricePerG,
@@ -563,23 +566,20 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
 
     let commonData = {
       id: newRow?.id,
-      qty: parseFloat(itemPriceRow?.qty).toFixed(2),
-      volume: parseFloat(itemPriceRow?.volume).toFixed(2),
-      weight: parseFloat(itemPriceRow?.weight).toFixed(2),
-      basePrice: parseFloat(itemPriceRow?.basePrice).toFixed(5),
-      unitPrice: parseFloat(itemPriceRow?.unitPrice).toFixed(3),
-      extendedPrice: parseFloat(itemPriceRow?.extendedPrice).toFixed(2),
+      qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
+      volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
+      weight: itemPriceRow?.weight ? parseFloat(itemPriceRow.weight).toFixed(2) : 0,
+      basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
+      unitPrice: itemPriceRow?.unitPrice ? parseFloat(itemPriceRow.unitPrice).toFixed(3) : 0,
+      extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
-      mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),
-      vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2),
+      mdAmount: itemPriceRow?.mdAmount ? parseFloat(itemPriceRow.mdAmount).toFixed(2) : 0,
+      vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0,
       taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
     }
-    let data = iconClicked ? { changes: commonData } : commonData
 
-    update(data)
-
-    return commonData
+    return iconClicked ? { changes: commonData } : commonData
   }
 
   const parsedItemsArray = formik.values.items
@@ -632,6 +632,12 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     return curSum + curValue
   }, 0)
   const totBalance = (parseFloat(subtotal) + parseFloat(vatAmount) - parseFloat(cashAmount)).toFixed(2)
+
+  const isPercentIcon = ({ value, data }) => {
+    const mdType = value?.mdType || data?.mdType
+
+    return mdType === MDTYPE_PCT ? true : false
+  }
 
   const columns = [
     {
@@ -688,7 +694,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       name: 'qty',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        await getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
+        update(data)
       }
     },
     {
@@ -705,7 +712,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       name: 'basePrice',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        await getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_BASE_PRICE)
+        update(data)
       }
     },
     {
@@ -714,7 +722,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       name: 'baseLaborPrice',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        await getItemPriceRow(update, newRow, DIRTYFIELD_BASE_LABOR_PRICE)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_BASE_LABOR_PRICE)
+        update(data)
       }
     },
     {
@@ -723,7 +732,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       name: 'totPricePerG',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        await getItemPriceRow(update, newRow, DIRTYFIELD_TWPG)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_TWPG)
+        update(data)
       }
     },
     {
@@ -731,8 +741,9 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       label: labels.unitPrice,
       name: 'unitPrice',
       updateOn: 'blur',
-      async onChange({ row: { update, oldRow, newRow } }) {
-        await getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
+      async onChange({ row: { update, newRow } }) {
+        const data = getItemPriceRow(newRow, DIRTYFIELD_UNIT_PRICE)
+        update(data)
       }
     },
     {
@@ -770,20 +781,23 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       }
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.markdown,
       name: 'mdAmount',
       updateOn: 'blur',
       flex: 2,
       props: {
         ShowDiscountIcons: true,
-        iconsClicked: (id, updateRow) => handleIconClick(id, updateRow),
-        gridData: formik.values.items,
+        iconsClicked: handleIconClick,
         type: 'numeric',
-        concatenateWith: '%'
+        concatenateWith: '%',
+        isPercentIcon
       },
-      async onChange({ row: { update, newRow } }) {
-        await getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)
+      async onChange({ row: { update, newRow, oldRow } }) {
+        if (oldRow.mdAmount !== newRow.mdAmount) {
+          const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
+          update(data)
+        }
       }
     },
     {
@@ -792,7 +806,8 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       name: 'extendedPrice',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        await getItemPriceRow(update, newRow, DIRTYFIELD_EXTENDED_PRICE)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_EXTENDED_PRICE)
+        update(data)
       }
     },
     {
