@@ -34,7 +34,9 @@ import {
   DIRTYFIELD_MDAMOUNT,
   DIRTYFIELD_UPO,
   DIRTYFIELD_EXTENDED_PRICE,
-  DIRTYFIELD_MDTYPE
+  DIRTYFIELD_MDTYPE,
+  MDTYPE_PCT,
+  MDTYPE_AMOUNT
 } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
 import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
@@ -277,6 +279,18 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     const mdType = value?.mdType || data?.mdType
 
     return mdType === MDTYPE_PCT ? true : false
+  }
+
+  function checkMinMaxAmount(amount, type, modType) {
+    let currentAmount = parseFloat(amount) || 0
+
+    if (type === modType) {
+      if (currentAmount < 0 || currentAmount > 100) currentAmount = 0
+    } else {
+      if (currentAmount < 0) currentAmount = 0
+    }
+
+    return currentAmount
   }
 
   const columns = [
@@ -528,12 +542,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         concatenateWith: '%',
         isPercentIcon
       },
-      async onChange({ row: { update, newRow, oldRow } }) {
-        if (oldRow.mdAmount !== newRow.mdAmount) {
-          const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
-          update(data)
-          checkMdAmountPct(newRow, update)
-        }
+      async onChange({ row: { update, newRow } }) {
+        const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
+        update(data)
+
+        checkMdAmountPct(newRow, update)
       }
     },
     {
@@ -585,8 +598,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       mdType: mdType
     }
 
-    const changes = getItemPriceRow({ ...data, ...newRow }, DIRTYFIELD_MDAMOUNT)
-    updateRow({ changes })
+    updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
   async function onClose() {
@@ -921,6 +933,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     })
 
     let commonData = {
+      ...newRow,
       id: newRow?.id,
       qty: parseFloat(itemPriceRow?.qty).toFixed(2),
       volume: parseFloat(itemPriceRow?.volume).toFixed(2),
@@ -1041,7 +1054,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }
 
   function checkMdAmountPct(rowData, update) {
-    const maxClientAmountDiscount = rowData.unitPrice * (formik.values.maxDiscount / 100)
+    const maxClientAmountDiscount = Number(rowData.unitPrice) * (formik.values.maxDiscount / 100)
     if (!formik.values.maxDiscount) return
     if (rowData.mdType == 1) {
       if (rowData.mdAmount > formik.values.maxDiscount) {

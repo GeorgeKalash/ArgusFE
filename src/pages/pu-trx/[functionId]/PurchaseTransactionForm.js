@@ -578,11 +578,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         concatenateWith: '%',
         isPercentIcon
       },
-      async onChange({ row: { update, newRow, oldRow } }) {
-        if (oldRow.mdAmount !== newRow.mdAmount) {
-          const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
-          update(data)
-        }
+      async onChange({ row: { update, newRow } }) {
+        const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
+        update(data)
       }
     },
     {
@@ -635,8 +633,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       mdType: mdType
     }
 
-    const changes = getItemPriceRow({ ...data, ...newRow }, DIRTYFIELD_MDAMOUNT)
-    updateRow({ changes })
+    updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
   async function onWorkFlowClick() {
@@ -1063,6 +1060,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const qtyInBase = itemPriceRow?.qty * newRow?.muQty
 
     let commonData = {
+      ...newRow,
       id: newRow?.id,
       qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
       baseQty: qtyInBase ? parseFloat(qtyInBase).toFixed(2) : 0,

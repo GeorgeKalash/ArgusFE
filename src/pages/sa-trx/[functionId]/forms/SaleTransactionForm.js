@@ -719,12 +719,11 @@ export default function SaleTransactionForm({
         concatenateWith: '%',
         isPercentIcon
       },
-      async onChange({ row: { update, newRow, oldRow } }) {
-        if (oldRow.mdAmount !== newRow.mdAmount) {
-          const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
-          update(data)
-          checkMdAmountPct(newRow, update)
-        }
+      async onChange({ row: { update, newRow } }) {
+        const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
+        update(data)
+
+        checkMdAmountPct(newRow, update)
       }
     },
     {
@@ -817,8 +816,7 @@ export default function SaleTransactionForm({
       mdType: mdType
     }
 
-    const changes = getItemPriceRow({ ...data, ...newRow }, DIRTYFIELD_MDAMOUNT)
-    updateRow({ changes })
+    updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
   async function onWorkFlowClick() {
@@ -1269,6 +1267,7 @@ export default function SaleTransactionForm({
     })
 
     let commonData = {
+      ...newRow,
       id: newRow?.id,
       qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
       volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,

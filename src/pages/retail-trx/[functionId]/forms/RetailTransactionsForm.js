@@ -390,8 +390,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       mdType: mdType
     }
 
-    const changes = getItemPriceRow({ ...data, ...newRow }, DIRTYFIELD_MDAMOUNT)
-    updateRow({ changes })
+    updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
   const onPost = async () => {
@@ -565,6 +564,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     })
 
     let commonData = {
+      ...newRow,
       id: newRow?.id,
       qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
       volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
@@ -793,11 +793,9 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
         concatenateWith: '%',
         isPercentIcon
       },
-      async onChange({ row: { update, newRow, oldRow } }) {
-        if (oldRow.mdAmount !== newRow.mdAmount) {
-          const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
-          update(data)
-        }
+      async onChange({ row: { update, newRow } }) {
+        const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
+        update(data)
       }
     },
     {
