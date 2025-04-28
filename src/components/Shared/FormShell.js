@@ -340,16 +340,18 @@ export default function FormShell({
           break
         case 'onClickMetal':
           action.onClick = () => {
-            stack({
-              Component: MetalSummary,
-              props: {
-                handleMetalClick: action?.handleMetalClick
-              },
-              width: 600,
-              height: 550,
-              title: platformLabels.Metals,
-              expandable: false
-            })
+            setTimeout(() => {
+              stack({
+                Component: MetalSummary,
+                props: {
+                  handleMetalClick: action?.handleMetalClick
+                },
+                width: 600,
+                height: 550,
+                title: platformLabels.Metals,
+                expandable: false
+              })
+            }, 5)
           }
           break
         case 'onUnpostConfirmation':

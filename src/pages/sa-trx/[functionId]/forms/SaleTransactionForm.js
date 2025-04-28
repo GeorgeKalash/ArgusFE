@@ -309,6 +309,8 @@ export default function SaleTransactionForm({
     }
   })
 
+  const itemsUpdate = useRef(formik?.values?.items)
+
   function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
@@ -869,8 +871,8 @@ export default function SaleTransactionForm({
   const handleMetalClick = async () => {
     let metalItemsList = []
 
-    if (formik.values?.items?.length > 0) {
-      metalItemsList = formik?.values?.items
+    if (itemsUpdate?.current?.length > 0) {
+      metalItemsList = itemsUpdate?.current
         ?.filter(item => item.metalId && item.metalId.toString().trim() !== '')
         .map(item => ({
           qty: item.qty,
@@ -1021,6 +1023,7 @@ export default function SaleTransactionForm({
       items: modifiedList,
       taxes: [...saTrxTaxes]
     })
+    itemsUpdate.current = modifiedList
 
     const res = await getClientInfo(saTrxHeader.clientId)
     getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
@@ -1982,6 +1985,7 @@ export default function SaleTransactionForm({
           <DataGrid
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
+              itemsUpdate.current = value
               action === 'delete' && setReCal(true)
             }}
             value={formik?.values?.items}

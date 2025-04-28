@@ -1,6 +1,6 @@
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -127,6 +127,8 @@ const PhysicalCountItemDe = () => {
     }
   })
 
+  const rowsUpdate = useRef(formik?.values?.rows)
+
   async function fetchGridData(controllerId) {
     const stockCountId = formik.values.stockCountId
 
@@ -144,7 +146,10 @@ const PhysicalCountItemDe = () => {
           weight: item?.weight || 0,
           countedQty: item?.countedQty || 0
         }))
-        modifiedList.length > 0 && formik.setFieldValue('rows', modifiedList)
+        if (modifiedList.length > 0) {
+          formik.setFieldValue('rows', modifiedList)
+          rowsUpdate.current = modifiedList
+        }
       }
 
       setEditMode(res.list.length > 0)
@@ -350,6 +355,7 @@ const PhysicalCountItemDe = () => {
 
   const clearGrid = () => {
     formik.setFieldValue('rows', formik.initialValues.rows)
+    rowsUpdate.current = formik.initialValues.rows
 
     setEditMode(false)
   }
@@ -357,8 +363,8 @@ const PhysicalCountItemDe = () => {
   const handleMetalClick = async () => {
     let metalItemsList = []
 
-    if (formik.values?.rows?.length > 0) {
-      metalItemsList = formik?.values?.rows
+    if (rowsUpdate?.current?.length > 0) {
+      metalItemsList = rowsUpdate?.current
         ?.filter(item => item.metalId && item.metalId.toString().trim() !== '')
         .map(item => ({
           qty: item.countedQty,
@@ -437,6 +443,7 @@ const PhysicalCountItemDe = () => {
         onConfirm: () => {
           formik.resetForm()
           formik.setFieldValue('rows', [])
+          rowsUpdate.current = []
 
           setEditMode(false)
         },
@@ -599,6 +606,7 @@ const PhysicalCountItemDe = () => {
           <DataGrid
             onChange={value => {
               formik.setFieldValue('rows', value)
+              rowsUpdate.current = value
             }}
             value={formik.values.controllerId && typeof disSkuLookup === 'boolean' ? formik.values?.rows : []}
             error={formik.errors?.rows}

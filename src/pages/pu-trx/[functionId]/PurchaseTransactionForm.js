@@ -279,6 +279,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   })
 
+  const itemsUpdate = useRef(formik?.values?.items)
+
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
@@ -659,8 +661,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const handleMetalClick = async () => {
     let metalItemsList = []
 
-    if (formik.values?.items?.length > 0) {
-      metalItemsList = formik?.values?.items
+    if (itemsUpdate?.current?.length > 0) {
+      metalItemsList = itemsUpdate?.current
         ?.filter(item => item.metalId && item.metalId.toString().trim() !== '')
         .map(item => ({
           qty: item.qty,
@@ -792,6 +794,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       items: modifiedList,
       taxCodes: [...puTrxTaxes]
     })
+
+    itemsUpdate.current = modifiedList
   }
 
   async function getPurchaseTransactionPack(transactionId) {
@@ -1640,6 +1644,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           <DataGrid
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
+              itemsUpdate.current = value
+
               action === 'delete' && setReCal(true)
             }}
             onSelectionChange={(row, update, field) => {
