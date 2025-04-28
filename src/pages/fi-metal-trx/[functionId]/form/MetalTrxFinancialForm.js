@@ -256,7 +256,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
     const modifiedList = itemsRes?.list?.map((item, index) => ({
       ...item,
-      purity: item.purity && item.purity <= 1 ? item.purity * 1000 : item.purity,
+      purity: item.purity * 1000,
+      stdPurity: item.stdPurity * 1000,
       metalValue:
         metalInfo?.purity || metal.purity
           ? ((item.qty * item.purity) / (metalInfo?.purity || metal.purity)).toFixed(2)
@@ -389,7 +390,14 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       component: 'numberfield',
       name: 'creditAmount',
       label: labels.labor,
-      props: { allowNegative: false, readOnly: true }
+      defaultValue: 0,
+      props: { allowNegative: false },
+      onChange: ({ row: { update, newRow } }) => {
+        const totalCredit = newRow.purityFromItem
+          ? newRow.qty * newRow.creditAmount
+          : newRow.qty * newRow.creditAmount * (newRow.purity / newRow.stdPurity)
+        update({ totalCredit: totalCredit.toFixed(2) })
+      }
     },
     {
       component: 'numberfield',
