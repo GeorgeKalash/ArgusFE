@@ -737,7 +737,6 @@ const Table = ({
   const onSortChanged = params => {
     if (params.columnApi && tableName && params.source == 'uiColumnSorted') {
       const columnState = params.columnApi.getColumnState()
-      console.log(params?.source, columnState)
 
       saveToDB(storeName, tableName, columnState)
       invalidate()
@@ -759,20 +758,26 @@ const Table = ({
     ? columnDefs.map((col, index) => {
         const savedCol = tableSettings?.find(c => c.colId === col?.field)
         const indexSort = tableSettings?.findIndex(c => c.colId === col?.field)
+
         const lastColumn = tableSettings?.length === indexSort + 1
 
         return {
           ...col,
           width: savedCol?.width ?? 'auto',
           flex: savedCol?.width ?? totalWidth / tableSettings?.length,
-          sortColumn: lastColumn ? columnDefs?.length + 1 : indexSort > -1 ? indexSort : index
+          sortColumn: lastColumn ? columnDefs?.length + 1 : indexSort > -1 ? indexSort : index,
+          sort: savedCol.sort ?? col?.sort
         }
       })
     : columnDefs
 
+  console.log('updatedColumns', updatedColumns)
+
   const finalColumns = updatedColumns?.sort((a, b) => {
     return (a.sortColumn ?? 0) - (b.sortColumn ?? 0)
   })
+
+  console.log('finalColumns', finalColumns)
 
   return (
     <VertLayout>
