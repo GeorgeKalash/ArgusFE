@@ -95,6 +95,16 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
         parameters: `_recordId=${recordId}`
       })
 
+      const res2 = await getRequest({
+        extension: SaleRepository.PriceListItem.qry,
+        parameters: `_pluId=${recordId}&_itemId=0`
+      })
+
+      setStore(prevStore => ({
+        ...prevStore,
+        items: res2
+      }))
+
       formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
     }
   }
@@ -132,6 +142,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
     })
 
     toast.success(platformLabels.Generated)
+    await getData(formik.values.recordId)
     invalidate()
   }
 
@@ -245,7 +256,7 @@ export default function PriceListUpdateForm({ labels, maxAccess: access, setStor
                 label={labels.amount}
                 value={formik?.values?.amount}
                 maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('amount', e.target.value)}
+                onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('amount', null)}
                 required
                 readOnly={isPosted}

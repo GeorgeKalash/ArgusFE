@@ -8,7 +8,8 @@ export default function PriceListUpdateWindow({ labels, maxAccess, recordId }) {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId
+    recordId,
+    items: [],
   })
 
   const tabs = [{ label: labels.PriceListUpdate }, { label: labels.items, disabled: !store.recordId }]

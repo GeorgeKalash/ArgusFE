@@ -140,7 +140,7 @@ const GridToolbar = ({
               </Grid>
             )}
             {inputSearch && (
-              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', m: '0px !important' }}>
+              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', m: '0 !important' }}>
                 <CustomTextField
                   name='search'
                   value={searchValue}
