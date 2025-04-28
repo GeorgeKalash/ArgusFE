@@ -471,7 +471,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         concatenateWith: '%',
         isPercentIcon
       },
-      async onChange({ row: { update, newRow, oldRow } }) {
+      async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
         update(data)
       }
