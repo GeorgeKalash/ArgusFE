@@ -28,7 +28,7 @@ import GenerateInvoiceForm from './GenerateInvoiceForm'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate }) {
+export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate, plantId, dtId, siteId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -228,7 +228,10 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       dtId: shipHeader.record.dtId,
       header: {
         ...formik.values.header,
-        ...shipHeader.record
+        plantId: plantId || formik?.values?.header?.plantId,
+        dtId: dtId || formik?.values?.header?.dtId,
+        ...shipHeader.record,
+        siteId: siteId || formik?.values?.header?.siteId
       },
       items: itemsList
     })
@@ -433,11 +436,13 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       label: labels.sku,
       name: 'sku',
       flex: 1,
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !!row.shipmentId && !!row.poId && !!row.sku }
+      },
       props: {
         store: skuStore?.current,
         displayField: 'sku',
         valueField: 'sku',
-        readOnly: editMode,
         mapping: [
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -515,7 +520,14 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         }
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
+        let store = []
+        if (row?.itemId) {
+          getFilteredMU(row?.itemId, row?.msId)
+
+          store = filteredMeasurements?.current
+        }
+
+        return { ...props, store }
       }
     },
     {
