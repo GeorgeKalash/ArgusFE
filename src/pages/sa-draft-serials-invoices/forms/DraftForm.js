@@ -391,7 +391,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 designRef: res?.record?.designRef || null,
                 volume: res?.record?.volume || 0,
                 baseLaborPrice: res?.record?.baseLaborPrice || 0,
-                unitPrice: res?.record?.unitPrice || 0,
+                unitPrice: parseFloat(res?.record?.unitPrice).toFixed(2) || 0,
                 vatPct: res?.record?.vatPct || 0,
                 vatAmount: parseFloat(res?.record?.vatAmount).toFixed(2) || 0,
 

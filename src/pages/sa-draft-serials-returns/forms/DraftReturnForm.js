@@ -415,7 +415,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
               invoiceReference: res?.record?.invoiceRef,
               volume: res?.record?.volume || 0,
               baseLaborPrice: res?.record?.laborPrice || 0,
-              unitPrice: res?.record?.unitPrice || 0,
+              unitPrice: parseFloat(res?.record?.unitPrice).toFixed(2) || 0,
               vatPct: res?.record?.vatPct || 0,
               vatAmount: parseFloat(res?.record?.vatAmount).toFixed(2) || 0,
               invoiceTrxId: res?.record?.trxId || 0,
