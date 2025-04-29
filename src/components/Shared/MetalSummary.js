@@ -14,10 +14,9 @@ const MetalSummary = ({ handleMetalClick }) => {
   async function fetchGridData() {
     let filteredItems = await handleMetalClick()
 
-    var parameters = ``
     getRequest({
       extension: InventoryRepository.Metals.qry,
-      parameters: parameters
+      parameters: ``
     }).then(res => {
       const metalsStoreList = res.list
 
@@ -43,7 +42,6 @@ const MetalSummary = ({ handleMetalClick }) => {
   }
 
   const processMetalsList = metalsList => {
-    // Update weight based on priceType
     const updatedList = metalsList?.map(line => {
       let updatedLine = { ...line }
       if (line.priceType === 1) {

@@ -22,7 +22,6 @@ const PhysicalCountItem = () => {
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
   const [siteStore, setSiteStore] = useState([])
-  const [editMode, setEditMode] = useState(false)
   const { stack } = useWindow()
 
   const {
@@ -70,9 +69,9 @@ const PhysicalCountItem = () => {
     formik.setFieldValue('totalCostPrice', sumCost)
     formik.setFieldValue('totalWeight', sumWeight)
     setData(res || { list: [] })
-
-    setEditMode(res?.list?.length > 0)
   }
+
+  const editMode = data?.list?.length > 0
 
   const fillSiteStore = stockCountId => {
     setSiteStore([])
@@ -140,7 +139,6 @@ const PhysicalCountItem = () => {
           formik.resetForm()
           setData({ list: [] })
           setSiteStore([])
-          setEditMode(false)
         }
       },
       width: 570,
@@ -150,22 +148,18 @@ const PhysicalCountItem = () => {
   }
 
   const handleMetalClick = async () => {
-    let metalItemsList = []
+    const metalItemsList = data?.list
+      ?.filter(item => item.metalId && item.metalId.toString().trim() !== '')
+      .map(item => ({
+        qty: item.countedQty,
+        metalRef: null,
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
 
-    if (data?.list?.length > 0) {
-      metalItemsList = data?.list
-        ?.filter(item => item.metalId && item.metalId.toString().trim() !== '')
-        .map(item => ({
-          qty: item.countedQty,
-          metalRef: null,
-          metalId: item.metalId,
-          metalPurity: item.metalPurity,
-          weight: item.weight,
-          priceType: item.priceType
-        }))
-    }
-
-    return metalItemsList
+    return metalItemsList || []
   }
 
   const actions = [

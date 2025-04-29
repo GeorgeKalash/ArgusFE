@@ -361,22 +361,18 @@ const PhysicalCountItemDe = () => {
   }
 
   const handleMetalClick = async () => {
-    let metalItemsList = []
+    const metalItemsList = rowsUpdate?.current
+      ?.filter(item => item.metalId && item.metalId.toString().trim() !== '')
+      .map(item => ({
+        qty: item.countedQty,
+        metalRef: null,
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
 
-    if (rowsUpdate?.current?.length > 0) {
-      metalItemsList = rowsUpdate?.current
-        ?.filter(item => item.metalId && item.metalId.toString().trim() !== '')
-        .map(item => ({
-          qty: item.countedQty,
-          metalRef: null,
-          metalId: item.metalId,
-          metalPurity: item.metalPurity,
-          weight: item.weight,
-          priceType: item.priceType
-        }))
-    }
-
-    return metalItemsList
+    return metalItemsList || []
   }
 
   const isPosted = formik.values.status === 3
@@ -459,8 +455,7 @@ const PhysicalCountItemDe = () => {
       key: 'Metals',
       condition: true,
       onClick: 'onClickMetal',
-      handleMetalClick,
-      disabled: formik.values.controllerId == null
+      handleMetalClick
     },
     {
       key: 'Locked',
