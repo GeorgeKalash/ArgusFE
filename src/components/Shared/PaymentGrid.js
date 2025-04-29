@@ -25,7 +25,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
         type: '',
         amount: '',
         paidAmount: '',
-        returnedAmount: '',
+        returnedAmount: 0,
         bankFees: '',
         receiptRef: ''
       }
@@ -151,7 +151,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
           updateRow({
             id: index,
             changes: {
-              returnedAmount: returnValue,
+              returnedAmount: returnValue || 0,
               amount:
                 amount +
                 parseFloat(cashAmount || 0) -
@@ -161,7 +161,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
           })
         } else {
           update({
-            returnedAmount: returnValue,
+            returnedAmount: returnValue || 0,
             amount: (parseFloat(amount || 0) - parseFloat(totalPaidAmount || 0)).toFixed(2)
           })
         }
