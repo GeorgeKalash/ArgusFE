@@ -31,7 +31,6 @@ import {
   DIRTYFIELD_TWPG,
   DIRTYFIELD_UNIT_PRICE,
   DIRTYFIELD_MDAMOUNT,
-  DIRTYFIELD_MDTYPE,
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_PCT,
   MDTYPE_AMOUNT
@@ -318,11 +317,14 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       taxDetailsButton: true
     }
     update(result)
-    const result2 = getItemPriceRow(result, DIRTYFIELD_UNIT_PRICE)
-    update(result2)
-    if (row?.qty > 0) {
-      const result3 = getItemPriceRow(result2, DIRTYFIELD_QTY)
-      update(result3)
+    if (result?.unitPrice) {
+      const result2 = getItemPriceRow(result, DIRTYFIELD_UNIT_PRICE)
+      update(result2)
+
+      if (row?.qty > 0) {
+        const result3 = getItemPriceRow(result2, DIRTYFIELD_QTY)
+        update(result3)
+      }
     }
   }
 
@@ -354,10 +356,10 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
     return res?.record
   }
 
-  function checkMinMaxAmount(amount, type, modType) {
+  function checkMinMaxAmount(amount, type) {
     let currentAmount = parseFloat(amount) || 0
 
-    if (type === modType) {
+    if (type === MDTYPE_PCT) {
       if (currentAmount < 0 || currentAmount > 100) currentAmount = 0
     } else {
       if (currentAmount < 0) currentAmount = 0
@@ -382,7 +384,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
 
     let mdType = mdt === MDTYPE_PCT ? MDTYPE_AMOUNT : MDTYPE_PCT
 
-    const currentMdAmount = checkMinMaxAmount(value?.mdAmount, mdType, MDTYPE_PCT)
+    const currentMdAmount = checkMinMaxAmount(value?.mdAmount, mdType)
 
     const newRow = {
       mdAmount: currentMdAmount,
@@ -532,7 +534,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
   function getItemPriceRow(newRow, dirtyField, iconClicked) {
     !reCal && setReCal(true)
 
-    const mdAmount = checkMinMaxAmount(newRow?.mdAmount, newRow?.mdType, MDTYPE_PCT)
+    const mdAmount = checkMinMaxAmount(newRow?.mdAmount, newRow?.mdType)
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
@@ -636,7 +638,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
   const isPercentIcon = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
 
-    return mdType === MDTYPE_PCT ? true : false
+    return mdType === MDTYPE_PCT
   }
 
   const columns = [
@@ -647,7 +649,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.barcode) return
-        await barcodeSkuSelection(update, newRow, true)
+        await barcodeSkuSelection(update, newRow)
       }
     },
     {
@@ -676,7 +678,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) return
-        await barcodeSkuSelection(update, newRow, false)
+        await barcodeSkuSelection(update, newRow)
       }
     },
     {

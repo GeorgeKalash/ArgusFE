@@ -34,7 +34,6 @@ import {
   DIRTYFIELD_MDAMOUNT,
   DIRTYFIELD_UPO,
   DIRTYFIELD_EXTENDED_PRICE,
-  DIRTYFIELD_MDTYPE,
   MDTYPE_AMOUNT,
   MDTYPE_PCT
 } from 'src/utils/ItemPriceCalculator'
@@ -236,7 +235,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   const isPercentIcon = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
 
-    return mdType === MDTYPE_PCT ? true : false
+    return mdType === MDTYPE_PCT
   }
 
   const columns = [
@@ -303,8 +302,10 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           rowTaxDetails = details
         }
 
-        const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+        const filteredMU = measurements?.filter(item => item.msId === itemInfo?.msId)
         getFilteredMU(newRow?.itemId)
+
+        const filteredItems = filteredMeasurements?.current?.filter(item => item.recordId === newRow?.muId)
 
         update({
           volume: parseFloat(itemPhysProp?.volume) || 0,
@@ -317,8 +318,8 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           mdAmount: formik.values.maxDiscount ? parseFloat(formik.values.maxDiscount).toFixed(2) : 0,
           qty: 0,
           msId: itemInfo?.msId,
-          muRef: filteredMeasurements?.[0]?.reference,
-          muId: filteredMeasurements?.[0]?.recordId,
+          muRef: filteredMU?.[0]?.reference,
+          muId: filteredMU?.[0]?.recordId,
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
@@ -327,7 +328,8 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
           saTrx: true,
-          taxDetailsButton: true
+          taxDetailsButton: true,
+          baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
         })
 
         formik.setFieldValue('mdAmount', formik.values.currentDiscount ? formik.values.currentDiscount : 0)
@@ -511,7 +513,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
 
     let mdType = mdt === MDTYPE_PCT ? MDTYPE_AMOUNT : MDTYPE_PCT
 
-    const currentMdAmount = checkMinMaxAmount(value?.mdAmount, mdType, MDTYPE_PCT)
+    const currentMdAmount = checkMinMaxAmount(value?.mdAmount, mdType)
 
     const newRow = {
       mdAmount: currentMdAmount,
@@ -805,10 +807,10 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     })
   }
 
-  function checkMinMaxAmount(amount, type, modType) {
+  function checkMinMaxAmount(amount, type) {
     let currentAmount = parseFloat(amount) || 0
 
-    if (type === modType) {
+    if (type === MDTYPE_PCT) {
       if (currentAmount < 0 || currentAmount > 100) currentAmount = 0
     } else {
       if (currentAmount < 0) currentAmount = 0
@@ -820,7 +822,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   function getItemPriceRow(newRow, dirtyField, iconClicked) {
     !reCal && setReCal(true)
 
-    const mdAmount = checkMinMaxAmount(newRow?.mdAmount, newRow?.mdType, MDTYPE_PCT)
+    const mdAmount = checkMinMaxAmount(newRow?.mdAmount, newRow?.mdType)
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType || 0,

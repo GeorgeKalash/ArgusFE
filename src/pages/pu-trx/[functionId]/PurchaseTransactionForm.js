@@ -73,7 +73,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const [cycleButtonState, setCycleButtonState] = useState({
     text: '%',
-    value: 2
+    value: MDTYPE_PCT
   })
 
   const { documentType, maxAccess } = useDocumentType({
@@ -333,6 +333,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       component: 'resourcecombobox',
       name: 'promotionTypeName',
       label: labels.promotionType,
+      hidden: true,
       props: {
         datasetId: DataSets.PROMOTION_TYPE,
         valueField: 'key',
