@@ -73,7 +73,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const [cycleButtonState, setCycleButtonState] = useState({
     text: '%',
-    value: MDTYPE_PCT
+    value: 2
   })
 
   const { documentType, maxAccess } = useDocumentType({
