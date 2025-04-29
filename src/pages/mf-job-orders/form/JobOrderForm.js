@@ -486,7 +486,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
         extension: SystemRepository.Defaults.get,
         parameters: `_filter=&_key=mf_jo_pic_source`
       })
-      setImageSource(res?.record?.value)
+      setImageSource(res?.record?.value || 3)
       if (recordId) await refetchForm(recordId)
       else await getAllLines()
     })()
