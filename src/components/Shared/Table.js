@@ -729,6 +729,9 @@ const Table = ({
   const onColumnResized = params => {
     if (params?.source === 'uiColumnResized' && tableName) {
       const columnState = params.columnApi.getColumnState()
+
+      console.log('columnState', columnState, params)
+
       saveToDB(storeName, tableName, columnState)
       invalidate()
     }
@@ -748,11 +751,11 @@ const Table = ({
     invalidate()
   }
 
-  const totalWidth = tableSettings?.reduce((acc, col) => {
-    const width = parseFloat(col.width) || 0
+  // const totalWidth = tableSettings?.reduce((acc, col) => {
+  //   const width = parseFloat(col.width) || 0
 
-    return acc + width
-  }, 0)
+  //   return acc + width
+  // }, 0)
 
   const updatedColumns = tableSettings
     ? columnDefs.map((col, index) => {
@@ -761,12 +764,15 @@ const Table = ({
 
         const lastColumn = tableSettings?.length === indexSort + 1
 
+        console.log('savedCol', savedCol)
+
         return {
           ...col,
           width: savedCol?.width ?? 'auto',
-          flex: savedCol?.width ?? totalWidth / tableSettings?.length,
+
+          // flex: savedCol?.width ?? totalWidth / tableSettings?.length,
           sortColumn: lastColumn ? columnDefs?.length + 1 : indexSort > -1 ? indexSort : index,
-          sort: savedCol.sort ?? col?.sort
+          sort: savedCol?.sort ?? col?.sort
         }
       })
     : columnDefs
