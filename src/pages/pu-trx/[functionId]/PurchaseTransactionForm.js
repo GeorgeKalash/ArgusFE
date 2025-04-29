@@ -199,14 +199,23 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         dueDate: yup.string().required(),
         currencyId: yup.string().required(),
         vendorId: yup.string().required(),
-        siteId: yup.number().test('', function (value) {
-          const { dtId } = this.parent
-          if (dtId == null) {
-            return !!value
-          }
+        siteId: yup
+          .number()
+          .transform(value => (isNaN(value) ? undefined : Number(value)))
+          .nullable()
+          .test('', function (value) {
+            const { dtId, commitItems } = this.parent
 
-          return true
-        })
+            if (dtId == null) {
+              return !!value
+            }
+
+            if (dtId && commitItems === true) {
+              return !!value
+            }
+
+            return true
+          })
       }),
       items: yup
         .array()
@@ -273,9 +282,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         record: JSON.stringify(payload)
       })
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
-      await refetchForm(puTrxRes.recordId)
-      invalidate()
+
+      if (puTrxRes?.recordId) {
+        await refetchForm(puTrxRes.recordId)
+        toast.success(actionMessage)
+        invalidate()
+      }
     }
   })
 
@@ -580,13 +592,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   ]
 
-  async function getSerials(recordId, seqNo) {
-    return await getRequest({
-      extension: PurchaseRepository.Serials.qry,
-      parameters: `_invoiceId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
-    })
-  }
-
   async function handleIconClick(id, updateRow) {
     const index = formik.values.items.findIndex(item => item.id === id)
 
@@ -713,6 +718,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxHeader = puTrxPack?.header
     const puTrxItems = puTrxPack?.items
     const puTrxTaxes = puTrxPack?.taxCodes
+    const puTrxSerials = puTrxPack?.serials
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -721,7 +727,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const modifiedList = await Promise.all(
       puTrxItems?.map(async (item, index) => {
         const taxDetailsResponse = []
-        const serials = await getSerials(recordId, item.seqNo)
 
         const updatedpuTrxTaxes =
           puTrxTaxes?.map(tax => {
@@ -741,7 +746,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           puTrx: true,
-          serials: serials.list.map((serialDetail, index) => {
+          serials: puTrxSerials?.map((serialDetail, index) => {
             return {
               ...serialDetail,
               id: index
