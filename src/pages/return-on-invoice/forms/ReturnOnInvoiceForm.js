@@ -1,6 +1,6 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-import { Grid } from '@mui/material'
+import { Box, Grid, IconButton } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -38,7 +38,6 @@ import {
 } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
 import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
@@ -48,6 +47,7 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
+import Image from 'next/image'
 
 export default function ReturnOnInvoiceForm({ labels, access, recordId, currency }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -110,6 +110,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     postMetalToFinancials: false,
     metalPrice: 0,
     KGmetalPrice: 0,
+    trackBy: 0,
     items: [
       {
         id: 1,
@@ -142,6 +143,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         taxId: null,
         taxDetails: null,
         taxDetailsButton: false,
+        serialLotButton: false,
         notes: null
       }
     ]
@@ -231,7 +233,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       }
 
       const sqRes = await postRequest({
-        extension: SaleRepository.SalesQuotations.set2,
+        extension: SaleRepository.ReturnOnInvoice.set2,
         record: JSON.stringify(itemsGridData)
       })
 
@@ -243,6 +245,26 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status == 3
+
+  const onCondition = row => {
+    console.log('check row', row)
+    if (row.trackBy == 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else if (row.trackBy == 2) {
+      return {
+        imgSrc: '/images/TableIcons/lot.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
 
   const columns = [
     {
@@ -348,6 +370,27 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       name: 'qty',
       onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
+      }
+    },
+    {
+      component: 'button',
+      name: 'serialLotButton',
+      label: labels.serialsLots,
+      props: {
+        onCondition
+      },
+      onClick: (e, row, update, updateRow) => {
+        // if (row?.trackBy === 1) {
+        //   stack({
+        //     Component: SerialsForm,
+        //     props: {
+        //       labels,
+        //     },
+        //     width: 500,
+        //     height: 700,
+        //     title: platformLabels.serials
+        //   })
+        // }
       }
     },
     {
@@ -516,7 +559,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   ]
 
   async function fillForm(retHeader, retItems, isCommitted) {
-    const shipAdd = await getAddress(retHeader?.record?.shipToAddressId)
+    const billAdd = await getAddress(retHeader?.record?.shipToAddressId)
 
     retHeader?.record?.tdType == 1 || retHeader?.record?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -542,24 +585,23 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             })
           )
         : formik.values.items
-
     formik.setValues({
-      ...retrecord,
+      ...retHeader.record,
       currentDiscount:
         retHeader?.record?.tdType == 1 || retHeader?.record?.tdType == null
           ? retHeader?.record?.tdAmount
           : retHeader?.record?.tdPct,
       amount: parseFloat(retHeader?.record?.amount).toFixed(2),
-      shipAddress: shipAdd,
+      billAddress: billAdd,
       commitItems: isCommitted,
       items: modifiedList
     })
   }
 
-  async function getRetailInvoice(sqId) {
+  async function getRetailInvoice(retId) {
     const res = await getRequest({
-      extension: SaleRepository.SalesQuotations.get,
-      parameters: `_recordId=${sqId}`
+      extension: SaleRepository.ReturnOnInvoice.get,
+      parameters: `_recordId=${retId}`
     })
 
     res.record.date = formatDateFromApi(res?.record?.date)
@@ -569,10 +611,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     return res
   }
 
-  async function getRetailInvoiceItems(sqId) {
+  async function getRetailInvoiceItems(retId) {
     return await getRequest({
-      extension: SaleRepository.QuotationItem.qry,
-      parameters: `_params=1|${sqId}&_startAt=0&_pageSize=3000&_sortBy=seqno`
+      extension: SaleRepository.ReturnItem.qry,
+      parameters: `_returnId=${retId}`
     })
   }
 
@@ -837,11 +879,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   }
 
   async function refetchForm(recordId) {
-    // const retHeader = await getRetailInvoice(recordId)
-    // const retItems = await getRetailInvoiceItems(recordId)
-    const isCommitted = await onChangeDtId(retreacord.dtId)
-
-    // await fillForm(retHeader, retItems,isCommitted)
+    const retHeader = await getRetailInvoice(recordId)
+    const retItems = await getRetailInvoiceItems(recordId)
+    const isCommitted = await onChangeDtId(retHeader.record.dtId)
+    await fillForm(retHeader, retItems, isCommitted)
   }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
