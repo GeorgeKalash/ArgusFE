@@ -109,7 +109,7 @@ const GeneratePurchaseInvoice = () => {
       },
       width: 1330,
       height: 720,
-      title: _labels.purchaseInvoice
+      title: _labels.salesInvoice
     })
   }
 
@@ -326,9 +326,12 @@ const GeneratePurchaseInvoice = () => {
                 endpointId={SaleRepository.SalesPerson.qry}
                 name='spId'
                 label={labels.salesPerson}
-                columnsInDropDown={[{ key: 'name', value: 'Name' }]}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'plantRef', value: 'Reference' },
+                  { key: 'plantName', value: 'Name' }
+                ]}
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('spId', newValue?.recordId || 0)
@@ -387,7 +390,13 @@ const GeneratePurchaseInvoice = () => {
               />
             </Grid>
             <Grid item xs={2}>
-              <CustomButton onClick={openInvDetailsForm} label={labels.edit} color='#231f20' image={'notes.png'} />
+              <CustomButton
+                onClick={openInvDetailsForm}
+                label={labels.moreDet}
+                tooltipText={labels.moreDet}
+                color='#231f20'
+                image={'notes.png'}
+              />
             </Grid>
             <Grid item xs={1}>
               <CustomButton
