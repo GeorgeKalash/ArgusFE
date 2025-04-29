@@ -289,9 +289,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         record: JSON.stringify(payload)
       })
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
-      await refetchForm(puTrxRes.recordId)
-      invalidate()
+
+      if (puTrxRes?.recordId) {
+        await refetchForm(puTrxRes.recordId)
+        toast.success(actionMessage)
+        invalidate()
+      }
     }
   })
 
@@ -613,13 +616,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     return currentAmount
   }
 
-  async function getSerials(recordId, seqNo) {
-    return await getRequest({
-      extension: PurchaseRepository.Serials.qry,
-      parameters: `_invoiceId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
-    })
-  }
-
   async function handleIconClick({ updateRow, value, data }) {
     const mdt = value?.mdType || data?.mdType
 
@@ -729,6 +725,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxHeader = puTrxPack?.header
     const puTrxItems = puTrxPack?.items
     const puTrxTaxes = puTrxPack?.taxCodes
+    const puTrxSerials = puTrxPack?.serials
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -737,7 +734,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const modifiedList = await Promise.all(
       puTrxItems?.map(async (item, index) => {
         const taxDetailsResponse = []
-        const serials = await getSerials(recordId, item.seqNo)
 
         const updatedpuTrxTaxes =
           puTrxTaxes?.map(tax => {
@@ -757,7 +753,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           vatAmount: item.vatAmount ? parseFloat(item.vatAmount).toFixed(2) : 0,
           extendedPrice: item.extendedPrice ? parseFloat(item.extendedPrice).toFixed(2) : 0,
           puTrx: true,
-          serials: serials.list.map((serialDetail, index) => {
+          serials: puTrxSerials?.map((serialDetail, index) => {
             return {
               ...serialDetail,
               id: index

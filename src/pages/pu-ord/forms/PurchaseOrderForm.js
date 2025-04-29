@@ -963,7 +963,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       mdAmount: mdAmount,
       mdType: newRow?.mdType,
       mdValue: parseFloat(newRow?.mdValue),
-      baseLaborPrice: newRow?.baseLaborPrice || 0,
+      baseLaborPrice: 0,
       totalWeightPerG: newRow?.totalWeightPerG || 0,
       tdPct: formik?.values?.header?.tdPct || 0,
       dirtyField: dirtyField
