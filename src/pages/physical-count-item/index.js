@@ -149,10 +149,10 @@ const PhysicalCountItem = () => {
 
   const handleMetalClick = async () => {
     const metalItemsList = data?.list
-      ?.filter(item => item.metalId && item.metalId.toString().trim() !== '')
+      ?.filter(item => item.metalId)
       .map(item => ({
         qty: item.countedQty,
-        metalRef: null,
+        metalRef: '',
         metalId: item.metalId,
         metalPurity: item.metalPurity,
         weight: item.weight,

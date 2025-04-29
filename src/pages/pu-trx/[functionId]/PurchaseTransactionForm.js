@@ -659,17 +659,16 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }
 
   const handleMetalClick = async () => {
-
-      const metalItemsList = itemsUpdate?.current
-        ?.filter(item => item.metalId && item.metalId.toString().trim() !== '')
-        .map(item => ({
-          qty: item.qty,
-          metalRef: null,
-          metalId: item.metalId,
-          metalPurity: item.metalPurity,
-          weight: item.weight,
-          priceType: item.priceType
-        }))
+    const metalItemsList = itemsUpdate?.current
+      ?.filter(item => item.metalId)
+      .map(item => ({
+        qty: item.qty,
+        metalRef: '',
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
 
     return metalItemsList || []
   }

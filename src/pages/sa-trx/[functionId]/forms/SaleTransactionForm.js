@@ -356,7 +356,7 @@ export default function SaleTransactionForm({
     let rowTaxDetails = null
 
     if (!formik.values.header.taxId) {
-      if (itemInfo.taxId) {
+      if (itemInfo?.taxId) {
         const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
 
         const details = taxDetailsResponse.map(item => ({
@@ -486,9 +486,15 @@ export default function SaleTransactionForm({
         if (!newRow?.barcode) return
 
         const ItemConvertPrice = await getItemConvertPrice2(newRow)
-        const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
-        const itemInfo = await getItem(ItemConvertPrice?.itemId)
-        await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
+        if (ItemConvertPrice) {
+          const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
+          const itemInfo = await getItem(ItemConvertPrice?.itemId)
+          await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
+        } else {
+          update({
+            barcode: null
+          })
+        }
       }
     },
     {
@@ -870,10 +876,10 @@ export default function SaleTransactionForm({
 
   const handleMetalClick = async () => {
     const metalItemsList = itemsUpdate?.current
-      ?.filter(item => item.metalId && item.metalId.toString().trim() !== '')
+      ?.filter(item => item.metalId)
       .map(item => ({
         qty: item.qty,
-        metalRef: null,
+        metalRef: '',
         metalId: item.metalId,
         metalPurity: item.metalPurity,
         weight: item.weight,
