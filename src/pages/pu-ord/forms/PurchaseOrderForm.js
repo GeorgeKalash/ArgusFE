@@ -259,7 +259,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
   const isPercentIcon = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
 
-    return mdType === MDTYPE_PCT ? true : false
+    return mdType === MDTYPE_PCT
   }
 
   const onCondition = row => {
