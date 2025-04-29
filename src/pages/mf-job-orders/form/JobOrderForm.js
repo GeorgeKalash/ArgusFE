@@ -473,18 +473,6 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     formik.setFieldValue('wcRef', res?.list[0]?.workCenterRef)
     formik.setFieldValue('wcName', res?.list[0]?.workCenterName)
   }
-  function getImageResourceId() {
-    if (editMode) return null
-
-    switch (imageSource) {
-      case 1:
-        return ResourceIds.Design
-      case 2:
-        return ResourceIds.Items
-      default:
-        return null
-    }
-  }
 
   useEffect(() => {
     ;(async function () {
@@ -850,21 +838,28 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
               <Grid item>
                 <ImageUpload
                   ref={imageUploadRef}
-                  resourceId={ResourceIds.JobOrder}
-                  pictureResourceId={
-                    !editMode
-                      ? imageSource === 1
-                        ? ResourceIds.Design
-                        : imageSource === 2
-                        ? ResourceIds.Items
-                        : null
+                  resourceId={
+                    imageSource == 1
+                      ? ResourceIds.Design
+                      : imageSource == 2
+                      ? ResourceIds.Item
+                      : imageSource == 3
+                      ? ResourceIds.MFJobOrders
                       : null
                   }
                   seqNo={0}
                   recordId={formik.values.recordId}
                   customWidth={300}
                   customHeight={180}
-                  rerender={imageSource == 1 ? formik.values.designId : imageSource == 2 ? formik.values.itemId : null}
+                  rerender={
+                    imageSource == 1
+                      ? formik.values.designId
+                      : imageSource == 2
+                      ? formik.values.itemId
+                      : imageSource == 3
+                      ? formik.values.recordId
+                      : null
+                  }
                   disabled={imageSource != 3}
                 />
               </Grid>
