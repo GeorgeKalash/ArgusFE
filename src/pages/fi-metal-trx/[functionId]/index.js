@@ -24,13 +24,11 @@ export default function MetalTrxFinancial() {
   const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
       extension: FinancialRepository.MetalTrx.page,
-      parameters: `_startAt=${_startAt}&_params=${
-        params || ''
-      }&_pageSize=${_pageSize}&_sortBy=reference&_functionId=${functionId}`
+      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}&_sortBy=reference&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -43,7 +41,7 @@ export default function MetalTrxFinancial() {
       case SystemFunction.MetalPaymentVoucher:
         return ResourceIds.MetalPaymentVoucher
       default:
-        return
+        return null
     }
   }
 
@@ -57,6 +55,7 @@ export default function MetalTrxFinancial() {
     access,
     invalidate
   } = useResourceQuery({
+    queryFn: fetchGridData,
     endpointId: FinancialRepository.MetalTrx.page,
     datasetId: ResourceIds.MetalReceiptVoucher,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
