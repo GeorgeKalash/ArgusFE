@@ -36,7 +36,7 @@ function CustomTabPanel(props) {
     if (!loading) {
       const timer = setTimeout(() => {
         setShowOverlay(true)
-      }, 10)
+      }, 300)
 
       return () => clearTimeout(timer)
     }
