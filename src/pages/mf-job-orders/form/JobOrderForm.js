@@ -363,6 +363,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
 
   async function fillItemInfo(values) {
     if (!values?.recordId) {
+      imageUploadRef.current.value = null
       formik.setFieldValue('itemId', null)
       formik.setFieldValue('itemName', null)
       formik.setFieldValue('sku', null)
@@ -392,6 +393,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     formik.setFieldValue('lineId', ItemProduction?.record?.lineId)
   }
   async function fillDesignInfo(values) {
+    imageUploadRef.current.value = values?.recordId || null
     formik.setFieldValue('designId', values?.recordId)
     formik.setFieldValue('designRef', values?.reference)
     formik.setFieldValue('designName', values?.name)
@@ -853,7 +855,6 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                       : null
                   }
                   seqNo={0}
-                  recordId={formik.values.recordId}
                   customWidth={300}
                   customHeight={180}
                   rerender={
@@ -865,7 +866,6 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                       ? formik.values.recordId
                       : null
                   }
-                  useDocumentId={false}
                   disabled={imageSource != 3}
                 />
               </Grid>
