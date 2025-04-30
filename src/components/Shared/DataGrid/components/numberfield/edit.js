@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from 'react'
+import { useContext, useRef } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
@@ -54,7 +54,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
       }}
       handleButtonClick={handleIconClick}
       {...props}
-      isPercentIcon={props?.isPercentIcon && props?.isPercentIcon({ value, data })}
+      iconKey={props?.iconKey && props?.iconKey({ value, data })}
     />
   )
 }

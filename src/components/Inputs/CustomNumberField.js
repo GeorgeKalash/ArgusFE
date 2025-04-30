@@ -6,6 +6,7 @@ import { IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { checkAccess } from 'src/lib/maxAccess'
+import { iconMap } from 'src/utils/iconMap'
 
 const CustomNumberField = ({
   variant = 'outlined',
@@ -90,9 +91,11 @@ const CustomNumberField = ({
     }
   }
   const displayButtons = (!_readOnly || allowClear) && !props.disabled && (value || value === 0)
+
   useEffect(() => {
     if (value) formatNumber({ target: { value } })
   }, [])
+
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.select()
@@ -140,11 +143,7 @@ const CustomNumberField = ({
         readOnly: _readOnly,
         endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (
           <InputAdornment position='end'>
-            {props.ShowDiscountIcons && (
-              <IconButton onClick={handleButtonClick}>
-                {props.isPercentIcon ? <PercentIcon /> : <PinIcon sx={{ minWidth: '40px', height: '70px' }} />}
-              </IconButton>
-            )}
+            {iconMap[props?.iconKey] && <IconButton onClick={handleButtonClick}>{iconMap[props?.iconKey]}</IconButton>}
             {displayButtons && (value || value === 0) && (
               <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
                 <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
