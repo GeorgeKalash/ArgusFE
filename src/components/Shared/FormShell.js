@@ -202,7 +202,7 @@ export default function FormShell({
                 valuesPath: action.valuesPath
               },
               width: 1000,
-              height: 620,
+              height: 650,
               title: platformLabels.GeneralLedger
             })
           }

@@ -713,7 +713,6 @@ const Table = ({
 
   const { data: tableSettings, refetch: invalidate } = useQuery({
     queryKey: [tableName],
-
     queryFn: () => getFromDB(storeName, tableName),
     enabled: !!tableName
   })
@@ -722,6 +721,7 @@ const Table = ({
     if (params.columnApi && tableName && params.source != 'gridOptionsChanged') {
       const columnState = params.columnApi.getColumnState()
       saveToDB(storeName, tableName, columnState)
+
       invalidate()
     }
   }
@@ -731,6 +731,7 @@ const Table = ({
       const columnState = params.columnApi.getColumnState()
 
       saveToDB(storeName, tableName, columnState)
+      invalidate()
     }
   }
 
@@ -766,7 +767,7 @@ const Table = ({
           width: savedCol?.width ?? 'auto',
           flex: col?.width ? undefined : savedCol?.width ?? totalWidth / tableSettings?.length,
           sortColumn: lastColumn ? columnDefs?.length + 1 : indexSort > -1 ? indexSort : index,
-          sort: savedCol.sort ?? col?.sort
+          sort: savedCol?.sort ?? col?.sort
         }
       })
     : columnDefs
@@ -804,7 +805,6 @@ const Table = ({
           }}
         >
           <AgGridReact
-            key={tableSettings}
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
             enableRangeSelection={true}

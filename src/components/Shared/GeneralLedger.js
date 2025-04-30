@@ -617,7 +617,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
         </Grow>
         <Fixed>
           <Grid container sx={{ flex: 1 }}>
-            <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={6} height={190} sx={{ display: 'flex', flex: 1 }}>
               <Table
                 gridData={{ count: 1, list: [baseGridData] }}
                 maxAccess={access}
@@ -631,7 +631,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
                 pagination={false}
               />
             </Grid>
-            <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={6} height={190} sx={{ display: 'flex', flex: 1 }}>
               <Table
                 name='generalLedger'
                 columns={[
