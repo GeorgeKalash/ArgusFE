@@ -1128,6 +1128,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                       label={labels.subtotal}
                       value={subtotal}
                       readOnly
+                      decimalScale={2}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -1137,6 +1138,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                       label={labels.vat}
                       value={vatAmount}
                       readOnly
+                      decimalScale={2}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -1146,6 +1148,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                       label={labels.total}
                       value={amount}
                       readOnly
+                      decimalScale={2}
                     />
                   </Grid>
                 </Grid>
