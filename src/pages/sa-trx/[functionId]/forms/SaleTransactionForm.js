@@ -309,6 +309,8 @@ export default function SaleTransactionForm({
     }
   })
 
+  const itemsUpdate = useRef(formik?.values?.items)
+
   function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
@@ -354,7 +356,7 @@ export default function SaleTransactionForm({
     let rowTaxDetails = null
 
     if (!formik.values.header.taxId) {
-      if (itemInfo.taxId) {
+      if (itemInfo?.taxId) {
         const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
 
         const details = taxDetailsResponse.map(item => ({
@@ -484,9 +486,15 @@ export default function SaleTransactionForm({
         if (!newRow?.barcode) return
 
         const ItemConvertPrice = await getItemConvertPrice2(newRow)
-        const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
-        const itemInfo = await getItem(ItemConvertPrice?.itemId)
-        await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
+        if (ItemConvertPrice) {
+          const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
+          const itemInfo = await getItem(ItemConvertPrice?.itemId)
+          await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
+        } else {
+          update({
+            barcode: null
+          })
+        }
       }
     },
     {
@@ -866,6 +874,21 @@ export default function SaleTransactionForm({
     })
   }
 
+  const handleMetalClick = async () => {
+    const metalItemsList = itemsUpdate?.current
+      ?.filter(item => item.metalId)
+      .map(item => ({
+        qty: item.qty,
+        metalRef: '',
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+
+    return metalItemsList || []
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -903,6 +926,12 @@ export default function SaleTransactionForm({
       onClick: 'onClickGL',
       valuesPath: formik.values.header,
       disabled: !editMode
+    },
+    {
+      key: 'Metals',
+      condition: true,
+      onClick: 'onClickMetal',
+      handleMetalClick
     },
     {
       key: 'Locked',
@@ -996,6 +1025,7 @@ export default function SaleTransactionForm({
       items: modifiedList,
       taxes: [...saTrxTaxes]
     })
+    itemsUpdate.current = modifiedList
 
     const res = await getClientInfo(saTrxHeader.clientId)
     getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
@@ -1957,6 +1987,7 @@ export default function SaleTransactionForm({
           <DataGrid
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
+              itemsUpdate.current = value
               action === 'delete' && setReCal(true)
             }}
             value={formik?.values?.items}

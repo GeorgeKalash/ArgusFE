@@ -47,7 +47,6 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
-import Image from 'next/image'
 
 export default function ReturnOnInvoiceForm({ labels, access, recordId, currency }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -65,86 +64,84 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   })
 
   const initialValues = {
-    recordId: recordId,
     dtId: null,
     reference: null,
-    date: new Date(),
-    expiryDate: null,
-    deliveryDate: null,
-    validity: null,
-    plantId: null,
-    clientId: '',
-    bpId: null,
-    bpRef: null,
-    bpName: null,
-    currencyId: parseInt(currency),
-    szId: null,
-    spId: null,
-    siteId: null,
-    description: null,
     status: 1,
-    isVattable: false,
-    exWorks: false,
-    taxId: null,
-    shipAddress: '',
+    releaseStatus: null,
+    date: new Date(),
+    oDocId: null,
+    currencyId: parseInt(currency),
+    plantId: null,
+    spId: null,
+    szId: null,
+    siteId: null,
+    invoiceId: null,
+    clientId: null,
+    clientRef: null,
+    clientName: null,
+    exRate: 1,
+    description: null,
+    amount: 0,
+    baseAmount: 0,
+    rateCalcMethod: null,
     subtotal: 0,
     miscAmount: 0,
-    amount: 0,
+    isVattable: false,
     vatAmount: 0,
-    tdAmount: 0,
-    plId: null,
-    ptId: null,
-    shipToAddressId: null,
-    maxDiscount: 0,
-    currentDiscount: 0,
-    exRate: 1,
-    rateCalcMethod: null,
     tdType: 2,
     tdPct: 0,
-    baseAmount: 0,
-    volume: 0,
-    weight: 0,
+    tdAmount: 0,
+    billAddressId: null,
+    returnReasonId: null,
+    contactId: null,
+    plId: null,
     qty: 0,
-    serializedAddress: null,
-    commitItems: false,
-    postMetalToFinancials: false,
+    pcs: 0,
+    isVerified: false,
     metalPrice: 0,
     KGmetalPrice: 0,
-    trackBy: 0,
     items: [
       {
         id: 1,
-        quotationId: recordId || 0,
+        returnId: recordId || 0,
+        seqNo: 1,
+        componentSeqNo: 1,
+        lotCategoryId: null,
+        invoiceId: null,
+        invoiceRef: null,
+        invoiceSeqNo: 1,
+        itemName: null,
+        muId: null,
+        baseQty: 0,
+        applyVat: false,
+        unitCost: 0,
+        isMetal: false,
+        metalId: 0,
+        metalPurity: 0,
+        taxId: 0,
+        balanceQty: 0,
+        pieces: 0,
+        taxCodes: [],
         itemId: null,
         sku: null,
-        itemName: null,
-        seqNo: 1,
-        siteId: null,
-        muId: null,
-        qty: 0,
-        volume: 0,
-        weight: 1,
-        msId: 0,
-        muQty: 0,
-        baseQty: 0,
-        mdType: 1,
-        basePrice: 0,
-        mdValue: 0,
-        unitPrice: 0,
-        unitCost: 0,
-        overheadId: null,
-        vatAmount: 0,
-        mdAmount: 0,
-        upo: 0,
-        extendedPrice: 0,
-        mdAmountPct: null,
         priceType: 1,
-        applyVat: false,
-        taxId: null,
-        taxDetails: null,
-        taxDetailsButton: false,
-        serialLotButton: false,
-        notes: null
+        basePrice: 0,
+        baseLaborPrice: 0,
+        volume: 0,
+        weight: 0,
+        unitPrice: 0,
+        upo: 0,
+        qty: 0,
+        mdAmount: 0,
+        mdType: 1,
+        mdValue: 0,
+        vatPct: 0,
+        vatAmount: 0,
+        extendedPrice: 0,
+        notes: null,
+        returnNowQty: 0,
+        returnedQty: 0,
+        trackBy: null
       }
     ]
   }
@@ -200,7 +197,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       }
 
       delete copy.items
-      ;['expiryDate', 'deliveryDate', 'rateCalcMethod'].forEach(field => {
+      ;['rateCalcMethod'].forEach(field => {
         if (!obj[field]) delete copy[field]
       })
 
@@ -212,7 +209,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             address
           })
         })
-        copy.shipToAddressId = addressRes.recordId
+        copy.billAddressId = addressRes.recordId
       }
 
       const updatedRows = formik.values.items
@@ -232,13 +229,13 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         items: updatedRows
       }
 
-      const sqRes = await postRequest({
+      const retRes = await postRequest({
         extension: SaleRepository.ReturnOnInvoice.set2,
         record: JSON.stringify(itemsGridData)
       })
 
       toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
-      await refetchForm(sqRes.recordId)
+      await refetchForm(retRes.recordId)
       invalidate()
     }
   })
@@ -267,6 +264,31 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   }
 
   const columns = [
+    {
+      component: 'resourcelookup',
+      label: labels.sku,
+      name: 'sku',
+      flex: 2,
+      props: {
+        endpointId: SaleRepository.ReturnOnInvoice.balance,
+        parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
+        displayField: 'sku',
+        valueField: 'sku',
+        mapping: [
+          { from: 'recordId', to: 'itemId' },
+          { from: 'sku', to: 'sku' },
+          { from: 'name', to: 'itemName' }
+        ],
+        columnsInDropDown: [
+          { key: 'sku', value: 'SKU' },
+          { key: 'name', value: 'Item Name' },
+          { key: 'flName', value: 'FL Name' }
+        ],
+        displayFieldWidth: 5,
+        filter: { salesItem: true }
+      },
+      async onChange({ row: { update, newRow } }) {}
+    },
     {
       component: 'resourcelookup',
       label: labels.sku,
@@ -559,7 +581,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   ]
 
   async function fillForm(retHeader, retItems, isCommitted) {
-    const billAdd = await getAddress(retHeader?.record?.shipToAddressId)
+    const billAdd = await getAddress(retHeader?.record?.billAddressId)
 
     retHeader?.record?.tdType == 1 || retHeader?.record?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -605,8 +627,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     })
 
     res.record.date = formatDateFromApi(res?.record?.date)
-    res.record.expiryDate = formatDateFromApi(res?.record?.expiryDate)
-    res.record.deliveryDate = formatDateFromApi(res?.record?.deliveryDate)
 
     return res
   }
@@ -962,15 +982,15 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     return res.record.exRate * 1000
   }
   useEffect(() => {
-    let shipAdd = ''
+    let billAddress = ''
     const { name, street1, street2, city, phone, phone2, email1 } = address
     if (name || street1 || street2 || city || phone || phone2 || email1) {
-      shipAdd = `${name || ''}\n${street1 || ''}\n${street2 || ''}\n${city || ''}\n${phone || ''}\n${phone2 || ''}\n${
-        email1 || ''
-      }`
+      billAddress = `${name || ''}\n${street1 || ''}\n${street2 || ''}\n${city || ''}\n${phone || ''}\n${
+        phone2 || ''
+      }\n${email1 || ''}`
     }
-    formik.setFieldValue('shipAddress', shipAdd)
-    formik.setFieldValue('serializedAddress', shipAdd)
+    formik.setFieldValue('billAddress', billAddress)
+    formik.setFieldValue('serializedAddress', billAddress)
   }, [address])
 
   useEffect(() => {
