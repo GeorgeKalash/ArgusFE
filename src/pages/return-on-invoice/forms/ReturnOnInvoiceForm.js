@@ -1,6 +1,6 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-import { Box, Grid, IconButton } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -265,29 +265,28 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
   const columns = [
     {
-      component: 'resourcelookup',
-      label: labels.sku,
-      name: 'sku',
+      component: 'resourcecombobox',
+      label: labels.invoice,
+      name: 'invoiceRef',
       flex: 2,
       props: {
         endpointId: SaleRepository.ReturnOnInvoice.balance,
-        parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
-        displayField: 'sku',
-        valueField: 'sku',
+        parameters: `_clientId=${formik.values.clientId}&_returnDate=${
+          formik?.values?.date?.toISOString().split('T')[0] + 'T00:00:00'
+        }`,
+        displayField: 'reference',
+        valueField: 'recordId',
         mapping: [
-          { from: 'recordId', to: 'itemId' },
-          { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'recordId', to: 'invoiceId' },
+          { from: 'reference', to: 'invoiceRef' },
+          { from: 'name', to: 'invoiceName' }
         ],
         columnsInDropDown: [
-          { key: 'sku', value: 'SKU' },
-          { key: 'name', value: 'Item Name' },
-          { key: 'flName', value: 'FL Name' }
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 5,
-        filter: { salesItem: true }
-      },
-      async onChange({ row: { update, newRow } }) {}
+        displayFieldWidth: 3
+      }
     },
     {
       component: 'resourcelookup',
