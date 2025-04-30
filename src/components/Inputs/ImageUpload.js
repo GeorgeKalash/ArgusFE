@@ -19,6 +19,7 @@ const ImageUpload = forwardRef(
       customWidth,
       customHeight,
       rerender,
+      useDocumentId = true,
       disabled = false
     },
     ref
@@ -34,7 +35,7 @@ const ImageUpload = forwardRef(
       validateOnChange: true,
       initialValues
     })
-    const uniqueRecord = recordId || ref?.current?.value
+    const uniqueRecord = useDocumentId ? recordId || ref?.current?.value : null
 
     useEffect(() => {
       if (rerender || uniqueRecord) {

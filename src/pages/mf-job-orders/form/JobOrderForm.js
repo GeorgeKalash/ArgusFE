@@ -108,7 +108,8 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       expectedPcs: yup.number().required(),
       workCenterId: yup.string().required(),
       itemCategoryId: yup.string().required(),
-      routingId: yup.string().required()
+      routingId: yup.string().required(),
+      itemId: yup.string().required()
     }),
     onSubmit: async values => {
       const obj = { ...values }
@@ -362,6 +363,9 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
 
   async function fillItemInfo(values) {
     if (!values?.recordId) {
+      formik.setFieldValue('itemId', null)
+      formik.setFieldValue('itemName', null)
+      formik.setFieldValue('sku', null)
       formik.setFieldValue('itemsPL', null)
       formik.setFieldValue('itemWeight', null)
       formik.setFieldValue('itemCategoryId', null)
@@ -402,7 +406,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       formik.setFieldValue('routingRef', null)
       formik.setFieldValue('routingName', null)
     } else {
-      formik.setFieldValue('routingId', values?.routingId)
+      formik.setFieldValue('routingId', values?.routingId || null)
       formik.setFieldValue('routingRef', values?.routingRef)
       formik.setFieldValue('routingName', values?.routingName)
     }
@@ -410,12 +414,12 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     formik.setFieldValue('designPL', values?.lineId)
     formik.setFieldValue('classId', values?.classId)
     formik.setFieldValue('standardId', values?.standardId)
-    formik.setFieldValue('itemCategoryId', values?.itemCategoryId)
+    formik.setFieldValue('itemCategoryId', values?.itemCategoryId || null)
     formik.setFieldValue('threeDDId', values?.threeDDId)
     formik.setFieldValue('threeDDRef', values?.threeDDRef)
     formik.setFieldValue('rubberId', values?.rubberId)
     formik.setFieldValue('rubberRef', values?.rubberRef)
-    formik.setFieldValue('itemId', values?.itemId)
+    formik.setFieldValue('itemId', values?.itemId || null)
     formik.setFieldValue('itemName', values?.itemName)
     formik.setFieldValue('sku', values?.sku)
   }
@@ -600,6 +604,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                         displayField='sku'
                         valueShow='sku'
                         secondValueShow='itemName'
+                        required
                         columnsInDropDown={[
                           { key: 'sku', value: 'SKU' },
                           { key: 'name', value: 'Name' }
@@ -860,6 +865,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                       ? formik.values.recordId
                       : null
                   }
+                  useDocumentId={false}
                   disabled={imageSource != 3}
                 />
               </Grid>
@@ -890,6 +896,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                   name='itemCategoryId'
                   label={labels.itemCategory}
                   readOnly
+                  required
                   valueField='recordId'
                   displayField={['caRef', 'name']}
                   values={formik.values}
