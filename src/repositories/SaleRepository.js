@@ -271,6 +271,19 @@ export const SaleRepository = {
     set: service + 'setPRC',
     del: service + 'delPRC'
   },
+  PriceListUpdate: {
+    page: service + 'pagePLU',
+    get: service + 'getPLU',
+    set: service + 'setPLU',
+    del: service + 'delPLU',
+    post: service + 'postPLU',
+    unpost: service + 'unpostPLU',
+    generate: service + 'generatePLU'
+  },
+  PriceListItem: {
+    qry: service + 'qryPLI',
+    snapshot: service + 'snapshotPLI'
+  },
   ReturnOnInvoice: {
     snapshot: service + 'snapshotRET',
     page: service + 'pageRET',
