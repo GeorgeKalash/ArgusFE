@@ -304,7 +304,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const isPercentIcon = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
 
-    return mdType === MDTYPE_PCT ? true : false
+    return mdType === MDTYPE_PCT
   }
 
   async function getPromotionTypes() {

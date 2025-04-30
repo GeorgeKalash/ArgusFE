@@ -375,6 +375,11 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update(data)
+        getFilteredMU(newRow?.itemId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        update({
+          baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
+        })
       }
     },
     {
