@@ -108,8 +108,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       expectedPcs: yup.number().required(),
       workCenterId: yup.string().required(),
       itemCategoryId: yup.string().required(),
-      routingId: yup.string().required(),
-      itemId: yup.string().required()
+      routingId: yup.string().required()
     }),
     onSubmit: async values => {
       const obj = { ...values }
@@ -387,10 +386,10 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     formik.setFieldValue('itemId', values?.recordId)
     formik.setFieldValue('itemName', values?.name)
     formik.setFieldValue('sku', values?.sku)
-    formik.setFieldValue('itemCategoryId', values?.categoryId)
     formik.setFieldValue('itemWeight', ItemPhysProp?.record?.weight)
     formik.setFieldValue('itemsPL', ItemProduction?.record?.lineId)
     formik.setFieldValue('lineId', ItemProduction?.record?.lineId)
+    formik.setFieldValue('itemCategoryId', values?.categoryId)
   }
   async function fillDesignInfo(values) {
     imageUploadRef.current.value = values?.recordId || null
@@ -421,7 +420,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     formik.setFieldValue('threeDDRef', values?.threeDDRef)
     formik.setFieldValue('rubberId', values?.rubberId)
     formik.setFieldValue('rubberRef', values?.rubberRef)
-    formik.setFieldValue('itemId', values?.itemId || null)
+    formik.setFieldValue('itemId', values?.itemId)
     formik.setFieldValue('itemName', values?.itemName)
     formik.setFieldValue('sku', values?.sku)
   }
@@ -475,9 +474,9 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       parameters: `_routingId=${routingId}`
     })
 
-    formik.setFieldValue('workCenterId', res?.list[0]?.workCenterId)
     formik.setFieldValue('wcRef', res?.list[0]?.workCenterRef)
     formik.setFieldValue('wcName', res?.list[0]?.workCenterName)
+    formik.setFieldValue('workCenterId', res?.list[0]?.workCenterId)
   }
 
   useEffect(() => {
@@ -606,7 +605,6 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                         displayField='sku'
                         valueShow='sku'
                         secondValueShow='itemName'
-                        required
                         columnsInDropDown={[
                           { key: 'sku', value: 'SKU' },
                           { key: 'name', value: 'Name' }
@@ -768,9 +766,9 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                         ]}
                         onChange={async (event, newValue) => {
                           await updateWC(newValue?.recordId)
-                          formik.setFieldValue('routingId', newValue?.recordId || null)
                           formik.setFieldValue('routingRef', newValue?.reference || null)
                           formik.setFieldValue('routingName', newValue?.name || null)
+                          formik.setFieldValue('routingId', newValue?.recordId || null)
                         }}
                       />
                     </Grid>

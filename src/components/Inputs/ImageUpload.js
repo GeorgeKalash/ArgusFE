@@ -39,7 +39,7 @@ const ImageUpload = forwardRef(
     useEffect(() => {
       if (rerender || uniqueRecord) {
         getData()
-      }
+      } else handleInputImageReset()
     }, [uniqueRecord, rerender])
 
     async function getData() {
