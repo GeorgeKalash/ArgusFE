@@ -96,7 +96,8 @@ export function useForm({ documentType = {}, maxAccess, validate = () => {}, ...
                 !maxAccessErrors[gridName][fieldName] &&
                 formik.values[gridName] &&
                 !formik.values[gridName][fieldName] &&
-                formik.values[gridName][fieldName] != 0
+                formik.values[gridName][fieldName] !== 0 &&
+                formik.values[gridName][fieldName] !== '0'
               ) {
                 maxAccessErrors[gridName][fieldName] = `${fieldName} is required.`
               }
