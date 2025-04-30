@@ -771,10 +771,12 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       const totWeight = parseFloat(row?.weight) || 0
 
       return {
-        subtotal: reCal ? acc?.subtotal + subTot : formik.values?.subtotal || 0,
-        vatAmount: reCal ? acc?.vatAmount + vatAmountTot : formik.values?.vatAmount || 0,
+        subtotal: reCal ? parseFloat((acc?.subtotal + subTot).toFixed(2)) : formik.values?.subtotal || 0,
+        vatAmount: reCal ? parseFloat((acc?.vatAmount + vatAmountTot).toFixed(2)) : formik.values?.vatAmount || 0,
         weight: reCal ? acc?.weight + totWeight : formik.values?.weight || 0,
-        amount: reCal ? acc?.subtotal + subTot + acc?.vatAmount + vatAmountTot : formik.values?.amount || 0
+        amount: reCal
+          ? parseFloat((acc?.subtotal + subTot + acc?.vatAmount + vatAmountTot).toFixed(2))
+          : formik.values?.amount || 0
       }
     },
     { subtotal: 0, vatAmount: 0, weight: 0, amount: 0 }
@@ -1129,7 +1131,6 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                       label={labels.subtotal}
                       value={subtotal}
                       readOnly
-                      decimalScale={2}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -1139,7 +1140,6 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                       label={labels.vat}
                       value={vatAmount}
                       readOnly
-                      decimalScale={2}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -1149,7 +1149,6 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                       label={labels.total}
                       value={amount}
                       readOnly
-                      decimalScale={2}
                     />
                   </Grid>
                 </Grid>

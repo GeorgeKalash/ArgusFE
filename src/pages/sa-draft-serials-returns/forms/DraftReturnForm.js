@@ -800,10 +800,12 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       const weight = parseFloat(row?.weight) || 0
 
       return {
-        subTotal: reCal ? acc?.subTotal + subTot : formik.values?.subTotal || 0,
-        vatAmount: reCal ? acc?.vatAmount + vatAmountTot : formik.values?.vatAmount || 0,
+        subTotal: reCal ? parseFloat((acc?.subTotal + subTot).toFixed(2)) : formik.values?.subTotal || 0,
+        vatAmount: reCal ? parseFloat((acc?.vatAmount + vatAmountTot).toFixed(2)) : formik.values?.vatAmount || 0,
         weight: reCal ? acc?.weight + weight : formik.values?.weight || 0,
-        amount: reCal ? acc?.subTotal + subTot + acc?.vatAmount + vatAmountTot : formik.values?.amount || 0
+        amount: reCal
+          ? parseFloat((acc?.subTotal + subTot + acc?.vatAmount + vatAmountTot).toFixed(2))
+          : formik.values?.amount || 0
       }
     },
     { subTotal: 0, vatAmount: 0, weight: 0, amount: 0 }
