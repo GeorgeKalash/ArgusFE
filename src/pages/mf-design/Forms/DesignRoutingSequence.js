@@ -16,7 +16,6 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const editMode = !!recordId
 
   const { formik } = useForm({
     validateOnChange: true,
@@ -63,6 +62,8 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
     }
   })
 
+  const editMode = !!recordId
+
   const getData = recordId => {
     getRequest({
       extension: ManufacturingRepository.DesignRawMaterial.qry,
@@ -73,7 +74,7 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
           ...item,
           id: index + 1
         }))
-        formik.setValues({ ...formik.values, items: items })
+        formik.setValues({ ...formik.values, recordId, items: items })
       }
     })
   }
@@ -140,7 +141,7 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
       props: {
         decimalScale: 3,
         maxLength: 12
-      },
+      }
     },
     {
       component: 'numberfield',
@@ -149,7 +150,7 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
       props: {
         decimalScale: 0,
         maxLength: 10
-      },
+      }
     }
   ]
 
@@ -158,8 +159,6 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
       form={formik}
       resourceId={ResourceIds.Designs}
       maxAccess={maxAccess}
-      infoVisible={false}
-      isSavedClear={false}
       isCleared={false}
       editMode={editMode}
     >

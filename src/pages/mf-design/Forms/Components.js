@@ -16,7 +16,6 @@ const Components = ({ store, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const editMode = !!recordId
 
   const { formik } = useForm({
     validateOnChange: true,
@@ -39,7 +38,7 @@ const Components = ({ store, maxAccess, labels }) => {
         yup.object({
           itemId: yup.number().required(),
           qty: yup.number().required(),
-          pcs: yup.number().required().max(2147483647),
+          pcs: yup.number().required().max(2147483647)
         })
       )
     }),
@@ -60,9 +59,10 @@ const Components = ({ store, maxAccess, labels }) => {
       })
 
       getData(recordId)
-
     }
   })
+
+  const editMode = !!recordId
 
   const getData = recordId => {
     getRequest({
@@ -75,7 +75,7 @@ const Components = ({ store, maxAccess, labels }) => {
           id: index + 1,
           seqNo: index + 1
         }))
-        formik.setValues({ ...formik.values, items: items })
+        formik.setValues({ ...formik.values, recordId, items: items })
       }
     })
   }
@@ -140,8 +140,6 @@ const Components = ({ store, maxAccess, labels }) => {
       form={formik}
       resourceId={ResourceIds.Designs}
       maxAccess={maxAccess}
-      infoVisible={false}
-      isSavedClear={false}
       isCleared={false}
       editMode={editMode}
     >
