@@ -199,14 +199,23 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         dueDate: yup.string().required(),
         currencyId: yup.string().required(),
         vendorId: yup.string().required(),
-        siteId: yup.number().test('', function (value) {
-          const { dtId } = this.parent
-          if (dtId == null) {
-            return !!value
-          }
+        siteId: yup
+          .number()
+          .transform(value => (isNaN(value) ? undefined : Number(value)))
+          .nullable()
+          .test('', function (value) {
+            const { dtId, commitItems } = this.parent
 
-          return true
-        })
+            if (dtId == null) {
+              return !!value
+            }
+
+            if (dtId && commitItems === true) {
+              return !!value
+            }
+
+            return true
+          })
       }),
       items: yup
         .array()
@@ -273,11 +282,16 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         record: JSON.stringify(payload)
       })
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
-      await refetchForm(puTrxRes.recordId)
-      invalidate()
+
+      if (puTrxRes?.recordId) {
+        await refetchForm(puTrxRes.recordId)
+        toast.success(actionMessage)
+        invalidate()
+      }
     }
   })
+
+  const itemsUpdate = useRef(formik?.values?.items)
 
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
@@ -580,13 +594,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   ]
 
-  async function getSerials(recordId, seqNo) {
-    return await getRequest({
-      extension: PurchaseRepository.Serials.qry,
-      parameters: `_invoiceId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
-    })
-  }
-
   async function handleIconClick(id, updateRow) {
     const index = formik.values.items.findIndex(item => item.id === id)
 
@@ -656,6 +663,21 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     invalidate()
   }
 
+  const handleMetalClick = async () => {
+    const metalItemsList = itemsUpdate?.current
+      ?.filter(item => item.metalId)
+      .map(item => ({
+        qty: item.qty,
+        metalRef: '',
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+
+    return metalItemsList || []
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -668,6 +690,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       condition: true,
       onClick: onWorkFlowClick,
       disabled: !editMode
+    },
+    {
+      key: 'Metals',
+      condition: true,
+      onClick: 'onClickMetal',
+      handleMetalClick
     },
     {
       key: 'Locked',
@@ -713,6 +741,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxHeader = puTrxPack?.header
     const puTrxItems = puTrxPack?.items
     const puTrxTaxes = puTrxPack?.taxCodes
+    const puTrxSerials = puTrxPack?.serials
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -721,7 +750,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const modifiedList = await Promise.all(
       puTrxItems?.map(async (item, index) => {
         const taxDetailsResponse = []
-        const serials = await getSerials(recordId, item.seqNo)
 
         const updatedpuTrxTaxes =
           puTrxTaxes?.map(tax => {
@@ -741,7 +769,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           puTrx: true,
-          serials: serials.list.map((serialDetail, index) => {
+          serials: puTrxSerials?.map((serialDetail, index) => {
             return {
               ...serialDetail,
               id: index
@@ -767,6 +795,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       items: modifiedList,
       taxCodes: [...puTrxTaxes]
     })
+
+    itemsUpdate.current = modifiedList
   }
 
   async function getPurchaseTransactionPack(transactionId) {
@@ -1167,9 +1197,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       setmetalPriceVisibility(false)
     }
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
-    formik.setFieldValue('header.plantId', dtd?.record?.plantId ?? userDefaultsDataState?.plantId)
-    formik.setFieldValue('header.spId', dtd?.record?.spId ?? userDefaultsDataState?.spId)
-    formik.setFieldValue('header.siteId', dtd?.record?.siteId ?? userDefaultsDataState?.siteId ?? null)
+    formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
+    formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
+    formik.setFieldValue(
+      'header.siteId',
+      dtd?.record.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
+    )
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
   }
@@ -1241,6 +1274,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     defaultsDataState && setDefaultFields()
   }, [defaultsDataState])
 
+  useEffect(() => {
+    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+  }, [formik.values?.header.dtId])
+
   async function getDefaultsData() {
     const myObject = {}
 
@@ -1280,9 +1317,15 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const setDefaultFields = () => {
     formik.setFieldValue('header.currencyId', defaultsDataState?.currencyId || null)
-    formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
-    formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
-    formik.setFieldValue('header.siteId', userDefaultsDataState?.siteId || null)
+    if (!formik.values.header.plantId) formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
+    if (!formik.values.header.spId) formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
+    if (!formik.values.header.siteId)
+      formik.setFieldValue(
+        'header.siteId',
+        !formik.values.header.dtId || (formik.values.header.dtId && formik.values.header.commitItems)
+          ? userDefaultsDataState?.siteId || null
+          : null
+      )
   }
 
   const getResourceId = functionId => {
@@ -1374,10 +1417,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
                   if (newValue) {
                     formik.setFieldValue('header.dtId', recordId)
-                    onChangeDtId(recordId)
                   } else {
                     formik.setFieldValue('header.dtId', null)
-                    formik.setFieldValue('header.siteId', null)
                     formik.setFieldValue('header.metalPrice', 0)
                     formik.setFieldValue('header.KGmetalPrice', 0)
                     setmetalPriceVisibility(false)
@@ -1491,11 +1532,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 displayFieldWidth={2}
-                readOnly={
-                  formik?.values?.header.dtId ||
-                  (formik?.values?.header.dtId && formik?.values?.header.commitItems == false) ||
-                  isPosted
-                }
+                readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
                 required={
                   !formik?.values?.header.dtId ||
                   (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
@@ -1608,6 +1645,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           <DataGrid
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
+              itemsUpdate.current = value
+
               action === 'delete' && setReCal(true)
             }}
             onSelectionChange={(row, update, field) => {

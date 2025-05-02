@@ -63,6 +63,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       jobId: null,
       productionClassId: null,
       density: null,
+      nbOfLayers: null,
       status: 1,
       wip: 1
     },
@@ -72,9 +73,10 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
     validationSchema: yup.object({
       date: yup.date().required(),
       fileReference: yup.string().required(),
-      threeDDId: yup.string().required(),
-      machineId: yup.string().required(),
-      setPcs: yup.number().nullable()
+      threeDDId: yup.number().required(),
+      machineId: yup.number().required(),
+      setPcs: yup.number().nullable(),
+      nbOfLayers: yup.number().required()
     }),
     onSubmit: async values => {
       const data = { ...values, date: formatDateToApi(values?.date) }
@@ -187,7 +189,6 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
     invalidate()
     getData(res.recordId)
   }
-
 
   useEffect(() => {
     if (recordId) {
@@ -351,6 +352,21 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                       formik.setFieldValue('productionClassId', newValue?.recordId || null)
                     }}
                     error={formik.touched.productionClassId && Boolean(formik.errors.productionClassId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='nbOfLayers'
+                    label={labels.nbOfLayers}
+                    value={formik.values.nbOfLayers}
+                    maxAccess={maxAccess}
+                    maxLength={4}
+                    decimalScale={0}
+                    required
+                    readOnly={isPosted || isReleased}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('nbOfLayers', '')}
+                    error={formik.touched.nbOfLayers && Boolean(formik.errors.nbOfLayers)}
                   />
                 </Grid>
                 <Grid item xs={12}>

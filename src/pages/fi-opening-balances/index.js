@@ -70,7 +70,8 @@ const FiOpeningBalance = () => {
     {
       field: 'amount',
       headerName: _labels.amount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'plantRef',
@@ -85,7 +86,8 @@ const FiOpeningBalance = () => {
     {
       field: 'baseAmount',
       headerName: _labels.baseAmount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     }
   ]
 

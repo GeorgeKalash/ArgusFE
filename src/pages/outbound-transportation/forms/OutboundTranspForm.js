@@ -134,18 +134,21 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         return
       }
 
-      filteredOrders = filteredOrders.map((order, index) => ({
-        ...order,
-        tripId: headerResponse.recordId || 0,
-        id: index + 1
-      }))
+      filteredOrders =
+        filteredOrders?.some(order=> order.soId)
+          ? filteredOrders.map((order, index) => ({
+              ...order,
+              tripId: headerResponse.recordId || 0,
+              id: index + 1
+            }))
+          : []
 
       const data = {
         tripId: headerResponse.recordId || 0,
         tripOrders: filteredOrders
       }
 
-      const response = await postRequest({
+      await postRequest({
         extension: DeliveryRepository.TripOrderPack2.set2,
         record: JSON.stringify(data)
       })

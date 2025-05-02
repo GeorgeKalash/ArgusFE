@@ -5,7 +5,6 @@ import FormShell from 'src/components/Shared/FormShell'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
@@ -23,15 +22,15 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function SketchForm({ recordId }) {
+export default function SketchForm({ recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
   const systemFunction = SystemFunction.Sketch
 
-  const { labels, access, invalidate } = useResourceQuery({
-    endpointId: ProductModelingRepository.Sketch.page,
+  const { labels, access } = useResourceParams({
     datasetId: ResourceIds.Sketch
   })
 
@@ -40,6 +39,10 @@ export default function SketchForm({ recordId }) {
     access,
     enabled: !recordId
   })
+
+  function refresh() {
+    invalidate && invalidate()
+  }
 
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId },
@@ -84,7 +87,8 @@ export default function SketchForm({ recordId }) {
       }
 
       await getData(res.recordId)
-      invalidate()
+
+      refresh()
 
       toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
     }
@@ -115,7 +119,7 @@ export default function SketchForm({ recordId }) {
 
     await getData(formik.values.recordId)
     toast.success(platformLabels.Closed)
-    invalidate()
+    refresh()
   }
 
   const onReopen = async () => {
@@ -128,7 +132,7 @@ export default function SketchForm({ recordId }) {
 
     await getData(formik.values.recordId)
     toast.success(platformLabels.Reopened)
-    invalidate()
+    refresh()
   }
 
   const onPost = async () => {
@@ -141,7 +145,7 @@ export default function SketchForm({ recordId }) {
 
     await getData(formik.values.recordId)
     toast.success(platformLabels.Posted)
-    invalidate()
+    refresh()
   }
 
   const actions = [

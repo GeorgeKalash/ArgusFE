@@ -267,5 +267,24 @@ export const SaleRepository = {
   },
   VerifyIntegrity: {
     check: service + 'checkTRX'
-  }
+  },
+  ClientPriceList: {
+    page: service + 'pagePRC',
+    get: service + 'getPRC',
+    set: service + 'setPRC',
+    del: service + 'delPRC',
+  },
+  PriceListUpdate: {
+    page: service + 'pagePLU',
+    get: service + 'getPLU',
+    set: service + 'setPLU',
+    del: service + 'delPLU',
+    post: service + 'postPLU',
+    unpost: service + 'unpostPLU',
+    generate: service + 'generatePLU',
+  },
+  PriceListItem: {
+    qry: service + 'qryPLI',
+    snapshot: service + 'snapshotPLI',
+  },
 }

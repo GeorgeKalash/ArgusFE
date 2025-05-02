@@ -184,7 +184,7 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
                 onChange={e => formik.setFieldValue('amount', e.target.value)}
                 onClear={() => formik.setFieldValue('amount', '')}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
-                maxLength={10}
+                maxLength={15}
               />
             </Grid>
             <Grid item xs={12}>
@@ -198,7 +198,7 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
                 onChange={e => formik.setFieldValue('baseAmount', e.target.value)}
                 onClear={() => formik.setFieldValue('baseAmount', '')}
                 error={formik.touched.baseAmount && Boolean(formik.errors.baseAmount)}
-                maxLength={10}
+                maxLength={15}
               />
             </Grid>
           </Grid>

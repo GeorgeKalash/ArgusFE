@@ -30,6 +30,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import SerialsLots from './SerialsLots'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import Samples from './Samples'
+import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 
 export default function JobOrderForm({ labels, maxAccess: access, setStore, store, setRefetchRouting }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -85,6 +86,8 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     itemCategoryId: null,
     classId: null,
     standardId: null,
+    rubberId: null,
+    threeDDId: null,
     status: 1,
     itemFromDesign: false
   }
@@ -347,6 +350,16 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       isCancelled: res?.record.status == -1
     }))
   }
+
+  async function getRouting(recordId) {
+    if (!recordId) return
+
+    return await getRequest({
+      extension: ManufacturingRepository.Routing.get,
+      parameters: `_recordId=${recordId}`
+    })
+  }
+
   async function fillItemInfo(values) {
     if (!values?.recordId) {
       currentItem.current = { itemId: null, sku: null, itemName: null }
@@ -380,9 +393,6 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     formik.setFieldValue('itemWeight', ItemPhysProp?.record?.weight)
     formik.setFieldValue('itemsPL', ItemProduction?.record?.lineId)
     formik.setFieldValue('lineId', ItemProduction?.record?.lineId)
-    formik.setFieldValue('designId', ItemProduction?.record?.designId || formik.values?.designId)
-    formik.setFieldValue('designRef', ItemProduction?.record?.designRef || formik.values?.designRef)
-    formik.setFieldValue('designName', ItemProduction?.record?.designName || formik.values?.designName)
   }
   async function fillDesignInfo(values) {
     if (values?.itemId) {
@@ -397,12 +407,25 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       'expectedQty',
       !values?.stdWeight || !formik.values.expectedPcs ? 0 : formik.values.expectedPcs * values?.stdWeight
     )
-    formik.setFieldValue('routingId', values?.routingId)
+    const routing = await getRouting(values?.routingId)
+    if (routing?.record?.isInactive) {
+      formik.setFieldValue('routingId', null)
+      formik.setFieldValue('routingRef', null)
+      formik.setFieldValue('routingName', null)
+    } else {
+      formik.setFieldValue('routingId', values?.routingId)
+      formik.setFieldValue('routingRef', values?.routingRef)
+      formik.setFieldValue('routingName', values?.routingName)
+    }
     formik.setFieldValue('lineId', values?.lineId)
     formik.setFieldValue('designPL', values?.lineId)
     formik.setFieldValue('classId', values?.classId)
     formik.setFieldValue('standardId', values?.standardId)
     formik.setFieldValue('itemCategoryId', values?.itemCategoryId)
+    formik.setFieldValue('threeDDId', values?.threeDDId)
+    formik.setFieldValue('threeDDRef', values?.threeDDRef)
+    formik.setFieldValue('rubberId', values?.rubberId)
+    formik.setFieldValue('rubberRef', values?.rubberRef)
   }
   async function fillBillingInfo(values) {
     if (!values?.recordId) return
@@ -454,9 +477,9 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       parameters: `_routingId=${routingId}`
     })
 
-    formik.setFieldValue('workCenterId', res.list[0].workCenterId)
-    formik.setFieldValue('wcRef', res.list[0].workCenterRef)
-    formik.setFieldValue('wcName', res.list[0].workCenterName)
+    formik.setFieldValue('workCenterId', res?.list[0]?.workCenterId)
+    formik.setFieldValue('wcRef', res?.list[0]?.workCenterRef)
+    formik.setFieldValue('wcName', res?.list[0]?.workCenterName)
   }
 
   useEffect(() => {
@@ -719,31 +742,36 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                         value={formik.values.lineId}
                         onChange={(event, newValue) => {
                           formik.setFieldValue('lineId', newValue?.recordId)
-                          formik.setFieldValue('routingId', newValue?.routingId)
                         }}
                         error={formik.touched.lineId && Boolean(formik.errors.lineId)}
                       />
                     </Grid>
                     <Grid item>
-                      <ResourceComboBox
-                        endpointId={ManufacturingRepository.Routing.qry}
-                        parameters={`_params=`}
+                      <ResourceLookup
+                        endpointId={ManufacturingRepository.Routing.snapshot2}
+                        valueField='reference'
+                        displayField='name'
                         name='routingId'
                         label={labels.routing}
-                        valueField='recordId'
-                        displayField={['reference', 'name']}
+                        form={formik}
+                        required
+                        minChars={2}
+                        firstValue={formik.values.routingRef}
+                        secondValue={formik.values.routingName}
+                        errorCheck={'routingId'}
+                        maxAccess={maxAccess}
+                        displayFieldWidth={2}
+                        readOnly={isCancelled || isReleased || isPosted}
                         columnsInDropDown={[
                           { key: 'reference', value: 'Reference' },
                           { key: 'name', value: 'Name' }
                         ]}
-                        readOnly={isCancelled || isReleased || isPosted}
-                        required
-                        values={formik.values}
                         onChange={async (event, newValue) => {
-                          formik.setFieldValue('routingId', newValue?.recordId)
                           await updateWC(newValue?.recordId)
+                          formik.setFieldValue('routingId', newValue?.recordId || null)
+                          formik.setFieldValue('routingRef', newValue?.reference || null)
+                          formik.setFieldValue('routingName', newValue?.name || null)
                         }}
-                        error={formik.touched.routingId && Boolean(formik.errors.routingId)}
                       />
                     </Grid>
                     <Grid item>
@@ -793,6 +821,22 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                         error={formik.touched.classId && Boolean(formik.errors.classId)}
                       />
                     </Grid>
+                    <Grid item xs={12}>
+                      <ResourceComboBox
+                        endpointId={ManufacturingRepository.ProductionStandard.qry}
+                        values={formik.values}
+                        name='standardId'
+                        label={labels.productionStandard}
+                        valueField='recordId'
+                        displayField='reference'
+                        readOnly={isCancelled || isReleased || isPosted}
+                        maxAccess={maxAccess}
+                        onChange={(event, newValue) => {
+                          formik.setFieldValue('standardId', newValue?.recordId)
+                        }}
+                        error={formik.touched.standardId && Boolean(formik.errors.standardId)}
+                      />
+                    </Grid>
                   </Grid>
                 </Grid>
               </Grid>
@@ -809,22 +853,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                   rerender={formik.values.designId}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={ManufacturingRepository.ProductionStandard.qry}
-                  values={formik.values}
-                  name='standardId'
-                  label={labels.productionStandard}
-                  valueField='recordId'
-                  displayField='reference'
-                  readOnly={isCancelled || isReleased || isPosted}
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('standardId', newValue?.recordId)
-                  }}
-                  error={formik.touched.standardId && Boolean(formik.errors.standardId)}
-                />
-              </Grid>
+
               <Grid item xs={12}>
                 <ResourceComboBox
                   endpointId={ManufacturingRepository.JobCategory.qry}
@@ -856,6 +885,45 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                   values={formik.values}
                   error={formik.touched.itemCategoryId && Boolean(formik.errors.itemCategoryId)}
                   maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={ProductModelingRepository.ThreeDDrawing.snapshot2}
+                  valueField='reference'
+                  displayField='reference'
+                  secondDisplayField={false}
+                  name='threeDDId'
+                  label={labels.threeDD}
+                  form={formik}
+                  valueShow='threeDDRef'
+                  maxAccess={maxAccess}
+                  readOnly={isCancelled || isReleased || isPosted}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('threeDDId', newValue?.recordId || null)
+                    formik.setFieldValue('threeDDRef', newValue?.reference || '')
+                    formik.setFieldValue('fileReference', newValue?.fileReference || '')
+                  }}
+                  errorCheck={'threeDDId'}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={ProductModelingRepository.Rubber.snapshot}
+                  valueField='reference'
+                  displayField='reference'
+                  secondDisplayField={false}
+                  name='rubberId'
+                  label={labels.rubber}
+                  form={formik}
+                  valueShow='rubberRef'
+                  maxAccess={maxAccess}
+                  readOnly={isCancelled || isReleased || isPosted}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('rubberId', newValue?.recordId || null)
+                    formik.setFieldValue('rubberRef', newValue?.reference || '')
+                  }}
+                  errorCheck={'rubberId'}
                 />
               </Grid>
               <Grid item xs={12}>
