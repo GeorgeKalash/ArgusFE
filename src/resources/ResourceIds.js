@@ -364,6 +364,7 @@ export const ResourceIds = {
   DraftSerialReturns: 51314,
   MetalSettings: 47100,
   WaxDocTypeDefaults: 42601,
+  WorksheetDTD: 42602,
   JobWaxInquiry: 47313,
   PostDraftSerials: 51315,
   UndeliveredItems: 52304,
