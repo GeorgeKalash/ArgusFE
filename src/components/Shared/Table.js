@@ -634,6 +634,7 @@ const Table = ({
       : []),
     ...filteredColumns.map(column => ({
       ...column,
+      sort: column.sort || '',
       cellRenderer: column.cellRenderer ? column.cellRenderer : FieldWrapper
     }))
   ]
