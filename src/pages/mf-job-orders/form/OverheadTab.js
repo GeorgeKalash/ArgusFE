@@ -201,7 +201,7 @@ export default function OverheadTab({ labels, maxAccess, store }) {
               }
             })
           )
-        : [{ id: 1 }]
+        : [{ id: 1, jobId: recordId, overheadId: '', seqNo: '', amount: 0, units: 0, unitCost: 0 }]
 
     formik.setFieldValue('items', updateItemsList)
   }
