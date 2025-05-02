@@ -3,7 +3,7 @@ import PinIcon from '@mui/icons-material/Pin'
 
 export const iconMap = {
   '%': <PercentIcon />,
-  123: <PinIcon sx={{ minWidth: '40px', height: '70px' }} />
+  123: <PinIcon sx={{ width: 'auto', height: '35px' }} />
 }
 
 export const iconMapView = {

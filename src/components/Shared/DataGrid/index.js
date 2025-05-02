@@ -94,6 +94,7 @@ export function DataGrid({
     const addRow = async ({ changes }) => {
       if (params.rowIndex === value.length - 1 && !changes) {
         addNewRow(params)
+        if (typeof onValidationRequired === 'function') onValidationRequired()
 
         return
       }
@@ -339,6 +340,22 @@ export function DataGrid({
       if (allowAddNewLine && !error) {
         event.stopPropagation()
         addNewRow()
+        setTimeout(() => {
+          if (typeof onValidationRequired === 'function') onValidationRequired()
+        }, 10)
+      }
+    }
+
+    const currentCell = api.getFocusedCell()
+    if (currentCell) {
+      const focusElement = document.querySelector('[tabindex="1"]')
+
+      if (event.target.tabIndex === 0 && document.querySelector('.ag-root') && focusElement && !event.shiftKey) {
+        event.preventDefault()
+
+        focusElement.focus()
+
+        return
       }
     }
 
@@ -705,13 +722,15 @@ export function DataGrid({
   const onCellEditingStopped = params => {
     const cellId = `${params.node.id}-${params.column.colId}`
     const { data, colDef } = params
-    let value = params?.data[params.column.colId]
+    let newValue = params?.data[params.column.colId]
+    let currentValue = value?.[params.rowIndex]?.[params.column.colId]
+    if (newValue == currentValue) return
 
-    if (value?.toString()?.endsWith('.') && colDef.component === 'numberfield') {
-      value = value.slice(0, -1).replace(/,/g, '')
+    if (newValue?.toString()?.endsWith('.') && colDef.component === 'numberfield') {
+      newValue = newValue.slice(0, -1).replace(/,/g, '')
 
       const changes = {
-        [colDef?.field]: value || undefined
+        [colDef?.field]: newValue || undefined
       }
       setData(changes, params)
       commit(changes)
@@ -720,7 +739,7 @@ export function DataGrid({
 
     if (lastCellStopped.current == cellId) return
     lastCellStopped.current = cellId
-    if (colDef.updateOn === 'blur' && data[colDef?.field] !== value?.[params?.columnIndex]?.[colDef?.field]) {
+    if (colDef.updateOn === 'blur' && data[colDef?.field] !== newValue?.[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
         stackDuplicate(params)
 

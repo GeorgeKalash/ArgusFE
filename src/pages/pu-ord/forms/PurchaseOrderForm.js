@@ -468,7 +468,6 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         ShowDiscountIcons: true,
         iconsClicked: handleIconClick,
         type: 'numeric',
-        concatenateWith: '%',
         iconKey
       },
       async onChange({ row: { update, newRow } }) {
@@ -968,6 +967,28 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       tdPct: formik?.values?.header?.tdPct || 0,
       dirtyField: dirtyField
     })
+
+    console.log(
+      {
+        priceType: newRow?.priceType,
+        basePrice: parseFloat(newRow?.basePrice || 0),
+        volume: parseFloat(newRow?.volume) || 0,
+        weight: parseFloat(newRow?.weight),
+        unitPrice: parseFloat(newRow?.unitPrice || 0),
+        upo: 0,
+        qty: parseFloat(newRow?.qty),
+        extendedPrice: parseFloat(newRow?.extendedPrice),
+        mdAmount: mdAmount,
+        mdType: newRow?.mdType,
+        mdValue: parseFloat(newRow?.mdValue),
+        baseLaborPrice: 0,
+        totalWeightPerG: newRow?.totalWeightPerG || 0,
+        tdPct: formik?.values?.header?.tdPct || 0,
+        dirtyField: dirtyField
+      },
+      'itemPriceRow',
+      itemPriceRow
+    )
 
     if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
 

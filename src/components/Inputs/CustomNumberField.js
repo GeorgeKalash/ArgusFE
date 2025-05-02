@@ -36,6 +36,7 @@ const CustomNumberField = ({
   align = 'left',
   handleButtonClick,
   cycleButtonLabel = '',
+  iconMapIndex = 0,
   ...props
 }) => {
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
@@ -143,7 +144,11 @@ const CustomNumberField = ({
         readOnly: _readOnly,
         endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (
           <InputAdornment position='end'>
-            {iconMap[props?.iconKey] && <IconButton onClick={handleButtonClick}>{iconMap[props?.iconKey]}</IconButton>}
+            {iconMap[props?.iconKey] && (
+              <IconButton tabIndex={iconMapIndex} onClick={handleButtonClick}>
+                {iconMap[props?.iconKey]}
+              </IconButton>
+            )}
             {displayButtons && (value || value === 0) && (
               <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
                 <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
