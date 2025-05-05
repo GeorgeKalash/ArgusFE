@@ -224,6 +224,7 @@ export function DataGrid({
             colKey: allColumns[0].name
           })
         }
+        if (typeof onValidationRequired === 'function') onValidationRequired()
       }, 0)
     }
   }
@@ -340,9 +341,6 @@ export function DataGrid({
       if (allowAddNewLine && !error) {
         event.stopPropagation()
         addNewRow()
-        setTimeout(() => {
-          if (typeof onValidationRequired === 'function') onValidationRequired()
-        }, 10)
       }
     }
 
