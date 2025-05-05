@@ -94,7 +94,6 @@ export function DataGrid({
     const addRow = async ({ changes }) => {
       if (params.rowIndex === value.length - 1 && !changes) {
         addNewRow(params)
-        if (typeof onValidationRequired === 'function') onValidationRequired()
 
         return
       }
