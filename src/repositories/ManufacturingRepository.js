@@ -281,7 +281,6 @@ export const ManufacturingRepository = {
     set2: service + 'set2AOH'
   },
   DesignFamily: {
-    qry: service + 'qryDEF',
     set: service + 'setDEF',
     get: service + 'getDEF',
     del: service + 'delDEF',
