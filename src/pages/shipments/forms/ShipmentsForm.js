@@ -28,7 +28,7 @@ import GenerateInvoiceForm from './GenerateInvoiceForm'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate }) {
+export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate, plantId, dtId, siteId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -45,8 +45,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
     objectName: 'header'
   })
 
-  const defplantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const defplantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value) || null
+  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value) || null
   const marginDefault = parseInt(defaultsData?.list?.find(obj => obj.key === 'POSHPVarPct')?.value) || 0
 
   const { formik } = useForm({
@@ -111,7 +111,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
     validationSchema: yup.object({
       header: yup.object({
         plantId: yup.number().required(),
-        date: yup.string().required(),
+        date: yup.date().required(),
         siteId: yup.number().required(),
         vendorId: yup.number().required()
       }),
@@ -228,7 +228,10 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       dtId: shipHeader.record.dtId,
       header: {
         ...formik.values.header,
-        ...shipHeader.record
+        plantId: plantId || formik?.values?.header?.plantId,
+        dtId: dtId || formik?.values?.header?.dtId,
+        ...shipHeader.record,
+        siteId: siteId || formik?.values?.header?.siteId
       },
       items: itemsList
     })
@@ -433,11 +436,13 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       label: labels.sku,
       name: 'sku',
       flex: 1,
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !!row.shipmentId && !!row.poId && !!row.sku }
+      },
       props: {
         store: skuStore?.current,
         displayField: 'sku',
         valueField: 'sku',
-        readOnly: editMode,
         mapping: [
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -515,7 +520,14 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         }
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
+        let store = []
+        if (row?.itemId) {
+          getFilteredMU(row?.itemId, row?.msId)
+
+          store = filteredMeasurements?.current
+        }
+
+        return { ...props, store }
       }
     },
     {
@@ -674,6 +686,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                     values={formik.values.header}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.plantId', newValue?.recordId || null)
+                      formik.setFieldValue('header.plantIdTouched', newValue?.recordId ? true : false)
+                      formik.setFieldValue('header.siteId', null)
                     }}
                     error={formik.touched?.header?.plantId && Boolean(formik.errors?.header?.plantId)}
                     required
@@ -732,7 +746,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                       { key: 'name', value: 'Name' }
                     ]}
                     filter={
-                      formik?.values?.header?.plantId
+                      formik.values?.header?.plantIdTouched
                         ? item => Number(item.plantId) === Number(formik?.values?.header?.plantId)
                         : undefined
                     }
