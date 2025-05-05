@@ -256,10 +256,10 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     filteredMeasurements.current = arrayMU
   }
 
-  const isPercentIcon = ({ value, data }) => {
+  const iconKey = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
 
-    return mdType === MDTYPE_PCT ? true : false
+    return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
   const onCondition = row => {
@@ -468,8 +468,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         ShowDiscountIcons: true,
         iconsClicked: handleIconClick,
         type: 'numeric',
-        concatenateWith: '%',
-        isPercentIcon
+        iconKey
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
@@ -1633,7 +1632,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
                   cycleButtonLabel={cycleButtonState.text}
                   decimalScale={2}
                   readOnly={isClosed}
-                  isPercentIcon={cycleButtonState.text === '%' ? true : false}
+                  iconKey={cycleButtonState.text}
                   handleButtonClick={handleButtonClick}
                   ShowDiscountIcons={true}
                   onChange={e => {
