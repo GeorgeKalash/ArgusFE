@@ -79,7 +79,7 @@ export const PurchaseRepository = {
     snapshot: service + 'snapshotIVR'
   },
   VendorPrice: {
-    get: service + 'getPRI'
+    get: service + 'getPRI2'
   },
   ItemCostHistory: {
     qry: service + 'qryIPH'
