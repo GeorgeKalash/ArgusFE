@@ -26,10 +26,16 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
     initialValues: terraPay,
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({}),
-    onSubmit: values => {
-      console.log(values)
+    validationSchema: yup.object({
+      transaction: yup.object({
+        creditorBankSubCode: yup.string().required(),
 
+        internationalTransferInformation: yup.object({
+          relationshipSender: yup.string().required()
+        })
+      })
+    }),
+    onSubmit: values => {
       onSubmit(values)
       window.close()
     }
@@ -68,8 +74,6 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
       }
     })()
   }, [])
-
-  console.log(beneficiary)
 
   return (
     <FormShell
@@ -121,28 +125,30 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
           <ResourceComboBox
             endpointId={RemittanceBankInterface.Combos.qryTerrapayCBX}
             parameters={`_combo=1`}
-            name='deliveryModeId'
-            label={labels.deliveryMode}
+            name='relationshipSender'
+            label={labels.relSender}
             valueField='recordId'
             displayField='name'
-            values={formik.values}
+            values={formik.values.transaction.internationalTransferInformation.relationshipSender}
             required
             onChange={(event, newValue) => {
-              formik.setFieldValue('deliveryModeId', newValue.recordId || '')
               formik.setFieldValue(
                 'transaction.internationalTransferInformation.relationshipSender',
-                newValue.recordId || ''
+                newValue?.recordId || ''
               )
             }}
             maxAccess={maxAccess}
-            error={formik.touched.deliveryModeId && Boolean(formik.errors.deliveryModeId)}
+            error={
+              formik.touched.transaction?.internationalTransferInformation?.relationshipSender &&
+              Boolean(formik.errors.transaction?.internationalTransferInformation?.relationshipSender)
+            }
           />
         </Grid>
         <Grid hideonempty xs={12}>
           <ResourceComboBox
             endpointId={RemittanceBankInterface.Combos.qryTerrapyBanks}
             parameters={`_country=${outwardsData?.countryRef || ''}`}
-            name='bankName'
+            name='transaction.creditorBankSubCode'
             label={labels.bank}
             valueField='bankCode'
             displayField='bankName'
@@ -158,10 +164,10 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
                 extension: RemittanceBankInterface.Combos.terrapayAccountStatus,
                 parameters: `_accountId=${formik.values.quotation?.creditorBankAccount}&_country=${
                   outwardsData?.countryRef
-                }&_bankName=${formik.values.transaction.bankName}&_MSISDN=${
+                }&_bankName=${newValue?.bankName || ''}&_MSISDN=${
                   formik.values.quotation?.creditorMSIDSN
                 }&_beneficiaryName=${beneficiary?.beneficiaryName}&_provider=${
-                  formik.values?.transaction?.providerCode
+                  newValue?.providerCode || ''
                 }&_bankCode=${beneficiary?.branchCode}&_bankSubCode=null&_accountType=${'checking'}`
               })
 
@@ -169,7 +175,9 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
               }
             }}
             maxAccess={maxAccess}
-            error={formik.touched.deliveryModeId && Boolean(formik.errors.deliveryModeId)}
+            error={
+              formik.touched.transaction?.creditorBankSubCode && Boolean(formik.errors.transaction?.creditorBankSubCode)
+            }
           />
         </Grid>
       </Grid>
