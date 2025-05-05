@@ -2143,6 +2143,7 @@ export default function SaleTransactionForm({
                       setReCal(true)
                     }}
                     onClear={() => formik.setFieldValue('header.miscAmount', 0)}
+                    error={formik?.touched?.header?.miscAmount && Boolean(formik?.errors?.header?.miscAmount)}
                   />
                 </Grid>
                 <Grid item xs={12}>
