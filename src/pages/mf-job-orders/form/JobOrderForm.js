@@ -37,9 +37,9 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
-  const currentItem = useRef({ itemId: '', sku: '', itemName: '' })
   const [plStore, setPlStore] = useState([])
   const recordId = store?.recordId
+  const [imageSource, setImageSource] = useState(null)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrder,
@@ -342,7 +342,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       startingDT: formatDateFromApi(res?.record?.startingDT),
       deliveryDate: formatDateFromApi(res?.record?.deliveryDate)
     })
-    currentItem.current = { itemId: res?.record?.itemId, sku: res?.record?.sku, itemName: res?.record?.itemName }
+
     setStore(prevStore => ({
       ...prevStore,
       recordId: res?.record.recordId,
@@ -362,22 +362,16 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
 
   async function fillItemInfo(values) {
     if (!values?.recordId) {
-      currentItem.current = { itemId: null, sku: null, itemName: null }
+      imageUploadRef.current.value = null
+      formik.setFieldValue('itemId', null)
+      formik.setFieldValue('itemName', null)
+      formik.setFieldValue('sku', null)
       formik.setFieldValue('itemsPL', null)
       formik.setFieldValue('itemWeight', null)
       formik.setFieldValue('itemCategoryId', null)
       formik.setFieldValue('itemFromDesign', false)
 
       return
-    }
-    const shouldUpdateCurrentItem = !currentItem.current.itemId || formik.values.itemFromDesign
-
-    if (shouldUpdateCurrentItem) {
-      currentItem.current = { itemId: values?.recordId, sku: values?.sku, itemName: values?.name }
-
-      if (formik.values.itemFromDesign) {
-        formik.setFieldValue('itemFromDesign', false)
-      }
     }
 
     const ItemPhysProp = await getRequest({
@@ -389,16 +383,16 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       extension: InventoryRepository.ItemProduction.get,
       parameters: `_recordId=${values?.recordId}`
     })
-    formik.setFieldValue('itemCategoryId', values?.categoryId)
+    formik.setFieldValue('itemId', values?.recordId)
+    formik.setFieldValue('itemName', values?.name)
+    formik.setFieldValue('sku', values?.sku)
     formik.setFieldValue('itemWeight', ItemPhysProp?.record?.weight)
     formik.setFieldValue('itemsPL', ItemProduction?.record?.lineId)
     formik.setFieldValue('lineId', ItemProduction?.record?.lineId)
+    formik.setFieldValue('itemCategoryId', values?.categoryId)
   }
   async function fillDesignInfo(values) {
-    if (values?.itemId) {
-      currentItem.current = { itemId: values?.itemId, sku: values?.sku, itemName: values?.itemName }
-      formik.setFieldValue('itemFromDesign', true)
-    }
+    imageUploadRef.current.value = values?.recordId || null
     formik.setFieldValue('designId', values?.recordId)
     formik.setFieldValue('designRef', values?.reference)
     formik.setFieldValue('designName', values?.name)
@@ -413,7 +407,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       formik.setFieldValue('routingRef', null)
       formik.setFieldValue('routingName', null)
     } else {
-      formik.setFieldValue('routingId', values?.routingId)
+      formik.setFieldValue('routingId', values?.routingId || null)
       formik.setFieldValue('routingRef', values?.routingRef)
       formik.setFieldValue('routingName', values?.routingName)
     }
@@ -421,11 +415,14 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     formik.setFieldValue('designPL', values?.lineId)
     formik.setFieldValue('classId', values?.classId)
     formik.setFieldValue('standardId', values?.standardId)
-    formik.setFieldValue('itemCategoryId', values?.itemCategoryId)
+    formik.setFieldValue('itemCategoryId', values?.itemCategoryId || null)
     formik.setFieldValue('threeDDId', values?.threeDDId)
     formik.setFieldValue('threeDDRef', values?.threeDDRef)
     formik.setFieldValue('rubberId', values?.rubberId)
     formik.setFieldValue('rubberRef', values?.rubberRef)
+    formik.setFieldValue('itemId', values?.itemId)
+    formik.setFieldValue('itemName', values?.itemName)
+    formik.setFieldValue('sku', values?.sku)
   }
   async function fillBillingInfo(values) {
     if (!values?.recordId) return
@@ -477,25 +474,26 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       parameters: `_routingId=${routingId}`
     })
 
-    formik.setFieldValue('workCenterId', res?.list[0]?.workCenterId)
     formik.setFieldValue('wcRef', res?.list[0]?.workCenterRef)
     formik.setFieldValue('wcName', res?.list[0]?.workCenterName)
+    formik.setFieldValue('workCenterId', res?.list[0]?.workCenterId)
   }
 
   useEffect(() => {
     ;(async function () {
-      formik.setFieldValue('itemId', currentItem?.current?.itemId)
-      formik.setFieldValue('itemName', currentItem?.current?.itemName)
-      formik.setFieldValue('sku', currentItem?.current?.sku)
-      !currentItem?.current?.itemId ? await getAllLines() : await getFilteredLines(currentItem?.current?.itemId)
+      !formik.values.itemId ? await getAllLines() : await getFilteredLines(formik.values.itemId)
     })()
-  }, [currentItem.current.itemId, formik.values.designId])
+  }, [formik.values.designId])
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        await refetchForm(recordId)
-      } else await getAllLines()
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=mf_jo_pic_source`
+      })
+      setImageSource(res?.record?.value || 3)
+      if (recordId) await refetchForm(recordId)
+      else await getAllLines()
     })()
   }, [])
 
@@ -768,9 +766,9 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                         ]}
                         onChange={async (event, newValue) => {
                           await updateWC(newValue?.recordId)
-                          formik.setFieldValue('routingId', newValue?.recordId || null)
                           formik.setFieldValue('routingRef', newValue?.reference || null)
                           formik.setFieldValue('routingName', newValue?.name || null)
+                          formik.setFieldValue('routingId', newValue?.recordId || null)
                         }}
                       />
                     </Grid>
@@ -845,12 +843,28 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
               <Grid item>
                 <ImageUpload
                   ref={imageUploadRef}
-                  resourceId={ResourceIds.Design}
+                  resourceId={
+                    imageSource == 1
+                      ? ResourceIds.Design
+                      : imageSource == 2
+                      ? ResourceIds.Item
+                      : imageSource == 3
+                      ? ResourceIds.MFJobOrders
+                      : null
+                  }
                   seqNo={0}
-                  recordId={formik.values.recordId}
                   customWidth={300}
                   customHeight={180}
-                  rerender={formik.values.designId}
+                  rerender={
+                    imageSource == 1
+                      ? formik.values.designId
+                      : imageSource == 2
+                      ? formik.values.itemId
+                      : imageSource == 3
+                      ? formik.values.recordId
+                      : null
+                  }
+                  disabled={imageSource != 3}
                 />
               </Grid>
 
@@ -880,6 +894,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                   name='itemCategoryId'
                   label={labels.itemCategory}
                   readOnly
+                  required
                   valueField='recordId'
                   displayField={['caRef', 'name']}
                   values={formik.values}
