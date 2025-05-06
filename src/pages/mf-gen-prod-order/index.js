@@ -245,13 +245,6 @@ const GeneratePoductionOrder = () => {
 
                   formik.setFieldValue('orders', { list: [] })
                 }}
-                secondField={{
-                  name: 'clientName',
-                  editable: false,
-                  onChange: (name, value) => {
-                    formik.setFieldValue('clientName', value)
-                  }
-                }}
                 maxAccess={access}
                 autoSelectFistValue={!formik.values.clientId}
                 displayFieldWidth={3}
