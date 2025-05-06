@@ -997,14 +997,14 @@ export default function SaleTransactionForm({
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           saTrx: true,
-          serials: serials.list.map((serialDetail, index) => {
+          serials: serials?.list?.map((serialDetail, index) => {
             return {
               ...serialDetail,
               id: index
             }
           }),
           taxDetails:
-            updatedSaTrxTaxes.filter(tax => saTrxItems?.some(responseTax => responseTax.seqNo != tax.seqNo)) || null
+            updatedSaTrxTaxes?.filter(tax => saTrxItems?.some(responseTax => responseTax.seqNo != tax.seqNo)) || null
         }
       })
     )
