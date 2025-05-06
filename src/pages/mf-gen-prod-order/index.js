@@ -181,7 +181,7 @@ const GeneratePoductionOrder = () => {
   }
 
   useEffect(() => {
-    fillSummaryORD(0)
+    fillSummaryORD()
   }, [])
 
   const disableCondition = data => {
