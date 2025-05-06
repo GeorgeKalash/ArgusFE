@@ -13,7 +13,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData, beneficiary }) {
+export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData, beneficiary, editMode }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
 
@@ -29,7 +29,6 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
     validationSchema: yup.object({
       transaction: yup.object({
         creditorBankSubCode: yup.string().required(),
-
         internationalTransferInformation: yup.object({
           relationshipSender: yup.string().required()
         })
@@ -81,16 +80,17 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
       isCleared={false}
       resourceId={ResourceIds.Terrapay}
       form={formik}
-      height={480}
       maxAccess={maxAccess}
+      disabledSubmit={editMode}
     >
       <Grid container rowGap={2} sx={{ px: 2, pt: 2 }}>
         <Grid hideonempty xs={12}>
           <CustomTextField
-            name='creditorReceivingCountry'
+            name='quotation.creditorReceivingCountry'
             required
             readOnly
             onChange={formik.handleChange}
+            maxAccess={maxAccess}
             label={labels.country}
             value={formik.values.quotation?.creditorReceivingCountry}
             error={
@@ -101,10 +101,11 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
         </Grid>
         <Grid hideonempty xs={12}>
           <CustomNumberField
-            name='requestAmount'
+            name='quotation.requestAmount'
             required
             readOnly
             onChange={formik.handleChange}
+            maxAccess={maxAccess}
             label={labels.amount}
             value={formik.values.quotation?.requestAmount}
             error={formik.touched.quotation?.requestAmount && Boolean(formik.errors.quotation?.requestAmount)}
@@ -112,10 +113,11 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
         </Grid>
         <Grid hideonempty xs={12}>
           <CustomTextField
-            name='requestCurrency'
+            name='quotation.requestCurrency'
             required
             readOnly
             onChange={formik.handleChange}
+            maxAccess={maxAccess}
             label={labels.currency}
             value={formik.values.quotation?.requestCurrency}
             error={formik.touched.quotation?.requestCurrency && Boolean(formik.errors.quotation?.requestCurrency)}
@@ -125,12 +127,13 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
           <ResourceComboBox
             endpointId={RemittanceBankInterface.Combos.qryTerrapayCBX}
             parameters={`_combo=1`}
-            name='relationshipSender'
+            name='transaction.internationalTransferInformation.relationshipSender'
             label={labels.relSender}
             valueField='recordId'
             displayField='name'
             values={formik.values.transaction.internationalTransferInformation.relationshipSender}
             required
+            readOnly={editMode}
             onChange={(event, newValue) => {
               formik.setFieldValue(
                 'transaction.internationalTransferInformation.relationshipSender',
@@ -154,6 +157,7 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
             displayField='bankName'
             values={formik.values.transaction.creditorBankSubCode}
             required
+            readOnly={editMode}
             onChange={async (event, newValue) => {
               formik.setFieldValue('transaction.bankName', newValue?.bankName || '')
               formik.setFieldValue('transaction.creditorBankSubCode', newValue?.bankCode || '')

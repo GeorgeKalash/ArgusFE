@@ -37,7 +37,6 @@ export default function SelectAgent({
       payingCurrency: payingCurrency
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       agentCode: yup.string().required()

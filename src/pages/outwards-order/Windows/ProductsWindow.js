@@ -95,39 +95,40 @@ const ProductsWindow = ({
       headerName: '',
       flex: 1,
       cellRenderer: params => {
-        return (
-          <Button
-            variant='contained'
-            size='small'
-            style={{ height: 25 }}
-            onClick={() =>
-              stack({
-                Component: SelectAgent,
-                props: {
-                  setData,
-                  productId: params.data?.productId,
-                  agentId: params.data?.agentId,
-                  baseAmount: params.data?.baseAmount,
-                  originAmount: params.data?.originAmount,
-                  receivingCountry: countryRef,
-                  deliveryModeId: params.data?.deliveryModeId,
-                  defaultAgentCode,
-                  targetCurrency: targetCurrency,
-                  payingCurrency: params.data?.payingCurrency,
-                  agentCode: params.data?.agentCode,
-                  agentDeliveryMode: params.data?.agentDeliveryMode,
-                  labels,
-                  maxAccess
-                },
-                width: 500,
-                height: 200,
-                title: params.data?.productName
-              })
-            }
-          >
-            {labels.select}
-          </Button>
-        )
+        if (params.data.interfaceId === 1)
+          return (
+            <Button
+              variant='contained'
+              size='small'
+              style={{ height: 25 }}
+              onClick={() =>
+                stack({
+                  Component: SelectAgent,
+                  props: {
+                    setData,
+                    productId: params.data?.productId,
+                    agentId: params.data?.agentId,
+                    baseAmount: params.data?.baseAmount,
+                    originAmount: params.data?.originAmount,
+                    receivingCountry: countryRef,
+                    deliveryModeId: params.data?.deliveryModeId,
+                    defaultAgentCode,
+                    targetCurrency: targetCurrency,
+                    payingCurrency: params.data?.payingCurrency,
+                    agentCode: params.data?.agentCode,
+                    agentDeliveryMode: params.data?.agentDeliveryMode,
+                    labels,
+                    maxAccess
+                  },
+                  width: 500,
+                  height: 200,
+                  title: params.data?.productName
+                })
+              }
+            >
+              {labels.select}
+            </Button>
+          )
       }
     },
     {

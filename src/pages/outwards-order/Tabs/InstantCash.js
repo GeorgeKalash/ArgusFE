@@ -26,7 +26,8 @@ export default function InstantCash({
   payingAgent,
   payingCurrency,
   outwardsData,
-  sysDefault
+  sysDefault,
+  editMode
 }) {
   const { getRequest } = useContext(RequestsContext)
 
@@ -64,7 +65,6 @@ export default function InstantCash({
         }
       }
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       deliveryModeId: yup.string().required(),
@@ -114,8 +114,8 @@ export default function InstantCash({
       isCleared={false}
       resourceId={ResourceIds.InstantCash}
       form={formik}
-      height={480}
       maxAccess={maxAccess}
+      disabledSubmit={editMode}
     >
       <VertLayout>
         <Grow>
@@ -134,29 +134,6 @@ export default function InstantCash({
                   onClear={() => formik.setFieldValue('sourceAmount', '')}
                 />
               </Grid>
-              {/* <Grid hideonempty xs={12}>
-                <CustomNumberField
-                  name='transactionsPerAnnum'
-                  onChange={formik.handleChange}
-                  label={_labels.trxCountPerYear}
-                  readOnly
-                  value={formik.values.transactionsPerAnnum}
-                  error={formik.touched.transactionsPerAnnum && Boolean(formik.errors.transactionsPerAnnum)}
-                />
-              </Grid>
-              <Grid hideonempty xs={12}>
-                <CustomNumberField
-                  name='totalTransactionAmountPerAnnum'
-                  onChange={formik.handleChange}
-                  readOnly
-                  label={_labels.trxAmountPerYear}
-                  value={formik.values.totalTransactionAmountPerAnnum}
-                  error={
-                    formik.touched.totalTransactionAmountPerAnnum &&
-                    Boolean(formik.errors.totalTransactionAmountPerAnnum)
-                  }
-                />
-              </Grid> */}
             </Grid>
             <Grid item xs={6}>
               <FieldSet title='Remitter'>
@@ -166,6 +143,7 @@ export default function InstantCash({
                     onChange={event => formik.setFieldValue('remitter.otherRelation', event.target.value)}
                     label={_labels.otherRelation}
                     value={formik.values.remitter.otherRelation}
+                    readOnly={editMode}
                     error={formik.touched.remitter?.otherRelation && Boolean(formik.errors.remitter?.otherRelation)}
                   />
                 </Grid>
@@ -188,11 +166,11 @@ export default function InstantCash({
                     name='remitter.employerStatus'
                     label={_labels.employerStatus}
                     required
+                    readOnly={editMode}
                     valueField='name'
                     displayField='name'
                     value={formik.values.remitter.employerStatus}
                     onChange={(event, newValue) => {
-                      console.log(newValue?.name)
                       formik.setFieldValue('remitter.employerStatus', newValue ? newValue?.name : '')
                     }}
                     maxAccess={maxAccess}
@@ -219,7 +197,7 @@ export default function InstantCash({
                     label={_labels.bank}
                     form={formik}
                     firstValue={formik.values.beneficiary.bankDetails.bankName}
-                    readOnly={!(formik.values.deliveryModeId && formik.values.payingAgent)}
+                    readOnly={!(formik.values.deliveryModeId && formik.values.payingAgent) || editMode}
                     maxAccess={maxAccess}
                     secondDisplayField={false}
                     onChange={async (event, newValue) => {
@@ -236,11 +214,16 @@ export default function InstantCash({
                 <Grid item xs={12}>
                   <CustomTextField
                     numberField={true}
-                    name='beneficiary.postCode'
+                    name='beneficiary.address.postCode'
+                    readOnly={editMode}
                     onChange={event => formik.setFieldValue('beneficiary.address.postCode', event.target.value)}
+                    onClear={() => formik.setFieldValue('beneficiary.address.postCode', '')}
                     label={_labels.postalCode}
                     value={formik.values.beneficiary.address.postCode}
-                    error={formik.touched.postCode && Boolean(formik.errors.postCode)}
+                    error={
+                      formik.touched.beneficiary?.address?.postCode &&
+                      Boolean(formik.errors.beneficiary?.address?.postCode)
+                    }
                     maxAccess={maxAccess}
                   />
                 </Grid>
