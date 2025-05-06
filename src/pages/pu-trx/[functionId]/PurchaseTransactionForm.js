@@ -57,7 +57,7 @@ import ItemPromotion from 'src/components/Shared/ItemPromotion'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 
-export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
+export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window, getResourceId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
@@ -1326,17 +1326,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           ? userDefaultsDataState?.siteId || null
           : null
       )
-  }
-
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.PurchaseInvoice:
-        return ResourceIds.PurchaseInvoice
-      case SystemFunction.PurchaseReturn:
-        return ResourceIds.PurchaseReturn
-      default:
-        return null
-    }
   }
 
   const onCondition = row => {
