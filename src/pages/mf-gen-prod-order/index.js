@@ -35,7 +35,7 @@ const GeneratePoductionOrder = () => {
     initialValues: {
       clientId: null,
       itemSummaries: { list: [] },
-      orders: { list: [] },
+      orders: { list: [] }
     },
     maxAccess: access,
     onSubmit: async () => {
@@ -206,6 +206,11 @@ const GeneratePoductionOrder = () => {
     }
   }
 
+  const resetForm = () => {
+    formik.resetForm()
+    fillSummaryORD()
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.GenerateProductionOrder}
@@ -238,9 +243,8 @@ const GeneratePoductionOrder = () => {
                   formik.setFieldValue('clientName', newValue?.name || '')
                   formik.setFieldValue('clientRef', newValue?.reference || '')
                   fillSummaryORD(newValue?.recordId)
-                  if (!newValue?.recordId) {
-                    formik.setFieldValue('orders', { list: [] })
-                  }
+
+                  formik.setFieldValue('orders', { list: [] })
                 }}
                 secondField={{
                   name: 'clientName',
@@ -347,7 +351,7 @@ const GeneratePoductionOrder = () => {
           <Grid container spacing={2} mt={2}>
             <Grid item xs={1}>
               <CustomButton
-                onClick={formik.resetForm}
+                onClick={resetForm}
                 label={platformLabels.Clear}
                 tooltipText={platformLabels.Clear}
                 image={'clear.png'}
