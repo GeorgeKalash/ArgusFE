@@ -272,10 +272,16 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       disabled: !editMode
     },
     {
-      key: 'Post',
-      condition: true,
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: isPosted || !editMode
+      disabled: !editMode
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      disabled: true
     },
     {
       key: 'generate',

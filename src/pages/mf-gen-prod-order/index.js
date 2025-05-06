@@ -64,7 +64,7 @@ const GeneratePoductionOrder = () => {
         },
         width: 850,
         height: 680,
-        title: labels.ProductionOrder
+        title: _labels.ProductionOrder
       })
 
       toast.success(platformLabels.Generated)
