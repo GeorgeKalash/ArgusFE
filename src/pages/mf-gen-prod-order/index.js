@@ -232,7 +232,6 @@ const GeneratePoductionOrder = () => {
                 displayField='name'
                 valueShow='clientRef'
                 secondValueShow='clientName'
-                formObject={formik.values.header}
                 form={formik}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
