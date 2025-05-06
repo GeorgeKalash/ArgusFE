@@ -69,13 +69,9 @@ const GeneratePoductionOrder = () => {
       })
 
       toast.success(platformLabels.Generated)
-
-      if (formik?.values?.clientId) {
-        await fillSummaryORD(formik?.values?.clientId, false)
-      } else {
-        await fillSummaryORD(0, true)
-      }
+      await fillSummaryORD(formik?.values?.clientId)
       formik.setFieldValue('orders', { list: [] })
+      formik.setFieldValue('ordersToGenerate', { list: [] })
     }
   })
 
@@ -167,7 +163,7 @@ const GeneratePoductionOrder = () => {
     }
   ]
 
-  const fillSummaryORD = async (clientId, initial) => {
+  const fillSummaryORD = async clientId => {
     const response = await getRequest({
       extension: SaleRepository.SalesOrder.summaryORD,
       parameters: `_clientId=${clientId || 0}`
@@ -184,17 +180,10 @@ const GeneratePoductionOrder = () => {
     }))
 
     formik.setFieldValue('itemSummaries', { list: newlyItemSummaries })
-
-    if (!initial) {
-      formik.setFieldValue('orders', { list: response?.record?.orders })
-      formik.setFieldValue('ordersToGenerate', { list: response?.record?.ordersToGenerate })
-    }
   }
 
   useEffect(() => {
-    ;(async function () {
-      await fillSummaryORD(0, true)
-    })()
+    fillSummaryORD(0)
   }, [])
 
   const disableCondition = data => {
@@ -203,11 +192,7 @@ const GeneratePoductionOrder = () => {
 
   useEffect(() => {
     const list = formik?.values?.itemSummaries?.list || []
-
-    const updatedList = list.map(item =>
-      item.deltaQty >= 0 && item.checked ? { ...item, checked: false } : item
-    )
-
+    const updatedList = list.map(item => (item.deltaQty >= 0 && item.checked ? { ...item, checked: false } : item))
     const hasChanges = list.some((item, index) => item.checked !== updatedList[index].checked)
 
     if (hasChanges) {
@@ -254,10 +239,9 @@ const GeneratePoductionOrder = () => {
                   formik.setFieldValue('clientId', newValue?.recordId || null)
                   formik.setFieldValue('clientName', newValue?.name || '')
                   formik.setFieldValue('clientRef', newValue?.reference || '')
-                  if (newValue?.recordId) {
-                    fillSummaryORD(newValue?.recordId, false)
-                  } else {
-                    fillSummaryORD(0, true)
+                  fillSummaryORD(newValue?.recordId)
+                  if (!newValue?.recordId) {
+                    formik.setFieldValue('orders', { list: [] })
                   }
                 }}
                 secondField={{

@@ -147,20 +147,17 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       })
     })
 
-    const title = res?.recordId ? platformLabels.Success : platformLabels.Error
-    const content = res?.recordId || platformLabels.NoAssembliesGenerated
-
     stack({
       Component: ConfirmationDialog,
       props: {
-        DialogText: content,
+        DialogText: res?.recordId || platformLabels.NoAssembliesGenerated,
         fullScreen: false,
         close: true,
         okButtonAction: () => window.close()
       },
       width: 500,
       height: 150,
-      title: title
+      title: res?.recordId ? platformLabels.Success : platformLabels.Error
     })
   }
 
