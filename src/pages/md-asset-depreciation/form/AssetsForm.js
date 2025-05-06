@@ -313,6 +313,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
 
         <Grow>
           <Table
+            name='assets'
             columns={columns}
             gridData={formik.values.asset}
             rowId={['recordId']}
