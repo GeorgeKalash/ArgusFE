@@ -23,10 +23,13 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { useWindow } from 'src/windows'
 
 export default function ProductionOrderForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ProductionOrder,
@@ -134,6 +137,28 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     toast.success(platformLabels.Posted)
     window.close()
     invalidate()
+  }
+
+  async function onGenerateAssembly() {
+    const res = await postRequest({
+      extension: ManufacturingRepository.Assembly.generate,
+      record: JSON.stringify({
+        poId: formik.values.recordId
+      })
+    })
+
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: res?.recordId || platformLabels.NoAssembliesGenerated,
+        fullScreen: false,
+        close: true,
+        okButtonAction: () => window.close()
+      },
+      width: 500,
+      height: 150,
+      title: res?.recordId ? platformLabels.Success : platformLabels.Error
+    })
   }
 
   async function getDTD(dtId) {
@@ -247,10 +272,22 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       disabled: !editMode
     },
     {
-      key: 'Post',
-      condition: true,
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: isPosted || !editMode
+      disabled: !editMode
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      disabled: true
+    },
+    {
+      key: 'generate',
+      condition: true,
+      onClick: onGenerateAssembly,
+      disabled: !editMode
     }
   ]
 
