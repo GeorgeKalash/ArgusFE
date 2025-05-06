@@ -275,10 +275,10 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     filteredMeasurements.current = arrayMU
   }
 
-  const isPercentIcon = ({ value, data }) => {
+  const iconKey = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
 
-    return mdType === MDTYPE_PCT ? true : false
+    return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
   function checkMinMaxAmount(amount, type, modType) {
@@ -537,8 +537,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         ShowDiscountIcons: true,
         iconsClicked: handleIconClick,
         type: 'numeric',
-        concatenateWith: '%',
-        isPercentIcon
+        iconKey
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
@@ -1626,7 +1625,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     value={formik.values.currentDiscount}
                     displayCycleButton={true}
                     readOnly={isClosed}
-                    isPercentIcon={cycleButtonState.text === '%' ? true : false}
+                    iconKey={cycleButtonState.text}                 
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
                     handleButtonClick={handleButtonClick}

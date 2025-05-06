@@ -475,10 +475,10 @@ export default function SaleTransactionForm({
     }
   }
 
-  const isPercentIcon = ({ value, data }) => {
+  const iconKey = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
 
-    return mdType === MDTYPE_PCT ? true : false
+    return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
   const columns = [
@@ -716,8 +716,7 @@ export default function SaleTransactionForm({
         ShowDiscountIcons: true,
         iconsClicked: handleIconClick,
         type: 'numeric',
-        concatenateWith: '%',
-        isPercentIcon
+        iconKey
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
@@ -2061,7 +2060,7 @@ export default function SaleTransactionForm({
                     decimalScale={2}
                     readOnly={isPosted}
                     handleButtonClick={handleButtonClick}
-                    isPercentIcon={cycleButtonState.text === '%' ? true : false}
+                    iconKey={cycleButtonState.text}
                     ShowDiscountIcons={true}
                     onChange={e => {
                       let discount = Number(e.target.value.replace(/,/g, ''))

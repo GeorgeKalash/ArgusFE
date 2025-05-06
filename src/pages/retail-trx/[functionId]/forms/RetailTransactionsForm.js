@@ -635,10 +635,10 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
   }, 0)
   const totBalance = (parseFloat(subtotal) + parseFloat(vatAmount) - parseFloat(cashAmount)).toFixed(2)
 
-  const isPercentIcon = ({ value, data }) => {
+  const iconKey = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
 
-    return mdType === MDTYPE_PCT
+    return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
   const columns = [
@@ -792,8 +792,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
         ShowDiscountIcons: true,
         iconsClicked: handleIconClick,
         type: 'numeric',
-        concatenateWith: '%',
-        isPercentIcon
+        iconKey
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)

@@ -301,10 +301,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
-  const isPercentIcon = ({ value, data }) => {
+  const iconKey = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
 
-    return mdType === MDTYPE_PCT
+    return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
   async function getPromotionTypes() {
@@ -579,8 +579,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         ShowDiscountIcons: true,
         iconsClicked: handleIconClick,
         type: 'numeric',
-        concatenateWith: '%',
-        isPercentIcon
+        iconKey
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
@@ -1709,7 +1708,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                   cycleButtonLabel={cycleButtonState.text}
                   decimalScale={2}
                   readOnly={isPosted}
-                  isPercentIcon={cycleButtonState.text === '%' ? true : false}
+                  iconKey={cycleButtonState.text}                  
                   handleButtonClick={handleButtonClick}
                   ShowDiscountIcons={true}
                   onChange={e => {
