@@ -36,7 +36,6 @@ const GeneratePoductionOrder = () => {
       clientId: null,
       itemSummaries: { list: [] },
       orders: { list: [] },
-      ordersToGenerate: { list: [] }
     },
     maxAccess: access,
     onSubmit: async () => {
@@ -71,7 +70,6 @@ const GeneratePoductionOrder = () => {
       toast.success(platformLabels.Generated)
       await fillSummaryORD(formik?.values?.clientId)
       formik.setFieldValue('orders', { list: [] })
-      formik.setFieldValue('ordersToGenerate', { list: [] })
     }
   })
 
