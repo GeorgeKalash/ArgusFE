@@ -57,7 +57,7 @@ import ItemPromotion from 'src/components/Shared/ItemPromotion'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 
-export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
+export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window, getResourceId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
@@ -199,14 +199,23 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         dueDate: yup.string().required(),
         currencyId: yup.string().required(),
         vendorId: yup.string().required(),
-        siteId: yup.number().test('', function (value) {
-          const { dtId } = this.parent
-          if (dtId == null) {
-            return !!value
-          }
+        siteId: yup
+          .number()
+          .transform(value => (isNaN(value) ? undefined : Number(value)))
+          .nullable()
+          .test('', function (value) {
+            const { dtId, commitItems } = this.parent
 
-          return true
-        })
+            if (dtId == null) {
+              return !!value
+            }
+
+            if (dtId && commitItems === true) {
+              return !!value
+            }
+
+            return true
+          })
       }),
       items: yup
         .array()
@@ -273,11 +282,16 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         record: JSON.stringify(payload)
       })
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
-      await refetchForm(puTrxRes.recordId)
-      invalidate()
+
+      if (puTrxRes?.recordId) {
+        await refetchForm(puTrxRes.recordId)
+        toast.success(actionMessage)
+        invalidate()
+      }
     }
   })
+
+  const itemsUpdate = useRef(formik?.values?.items)
 
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
@@ -580,13 +594,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   ]
 
-  async function getSerials(recordId, seqNo) {
-    return await getRequest({
-      extension: PurchaseRepository.Serials.qry,
-      parameters: `_invoiceId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
-    })
-  }
-
   async function handleIconClick(id, updateRow) {
     const index = formik.values.items.findIndex(item => item.id === id)
 
@@ -656,6 +663,21 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     invalidate()
   }
 
+  const handleMetalClick = async () => {
+    const metalItemsList = itemsUpdate?.current
+      ?.filter(item => item.metalId)
+      .map(item => ({
+        qty: item.qty,
+        metalRef: '',
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+
+    return metalItemsList || []
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -668,6 +690,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       condition: true,
       onClick: onWorkFlowClick,
       disabled: !editMode
+    },
+    {
+      key: 'Metals',
+      condition: true,
+      onClick: 'onClickMetal',
+      handleMetalClick
     },
     {
       key: 'Locked',
@@ -713,6 +741,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxHeader = puTrxPack?.header
     const puTrxItems = puTrxPack?.items
     const puTrxTaxes = puTrxPack?.taxCodes
+    const puTrxSerials = puTrxPack?.serials
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -721,7 +750,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const modifiedList = await Promise.all(
       puTrxItems?.map(async (item, index) => {
         const taxDetailsResponse = []
-        const serials = await getSerials(recordId, item.seqNo)
 
         const updatedpuTrxTaxes =
           puTrxTaxes?.map(tax => {
@@ -741,7 +769,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           puTrx: true,
-          serials: serials.list.map((serialDetail, index) => {
+          serials: puTrxSerials?.map((serialDetail, index) => {
             return {
               ...serialDetail,
               id: index
@@ -767,6 +795,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       items: modifiedList,
       taxCodes: [...puTrxTaxes]
     })
+
+    itemsUpdate.current = modifiedList
   }
 
   async function getPurchaseTransactionPack(transactionId) {
@@ -1298,17 +1328,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       )
   }
 
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.PurchaseInvoice:
-        return ResourceIds.PurchaseInvoice
-      case SystemFunction.PurchaseReturn:
-        return ResourceIds.PurchaseReturn
-      default:
-        return null
-    }
-  }
-
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
@@ -1615,6 +1634,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           <DataGrid
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
+              itemsUpdate.current = value
+
               action === 'delete' && setReCal(true)
             }}
             onSelectionChange={(row, update, field) => {

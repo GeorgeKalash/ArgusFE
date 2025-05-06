@@ -588,7 +588,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
             <Grid item xs={4}>
               <ImageUpload
                 ref={imageUploadRef}
-                resourceId={ResourceIds.Items}
+                resourceId={ResourceIds.ThreeDDesign}
                 seqNo={0}
                 recordId={recordId}
                 width={300}
