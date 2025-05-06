@@ -146,7 +146,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
         poId: formik.values.recordId
       })
     })
-    console.log(res)
+
     const title = res?.recordId ? platformLabels.Success : platformLabels.Error
     const content = res?.recordId || platformLabels.NoAssembliesGenerated
 

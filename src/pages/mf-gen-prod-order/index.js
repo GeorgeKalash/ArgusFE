@@ -39,7 +39,6 @@ const GeneratePoductionOrder = () => {
       ordersToGenerate: { list: [] }
     },
     maxAccess: access,
-    enableReinitialize: true,
     onSubmit: async () => {
       const data = {
         items: formik?.values?.itemSummaries?.list
@@ -192,10 +191,6 @@ const GeneratePoductionOrder = () => {
     }
   }
 
-  const resetForm = () => {
-    formik.resetForm()
-  }
-
   useEffect(() => {
     ;(async function () {
       await fillSummaryORD(0, true)
@@ -210,7 +205,7 @@ const GeneratePoductionOrder = () => {
     const list = formik?.values?.itemSummaries?.list || []
 
     const updatedList = list.map(item =>
-      item.deltaQty >= 0 && item.checked !== false ? { ...item, checked: false } : item
+      item.deltaQty >= 0 && item.checked ? { ...item, checked: false } : item
     )
 
     const hasChanges = list.some((item, index) => item.checked !== updatedList[index].checked)
@@ -370,7 +365,7 @@ const GeneratePoductionOrder = () => {
           <Grid container spacing={2} mt={2}>
             <Grid item xs={1}>
               <CustomButton
-                onClick={() => resetForm()}
+                onClick={formik.resetForm}
                 label={platformLabels.Clear}
                 tooltipText={platformLabels.Clear}
                 image={'clear.png'}
