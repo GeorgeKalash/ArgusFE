@@ -48,6 +48,7 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
 import ChangeClient from 'src/components/Shared/ChangeClient'
+import InvoiceForm from './InvoiceForm'
 
 export default function ReturnOnInvoiceForm({ labels, access, recordId, currency }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -264,7 +265,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   }
 
   const columns = [
-    {
+    !formik.values.invoiceId && {
       component: 'resourcecombobox',
       label: labels.invoice,
       name: 'invoiceRef',
@@ -555,7 +556,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         getItemPriceRow(update, newRow, DIRTYFIELD_EXTENDED_PRICE)
       }
     }
-  ]
+  ].filter(Boolean)
 
   async function handleIconClick(id, updateRow) {
     const index = formik.values.items.findIndex(item => item.id === id)
@@ -1301,7 +1302,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       formik.setFieldValue('metalPrice', KGmetalPrice / 1000)
                     }}
                     readOnly={!formik.values.baseMetalCuId || isPosted}
-                    hidden={editMode || !formik.values.baseMetalCuId || formik.values.dtId}
+                    hidden={
+                      isPosted || (!editMode && !formik.values.baseMetalCuId) || (!editMode && formik.values.dtId)
+                    }
                     onClear={() => formik.setFieldValue('KGmetalPrice', '')}
                     error={formik.touched?.KGmetalPrice && Boolean(formik.errors?.KGmetalPrice)}
                   />
@@ -1361,7 +1364,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                           form: formik
                         },
                         width: 500,
-                        height: 520,
+                        height: 570,
                         title: labels.changeClient
                       })
                     }}
@@ -1382,7 +1385,19 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                 </Grid>
                 <Grid item xs={12}>
                   <CustomButton
-                    onClick={() => {}}
+                    onClick={() => {
+                      stack({
+                        Component: InvoiceForm,
+                        props: {
+                          form: formik,
+                          maxAccess,
+                          labels
+                        },
+                        width: 900,
+                        height: 550,
+                        title: labels.invoice
+                      })
+                    }}
                     tooltipText={platformLabels.import}
                     image={'import.png'}
                     disabled={!formik.values.invoiceId}

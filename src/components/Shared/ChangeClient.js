@@ -13,28 +13,71 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
 import { useForm } from 'src/hooks/form'
+import { useError } from 'src/error'
 
 export default function ChangeClient({ form, window }) {
+  const { stack: stackError } = useError()
+
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.ChangeClient
   })
 
   const { formik } = useForm({
     maxAccess: access,
-    initialValues: { changetoId: null, changeToRef: '', changeToName: '' },
+    initialValues: {
+      changeToId: null,
+      changeToRef: '',
+      changeToName: '',
+      changeBillAddressId: null,
+      changeBill: '',
+      changeSzId: null
+    },
     validateOnChange: true,
     validationSchema: yup.object({
-      changetoId: yup.string().required()
+      changeToId: yup.string().required()
     }),
     onSubmit: async values => {
-      if (values.changetoId) {
-        form.setFieldValue('clientId', values.changetoId)
+      if (values.changeToId) {
+        form.setFieldValue('clientId', values.changeToId)
         form.setFieldValue('clientName', values.changeToName)
         form.setFieldValue('clientRef', values.changeToRef)
+        form.setFieldValue('billAddressId', values.changeBillAddressId)
+        form.setFieldValue('billAddress', values.changeBill)
+        form.setFieldValue('szId', values.changeSzId)
         window.close()
       }
     }
   })
+
+  function isValidClient(values) {
+    if (form.plId != values.plId) {
+      stackError({
+        message: labels.mismatchPrice
+      })
+
+      return false
+    } else if (form.isVattable != values.IsSubjectToVat) {
+      stackError({
+        message: labels.mismatchVat
+      })
+
+      return false
+    } else if (form.taxId != values.taxId) {
+      stackError({
+        message: labels.mismatchTax
+      })
+
+      return false
+    } else if (form.maxDiscount <= values.maxDiscount) {
+      stackError({
+        message: labels.mismatchDiscount
+      })
+
+      return false
+    }
+
+    return true
+  }
 
   return (
     <FormShell form={formik} isInfo={false} isCleared={false}>
@@ -61,6 +104,17 @@ export default function ChangeClient({ form, window }) {
               maxLength='100'
               readOnly
               maxAccess={access}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={SaleRepository.PriceLevel.qry}
+              name='plId'
+              label={labels.priceLevel}
+              readOnly
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              values={formik.values}
             />
           </Grid>
           <Grid item xs={9}>
@@ -106,7 +160,7 @@ export default function ChangeClient({ form, window }) {
               valueField='reference'
               displayField='name'
               secondFieldLabel={labels.name}
-              name='changetoId'
+              name='changeToId'
               label={labels.changeTo}
               form={formik}
               displayFieldWidth={3}
@@ -122,11 +176,15 @@ export default function ChangeClient({ form, window }) {
               ]}
               required
               onChange={async (event, newValue) => {
-                formik.setFieldValue('changetoId', newValue?.recordId)
-                formik.setFieldValue('changeToName', newValue?.name)
-                formik.setFieldValue('changeToRef', newValue?.reference)
+                const isValid = isValidClient(newValue)
+                formik.setFieldValue('changeToId', isValid ? newValue?.recordId : null)
+                formik.setFieldValue('changeToName', isValid ? newValue?.name : '')
+                formik.setFieldValue('changeToRef', isValid ? newValue?.reference : '')
+                formik.setFieldValue('changeBillId', isValid ? newValue?.billAddressId : null)
+                formik.setFieldValue('changeBill', isValid ? newValue?.billAddress : '')
+                formik.setFieldValue('changeSzId', isValid ? newValue?.szId : null)
               }}
-              errorCheck={'changetoId'}
+              errorCheck={'changeToId'}
             />
           </Grid>
         </Grid>
