@@ -1,6 +1,5 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -8,37 +7,29 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Custom Imports
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { ControlContext } from 'src/providers/ControlContext'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function RoutingForm({
-  labels,
-  maxAccess,
-  recordId,
-  setErrorMessage,
-  setSelectedRecordId,
-  editMode,
-  setEditMode
-}) {
-  const [isLoading, setIsLoading] = useState(false)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    name: ''
-  })
-
+export default function RoutingForm({ labels, maxAccess, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { recordId } = store
+  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.Routing.page
   })
 
   const formik = useFormik({
-    initialValues,
+    initialValues: {
+      recordId: null,
+      reference: '',
+      name: '',
+      isInactive: false
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -46,23 +37,17 @@ export default function RoutingForm({
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      console.log(obj)
-      const recordId = obj.recordId
-
-      const response = await postRequest({
+      const res = await postRequest({
         extension: ManufacturingRepository.Routing.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
-        })
-        setSelectedRecordId(response.recordId)
-      } else toast.success('Record Edited Successfully')
-      setEditMode(true)
+      formik.setFieldValue('recordId', res.recordId)
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: res.recordId
+      }))
+      toast.success(!recordId ? platformLabels.Added : platformLabels.Edited)
 
       invalidate()
     }
@@ -70,21 +55,16 @@ export default function RoutingForm({
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
+      if (recordId) {
+        const res = await getRequest({
+          extension: ManufacturingRepository.Routing.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          const res = await getRequest({
-            extension: ManufacturingRepository.Routing.get,
-            parameters: `_recordId=${recordId}`
-          })
-
-          setInitialData(res.record)
-        }
-      } catch (exception) {
-        setErrorMessage(error)
+        formik.setValues({
+          ...res.record
+        })
       }
-      setIsLoading(false)
     })()
   }, [])
 
@@ -103,7 +83,6 @@ export default function RoutingForm({
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-            helperText={formik.touched.reference && formik.errors.reference}
           />
         </Grid>
         <Grid item xs={12}>
@@ -117,7 +96,34 @@ export default function RoutingForm({
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
-            helperText={formik.touched.name && formik.errors.name}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={ManufacturingRepository.ProductionLine.qry}
+            name='lineId'
+            label={labels.lineId}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            valueField='recordId'
+            displayField={['reference', 'name']}
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('lineId', newValue?.recordId || null)
+            }}
+            maxAccess={maxAccess}
+            error={formik.touched.lineId && Boolean(formik.errors.lineId)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomCheckBox
+            name='isInactive'
+            value={formik.values?.isInactive}
+            onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
+            label={labels.isInactive}
+            maxAccess={maxAccess}
           />
         </Grid>
       </Grid>

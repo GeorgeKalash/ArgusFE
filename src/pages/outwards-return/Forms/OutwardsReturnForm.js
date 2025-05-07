@@ -113,7 +113,7 @@ export default function OutwardsReturnForm({
       lcAmount: '',
       releaseStatus: null,
       otpVerified: false,
-      settlementStatus: 1,
+      settlementStatus: null,
       interfaceId: null,
       attemptNo: 1
     },

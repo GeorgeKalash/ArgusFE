@@ -54,6 +54,7 @@ export const DeliveryRepository = {
     get: service + 'getORD',
     snapshot: service + 'snapshotORD',
     unpost: service + 'unpostORD',
+    gen: service + 'genORD',
     post: service + 'postORD',
     del: service + 'delORD',
     cancel: service + 'cancelORD',

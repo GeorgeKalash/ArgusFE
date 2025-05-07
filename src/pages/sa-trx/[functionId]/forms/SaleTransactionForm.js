@@ -58,6 +58,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import TaxDetails from 'src/components/Shared/TaxDetails'
+import { SerialsForm } from 'src/components/Shared/SerialsForm'
 
 export default function SaleTransactionForm({
   labels,
@@ -238,8 +239,35 @@ export default function SaleTransactionForm({
           extension: SaleRepository.Address.set,
           record: JSON.stringify(addressData)
         })
+
         obj.header.billAddressId = addressRes.recordId
       }
+
+      let serialsValues = []
+
+      const updatedRows = obj.items.map(({ id, isVattable, taxDetails, ...rest }) => {
+        const { serials, ...restDetails } = rest
+
+        if (serials) {
+          const updatedSerials = serials.map((serialDetail, idx) => ({
+            ...serialDetail,
+            srlSeqNo: 0,
+            id: idx,
+            componentSeqNo: 0,
+            trxId: formik.values.recordId || 0,
+            itemId: rest?.itemId,
+            seqNo: id
+          }))
+
+          serialsValues = [...serialsValues, ...updatedSerials]
+        }
+
+        return {
+          ...restDetails,
+          seqNo: id,
+          applyVat: isVattable
+        }
+      })
 
       const payload = {
         header: {
@@ -247,11 +275,8 @@ export default function SaleTransactionForm({
           date: formatDateToApi(obj.header.date),
           dueDate: formatDateToApi(obj.header.dueDate)
         },
-        items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
-          seqNo: id,
-          applyVat: isVattable,
-          ...rest
-        })),
+        items: updatedRows,
+        serials: serialsValues,
         taxes: Object.values(
           [
             ...obj.taxes,
@@ -270,7 +295,7 @@ export default function SaleTransactionForm({
           }, {})
         ),
 
-        ...(({ header, items, taxes, ...rest }) => rest)(obj)
+        ...(({ header, items, taxes, serials, ...rest }) => rest)(obj)
       }
 
       const saTrxRes = await postRequest({
@@ -283,6 +308,8 @@ export default function SaleTransactionForm({
       invalidate()
     }
   })
+
+  const itemsUpdate = useRef(formik?.values?.items)
 
   function openMCRForm(data) {
     stack({
@@ -329,7 +356,7 @@ export default function SaleTransactionForm({
     let rowTaxDetails = null
 
     if (!formik.values.header.taxId) {
-      if (itemInfo.taxId) {
+      if (itemInfo?.taxId) {
         const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
 
         const details = taxDetailsResponse.map(item => ({
@@ -435,6 +462,20 @@ export default function SaleTransactionForm({
     }
   }
 
+  const onCondition = row => {
+    if (row.trackBy === 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
   const columns = [
     {
       component: 'textfield',
@@ -445,9 +486,15 @@ export default function SaleTransactionForm({
         if (!newRow?.barcode) return
 
         const ItemConvertPrice = await getItemConvertPrice2(newRow)
-        const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
-        const itemInfo = await getItem(ItemConvertPrice?.itemId)
-        await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
+        if (ItemConvertPrice) {
+          const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
+          const itemInfo = await getItem(ItemConvertPrice?.itemId)
+          await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
+        } else {
+          update({
+            barcode: null
+          })
+        }
       }
     },
     {
@@ -464,6 +511,7 @@ export default function SaleTransactionForm({
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
+          { from: 'trackBy', to: 'trackBy' },
           { from: 'msId', to: 'msId' }
         ],
         columnsInDropDown: [
@@ -479,6 +527,9 @@ export default function SaleTransactionForm({
         getFilteredMU(newRow?.itemId)
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
         await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
+      },
+      propsReducer({ row, props }) {
+        return { ...props, imgSrc: onCondition(row) }
       }
     },
     {
@@ -704,6 +755,33 @@ export default function SaleTransactionForm({
       component: 'textfield',
       label: labels.notes,
       name: 'notes'
+    },
+    {
+      component: 'button',
+      name: 'serials',
+      label: platformLabels.serials,
+      props: {
+        onCondition
+      },
+      onClick: (e, row, update, updateRow) => {
+        if (row?.trackBy === 1) {
+          stack({
+            Component: SerialsForm,
+            props: {
+              labels,
+              row,
+              disabled: isPosted,
+              siteId: formik?.values?.header.siteId,
+              maxAccess,
+              checkForSiteId: true,
+              updateRow
+            },
+            width: 500,
+            height: 700,
+            title: platformLabels.serials
+          })
+        }
+      }
     }
   ]
 
@@ -796,6 +874,21 @@ export default function SaleTransactionForm({
     })
   }
 
+  const handleMetalClick = async () => {
+    const metalItemsList = itemsUpdate?.current
+      ?.filter(item => item.metalId)
+      .map(item => ({
+        qty: item.qty,
+        metalRef: '',
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+
+    return metalItemsList || []
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -835,6 +928,12 @@ export default function SaleTransactionForm({
       disabled: !editMode
     },
     {
+      key: 'Metals',
+      condition: true,
+      onClick: 'onClickMetal',
+      handleMetalClick
+    },
+    {
       key: 'Locked',
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
@@ -855,6 +954,14 @@ export default function SaleTransactionForm({
     }
   ]
 
+  async function getSerials(recordId, seqNo) {
+    if (recordId)
+      return await getRequest({
+        extension: SaleRepository.LastSerialInvoice.qry,
+        parameters: `_trxId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
+      })
+  }
+
   async function fillForm(saTrxPack, dtInfo) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
@@ -868,6 +975,7 @@ export default function SaleTransactionForm({
     const modifiedList = await Promise.all(
       saTrxItems?.map(async (item, index) => {
         const taxDetailsResponse = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
+        const serials = await getSerials(recordId, item.seqNo)
 
         const updatedSaTrxTaxes =
           saTrxTaxes?.map(tax => {
@@ -888,6 +996,12 @@ export default function SaleTransactionForm({
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           saTrx: true,
+          serials: serials.list.map((serialDetail, index) => {
+            return {
+              ...serialDetail,
+              id: index
+            }
+          }),
           taxDetails:
             updatedSaTrxTaxes.filter(tax => saTrxItems?.some(responseTax => responseTax.seqNo != tax.seqNo)) || null
         }
@@ -910,6 +1024,7 @@ export default function SaleTransactionForm({
       items: modifiedList,
       taxes: [...saTrxTaxes]
     })
+    itemsUpdate.current = modifiedList
 
     const res = await getClientInfo(saTrxHeader.clientId)
     getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
@@ -1403,9 +1518,9 @@ export default function SaleTransactionForm({
       setmetalPriceVisibility(false)
     }
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
-    formik.setFieldValue('header.plantId', dtd?.record?.plantId ?? userDefaultsDataState?.plantId)
-    formik.setFieldValue('header.spId', dtd?.record?.spId ?? userDefaultsDataState?.spId)
-    formik.setFieldValue('header.siteId', dtd?.record?.siteId ?? userDefaultsDataState?.siteId)
+    formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
+    formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
+    formik.setFieldValue('header.siteId', dtd?.record?.siteId || userDefaultsDataState?.siteId || null)
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
     if (dtd?.record?.commitItems == false) formik.setFieldValue('header.siteId', null)
@@ -1462,14 +1577,8 @@ export default function SaleTransactionForm({
   }, [])
 
   useEffect(() => {
-    ;(async function () {
-      if (!recordId) {
-        const dtInfo = await getDTD(documentType?.dtId)
-        formik.setFieldValue('header.commitItems', dtInfo?.record?.commitItems)
-        if (!dtInfo?.record?.commitItems) formik.setFieldValue('header.siteId', null)
-      }
-    })()
-  }, [documentType?.dtId])
+    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+  }, [formik.values?.header.dtId])
 
   useEffect(() => {
     ;(async function () {
@@ -1514,7 +1623,7 @@ export default function SaleTransactionForm({
     const myObject = {}
 
     const filteredList = userDefaultsData?.list?.filter(obj => {
-      return obj.key === 'plantId' || obj.key === 'siteId'
+      return obj.key === 'plantId' || obj.key === 'siteId' || obj.key === 'spId'
     })
     filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
     setUserDefaultsDataState(myObject)
@@ -1574,12 +1683,8 @@ export default function SaleTransactionForm({
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       const recordId = newValue ? newValue.recordId : null
-
                       await formik.setFieldValue('header.dtId', recordId)
-
-                      if (newValue) {
-                        onChangeDtId(recordId)
-                      } else {
+                      if (!newValue) {
                         formik.setFieldValue('header.dtId', null)
                         formik.setFieldValue('header.siteId', null)
                         formik.setFieldValue('header.metalPrice', 0)
@@ -1881,6 +1986,7 @@ export default function SaleTransactionForm({
           <DataGrid
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
+              itemsUpdate.current = value
               action === 'delete' && setReCal(true)
             }}
             value={formik?.values?.items}

@@ -52,8 +52,6 @@ const SystemFunction = () => {
           sfName: '',
           nraId: '',
           nraRef: '',
-          batchNRAId: '',
-          batchNRARef: '',
           integrationLevel: '',
           integrationLevelName: ''
         }
@@ -107,25 +105,6 @@ const SystemFunction = () => {
           { from: 'recordId', to: 'nraId' },
           { from: 'reference', to: 'nraRef' },
           { from: 'name', to: 'nraName' }
-        ]
-      }
-    },
-    {
-      component: 'resourcelookup',
-      label: labels.batchNumberRange,
-      name: 'batchNRARef',
-      props: {
-        endpointId: SystemRepository.NumberRange.snapshot,
-        displayField: 'reference',
-        valueField: 'recordId',
-        columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'description', value: 'Name' }
-        ],
-        mapping: [
-          { from: 'recordId', to: 'batchNRAId' },
-          { from: 'reference', to: 'batchNRARef' },
-          { from: 'name', to: 'batchNRAName' }
         ]
       }
     },

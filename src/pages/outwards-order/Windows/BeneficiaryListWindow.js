@@ -1,5 +1,5 @@
 import Table from 'src/components/Shared/Table'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
@@ -8,15 +8,13 @@ import { useFormik } from 'formik'
 
 const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
   const { getRequest } = useContext(RequestsContext)
-  const [data, setData] = useState([])
 
   const formik = useFormik({
-    initialValues: { clientId: form.values.clientId },
-    enableReinitialize: true,
+    initialValues: { clientId: form.values.clientId, benList: [] },
     validateOnChange: true,
     validateOnBlur: true,
-    onSubmit: () => {
-      const checkedBeneficiary = data.list.find(ben => ben.checked)
+    onSubmit: values => {
+      const checkedBeneficiary = values.benList.find(ben => ben.checked)
 
       form.setValues({
         ...form.values,
@@ -40,8 +38,7 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
 
       return item
     })
-
-    setData(res ?? { list: [] })
+    formik.setFieldValue('benList', res.list ?? { list: [] })
   }
 
   const columns = [
@@ -76,11 +73,7 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
   ]
 
   useEffect(() => {
-    ;(async function () {
-      try {
-        await fetchGridData()
-      } catch (error) {}
-    })()
+    fetchGridData()
   }, [])
 
   return (
@@ -94,8 +87,7 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
     >
       <Table
         columns={columns}
-        gridData={data}
-        setData={setData}
+        gridData={{ list: formik.values.benList }}
         rowId={['beneficiaryId']}
         rowSelection='single'
         isLoading={false}

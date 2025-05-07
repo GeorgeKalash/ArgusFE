@@ -55,8 +55,9 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import { CommonContext } from 'src/providers/CommonContext'
 import ItemPromotion from 'src/components/Shared/ItemPromotion'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { SerialsForm } from 'src/components/Shared/SerialsForm'
 
-export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
+export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window, getResourceId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
@@ -198,14 +199,23 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         dueDate: yup.string().required(),
         currencyId: yup.string().required(),
         vendorId: yup.string().required(),
-        siteId: yup.number().test('', function (value) {
-          const { dtId } = this.parent
-          if (dtId == null) {
-            return !!value
-          }
+        siteId: yup
+          .number()
+          .transform(value => (isNaN(value) ? undefined : Number(value)))
+          .nullable()
+          .test('', function (value) {
+            const { dtId, commitItems } = this.parent
 
-          return true
-        })
+            if (dtId == null) {
+              return !!value
+            }
+
+            if (dtId && commitItems === true) {
+              return !!value
+            }
+
+            return true
+          })
       }),
       items: yup
         .array()
@@ -219,17 +229,41 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         .required()
     }),
     onSubmit: async obj => {
+      const serialsValues = []
+
+      const updatedRows = obj.items.map(({ id, isVattable, taxDetails, ...rest }) => {
+        const { serials, ...restDetails } = rest
+        if (serials) {
+          const updatedSerials = serials.map((serialDetail, idx) => {
+            return {
+              ...serialDetail,
+              id: idx + 1,
+              seqNo: id,
+              srlSeqNo: 0,
+              componentSeqNo: 0,
+              invoiceId: formik.values.recordId || 0,
+              itemId: rest?.itemId
+            }
+          })
+          serialsValues.push(...updatedSerials)
+        }
+
+        return {
+          ...restDetails,
+          seqNo: id,
+          invoiceId: formik.values.recordId || 0,
+          applyVat: isVattable
+        }
+      })
+
       const payload = {
         header: {
           ...obj.header,
           date: formatDateToApi(obj.header.date),
           dueDate: formatDateToApi(obj.header.dueDate)
         },
-        items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
-          seqNo: id,
-          applyVat: isVattable,
-          ...rest
-        })),
+        items: updatedRows,
+        serials: serialsValues,
         taxCodes: [
           ...[
             ...obj.items
@@ -240,7 +274,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
               }))
           ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
         ],
-        ...(({ header, items, taxCodes, ...rest }) => rest)(obj)
+        ...(({ header, items, taxCodes, serials, ...rest }) => rest)(obj)
       }
 
       const puTrxRes = await postRequest({
@@ -248,11 +282,16 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         record: JSON.stringify(payload)
       })
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
-      await refetchForm(puTrxRes.recordId)
-      invalidate()
+
+      if (puTrxRes?.recordId) {
+        await refetchForm(puTrxRes.recordId)
+        toast.success(actionMessage)
+        invalidate()
+      }
     }
   })
+
+  const itemsUpdate = useRef(formik?.values?.items)
 
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
@@ -312,6 +351,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
+          { from: 'trackBy', to: 'trackBy' },
           { from: 'msId', to: 'msId' }
         ],
         columnsInDropDown: [
@@ -337,6 +377,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             ? undefined
             : await getVendorPrice(newRow, formik.values.header)
         fillItemObject(update, phycialProperty, itemInfo, vendorPrice)
+      },
+      propsReducer({ row, props }) {
+        return { ...props, imgSrc: onCondition(row) }
       }
     },
     {
@@ -620,6 +663,21 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     invalidate()
   }
 
+  const handleMetalClick = async () => {
+    const metalItemsList = itemsUpdate?.current
+      ?.filter(item => item.metalId)
+      .map(item => ({
+        qty: item.qty,
+        metalRef: '',
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+
+    return metalItemsList || []
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -632,6 +690,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       condition: true,
       onClick: onWorkFlowClick,
       disabled: !editMode
+    },
+    {
+      key: 'Metals',
+      condition: true,
+      onClick: 'onClickMetal',
+      handleMetalClick
     },
     {
       key: 'Locked',
@@ -677,6 +741,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxHeader = puTrxPack?.header
     const puTrxItems = puTrxPack?.items
     const puTrxTaxes = puTrxPack?.taxCodes
+    const puTrxSerials = puTrxPack?.serials
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -704,6 +769,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           puTrx: true,
+          serials: puTrxSerials?.map((serialDetail, index) => {
+            return {
+              ...serialDetail,
+              id: index
+            }
+          }),
           taxDetails: updatedpuTrxTaxes.filter(tax => tax.seqNo === item.seqNo)
         }
       })
@@ -724,6 +795,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       items: modifiedList,
       taxCodes: [...puTrxTaxes]
     })
+
+    itemsUpdate.current = modifiedList
   }
 
   async function getPurchaseTransactionPack(transactionId) {
@@ -1124,9 +1197,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       setmetalPriceVisibility(false)
     }
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
-    formik.setFieldValue('header.plantId', dtd?.record?.plantId ?? userDefaultsDataState?.plantId)
-    formik.setFieldValue('header.spId', dtd?.record?.spId ?? userDefaultsDataState?.spId)
-    formik.setFieldValue('header.siteId', dtd?.record?.siteId ?? userDefaultsDataState?.siteId ?? null)
+    formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
+    formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
+    formik.setFieldValue(
+      'header.siteId',
+      dtd?.record.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
+    )
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
   }
@@ -1198,6 +1274,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     defaultsDataState && setDefaultFields()
   }, [defaultsDataState])
 
+  useEffect(() => {
+    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+  }, [formik.values?.header.dtId])
+
   async function getDefaultsData() {
     const myObject = {}
 
@@ -1237,20 +1317,59 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const setDefaultFields = () => {
     formik.setFieldValue('header.currencyId', defaultsDataState?.currencyId || null)
-    formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
-    formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
-    formik.setFieldValue('header.siteId', userDefaultsDataState?.siteId || null)
+    if (!formik.values.header.plantId) formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
+    if (!formik.values.header.spId) formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
+    if (!formik.values.header.siteId)
+      formik.setFieldValue(
+        'header.siteId',
+        !formik.values.header.dtId || (formik.values.header.dtId && formik.values.header.commitItems)
+          ? userDefaultsDataState?.siteId || null
+          : null
+      )
   }
 
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.PurchaseInvoice:
-        return ResourceIds.PurchaseInvoice
-      case SystemFunction.PurchaseReturn:
-        return ResourceIds.PurchaseReturn
-      default:
-        return null
+  const onCondition = row => {
+    if (row.trackBy === 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
     }
+  }
+
+  if (functionId == SystemFunction.PurchaseReturn) {
+    columns.push({
+      component: 'button',
+      name: 'serials',
+      label: platformLabels.serials,
+      props: {
+        onCondition
+      },
+      onClick: (e, row, update, updateRow) => {
+        if (row?.trackBy === 1) {
+          stack({
+            Component: SerialsForm,
+            props: {
+              labels,
+              row,
+              disabled: isPosted,
+              siteId: formik?.values?.header.siteId,
+              maxAccess,
+              checkForSiteId: row.qty >= 0 ? false : true,
+              updateRow
+            },
+            width: 500,
+            height: 700,
+            title: platformLabels.serials
+          })
+        }
+      }
+    })
   }
 
   return (
@@ -1287,10 +1406,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
                   if (newValue) {
                     formik.setFieldValue('header.dtId', recordId)
-                    onChangeDtId(recordId)
                   } else {
                     formik.setFieldValue('header.dtId', null)
-                    formik.setFieldValue('header.siteId', null)
                     formik.setFieldValue('header.metalPrice', 0)
                     formik.setFieldValue('header.KGmetalPrice', 0)
                     setmetalPriceVisibility(false)
@@ -1404,11 +1521,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 displayFieldWidth={2}
-                readOnly={
-                  formik?.values?.header.dtId ||
-                  (formik?.values?.header.dtId && formik?.values?.header.commitItems == false) ||
-                  isPosted
-                }
+                readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
                 required={
                   !formik?.values?.header.dtId ||
                   (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
@@ -1521,6 +1634,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           <DataGrid
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
+              itemsUpdate.current = value
+
               action === 'delete' && setReCal(true)
             }}
             onSelectionChange={(row, update, field) => {

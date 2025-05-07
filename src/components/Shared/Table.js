@@ -39,6 +39,7 @@ const Table = ({
   handleCheckboxChange = '',
   showSelectAll = true,
   onSelectionChange,
+  selectionMode = 'row',
   rowDragManaged = false,
   onRowDragEnd = false,
   ...props
@@ -56,6 +57,7 @@ const Table = ({
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
   const [focus, setFocus] = useState(false)
+  const hasRowId = gridData?.list?.[0]?.id
 
   const columns = props?.columns
     .filter(
@@ -85,7 +87,7 @@ const Table = ({
       if (col.type === 'number' || col?.type?.field === 'number') {
         return {
           ...col,
-          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal),
+          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round),
           cellStyle: { textAlign: 'right' },
           sortable: !disableSorting
         }
@@ -162,7 +164,8 @@ const Table = ({
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
 
   useEffect(() => {
-    const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
+    const areAllValuesTrue =
+      props?.gridData?.list?.length > 0 && props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
     if (typeof setData === 'function') {
       onSelectionChanged()
@@ -480,6 +483,7 @@ const Table = ({
           height: '100%'
         }}
         checked={params.value}
+        disabled={props?.disable && props?.disable(params?.data)}
         onChange={e => {
           const checked = e.target.checked
           if (rowSelection !== 'single') {
@@ -515,8 +519,17 @@ const Table = ({
     const [tooltipOpen, setTooltipOpen] = useState(false)
 
     const handleClick = event => {
-      if (onSelectionChange) {
-        onSelectionChange(params.data)
+      if (selectionMode === 'row' && onSelectionChange) {
+        onSelectionChange(params.data, params.rowIndex)
+      } else if (selectionMode === 'column' && onSelectionChange) {
+        const columnValues = params.api.getDisplayedRowCount()
+          ? Array.from(
+              { length: params.api.getDisplayedRowCount() },
+              (_, i) => params.api.getDisplayedRowAtIndex(i).data[params.colDef.field]
+            )
+          : []
+
+        onSelectionChange(columnValues, params.colDef.field)
       }
 
       const range = document.createRange()
@@ -679,12 +692,19 @@ const Table = ({
     }
   }
 
+  const height = gridData?.list?.length * 35 + 40 + 40
+
   return (
     <VertLayout>
       <Grow>
         <Box
           className='ag-theme-alpine'
-          style={{ flex: 1, width: '1000px !important', height: props?.height || 'auto' }}
+          style={{
+            flex: !props.maxHeight && !props.height && 1,
+            width: '1000px !important',
+            height: props?.maxHeight ? height : props?.height || 'auto',
+            maxHeight: props?.maxHeight || 'auto'
+          }}
           sx={{
             '.ag-header': {
               height: '40px !important',
@@ -707,6 +727,9 @@ const Table = ({
             enableClipboard={true}
             enableRangeSelection={true}
             columnDefs={columnDefs}
+            {...(hasRowId && {
+              getRowId: params => params?.data?.id
+            })}
             pagination={false}
             paginationPageSize={pageSize}
             rowSelection={'single'}

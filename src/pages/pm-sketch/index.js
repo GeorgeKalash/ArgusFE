@@ -119,7 +119,8 @@ const Sketch = () => {
     stack({
       Component: SketchForm,
       props: {
-        recordId
+        recordId,
+        invalidate
       },
       width: 700,
       height: 700,

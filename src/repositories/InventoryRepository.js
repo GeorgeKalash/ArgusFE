@@ -91,7 +91,6 @@ export const InventoryRepository = {
     get: service + 'getITC',
     set: service + 'setITC'
   },
-
   MeasurementUnit: {
     qry: service + 'qryMU',
     get: service + 'getMU',
@@ -166,9 +165,6 @@ export const InventoryRepository = {
   MaterialsTransferItems: {
     qry: service + 'qryTFI'
   },
-  Cost: {
-    get: service + 'getCOS'
-  },
   ItemPhysProp: {
     get: service + 'getPP'
   },
@@ -209,6 +205,7 @@ export const InventoryRepository = {
   },
   AvailabilitySerial: {
     qry: service + 'qryAVS',
+    get: service + 'getAVS',
     page: service + 'pageAVS'
   },
   AvailabilityLot: {
@@ -263,7 +260,14 @@ export const InventoryRepository = {
   },
   Serial: {
     qry: service + 'qrySRL',
-    get2: service + 'get2SRL'
+    get2: service + 'get2SRL',
+    get: service + 'getSRL'
+  },
+  MaterialTransferSerial: {
+    qry: service + 'qryTFS'
+  },
+  MaterialAdjustmentSerial: {
+    qry: service + 'qryADS'
   },
   DraftTransfer: {
     page: service + 'pageDTF',
@@ -294,5 +298,19 @@ export const InventoryRepository = {
     qry: service + 'qryCOL',
     del: service + 'delCOL',
     set: service + 'setCOL'
+  },
+  Management: {
+    get: service + 'getMAN',
+    set2: service + 'set2MAN'
+  },
+  SManagement: {
+    qry: service + 'qrySMA'
+  },
+  Replacement: {
+    qry: service + 'qryRPL'
+  },
+  Lot: {
+    get: service + 'getLOT',
+    set: service + 'setLOT'
   }
 }

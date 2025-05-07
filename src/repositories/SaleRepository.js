@@ -157,7 +157,8 @@ export const SaleRepository = {
     reopen: service + 'reopenORD',
     cancel: service + 'terminateORD',
     postToInvoice: service + 'transfer2ORD',
-    snapshot: service + 'snapshotORD'
+    snapshot: service + 'snapshotORD',
+    summaryORD: service + 'summaryORD'
   },
   SalesOrderItem: {
     qry: service + 'qryORI'
@@ -259,9 +260,32 @@ export const SaleRepository = {
   },
   LastSerialInvoice: {
     get: service + 'lastSRL',
-    qry: service + 'importSRL'
+    import: service + 'importSRL',
+    qry: service + 'qrySRL'
   },
   InvoiceReturnBalance: {
     balance: service + 'balanceRET'
-  }
+  },
+  VerifyIntegrity: {
+    check: service + 'checkTRX'
+  },
+  ClientPriceList: {
+    page: service + 'pagePRC',
+    get: service + 'getPRC',
+    set: service + 'setPRC',
+    del: service + 'delPRC',
+  },
+  PriceListUpdate: {
+    page: service + 'pagePLU',
+    get: service + 'getPLU',
+    set: service + 'setPLU',
+    del: service + 'delPLU',
+    post: service + 'postPLU',
+    unpost: service + 'unpostPLU',
+    generate: service + 'generatePLU',
+  },
+  PriceListItem: {
+    qry: service + 'qryPLI',
+    snapshot: service + 'snapshotPLI',
+  },
 }

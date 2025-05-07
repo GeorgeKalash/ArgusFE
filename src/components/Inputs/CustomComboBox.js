@@ -27,7 +27,6 @@ const CustomComboBox = ({
   readOnly = false,
   neverPopulate = false,
   displayFieldWidth = 1,
-  defaultIndex,
   sx,
   columnsInDropDown,
   editMode = false,
@@ -51,12 +50,6 @@ const CustomComboBox = ({
 
   const [focus, setAutoFocus] = useState(autoFocus)
   const [isFocused, setIsFocused] = useState(false)
-
-  useEffect(() => {
-    if (!value && store?.length > 0 && typeof defaultIndex === 'number' && defaultIndex === 0) {
-      onChange(store?.[defaultIndex])
-    }
-  }, [defaultIndex])
 
   const autocompleteRef = useRef(null)
 
@@ -219,10 +212,9 @@ const CustomComboBox = ({
           error={error}
           helperText={helperText}
           onBlur={e => {
-            const listbox = document.querySelector('[role="listbox"]')
-            if (selectFirstValue.current !== 'click' && listbox && listbox.offsetHeight > 0) {
-              onBlur(e, valueHighlightedOption?.current, filterOptions.current)
-            }
+            const allowSelect =
+              selectFirstValue.current !== 'click' && document.querySelector('.MuiAutocomplete-listbox')
+            onBlur(e, valueHighlightedOption?.current, filterOptions.current, allowSelect)
           }}
           InputProps={{
             ...params.InputProps,

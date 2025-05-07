@@ -609,7 +609,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       if (plantId && data.countryId && data.currencyId && data.dispersalType) {
         formik.setFieldValue('products', [])
 
-        var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${
+        var parameters = `_plantId=${editMode ? data.plantId : plantId}&_countryId=${data.countryId}&_dispersalType=${
           data.dispersalType
         }&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}&_includingFees=${
           data.includingFees ? 1 : 0
@@ -626,12 +626,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           InstantCashProduct ? await mergeICRates(res.list, data) : await displayProduct(res.list, data.productId)
         } else {
           formik.setFieldValue('products', [])
-          handleSelectedProduct()
+          !editMode && handleSelectedProduct(null, null)
         }
       }
     } catch (error) {
       formik.setFieldValue('products', [])
-      handleSelectedProduct()
+      !editMode && handleSelectedProduct()
     }
   }
   async function mergeICRates(data, outwardsList) {
@@ -721,6 +721,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     ;(async function () {
       if (recordId) {
         const res = await refetchForm(recordId)
+
         const copy = { ...res.record }
         copy.lcAmount = 0
         await fillProducts(copy)
@@ -730,10 +731,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }, [])
 
   useEffect(() => {
-    formik.setFieldValue(
-      'amount',
-      formik.values.lcAmount + (formik.values.commission + vatAmount - formik.values.tdAmount)
-    )
+    formik.setFieldValue('amount', amount)
   }, [amount])
 
   return (
@@ -873,20 +871,33 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={
-                        formik.values.countryId &&
-                        formik.values.dispersalType &&
-                        RemittanceOutwardsRepository.Currency.qry
+                        editMode
+                          ? SystemRepository.Currency.qry
+                          : formik.values.countryId &&
+                            formik.values.dispersalType &&
+                            RemittanceOutwardsRepository.Currency.qry
                       }
-                      parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}`}
+                      parameters={
+                        !editMode
+                          ? `_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}`
+                          : undefined
+                      }
                       label={labels.Currency}
                       required
                       name='currencyId'
-                      displayField={['currencyRef', 'currencyName']}
-                      columnsInDropDown={[
-                        { key: 'currencyRef', value: 'Reference' },
-                        { key: 'currencyName', value: 'Name' }
-                      ]}
-                      valueField='currencyId'
+                      displayField={editMode ? ['reference', 'name'] : ['currencyRef', 'currencyName']}
+                      columnsInDropDown={
+                        editMode
+                          ? [
+                              { key: 'reference', value: 'Reference' },
+                              { key: 'name', value: 'Name' }
+                            ]
+                          : [
+                              { key: 'currencyRef', value: 'Reference' },
+                              { key: 'currencyName', value: 'Name' }
+                            ]
+                      }
+                      valueField={editMode ? 'recordId' : 'currencyId'}
                       values={formik.values}
                       readOnly={!formik.values.dispersalType || isClosed || isPosted || editMode}
                       onChange={(event, newValue) => {
@@ -923,7 +934,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             dispersalType: formik.values.dispersalType,
                             lcAmount: formik.values.lcAmount || 0,
                             fcAmount: formik.values.fcAmount || 0,
-                            includingFees: formik.values.includingFees
+                            includingFees: formik.values.includingFees,
+                            plantId: formik.values.plantId
                           })
                       }}
                       onClear={() => {
@@ -955,7 +967,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             dispersalType: formik.values.dispersalType,
                             lcAmount: formik.values.lcAmount || 0,
                             fcAmount: formik.values.fcAmount || 0,
-                            includingFees: formik.values.includingFees
+                            includingFees: formik.values.includingFees,
+                            plantId: formik.values.plantId
                           })
                       }}
                       onClear={() => {
