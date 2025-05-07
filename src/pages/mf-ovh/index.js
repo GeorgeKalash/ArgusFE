@@ -68,6 +68,12 @@ const Overhead = () => {
       field: 'name',
       headerName: labels.name,
       flex: 1
+    },
+    {
+      field: 'unitCost',
+      headerName: labels.unitCost,
+      flex: 1,
+      type: 'number'
     }
   ]
 
