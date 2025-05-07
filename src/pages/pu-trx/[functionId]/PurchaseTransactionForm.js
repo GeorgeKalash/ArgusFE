@@ -192,8 +192,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     })
   }
 
-  console.log(initialValues, 'initialValues')
-
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
@@ -383,7 +381,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           newRow?.promotionTypeId === '3' || newRow?.promotionTypeId === '4'
             ? undefined
             : await getVendorPrice(newRow, formik.values.header)
-        fillItemObject(update, phycialProperty, itemInfo, vendorPrice)
+        await fillItemObject(update, phycialProperty, itemInfo, vendorPrice)
       },
       propsReducer({ row, props }) {
         return { ...props, imgSrc: onCondition(row) }
@@ -912,7 +910,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           taxId: itemInfo.taxId,
           taxCodeId: item.taxCodeId,
           taxBase: item.taxBase,
-          amount: item.amount
+          amount: item.amount ?? 0
         }))
         rowTax = itemInfo.taxId
         rowTaxDetails = details
@@ -1040,8 +1038,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       dirtyField: dirtyField
     })
 
-    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
-
     const vatCalcRow = getVatCalc({
       basePrice: itemPriceRow?.basePrice,
       unitPrice: itemPriceRow?.unitPrice,
@@ -1137,7 +1133,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
-      if (item?.taxDetails?.length > 0) item.taxDetails = [item.taxDetails[0]]
 
       const vatCalcRow = getVatCalc({
         basePrice: parseFloat(item?.basePrice),
@@ -1708,7 +1703,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                   cycleButtonLabel={cycleButtonState.text}
                   decimalScale={2}
                   readOnly={isPosted}
-                  iconKey={cycleButtonState.text}                  
+                  iconKey={cycleButtonState.text}
                   handleButtonClick={handleButtonClick}
                   ShowDiscountIcons={true}
                   onChange={e => {
