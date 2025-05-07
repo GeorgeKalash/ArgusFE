@@ -281,5 +281,12 @@ export const ManufacturingRepository = {
   AssemblyOverhead: {
     qry: service + 'qryAOH',
     set2: service + 'set2AOH'
+  },
+  Overhead: {
+    page: service + 'pageOVH',
+    set: service + 'setOVH',
+    get: service + 'getOVH',
+    del: service + 'delOVH',
+    snapshot: service + 'snapshotOVH'
   }
 }
