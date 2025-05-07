@@ -338,6 +338,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     RateDivision.FINANCIALS
                   )
                 }}
+                autoFocus={!editMode}
                 readOnly={isCancelled || isPosted}
                 value={formik.values.date}
                 maxAccess={maxAccess}
