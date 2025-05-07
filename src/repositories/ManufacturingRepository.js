@@ -281,5 +281,11 @@ export const ManufacturingRepository = {
   AssemblyOverhead: {
     qry: service + 'qryAOH',
     set2: service + 'set2AOH'
+  },
+  JobCategory: {
+    set: service + 'setJCA',
+    get: service + 'getJCA',
+    del: service + 'delJCA',
+    page: service + 'pageJCA'
   }
 }
