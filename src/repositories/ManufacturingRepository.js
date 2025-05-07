@@ -107,6 +107,7 @@ export const ManufacturingRepository = {
     set: service + 'setOVH',
     get: service + 'getOVH',
     del: service + 'delOVH',
+    page: service + 'pageOVH',
     snapshot: service + 'snapshotOVH'
   },
   Design: {
@@ -281,12 +282,5 @@ export const ManufacturingRepository = {
   AssemblyOverhead: {
     qry: service + 'qryAOH',
     set2: service + 'set2AOH'
-  },
-  Overhead: {
-    page: service + 'pageOVH',
-    set: service + 'setOVH',
-    get: service + 'getOVH',
-    del: service + 'delOVH',
-    snapshot: service + 'snapshotOVH'
   }
 }
