@@ -67,10 +67,9 @@ export default function InstantCash({
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      deliveryModeId: yup.string().required(),
-      toCountryId: yup.string().required(),
+      deliveryModeId: yup.number().required(),
       payingAgent: yup.string().required(),
-      sourceAmount: yup.string().required(),
+      sourceAmount: yup.number().required(),
       remitter: yup.object().shape({
         employerName: yup.string().required(),
         employerStatus: yup.string().required()
@@ -86,6 +85,7 @@ export default function InstantCash({
       window.close()
     }
   })
+
   useEffect(() => {
     ;(async function () {
       try {

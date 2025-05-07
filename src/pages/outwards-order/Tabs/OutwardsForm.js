@@ -326,8 +326,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       toast.success(platformLabels.Closed)
 
       getDefaultVAT()
-      result = await refetchForm(res.recordId)
-      result.record.headerView.status === 4 && openRV()
+      const result = await refetchForm(res.recordId)
+      result?.record?.headerView?.status === 4 && openRV()
     }
   }
 
@@ -467,45 +467,44 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }
 
   const chooseClient = async (clientId, category) => {
-    if (clientId) {
-      if (category == 1) {
-        const result = await getClientInfo(clientId)
-        if (!result?.clientRemittance) {
-          stackError({
-            message: `Chosen Client Has No KYC.`
-          })
-
-          return
-        }
-        formik.setFieldValue('idNo', result?.clientIDView?.idNo)
-        formik.setFieldValue('expiryDate', formatDateFromApi(result?.clientIDView?.idExpiryDate))
-        formik.setFieldValue('firstName', result?.clientIndividual?.firstName)
-        formik.setFieldValue('middleName', result?.clientIndividual?.middleName)
-        formik.setFieldValue('lastName', result?.clientIndividual?.lastName)
-        formik.setFieldValue('familyName', result?.clientIndividual?.familyName)
-        formik.setFieldValue('fl_firstName', result?.clientIndividual?.fl_firstName)
-        formik.setFieldValue('fl_middleName', result?.clientIndividual?.fl_middleName)
-
-        formik.setFieldValue('fl_lastName', result?.clientIndividual?.fl_lastName)
-        formik.setFieldValue('fl_familyName', result?.clientIndividual?.fl_familyName)
-        formik.setFieldValue('professionId', result?.clientIndividual?.professionId)
-        formik.setFieldValue('header.cellPhone', result?.clientMaster?.cellPhone)
-        formik.setFieldValue('header.nationalityId', result?.clientMaster?.nationalityId)
-        formik.setFieldValue('hiddenTrxCount', result?.clientRemittance?.trxCountPerYear)
-        formik.setFieldValue('hiddenTrxAmount', result?.clientRemittance?.trxAmountPerYear)
-        formik.setFieldValue('ICRequest.remitter.employerName', result?.clientIndividual?.sponsorName)
-      } else if (category == 2) {
-        const res = await getRequest({
-          extension: CTCLRepository.ClientCorporate.get,
-          parameters: `_clientId=${clientId}`
+    if (category == 1) {
+      const result = clientId ? await getClientInfo(clientId) : null
+      if (clientId && !result?.clientRemittance) {
+        stackError({
+          message: `Chosen Client Has No KYC.`
         })
-        if (!res) {
-          return
-        }
-        formik.setFieldValue('header.nationalityId', result?.clientMaster?.nationalityId)
-        formik.setFieldValue('header.cellPhone', result?.clientMaster?.cellPhone)
-        formik.setFieldValue('expiryDate', formatDateFromApi(result?.clientMaster?.expiryDate))
+
+        return
       }
+
+      formik.setFieldValue('idNo', result?.clientIDView?.idNo)
+      formik.setFieldValue('expiryDate', formatDateFromApi(result?.clientIDView?.idExpiryDate))
+      formik.setFieldValue('firstName', result?.clientIndividual?.firstName)
+      formik.setFieldValue('middleName', result?.clientIndividual?.middleName)
+      formik.setFieldValue('lastName', result?.clientIndividual?.lastName)
+      formik.setFieldValue('familyName', result?.clientIndividual?.familyName)
+      formik.setFieldValue('fl_firstName', result?.clientIndividual?.fl_firstName)
+      formik.setFieldValue('fl_middleName', result?.clientIndividual?.fl_middleName)
+
+      formik.setFieldValue('fl_lastName', result?.clientIndividual?.fl_lastName)
+      formik.setFieldValue('fl_familyName', result?.clientIndividual?.fl_familyName)
+      formik.setFieldValue('professionId', result?.clientIndividual?.professionId)
+      formik.setFieldValue('header.cellPhone', result?.clientMaster?.cellPhone)
+      formik.setFieldValue('header.nationalityId', result?.clientMaster?.nationalityId)
+      formik.setFieldValue('hiddenTrxCount', result?.clientRemittance?.trxCountPerYear)
+      formik.setFieldValue('hiddenTrxAmount', result?.clientRemittance?.trxAmountPerYear)
+      formik.setFieldValue('ICRequest.remitter.employerName', result?.clientIndividual?.sponsorName)
+    } else if (category == 2) {
+      const res = await getRequest({
+        extension: CTCLRepository.ClientCorporate.get,
+        parameters: `_clientId=${clientId}`
+      })
+      if (!res) {
+        return
+      }
+      formik.setFieldValue('header.nationalityId', result?.clientMaster?.nationalityId)
+      formik.setFieldValue('header.cellPhone', result?.clientMaster?.cellPhone)
+      formik.setFieldValue('expiryDate', formatDateFromApi(result?.clientMaster?.expiryDate))
     }
   }
 
@@ -953,7 +952,11 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                         formik.setFieldValue('header.dispersalTypeName', newValue ? newValue?.dispersalTypeName : '')
                         formik.setFieldValue('header.beneficiaryId', '')
                         formik.setFieldValue('header.beneficiaryName', '')
-                        if (!newValue) formik.setFieldValue('header.currencyId', '')
+                        if (!newValue) {
+                          formik.setFieldValue('header.currencyId', '')
+                        }
+                        formik.setFieldValue('header.lcAmount', '')
+                        formik.setFieldValue('header.fcAmount', '')
                       }}
                       error={formik.touched.header?.dispersalType && Boolean(formik.errors.header?.dispersalType)}
                     />
@@ -993,6 +996,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       onChange={(event, newValue) => {
                         formik.setFieldValue('header.currencyId', newValue?.currencyId)
                         formik.setFieldValue('header.currencyRef', newValue?.currencyRef)
+                        formik.setFieldValue('header.lcAmount', '')
+                        formik.setFieldValue('header.fcAmount', '')
                       }}
                       error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
                     />
@@ -1003,7 +1008,11 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       label={labels.includeTransferFees}
                       name='includingFees'
                       checked={formik.values.header.includingFees}
-                      onChange={e => formik.setFieldValue('header.includingFees', e.target.checked)}
+                      onChange={e => {
+                        formik.setFieldValue('header.includingFees', e.target.checked)
+                        formik.setFieldValue('header.lcAmount', '')
+                        formik.setFieldValue('header.fcAmount', '')
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -1082,10 +1091,15 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                           plantId &&
                           formik.values.header.countryId &&
                           formik.values.header.currencyId &&
-                          formik.values.header.dispersalType
+                          formik.values.header.dispersalType &&
+                          (formik.values.header.fcAmount || formik.values.header.lcAmount)
                         )
                       }
-                      onClick={() => openProductWindow()}
+                      onClick={() =>
+                        setTimeout(() => {
+                          openProductWindow()
+                        }, 10)
+                      }
                     />
                   </Grid>
                   <Grid item xs={6}>
@@ -1233,9 +1247,11 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             formik.setFieldValue('header.clientName', newValue?.name || '')
                             formik.setFieldValue('header.clientRef', newValue?.reference || '')
                             formik.setFieldValue('header.category', newValue?.category || 1)
-                            await chooseClient(newValue?.recordId, newValue?.category)
+                            await chooseClient(newValue?.recordId, newValue?.category || 1)
                             formik.setFieldValue('header.beneficiaryId', null)
                             formik.setFieldValue('header.beneficiaryName', '')
+                            formik.setFieldValue('header.beneficiarySeqNo', null)
+                            formik.setFieldValue('header.branchCode', '')
                           }}
                           errorCheck={'clientId'}
                         />
@@ -1439,8 +1455,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       formik.setFieldValue('header.beneficiaryName', newValue?.name)
                       formik.setFieldValue('header.beneficiarySeqNo', newValue?.seqNo)
                       formik.setFieldValue('header.branchCode', newValue?.branchCode)
-                      formik.setFieldValue('terraPayDetails.quotation.creditorMSIDSN', newValue?.cellPhone)
-                      formik.setFieldValue('terraPayDetails.quotation.creditorBankAccount', newValue?.IBAN)
+                      if (formik.values.header.interfaceId === 2) {
+                        formik.setFieldValue('terraPayDetails.quotation.creditorMSIDSN', newValue?.cellPhone || '')
+                        formik.setFieldValue('terraPayDetails.quotation.creditorBankAccount', newValue?.IBAN || '')
+                      }
                     }}
                     errorCheck={'header.beneficiaryId'}
                   />
@@ -1448,7 +1466,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                 <Grid item xs={3}>
                   <CustomButton
                     onClick={() => openBankWindow()}
-                    label={'Bank API'}
+                    label={labels.bankApi}
                     color='#000000'
                     disabled={!formik.values.header.beneficiaryId || !formik.values.header.interfaceId}
                   />
