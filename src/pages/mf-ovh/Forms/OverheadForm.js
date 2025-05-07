@@ -97,7 +97,7 @@ export default function OverheadForm({ labels, maxAccess, recordId }) {
               <CustomNumberField
                 name='unitCost'
                 decimalScale={2}
-                maxLength={13}
+                maxLength={12}
                 label={labels.unitCost}
                 value={formik.values.unitCost}
                 maxAccess={maxAccess}
