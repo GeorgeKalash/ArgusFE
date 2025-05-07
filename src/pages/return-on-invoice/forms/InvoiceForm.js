@@ -69,10 +69,10 @@ export default function InvoiceForm({ form, maxAccess, labels }) {
   async function fetchGridData() {
     let items = []
     let invoices = []
-    if (form.recordId) {
+    if (form?.values?.recordId) {
       const retItems = await getRequest({
         extension: SaleRepository.ReturnItem.qry,
-        parameters: `_returnId=${form.recordId}`
+        parameters: `_returnId=${form?.values?.recordId}`
       })
       items = retItems.list.map(item => ({
         ...item,
@@ -81,23 +81,52 @@ export default function InvoiceForm({ form, maxAccess, labels }) {
       }))
     }
 
-    const res = await getRequest({
+    const combined = [...items, ...form.values.items]
+
+    const allLists = Array.from(
+      combined
+        .reduce((map, item) => {
+          const key = item.itemId + '_' + item.seqNo
+          if (!map.has(key)) {
+            map.set(key, item)
+          }
+
+          return map
+        }, new Map())
+        .values()
+    )
+
+    const listReq = await getRequest({
       extension: SaleRepository.ReturnItem.balance,
       parameters: `_invoiceId=${form?.values?.invoiceId}`
     })
-    invoices = res?.list.map(item => {
-      return {
-        itemId: item.item.itemId,
-        sku: item.item.sku,
-        itemName: item.item.itemName,
-        qty: item.item.qty || 0,
-        returnedQty: item.returnedQty || 0,
-        balanceQty: item.item.qty - item.returnedQty || 0,
-        returnNow: 0,
-        checked: false
+    listReq.list = listReq?.list.map(x => {
+      let index2 = allLists.findIndex(
+        item => item.seqNo === x.item.seqNo && item.componentSeqNo === x.item.componentSeqNo
+      )
+
+      if (index2 != 1) {
+        x.check =
+          form.values.items.FindIndex(
+            item => item.seqNo == x.item.seqNo && item.componentSeqNo == x.item.componentSeqNo
+          ) == -1
+        x.returnNow = allLists[index2].returnNowQty
       }
     })
-    formik.setFieldValue('invoices', invoices)
+
+    // invoices = listReq?.list.map(item => {
+    //   return {
+    //     itemId: item.item.itemId,
+    //     sku: item.item.sku,
+    //     itemName: item.item.itemName,
+    //     qty: item.item.qty || 0,
+    //     returnedQty: item.returnedQty || 0,
+    //     balanceQty: item.item.qty - item.returnedQty || 0,
+    //     returnNow: 0,
+    //     checked: false
+    //   }
+    // })
+    formik.setFieldValue('invoices', allLists)
   }
 
   useEffect(() => {
@@ -163,7 +192,7 @@ export default function InvoiceForm({ form, maxAccess, labels }) {
             name='table'
             columns={columns}
             gridData={{ list: formik.values.invoices }}
-            rowId={['itemId']}
+            rowId={['itemId', 'seqNo']}
             maxAccess={maxAccess}
             pagination={false}
             showCheckboxColumn={true}
