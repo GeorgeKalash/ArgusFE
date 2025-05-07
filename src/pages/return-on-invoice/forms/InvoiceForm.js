@@ -68,29 +68,28 @@ export default function InvoiceForm({ form, maxAccess, labels }) {
   ]
   async function fetchGridData() {
     let items = []
-    let invoices = []
+
     if (form?.values?.recordId) {
       const retItems = await getRequest({
         extension: SaleRepository.ReturnItem.qry,
-        parameters: `_returnId=${form?.values?.recordId}`
+        parameters: `_returnId=${form.values.recordId}`
       })
+
       items = retItems.list.map(item => ({
         ...item,
         returnNowQty: item.qty,
-        componentSeqNo: item.componentSeqNo == null ? item.componentSeqNo : 0
+        componentSeqNo: item.componentSeqNo ?? 0
       }))
     }
 
     const combined = [...items, ...form.values.items]
-
     const allLists = Array.from(
       combined
         .reduce((map, item) => {
-          const key = item.itemId + '_' + item.seqNo
+          const key = `${item.itemId}_${item.seqNo}`
           if (!map.has(key)) {
             map.set(key, item)
           }
-
           return map
         }, new Map())
         .values()
@@ -98,35 +97,43 @@ export default function InvoiceForm({ form, maxAccess, labels }) {
 
     const listReq = await getRequest({
       extension: SaleRepository.ReturnItem.balance,
-      parameters: `_invoiceId=${form?.values?.invoiceId}`
+      parameters: `_invoiceId=${form.values.invoiceId}`
     })
-    listReq.list = listReq?.list.map(x => {
-      let index2 = allLists.findIndex(
-        item => item.seqNo === x.item.seqNo && item.componentSeqNo === x.item.componentSeqNo
-      )
 
-      if (index2 != 1) {
-        x.check =
-          form.values.items.FindIndex(
-            item => item.seqNo == x.item.seqNo && item.componentSeqNo == x.item.componentSeqNo
-          ) == -1
-        x.returnNow = allLists[index2].returnNowQty
+    const invoices = listReq?.list.map(x => {
+      const seqNo = x.item.seqNo
+      const componentSeqNo = x.item.componentSeqNo
+
+      const index2 = allLists.findIndex(item => item.seqNo === seqNo && item.componentSeqNo === componentSeqNo)
+
+      const existsInFormValues =
+        form.values.items.findIndex(item => item.seqNo === seqNo && item.componentSeqNo === componentSeqNo) !== -1
+
+      const returnNowValue = existsInFormValues && index2 !== -1 ? allLists[index2].returnNowQty : 0
+
+      const updatedItem = {
+        ...x,
+        itemId: x.item.itemId,
+        sku: x.item.sku,
+        itemName: x.item.itemName,
+        qty: x.item.qty || 0,
+        returnedQty: (x.returnedQty || 0) - returnNowValue,
+        balanceQty: (x.item.qty || 0) - (x.returnedQty || 0),
+        returnNow: index2 !== 1 ? returnNowValue : 0,
+        checked: false,
+        check: !existsInFormValues
       }
+
+      if (index2 === 1) {
+        updatedItem.item.invoiceId = form?.values?.invoiceId || 0
+        updatedItem.item.invoiceRef = form?.values?.invoiceRef || ''
+      }
+
+      return updatedItem
     })
 
-    // invoices = listReq?.list.map(item => {
-    //   return {
-    //     itemId: item.item.itemId,
-    //     sku: item.item.sku,
-    //     itemName: item.item.itemName,
-    //     qty: item.item.qty || 0,
-    //     returnedQty: item.returnedQty || 0,
-    //     balanceQty: item.item.qty - item.returnedQty || 0,
-    //     returnNow: 0,
-    //     checked: false
-    //   }
-    // })
-    formik.setFieldValue('invoices', allLists)
+    const filteredInvoices = invoices?.filter(x => x.item.qty !== x.returnedQty)
+    formik.setFieldValue('invoices', filteredInvoices)
   }
 
   useEffect(() => {
