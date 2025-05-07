@@ -136,7 +136,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         parameters: `_dtId=${dtId}`
       })
       formik.setFieldValue('plantId', record?.plantId || plantId)
-      getCashAccount(record?.cashAccountId)
+      getCashAccount(record?.cashAccountId || defaultAccountId)
     }
   }
 
