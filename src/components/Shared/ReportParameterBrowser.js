@@ -318,7 +318,7 @@ const GetNumberField = ({ field, formik }) => {
       <CustomNumberField
         name={`parameters[${field.id}`}
         label={field.caption}
-        value={formik.values?.parameters?.[field.id]?.value || null}
+        value={formik.values?.parameters?.[field.id]?.value}
         required={field.mandatory}
         decimalScale={2}
         onChange={e => {
