@@ -1,6 +1,6 @@
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -28,7 +28,6 @@ const PhysicalCountItemDe = () => {
   const { platformLabels } = useContext(ControlContext)
   const [siteStore, setSiteStore] = useState([])
   const [controllerStore, setControllerStore] = useState([])
-  const [filteredItems, setFilteredItems] = useState([])
   const [editMode, setEditMode] = useState(false)
   const [disSkuLookup, setDisSkuLookup] = useState('')
   const [jumpToNextLine, setJumpToNextLine] = useState(false)
@@ -125,10 +124,10 @@ const PhysicalCountItemDe = () => {
       toast.success(platformLabels.Edited)
       setEditMode(items.length > 0)
       checkPhyStatus(obj.controllerId)
-
-      handleClick(items)
     }
   })
+
+  const rowsUpdate = useRef(formik?.values?.rows)
 
   async function fetchGridData(controllerId) {
     const stockCountId = formik.values.stockCountId
@@ -147,11 +146,13 @@ const PhysicalCountItemDe = () => {
           weight: item?.weight || 0,
           countedQty: item?.countedQty || 0
         }))
-        modifiedList.length > 0 && formik.setFieldValue('rows', modifiedList)
+        if (modifiedList.length > 0) {
+          formik.setFieldValue('rows', modifiedList)
+          rowsUpdate.current = modifiedList
+        }
       }
 
       setEditMode(res.list.length > 0)
-      handleClick(res.list)
     })
   }
 
@@ -163,7 +164,6 @@ const PhysicalCountItemDe = () => {
     if (!formik.values.stockCountId) {
       setSiteStore([])
       setControllerStore([])
-      setFilteredItems([])
       setEditMode(false)
     }
   }, [formik.values.stockCountId])
@@ -353,26 +353,26 @@ const PhysicalCountItemDe = () => {
 
   const clearGrid = () => {
     formik.setFieldValue('rows', formik.initialValues.rows)
+    rowsUpdate.current = formik.initialValues.rows
 
-    setFilteredItems([])
     setEditMode(false)
   }
 
-  const handleClick = async dataList => {
-    setFilteredItems([])
+  const handleMetalClick = async () => {
+    console.log('rowsUpdate?.current', rowsUpdate?.current)
 
-    const filteredItemsList = dataList
-      .filter(item => item.metalId && item.metalId.toString().trim() !== '')
+    const metalItemsList = rowsUpdate?.current
+      ?.filter(item => item.metalId)
       .map(item => ({
         qty: item.countedQty,
-        metalRef: null,
+        metalRef: '',
         metalId: item.metalId,
         metalPurity: item.metalPurity,
         weight: item.weight,
         priceType: item.priceType
       }))
-    setFilteredItems(filteredItemsList)
-    setEditMode(dataList.length > 0)
+
+    return metalItemsList || []
   }
 
   const isPosted = formik.values.status === 3
@@ -440,7 +440,6 @@ const PhysicalCountItemDe = () => {
           formik.resetForm()
           formik.setFieldValue('rows', [])
 
-          setFilteredItems([])
           setEditMode(false)
         },
         dialogText: platformLabels.ClearFormGrid
@@ -456,7 +455,7 @@ const PhysicalCountItemDe = () => {
       key: 'Metals',
       condition: true,
       onClick: 'onClickMetal',
-      disabled: formik.values.controllerId == null
+      handleMetalClick
     },
     {
       key: 'Locked',
@@ -508,7 +507,6 @@ const PhysicalCountItemDe = () => {
       actions={actions}
       maxAccess={access}
       resourceId={ResourceIds.IVPhysicalCountItemDetails}
-      filteredItems={filteredItems}
       previewReport={editMode}
     >
       <VertLayout>
@@ -532,7 +530,6 @@ const PhysicalCountItemDe = () => {
 
                   if (!newValue) {
                     setSiteStore([])
-                    setFilteredItems([])
                     clearGrid()
                     formik.setFieldValue('SCStatus', null)
                     formik.setFieldValue('SCWIP', null)
@@ -567,7 +564,6 @@ const PhysicalCountItemDe = () => {
 
                   if (!newValue) {
                     setControllerStore([])
-                    setFilteredItems([])
                     clearGrid()
                     formik.setFieldValue('EndofSiteStatus', null)
                   } else {
@@ -604,6 +600,7 @@ const PhysicalCountItemDe = () => {
           <DataGrid
             onChange={value => {
               formik.setFieldValue('rows', value)
+              rowsUpdate.current = value
             }}
             value={formik.values.controllerId && typeof disSkuLookup === 'boolean' ? formik.values?.rows : []}
             error={formik.errors?.rows}

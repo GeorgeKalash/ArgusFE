@@ -229,8 +229,8 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={ManufacturingRepository.BillOfMaterials.qry2}
-                parameters={`_itemId=${formik.values.itemId}`}
+                endpointId={formik.values.itemId && ManufacturingRepository.BillOfMaterials.qry2}
+                parameters={`_itemId=${formik?.values?.itemId}`}
                 name='bomId'
                 label={labels.bom}
                 columnsInDropDown={[

@@ -28,6 +28,8 @@ const PuTrx = () => {
     switch (functionId) {
       case SystemFunction.PurchaseInvoice:
         return ResourceIds.PurchaseInvoice
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.PurchaseReturn
       default:
         return null
     }
@@ -194,7 +196,8 @@ const PuTrx = () => {
         labels,
         recordId,
         access,
-        functionId
+        functionId,
+        getResourceId
       },
       width: 1330,
       height: 720,
