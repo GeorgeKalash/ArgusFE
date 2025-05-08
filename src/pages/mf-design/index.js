@@ -40,7 +40,7 @@ const Designs = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.Design.page,
-    datasetId: ResourceIds.Designs,
+    datasetId: ResourceIds.Design,
     filter: {
       filterFn: fetchWithFilter
     }

@@ -203,7 +203,7 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
   return (
     <FormShell
       form={formik}
-      resourceId={ResourceIds.Designs}
+      resourceId={ResourceIds.Design}
       maxAccess={maxAccess}
       isCleared={false}
       editMode={editMode}

@@ -360,7 +360,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
             <Grid item xs={6}>
               <ImageUpload
                 ref={imageUploadRef}
-                resourceId={ResourceIds.Designs}
+                resourceId={ResourceIds.Design}
                 seqNo={0}
                 recordId={recordId}
                 width={300}
