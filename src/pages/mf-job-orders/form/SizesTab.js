@@ -175,7 +175,7 @@ export default function SizesTab({ labels, maxAccess, store }) {
               }
             })
           )
-        : [{ id: 1 , jobId: recordId, sizeId: '', expectedQty: 0, expectedPcs: 0, qty: 0, pcs: 0 }]
+        : formik.initialValues.jobItemSizes
 
     formik.setValues({
       jobId: recordId,
