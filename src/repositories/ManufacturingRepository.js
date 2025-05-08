@@ -286,5 +286,17 @@ export const ManufacturingRepository = {
     qry: service + 'qryMSM',
     set: service + 'setMSM',
     del: service + 'delMSM',
+  },
+  DesignGroup: {
+    set: service + 'setDEG',
+    get: service + 'getDEG',
+    del: service + 'delDEG',
+    page: service + 'pageDEG',
+  },
+  DesignFamily: {
+    set: service + 'setDEF',
+    get: service + 'getDEF',
+    del: service + 'delDEF',
+    page: service + 'pageDEF',
   }
 }

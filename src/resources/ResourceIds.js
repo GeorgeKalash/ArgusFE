@@ -1,4 +1,5 @@
 export const ResourceIds = {
+  UserDashboard: 20117,
   GeneralLedger: 30303,
   JournalVoucher: 30302,
   FRT_DR_approvals: 10302,
@@ -364,6 +365,7 @@ export const ResourceIds = {
   DraftSerialReturns: 51314,
   MetalSettings: 47100,
   WaxDocTypeDefaults: 42601,
+  WorksheetDTD: 42602,
   JobWaxInquiry: 47313,
   PostDraftSerials: 51315,
   UndeliveredItems: 52304,
@@ -404,5 +406,7 @@ export const ResourceIds = {
   Batches: 20205,
   GenerateInvoices: 52302,
   GeneratePUInvoices: 50307,
-  MeasurementScheduleMaps: 42110
+  MeasurementScheduleMaps: 42110,
+  DesignGroup: 42116,
+  DesignFamilies: 42115,
 }

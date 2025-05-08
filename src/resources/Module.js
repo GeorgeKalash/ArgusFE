@@ -21,6 +21,7 @@ export const Module = {
   CostAllocations: 53,
   PointOfSale: 54,
   BusinessPartner: 56,
+  Dashboard: 60,
   Report: 65,
   EmployeeProfile: 71,
   TimeAttendance: 72,
