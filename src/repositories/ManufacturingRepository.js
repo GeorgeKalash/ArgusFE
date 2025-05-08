@@ -281,5 +281,17 @@ export const ManufacturingRepository = {
   AssemblyOverhead: {
     qry: service + 'qryAOH',
     set2: service + 'set2AOH'
+  },
+  DesignGroup: {
+    set: service + 'setDEG',
+    get: service + 'getDEG',
+    del: service + 'delDEG',
+    page: service + 'pageDEG',
+  },
+  DesignFamily: {
+    set: service + 'setDEF',
+    get: service + 'getDEF',
+    del: service + 'delDEF',
+    page: service + 'pageDEF',
   }
 }

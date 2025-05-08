@@ -366,6 +366,7 @@ export const ResourceIds = {
   DraftSerialReturns: 51314,
   MetalSettings: 47100,
   WaxDocTypeDefaults: 42601,
+  WorksheetDTD: 42602,
   JobWaxInquiry: 47313,
   PostDraftSerials: 51315,
   UndeliveredItems: 52304,
@@ -405,5 +406,7 @@ export const ResourceIds = {
   PriceListUpdates: 51311,
   Batches: 20205,
   GenerateInvoices: 52302,
-  GeneratePUInvoices: 50307
+  GeneratePUInvoices: 50307,
+  DesignGroup: 42116,
+  DesignFamilies: 42115,
 }
