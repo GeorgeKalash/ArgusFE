@@ -335,7 +335,7 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('plantId', newValue?.recordId)
+                      formik.setFieldValue('plantId', newValue?.recordId || null)
                     }}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                   />
