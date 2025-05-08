@@ -68,7 +68,6 @@ export default function FormShell({
   setIDInfoAutoFilled,
   visibleClear,
   actions,
-  filteredItems = [],
   isParentWindow = true
 }) {
   const { stack } = useWindow()
@@ -341,16 +340,18 @@ export default function FormShell({
           break
         case 'onClickMetal':
           action.onClick = () => {
-            stack({
-              Component: MetalSummary,
-              props: {
-                filteredItems
-              },
-              width: 600,
-              height: 550,
-              title: platformLabels.Metals,
-              expandable: false
-            })
+            setTimeout(() => {
+              stack({
+                Component: MetalSummary,
+                props: {
+                  handleMetalClick: action?.handleMetalClick
+                },
+                width: 600,
+                height: 550,
+                title: platformLabels.Metals,
+                expandable: false
+              })
+            }, 5)
           }
           break
         case 'onUnpostConfirmation':
@@ -378,20 +379,6 @@ export default function FormShell({
               width: 1000,
               height: 620,
               title: platformLabels.Aging
-            })
-          }
-          break
-        case 'onClickMetal':
-          action.onClick = () => {
-            stack({
-              Component: MetalSummary,
-              props: {
-                filteredItems
-              },
-              width: 600,
-              height: 550,
-              title: platformLabels.Metals,
-              expandable: false
             })
           }
           break

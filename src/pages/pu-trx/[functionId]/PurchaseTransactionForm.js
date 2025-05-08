@@ -57,7 +57,7 @@ import ItemPromotion from 'src/components/Shared/ItemPromotion'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 
-export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
+export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window, getResourceId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
@@ -290,6 +290,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       }
     }
   })
+
+  const itemsUpdate = useRef(formik?.values?.items)
 
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
@@ -661,6 +663,21 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     invalidate()
   }
 
+  const handleMetalClick = async () => {
+    const metalItemsList = itemsUpdate?.current
+      ?.filter(item => item.metalId)
+      .map(item => ({
+        qty: item.qty,
+        metalRef: '',
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+
+    return metalItemsList || []
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -673,6 +690,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       condition: true,
       onClick: onWorkFlowClick,
       disabled: !editMode
+    },
+    {
+      key: 'Metals',
+      condition: true,
+      onClick: 'onClickMetal',
+      handleMetalClick
     },
     {
       key: 'Locked',
@@ -772,6 +795,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       items: modifiedList,
       taxCodes: [...puTrxTaxes]
     })
+
+    itemsUpdate.current = modifiedList
   }
 
   async function getPurchaseTransactionPack(transactionId) {
@@ -1303,17 +1328,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       )
   }
 
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.PurchaseInvoice:
-        return ResourceIds.PurchaseInvoice
-      case SystemFunction.PurchaseReturn:
-        return ResourceIds.PurchaseReturn
-      default:
-        return null
-    }
-  }
-
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
@@ -1620,6 +1634,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           <DataGrid
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
+              itemsUpdate.current = value
+
               action === 'delete' && setReCal(true)
             }}
             onSelectionChange={(row, update, field) => {

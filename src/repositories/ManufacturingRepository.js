@@ -248,7 +248,8 @@ export const ManufacturingRepository = {
     del: service + 'delPO',
     page: service + 'pagePO',
     snapshot: service + 'snapshotPO',
-    post: service + 'postPO'
+    post: service + 'postPO',
+    gen: service + 'genPO'
   },
   BillOfMaterials: {
     get: service + 'getBMA',
@@ -272,7 +273,8 @@ export const ManufacturingRepository = {
     page: service + 'pageASM',
     snapshot: service + 'snapshotASM',
     post: service + 'postASM',
-    unpost: service + 'unpostASM'
+    unpost: service + 'unpostASM',
+    generate: service + 'genASM'
   },
   AssemblyItems: {
     qry: service + 'qryASC'
@@ -286,13 +288,21 @@ export const ManufacturingRepository = {
     set2: service + 'set2AOH'
   },
   DesignGroup: {
-    qry: service + 'qryDEG'
-  },
-  DesignFamily: {
-    qry: service + 'qryDEF'
+    qry: service + 'qryDEG',
+    set: service + 'setDEG',
+    get: service + 'getDEG',
+    del: service + 'delDEG',
+    page: service + 'pageDEG',
   },
   Components: {
     qry: service + 'qryDEM',
     set2: service + 'set2DEM',
+  },
+  DesignFamily: {
+    qry: service + 'qryDEF',
+    set: service + 'setDEF',
+    get: service + 'getDEF',
+    del: service + 'delDEF',
+    page: service + 'pageDEF',
   }
 }

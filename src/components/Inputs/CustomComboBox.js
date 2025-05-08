@@ -212,10 +212,9 @@ const CustomComboBox = ({
           error={error}
           helperText={helperText}
           onBlur={e => {
-            const listbox = document.querySelector('[role="listbox"]')
-            if (selectFirstValue.current !== 'click' && listbox && listbox.offsetHeight > 0) {
-              onBlur(e, valueHighlightedOption?.current, filterOptions.current)
-            }
+            const allowSelect =
+              selectFirstValue.current !== 'click' && document.querySelector('.MuiAutocomplete-listbox')
+            onBlur(e, valueHighlightedOption?.current, filterOptions.current, allowSelect)
           }}
           InputProps={{
             ...params.InputProps,
