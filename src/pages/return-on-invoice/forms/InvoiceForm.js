@@ -3,7 +3,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import FormShell from 'src/components/Shared/FormShell'
-import * as yup from 'yup'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -11,59 +10,98 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import Table from 'src/components/Shared/Table'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { DataGrid } from 'src/components/Shared/DataGrid'
 
-export default function InvoiceForm({ form, maxAccess, labels }) {
+export default function InvoiceForm({ form, maxAccess, labels, window }) {
   const { getRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      invoices: []
-    },
-    validateOnChange: true,
-    validationSchema: yup.object({
-      changeToId: yup.string().required()
-    }),
-    onSubmit: async values => {}
+      items: [{ id: 1, sku: '', itemName: '', qty: 0, returnedQty: 0, balanceQty: 0, returnNow: 0 }]
+    }
   })
+  function importAllItems() {
+    const updatedList = formik?.values?.items?.map((x, index) => {
+      return { ...x.item, id: index + 1, checked: true }
+    })
+    if (updatedList.length == 0) return
+    form.setFieldValue('items', formik.values.items)
+    window.close()
+  }
+  function importSelectedItems() {}
 
   const columns = [
     {
-      field: 'sku',
-      headerName: labels.sku,
-      flex: 1
+      component: 'checkbox',
+      label: ' ',
+      name: 'checked'
     },
     {
-      field: 'itemName',
-      headerName: labels.itemName,
-      flex: 1
+      component: 'textfield',
+      label: labels.sku,
+      name: 'sku',
+      flex: 2,
+      props: {
+        readOnly: true
+      }
     },
     {
-      field: 'qty',
-      headerName: labels.qty,
-      flex: 1,
-      type: 'number'
+      component: 'textfield',
+      label: labels.itemName,
+      name: 'itemName',
+      flex: 3,
+      props: {
+        readOnly: true
+      }
     },
     {
-      field: 'returnedQty',
-      headerName: labels.returnQty,
-      flex: 1,
-      type: 'number'
+      component: 'numberfield',
+      label: labels.qty,
+      name: 'qty',
+      flex: 2,
+      props: {
+        readOnly: true
+      }
     },
     {
-      field: 'balanceQty',
-      headerName: labels.balanceQty,
-      flex: 1,
-      type: 'number'
+      component: 'numberfield',
+      label: labels.returnQty,
+      name: 'returnedQty',
+      flex: 2,
+      props: {
+        readOnly: true
+      }
     },
     {
-      field: 'returnNow',
-      headerName: labels.returnNow,
-      flex: 1,
-      type: 'number'
+      component: 'numberfield',
+      label: labels.balanceQty,
+      name: 'balanceQty',
+      flex: 2,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.returnNow,
+      flex: 2,
+      name: 'returnNow'
+    }
+  ]
+
+  const actions = [
+    {
+      key: 'Import',
+      condition: true,
+      onClick: importSelectedItems
+    },
+    {
+      key: 'ImportAll',
+      condition: true,
+      onClick: importAllItems
     }
   ]
   async function fetchGridData() {
@@ -78,62 +116,79 @@ export default function InvoiceForm({ form, maxAccess, labels }) {
       items = retItems.list.map(item => ({
         ...item,
         returnNowQty: item.qty,
-        componentSeqNo: item.componentSeqNo ?? 0
+        componentSeqNo: item.componentSeqNo || 0
       }))
     }
 
-    const combined = [...items, ...form.values.items]
-    const allLists = Array.from(
-      combined
-        .reduce((map, item) => {
-          const key = `${item.itemId}_${item.seqNo}`
-          if (!map.has(key)) {
-            map.set(key, item)
-          }
-          return map
-        }, new Map())
-        .values()
-    )
+    const combined = items.length > 0 ? [...items, ...form.values.items] : form.values.items
+
+    const allLists =
+      items.length > 0
+        ? Array.from(
+            combined
+              .reduce((map, item) => {
+                const key = `${item.itemId}_${item.seqNo}`
+                if (!map.has(key)) {
+                  map.set(key, item)
+                }
+
+                return map
+              }, new Map())
+              .values()
+          )
+        : form.values.items
 
     const listReq = await getRequest({
       extension: SaleRepository.ReturnItem.balance,
       parameters: `_invoiceId=${form.values.invoiceId}`
     })
 
-    const invoices = listReq?.list.map(x => {
-      const seqNo = x.item.seqNo
-      const componentSeqNo = x.item.componentSeqNo
+    const itemsList = listReq?.list.map((x, index) => {
+      const { seqNo, componentSeqNo, qty = 0, itemId } = x.item
 
-      const index2 = allLists.findIndex(item => item.seqNo === seqNo && item.componentSeqNo === componentSeqNo)
+      const indexInAllLists = allLists.findIndex(item => item.seqNo == seqNo && item.componentSeqNo == componentSeqNo)
 
-      const existsInFormValues =
-        form.values.items.findIndex(item => item.seqNo === seqNo && item.componentSeqNo === componentSeqNo) !== -1
-
-      const returnNowValue = existsInFormValues && index2 !== -1 ? allLists[index2].returnNowQty : 0
+      const existsInFormValues = form.values.items.some(item => item.seqNo == seqNo && item.itemId == itemId)
 
       const updatedItem = {
         ...x,
+        id: index + 1,
         itemId: x.item.itemId,
         sku: x.item.sku,
         itemName: x.item.itemName,
-        qty: x.item.qty || 0,
-        returnedQty: (x.returnedQty || 0) - returnNowValue,
-        balanceQty: (x.item.qty || 0) - (x.returnedQty || 0),
-        returnNow: index2 !== 1 ? returnNowValue : 0,
-        checked: false,
-        check: !existsInFormValues
+        qty: x.item.qty || 0
+      }
+      const currentItem = indexInAllLists != -1 ? allLists[indexInAllLists] : null
+
+      if (currentItem) {
+        updatedItem.checked = existsInFormValues
+        updatedItem.returnNow = currentItem.returnNowQty
+
+        if (existsInFormValues) {
+          updatedItem.returnedQty = (updatedItem.returnedQty || 0) - updatedItem.returnNow || 0
+          updatedItem.balanceQty = (updatedItem.balanceQty || 0) + updatedItem.returnNow || 0
+
+          if (!existsInFormValues) {
+            updatedItem.returnNow = 0
+          }
+        } else {
+          updatedItem.returnedQty = currentItem.returnedQty || 0
+        }
+      } else {
+        updatedItem.returnNow = 0
+        updatedItem.item.invoiceId = form?.values?.invoiceId ? parseInt(form.values.invoiceId) : 0
+        updatedItem.item.invoiceRef = form?.values?.invoiceRef || null
       }
 
-      if (index2 === 1) {
-        updatedItem.item.invoiceId = form?.values?.invoiceId || 0
-        updatedItem.item.invoiceRef = form?.values?.invoiceRef || ''
-      }
+      updatedItem.balanceQty = qty - (updatedItem.returnedQty || 0)
 
       return updatedItem
     })
 
-    const filteredInvoices = invoices?.filter(x => x.item.qty !== x.returnedQty)
-    formik.setFieldValue('invoices', filteredInvoices)
+    formik.setFieldValue(
+      'items',
+      itemsList?.filter(x => x.item.qty != x.returnedQty)
+    )
   }
 
   useEffect(() => {
@@ -151,6 +206,7 @@ export default function InvoiceForm({ form, maxAccess, labels }) {
       isCleared={false}
       isSaved={false}
       isInfo={false}
+      actions={actions}
       maxAccess={maxAccess}
       editMode={true}
     >
@@ -195,14 +251,14 @@ export default function InvoiceForm({ form, maxAccess, labels }) {
           </Grid>
         </Fixed>
         <Grow>
-          <Table
-            name='table'
+          <DataGrid
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values.items}
+            error={formik.errors.items}
             columns={columns}
-            gridData={{ list: formik.values.invoices }}
-            rowId={['itemId', 'seqNo']}
+            name='items'
             maxAccess={maxAccess}
-            pagination={false}
-            showCheckboxColumn={true}
+            allowDelete={false}
           />
         </Grow>
       </VertLayout>

@@ -390,6 +390,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'ImportAll',
+    label: platformLabels.importAll,
+    color: '#000',
+    image: 'importAll.png',
+    main: false
+  },
+  {
     key: 'Lock',
     label: platformLabels.Lock,
     color: '#231f20',
