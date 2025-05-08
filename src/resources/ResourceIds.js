@@ -403,5 +403,6 @@ export const ResourceIds = {
   PriceListUpdates: 51311,
   Batches: 20205,
   GenerateInvoices: 52302,
-  GeneratePUInvoices: 50307
+  GeneratePUInvoices: 50307,
+  MeasurementScheduleMaps: 42110
 }

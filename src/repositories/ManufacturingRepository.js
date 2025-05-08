@@ -281,5 +281,10 @@ export const ManufacturingRepository = {
   AssemblyOverhead: {
     qry: service + 'qryAOH',
     set2: service + 'set2AOH'
+  },
+  MeasurementScheduleMap: {
+    qry: service + 'qryMSM',
+    set: service + 'setMSM',
+    del: service + 'delMSM',
   }
 }
