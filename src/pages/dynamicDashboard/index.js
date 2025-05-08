@@ -127,7 +127,7 @@ const DashboardLayout = () => {
 
   useEffect(() => {
     getRequest({
-      extension: SystemRepository.DynamicDashboard,
+      extension: SystemRepository.DynamicDashboard.qry,
       parameters: `_userId=${_userId}`
     })
       .then(result => {

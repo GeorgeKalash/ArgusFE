@@ -5,10 +5,19 @@ export const SystemRepository = {
   getLabels: service + 'qryLBL',
   KeyValueStore: service + 'qryKVS',
   ParameterDefinition: service + 'qryRP',
-  DynamicDashboard: service + 'qryUDB',
   ReportLayout: service + 'qryRL',
-  ReportLayoutObject: { qry: service + 'qryRLO', set2: service + 'set2RLO' },
-  ReportTemplate: { qry: service + 'qryRT', set2: service + 'set2RT' },
+  DynamicDashboard: {
+    qry: service + 'qryUDB',
+    set2: service + 'set2UDB'
+  },
+  ReportLayoutObject: {
+    qry: service + 'qryRLO',
+    set2: service + 'set2RLO'
+  },
+  ReportTemplate: {
+    qry: service + 'qryRT',
+    set2: service + 'set2RT'
+  },
   DocumentType: {
     qry: service + 'qryDT',
     get: service + 'getDT',
@@ -190,7 +199,7 @@ export const SystemRepository = {
     get: service + 'getBAT',
     set: service + 'setBAT',
     del: service + 'delBAT',
-    page: service + 'pageBAT',
+    page: service + 'pageBAT'
   },
   ETL: {
     get: service + 'getETL'
