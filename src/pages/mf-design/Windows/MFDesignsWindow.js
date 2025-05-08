@@ -21,14 +21,14 @@ const MFDesignsWindow = ({ recordId, labels, maxAccess }) => {
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={670} index={0} value={activeTab}>
+      <CustomTabPanel index={0} value={activeTab}>
         <DesignsForm labels={labels} setStore={setStore} store={store} access={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <DesignRoutingSequence labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} />
+        <DesignRoutingSequence labels={labels} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <Components labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} />
+        <Components labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )

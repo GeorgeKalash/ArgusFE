@@ -26,63 +26,109 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
         {
           id: 1,
           designId: recordId,
-          operationId: null,
+          operationId: '',
           rmSeqNo: null,
-          itemId: null,
-          designQty: null,
-          designPcs: null
+          itemId: '',
+          designQty: 0,
+          designPcs: 0
         }
       ]
     },
     validationSchema: yup.object({
       items: yup.array().of(
         yup.object({
-          operationId: yup.number().required(),
-          itemId: yup.number().required(),
-          designQty: yup.number().required()
+          operationId: yup.string().test(function (value) {
+            const isAnyFieldFilled = this.parent.designQty || this.parent.itemId
+            if (this.options.from[1]?.value?.items?.length === 1) {
+              if (isAnyFieldFilled && isAnyFieldFilled != 0) {
+                return !!value
+              }
+
+              return true
+            }
+
+            return !!value
+          }),
+          itemId: yup.string().test(function (value) {
+            const isAnyFieldFilled = this.parent.designQty || this.parent.operationId
+            if (this.options.from[1]?.value?.items?.length === 1) {
+              if (isAnyFieldFilled && isAnyFieldFilled != 0) {
+                return !!value
+              }
+
+              return true
+            }
+
+            return !!value
+          }),
+          designQty: yup.string().test('check-value', 'Design Qty required', function (value) {
+            const isFilled = !!this.parent.operationId || !!this.parent.itemId
+            if (isFilled) {
+              const numericValue = Number(value)
+
+              if (!value || isNaN(numericValue)) {
+                return false
+              }
+            }
+
+            return true
+          })
         })
       )
     }),
     onSubmit: async values => {
-      const item = formik.values.items.map((item, index) => ({
-        ...item,
-        rmSeqNo: index + 1,
-        id: index + 1
-      }))
-
-      const data = { ...values, data: item }
+      const modifiedItems = values?.items
+        .map((details, index) => {
+          return {
+            ...details,
+            id: index + 1,
+            rmSeqNo: index + 1,
+            designId: recordId
+          }
+        })
+        .filter(item => item.operationId || item.itemId || item.designQty)
 
       await postRequest({
         extension: ManufacturingRepository.DesignRawMaterial.set2,
-        record: JSON.stringify(data)
-      }).then(res => {
+        record: JSON.stringify({ designId: recordId, data: modifiedItems })
+      }).then(() => {
+        fetchGridData()
         toast.success(platformLabels.Edited)
       })
-      getData(recordId)
     }
   })
 
   const editMode = !!recordId
 
-  const getData = recordId => {
-    getRequest({
+  async function fetchGridData() {
+    const res = await getRequest({
       extension: ManufacturingRepository.DesignRawMaterial.qry,
       parameters: `_designId=${recordId}`
-    }).then(res => {
-      if (res?.list?.length > 0) {
-        const items = res.list.map((item, index) => ({
-          ...item,
-          id: index + 1
-        }))
-        formik.setValues({ ...formik.values, recordId, items: items })
-      }
+    })
+
+    const updateItemsList =
+      res?.list?.length !== 0
+        ? await Promise.all(
+            res.list.map(async (item, index) => {
+              return {
+                ...item,
+                id: index + 1
+              }
+            })
+          )
+        : formik.initialValues.items
+
+    formik.setValues({
+      designId: recordId,
+      recordId,
+      items: updateItemsList
     })
   }
 
   useEffect(() => {
-    if (recordId) {
-      getData(recordId)
-    }
+    ;(async function () {
+      if (recordId) await fetchGridData()
+    })()
   }, [])
 
   const columns = [

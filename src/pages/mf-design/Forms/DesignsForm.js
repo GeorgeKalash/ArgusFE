@@ -13,7 +13,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -54,7 +53,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       lineId: null,
       classId: null,
       standardId: null,
-      stdWeight: null
+      stdWeight: 0
     },
     maxAccess,
     validateOnChange: true,
@@ -113,7 +112,13 @@ export default function DesignsForm({ labels, access, store, setStore }) {
   }
 
   return (
-    <FormShell resourceId={ResourceIds.Designs} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.Designs}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -132,7 +137,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                       formik.setFieldValue('groupId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
-                    error={formik.touched.taxId && Boolean(formik.errors.taxId)}
+                    error={formik.touched.groupId && Boolean(formik.errors.groupId)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -167,7 +172,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     label={labels.designDate}
                     value={formik.values?.designDate}
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('designDate', '')}
+                    onClear={() => formik.setFieldValue('designDate', null)}
                     error={formik.touched.designDate && Boolean(formik.errors.designDate)}
                     maxAccess={maxAccess}
                   />
@@ -346,7 +351,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     onChange={formik.handleChange}
                     maxLength={12}
                     decimalScale={3}
-                    onClear={() => formik.setFieldValue('stdWeight', null)}
+                    onClear={() => formik.setFieldValue('stdWeight', 0)}
                     error={formik.touched.stdWeight && Boolean(formik.errors.stdWeight)}
                   />
                 </Grid>

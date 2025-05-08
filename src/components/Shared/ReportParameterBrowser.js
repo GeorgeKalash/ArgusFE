@@ -14,6 +14,7 @@ import { formatDateDefault, formatDateTimeDefault } from 'src/lib/date-helper'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useError } from 'src/error'
 import CustomDateTimePicker from '../Inputs/CustomDateTimePicker'
+import CustomNumberField from '../Inputs/CustomNumberField'
 
 const formatDateTo = value => {
   const date = new Date(value)
@@ -311,6 +312,32 @@ const GetTextField = ({ field, formik }) => {
   )
 }
 
+const GetNumberField = ({ field, formik }) => {
+  return (
+    <Grid item xs={12} key={field.id}>
+      <CustomNumberField
+        name={`parameters[${field.id}`}
+        label={field.caption}
+        value={formik.values?.parameters?.[field.id]?.value || 0}
+        required={field.mandatory}
+        onChange={e => {
+          e.target.value != null
+            ? formik.setFieldValue(`parameters[${field.id}]`, {
+                fieldId: field.id,
+                fieldKey: field.key,
+                value: e.target.value,
+                caption: field.caption,
+                display: e.target.value
+              })
+            : formik.setFieldValue(`parameters[${field.id}]`, null)
+        }}
+        error={Boolean(formik.errors?.parameters?.[field.id])}
+        onClear={() => formik.setFieldValue(`parameters[${field.id}]`, 0)}
+      />
+    </Grid>
+  )
+}
+
 const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const [items, setItems] = useState([])
@@ -447,6 +474,8 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
             return <GetTextField key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
           } else if (item.controlType === 7) {
             return <GetDateTimePicker key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
+          } else if (item.controlType === 3) {
+            return <GetNumberField key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
           }
         })}
       </Grid>

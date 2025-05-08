@@ -26,64 +26,106 @@ const Components = ({ store, maxAccess, labels }) => {
         {
           id: 1,
           designId: recordId,
-          itemId: null,
-          seqNo: null,
-          qty: null,
-          pcs: null
+          itemId: '',
+          seqNo: '',
+          qty: 0,
+          pcs: 0
         }
       ]
     },
     validationSchema: yup.object({
       items: yup.array().of(
         yup.object({
-          itemId: yup.number().required(),
-          qty: yup.number().required(),
-          pcs: yup.number().required().max(2147483647)
+          itemId: yup.string().test(function (value) {
+            const isAnyFieldFilled = this.parent.qty || this.parent.pcs
+            if (this.options.from[1]?.value?.items?.length === 1) {
+              if (isAnyFieldFilled && isAnyFieldFilled != 0) {
+                return !!value
+              }
+
+              return true
+            }
+
+            return !!value
+          }),
+          qty: yup.string().test('check-value', 'Qty is required', function (value) {
+            const isFilled = !!this.parent.itemId || !!this.parent.pcs
+            if (isFilled) {
+              const numericValue = Number(value)
+
+              if (!value || isNaN(numericValue)) {
+                return false
+              }
+            }
+
+            return true
+          }),
+          pcs: yup.string().test('check-value', 'PCS is required', function (value) {
+            const isFilled = !!this.parent.itemId || !!this.parent.qty
+            if (isFilled) {
+              const numericValue = Number(value)
+
+              if (!value || isNaN(numericValue) || numericValue > 2147483647) {
+                return false
+              }
+            }
+
+            return true
+          })
         })
       )
     }),
     onSubmit: async values => {
-      const item = formik.values.items.map((item, index) => ({
-        ...item,
-        seqNo: index + 1,
-        id: index + 1
-      }))
-
-      const data = { ...values, items: item }
+      const modifiedItems = values.items
+        .map((item, index) => ({
+          ...item,
+          seqNo: index + 1,
+          id: index + 1
+        }))
+        .filter(item => item.itemId || item.qty || item.pcs)
 
       await postRequest({
         extension: ManufacturingRepository.Components.set2,
-        record: JSON.stringify(data)
+        record: JSON.stringify({ designId: recordId, items: modifiedItems })
       }).then(() => {
+        fetchGridData()
         toast.success(platformLabels.Edited)
       })
 
-      getData(recordId)
     }
   })
 
   const editMode = !!recordId
 
-  const getData = recordId => {
-    getRequest({
+  async function fetchGridData() {
+    const res = await getRequest({
       extension: ManufacturingRepository.Components.qry,
       parameters: `_designId=${recordId}`
-    }).then(res => {
-      if (res?.list?.length > 0) {
-        const items = res.list.map((item, index) => ({
-          ...item,
-          id: index + 1,
-          seqNo: index + 1
-        }))
-        formik.setValues({ ...formik.values, recordId, items: items })
-      }
+    })
+
+    const updateItemsList =
+      res?.list?.length != 0
+        ? await Promise.all(
+            res.list.map(async (item, index) => {
+              return {
+                ...item,
+                id: index + 1
+              }
+            })
+          )
+        : formik.initialValues.items
+
+    formik.setValues({
+      designId: recordId,
+      recordId,
+      items: updateItemsList
     })
   }
 
   useEffect(() => {
-    if (recordId) {
-      getData(recordId)
-    }
+    ;(async function () {
+      if (recordId) await fetchGridData()
+    })()
   }, [])
 
   const columns = [

@@ -104,7 +104,7 @@ const Designs = () => {
         maxAccess: access
       },
       width: 900,
-      height: 790,
+      height: 740,
       title: labels.Designs
     })
   }
@@ -131,7 +131,6 @@ const Designs = () => {
           onEdit={edit}
           refetch={refetch}
           onDelete={del}
-          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           maxAccess={access}
