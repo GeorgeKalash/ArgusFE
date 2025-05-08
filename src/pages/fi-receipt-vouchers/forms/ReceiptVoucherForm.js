@@ -53,6 +53,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
   const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const defaultAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   const { formik } = useForm({
     maxAccess: maxAccess,
@@ -130,14 +131,12 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
   async function getDTD(dtId) {
     if (dtId) {
-      const res = await getRequest({
+      const { record } = await getRequest({
         extension: FinancialRepository.FIDocTypeDefaults.get,
         parameters: `_dtId=${dtId}`
       })
-
-      formik.setFieldValue('cashAccountId', res?.record?.cashAccountId)
-      getCashAccount(res?.record?.cashAccountId)
-      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+      formik.setFieldValue('plantId', record?.plantId || plantId)
+      getCashAccount(record?.cashAccountId || defaultAccountId)
     }
   }
 
@@ -170,22 +169,28 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   const isPosted = formik.values.status === 3
 
   const getCashAccount = async cashAccountId => {
-    if (cashAccountId) {
-      const { record: cashAccountResult } = await getRequest({
-        extension: CashBankRepository.CbBankAccounts.get,
-        parameters: `_recordId=${cashAccountId}`
-      })
+    if (!cashAccountId) {
+      formik.setFieldValue('cashAccountId', null)
+      formik.setFieldValue('cashAccountRef', '')
+      formik.setFieldValue('cashAccountName', '')
 
-      formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
-      formik.setFieldValue('cashAccountName', cashAccountResult.name)
+      return
     }
+
+    const { record: cashAccountResult } = await getRequest({
+      extension: CashBankRepository.CbBankAccounts.get,
+      parameters: `_recordId=${cashAccountId}`
+    })
+
+    formik.setFieldValue('cashAccountId', cashAccountResult?.recordId)
+    formik.setFieldValue('cashAccountRef', cashAccountResult?.reference)
+    formik.setFieldValue('cashAccountName', cashAccountResult?.name)
   }
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        await getData(recordId)
-      }
+      if (recordId) await getData(recordId)
+      else getCashAccount(defaultAccountId)
     })()
   }, [])
 
@@ -473,7 +478,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               <ResourceLookup
                 endpointId={CashBankRepository.CashAccount.snapshot}
                 parameters={{
-                  _type: 0
+                  _type: formik.values.paymentMethod == 2 ? 1 : 0
                 }}
                 name='cashAccountRef'
                 readOnly={isCancelled || isPosted}

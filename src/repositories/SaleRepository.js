@@ -157,7 +157,8 @@ export const SaleRepository = {
     reopen: service + 'reopenORD',
     cancel: service + 'terminateORD',
     postToInvoice: service + 'transfer2ORD',
-    snapshot: service + 'snapshotORD'
+    snapshot: service + 'snapshotORD',
+    summaryORD: service + 'summaryORD'
   },
   SalesOrderItem: {
     qry: service + 'qryORI'
