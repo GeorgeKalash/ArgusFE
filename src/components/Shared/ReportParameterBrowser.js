@@ -477,8 +477,6 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
             return <GetNumberField key={item.fieldId} formik={formik} field={item} />
           } else if (item.controlType === 7) {
             return <GetDateTimePicker key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
-          } else if (item.controlType === 3) {
-            return <GetNumberField key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
           }
         })}
       </Grid>
