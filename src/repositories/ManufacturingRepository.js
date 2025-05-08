@@ -286,12 +286,15 @@ export const ManufacturingRepository = {
     set: service + 'setDEG',
     get: service + 'getDEG',
     del: service + 'delDEG',
-    page: service + 'pageDEG',
+    page: service + 'pageDEG'
   },
   DesignFamily: {
     set: service + 'setDEF',
     get: service + 'getDEF',
     del: service + 'delDEF',
-    page: service + 'pageDEF',
+    page: service + 'pageDEF'
+  },
+  workInProcess: {
+    wipJOB: service + 'wipJOB'
   }
 }
