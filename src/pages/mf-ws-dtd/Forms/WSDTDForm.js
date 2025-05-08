@@ -33,7 +33,6 @@ export default function WSDTDForm({ labels, maxAccess, recordId, window }) {
       lineId: null
     },
     maxAccess,
-    enableReinitialize: false,
     validationSchema: yup.object({
       dtId: yup.string().required()
     }),
