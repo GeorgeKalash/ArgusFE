@@ -172,12 +172,14 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     })
 
     return await Promise.all(
-      response?.list?.map(async (item, index) => {
-        return {
-          ...item,
-          id: index + 1
-        }
-      })
+      response.list.length > 0
+        ? response.list.map(async (item, index) => {
+            return {
+              ...item,
+              id: index + 1
+            }
+          })
+        : formik.values.items
     )
   }
 
@@ -643,7 +645,14 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField name='header.rmWgt' label={labels.rmWgt} required value={rmWgt} readOnly />
+                  <CustomNumberField
+                    name='header.rmWgt'
+                    label={labels.rmWgt}
+                    required
+                    value={rmWgt}
+                    readOnly
+                    error={formik.touched?.header?.rmWgt && Boolean(formik.errors?.header?.rmWgt)}
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
@@ -659,7 +668,14 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField name='header.netWgt' label={labels.netWgt} required value={netWgt} readOnly />
+                  <CustomNumberField
+                    name='header.netWgt'
+                    label={labels.netWgt}
+                    required
+                    value={netWgt}
+                    readOnly
+                    error={formik.touched?.header?.netWgt && Boolean(formik.errors?.header?.netWgt)}
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
@@ -669,6 +685,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     maxAccess={maxAccess}
                     value={suggestedWgt}
                     readOnly
+                    error={formik.touched?.header?.suggestedWgt && Boolean(formik.errors?.header?.suggestedWgt)}
                   />
                 </Grid>
               </Grid>
