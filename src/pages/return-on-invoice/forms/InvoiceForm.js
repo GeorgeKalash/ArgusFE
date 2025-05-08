@@ -25,10 +25,25 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
   })
   function importAllItems() {
     const updatedList = formik?.values?.items?.map((x, index) => {
-      return { ...x.item, id: index + 1, checked: true }
+      console.log('check x', x)
+      const returnNow = x.balanceQty
+
+      const item = {
+        ...x.item,
+        id: index + 1,
+        returnedQty: x.returnedQty,
+        checked: true,
+        returnNowQty: returnNow,
+        invoiceSeqNo: x.item.seqNo,
+        extendedPrice:
+          x.item.extendedPrice !== 0 ? (returnNow * x.item.extendedPrice) / x.item.qty : x.item.extendedPrice
+      }
+
+      return item
     })
+    console.log('check list', updatedList)
     if (updatedList.length == 0) return
-    form.setFieldValue('items', formik.values.items)
+    form.setFieldValue('items', updatedList)
     window.close()
   }
   function importSelectedItems() {}
