@@ -2,6 +2,29 @@ import { useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 
+const predefinedColors = [
+  'rgba(88, 2, 1)',
+  'rgba(67, 67, 72)',
+  'rgba(144, 237, 125)',
+  'rgba(247, 163, 92)',
+  'rgba(54, 162, 235)',
+  'rgba(153, 102, 255)',
+  'rgba(201, 203, 207)'
+]
+
+const generateColors = dataLength => {
+  const backgroundColors = []
+  const borderColors = []
+
+  for (let i = 0; i < dataLength; i++) {
+    const color = predefinedColors[i % predefinedColors.length]
+    backgroundColors.push(color)
+    borderColors.push(color.replace('rgba', 'rgb'))
+  }
+
+  return { backgroundColors, borderColors }
+}
+
 const getChartOptions = (label, type) => {
   const baseOptions = {
     responsive: true,
@@ -76,6 +99,90 @@ const getChartOptions = (label, type) => {
       }
     }
   }
+}
+
+export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio = 3 }) => {
+  useEffect(() => {
+    const ctx = document.getElementById(id).getContext('2d')
+
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: label1,
+            data: data1,
+            backgroundColor: 'rgb(88, 2, 1)',
+            hoverBackgroundColor: 'rgb(113, 27, 26)'
+          },
+          {
+            label: label2,
+            data: data2,
+            backgroundColor: 'rgb(5, 28, 104)',
+            hoverBackgroundColor: 'rgb(33, 58, 141)'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        aspectRatio: ratio,
+        plugins: {
+          datalabels: {
+            anchor: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? 'center' : 'end'
+            },
+            align: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? 'center' : 'end'
+            },
+            color: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? '#fff' : '#000'
+            },
+            offset: 0,
+            rotation: -90,
+            font: {
+              size: 14
+            },
+            formatter: value => value.toLocaleString()
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    })
+
+    return () => {
+      chart.destroy()
+    }
+  }, [id, labels, data1, data2, label1, label2])
+
+  return <canvas id={id} style={{ width: '100%', height: '300px', position: 'relative' }}></canvas>
 }
 
 export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverColor }) => {
@@ -184,6 +291,86 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
             data,
             backgroundColor: color || 'rgb(88, 2, 1)',
             hoverBackgroundColor: hoverColor || 'rgb(113, 27, 26)',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        aspectRatio: ratio,
+        plugins: {
+          datalabels: {
+            anchor: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? 'center' : 'end'
+            },
+            align: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? 'center' : 'end'
+            },
+            color: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? '#fff' : '#000'
+            },
+            offset: 0,
+            rotation: -90,
+            font: {
+              size: 14
+            },
+            formatter: value => value.toLocaleString()
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    })
+
+    return () => {
+      chart.destroy()
+    }
+  }, [id, labels, data, label])
+
+  return <canvas id={id} style={{ width: '100%', height: '300px', position: 'relative' }}></canvas>
+}
+
+export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) => {
+  useEffect(() => {
+    const ctx = document.getElementById(id).getContext('2d')
+    const colors = generateColors(data.length)
+
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label,
+            data,
+            backgroundColor: colors.backgroundColors,
+            borderColor: colors.borderColors,
             borderWidth: 1
           }
         ]

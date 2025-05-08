@@ -2,13 +2,19 @@ import React, { useEffect, useState, useContext } from 'react'
 import styled, { keyframes } from 'styled-components'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { CompositeBarChartDark, HorizontalBarChartDark } from '../../components/Shared/dashboardApplets/charts'
+import {
+  CompositeBarChartDark,
+  HorizontalBarChartDark,
+  MixedBarChart,
+  MixedColorsBarChartDark
+} from '../../components/Shared/dashboardApplets/charts'
 import { getStorageData } from 'src/storage/storage'
 import { DashboardRepository } from 'src/repositories/DashboardRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { debounce } from 'lodash'
 import { SummaryFiguresItem } from 'src/resources/DashboardFigures'
+import { LineChart } from 'recharts'
 
 const Frame = styled.div`
   display: flex;
@@ -140,8 +146,13 @@ const DashboardLayout = () => {
         })
       })
       .then(res => {
-        setData(res.record)
-        debouncedCloseLoading()
+        return getRequest({
+          extension: DashboardRepository.SalesPersonDashboard.spDB,
+          parameters: ``
+        }).then(resSP => {
+          setData({ ...res?.record, ...resSP?.record })
+          debouncedCloseLoading()
+        })
       })
   }, [])
 
@@ -175,6 +186,117 @@ const DashboardLayout = () => {
                 labels={data?.todaysRetailSales?.map(ws => ws.posRef) || []}
                 data={data?.todaysRetailSales?.map(ws => ws.sales) || []}
                 label={labels.retailSales}
+                ratio={5}
+              />
+            </ChartCard>
+          </TopRow>
+        )}
+        {containsApplet(ResourceIds.MyYearlySalesPerformance) && (
+          <TopRow>
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.myYearlySalesPerformance}</Title>
+              </SummaryCard>
+              <MixedBarChart
+                id='myYearlySalesPerformance'
+                labels={data?.myYearlySalesPerformanceList?.map(ws => ws.year) || []}
+                data1={data?.myYearlySalesPerformanceList?.map(ws => ws.sales) || []}
+                data2={data?.myYearlySalesPerformanceList?.map(ws => ws.target) || []}
+                label1='sales'
+                label2='target'
+                ratio={5}
+              />
+            </ChartCard>
+          </TopRow>
+        )}
+        {containsApplet(ResourceIds.MyMonthlySalesPerformance) && (
+          <TopRow>
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.myMonthlySalesPerformance}</Title>
+              </SummaryCard>
+              <MixedBarChart
+                id='myMonthlySalesPerformance'
+                labels={data?.myMonthlySalesPerformanceList?.map(ws => ws.monthName) || []}
+                data1={data?.myMonthlySalesPerformanceList?.map(ws => ws.sales) || []}
+                data2={data?.myMonthlySalesPerformanceList?.map(ws => ws.target) || []}
+                label1='sales'
+                label2='target'
+                ratio={5}
+              />
+            </ChartCard>
+          </TopRow>
+        )}
+        <MiddleRow>
+          {containsApplet(ResourceIds.MyYearlyUnitsSoldList) && (
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.myYearlyUnitsSoldList}</Title>
+              </SummaryCard>
+              <MixedColorsBarChartDark
+                id='myYearlyUnitsSoldChart'
+                labels={data?.myYearlyUnitsSoldList?.map(ws => ws.year) || []}
+                data={data?.myYearlyUnitsSoldList?.map(ws => ws.qty) || []}
+                label={labels.qty}
+              />
+            </ChartCard>
+          )}
+          {containsApplet(ResourceIds.MyYearlyGrowthInUnitsSoldList) && (
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.myYearlyGrowthInUnitsSoldList}</Title>
+              </SummaryCard>
+              <MixedColorsBarChartDark
+                id='myYearlyGrowthUnitsSoldChart'
+                labels={data?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.year) || []}
+                data={data?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.qty) || []}
+                label={labels.qty}
+              />
+            </ChartCard>
+          )}
+          {containsApplet(ResourceIds.MyYearlyClientsAcquiredList) && (
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.myYearlyClientsAcquiredList}</Title>
+              </SummaryCard>
+              <MixedColorsBarChartDark
+                id='myYearlyClientsAcquiredList'
+                labels={data?.myYearlyClientsAcquiredList?.map(ws => ws.year) || []}
+                data={data?.myYearlyClientsAcquiredList?.map(ws => ws.qty) || []}
+                label={labels.qty}
+              />
+            </ChartCard>
+          )}
+          {containsApplet(ResourceIds.MyYearlyGrowthInClientsAcquiredList) && (
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.myYearlyGrowthInClientsAc}</Title>
+              </SummaryCard>
+              <MixedColorsBarChartDark
+                id='myYearlyGrowthInClientsAcquiredList'
+                labels={data?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.year) || []}
+                data={data?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.qty) || []}
+                label={labels.qty}
+              />
+            </ChartCard>
+          )}
+        </MiddleRow>
+        {containsApplet(ResourceIds.TodayPlantSales) && (
+          <TopRow>
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.todayPlantSales}</Title>
+                <strong>
+                  {(
+                    data?.todaysCreditSales?.map(tcs => tcs.sales).reduce((acc, val) => acc + val, 0) || 0
+                  ).toLocaleString()}
+                </strong>
+              </SummaryCard>
+              <CompositeBarChartDark
+                id='todayPlantSales'
+                labels={data?.todaysCreditSales?.map(ws => ws.plantRef) || []}
+                data={data?.todaysCreditSales?.map(ws => ws.sales) || []}
+                label={labels.todayPlantSales}
                 ratio={5}
               />
             </ChartCard>
@@ -378,6 +500,18 @@ const DashboardLayout = () => {
               />
             </ChartCard>
           )}
+          {/* {containsApplet(ResourceIds.AverageRevenuePerItem) && (
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.AverageRevenuePerItem}</Title>
+              </SummaryCard>
+              <LineChart
+                id='AverageRevenuePerItem'
+                labels={data?.avgUnitSales?.map(c => c.itemName) || []}
+                data={data?.avgUnitSales?.map(c => c.avgPrice) || []}
+              />
+            </ChartCard>
+          )} */}
         </MiddleRow>
       </Container>
     </Frame>
