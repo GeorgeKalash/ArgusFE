@@ -415,9 +415,9 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
               invoiceReference: res?.record?.invoiceRef,
               volume: res?.record?.volume || 0,
               baseLaborPrice: res?.record?.laborPrice || 0,
-              unitPrice: res?.record?.unitPrice || 0,
+              unitPrice: parseFloat(res?.record?.unitPrice).toFixed(2) || 0,
               vatPct: res?.record?.vatPct || 0,
-              vatAmount: parseFloat(res?.record?.vatAmount) || 0,
+              vatAmount: parseFloat(res?.record?.vatAmount).toFixed(2) || 0,
               invoiceTrxId: res?.record?.trxId || 0,
 
               ...(res?.record?.taxId && {
@@ -441,8 +441,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
               (lineObj.changes.taxDetails = FilteredListByTaxId(formik?.values?.taxDetailsStore, lineObj.changes.taxId))
           }
 
-          addRow(lineObj)
-
           const successSave = formik?.values?.recordId
             ? await autoSave(formik?.values, lineObj.changes)
             : await saveHeader(lineObj.changes)
@@ -450,8 +448,11 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           if (!successSave) {
             update({
               ...formik?.initialValues?.serials,
-              id: newRow?.id
+              id: newRow?.id,
+              srlNo: ''
             })
+          } else {
+            await addRow(lineObj)
           }
         }
       }
@@ -799,10 +800,12 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       const weight = parseFloat(row?.weight) || 0
 
       return {
-        subTotal: reCal ? acc?.subTotal + subTot : formik.values?.subTotal || 0,
-        vatAmount: reCal ? acc?.vatAmount + vatAmountTot : formik.values?.vatAmount || 0,
+        subTotal: reCal ? parseFloat((acc?.subTotal + subTot).toFixed(2)) : formik.values?.subTotal || 0,
+        vatAmount: reCal ? parseFloat((acc?.vatAmount + vatAmountTot).toFixed(2)) : formik.values?.vatAmount || 0,
         weight: reCal ? acc?.weight + weight : formik.values?.weight || 0,
-        amount: reCal ? acc?.subTotal + subTot + acc?.vatAmount + vatAmountTot : formik.values?.amount || 0
+        amount: reCal
+          ? parseFloat((acc?.subTotal + subTot + acc?.vatAmount + vatAmountTot).toFixed(2))
+          : formik.values?.amount || 0
       }
     },
     { subTotal: 0, vatAmount: 0, weight: 0, amount: 0 }

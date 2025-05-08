@@ -301,7 +301,6 @@ export default function DraftTransfer({ labels, access, recordId }) {
           }
 
           !reCal && setReCal(true)
-          addRow(lineObj)
 
           const successSave = formik?.values?.recordId
             ? await autoSave(formik?.values, lineObj.changes)
@@ -310,8 +309,11 @@ export default function DraftTransfer({ labels, access, recordId }) {
           if (!successSave) {
             update({
               ...formik?.initialValues?.serials,
-              id: newRow?.id
+              id: newRow?.id,
+              srlNo: ''
             })
+          } else {
+            await addRow(lineObj)
           }
         }
       }
