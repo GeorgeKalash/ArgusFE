@@ -27,7 +27,7 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
           id: 1,
           designId: recordId,
           operationId: '',
-          rmSeqNo: null,
+          rmSeqNo: 1,
           itemId: '',
           designQty: 0,
           designPcs: 0

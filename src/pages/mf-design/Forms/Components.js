@@ -27,7 +27,7 @@ const Components = ({ store, maxAccess, labels }) => {
           id: 1,
           designId: recordId,
           itemId: '',
-          seqNo: '',
+          seqNo: 1,
           qty: 0,
           pcs: 0
         }
@@ -37,7 +37,7 @@ const Components = ({ store, maxAccess, labels }) => {
       items: yup.array().of(
         yup.object({
           itemId: yup.string().test(function (value) {
-            const isAnyFieldFilled = this.parent.qty || this.parent.pcs
+            const isAnyFieldFilled = this.parent.qty && this.parent.pcs
             if (this.options.from[1]?.value?.items?.length === 1) {
               if (isAnyFieldFilled && isAnyFieldFilled != 0) {
                 return !!value
@@ -49,7 +49,7 @@ const Components = ({ store, maxAccess, labels }) => {
             return !!value
           }),
           qty: yup.string().test('check-value', 'Qty is required', function (value) {
-            const isFilled = !!this.parent.itemId || !!this.parent.pcs
+            const isFilled = !!this.parent.itemId && !!this.parent.pcs
             if (isFilled) {
               const numericValue = Number(value)
 
@@ -61,7 +61,7 @@ const Components = ({ store, maxAccess, labels }) => {
             return true
           }),
           pcs: yup.string().test('check-value', 'PCS is required', function (value) {
-            const isFilled = !!this.parent.itemId || !!this.parent.qty
+            const isFilled = !!this.parent.itemId && !!this.parent.qty
             if (isFilled) {
               const numericValue = Number(value)
 
