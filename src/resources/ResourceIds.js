@@ -406,6 +406,7 @@ export const ResourceIds = {
   Batches: 20205,
   GenerateInvoices: 52302,
   GeneratePUInvoices: 50307,
+  JobCategory: 42122,
   DesignGroup: 42116,
   DesignFamilies: 42115,
 }
