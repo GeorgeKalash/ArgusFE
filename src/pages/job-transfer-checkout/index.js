@@ -132,8 +132,7 @@ const JTCheckout = () => {
       props: {
         labels,
         recordId: obj?.recordId,
-        maxAccess: access,
-        invalidate
+        access
       },
       width: 1200,
       height: 780,

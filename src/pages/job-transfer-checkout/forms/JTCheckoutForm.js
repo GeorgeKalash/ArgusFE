@@ -23,9 +23,9 @@ import Table from 'src/components/Shared/Table'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { useWindow } from 'src/windows'
+import { useInvalidate } from 'src/hooks/resource'
 
-export default function JTCheckoutForm({ labels, recordId, access, invalidate }) {
+export default function JTCheckoutForm({ labels, recordId, access }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const imageUploadRef = useRef(null)
@@ -34,6 +34,10 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
     functionId: SystemFunction.JTCheckOut,
     access,
     enabled: !recordId
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: ManufacturingRepository.JobTransfer.page
   })
 
   const { formik } = useForm({
@@ -57,7 +61,7 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
       routingSeq: null,
       data: { list: [] }
     },
-    maxAccess: access,
+    maxAccess,
     validationSchema: yup.object({
       jobId: yup.number().required(),
       fromWCId: yup.number().required(),
@@ -78,20 +82,12 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
         extension: ManufacturingRepository.JobTransfer.set2,
         record: JSON.stringify(transferPack)
       }).then(async res => {
-        if (imageUploadRef.current) {
-          imageUploadRef.current.value = parseInt(res.recordId)
-
-          await imageUploadRef.current.submit()
-        }
-
         getData(res?.recordId)
         toast.success(obj?.recordId ? platformLabels.Edited : platformLabels.Added)
         invalidate()
       })
     }
   })
-
-  const editMode = !!formik?.values?.recordId
 
   const getData = async recordId => {
     await getRequest({
@@ -114,8 +110,7 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
         designName: res2?.record?.designName
       })
 
-      //additional request
-      //calculate total
+      imageUploadRef.current.value = res?.record?.transfer?.jobId
     })
   }
 
@@ -128,6 +123,7 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
   const isPosted = formik.values.status === 3
   const isClosed = formik.values.wip === 2
   const totalQty = formik?.values?.data?.list ? formik?.values?.data?.list?.reduce((op, item) => op + item?.qty, 0) : 0
+  const editMode = !!formik?.values?.recordId
 
   const onPost = async () => {
     await postRequest({
@@ -171,18 +167,11 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
     })
   }
 
-  async function fillItems(jobId) {
-    const itemsRes = await getRequest({
-      extension: ManufacturingRepository.IssueOfMaterialsItems.qry2,
-      parameters: `_jobId=${jobId}`
-    })
-
-    formik.setFieldValue('data', { list: itemsRes?.list })
-  }
-
   async function onJobSelection(jobId, routingSeq) {
     if (jobId) {
       fillItems(jobId)
+
+      imageUploadRef.current.value = jobId
 
       const routingRes = await getRequest({
         extension: ManufacturingRepository.JobRouting.qry,
@@ -202,19 +191,35 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
           formik.setFieldValue('toWCId', toWCRecord.workCenterId)
           formik.setFieldValue('toSVName', toWCRecord?.supervisorName)
           formik.setFieldValue('toSeqNo', toWCRecord?.seqNo)
-        }
-      }
+        } else clearSelection()
+      } else clearSelection()
     } else {
-      formik.setFieldValue('fromSeqNo', null)
-      formik.setFieldValue('fromWCId', null)
-      formik.setFieldValue('fromSVName', '')
-      formik.setFieldValue('qty', 0)
-      formik.setFieldValue('pcs', 0)
+      clearSelection()
 
-      formik.setFieldValue('toWCId', null)
-      formik.setFieldValue('toSVName', '')
-      formik.setFieldValue('toSeqNo', null)
+      imageUploadRef.current.value = null
+      formik.setFieldValue('data', { list: [] })
     }
+  }
+
+  async function fillItems(jobId) {
+    const itemsRes = await getRequest({
+      extension: ManufacturingRepository.IssueOfMaterialsItems.qry2,
+      parameters: `_jobId=${jobId}`
+    })
+
+    formik.setFieldValue('data', { list: itemsRes?.list })
+  }
+
+  async function clearSelection() {
+    formik.setFieldValue('fromSeqNo', null)
+    formik.setFieldValue('fromWCId', null)
+    formik.setFieldValue('fromSVName', '')
+    formik.setFieldValue('qty', 0)
+    formik.setFieldValue('pcs', 0)
+
+    formik.setFieldValue('toWCId', null)
+    formik.setFieldValue('toSVName', '')
+    formik.setFieldValue('toSeqNo', null)
   }
 
   const actions = [
@@ -248,7 +253,7 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
       resourceId={ResourceIds.JTCheckOut}
       functionId={SystemFunction.JTCheckOut}
       form={formik}
-      maxAccess={access}
+      maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
       previewReport={true}
@@ -274,7 +279,7 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                         valueField='recordId'
                         displayField={['reference', 'name']}
                         values={formik.values}
-                        maxAccess={access}
+                        maxAccess
                         onChange={async (event, newValue) => {
                           formik.setFieldValue('dtId', newValue?.recordId || null)
                           changeDT(newValue)
@@ -298,13 +303,12 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                           { key: 'description', value: 'Description' },
                           { key: 'itemName', value: 'Item Name' }
                         ]}
-                        readOnly={isPosted || editMode}
+                        readOnly={editMode}
                         required
                         secondDisplayField={false}
                         form={formik}
                         onChange={(event, newValue) => {
                           formik.setValues({
-                            //check mapping
                             ...formik.values,
                             jobId: newValue?.recordId || null,
                             jobRef: newValue?.reference || '',
@@ -321,7 +325,7 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                           onJobSelection(newValue?.recordId, newValue?.routingSeqNo)
                         }}
                         errorCheck={'jobId'}
-                        maxAccess={access}
+                        maxAccess
                       />
                     </Grid>
                   </Grid>
@@ -331,10 +335,10 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                     <Grid item xs={12}>
                       <CustomDatePicker
                         name='date'
-                        readOnly
+                        readOnly={isClosed || isPosted}
                         label={labels.date}
                         value={formik.values.date}
-                        maxAccess={access}
+                        maxAccess
                       />
                     </Grid>
 
@@ -345,7 +349,7 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                         value={formik.values.reference}
                         readOnly={editMode}
                         maxLength='15'
-                        maxAccess={!editMode && access}
+                        maxAccess={!editMode && maxAccess}
                         onChange={formik.handleChange}
                         onClear={() => formik.setFieldValue('reference', '')}
                         error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -360,8 +364,8 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                     value={formik.values.description}
                     rows={2}
                     editMode={editMode}
-                    readOnly={isClosed}
-                    maxAccess={maxAccess}
+                    readOnly={isClosed || isPosted}
+                    maxAccess
                     onChange={e => formik.setFieldValue('description', e.target.value)}
                     onClear={() => formik.setFieldValue('description', '')}
                     error={formik.touched.description && Boolean(formik.errors.description)}
@@ -370,21 +374,15 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                 <Grid item xs={6}>
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
-                      <CustomTextField
-                        name='sku'
-                        label={labels.item}
-                        value={formik.values.sku}
-                        readOnly
-                        maxAccess={access}
-                      />
+                      <CustomTextField name='sku' label={labels.itemRef} value={formik.values.sku} readOnly maxAccess />
                     </Grid>
                     <Grid item xs={12}>
                       <CustomTextField
                         name='designRef'
-                        label={labels.design}
+                        label={labels.designRef}
                         value={formik.values.designRef}
                         readOnly
-                        maxAccess={access}
+                        maxAccess
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -398,7 +396,7 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                         displayField={['workCenterRef', 'workCenterName']}
                         values={formik.values}
                         required
-                        maxAccess={access}
+                        maxAccess
                         error={formik.touched.fromSeqNo && formik.errors.fromSeqNo}
                       />
                     </Grid>
@@ -408,7 +406,7 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                         readOnly
                         label={labels.qty}
                         value={formik?.values?.qty}
-                        maxAccess={access}
+                        maxAccess
                         onChange={formik.handleChange}
                         onClear={() => formik.setFieldValue('qty', 0)}
                         error={formik.touched.qty && Boolean(formik.errors.qty)}
@@ -431,7 +429,7 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                         displayField={['workCenterRef', 'workCenterName']}
                         values={formik.values}
                         required
-                        maxAccess={access}
+                        maxAccess
                         error={formik.touched.toWCId && formik.errors.toWCId}
                       />
                     </Grid>
@@ -440,11 +438,23 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                 <Grid item xs={6}>
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
-                      <CustomTextField name='itemName' value={formik.values.itemName} readOnly maxAccess={access} />
+                      <CustomTextField
+                        name='itemName'
+                        label={labels.itemName}
+                        value={formik.values.itemName}
+                        readOnly
+                        maxAccess
+                      />
                     </Grid>
 
                     <Grid item xs={12}>
-                      <CustomTextField name='designName' value={formik.values.designName} readOnly maxAccess={access} />
+                      <CustomTextField
+                        name='designName'
+                        label={labels.designName}
+                        value={formik.values.designName}
+                        readOnly
+                        maxAccess
+                      />
                     </Grid>
                     <Grid item xs={12}>
                       <CustomTextField
@@ -452,7 +462,7 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                         label={labels.superVisor}
                         value={formik.values.fromSVName}
                         readOnly
-                        maxAccess={access}
+                        maxAccess
                       />
                     </Grid>
 
@@ -460,9 +470,9 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                       <CustomNumberField
                         name='pcs'
                         readOnly
-                        label={labels.pcs}
+                        label={labels.pieces}
                         value={formik?.values?.pcs}
-                        maxAccess={access}
+                        maxAccess
                         onChange={formik.handleChange}
                         onClear={() => formik.setFieldValue('pcs', 0)}
                         error={formik.touched.pcs && Boolean(formik.errors.pcs)}
@@ -476,7 +486,7 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                         label={labels.superVisor}
                         value={formik.values.toSVName}
                         readOnly
-                        maxAccess={access}
+                        maxAccess
                       />
                     </Grid>
                   </Grid>
@@ -488,22 +498,18 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
                 <Grid item xs={12}>
                   <ImageUpload
                     ref={imageUploadRef}
-                    resourceId={ResourceIds.JTCheckOut}
+                    resourceId={ResourceIds.MFJobOrders}
                     seqNo={0}
-                    recordId={recordId}
+                    recordId={formik.values.jobId}
+                    rerender={formik.values.jobId}
                     customWidth={320}
                     customHeight={180}
+                    disabled
                   />
                 </Grid>
                 <Grid item xs={12} height={122}></Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField
-                    name='totalQty'
-                    value={totalQty}
-                    readOnly
-                    label={labels.totalQty}
-                    maxAccess={access}
-                  />
+                  <CustomNumberField name='totalQty' value={totalQty} readOnly label={labels.totalQty} maxAccess />
                 </Grid>
               </Grid>
             </Grid>
@@ -513,10 +519,10 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
           <Table
             name='itemTable'
             gridData={formik.values.data}
-            maxAccess={access}
+            maxAccess={maxAccess}
             columns={[
-              { field: 'categoryRef', headerName: labels.categoryRef, flex: 1 },
-              { field: 'categoryName', headerName: labels.categoryName, flex: 1 },
+              { field: 'categoryRef', headerName: labels.itemCategory, flex: 1 },
+              { field: 'categoryName', headerName: labels.title, flex: 1 },
               { field: 'qty', headerName: labels.qty, type: 'number', flex: 1 },
               { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 }
             ]}
@@ -528,3 +534,4 @@ export default function JTCheckoutForm({ labels, recordId, access, invalidate })
     </FormShell>
   )
 }
+
