@@ -22,6 +22,15 @@ const ControlProvider = ({ children }) => {
   const [loading, setLoading] = useState(false)
   const errorModel = useError()
 
+  const [contextData, setContextData] = useState({})
+
+  const setContextLabels = (resourceId, labels) => {
+    setContextData(prevData => ({
+      ...prevData,
+      [resourceId]: labels
+    }))
+  }
+
   async function showError(props) {
     if (errorModel) await errorModel.stack(props)
   }
@@ -170,7 +179,9 @@ const ControlProvider = ({ children }) => {
     updateDefaults,
     userDefaultsData,
     setUserDefaultsData,
-    systemChecks
+    systemChecks,
+    setContextLabels,
+    contextData
   }
 
   return <ControlContext.Provider value={values}>{children}</ControlContext.Provider>
