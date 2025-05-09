@@ -3,14 +3,14 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
 
-export default function NumberfieldEdit({ id, column: { props, field }, value, update, updateRow }) {
+export default function NumberfieldEdit({ id, column: { props, field }, value, data, update, updateRow }) {
   const { systemChecks } = useContext(ControlContext)
   const viewDecimals = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
-  const isPercentIcon = props?.gridData ? props?.gridData[id - 1]?.mdType === 1 : false
+
   const typing = useRef(false)
 
   const handleIconClick = () => {
-    props?.iconsClicked(id, updateRow)
+    props?.iconsClicked({ updateRow, value, data })
   }
 
   const formatValue = val => {
@@ -33,6 +33,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, u
       decimalScale={props?.decimalScale}
       autoFocus
       hasBorder={false}
+      iconMapIndex='1'
       onChange={e => {
         typing.current = true
         update({
@@ -53,8 +54,8 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, u
         typing.current = false
       }}
       handleButtonClick={handleIconClick}
-      isPercentIcon={isPercentIcon}
       {...props}
+      iconKey={props?.iconKey && props?.iconKey({ value, data })}
     />
   )
 }

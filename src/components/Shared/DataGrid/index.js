@@ -26,6 +26,7 @@ export function DataGrid({
   onSelectionChange,
   rowSelectionModel,
   autoDelete,
+  initialValues,
   bg,
   onValidationRequired
 }) {
@@ -109,16 +110,14 @@ export function DataGrid({
           ? value.reduce((max, current) => (max.id > current.id ? max : current)).id + 1
           : 1
 
-        const defaultValues = Object.fromEntries(
-          columns?.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
-        )
         rows = [
           ...value.map(row => (row.id === updatedRow.id ? updatedRow : row)),
           {
-            id: highestIndex,
-            ...defaultValues
+            ...initialValues,
+            id: highestIndex
           }
         ]
+
         onChange(rows)
 
         setTimeout(() => {
@@ -204,23 +203,9 @@ export function DataGrid({
   const addNewRow = () => {
     const highestIndex = Math.max(...value?.map(item => item.id), 0) + 1
 
-    const defaultValues = allColumns
-      .filter(({ name }) => name !== 'id')
-      .reduce((acc, { name, defaultValue }) => {
-        if (typeof defaultValue === 'object' && defaultValue !== null) {
-          Object.entries(defaultValue).forEach(([key, value]) => {
-            acc[key] = value
-          })
-        } else {
-          acc[name] = defaultValue
-        }
-
-        return acc
-      }, {})
-
     const newRow = {
-      id: highestIndex,
-      ...defaultValues
+      ...initialValues,
+      id: highestIndex
     }
 
     const res = gridApiRef.current?.applyTransaction({ add: [newRow] })
@@ -238,6 +223,7 @@ export function DataGrid({
             colKey: allColumns[0].name
           })
         }
+        if (typeof onValidationRequired === 'function') onValidationRequired()
       }, 0)
     }
   }
@@ -357,6 +343,19 @@ export function DataGrid({
       }
     }
 
+    const currentCell = api.getFocusedCell()
+    if (currentCell) {
+      const focusElement = document.querySelector('[tabindex="1"]')
+
+      if (event.target.tabIndex === 0 && document.querySelector('.ag-root') && focusElement && !event.shiftKey) {
+        event.preventDefault()
+
+        focusElement.focus()
+
+        return
+      }
+    }
+
     const columns = gridApiRef.current.getColumnDefs()
     if (!event.shiftKey) {
       const skipReadOnlyTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, 1, api)
@@ -468,7 +467,7 @@ export function DataGrid({
       }
     }
 
-    const updateRow = ({ changes }) => {
+    const updateRow = ({ changes, commitOnBlur }) => {
       const oldRow = params.data
 
       setCurrentValue(changes || '')
@@ -481,7 +480,7 @@ export function DataGrid({
         return
       }
 
-      if (column.colDef.updateOn !== 'blur') {
+      if (column.colDef.updateOn !== 'blur' || commitOnBlur) {
         commit(changes)
 
         process(params, oldRow, setData)
@@ -720,13 +719,15 @@ export function DataGrid({
   const onCellEditingStopped = params => {
     const cellId = `${params.node.id}-${params.column.colId}`
     const { data, colDef } = params
-    let value = params?.data[params.column.colId]
+    let newValue = params?.data[params.column.colId]
+    let currentValue = value?.[params.rowIndex]?.[params.column.colId]
+    if (newValue == currentValue) return
 
-    if (value?.toString()?.endsWith('.') && colDef.component === 'numberfield') {
-      value = value.slice(0, -1).replace(/,/g, '')
+    if (newValue?.toString()?.endsWith('.') && colDef.component === 'numberfield') {
+      newValue = newValue.slice(0, -1).replace(/,/g, '')
 
       const changes = {
-        [colDef?.field]: value || undefined
+        [colDef?.field]: newValue || undefined
       }
       setData(changes, params)
       commit(changes)
@@ -735,7 +736,7 @@ export function DataGrid({
 
     if (lastCellStopped.current == cellId) return
     lastCellStopped.current = cellId
-    if (colDef.updateOn === 'blur' && data[colDef?.field] !== value?.[params?.columnIndex]?.[colDef?.field]) {
+    if (colDef.updateOn === 'blur' && data[colDef?.field] !== newValue?.[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
         stackDuplicate(params)
 
