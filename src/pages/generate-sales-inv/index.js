@@ -41,16 +41,10 @@ const GeneratePurchaseInvoice = () => {
 
   const defCurrencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value)
 
-  const basicValidation = yup.object({
+  const basicValidation = {
     clientId: yup.number().required(),
     currencyId: yup.number().required()
-  })
-
-  const fullValidation = yup.object({
-    clientId: yup.number().required(),
-    currencyId: yup.number().required(),
-    dtId: yup.number().required()
-  })
+  }
 
   const [validationMode, setValidationMode] = useState(basicValidation)
 
@@ -69,7 +63,7 @@ const GeneratePurchaseInvoice = () => {
       description: '',
       data: { list: [] }
     },
-    validationSchema: validationMode,
+    validationSchema: yup.object(validationMode),
     maxAccess: access,
     validateOnChange: true,
     onSubmit: async obj => {
@@ -219,7 +213,7 @@ const GeneratePurchaseInvoice = () => {
   }
 
   const onGenerateSI = async () => {
-    setValidationMode(fullValidation)
+    setValidationMode({ ...basicValidation, dtId: yup.number().required() })
 
     if (Object.keys(await formik.validateForm()).length) {
       const errors = await formik.validateForm()
