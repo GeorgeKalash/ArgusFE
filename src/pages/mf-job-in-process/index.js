@@ -30,6 +30,7 @@ const AssetsDescription = () => {
     refetch,
     labels,
     access,
+    invalidate,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -122,14 +123,14 @@ const AssetsDescription = () => {
       flex: 1
     }
   ]
-
   function openForm(recordId) {
     stack({
       Component: JobOrderWindow,
       props: {
         labels: _labels,
         access: maxAccess,
-        recordId
+        recordId,
+        invalidate
       },
       width: 1150,
       height: 700,

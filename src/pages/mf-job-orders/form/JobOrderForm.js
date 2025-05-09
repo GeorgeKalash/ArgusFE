@@ -6,7 +6,6 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -32,7 +31,7 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import Samples from './Samples'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 
-export default function JobOrderForm({ labels, maxAccess: access, setStore, store, setRefetchRouting }) {
+export default function JobOrderForm({ labels, maxAccess: access, setStore, store, setRefetchRouting, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -91,10 +90,6 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     status: 1,
     itemFromDesign: false
   }
-
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.MFJobOrder.qry
-  })
 
   const { formik } = useForm({
     maxAccess,
