@@ -59,8 +59,12 @@ export const DeliveryRepository = {
     del: service + 'delORD',
     cancel: service + 'cancelORD',
     flag: service + 'flagORD',
-    set2: service + 'set2ORD',
-    generate: service + 'generateIVC2'
+    set2: service + 'set2ORD'
+  },
+  Invoice: {
+    generate: service + 'generateIVC2',
+    generateInv: service + 'generateIVC',
+    preview: service + 'previewIVC'
   },
   OrderItem: {
     qry: service + 'qryORI',
