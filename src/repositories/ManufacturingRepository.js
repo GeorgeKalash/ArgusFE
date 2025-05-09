@@ -1,7 +1,11 @@
 const service = 'MF.asmx/'
 
 export const ManufacturingRepository = {
-  DesignRawMaterial: { qry2: service + 'qryDRM2' },
+  DesignRawMaterial: { 
+    qry2: service + 'qryDRM2', 
+    qry: service + 'qryDRM', 
+    set2: service + 'set2DRM' 
+  },
   IssueOfMaterialsItems: { qry: service + 'qryIMI' },
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
@@ -114,7 +118,8 @@ export const ManufacturingRepository = {
     set: service + 'setDES',
     get: service + 'getDES',
     del: service + 'delDES',
-    snapshot: service + 'snapshotDES'
+    snapshot: service + 'snapshotDES',
+    page: service + 'pageDES'
   },
   MFJobOrder: {
     qry: service + 'qryJOB',
@@ -289,12 +294,18 @@ export const ManufacturingRepository = {
     page: service + 'pageJCA'
   },
   DesignGroup: {
+    qry: service + 'qryDEG',
     set: service + 'setDEG',
     get: service + 'getDEG',
     del: service + 'delDEG',
     page: service + 'pageDEG',
   },
+  Components: {
+    qry: service + 'qryDEM',
+    set2: service + 'set2DEM',
+  },
   DesignFamily: {
+    qry: service + 'qryDEF',
     set: service + 'setDEF',
     get: service + 'getDEF',
     del: service + 'delDEF',
