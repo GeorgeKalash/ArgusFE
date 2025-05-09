@@ -36,43 +36,46 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
     },
     validationSchema: yup.object({
       items: yup.array().of(
-        yup.object({
-          operationId: yup.string().test(function (value) {
-            const isAnyFieldFilled = this.parent.designQty || this.parent.itemId
-            if (this.options.from[1]?.value?.items?.length === 1) {
-              if (isAnyFieldFilled && isAnyFieldFilled != 0) {
-                return !!value
-              }
+        yup.object().shape({
+          operationId: yup.string().test('required-if-any', 'Operation is required', function (value) {
+            const { itemId, designQty, designPcs } = this.parent
+            const isAnyFilled = !!itemId || !!designQty || !!designPcs
+            const allItems = this.options.from?.[1]?.value?.items || []
 
-              return true
-            }
-
-            return !!value
-          }),
-          itemId: yup.string().test(function (value) {
-            const isAnyFieldFilled = this.parent.designQty || this.parent.operationId
-            if (this.options.from[1]?.value?.items?.length === 1) {
-              if (isAnyFieldFilled && isAnyFieldFilled != 0) {
-                return !!value
-              }
-
-              return true
-            }
-
-            return !!value
-          }),
-          designQty: yup.string().test('check-value', 'Design Qty required', function (value) {
-            const isFilled = !!this.parent.operationId || !!this.parent.itemId
-            if (isFilled) {
-              const numericValue = Number(value)
-
-              if (!value || isNaN(numericValue)) {
-                return false
-              }
+            if (allItems.length === 1 && isAnyFilled) {
+              return !!value
             }
 
             return true
-          })
+          }),
+
+          itemId: yup.string().test('required-if-any', 'Item is required', function (value) {
+            const { operationId, designQty, designPcs } = this.parent
+            const isAnyFilled = !!operationId || !!designQty || !!designPcs
+            const allItems = this.options.from?.[1]?.value?.items || []
+
+            if (allItems.length === 1 && isAnyFilled) {
+              return !!value
+            }
+
+            return true
+          }),
+
+          designQty: yup
+            .string()
+            .test('required-if-any', 'Design Qty is required and must be a number', function (value) {
+              const { operationId, itemId, designPcs } = this.parent
+              const isAnyFilled = !!operationId || !!itemId || !!designPcs
+              const allItems = this.options.from?.[1]?.value?.items || []
+
+              if (allItems.length === 1 && isAnyFilled) {
+                const numericValue = Number(value)
+
+                return !!value && !isNaN(numericValue)
+              }
+
+              return true
+            })
         })
       )
     }),
