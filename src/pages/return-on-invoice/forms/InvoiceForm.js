@@ -25,7 +25,6 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
   })
   function importAllItems() {
     const updatedList = formik?.values?.items?.map((x, index) => {
-      console.log('check x', x)
       const returnNow = x.balanceQty
 
       const item = {
@@ -41,18 +40,44 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
 
       return item
     })
-    console.log('check list', updatedList)
     if (updatedList.length == 0) return
     form.setFieldValue('items', updatedList)
     window.close()
   }
-  function importSelectedItems() {}
+  function importSelectedItems() {
+    const updatedList = formik?.values?.items
+      ?.filter(x => x.checked === true && x.balanceQty > 0)
+      .map((x, index) => {
+        const returnNow = x.balanceQty
+
+        const item = {
+          ...x.item,
+          id: index + 1,
+          returnedQty: x.returnedQty,
+          returnNowQty: returnNow,
+          invoiceSeqNo: x.item.seqNo,
+          extendedPrice:
+            x.item.extendedPrice !== 0 ? (returnNow * x.item.extendedPrice) / x.item.qty : x.item.extendedPrice
+        }
+
+        return item
+      })
+
+    if (updatedList.length == 0) return
+    form.setFieldValue('items', updatedList)
+    window.close()
+  }
 
   const columns = [
     {
       component: 'checkbox',
       label: ' ',
-      name: 'checked'
+      name: 'checked',
+      async onChange({ row: { update, newRow } }) {
+        update({
+          returnNow: newRow?.checked ? newRow?.balanceQty : 0
+        })
+      }
     },
     {
       component: 'textfield',

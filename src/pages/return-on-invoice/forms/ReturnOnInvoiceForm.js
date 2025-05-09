@@ -49,6 +49,7 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { RateDivision } from 'src/resources/RateDivision'
 import ChangeClient from 'src/components/Shared/ChangeClient'
 import InvoiceForm from './InvoiceForm'
+import { SerialsForm } from 'src/components/Shared/SerialsForm'
 
 export default function ReturnOnInvoiceForm({ labels, access, recordId, currency }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -296,7 +297,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'trackBy', to: 'trackBy' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -412,8 +414,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
           applyVat: formik.values.isVattable,
-          taxDetailsButton: true
+          taxDetailsButton: true,
+          trackBy: newRow?.trackBy
         })
+        console.log('newRow', newRow)
       }
     },
     {
@@ -428,7 +432,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     {
       component: 'numberfield',
       label: labels.quantity,
-      name: 'qty',
+      name: 'returnNowQty',
       onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
       }
@@ -441,17 +445,35 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         onCondition
       },
       onClick: (e, row, update, updateRow) => {
-        // if (row?.trackBy === 1) {
-        //   stack({
-        //     Component: SerialsForm,
-        //     props: {
-        //       labels,
-        //     },
-        //     width: 500,
-        //     height: 700,
-        //     title: platformLabels.serials
-        //   })
-        // }
+        if (row?.trackBy == 1) {
+          stack({
+            Component: SerialsForm,
+            props: {
+              labels,
+              disabled: isPosted,
+              row,
+              siteId: null,
+              maxAccess,
+              checkForSiteId: row.qty < 0,
+              updateRow
+            },
+            width: 500,
+            height: 700,
+            title: platformLabels.serials
+          })
+        } else if (row?.trackBy == 2) {
+          stack({
+            Component: LotForm,
+            props: {
+              labels,
+              access,
+              form: formik.values
+            },
+            width: 700,
+            height: 550,
+            title: labels.lot
+          })
+        }
       }
     },
     {
