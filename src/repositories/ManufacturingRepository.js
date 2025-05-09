@@ -287,5 +287,17 @@ export const ManufacturingRepository = {
     get: service + 'getJCA',
     del: service + 'delJCA',
     page: service + 'pageJCA'
+  },
+  DesignGroup: {
+    set: service + 'setDEG',
+    get: service + 'getDEG',
+    del: service + 'delDEG',
+    page: service + 'pageDEG',
+  },
+  DesignFamily: {
+    set: service + 'setDEF',
+    get: service + 'getDEF',
+    del: service + 'delDEF',
+    page: service + 'pageDEF',
   }
 }
