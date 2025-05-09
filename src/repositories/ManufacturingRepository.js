@@ -2,7 +2,7 @@ const service = 'MF.asmx/'
 
 export const ManufacturingRepository = {
   DesignRawMaterial: { qry2: service + 'qryDRM2' },
-  IssueOfMaterialsItems: { qry: service + 'qryIMI' },
+  IssueOfMaterialsItems: { qry: service + 'qryIMI', qry2: service + 'qryIMI2' },
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
     page: service + 'pageLBG',
@@ -281,5 +281,16 @@ export const ManufacturingRepository = {
   AssemblyOverhead: {
     qry: service + 'qryAOH',
     set2: service + 'set2AOH'
+  },
+  JobTransfer: {
+    get2: service + 'get2TFR',
+    set2: service + 'set2TFR',
+    del: service + 'delTFR',
+    page: service + 'pageTFR',
+    snapshot: service + 'snapshotTFR',
+    post: service + 'postTFR',
+    unpost: service + 'unpostTFR',
+    close: service + 'closeTFR',
+    reopen: service + 'reopenTFR'
   }
 }
