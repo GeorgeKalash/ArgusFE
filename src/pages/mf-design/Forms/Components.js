@@ -36,42 +36,45 @@ const Components = ({ store, maxAccess, labels }) => {
     validationSchema: yup.object({
       items: yup.array().of(
         yup.object({
-          itemId: yup.string().test(function (value) {
-            const isAnyFieldFilled = this.parent.qty && this.parent.pcs
-            if (this.options.from[1]?.value?.items?.length === 1) {
-              if (isAnyFieldFilled && isAnyFieldFilled != 0) {
-                return !!value
+          itemId: yup.string().test('required-if-filled', 'Item is required', function (value) {
+            const { qty, pcs } = this.parent
+            const isAnyFieldFilled = !!qty || !!pcs
+            const allItems = this.options.from?.[1]?.value?.items || []
+
+            if (allItems.length === 1 && isAnyFieldFilled) {
+              return !!value
+            }
+
+            return true
+          }),
+          qty: yup.string().test('required-if-filled', 'Qty is required and must be a number', function (value) {
+            const { itemId, pcs } = this.parent
+            const isFilled = !!itemId || !!pcs
+            const allItems = this.options.from?.[1]?.value?.items || []
+
+            if (allItems.length === 1 && isFilled) {
+              const numericValue = Number(value)
+
+              return !!value && !isNaN(numericValue)
+            }
+
+            return true
+          }),
+          pcs: yup
+            .string()
+            .test('required-if-filled', 'PCS is required and must be a number ≤ 2147483647', function (value) {
+              const { itemId, qty } = this.parent
+              const isFilled = !!itemId || !!qty
+              const allItems = this.options.from?.[1]?.value?.items || []
+
+              if (allItems.length === 1 && isFilled) {
+                const numericValue = Number(value)
+
+                return !!value && !isNaN(numericValue) && numericValue <= 2147483647
               }
 
               return true
-            }
-
-            return !!value
-          }),
-          qty: yup.string().test('check-value', 'Qty is required', function (value) {
-            const isFilled = !!this.parent.itemId && !!this.parent.pcs
-            if (isFilled) {
-              const numericValue = Number(value)
-
-              if (!value || isNaN(numericValue)) {
-                return false
-              }
-            }
-
-            return true
-          }),
-          pcs: yup.string().test('check-value', 'PCS is required', function (value) {
-            const isFilled = !!this.parent.itemId && !!this.parent.qty
-            if (isFilled) {
-              const numericValue = Number(value)
-
-              if (!value || isNaN(numericValue) || numericValue > 2147483647) {
-                return false
-              }
-            }
-
-            return true
-          })
+            })
         })
       )
     }),
@@ -91,7 +94,6 @@ const Components = ({ store, maxAccess, labels }) => {
         fetchGridData()
         toast.success(platformLabels.Edited)
       })
-
     }
   })
 
