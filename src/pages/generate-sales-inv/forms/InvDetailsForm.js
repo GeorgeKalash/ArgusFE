@@ -14,8 +14,8 @@ export default function InvDetailsForm({ labels, access, form, window }) {
   const { formik } = useForm({
     initialValues: {
       date: form?.values?.date || new Date(),
-      plantId: form?.values?.plantId || null,
-      description: form?.values?.description || ''
+      plantId: form?.values?.plantId,
+      description: form?.values?.description
     },
     maxAccess: access,
     validateOnChange: true,
@@ -71,7 +71,7 @@ export default function InvDetailsForm({ labels, access, form, window }) {
                 displayField={['reference', 'name']}
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue?.recordId || null)
+                  formik.setFieldValue('plantId', newValue?.recordId)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />

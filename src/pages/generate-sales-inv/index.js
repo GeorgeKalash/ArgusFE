@@ -245,7 +245,7 @@ const GeneratePurchaseInvoice = () => {
         parameters: `_dtId=${recordId}`
       })
 
-      formik.setFieldValue('plantId', dtd?.record?.plantId || null)
+      formik.setFieldValue('plantId', dtd?.record?.plantId)
     }
   }
 
@@ -351,19 +351,17 @@ const GeneratePurchaseInvoice = () => {
           </Grid>
         </Fixed>
         <Grow>
-          <Grid item xs={3} sx={{ display: 'flex', flex: 1 }}>
-            <Table
-              columns={columns}
-              gridData={formik?.values?.data}
-              rowId={['orderId']}
-              isLoading={false}
-              pagination={false}
-              maxAccess={access}
-              showCheckboxColumn={true}
-              showSelectAll={true}
-              handleCheckboxChange={totalAmountFromChecked}
-            />
-          </Grid>
+          <Table
+            columns={columns}
+            gridData={formik?.values?.data}
+            rowId={['orderId']}
+            isLoading={false}
+            pagination={false}
+            maxAccess={access}
+            showCheckboxColumn={true}
+            showSelectAll={true}
+            handleCheckboxChange={totalAmountFromChecked}
+          />
         </Grow>
         <Fixed>
           <Grid container spacing={2}>
