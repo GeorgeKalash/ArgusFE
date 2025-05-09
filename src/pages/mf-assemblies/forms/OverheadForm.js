@@ -145,7 +145,6 @@ export default function OverheadForm({ labels, maxAccess, store, setTotalOverhea
       component: 'numberfield',
       label: labels.units,
       name: 'units',
-      defaultValue: 0,
       async onChange({ row: { update, newRow } }) {
         update({ amount: newRow?.units * newRow?.unitCost || 0 })
       }
@@ -154,7 +153,6 @@ export default function OverheadForm({ labels, maxAccess, store, setTotalOverhea
       component: 'numberfield',
       label: labels.unitCost,
       name: 'unitCost',
-      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -163,7 +161,6 @@ export default function OverheadForm({ labels, maxAccess, store, setTotalOverhea
       component: 'numberfield',
       label: labels.amount,
       name: 'amount',
-      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -219,6 +216,7 @@ export default function OverheadForm({ labels, maxAccess, store, setTotalOverhea
             error={formik.errors.items}
             columns={columns}
             name='items'
+            initialValues={formik?.initialValues?.items?.[0]}
             maxAccess={maxAccess}
             disabled={store?.isPosted}
             allowDelete={!store?.isPosted}

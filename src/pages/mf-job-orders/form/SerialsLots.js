@@ -65,8 +65,7 @@ export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
     {
       component: 'numberfield',
       label: labels.weight,
-      name: 'weight',
-      defaultValue: 0
+      name: 'weight'
     }
   ]
 
@@ -131,6 +130,8 @@ export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
             onChange={value => formik.setFieldValue('serials', value)}
             value={formik.values?.serials}
             error={formik.errors?.serials}
+            initialValues={formik?.initialValues?.serials?.[0]}
+            allowAddNewLine={false}
             columns={columns}
             name='serials'
             maxAccess={maxAccess}

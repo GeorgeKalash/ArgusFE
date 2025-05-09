@@ -112,8 +112,6 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
       props: {
         allowNegative: false
       },
-
-      defaultValue: 0,
       onChange: ({ row: { update, newRow } }) => {
         if (newRow.decimals == '' || newRow.decimals == null) {
           update({
@@ -163,6 +161,7 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
           <DataGrid
             onChange={value => formik.setFieldValue('data', value)}
             value={formik.values.data || []}
+            initialValues={formik?.initialValues?.data?.[0]}
             error={formik.errors.data}
             columns={columns}
           />

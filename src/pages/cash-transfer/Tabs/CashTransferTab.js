@@ -505,6 +505,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
             allowDelete={!isClosed}
             allowAddNewLine={!isClosed}
             maxAccess={maxAccess}
+            initialValues={formik?.initialValues?.transfers?.[0]}
             name='currencies'
             columns={[
               {
@@ -545,7 +546,6 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                 component: 'numberfield',
                 label: labels.amount,
                 name: 'amount',
-                defaultValue: '',
                 props: { readOnly: isClosed },
                 async onChange({ row: { update, newRow } }) {
                   if (!newRow?.amount) {
@@ -569,14 +569,12 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                 component: 'numberfield',
                 label: labels.baseAmount,
                 name: 'baseAmount',
-                defaultValue: '',
                 props: { readOnly: true }
               },
               {
                 component: 'numberfield',
                 name: 'balance',
                 label: labels.balance,
-                defaultValue: '0',
                 props: { readOnly: true }
               }
             ]}

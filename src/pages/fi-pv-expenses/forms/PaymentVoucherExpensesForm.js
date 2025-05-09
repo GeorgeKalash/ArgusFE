@@ -430,7 +430,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     {
       component: 'button',
       name: 'hasCostCenters',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/costCenter.png'
       },
@@ -853,6 +852,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
           }}
           value={formik?.values?.expenses}
           error={formik?.errors?.expenses}
+          initialValues={formik?.initialValues?.expenses[0]}
           columns={columns}
           allowDelete={!isPosted && !isCancelled}
           allowAddNewLine={!isPosted && !isCancelled}

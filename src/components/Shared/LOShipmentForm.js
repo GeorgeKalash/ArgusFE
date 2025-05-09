@@ -256,6 +256,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                       maxAccess={maxAccess}
                       rowSelectionModel={selectedRowId}
                       allowAddNewLine={!editMode}
+                      initialValues={formik?.initialValues?.packages?.[0]}
                       allowDelete={!editMode}
                       onSelectionChange={row => {
                         row && loadSerialsGrid(row)
@@ -280,7 +281,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                           component: 'numberfield',
                           name: 'qty',
                           label: labels.qty,
-                          defaultValue: '',
                           props: {
                             readOnly: editMode
                           }
@@ -289,7 +289,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                           component: 'numberfield',
                           label: labels.amount,
                           name: 'amount',
-                          defaultValue: '',
                           props: { readOnly: editMode }
                         }
                       ]}

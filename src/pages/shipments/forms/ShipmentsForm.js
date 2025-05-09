@@ -553,7 +553,6 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       component: 'button',
       hidden: true,
       name: 'lotButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/TableIcons/lot.png'
       },
@@ -793,6 +792,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
             }}
             value={formik?.values?.items}
             error={formik?.errors?.items}
+            initialValues={formik?.initialValues?.items?.[0]}
             columns={columns}
             maxAccess={maxAccess}
             name='shippedItems'

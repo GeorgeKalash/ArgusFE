@@ -34,7 +34,9 @@ import {
   DIRTYFIELD_MDAMOUNT,
   DIRTYFIELD_UPO,
   DIRTYFIELD_EXTENDED_PRICE,
-  DIRTYFIELD_MDTYPE
+  DIRTYFIELD_MDTYPE,
+  MDTYPE_PCT,
+  MDTYPE_AMOUNT
 } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
 import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
@@ -139,7 +141,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         applyVat: false,
         taxId: '',
         taxDetails: null,
-        taxDetailsButton: false,
+        taxDetailsButton: true,
         notes: ''
       }
     ]
@@ -273,6 +275,24 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     filteredMeasurements.current = arrayMU
   }
 
+  const iconKey = ({ value, data }) => {
+    const mdType = value?.mdType || data?.mdType
+
+    return mdType === MDTYPE_PCT ? '%' : '123'
+  }
+
+  function checkMinMaxAmount(amount, type, modType) {
+    let currentAmount = parseFloat(amount) || 0
+
+    if (type === modType) {
+      if (currentAmount < 0 || currentAmount > 100) currentAmount = 0
+    } else {
+      if (currentAmount < 0) currentAmount = 0
+    }
+
+    return currentAmount
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -346,7 +366,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
           upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
           priceType: ItemConvertPrice?.priceType || 1,
-          mdAmount: formik.values.maxDiscount ? parseFloat(formik.values.maxDiscount).toFixed(2) : 0,
+          mdAmount: formik.values.tdPct ? parseFloat(formik.values.tdPct).toFixed(2) : 0,
           qty: 0,
           msId: itemInfo?.msId,
           muRef: filteredMeasurements?.[0]?.reference,
@@ -361,8 +381,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           saTrx: true,
           taxDetailsButton: true
         })
-
-        formik.setFieldValue('mdAmount', formik.values.currentDiscount ? formik.values.currentDiscount : 0)
       }
     },
     {
@@ -423,8 +441,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
-      onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
+      async onChange({ row: { update, newRow } }) {
+        const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
+        update(data)
       }
     },
     {
@@ -452,7 +471,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         decimalScale: 5
       },
       async onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_BASE_PRICE)
+        update(data)
       }
     },
     {
@@ -464,7 +484,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         decimalScale: 5
       },
       async onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_UNIT_PRICE)
+        update(data)
       }
     },
     {
@@ -473,7 +494,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       name: 'upo',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_UPO)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_UPO)
+        update(data)
       }
     },
     {
@@ -487,7 +509,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     {
       component: 'button',
       name: 'taxDetailsButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/tax-icon.png'
       },
@@ -514,13 +535,14 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       flex: 2,
       props: {
         ShowDiscountIcons: true,
-        iconsClicked: (id, updateRow) => handleIconClick(id, updateRow),
-        gridData: formik.values.items,
+        iconsClicked: handleIconClick,
         type: 'numeric',
-        concatenateWith: '%'
+        iconKey
       },
       async onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
+        update(data)
+
         checkMdAmountPct(newRow, update)
       }
     },
@@ -548,7 +570,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       name: 'extendedPrice',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_EXTENDED_PRICE)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_EXTENDED_PRICE)
+        update(data)
       }
     },
     {
@@ -559,37 +582,20 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     }
   ]
 
-  async function handleIconClick(id, updateRow) {
-    const index = formik.values.items.findIndex(item => item.id === id)
+  async function handleIconClick({ updateRow, value, data }) {
+    const mdt = value?.mdType || data?.mdType
 
-    if (index === -1) return
+    let mdType = mdt === MDTYPE_PCT ? MDTYPE_AMOUNT : MDTYPE_PCT
 
-    let currentMdType
-    let currenctMdAmount = parseFloat(formik.values.items[index].mdAmount)
-    const maxClientAmountDiscount = formik.values.items[index].unitPrice * (formik.values?.maxDiscount / 100)
-
-    if (formik.values.items[index].mdType == 2) {
-      if (currenctMdAmount < 0 || currenctMdAmount > 100) currenctMdAmount = 0
-      formik.setFieldValue(`items[${index}].mdAmountPct`, 1)
-      formik.setFieldValue(`items[${index}].mdType`, 1)
-      currentMdType = 1
-      formik.setFieldValue(`items[${index}].mdAmount`, parseFloat(currenctMdAmount).toFixed(2))
-    } else {
-      if (currenctMdAmount < 0 || currenctMdAmount > maxClientAmountDiscount) currenctMdAmount = 0
-      formik.setFieldValue(`items[${index}].mdAmountPct`, 2)
-      formik.setFieldValue(`items[${index}].mdType`, 2)
-      currentMdType = 2
-      formik.setFieldValue(`items[${index}].mdAmount`, parseFloat(currenctMdAmount).toFixed(2))
-    }
+    const currentMdAmount = checkMinMaxAmount(value?.mdAmount, mdType, MDTYPE_PCT)
 
     const newRow = {
-      ...formik.values.items[index],
-      mdAmount: currenctMdAmount,
-      mdType: currentMdType
+      mdAmount: currentMdAmount,
+      mdAmountPct: mdType,
+      mdType: mdType
     }
 
-    getItemPriceRow(updateRow, newRow, DIRTYFIELD_MDTYPE, true)
-    checkMdAmountPct(newRow, updateRow)
+    updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
   async function onClose() {
@@ -890,19 +896,21 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       return newState
     })
   }
-  function getItemPriceRow(update, newRow, dirtyField, iconClicked) {
+  function getItemPriceRow(newRow, dirtyField, iconClicked) {
     !reCal && setReCal(true)
+
+    const mdAmount = checkMinMaxAmount(newRow?.mdAmount, newRow?.mdType, MDTYPE_PCT)
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType || 0,
       basePrice: parseFloat(newRow?.basePrice) || 0,
-      volume: parseFloat(newRow?.volume),
+      volume: parseFloat(newRow?.volume) || 0,
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
       qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
-      mdAmount: parseFloat(newRow?.mdAmount),
+      mdAmount: mdAmount,
       mdType: newRow?.mdType,
       baseLaborPrice: 0,
       totalWeightPerG: 0,
@@ -922,6 +930,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     })
 
     let commonData = {
+      ...newRow,
       id: newRow?.id,
       qty: parseFloat(itemPriceRow?.qty).toFixed(2),
       volume: parseFloat(itemPriceRow?.volume).toFixed(2),
@@ -935,8 +944,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),
       vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
     }
-    let data = iconClicked ? { changes: commonData } : commonData
-    update(data)
+
+    return iconClicked ? { changes: commonData } : commonData
   }
 
   const parsedItemsArray = formik.values.items
@@ -1018,7 +1027,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     if (parseFloat(rowData.mdAmount) > clientMaxDiscount) {
       formik.setFieldValue('mdAmount', clientMaxDiscount)
       rowData.mdAmount = clientMaxDiscount
-      getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
+      const data = getItemPriceRow(rowData, DIRTYFIELD_MDAMOUNT)
+      update(data)
+
       stackError({
         message: labels.clientMaxPctDiscount + ' ' + clientMaxDiscount + '%'
       })
@@ -1031,7 +1042,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       formik.setFieldValue('mdAmount', clientMaxDiscountValue)
       rowData.mdType = 2
       rowData.mdAmount = clientMaxDiscountValue
-      getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
+      const data = getItemPriceRow(rowData, DIRTYFIELD_MDAMOUNT)
+      update(data)
       stackError({
         message: labels.clientMaxDiscount + ' ' + clientMaxDiscountValue
       })
@@ -1039,7 +1051,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }
 
   function checkMdAmountPct(rowData, update) {
-    const maxClientAmountDiscount = rowData.unitPrice * (formik.values.maxDiscount / 100)
+    const maxClientAmountDiscount = Number(rowData.unitPrice) * (formik.values.maxDiscount / 100)
     if (!formik.values.maxDiscount) return
     if (rowData.mdType == 1) {
       if (rowData.mdAmount > formik.values.maxDiscount) {
@@ -1423,6 +1435,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                   formik.setFieldValue('clientRef', newValue?.reference)
                   formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                   formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
+                  formik.setFieldValue('tdPct', newValue?.tdPct)
                   formik.setFieldValue('taxId', newValue?.taxId)
                   setAddress({})
                   fillClientData(newValue?.recordId)
@@ -1530,6 +1543,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
             }}
             value={formik.values.items}
             error={formik.errors.items}
+            initialValues={formik?.initialValues?.items?.[0]}
             columns={columns}
             name='items'
             maxAccess={maxAccess}
@@ -1611,7 +1625,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     value={formik.values.currentDiscount}
                     displayCycleButton={true}
                     readOnly={isClosed}
-                    isPercentIcon={cycleButtonState.text === '%' ? true : false}
+                    iconKey={cycleButtonState.text}                 
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
                     handleButtonClick={handleButtonClick}

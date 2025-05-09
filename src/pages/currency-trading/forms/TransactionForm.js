@@ -1342,6 +1342,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   onChange={value => formik.setFieldValue('operations', value)}
                   value={formik.values.operations}
                   error={emptyRows.length < 1 ? formik.errors.operations : true}
+                  initialValues={formik?.initialValues?.operations?.[0]}
                   height={175}
                   disabled={isClosed}
                   maxAccess={maxAccess}
@@ -1443,8 +1444,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           update({
                             lcAmount: lcAmount?.toFixed(2)
                           })
-                      },
-                      defaultValue: ''
+                      }
                     },
                     {
                       component: 'numberfield',
@@ -1497,8 +1497,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                             return
                           }
                       },
-
-                      defaultValue: ''
                     },
                     {
                       component: 'numberfield',
@@ -1520,8 +1518,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                             fcAmount: fcAmount.toFixed(2)
                           })
                       },
-
-                      defaultValue: ''
                     }
                   ]}
                 />

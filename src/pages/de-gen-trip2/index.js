@@ -222,7 +222,6 @@ const GenerateOutboundTransportation2 = () => {
         allowNegative: false,
         decimalScale: 0
       },
-      defaultValue: 0,
       flex: 1
     }
   ]
