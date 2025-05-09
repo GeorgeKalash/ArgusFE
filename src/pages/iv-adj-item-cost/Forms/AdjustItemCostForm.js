@@ -87,7 +87,7 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
         items: formik.values.rows.map((details, index) => {
           return {
             ...details,
-            acoId: recordId ?? 0,
+            acoId: obj.recordId ?? 0,
             seqNo: index + 1
           }
         })
@@ -145,6 +145,15 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
     getDTD(formik?.values?.header?.dtId)
   }, [formik.values?.header?.dtId])
 
+  const getUnitCost = async itemId => {
+    const res = await getRequest({
+      extension: InventoryRepository.CurrentCost.get,
+      parameters: '_itemId=' + itemId
+    })
+
+    return res?.record?.currentCost
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -164,6 +173,16 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
           { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow?.itemId) {
+          return
+        }
+        const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
+
+        update({
+          unitCost
+        })
       }
     },
     {

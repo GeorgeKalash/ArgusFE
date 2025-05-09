@@ -317,7 +317,6 @@ export const InventoryRepository = {
     page: service + 'pageACO',
     qry: service + 'qryACO',
     get2: service + 'get2ACO',
-    set: service + 'setACO',
     set2: service + 'set2ACO',
     del: service + 'delACO',
     snapshot: service + 'snapshotACO',

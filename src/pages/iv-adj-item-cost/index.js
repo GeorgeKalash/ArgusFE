@@ -56,8 +56,8 @@ const AdjustItemCost = () => {
     },
     {
       field: 'notes',
-      headerName: labels.description,
-      flex: 1
+      headerName: labels.notes,
+      flex: 2
     },
     {
       field: 'statusName',
