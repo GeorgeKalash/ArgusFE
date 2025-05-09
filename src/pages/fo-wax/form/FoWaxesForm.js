@@ -468,7 +468,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
-                    readOnly={editMode}
+                    readOnly={editMode || formik.values.items.some(item => item.jobId)}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
