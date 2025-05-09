@@ -254,7 +254,8 @@ const GeneratePoductionOrder = () => {
             <Grid item xs={2}>
               <CustomButton
                 onClick={() => fillSummaryORD(formik.values.clientId)}
-                label={platformLabels.Refresh}
+                label={platformLabels.Preview}
+                image={'preview.png'}
                 color='#231f20'
               />
             </Grid>
