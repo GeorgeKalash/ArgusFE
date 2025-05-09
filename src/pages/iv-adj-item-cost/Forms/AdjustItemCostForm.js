@@ -32,22 +32,24 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
     enabled: !recordId
   })
 
-
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.AdjustItemCost.page
   })
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
       recordId,
-      dtId: null,
-      reference: '',
-      plantId: null,
-      notes: '',
-      date: new Date(),
-      status: 1,
+      header: {
+        recordId: null,
+        dtId: null,
+        reference: '',
+        plantId: null,
+        notes: '',
+        date: new Date(),
+        status: 1
+      },
       rows: [
         {
           id: 1,
@@ -62,67 +64,63 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.date().required(),
+      header: yup.object({
+        date: yup.date().required()
+      }),
       rows: yup
         .array()
         .of(
           yup.object().shape({
             sku: yup.string().required(),
             itemName: yup.string().required(),
-            unitCost: yup.number().required(),
+            unitCost: yup.number().required()
           })
         )
         .required()
     }),
     onSubmit: async obj => {
-      const { rows, date, ...rest } = obj
-
-      const header = {
-        ...rest,
-        date: formatDateToApi(date)
-      }
-
-      const updatedRows = formik.values.rows.map((details, index) => {
-        return {
-          ...details,
-          acoId: recordId ?? 0,
-          seqNo: index + 1
-        }
-      })
-
-      const resultObject = {
-        header,
-        items: updatedRows
+      const data = {
+        header: {
+          ...obj.header,
+          date: formatDateToApi(obj.header.date)
+        },
+        items: formik.values.rows.map((details, index) => {
+          return {
+            ...details,
+            acoId: recordId ?? 0,
+            seqNo: index + 1
+          }
+        })
       }
 
       const res = await postRequest({
         extension: InventoryRepository.AdjustItemCost.set2,
-        record: JSON.stringify(resultObject)
+        record: JSON.stringify(data)
       })
+      formik.setFieldValue('recordId', res.recordId)
+      formik.setFieldValue('header.recordId', res.recordId)
 
-      const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
-      toast.success(actionMessage)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
       refetchForm(res?.recordId)
     }
   })
 
   const editMode = !!formik.values.recordId
-  const isPosted = formik.values.status === 3
+  const isPosted = formik.values.header.status === 3
 
   async function onPost() {
     const res = await postRequest({
       extension: InventoryRepository.AdjustItemCost.post,
       record: JSON.stringify({
-        ...formik.values,
-        date: formatDateToApi(formik.values.date)
+        ...formik.values.header,
+        date: formatDateToApi(formik.values.header.date)
       })
     })
 
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
       invalidate()
-
       refetchForm(res?.recordId)
     }
   }
@@ -134,15 +132,18 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : null)
+      formik.setFieldValue(
+        'header.plantId',
+        res?.record?.plantId ? res?.record?.plantId : formik?.values?.header?.plantId
+      )
 
       return res
     }
   }
 
   useEffect(() => {
-    getDTD(formik?.values?.dtId)
-  }, [formik.values.dtId])
+    getDTD(formik?.values?.header?.dtId)
+  }, [formik.values?.header?.dtId])
 
   const columns = [
     {
@@ -188,7 +189,7 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
   const onUnpost = async () => {
     const res = await postRequest({
       extension: InventoryRepository.AdjustItemCost.unpost,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify(formik.values.header)
     })
 
     if (res?.recordId) {
@@ -211,8 +212,11 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
       }))
 
       formik.setValues({
-        ...res.record.header,
-        date: formatDateFromApi(res?.record?.header?.date),
+        recordId: res.record.header.recordId,
+        header: {
+          ...res.record.header,
+          date: formatDateFromApi(res?.record?.header?.date)
+        },
         rows: modifiedList
       })
 
@@ -226,9 +230,9 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
 
   const actions = [
     {
-      key: 'RecordRemarks',
+      key: 'GL',
       condition: true,
-      onClick: 'onRecordRemarks',
+      onClick: 'onClickGL',
       disabled: !editMode
     },
     {
@@ -272,7 +276,7 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.AdjustmentCost}`}
-                    name='dtId'
+                    name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -281,39 +285,39 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
                     readOnly={editMode}
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    values={formik.values}
+                    values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId || null)
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
-                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                    error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='reference'
+                    name='header.reference'
                     label={labels.reference}
-                    value={formik?.values?.reference}
+                    value={formik?.values?.header?.reference}
                     maxAccess={!editMode && maxAccess}
                     maxLength='30'
                     readOnly={isPosted}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    onClear={() => formik.setFieldValue('header.reference', '')}
+                    error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
-                    name='date'
+                    name='header.date'
                     label={labels.date}
                     readOnly={isPosted}
-                    value={formik?.values?.date}
+                    value={formik?.values?.header.date}
                     onChange={formik.setFieldValue}
                     required
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('date', null)}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
+                    onClear={() => formik.setFieldValue('header.date', null)}
+                    error={formik?.touched?.header?.date && Boolean(formik?.errors?.header?.date)}
                   />
                 </Grid>
               </Grid>
@@ -323,34 +327,33 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
-                    name='plantId'
+                    name='header.plantId'
                     label={labels.plant}
                     readOnly={isPosted}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    values={formik.values}
+                    values={formik.values.header}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('plantId', newValue?.recordId || null)
+                      formik.setFieldValue('header.plantId', newValue?.recordId || null)
                     }}
-                    error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                    error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
-                    name='notes'
+                    name='header.notes'
                     label={labels.description}
-                    value={formik?.values?.notes}
-                    rows={2.5}
+                    value={formik.values.header?.notes}
                     readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('notes', '')}
-                    error={formik.touched.notes && Boolean(formik.errors.notes)}
+                    onClear={() => formik.setFieldValue('header.notes', '')}
+                    error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
                   />
                 </Grid>
               </Grid>
