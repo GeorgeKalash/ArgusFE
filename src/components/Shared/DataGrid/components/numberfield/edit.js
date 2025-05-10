@@ -32,6 +32,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, u
       readOnly={props?.readOnly}
       decimalScale={props?.decimalScale}
       autoFocus
+      autoSelect
       hasBorder={false}
       onChange={e => {
         typing.current = true

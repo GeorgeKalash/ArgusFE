@@ -24,6 +24,7 @@ const CustomNumberField = ({
   error,
   helperText,
   hasBorder = true,
+  autoSelect = false,
   editMode = false,
   maxLength = 1000,
   thousandSeparator = ',',
@@ -40,8 +41,6 @@ const CustomNumberField = ({
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
-  const [isFocused, setIsFocused] = useState(false)
-  const inputRef = useRef(null)
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/
@@ -89,14 +88,11 @@ const CustomNumberField = ({
       onChange(e)
     }
   }
+
   const displayButtons = (!_readOnly || allowClear) && !props.disabled && (value || value === 0)
+
   useEffect(() => {
     if (value) formatNumber({ target: { value } })
-  }, [])
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.select()
-    }
   }, [])
 
   return _hidden ? (
@@ -117,18 +113,15 @@ const CustomNumberField = ({
       helperText={helperText}
       required={_required}
       onInput={handleInput}
-      onFocus={() => setIsFocused(true)}
+      onFocus={e => autoSelect && e.target.select()}
       onBlur={e => {
         onBlur(e)
         if (e.target.value?.endsWith('.')) {
           e.target.value = e.target.value.slice(0, -1)
           handleNumberChangeValue(e)
         }
-        setIsFocused(false)
       }}
       InputProps={{
-        inputRef,
-        autoFocus: false,
         inputProps: {
           min: min,
           max: max,
