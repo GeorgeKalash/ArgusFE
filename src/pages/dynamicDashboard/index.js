@@ -6,7 +6,8 @@ import {
   CompositeBarChartDark,
   HorizontalBarChartDark,
   MixedBarChart,
-  MixedColorsBarChartDark
+  MixedColorsBarChartDark,
+  LineChart
 } from '../../components/Shared/dashboardApplets/charts'
 import { getStorageData } from 'src/storage/storage'
 import { DashboardRepository } from 'src/repositories/DashboardRepository'
@@ -14,7 +15,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { debounce } from 'lodash'
 import { SummaryFiguresItem } from 'src/resources/DashboardFigures'
-import { LineChart } from 'recharts'
 
 const Frame = styled.div`
   display: flex;
@@ -494,24 +494,25 @@ const DashboardLayout = () => {
                 id='TopCustomers'
                 labels={data?.topCustomers?.map(c => c.clientName) || []}
                 data={data?.topCustomers?.map(c => c.amount) || []}
-                label={labels.topCostumers}
+                label={labels.revenue}
                 color='#d5b552'
                 hoverColor='#818181'
               />
             </ChartCard>
           )}
-          {/* {containsApplet(ResourceIds.AverageRevenuePerItem) && (
+          {containsApplet(ResourceIds.AverageRevenuePerItem) && (
             <ChartCard>
               <SummaryCard>
-                <Title>{labels.AverageRevenuePerItem}</Title>
+                <Title>{labels.averageRevenuePerItem}</Title>
               </SummaryCard>
               <LineChart
                 id='AverageRevenuePerItem'
                 labels={data?.avgUnitSales?.map(c => c.itemName) || []}
                 data={data?.avgUnitSales?.map(c => c.avgPrice) || []}
+                label={labels.averageRevenue}
               />
             </ChartCard>
-          )} */}
+          )}
         </MiddleRow>
       </Container>
     </Frame>

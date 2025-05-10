@@ -466,10 +466,16 @@ export const CompositeBarChart = ({ id, labels, data, label }) => {
 }
 
 export const LineChart = ({ id, labels, data, label }) => {
-  useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+  const chartRef = useRef(null)
+  const chartInstanceRef = useRef(null)
 
-    const chart = new Chart(ctx, {
+  useEffect(() => {
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.destroy()
+    }
+    const ctx = chartRef.current.getContext('2d')
+
+    chartInstanceRef.current = new Chart(ctx, {
       type: 'line',
       data: {
         labels,
@@ -478,22 +484,79 @@ export const LineChart = ({ id, labels, data, label }) => {
             label,
             data,
             fill: false,
-            borderColor: '#6673FD',
-            backgroundColor: '#6673FD',
+            borderColor: 'rgb(102, 115, 253)',
+            backgroundColor: 'rgb(102, 115, 253)',
+            hoverBackgroundColor: 'rgb(126, 135, 243)',
             borderWidth: 1,
             tension: 0.1
           }
         ]
       },
-      options: getChartOptions(label, 'line')
+      options: {
+        indexAxis: 'x',
+        responsive: false,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            max: Math.max(...data) * 1.1
+          }
+        },
+        plugins: {
+          datalabels: {
+            anchor: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartWidth = chart.scales.x.right - chart.scales.x.left
+              const maxValue = chart.scales.x.max
+              const barWidth = (value / maxValue) * chartWidth
+
+              return barWidth >= 65 ? 'center' : 'end'
+            },
+            align: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartWidth = chart.scales.x.right - chart.scales.x.left
+              const maxValue = chart.scales.x.max
+              const barWidth = (value / maxValue) * chartWidth
+
+              return barWidth >= 65 ? 'center' : 'right'
+            },
+            color: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartWidth = chart.scales.x.right - chart.scales.x.left
+              const maxValue = chart.scales.x.max
+              const barWidth = (value / maxValue) * chartWidth
+
+              return barWidth >= 65 ? '#fff' : '#000'
+            },
+            offset: 0,
+            font: {
+              size: 14
+            },
+            formatter: value => value.toLocaleString()
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
     })
 
     return () => {
-      chart.destroy()
+      chartInstanceRef.current.destroy()
     }
   }, [id, labels, data, label])
 
-  return <canvas id={id}></canvas>
+  const baseHeight = 200
+  const barHeight = 25
+  const dynamicHeight = baseHeight + labels.length * barHeight
+
+  return <canvas id={id} ref={chartRef} height={dynamicHeight} width={window.innerWidth / 2.5}></canvas>
 }
 
 export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
