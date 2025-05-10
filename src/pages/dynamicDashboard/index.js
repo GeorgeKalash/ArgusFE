@@ -2,12 +2,19 @@ import React, { useEffect, useState, useContext } from 'react'
 import styled, { keyframes } from 'styled-components'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { CompositeBarChartDark, HorizontalBarChartDark } from '../../components/Shared/dashboardApplets/charts'
+import {
+  CompositeBarChartDark,
+  HorizontalBarChartDark,
+  MixedBarChart,
+  MixedColorsBarChartDark,
+  LineChart
+} from '../../components/Shared/dashboardApplets/charts'
 import { getStorageData } from 'src/storage/storage'
 import { DashboardRepository } from 'src/repositories/DashboardRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { debounce } from 'lodash'
+import { SummaryFiguresItem } from 'src/resources/DashboardFigures'
 
 const Frame = styled.div`
   display: flex;
@@ -68,6 +75,7 @@ const MiddleRow = styled.div`
   grid-template-columns: 50% 50%;
   gap: 10px;
   margin-bottom: 10px;
+  margin-right: 10px;
 `
 
 const ChartCard = styled.div`
@@ -138,8 +146,13 @@ const DashboardLayout = () => {
         })
       })
       .then(res => {
-        setData(res.record)
-        debouncedCloseLoading()
+        return getRequest({
+          extension: DashboardRepository.SalesPersonDashboard.spDB,
+          parameters: ``
+        }).then(resSP => {
+          setData({ ...res?.record, ...resSP?.record })
+          debouncedCloseLoading()
+        })
       })
   }, [])
 
@@ -153,192 +166,350 @@ const DashboardLayout = () => {
     return applets.some(applet => applet.appletId === appletId)
   }
 
-  const todayRetailSales = data?.summaryFigures?.find(f => f.itemId === 13)?.amount ?? 0
-  const todayHoSales = data?.summaryFigures?.find(f => f.itemId === 14)?.amount ?? 0
-  const todaysSales = todayHoSales + todayRetailSales
-
-  const globalHoSales = data?.summaryFigures?.find(f => f.itemId === 16)?.amount ?? 0
-  const globalRetailSales = data?.summaryFigures?.find(f => f.itemId === 15)?.amount ?? 0
-  const globalSales = globalHoSales + globalRetailSales
-
-  const openSo = data?.summaryFigures?.find(f => f.itemId === 18)?.amount ?? 0
-  const returnSales = data?.summaryFigures?.find(f => f.itemId === 17)?.amount ?? 0
-
-  const revenues = data?.summaryFigures?.find(f => f.itemId === 2)?.amount ?? 0
-  const profit = data?.summaryFigures?.find(f => f.itemId === 3)?.amount ?? 0
-
-  const newCustomers = data?.summaryFigures?.find(f => f.itemId === 1)?.amount ?? 0
-
-  const retailLabels = data?.todaysRetailSales?.map(ws => ws.posRef) || []
-  const retailValues = data?.todaysRetailSales?.map(ws => ws.sales) || []
-
-  const weeklyLabels = data?.weeklySales?.map(ws => ws.weekName) || []
-  const weeklyValues = data?.weeklySales?.map(ws => ws.sales) || []
-
-  const averageWeekly =
-    weeklyValues.length > 0 ? weeklyValues.reduce((acc, val) => acc + val, 0) / weeklyValues.length : 0
-
-  const monthlyLabels = data?.monthlySales?.map(ms => `${ms.year}/${ms.month}`) || []
-  const monthlyValues = data?.monthlySales?.map(ms => ms.sales) || []
-
-  const averageMonthly =
-    monthlyValues.length > 0 ? monthlyValues.reduce((acc, val) => acc + val, 0) / monthlyValues.length : 0
-
-  const revenuesLabels = data?.accumulatedMonthlySales?.map(ms => ms.monthName) || []
-  const revenuesValues = data?.accumulatedMonthlySales?.map(ms => ms.sales) || []
-
-  const receivablesLabels = Object.keys(data?.receivables || {})
-  const receivablesValues = Object.values(data?.receivables || {})
-
-  const topCustomersLabels = data?.topCustomers?.map(c => c.clientName) || []
-  const topCustomersValues = data?.topCustomers?.map(c => c.amount) || []
-
   return (
     <Frame>
       <Container>
-        {containsApplet(60110) && (
+        {containsApplet(ResourceIds.TodayRetailOrders) && (
           <TopRow>
             <ChartCard>
               <SummaryCard>
                 <Title>{labels.retailSales}</Title>
-                <strong>{todayRetailSales.toLocaleString()}</strong>
+                <strong>
+                  {(
+                    data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_RETAIL_SALES)
+                      ?.amount ?? 0
+                  ).toLocaleString()}
+                </strong>
               </SummaryCard>
               <CompositeBarChartDark
                 id='retailSalesChart'
-                labels={retailLabels}
-                data={retailValues}
+                labels={data?.todaysRetailSales?.map(ws => ws.posRef) || []}
+                data={data?.todaysRetailSales?.map(ws => ws.sales) || []}
                 label={labels.retailSales}
                 ratio={5}
               />
             </ChartCard>
           </TopRow>
         )}
+        {containsApplet(ResourceIds.MyYearlySalesPerformance) && (
+          <TopRow>
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.myYearlySalesPerformance}</Title>
+              </SummaryCard>
+              <MixedBarChart
+                id='myYearlySalesPerformance'
+                labels={data?.myYearlySalesPerformanceList?.map(ws => ws.year) || []}
+                data1={data?.myYearlySalesPerformanceList?.map(ws => ws.sales) || []}
+                data2={data?.myYearlySalesPerformanceList?.map(ws => ws.target) || []}
+                label1='sales'
+                label2='target'
+                ratio={5}
+              />
+            </ChartCard>
+          </TopRow>
+        )}
+        {containsApplet(ResourceIds.MyMonthlySalesPerformance) && (
+          <TopRow>
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.myMonthlySalesPerformance}</Title>
+              </SummaryCard>
+              <MixedBarChart
+                id='myMonthlySalesPerformance'
+                labels={data?.myMonthlySalesPerformanceList?.map(ws => ws.monthName) || []}
+                data1={data?.myMonthlySalesPerformanceList?.map(ws => ws.sales) || []}
+                data2={data?.myMonthlySalesPerformanceList?.map(ws => ws.target) || []}
+                label1='sales'
+                label2='target'
+                ratio={5}
+              />
+            </ChartCard>
+          </TopRow>
+        )}
         <MiddleRow>
-          {(containsApplet(60106) || containsApplet(60112)) && (
+          {containsApplet(ResourceIds.MyYearlyUnitsSoldList) && (
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.myYearlyUnitsSoldList}</Title>
+              </SummaryCard>
+              <MixedColorsBarChartDark
+                id='myYearlyUnitsSoldChart'
+                labels={data?.myYearlyUnitsSoldList?.map(ws => ws.year) || []}
+                data={data?.myYearlyUnitsSoldList?.map(ws => ws.qty) || []}
+                label={labels.qty}
+              />
+            </ChartCard>
+          )}
+          {containsApplet(ResourceIds.MyYearlyGrowthInUnitsSoldList) && (
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.myYearlyGrowthInUnitsSoldList}</Title>
+              </SummaryCard>
+              <MixedColorsBarChartDark
+                id='myYearlyGrowthUnitsSoldChart'
+                labels={data?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.year) || []}
+                data={data?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.qty) || []}
+                label={labels.qty}
+              />
+            </ChartCard>
+          )}
+          {containsApplet(ResourceIds.MyYearlyClientsAcquiredList) && (
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.myYearlyClientsAcquiredList}</Title>
+              </SummaryCard>
+              <MixedColorsBarChartDark
+                id='myYearlyClientsAcquiredList'
+                labels={data?.myYearlyClientsAcquiredList?.map(ws => ws.year) || []}
+                data={data?.myYearlyClientsAcquiredList?.map(ws => ws.qty) || []}
+                label={labels.qty}
+              />
+            </ChartCard>
+          )}
+          {containsApplet(ResourceIds.MyYearlyGrowthInClientsAcquiredList) && (
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.myYearlyGrowthInClientsAc}</Title>
+              </SummaryCard>
+              <MixedColorsBarChartDark
+                id='myYearlyGrowthInClientsAcquiredList'
+                labels={data?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.year) || []}
+                data={data?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.qty) || []}
+                label={labels.qty}
+              />
+            </ChartCard>
+          )}
+        </MiddleRow>
+        {containsApplet(ResourceIds.TodayPlantSales) && (
+          <TopRow>
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.todayPlantSales}</Title>
+                <strong>
+                  {(
+                    data?.todaysCreditSales?.map(tcs => tcs.sales).reduce((acc, val) => acc + val, 0) || 0
+                  ).toLocaleString()}
+                </strong>
+              </SummaryCard>
+              <CompositeBarChartDark
+                id='todayPlantSales'
+                labels={data?.todaysCreditSales?.map(ws => ws.plantRef) || []}
+                data={data?.todaysCreditSales?.map(ws => ws.sales) || []}
+                label={labels.todayPlantSales}
+                ratio={5}
+              />
+            </ChartCard>
+          </TopRow>
+        )}
+        <MiddleRow>
+          {(containsApplet(ResourceIds.NewCustomers) || containsApplet(ResourceIds.GlobalSalesYTD)) && (
             <SummaryGrid>
-              {containsApplet(60112) && (
+              {containsApplet(ResourceIds.GlobalSalesYTD) && (
                 <>
-                  <SummaryItem>
-                    <RedCenter>{labels.todaysSale}</RedCenter>
-                    <InnerGrid>
-                      <Label>{labels.hoSalesOrders}:</Label>
-                      <Value>{todayHoSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
-                      <Label>{labels.retailSales}:</Label>
-                      <Value>{todayRetailSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
-                      <Label>{labels.total}:</Label>
-                      <Value>{todaysSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
-                    </InnerGrid>
-                  </SummaryItem>
-                  <SummaryItem>
-                    <RedCenter>{labels.globalSales}</RedCenter>
-                    <InnerGrid>
-                      <Label>{labels.hoSales}:</Label>
-                      <Value>{globalHoSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
-                      <Label>{labels.retailSales}:</Label>
-                      <Value>{globalRetailSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
-                      <Label>{labels.total}:</Label>
-                      <Value>{globalSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
-                    </InnerGrid>
-                  </SummaryItem>
-                  <SummaryItem>
-                    <RedCenter>{labels.miscData}</RedCenter>
-                    <InnerGrid>
-                      <Label>{labels.openSo}:</Label>
-                      <Value>{openSo.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
-                      <Label>{labels.returnSales}:</Label>
-                      <Value>{returnSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
-                    </InnerGrid>
-                  </SummaryItem>
-                  <SummaryItem>
-                    <RedCenter>{labels.generalRevenue}</RedCenter>
-                    <InnerGrid>
-                      <Label>{labels.revenues}:</Label>
-                      <Value>{revenues.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
-                      <Label>{labels.profit}:</Label>
-                      <Value>{profit.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
-                    </InnerGrid>
-                  </SummaryItem>
+                  {[
+                    {
+                      title: labels.todaysSale,
+                      rows: [
+                        {
+                          label: labels.hoSalesOrders,
+                          value:
+                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS)
+                              ?.amount ?? 0
+                        },
+                        {
+                          label: labels.retailSales,
+                          value:
+                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS)
+                              ?.amount ?? 0
+                        },
+                        {
+                          label: labels.total,
+                          value:
+                            (data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS)
+                              ?.amount ?? 0) +
+                            (data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS)
+                              ?.amount ?? 0)
+                        }
+                      ]
+                    },
+                    {
+                      title: labels.globalSales,
+                      rows: [
+                        {
+                          label: labels.hoSales,
+                          value:
+                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.CREDIT_SALES_YTD)?.amount ??
+                            0
+                        },
+                        {
+                          label: labels.retailSales,
+                          value:
+                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.RETAIL_SALES_YTD)?.amount ??
+                            0
+                        },
+                        {
+                          label: labels.total,
+                          value:
+                            (data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.CREDIT_SALES_YTD)
+                              ?.amount ?? 0) +
+                            (data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.RETAIL_SALES_YTD)
+                              ?.amount ?? 0)
+                        }
+                      ]
+                    },
+                    {
+                      title: labels.miscData,
+                      rows: [
+                        {
+                          label: labels.openSo,
+                          value:
+                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.OPEN_SALES_ORDERS)
+                              ?.amount ?? 0
+                        },
+                        {
+                          label: labels.returnSales,
+                          value:
+                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.CREDIT_SALES_RETURNS_YTD)
+                              ?.amount ?? 0
+                        }
+                      ]
+                    },
+                    {
+                      title: labels.generalRevenue,
+                      rows: [
+                        {
+                          label: labels.revenues,
+                          value: data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)?.amount ?? 0
+                        },
+                        {
+                          label: labels.profit,
+                          value:
+                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)?.amount ?? 0
+                        }
+                      ]
+                    }
+                  ].map((summary, index) => (
+                    <SummaryItem key={index}>
+                      <RedCenter>{summary.title}</RedCenter>
+                      <InnerGrid>
+                        {summary.rows.map((row, idx) => (
+                          <React.Fragment key={idx}>
+                            <Label>{row.label}:</Label>
+                            <Value>{row.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Value>
+                          </React.Fragment>
+                        ))}
+                      </InnerGrid>
+                    </SummaryItem>
+                  ))}
                 </>
               )}
-              {containsApplet(60106) && (
+              {containsApplet(ResourceIds.NewCustomers) && (
                 <SummaryItem style={{ gridColumn: '1 / 3' }}>
                   <RedCenter>
-                    {labels.newCostumers}: {newCustomers.toLocaleString()}
+                    {labels.newCostumers}:{' '}
+                    {(
+                      data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.NEW_CUSTOMERS_YTD)?.amount ?? 0
+                    ).toLocaleString()}
                   </RedCenter>
                 </SummaryItem>
               )}
             </SummaryGrid>
           )}
-          {containsApplet(60100) && (
+
+          {containsApplet(ResourceIds.WeeklySalesYTD) && (
             <ChartCard>
               <SummaryCard>
                 <Title>{labels.avWeeklySales}</Title>
-                <strong>{averageWeekly.toLocaleString()}</strong>
+                <strong>
+                  {(
+                    (data?.weeklySales?.map(ws => ws.sales).reduce((acc, val) => acc + val, 0) || 0) /
+                    (data?.weeklySales?.length || 1)
+                  ).toLocaleString()}
+                </strong>
               </SummaryCard>
               <CompositeBarChartDark
                 id='weeklySalesChart'
-                labels={weeklyLabels}
-                data={weeklyValues}
+                labels={data?.weeklySales?.map(ws => ws.weekName) || []}
+                data={data?.weeklySales?.map(ws => ws.sales) || []}
                 label={labels.weeklySales}
               />
             </ChartCard>
           )}
-          {containsApplet(60101) && (
+          {containsApplet(ResourceIds.MonthlySalesYTD) && (
             <ChartCard>
               <SummaryCard>
                 <Title>{labels.avMonthlySales}</Title>
-                <strong>{averageMonthly.toLocaleString()}</strong>
+                <strong>
+                  {(
+                    (data?.monthlySales?.map(ms => ms.sales).reduce((acc, val) => acc + val, 0) || 0) /
+                    (data?.monthlySales?.length || 1)
+                  ).toLocaleString()}
+                </strong>
               </SummaryCard>
               <CompositeBarChartDark
                 id='monthlySalesChart'
-                labels={monthlyLabels}
-                data={monthlyValues}
+                labels={data?.monthlySales?.map(ms => `${ms.year}/${ms.month}`) || []}
+                data={data?.monthlySales?.map(ms => ms.sales) || []}
                 label={labels.monthlySales}
               />
             </ChartCard>
           )}
-          {containsApplet(60103) && (
+          {containsApplet(ResourceIds.AccumulatedRevenuesYTD) && (
             <ChartCard>
               <SummaryCard>
                 <Title>{labels.accRevenues}</Title>
               </SummaryCard>
               <CompositeBarChartDark
                 id='accumulatedRevenuesChart'
-                labels={revenuesLabels}
-                data={revenuesValues}
+                labels={data?.accumulatedMonthlySales?.map(ams => ams.monthName) || []}
+                data={data?.accumulatedMonthlySales?.map(ams => ams.sales) || []}
                 label={labels.accRevenues}
                 color='#ff6c02'
                 hoverColor='#fec106'
               />
             </ChartCard>
           )}
-          {containsApplet(60109) && (
+          {containsApplet(ResourceIds.Receivables) && (
             <ChartCard>
               <SummaryCard>
                 <Title>{labels.receivables}</Title>
               </SummaryCard>
               <HorizontalBarChartDark
                 id='Receivables'
-                labels={receivablesLabels}
-                data={receivablesValues}
+                labels={Object.keys(data?.receivables || {})}
+                data={Object.values(data?.receivables || {})}
                 label={labels.receivables}
                 color='#6e87b6'
                 hoverColor='#818181'
               />
             </ChartCard>
           )}
-          {containsApplet(60102) && (
+          {containsApplet(ResourceIds.TopCustomers) && (
             <ChartCard>
               <SummaryCard>
                 <Title>{labels.topCostumers}</Title>
               </SummaryCard>
               <HorizontalBarChartDark
                 id='TopCustomers'
-                labels={topCustomersLabels}
-                data={topCustomersValues}
-                label={labels.topCostumers}
+                labels={data?.topCustomers?.map(c => c.clientName) || []}
+                data={data?.topCustomers?.map(c => c.amount) || []}
+                label={labels.revenue}
                 color='#d5b552'
                 hoverColor='#818181'
+              />
+            </ChartCard>
+          )}
+          {containsApplet(ResourceIds.AverageRevenuePerItem) && (
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.averageRevenuePerItem}</Title>
+              </SummaryCard>
+              <LineChart
+                id='AverageRevenuePerItem'
+                labels={data?.avgUnitSales?.map(c => c.itemName) || []}
+                data={data?.avgUnitSales?.map(c => c.avgPrice) || []}
+                label={labels.averageRevenue}
               />
             </ChartCard>
           )}
