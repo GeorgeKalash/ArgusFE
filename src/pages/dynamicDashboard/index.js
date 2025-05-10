@@ -15,6 +15,10 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { debounce } from 'lodash'
 import { SummaryFiguresItem } from 'src/resources/DashboardFigures'
+import Table from 'src/components/Shared/Table'
+import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Frame = styled.div`
   display: flex;
@@ -150,12 +154,16 @@ const DashboardLayout = () => {
           extension: DashboardRepository.SalesPersonDashboard.spDB,
           parameters: ``
         }).then(resSP => {
-          setData({ ...res?.record, ...resSP?.record })
-          debouncedCloseLoading()
+          return getRequest({
+            extension: DocumentReleaseRepository.Approvals.qry2,
+            parameters: ``
+          }).then(resDR => {
+            setData({ ...res?.record, ...resSP?.record, authorization: { ...resDR } })
+            debouncedCloseLoading()
+          })
         })
       })
   }, [])
-
   if (loading) {
     return <LoadingOverlay />
   }
@@ -511,6 +519,39 @@ const DashboardLayout = () => {
                 data={data?.avgUnitSales?.map(c => c.avgPrice) || []}
                 label={labels.averageRevenue}
               />
+            </ChartCard>
+          )}
+          {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.authorization}</Title>
+              </SummaryCard>
+              <VertLayout>
+                <Grow>
+                  <Table
+                    columns={[
+                      {
+                        field: 'reference',
+                        headerName: labels.reference,
+                        flex: 1
+                      },
+                      {
+                        field: 'functionName',
+                        headerName: labels.functionName,
+                        flex: 1
+                      },
+                      {
+                        field: 'thirdParty',
+                        headerName: labels.thirdParty,
+                        flex: 1
+                      }
+                    ]}
+                    gridData={data?.authorization}
+                    rowId={['recordId']}
+                    pagination={false}
+                  />
+                </Grow>
+              </VertLayout>
             </ChartCard>
           )}
         </MiddleRow>
