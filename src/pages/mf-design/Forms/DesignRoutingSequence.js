@@ -17,6 +17,20 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const requiredIfAny = (otherFields, message, customCheck) => {
+    return yup.string().test('required-if-any', message, function (value) {
+      const index = this.options.index
+      const parent = this.parent
+
+      const isAnyFilled = otherFields.some(field => !!parent[field])
+      const isFirst = index === 0
+
+      const isValid = customCheck ? customCheck(value) : !!value
+
+      return isFirst ? !isAnyFilled || isValid : isValid
+    })
+  }
+
   const { formik } = useForm({
     validateOnChange: true,
     maxAccess,
@@ -37,45 +51,13 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
     validationSchema: yup.object({
       items: yup.array().of(
         yup.object().shape({
-          operationId: yup.string().test('required-if-any', 'Operation is required', function (value) {
-            const { itemId, designQty, designPcs } = this.parent
-            const index = this.options.index
-
-            const isAnyFilled = !!itemId || !!designQty || !!designPcs
-            if (index === 0) {
-              return !isAnyFilled || !!value
-            }
-
-            return !!value
-          }),
-
-          itemId: yup.string().test('required-if-any', 'Item is required', function (value) {
-            const { operationId, designQty, designPcs } = this.parent
-            const index = this.options.index
-
-            const isAnyFilled = !!operationId || !!designQty || !!designPcs
-            if (index === 0) {
-              return !isAnyFilled || !!value
-            }
-
-            return !!value
-          }),
-
-          designQty: yup
-            .string()
-            .test('required-if-any', 'Design Qty is required and must be a number', function (value) {
-              const { operationId, itemId, designPcs } = this.parent
-              const index = this.options.index
-
-              const isAnyFilled = !!operationId || !!itemId || !!designPcs
-              const numericValue = Number(value)
-
-              if (index === 0) {
-                return !isAnyFilled || (!!value && !isNaN(numericValue))
-              }
-
-              return !!value && !isNaN(numericValue)
-            })
+          operationId: requiredIfAny(['itemId', 'designQty', 'designPcs'], 'Operation is required'),
+          itemId: requiredIfAny(['operationId', 'designQty', 'designPcs'], 'Item is required'),
+          designQty: requiredIfAny(
+            ['operationId', 'itemId', 'designPcs'],
+            'Design Qty is required and must be a number',
+            value => !!value && !isNaN(Number(value))
+          )
         })
       )
     }),

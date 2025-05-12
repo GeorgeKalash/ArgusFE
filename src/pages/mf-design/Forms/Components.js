@@ -17,6 +17,20 @@ const Components = ({ store, maxAccess, labels }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const requiredIfAny = (otherFields, message, customCheck) => {
+    return yup.string().test('required-if-any', message, function (value) {
+      const index = this.options.index
+      const parent = this.parent
+
+      const isAnyFilled = otherFields.some(field => !!parent[field])
+      const isFirst = index === 0
+
+      const isValid = customCheck ? customCheck(value) : !!value
+
+      return isFirst ? !isAnyFilled || isValid : isValid
+    })
+  }
+
   const { formik } = useForm({
     validateOnChange: true,
     maxAccess,
@@ -35,46 +49,18 @@ const Components = ({ store, maxAccess, labels }) => {
     },
     validationSchema: yup.object({
       items: yup.array().of(
-        yup.object({
-          itemId: yup.string().test('required-if-filled', 'Item is required', function (value) {
-            const { qty, pcs } = this.parent
-            const index = this.options.index
-            const isAnyFieldFilled = !!qty || !!pcs
+        yup.object().shape({
+          itemId: requiredIfAny(['qty', 'pcs'], 'Item is required'),
+          qty: requiredIfAny(
+            ['itemId', 'pcs'],
+            'Qty is required and must be a number',
+            value => !!value && !isNaN(Number(value))
+          ),
+          pcs: requiredIfAny(['itemId', 'qty'], 'PCS is required and must be a number ≤ 2147483647', value => {
+            const numeric = Number(value)
 
-            if (index === 0) {
-              return !isAnyFieldFilled || !!value
-            }
-
-            return !!value
-          }),
-
-          qty: yup.string().test('required-if-filled', 'Qty is required and must be a number', function (value) {
-            const { itemId, pcs } = this.parent
-            const index = this.options.index
-            const isAnyFieldFilled = !!itemId || !!pcs
-            const numericValue = Number(value)
-
-            if (index === 0) {
-              return !isAnyFieldFilled || (!!value && !isNaN(numericValue))
-            }
-
-            return !!value && !isNaN(numericValue)
-          }),
-
-          pcs: yup
-            .string()
-            .test('required-if-filled', 'PCS is required and must be a number ≤ 2147483647', function (value) {
-              const { itemId, qty } = this.parent
-              const index = this.options.index
-              const isAnyFieldFilled = !!itemId || !!qty
-              const numericValue = Number(value)
-
-              if (index === 0) {
-                return !isAnyFieldFilled || (!!value && !isNaN(numericValue) && numericValue <= 2147483647)
-              }
-
-              return !!value && !isNaN(numericValue) && numericValue <= 2147483647
-            })
+            return !!value && !isNaN(numeric) && numeric <= 2147483647
+          })
         })
       )
     }),
