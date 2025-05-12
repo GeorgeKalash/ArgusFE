@@ -38,42 +38,42 @@ const Components = ({ store, maxAccess, labels }) => {
         yup.object({
           itemId: yup.string().test('required-if-filled', 'Item is required', function (value) {
             const { qty, pcs } = this.parent
+            const index = this.options.index
             const isAnyFieldFilled = !!qty || !!pcs
-            const allItems = this.options.from?.[1]?.value?.items || []
 
-            if (allItems.length === 1 && isAnyFieldFilled) {
-              return !!value
+            if (index === 0) {
+              return !isAnyFieldFilled || !!value
             }
 
-            return true
+            return !!value
           }),
+
           qty: yup.string().test('required-if-filled', 'Qty is required and must be a number', function (value) {
             const { itemId, pcs } = this.parent
-            const isFilled = !!itemId || !!pcs
-            const allItems = this.options.from?.[1]?.value?.items || []
+            const index = this.options.index
+            const isAnyFieldFilled = !!itemId || !!pcs
+            const numericValue = Number(value)
 
-            if (allItems.length === 1 && isFilled) {
-              const numericValue = Number(value)
-
-              return !!value && !isNaN(numericValue)
+            if (index === 0) {
+              return !isAnyFieldFilled || (!!value && !isNaN(numericValue))
             }
 
-            return true
+            return !!value && !isNaN(numericValue)
           }),
+
           pcs: yup
             .string()
             .test('required-if-filled', 'PCS is required and must be a number ≤ 2147483647', function (value) {
               const { itemId, qty } = this.parent
-              const isFilled = !!itemId || !!qty
-              const allItems = this.options.from?.[1]?.value?.items || []
+              const index = this.options.index
+              const isAnyFieldFilled = !!itemId || !!qty
+              const numericValue = Number(value)
 
-              if (allItems.length === 1 && isFilled) {
-                const numericValue = Number(value)
-
-                return !!value && !isNaN(numericValue) && numericValue <= 2147483647
+              if (index === 0) {
+                return !isAnyFieldFilled || (!!value && !isNaN(numericValue) && numericValue <= 2147483647)
               }
 
-              return true
+              return !!value && !isNaN(numericValue) && numericValue <= 2147483647
             })
         })
       )

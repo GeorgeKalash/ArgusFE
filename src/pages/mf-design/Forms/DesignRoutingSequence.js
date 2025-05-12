@@ -39,42 +39,42 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
         yup.object().shape({
           operationId: yup.string().test('required-if-any', 'Operation is required', function (value) {
             const { itemId, designQty, designPcs } = this.parent
-            const isAnyFilled = !!itemId || !!designQty || !!designPcs
-            const allItems = this.options.from?.[1]?.value?.items || []
+            const index = this.options.index
 
-            if (allItems.length === 1 && isAnyFilled) {
-              return !!value
+            const isAnyFilled = !!itemId || !!designQty || !!designPcs
+            if (index === 0) {
+              return !isAnyFilled || !!value
             }
 
-            return true
+            return !!value
           }),
 
           itemId: yup.string().test('required-if-any', 'Item is required', function (value) {
             const { operationId, designQty, designPcs } = this.parent
-            const isAnyFilled = !!operationId || !!designQty || !!designPcs
-            const allItems = this.options.from?.[1]?.value?.items || []
+            const index = this.options.index
 
-            if (allItems.length === 1 && isAnyFilled) {
-              return !!value
+            const isAnyFilled = !!operationId || !!designQty || !!designPcs
+            if (index === 0) {
+              return !isAnyFilled || !!value
             }
 
-            return true
+            return !!value
           }),
 
           designQty: yup
             .string()
             .test('required-if-any', 'Design Qty is required and must be a number', function (value) {
               const { operationId, itemId, designPcs } = this.parent
+              const index = this.options.index
+
               const isAnyFilled = !!operationId || !!itemId || !!designPcs
-              const allItems = this.options.from?.[1]?.value?.items || []
+              const numericValue = Number(value)
 
-              if (allItems.length === 1 && isAnyFilled) {
-                const numericValue = Number(value)
-
-                return !!value && !isNaN(numericValue)
+              if (index === 0) {
+                return !isAnyFilled || (!!value && !isNaN(numericValue))
               }
 
-              return true
+              return !!value && !isNaN(numericValue)
             })
         })
       )
