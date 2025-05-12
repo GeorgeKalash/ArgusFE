@@ -352,7 +352,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
       extension: SystemRepository.ParameterDefinition,
       parameters: parameters
     }).then(res => {
-      setParameters(res.list)
+      if (res?.list) setParameters(res.list)
     })
   }
 

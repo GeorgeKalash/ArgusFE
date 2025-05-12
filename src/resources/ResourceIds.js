@@ -1,4 +1,5 @@
 export const ResourceIds = {
+  UserDashboard: 20117,
   GeneralLedger: 30303,
   JournalVoucher: 30302,
   FRT_DR_approvals: 10302,
@@ -405,6 +406,8 @@ export const ResourceIds = {
   Batches: 20205,
   GenerateInvoices: 52302,
   GeneratePUInvoices: 50307,
+  AdjustItemCost: 41216,
+  JobCategory: 42122,
   DesignGroup: 42116,
   DesignFamilies: 42115,
   ReturnOnInvoice: 51319,

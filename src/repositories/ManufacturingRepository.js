@@ -282,6 +282,12 @@ export const ManufacturingRepository = {
     qry: service + 'qryAOH',
     set2: service + 'set2AOH'
   },
+  JobCategory: {
+    set: service + 'setJCA',
+    get: service + 'getJCA',
+    del: service + 'delJCA',
+    page: service + 'pageJCA'
+  },
   DesignGroup: {
     set: service + 'setDEG',
     get: service + 'getDEG',
