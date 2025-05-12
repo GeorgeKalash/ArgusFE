@@ -1312,7 +1312,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     }}
                     readOnly={!formik.values.baseMetalCuId || isPosted}
                     hidden={
-                      isPosted || (!editMode && !formik.values.baseMetalCuId) || (!editMode && formik.values.dtId)
+                      isPosted || (!editMode && !formik.values.baseMetalCuId) || (!editMode && !formik.values.dtId)
                     }
                     onClear={() => formik.setFieldValue('KGmetalPrice', '')}
                     error={formik.touched?.KGmetalPrice && Boolean(formik.errors?.KGmetalPrice)}
@@ -1579,7 +1579,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             columns={columns}
             name='items'
             maxAccess={maxAccess}
-            disabled={!formik.values.clientId || isPosted}
+            disabled={!formik.values.clientId || formik.values.invoiceId || isPosted}
             allowDelete={!isPosted && !formik.values.invoiceId}
           />
         </Grow>

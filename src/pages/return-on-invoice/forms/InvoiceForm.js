@@ -41,6 +41,7 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
       return item
     })
     if (updatedList.length == 0) return
+
     form.setFieldValue('items', updatedList)
     window.close()
   }
@@ -227,6 +228,10 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
 
     formik.setFieldValue(
       'items',
+      itemsList?.filter(x => x.item.qty != x.returnedQty)
+    )
+    console.log(
+      'check ',
       itemsList?.filter(x => x.item.qty != x.returnedQty)
     )
   }
