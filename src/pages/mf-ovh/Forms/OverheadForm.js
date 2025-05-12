@@ -8,6 +8,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
+import { MasterSource } from 'src/resources/MasterSource'
 import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -67,6 +68,7 @@ export default function OverheadForm({ labels, maxAccess, recordId }) {
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      masterSource: MasterSource.ProductionOverhead,
       disabled: !editMode
     }
   ]
