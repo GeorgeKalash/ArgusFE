@@ -410,4 +410,5 @@ export const ResourceIds = {
   JobCategory: 42122,
   DesignGroup: 42116,
   DesignFamilies: 42115,
+  LotAvailability: 41221
 }
