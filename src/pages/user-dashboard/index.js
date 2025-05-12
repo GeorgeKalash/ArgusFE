@@ -101,7 +101,7 @@ const UserDashboard = () => {
         return item
       })
 
-    await postRequest({
+    postRequest({
       extension: SystemRepository.DynamicDashboard.set2,
       record: JSON.stringify({
         userId: _userId,
@@ -121,9 +121,7 @@ const UserDashboard = () => {
               name='search'
               value={search}
               label={platformLabels.Search}
-              onClear={() => {
-                setSearch('')
-              }}
+              onClear={() => setSearch('')}
               onChange={handleSearchChange}
               onSearch={e => setSearch(e)}
               search={true}
