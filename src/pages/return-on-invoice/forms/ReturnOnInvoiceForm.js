@@ -417,7 +417,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           taxDetailsButton: true,
           trackBy: newRow?.trackBy
         })
-        console.log('newRow', newRow)
       }
     },
     {
@@ -460,18 +459,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             width: 500,
             height: 700,
             title: platformLabels.serials
-          })
-        } else if (row?.trackBy == 2) {
-          stack({
-            Component: LotForm,
-            props: {
-              labels,
-              access,
-              form: formik.values
-            },
-            width: 700,
-            height: 550,
-            title: labels.lot
           })
         }
       }
