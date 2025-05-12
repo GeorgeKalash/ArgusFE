@@ -33,7 +33,7 @@ export default function OverheadForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      reference: yup.string().required(),
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -62,8 +62,23 @@ export default function OverheadForm({ labels, maxAccess, recordId }) {
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.Overhead} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.Overhead}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -74,7 +89,7 @@ export default function OverheadForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='10'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -87,7 +102,7 @@ export default function OverheadForm({ labels, maxAccess, recordId }) {
                 value={formik.values.name}
                 required
                 maxAccess={maxAccess}
-                maxLength='50'
+                maxLength='30'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
