@@ -113,7 +113,7 @@ const GeneratePurchaseInvoice = () => {
       props: {
         labels,
         access,
-        form: formik
+        form: formik?.values
       },
       width: 500,
       height: 300,
@@ -321,10 +321,10 @@ const GeneratePurchaseInvoice = () => {
                 name='spId'
                 label={labels.salesPerson}
                 valueField='recordId'
-                displayField={['reference', 'name']}
+                displayField={['spRef', 'name']}
                 columnsInDropDown={[
-                  { key: 'plantRef', value: 'Reference' },
-                  { key: 'plantName', value: 'Name' }
+                  { key: 'spRef', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
                 onChange={(event, newValue) => {

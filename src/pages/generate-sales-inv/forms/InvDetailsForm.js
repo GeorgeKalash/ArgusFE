@@ -13,9 +13,9 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 export default function InvDetailsForm({ labels, access, form, window }) {
   const { formik } = useForm({
     initialValues: {
-      date: form?.values?.date || new Date(),
-      plantId: form?.values?.plantId,
-      description: form?.values?.description
+      date: form?.date || new Date(),
+      plantId: form?.plantId,
+      description: form?.description
     },
     maxAccess: access,
     validateOnChange: true,
@@ -24,7 +24,7 @@ export default function InvDetailsForm({ labels, access, form, window }) {
     }),
     onSubmit: async obj => {
       form.setValues({
-        ...form.values,
+        ...form,
         date: obj.date,
         plantId: obj.plantId,
         description: obj.description
