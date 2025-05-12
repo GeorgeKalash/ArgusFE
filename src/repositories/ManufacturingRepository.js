@@ -115,6 +115,7 @@ export const ManufacturingRepository = {
     set: service + 'setOVH',
     get: service + 'getOVH',
     del: service + 'delOVH',
+    page: service + 'pageOVH',
     snapshot: service + 'snapshotOVH'
   },
   Design: {
