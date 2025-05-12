@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
-import styled, { keyframes } from 'styled-components'
+import styled from 'styled-components'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import {
@@ -17,8 +17,6 @@ import { debounce } from 'lodash'
 import { SummaryFiguresItem } from 'src/resources/DashboardFigures'
 import Table from 'src/components/Shared/Table'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Frame = styled.div`
   display: flex;
@@ -85,6 +83,7 @@ const MiddleRow = styled.div`
 const ChartCard = styled.div`
   background: rgb(255, 255, 255);
   border-radius: 10px;
+  display: flex;
   padding: 10px;
   flex-direction: column;
 `
@@ -526,32 +525,28 @@ const DashboardLayout = () => {
               <SummaryCard>
                 <Title>{labels.authorization}</Title>
               </SummaryCard>
-              <VertLayout>
-                <Grow>
-                  <Table
-                    columns={[
-                      {
-                        field: 'reference',
-                        headerName: labels.reference,
-                        flex: 1
-                      },
-                      {
-                        field: 'functionName',
-                        headerName: labels.functionName,
-                        flex: 1
-                      },
-                      {
-                        field: 'thirdParty',
-                        headerName: labels.thirdParty,
-                        flex: 1
-                      }
-                    ]}
-                    gridData={data?.authorization}
-                    rowId={['recordId']}
-                    pagination={false}
-                  />
-                </Grow>
-              </VertLayout>
+              <Table
+                columns={[
+                  {
+                    field: 'reference',
+                    headerName: labels.reference,
+                    flex: 1
+                  },
+                  {
+                    field: 'functionName',
+                    headerName: labels.functionName,
+                    flex: 1
+                  },
+                  {
+                    field: 'thirdParty',
+                    headerName: labels.thirdParty,
+                    flex: 1
+                  }
+                ]}
+                gridData={data?.authorization}
+                rowId={['recordId']}
+                pagination={false}
+              />
             </ChartCard>
           )}
         </MiddleRow>
