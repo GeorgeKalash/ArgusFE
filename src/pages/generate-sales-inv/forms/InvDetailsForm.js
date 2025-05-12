@@ -10,12 +10,12 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-export default function InvDetailsForm({ labels, access, form, window }) {
+export default function InvDetailsForm({ labels, access, values, setValues, window }) {
   const { formik } = useForm({
     initialValues: {
-      date: form?.date || new Date(),
-      plantId: form?.plantId,
-      description: form?.description
+      date: values?.date || new Date(),
+      plantId: values?.plantId,
+      description: values?.description
     },
     maxAccess: access,
     validateOnChange: true,
@@ -23,8 +23,8 @@ export default function InvDetailsForm({ labels, access, form, window }) {
       date: yup.string().required()
     }),
     onSubmit: async obj => {
-      form.setValues({
-        ...form,
+      setValues({
+        ...values,
         date: obj.date,
         plantId: obj.plantId,
         description: obj.description

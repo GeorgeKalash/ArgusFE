@@ -113,7 +113,8 @@ const GeneratePurchaseInvoice = () => {
       props: {
         labels,
         access,
-        form: formik?.values
+        values: formik?.values,
+        setValues: formik?.setValues
       },
       width: 500,
       height: 300,
