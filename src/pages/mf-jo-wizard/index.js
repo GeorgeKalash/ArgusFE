@@ -21,11 +21,11 @@ const JobOrderWizard = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params } = options
+    const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
       extension: ManufacturingRepository.JobOrderWizard.page,
-      parameters: `_filter=&_startAt=${_startAt}&&_pageSize=${_pageSize}&_params=${params || ''}`
+      parameters: `_filter=&_startAt=${_startAt}&&_pageSize=${_pageSize}`
     })
 
     if (response && response?.list) {
