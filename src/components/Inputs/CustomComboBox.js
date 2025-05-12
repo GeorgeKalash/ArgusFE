@@ -172,7 +172,7 @@ const CustomComboBox = ({
                 {columnsInDropDown.map((header, i) => {
                   let displayValue = option[header.key]
 
-                  if (header.key === 'date' && displayValue) {
+                  if (header?.type && header?.type === 'date' && displayValue) {
                     displayValue = formatDateDefault(displayValue)
                   }
 

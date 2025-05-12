@@ -299,7 +299,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
-                  { key: 'date', value: 'Date' },
+                  { key: 'date', value: 'Date', type: 'date' },
                   { key: 'sku', value: 'sku' },
                   { key: 'itemName', value: 'Item Name' },
                   { key: 'productionLineName', value: 'Production Line' }
