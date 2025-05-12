@@ -1088,6 +1088,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
+      totalWeightPerG: itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow?.totalWeightPerG) : 0,
       mdAmount: itemPriceRow?.mdAmount ? parseFloat(itemPriceRow.mdAmount).toFixed(2) : 0,
       vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0
     }
@@ -1260,13 +1261,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       const defaultObj = await getDefaultsData()
       getUserDefaultsData()
       if (!recordId) {
-        if (defaultObj.salesTD == 'True') {
-          setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
-          formik.setFieldValue('header.tdType', 2)
-        } else {
-          setCycleButtonState({ text: '123', value: 1 })
-          formik.setFieldValue('header.tdType', 1)
-        }
+        setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
+        formik.setFieldValue('header.tdType', 2)
       }
     })()
   }, [])
@@ -1298,7 +1294,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         obj.key === 'plId' ||
         obj.key === 'ptId' ||
         obj.key === 'allowSalesNoLinesTrx' ||
-        obj.key === 'salesTD' ||
         obj.key === 'sdpClientName' ||
         obj.key === 'sdpItemName' ||
         obj.key === 'currencyId'
