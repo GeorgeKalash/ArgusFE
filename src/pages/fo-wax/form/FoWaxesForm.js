@@ -146,7 +146,9 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     ? Number(formik?.values?.header?.grossWgt || 0) - Number(rmWgt || 0) - Number(formik?.values?.header?.mouldWgt || 0)
     : 0
 
-  const suggestedWgt = Number((netWgt || 0) * (formik.values.header.factor || 0))
+  const suggestedWgt = reCal
+    ? Number((netWgt || 0) * (formik.values.header.factor || 0))
+    : Number(formik.values.header.suggestedWgt)
 
   const getHeaderData = async recordId => {
     if (!recordId) return
@@ -271,10 +273,16 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
   async function refetchForm(recordId) {
     const header = await getHeaderData(recordId)
     const items = await getItems(recordId)
+    const factor = await getMetalSetting(header.metalId, header.metalColorId)
     formik.setValues({
+      ...formik.values,
       recordId: header.recordId,
-      header: header,
-      items: items
+      header: {
+        ...formik.values.header,
+        ...header,
+        factor: factor?.rate
+      },
+      items
     })
   }
 
