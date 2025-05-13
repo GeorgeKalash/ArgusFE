@@ -312,5 +312,15 @@ export const InventoryRepository = {
   Lot: {
     get: service + 'getLOT',
     set: service + 'setLOT'
+  },
+  AdjustItemCost: {
+    page: service + 'pageACO',
+    qry: service + 'qryACO',
+    get2: service + 'get2ACO',
+    set2: service + 'set2ACO',
+    del: service + 'delACO',
+    snapshot: service + 'snapshotACO',
+    post: service + 'postACO',
+    unpost: service + 'unpostACO',
   }
 }

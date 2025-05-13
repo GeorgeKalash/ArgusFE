@@ -88,7 +88,8 @@ const RPBGridToolbar = ({
       key: 'OpenRPB',
       condition: true,
       onClick: openRPB,
-      disabled: false
+      disabled: false,
+      hidden: !reportName
     },
     {
       key: 'GO',
@@ -104,7 +105,7 @@ const RPBGridToolbar = ({
       },
       disabled: false
     }
-  ]
+  ].filter(item => !item?.hidden)
 
   return (
     <GridToolbar
