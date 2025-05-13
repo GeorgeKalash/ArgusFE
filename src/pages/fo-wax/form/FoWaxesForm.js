@@ -81,7 +81,6 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       ]
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -171,16 +170,14 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       parameters: `_waxId=${recordId}`
     })
 
-    return await Promise.all(
-      response.list.length > 0
-        ? response.list.map(async (item, index) => {
-            return {
-              ...item,
-              id: index + 1
-            }
-          })
-        : formik.values.items
-    )
+    return response?.list?.length > 0
+      ? response.list.map((item, index) => {
+          return {
+            ...item,
+            id: index + 1
+          }
+        })
+      : formik.values.items
   }
 
   const getDesign = async recordId => {
@@ -475,7 +472,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     ]}
                     values={formik.values.header}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('header.dtId', newValue?.recordId)
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
                     error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
@@ -508,7 +505,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.mouldId', newValue?.recordId || null)
-                      formik.setFieldValue('header.mouldRef', newValue?.reference || null)
+                      formik.setFieldValue('header.mouldRef', newValue?.reference || '')
                     }}
                     error={formik.touched?.header?.mouldId && Boolean(formik.errors?.header?.mouldId)}
                   />
