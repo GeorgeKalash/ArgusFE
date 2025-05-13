@@ -17,6 +17,7 @@ import { debounce } from 'lodash'
 import { SummaryFiguresItem } from 'src/resources/DashboardFigures'
 import Table from 'src/components/Shared/Table'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
+import { Box } from '@mui/material'
 
 const Frame = styled.div`
   display: flex;
@@ -163,6 +164,7 @@ const DashboardLayout = () => {
         })
       })
   }, [])
+
   if (loading) {
     return <LoadingOverlay />
   }
@@ -423,7 +425,6 @@ const DashboardLayout = () => {
               )}
             </SummaryGrid>
           )}
-
           {containsApplet(ResourceIds.WeeklySalesYTD) && (
             <ChartCard>
               <SummaryCard>
@@ -525,28 +526,30 @@ const DashboardLayout = () => {
               <SummaryCard>
                 <Title>{labels.authorization}</Title>
               </SummaryCard>
-              <Table
-                columns={[
-                  {
-                    field: 'reference',
-                    headerName: labels.reference,
-                    flex: 1
-                  },
-                  {
-                    field: 'functionName',
-                    headerName: labels.functionName,
-                    flex: 1
-                  },
-                  {
-                    field: 'thirdParty',
-                    headerName: labels.thirdParty,
-                    flex: 1
-                  }
-                ]}
-                gridData={data?.authorization}
-                rowId={['recordId']}
-                pagination={false}
-              />
+              <Box style={{ height: '350px', display: 'flex' }}>
+                <Table
+                  columns={[
+                    {
+                      field: 'reference',
+                      headerName: labels.reference,
+                      flex: 1
+                    },
+                    {
+                      field: 'functionName',
+                      headerName: labels.functionName,
+                      flex: 1
+                    },
+                    {
+                      field: 'thirdParty',
+                      headerName: labels.thirdParty,
+                      flex: 1
+                    }
+                  ]}
+                  gridData={data?.authorization}
+                  rowId={['recordId']}
+                  pagination={false}
+                />
+              </Box>
             </ChartCard>
           )}
         </MiddleRow>
