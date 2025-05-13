@@ -113,7 +113,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.Designs}
+      resourceId={ResourceIds.Design}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
