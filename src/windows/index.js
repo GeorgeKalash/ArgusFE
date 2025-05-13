@@ -89,6 +89,9 @@ export function WindowProvider({ children }) {
   function addToStack(options) {
     setStack(stack => [...stack, { ...options, id: uuidv4() }])
   }
+  function updateWindow(id, updates) {
+    setStack(prev => prev.map(w => (w.id === id ? { ...w, ...updates } : w)))
+  }
 
   return (
     <WindowContext.Provider value={{ stack: addToStack, lockRecord }}>
@@ -139,7 +142,7 @@ export function WindowProvider({ children }) {
               expandable={expandable}
               draggable={draggable}
               closable={closable}
-              styles={styles}
+              styles={{ display: !height ? 'none' : '', ...styles }}
             >
               <Component
                 {...props}
@@ -147,7 +150,11 @@ export function WindowProvider({ children }) {
                   ? { maxAccess: { ...props?.maxAccess, editMode: !!props.recordId } }
                   : { access: { ...props.access, editMode: !!props.recordId } })}
                 window={{
-                  close: () => closeWindowById(id)
+                  close: () => closeWindowById(id),
+                  setTitle: newTitle => updateWindow(id, { title: newTitle }),
+                  setSize: ({ width, height }) => {
+                    updateWindow(id, { width, height })
+                  }
                 }}
               />
             </Window>

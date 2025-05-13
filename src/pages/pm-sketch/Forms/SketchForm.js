@@ -24,7 +24,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function SketchForm({ recordId, invalidate }) {
+export default function SketchForm({ recordId, invalidate, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
@@ -112,6 +112,10 @@ export default function SketchForm({ recordId, invalidate }) {
     })
   }
 
+  useEffect(() => {
+    window.setTitle(labels.Sketch)
+  }, [labels.Sketch])
+
   const onClose = async () => {
     await postRequest({
       extension: ProductModelingRepository.Sketch.close,
@@ -177,6 +181,7 @@ export default function SketchForm({ recordId, invalidate }) {
   ]
 
   useEffect(() => {
+    window.setSize({ width: 700, height: 700 })
     ;(async function () {
       if (recordId) {
         await getData(recordId)

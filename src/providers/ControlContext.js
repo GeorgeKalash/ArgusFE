@@ -22,12 +22,20 @@ const ControlProvider = ({ children }) => {
   const [loading, setLoading] = useState(false)
   const errorModel = useError()
 
-  const [contextData, setContextData] = useState({})
+  const [contextLabels, setContextLabels] = useState({})
+  const [contextAccess, setContextAccess] = useState({})
 
-  const setContextLabels = (resourceId, labels) => {
-    setContextData(prevData => ({
+  const setLabels = (resourceId, labels) => {
+    setContextLabels(prevData => ({
       ...prevData,
       [resourceId]: labels
+    }))
+  }
+
+  const setAccess = (resourceId, access) => {
+    setContextAccess(prevData => ({
+      ...prevData,
+      [resourceId]: access
     }))
   }
 
@@ -150,24 +158,38 @@ const ControlProvider = ({ children }) => {
       })
   }
 
-  const getLabels = (resourceId, callback) => {
-    var parameters = '_dataset=' + resourceId
-    getRequest({
-      extension: KVSRepository.getLabels,
-      parameters: parameters
-    }).then(res => {
-      callback(res.list)
-    })
+  const getLabels = (resourceId, callback, cache = false) => {
+    if (cache && contextLabels?.[resourceId]) {
+      callback(contextLabels?.[resourceId])
+    } else {
+      var parameters = '_dataset=' + resourceId
+      getRequest({
+        extension: KVSRepository.getLabels,
+        parameters: parameters
+      }).then(res => {
+        if (cache && !contextLabels?.[resourceId]) {
+          setLabels(resourceId, res.list)
+        }
+        callback(res.list)
+      })
+    }
   }
 
-  const getAccess = (resourceId, callback) => {
-    var parameters = '_resourceId=' + resourceId
-    getRequest({
-      extension: AccessControlRepository.maxAccess,
-      parameters: parameters
-    }).then(res => {
-      callback(res)
-    })
+  const getAccess = (resourceId, callback, cache) => {
+    if (cache && contextAccess?.[resourceId]) {
+      callback(contextAccess?.[resourceId])
+    } else {
+      var parameters = '_resourceId=' + resourceId
+      getRequest({
+        extension: AccessControlRepository.maxAccess,
+        parameters: parameters
+      }).then(res => {
+        if (cache && !contextAccess?.[resourceId]) {
+          setAccess(resourceId, res)
+        }
+        callback(res)
+      })
+    }
   }
 
   const values = {
@@ -180,8 +202,7 @@ const ControlProvider = ({ children }) => {
     userDefaultsData,
     setUserDefaultsData,
     systemChecks,
-    setContextLabels,
-    contextData
+    contextData: contextLabels
   }
 
   return <ControlContext.Provider value={values}>{children}</ControlContext.Provider>

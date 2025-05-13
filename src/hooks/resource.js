@@ -10,7 +10,8 @@ export function useResourceQuery({
   queryFn,
   search,
   enabled = true,
-  enabledOnApplyOnly = false
+  enabledOnApplyOnly = false,
+  labelAccess
 }) {
   const [searchValue, setSearchValue] = useState('')
   const [filters, setFilters] = useState(filter?.default || {})
@@ -26,7 +27,8 @@ export function useResourceQuery({
 
   const { access, labels } = useResourceParams({
     datasetId,
-    DatasetIdAccess
+    DatasetIdAccess,
+    cache: labelAccess?.cache
   })
   const queryClient = useQueryClient()
 

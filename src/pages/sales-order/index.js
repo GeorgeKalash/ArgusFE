@@ -166,10 +166,7 @@ const SalesOrder = () => {
         access,
         currency,
         recordId
-      },
-      width: 1300,
-      height: 730,
-      title: labels.salesOrder
+      }
     })
   }
 
