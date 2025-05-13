@@ -430,10 +430,8 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
   ]
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) refetchForm(recordId)
-      setReCal(true)
-    })()
+    if (recordId) refetchForm(recordId)
+    setReCal(true)
   }, [recordId])
 
   useEffect(() => {
