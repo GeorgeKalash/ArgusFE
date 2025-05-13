@@ -30,7 +30,6 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
     },
     onSubmit: async obj => {
       try {
-        const items = data.list.filter(item => item.checked)
         await postRequest({
           extension: SystemRepository.UserFunction.set,
           record: JSON.stringify({ userId: obj.userId, functionId: obj.functionId, dtId: obj.dtId || null })
@@ -38,16 +37,17 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
 
         const accessPayload = {
           userId: storeRecordId,
-          resourceId: ResourceIds.DocumentTypes,
-          items: items.map(item => ({
+          functionId: obj.functionId,
+          items: data.list.map(item => ({
             userId: storeRecordId,
-            resourceId: ResourceIds.DocumentTypes,
-            recordId: item.recordId
+            dtId: item.recordId,
+            functionId: obj.functionId,
+            isChecked: item.checked
           }))
         }
 
         await postRequest({
-          extension: AccessControlRepository.RowAccessUserView.set2,
+          extension: SystemRepository.UserFunction.set2,
           record: JSON.stringify(accessPayload)
         })
 
