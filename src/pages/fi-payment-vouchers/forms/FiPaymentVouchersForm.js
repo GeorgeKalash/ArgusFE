@@ -391,7 +391,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 onClear={() => formik.setFieldValue('date', null)}
                 readOnly={isPosted || isCancelled}
                 error={formik.touched.date && Boolean(formik.errors.date)}
-                helperText={formik.touched.date && formik.errors.date}
                 maxAccess={maxAccess}
               />
             </Grid>

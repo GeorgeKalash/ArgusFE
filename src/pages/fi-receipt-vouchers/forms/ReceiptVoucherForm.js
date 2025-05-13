@@ -91,6 +91,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       accountId: yup.string().required(),
       currencyId: yup.string().required(),
       cashAccountId: yup.string().required(),
+      date: yup.date().required(),
       amount: yup.string().required(),
       paymentMethod: yup.string().required()
     }),
@@ -342,6 +343,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 readOnly={isCancelled || isPosted}
                 value={formik.values.date}
                 maxAccess={maxAccess}
+                required
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>

@@ -664,7 +664,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                 name='date'
                 label={labels.date}
                 value={formik.values?.date}
-                required={true}
+                required
                 onChange={async (e, newValue) => {
                   formik.setFieldValue('date', newValue)
                   await getMultiCurrencyFormData(formik.values.currencyId, newValue, RateDivision.FINANCIALS)
@@ -672,7 +672,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                 onClear={() => formik.setFieldValue('date', null)}
                 readOnly={isPosted || isCancelled}
                 error={formik.touched.date && Boolean(formik.errors.date)}
-                helperText={formik.touched.date && formik.errors.date}
                 maxAccess={maxAccess}
               />
             </Grid>
