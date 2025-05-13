@@ -1,10 +1,10 @@
 const service = 'MF.asmx/'
 
 export const ManufacturingRepository = {
-  DesignRawMaterial: { 
-    qry2: service + 'qryDRM2', 
-    qry: service + 'qryDRM', 
-    set2: service + 'set2DRM' 
+  DesignRawMaterial: {
+    qry2: service + 'qryDRM2',
+    qry: service + 'qryDRM',
+    set2: service + 'set2DRM'
   },
   IssueOfMaterialsItems: { qry: service + 'qryIMI', qry2: service + 'qryIMI2' },
   LaborGroup: {
@@ -97,7 +97,7 @@ export const ManufacturingRepository = {
     page: service + 'pageSTD',
     set: service + 'setSTD',
     get: service + 'getSTD',
-    del: service + 'delSTD',
+    del: service + 'delSTD'
   },
   ProductionClassSemiFinished: {
     qry: service + 'qryCSF',
@@ -295,7 +295,7 @@ export const ManufacturingRepository = {
   MeasurementScheduleMap: {
     qry: service + 'qryMSM',
     set: service + 'setMSM',
-    del: service + 'delMSM',
+    del: service + 'delMSM'
   },
   JobCategory: {
     set: service + 'setJCA',
@@ -308,18 +308,18 @@ export const ManufacturingRepository = {
     set: service + 'setDEG',
     get: service + 'getDEG',
     del: service + 'delDEG',
-    page: service + 'pageDEG',
+    page: service + 'pageDEG'
   },
   Components: {
     qry: service + 'qryDEM',
-    set2: service + 'set2DEM',
+    set2: service + 'set2DEM'
   },
   DesignFamily: {
     qry: service + 'qryDEF',
     set: service + 'setDEF',
     get: service + 'getDEF',
     del: service + 'delDEF',
-    page: service + 'pageDEF',
+    page: service + 'pageDEF'
   },
   JobTransfer: {
     get2: service + 'get2TFR',
