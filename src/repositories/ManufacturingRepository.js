@@ -289,7 +289,6 @@ export const ManufacturingRepository = {
     page: service + 'pageTFR',
     snapshot: service + 'snapshotTFR',
     post: service + 'postTFR',
-    unpost: service + 'unpostTFR',
     close: service + 'closeTFR',
     reopen: service + 'reopenTFR'
   }

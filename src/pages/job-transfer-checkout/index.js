@@ -25,7 +25,7 @@ const JTCheckout = () => {
 
     const response = await getRequest({
       extension: ManufacturingRepository.JobTransfer.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_params=${params}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -135,7 +135,7 @@ const JTCheckout = () => {
         access
       },
       width: 1200,
-      height: 780,
+      height: 700,
       title: labels.jtCheckout
     })
   }
@@ -170,10 +170,10 @@ const JTCheckout = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
+          deleteConfirmationType={'strict'}
           refetch={refetch}
           maxAccess={access}
         />
