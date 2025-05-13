@@ -30,14 +30,19 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
 
   const columns = [
     {
+      field: 'functionId',
+      headerName: labels.functionId,
+      flex: 1,
+    },
+    {
       field: 'sfName',
       headerName: labels.systemFunction,
-      flex: 1
+      flex: 2
     },
     {
       field: 'dtName',
       headerName: labels.docType,
-      flex: 1
+      flex: 2
     }
   ]
 
