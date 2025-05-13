@@ -146,7 +146,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     ? Number(formik?.values?.header?.grossWgt || 0) - Number(rmWgt || 0) - Number(formik?.values?.header?.mouldWgt || 0)
     : 0
 
-  const suggestedWgt = Number(formik.values?.header.suggestedWgt || 0)
+  const suggestedWgt = Number((netWgt || 0) * (formik.values.header.factor || 0))
 
   const getHeaderData = async recordId => {
     if (!recordId) return
