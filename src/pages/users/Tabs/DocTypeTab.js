@@ -91,7 +91,8 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
     list: data.list.filter(
       item =>
         (item.sfName && item.sfName.toLowerCase().includes(value.toLowerCase())) ||
-        (item.dtName && item.dtName.toLowerCase().includes(value.toLowerCase()))
+        (item.dtName && item.dtName.toLowerCase().includes(value.toLowerCase())) ||
+        (item.functionId !== null && String(item.functionId).includes(value))
     )
   }
 
