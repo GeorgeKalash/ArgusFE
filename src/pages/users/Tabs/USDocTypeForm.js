@@ -62,7 +62,7 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
     {
       field: 'reference',
       headerName: labels.reference,
-      flex: 2
+      flex: 1
     },
     {
       field: 'name',
@@ -129,7 +129,11 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
               name='dtId'
               label={labels.docType}
               valueField='recordId'
-              displayField='name'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               values={formik.values}
               onChange={async (event, newValue) => {
                 formik.setFieldValue('dtId', newValue?.recordId)
