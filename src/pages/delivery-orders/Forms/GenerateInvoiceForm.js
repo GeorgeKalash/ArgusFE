@@ -80,7 +80,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
     }),
     onSubmit: async obj => {
       const res = await postRequest({
-        extension: DeliveryRepository.DeliveriesOrders.generate,
+        extension: DeliveryRepository.Invoice.generate,
         record: JSON.stringify(obj)
       })
 
