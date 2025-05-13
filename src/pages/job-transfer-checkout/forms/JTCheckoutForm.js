@@ -125,6 +125,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
 
   const isPosted = formik.values.transfer.status === 3
   const isClosed = formik.values.transfer.wip === 2
+
   const totalQty = formik?.values?.categorySummary?.list
     ? formik?.values?.categorySummary?.list?.reduce((op, item) => op + item?.qty, 0)
     : 0
