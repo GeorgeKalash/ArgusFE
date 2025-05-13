@@ -108,6 +108,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       plId: null,
       taxId: null,
       isVatable: false,
+      clientTaxNo: '',
       deliveryNotes: '',
       name: '',
       street1: null,
@@ -1403,7 +1404,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                     name='header.deliveryNotes'
                     label={labels.notes}
                     value={formik.values.header.deliveryNotes}
-                    rows={3.5}
+                    rows={3.8}
                     maxAccess={maxAccess}
                     readOnly={isPosted}
                     onChange={e => formik.setFieldValue('header.deliveryNotes', e.target.value)}
@@ -1424,6 +1425,19 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
                   >
                     {labels.addressDetails}
                   </Button>
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='header.clientTaxNo'
+                    label={labels.clientTaxNo}
+                    readOnly={isPosted}
+                    maxLength='30'
+                    value={formik?.values?.header?.clientTaxNo}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('header.clientTaxNo', '')}
+                    error={formik.touched?.header?.clientTaxNo && Boolean(formik.errors?.header?.clientTaxNo)}
+                  />
                 </Grid>
               </Grid>
             </Grid>
