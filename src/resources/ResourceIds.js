@@ -399,6 +399,7 @@ export const ResourceIds = {
   GenerateProductionOrder: 51416,
   ProductionOrder: 42337,
   YearlyComparativeSales: 51550,
+  PurchaseTransactions: 50303,
   SManagement: 41213,
   OpenPOs: 50312,
   NotificationLabels: 23106,
