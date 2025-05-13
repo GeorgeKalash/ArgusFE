@@ -68,7 +68,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         itemNmae: '',
         designName: ''
       },
-      categorySummary: { list: [] }
+      categorySummary: []
     },
     maxAccess,
     validationSchema: yup.object({
@@ -84,7 +84,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
           ...obj.transfer,
           date: formatDateToApi(obj.transfer.date)
         },
-        categorySummary: obj.categorySummary?.list
+        categorySummary: obj.categorySummary
       }
 
       await postRequest({
@@ -110,7 +110,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
           ...res?.record?.transfer,
           date: formatDateFromApi(res?.record?.transfer?.date)
         },
-        categorySummary: { list: res?.record?.categorySummary }
+        categorySummary: res?.record?.categorySummary || []
       })
 
       imageUploadRef.current.value = res?.record?.transfer?.jobId
@@ -176,8 +176,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
 
   async function onJobSelection(jobId, routingSeq, transferUpdate) {
     if (jobId) {
-      fillItems(jobId)
-
       imageUploadRef.current.value = jobId
 
       const routingRes = await getRequest({
@@ -208,11 +206,13 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
           })
         } else clearSelection(transferUpdate)
       } else clearSelection(transferUpdate)
+
+      await fillItems(jobId)
     } else {
       clearSelection(transferUpdate)
 
       imageUploadRef.current.value = null
-      formik.setFieldValue('categorySummary', { list: [] })
+      formik.setFieldValue('categorySummary', [])
     }
   }
 
@@ -222,7 +222,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
       parameters: `_jobId=${jobId}`
     })
 
-    formik.setFieldValue('categorySummary', { list: itemsRes?.list || [] })
+    formik.setFieldValue('categorySummary', itemsRes?.list || [])
   }
 
   async function clearSelection(transferUpdate) {
@@ -305,6 +305,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                           changeDT(newValue)
                         }}
                         readOnly={editMode}
+                        required
                         error={formik.touched.transfer?.dtId && Boolean(formik.errors.transfer?.dtId)}
                       />
                     </Grid>
@@ -313,10 +314,10 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         endpointId={ManufacturingRepository.MFJobOrder.snapshot2}
                         parameters={{ _workCenterId: '0' }}
                         filter={{ status: 4 }}
-                        name='transfer.jobRef'
+                        name='transfer.jobId'
                         label={labels.jobRef}
                         valueField='reference'
-                        displayField='name'
+                        displayField='reference'
                         valueShow='jobRef'
                         columnsInDropDown={[
                           { key: 'reference', value: 'Job Order' },
@@ -346,7 +347,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
 
                           onJobSelection(newValue?.recordId, newValue?.routingSeqNo, transferUpdate)
                         }}
-                        errorCheck={'transfer.jobId'}
+                        errorCheck={'transfer.jobRef'}
                         maxAccess
                       />
                     </Grid>
@@ -504,7 +505,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         onChange={formik.handleChange}
                         onClear={() => formik.setFieldValue('transfer.pcs', 0)}
                         error={formik.touched.transfer?.pcs && Boolean(formik.errors.transfer?.pcs)}
-                        decimalScale={3}
                       />
                     </Grid>
 
@@ -552,13 +552,21 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         <Grow>
           <Table
             name='itemTable'
-            gridData={formik.values.categorySummary}
+            gridData={{ list: formik.values.categorySummary }}
             maxAccess={maxAccess}
             columns={[
               { field: 'categoryRef', headerName: labels.itemCategory, flex: 1 },
               { field: 'categoryName', headerName: labels.title, flex: 1 },
-              { field: 'qty', headerName: labels.qty, type: 'number', decimal: 2, flex: 1 },
-              { field: 'pcs', headerName: labels.pcs, type: 'number', decimal: 2, flex: 1 }
+              {
+                field: 'qty',
+                headerName: labels.qty,
+                type: {
+                  field: 'number',
+                  decimal: 2
+                },
+                flex: 1
+              },
+              { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 }
             ]}
             rowId={['itemId']}
             pagination={false}
