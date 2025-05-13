@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -12,10 +12,11 @@ import { Grid } from '@mui/material'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useEffect } from 'react'
 import useResourceParams from 'src/hooks/useResourceParams'
 import JobOrderWindow from '../mf-job-orders/window/JobOrderWindow'
+import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
 
 const AssetsDescription = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -23,7 +24,6 @@ const AssetsDescription = () => {
 
   const { stack } = useWindow()
   const workCenterId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
-  const [workCenter, setWorkCenter] = useState({ workCenterId: workCenterId, name: '' })
 
   const {
     query: { data },
@@ -42,6 +42,18 @@ const AssetsDescription = () => {
     datasetId: ResourceIds.MFJobOrders
   })
 
+  const { formik } = useForm({
+    initialValues: { workCenterId: null, workCenterName: '', workCenterRef: '' },
+    maxAccess,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      workCenterId: yup.number().required()
+    }),
+    onSubmit: () => {
+      refetch()
+    }
+  })
+
   useEffect(() => {
     ;(async function () {
       if (workCenterId) {
@@ -50,17 +62,17 @@ const AssetsDescription = () => {
           parameters: `_recordId=${workCenterId}`
         })
 
-        setWorkCenter({ workCenterId: workCenterId, name: record.name })
+        formik.setValues({ workCenterId: workCenterId, workCenterName: record.name, workCenterRef: record.reference })
       }
     })()
   }, [workCenterId])
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
-    if (workCenter?.workCenterId) {
+    if (formik.values.workCenterId) {
       const response = await getRequest({
         extension: ManufacturingRepository.workInProcess.wipJOB,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_workCenterId=${workCenter?.workCenterId}&_params=`
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_workCenterId=${formik.values.workCenterId}&_params=`
       })
 
       return { ...response, _startAt: _startAt }
@@ -93,11 +105,6 @@ const AssetsDescription = () => {
     {
       field: 'designRef',
       headerName: labels.design,
-      flex: 1
-    },
-    {
-      field: 'seqName',
-      headerName: labels.name,
       flex: 1
     },
     {
@@ -150,29 +157,33 @@ const AssetsDescription = () => {
             <ResourceLookup
               endpointId={ManufacturingRepository.WorkCenter.snapshot}
               valueField='name'
+              displayField='reference'
               name='workCenterId'
               label={labels.workCenter}
-              valueShow='name'
+              valueShow='workCenterRef'
+              secondValueShow='workCenterName'
               maxAccess={access}
-              formObject={workCenter}
-              secondDisplayField={false}
+              formObject={formik.values}
+              required
               columnsInDropDown={[
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' }
               ]}
               onChange={(event, newValue) => {
-                setWorkCenter({
-                  workCenterId: newValue?.recordId,
-                  name: newValue?.name
+                formik.setValues({
+                  workCenterId: newValue?.recordId || null,
+                  workCenterRef: newValue?.reference || '',
+                  workCenterName: newValue?.name || ''
                 })
               }}
+              error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
             />
           </Grid>
           <Grid item xs={2}>
             <CustomButton
               variant='contained'
               label={platformLabels.Preview}
-              onClick={() => refetch()}
+              onClick={() => formik.handleSubmit()}
               color='#231f20'
             />
           </Grid>

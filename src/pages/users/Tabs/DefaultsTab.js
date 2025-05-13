@@ -222,7 +222,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                 name='workCenterId'
                 label={labels.workCenter}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
