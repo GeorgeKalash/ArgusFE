@@ -76,7 +76,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         .of(
           yup.object().shape({
             sku: yup.string().required(),
-            itemName: yup.string().required(),
             issued: yup.number().required(),
             returned: yup.number().required(),
             consumed: yup.number().required()
@@ -106,8 +105,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         extension: ManufacturingRepository.JobOrderWizard.set2,
         record: JSON.stringify(data)
       })
-      formik.setFieldValue('recordId', res.recordId)
-      formik.setFieldValue('header.recordId', res.recordId)
 
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
@@ -342,7 +339,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 valueShow='sku'
                 secondValueShow='itemName'
                 formObject={formik.values.header}
-                form={formik}
                 readOnly
                 maxAccess={access}
               />
@@ -388,8 +384,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 displayField='name'
                 readOnly={isPosted}
                 valueShow='sfItemSku'
+                required
                 secondValueShow='sfItemName'
-                form={formik}
                 formObject={formik.values.header}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('header.sfItemId', newValue?.recordId)

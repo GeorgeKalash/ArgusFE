@@ -307,7 +307,6 @@ export const ManufacturingRepository = {
     del: service + 'delJOZ',
     page: service + 'pageJOZ',
     snapshot: service + 'snapshotJOZ',
-    post: service + 'postJOZ',
-    unpost: service + 'unpostJOZ',
+    post: service + 'postJOZ'
   }
 }

@@ -44,6 +44,13 @@ const JobOrderWizard = () => {
       parameters: `_filter=${qry}`
     })
 
+    if (response && response?.list) {
+      response.list = response?.list?.map(item => ({
+        ...item,
+        producedWeight: item.pcs * item.avgWeight
+      }))
+    }
+
     return response
   }
 
