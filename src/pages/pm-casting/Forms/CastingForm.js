@@ -52,6 +52,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       threeDPId: null,
       productionLineId: null,
       laborId: null,
+      mould: '',
       setPcs: null,
       weight: null,
       notes: '',
@@ -285,6 +286,18 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                   formik.setFieldValue('productionLineId', newValue?.recordId || null)
                 }}
                 error={formik.touched.productionLineId && formik.errors.productionLineId}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='mould'
+                label={labels.mould}
+                value={formik.values.mould}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                readOnly={isPosted}
+                onClear={() => formik.setFieldValue('mould', '')}
+                error={formik.touched.mould && Boolean(formik.errors.mould)}
               />
             </Grid>
             <Grid item xs={12}>

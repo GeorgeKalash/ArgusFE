@@ -56,7 +56,6 @@ export default function RubberForm({ labels, access, recordId }) {
       pcs: null,
       jobId: null,
       status: 1,
-      weight: null,
       notes: ''
     },
     enableReinitialize: false,
@@ -309,7 +308,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('pcs', null)}
                 maxLength={4}
-                error={formik.touched.weight && Boolean(formik.errors.pcs)}
+                error={formik.touched.pcs && Boolean(formik.errors.pcs)}
               />
             </Grid>
 
@@ -334,20 +333,6 @@ export default function RubberForm({ labels, access, recordId }) {
               />
             </Grid>
 
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='weight'
-                label={labels.weight}
-                value={formik?.values?.weight}
-                maxAccess={maxAccess}
-                maxLength={8}
-                decimalScale={2}
-                readOnly={isReleased || isPosted}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('weight', null)}
-                error={formik.touched.weight && Boolean(formik.errors.weight)}
-              />
-            </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='status'

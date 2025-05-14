@@ -117,7 +117,7 @@ const ThreeDDesign = () => {
       props: {
         labels,
         recordId: obj?.recordId,
-        maxAccess: access
+        access
       },
       width: 1200,
       height: 700,

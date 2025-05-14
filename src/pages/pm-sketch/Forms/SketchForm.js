@@ -68,7 +68,6 @@ export default function SketchForm({ recordId, invalidate }) {
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      designerId: yup.string().required(),
       itemGroupId: yup.string().required(),
       source: yup.string().required()
     }),
@@ -257,7 +256,6 @@ export default function SketchForm({ recordId, invalidate }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    required
                     readOnly={isPosted || isClosed}
                     maxAccess={maxAccess}
                     values={formik.values}

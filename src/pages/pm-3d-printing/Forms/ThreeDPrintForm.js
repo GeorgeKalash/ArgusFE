@@ -72,11 +72,9 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      fileReference: yup.string().required(),
       threeDDId: yup.number().required(),
       machineId: yup.number().required(),
-      setPcs: yup.number().nullable(),
-      nbOfLayers: yup.number().required()
+      setPcs: yup.number().nullable()
     }),
     onSubmit: async values => {
       const data = { ...values, date: formatDateToApi(values?.date) }
@@ -362,7 +360,6 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     maxAccess={maxAccess}
                     maxLength={4}
                     decimalScale={0}
-                    required
                     readOnly={isPosted || isReleased}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('nbOfLayers', '')}
