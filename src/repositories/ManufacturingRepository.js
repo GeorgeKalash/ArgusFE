@@ -1,7 +1,11 @@
 const service = 'MF.asmx/'
 
 export const ManufacturingRepository = {
-  DesignRawMaterial: { qry2: service + 'qryDRM2' },
+  DesignRawMaterial: { 
+    qry2: service + 'qryDRM2', 
+    qry: service + 'qryDRM', 
+    set2: service + 'set2DRM' 
+  },
   IssueOfMaterialsItems: { qry: service + 'qryIMI' },
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
@@ -89,7 +93,11 @@ export const ManufacturingRepository = {
     snapshot: service + 'qryCLS'
   },
   ProductionStandard: {
-    qry: service + 'qrySTD'
+    qry: service + 'qrySTD',
+    page: service + 'pageSTD',
+    set: service + 'setSTD',
+    get: service + 'getSTD',
+    del: service + 'delSTD',
   },
   ProductionClassSemiFinished: {
     qry: service + 'qryCSF',
@@ -107,6 +115,7 @@ export const ManufacturingRepository = {
     set: service + 'setOVH',
     get: service + 'getOVH',
     del: service + 'delOVH',
+    page: service + 'pageOVH',
     snapshot: service + 'snapshotOVH'
   },
   Design: {
@@ -114,7 +123,8 @@ export const ManufacturingRepository = {
     set: service + 'setDES',
     get: service + 'getDES',
     del: service + 'delDES',
-    snapshot: service + 'snapshotDES'
+    snapshot: service + 'snapshotDES',
+    page: service + 'pageDES'
   },
   MFJobOrder: {
     qry: service + 'qryJOB',
@@ -281,5 +291,35 @@ export const ManufacturingRepository = {
   AssemblyOverhead: {
     qry: service + 'qryAOH',
     set2: service + 'set2AOH'
+  },
+  MeasurementScheduleMap: {
+    qry: service + 'qryMSM',
+    set: service + 'setMSM',
+    set2: service + 'set2MSM',
+    del: service + 'delMSM',
+  },
+  JobCategory: {
+    set: service + 'setJCA',
+    get: service + 'getJCA',
+    del: service + 'delJCA',
+    page: service + 'pageJCA'
+  },
+  DesignGroup: {
+    qry: service + 'qryDEG',
+    set: service + 'setDEG',
+    get: service + 'getDEG',
+    del: service + 'delDEG',
+    page: service + 'pageDEG',
+  },
+  Components: {
+    qry: service + 'qryDEM',
+    set2: service + 'set2DEM',
+  },
+  DesignFamily: {
+    qry: service + 'qryDEF',
+    set: service + 'setDEF',
+    get: service + 'getDEF',
+    del: service + 'delDEF',
+    page: service + 'pageDEF',
   }
 }
