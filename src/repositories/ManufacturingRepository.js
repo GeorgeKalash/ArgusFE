@@ -126,7 +126,8 @@ export const ManufacturingRepository = {
     cancel: service + 'cancelJOB',
     post: service + 'postJOB',
     start: service + 'startJOB',
-    stop: service + 'stopJOB'
+    stop: service + 'stopJOB',
+    wip: service + 'wipJOB'
   },
   ProductionSheet: {
     page: service + 'pagePST',
@@ -293,8 +294,5 @@ export const ManufacturingRepository = {
     get: service + 'getDEF',
     del: service + 'delDEF',
     page: service + 'pageDEF'
-  },
-  workInProcess: {
-    wipJOB: service + 'wipJOB'
   }
 }

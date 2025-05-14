@@ -18,7 +18,7 @@ import JobOrderWindow from '../mf-job-orders/window/JobOrderWindow'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
 
-const AssetsDescription = () => {
+const JobInProcess = () => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
 
@@ -34,7 +34,7 @@ const AssetsDescription = () => {
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.workInProcess.wipJOB,
+    endpointId: ManufacturingRepository.MFJobOrder.wip,
     datasetId: ResourceIds.JobsInProcess
   })
 
@@ -71,13 +71,11 @@ const AssetsDescription = () => {
     const { _startAt = 0, _pageSize = 50 } = options
     if (formik.values.workCenterId) {
       const response = await getRequest({
-        extension: ManufacturingRepository.workInProcess.wipJOB,
+        extension: ManufacturingRepository.MFJobOrder.wip,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_workCenterId=${formik.values.workCenterId}&_params=`
       })
 
       return { ...response, _startAt: _startAt }
-    } else {
-      return { list: [], _startAt: _startAt }
     }
   }
 
@@ -164,6 +162,7 @@ const AssetsDescription = () => {
               secondValueShow='workCenterName'
               maxAccess={access}
               formObject={formik.values}
+              displayFieldWidth={1.5}
               required
               columnsInDropDown={[
                 { key: 'reference', value: 'Reference' },
@@ -198,7 +197,6 @@ const AssetsDescription = () => {
           isLoading={false}
           pageSize={50}
           paginationType='api'
-          deleteConfirmationType={'strict'}
           paginationParameters={paginationParameters}
           refetch={refetch}
           maxAccess={access}
@@ -208,4 +206,4 @@ const AssetsDescription = () => {
   )
 }
 
-export default AssetsDescription
+export default JobInProcess

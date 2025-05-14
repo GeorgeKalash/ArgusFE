@@ -230,7 +230,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('workCenterId', newValue.recordId || null)
+                  formik.setFieldValue('workCenterId', newValue?.recordId || null)
                 }}
                 error={formik.touched.workCenterId && formik.errors.workCenterId}
               />
