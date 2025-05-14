@@ -9,7 +9,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function SerialsTrackingsForm({ _labels: labels, maxAccess }) {
+export default function SerialsTrackingsForm({ _labels: labels, access }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -18,7 +18,7 @@ export default function SerialsTrackingsForm({ _labels: labels, maxAccess }) {
       recordId: null,
       rows: []
     },
-    maxAccess,
+    access,
     validateOnChange: true,
     onSubmit: async values => {
       const payload = values.rows
@@ -102,7 +102,7 @@ export default function SerialsTrackingsForm({ _labels: labels, maxAccess }) {
       resourceId={ResourceIds.SerialsTrackings}
       isInfo={false}
       form={formik}
-      maxAccess={maxAccess}
+      access={access}
       editMode={false}
       isCleared={false}
     >
