@@ -252,7 +252,7 @@ const Navigation = props => {
     setLastOpenedPage(node)
   }
 
-  const restartCollapse = () => {
+  const onCollapse = () => {
     setOpenFolders([])
   }
 
@@ -302,7 +302,7 @@ const Navigation = props => {
             }}
             title={platformLabels.collapse}
           >
-            <Remove onClick={restartCollapse} width={28} />
+            <Remove onClick={onCollapse} width={28} />
           </Tooltip>
 
           <Dropdown
