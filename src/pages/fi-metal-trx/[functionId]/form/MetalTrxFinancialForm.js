@@ -75,18 +75,18 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         {
           id: 1,
           baseMetalQty: null,
-          creditAmount: null,
+          creditAmount: 0,
           stdPurity: null,
           itemId: null,
           sku: '',
           itemName: '',
           metalId: null,
-          purity: null,
-          qty: null,
+          purity: 0,
+          qty: 0,
           seqNo: 1,
           purityFromItem: false,
           metalValue: null,
-          totalCredit: null,
+          totalCredit: 0,
           trackBy: null,
           trxId: recordId || 0
         }
@@ -350,7 +350,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       component: 'numberfield',
       name: 'purity',
       label: labels.purity,
-      defaultValue: 0,
       onChange: ({ row: { update, newRow } }) => {
         const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metal.purity * 1000)
         update({ purityFromItem: false })
@@ -374,7 +373,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       name: 'qty',
       label: labels.qty,
       props: { allowNegative: false },
-      defaultValue: 0,
       onChange: ({ row: { update, newRow } }) => {
         const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metal.purity * 1000)
 
@@ -405,7 +403,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       component: 'numberfield',
       name: 'totalCredit',
       label: labels.totalLabor,
-      defaultValue: 0,
       props: { allowNegative: false, readOnly: true }
     }
   ]
@@ -651,6 +648,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
             error={formik.errors?.items}
             name='items'
             columns={columns}
+            initialValues={formik?.initialValues?.items?.[0]}
             maxAccess={maxAccess}
             disabled={isPosted}
             allowDelete={!isPosted}
