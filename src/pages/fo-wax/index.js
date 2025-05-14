@@ -12,10 +12,10 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import JobOrderWindow from './window/JobOrderWindow'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { FoundryRepository } from 'src/repositories/FoundryRepository'
+import FoWaxesForm from './form/FoWaxesForm'
 
-const JobOrder = () => {
+const FoWax = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -30,8 +30,8 @@ const JobOrder = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.MFJobOrder.qry,
-    datasetId: ResourceIds.MFJobOrders,
+    endpointId: FoundryRepository.Wax.page,
+    datasetId: ResourceIds.FoWaxes,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -39,8 +39,8 @@ const JobOrder = () => {
 
   const columns = [
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'dtName',
+      headerName: labels.docType,
       flex: 1
     },
     {
@@ -50,44 +50,57 @@ const JobOrder = () => {
       type: 'date'
     },
     {
-      field: 'designRef',
-      headerName: labels.design,
+      field: 'reference',
+      headerName: labels.reference,
       flex: 1
     },
     {
-      field: 'clientName',
-      headerName: labels.client,
+      field: 'prodLineName',
+      headerName: labels.prodLine,
       flex: 1
     },
     {
-      field: 'itemName',
-      headerName: labels.item,
+      field: 'metalColorRef',
+      headerName: labels.metalColor,
       flex: 1
     },
     {
-      field: 'wcName',
-      headerName: labels.workCenter,
+      field: 'metalRef',
+      headerName: labels.metal,
       flex: 1
     },
     {
-      field: 'className',
-      headerName: labels.productionClass,
+      field: 'mouldRef',
+      headerName: labels.mould,
       flex: 1
     },
     {
-      field: 'standardRef',
-      headerName: labels.productionStandard,
-      flex: 1
-    },
-    {
-      field: 'pcs',
-      headerName: labels.pcs,
+      field: 'grossWgt',
+      headerName: labels.grossWgt,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'qty',
-      headerName: labels.qty,
+      field: 'rmWgt',
+      headerName: labels.rmWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'mouldWgt',
+      headerName: labels.mouldWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'netWgt',
+      headerName: labels.netWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'suggestedWgt',
+      headerName: labels.suggestedWgt,
       flex: 1,
       type: 'number'
     },
@@ -97,22 +110,9 @@ const JobOrder = () => {
       flex: 1
     },
     {
-      field: 'startingDT',
-      headerName: labels.startingDate,
-      flex: 1,
-      type: 'date'
-    },
-    {
-      field: 'deliveryDate',
-      headerName: labels.deliveryDate,
-      flex: 1,
-      type: 'date'
-    },
-    {
-      field: 'endingDT',
-      headerName: labels.endingDate,
-      flex: 1,
-      type: 'date'
+      field: 'wipName',
+      headerName: labels.wip,
+      flex: 1
     }
   ]
 
@@ -120,8 +120,8 @@ const JobOrder = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: ManufacturingRepository.MFJobOrder.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+      extension: FoundryRepository.Wax.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -130,44 +130,42 @@ const JobOrder = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
       return await getRequest({
-        extension: ManufacturingRepository.MFJobOrder.snapshot,
+        extension: FoundryRepository.Wax.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.JobOrder,
-    action: openForm,
-    hasDT: false
+    functionId: SystemFunction.Wax,
+    action: openForm
   })
 
   const add = async () => {
     proxyAction()
   }
 
-  const editJOB = obj => {
+  const edit = obj => {
     openForm(obj?.recordId)
   }
 
   async function openForm(recordId) {
     stack({
-      Component: JobOrderWindow,
+      Component: FoWaxesForm,
       props: {
         labels,
         access,
-        recordId,
-        invalidate
+        recordId
       },
-      width: 1150,
+      width: 1200,
       height: 700,
-      title: labels.jobOrder
+      title: labels.wax
     })
   }
 
-  const delJOB = async obj => {
+  const del = async obj => {
     await postRequest({
-      extension: ManufacturingRepository.MFJobOrder.del,
+      extension: FoundryRepository.Wax.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -177,17 +175,17 @@ const JobOrder = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'MFJOB'} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'FOWAX'} />
       </Fixed>
       <Grow>
         <Table
-          name='jobTable'
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={editJOB}
+          onEdit={edit}
           refetch={refetch}
-          onDelete={delJOB}
+          onDelete={del}
           deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
@@ -200,4 +198,4 @@ const JobOrder = () => {
   )
 }
 
-export default JobOrder
+export default FoWax

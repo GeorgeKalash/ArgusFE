@@ -91,6 +91,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       accountId: yup.string().required(),
       currencyId: yup.string().required(),
       cashAccountId: yup.string().required(),
+      date: yup.date().required(),
       amount: yup.string().required(),
       paymentMethod: yup.string().required()
     }),
@@ -112,7 +113,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     if (currencyId && date && rateType) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
+        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${rateType}`
       })
 
       const updatedRateRow = getRate({
@@ -337,15 +338,13 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 label={labels.date}
                 onChange={async (e, newValue) => {
                   formik.setFieldValue('date', newValue)
-                  await getMultiCurrencyFormData(
-                    formik.values.currencyId,
-                    formatDateForGetApI(formik.values.date),
-                    RateDivision.FINANCIALS
-                  )
+                  await getMultiCurrencyFormData(formik.values.currencyId, newValue, RateDivision.FINANCIALS)
                 }}
+                autoFocus={!editMode}
                 readOnly={isCancelled || isPosted}
                 value={formik.values.date}
                 maxAccess={maxAccess}
+                required
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
@@ -516,11 +515,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={async (event, newValue) => {
-                      await getMultiCurrencyFormData(
-                        newValue?.recordId,
-                        formatDateForGetApI(formik.values.date),
-                        RateDivision.FINANCIALS
-                      )
+                      await getMultiCurrencyFormData(newValue?.recordId, formik.values.date, RateDivision.FINANCIALS)
                       formik.setFieldValue('currencyId', newValue?.recordId)
                       formik.setFieldValue('currencyName', newValue?.name)
                     }}
