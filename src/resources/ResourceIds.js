@@ -415,5 +415,7 @@ export const ResourceIds = {
   DesignGroup: 42116,
   DesignFamilies: 42115,
   SerialsTrackings: 41111,
-  JobsInProcess: 42309
+  JobsInProcess: 42309,
+  BalanceTransferPurchase: 31318,
+  BalanceTransferSales: 31319
 }

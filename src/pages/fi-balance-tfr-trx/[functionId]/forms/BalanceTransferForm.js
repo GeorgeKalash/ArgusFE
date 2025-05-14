@@ -1,0 +1,510 @@
+import { Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
+import * as yup from 'yup'
+import FormShell from 'src/components/Shared/FormShell'
+import toast from 'react-hot-toast'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { ControlContext } from 'src/providers/ControlContext'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
+import { useInvalidate } from 'src/hooks/resource'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { RateDivision } from 'src/resources/RateDivision'
+import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
+
+export default function BalanceTransferForm({ labels, maxAccess, recordId, functionId, resourceId }) {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: FinancialRepository.BalanceTransfer.page
+  })
+
+  const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
+
+  const { formik } = useForm({
+    initialValues: {
+      recordId,
+      dtId: null,
+      reference: '',
+      date: new Date(),
+      plantId: null,
+      spId: null,
+      fromAccountId: null,
+      fromAccountRef: '',
+      fromAccountName: '',
+      fromCurrencyId: null,
+      toCurrencyId: parseInt(defaultCurrency),
+      fromBaseAmount: null,
+      fromAmount: null,
+      fromExRate: null,
+      status: 1,
+      notes: '',
+      toAmount: null,
+      toExRate: null,
+      toBaseAmount: null,
+      fromRateCalcMethod: null,
+      toRateCalcMethod: null,
+      functionId
+    },
+    maxAccess,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      date: yup.string().required(),
+      fromAccountId: yup.number().required(),
+      fromCurrencyId: yup.number().required(),
+      fromAmount: yup.number().required(),
+      fromBaseAmount: yup.number().required(),
+      fromExRate: yup.number().required()
+    }),
+    onSubmit: async obj => {
+      const { fromAccountName, fromAccountRef, templateId, ...rest } = obj
+
+      const response = await postRequest({
+        extension: FinancialRepository.BalanceTransfer.set,
+        record: JSON.stringify({ ...rest, date: formatDateToApi(rest.date), toAccountId: rest.fromAccountId })
+      })
+
+      if (!rest.recordId) {
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
+
+      refetchForm(response.recordId)
+      invalidate()
+    }
+  })
+
+  const editMode = !!formik.values.recordId
+  const isPosted = formik.values.status === 3
+
+  const refetchForm = async recordId => {
+    const { record } = await getRequest({
+      extension: FinancialRepository.BalanceTransfer.get,
+      parameters: `_recordId=${recordId || formik.values.recordId}`
+    })
+
+    const updatedRateRow = getRate({
+      amount: record.fromAmount,
+      exRate: record?.fromExRate,
+      baseAmount: record?.fromBaseAmount,
+      rateCalcMethod: record?.fromRateCalcMethod,
+      dirtyField: DIRTYFIELD_RATE
+    })
+    formik.setValues({ ...record, date: formatDateFromApi(record.date), fromAmount: updatedRateRow.amount })
+  }
+
+  useEffect(() => {
+    ;(async function () {
+      if (recordId) {
+        refetchForm()
+      }
+      if (!editMode) onSelectionChange('to', defaultCurrency, formik.values?.date)
+    })()
+  }, [])
+
+  const { fromAccountName, fromAccountRef, templateId, ...rest } = formik.values
+
+  const onPost = async () => {
+    await postRequest({
+      extension: FinancialRepository.BalanceTransfer.post,
+      record: JSON.stringify({ ...rest, date: formatDateToApi(rest.date) })
+    })
+
+    toast.success(platformLabels.Posted)
+    refetchForm()
+    invalidate()
+  }
+
+  const onUnpost = async () => {
+    await postRequest({
+      extension: FinancialRepository.BalanceTransfer.unpost,
+      record: JSON.stringify({ ...rest, date: formatDateToApi(rest.date), toAccountId: rest.fromAccountId })
+    })
+
+    toast.success(platformLabels.Unposted)
+    refetchForm()
+    invalidate()
+  }
+
+  async function getRates(currencyId, date) {
+    if (currencyId && date) {
+      const { record } = await getRequest({
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${
+          RateDivision.FINANCIALS
+        }`
+      })
+
+      return record
+    }
+  }
+
+  const onSelectionChange = async (type, currencyId, date, amount) => {
+    const rate = await getRates(currencyId, date)
+
+    formik.setFieldValue(`${type}ExRate`, rate?.exRate)
+    formik.setFieldValue(`${type}RateCalcMethod`, rate?.rateCalcMethod)
+
+    const updatedRateRow = getRate({
+      amount: amount || 0,
+      exRate: rate?.exRate,
+      baseAmount: 0,
+      rateCalcMethod: rate?.rateCalcMethod,
+      dirtyField: DIRTYFIELD_RATE
+    })
+
+    formik.setFieldValue(`${type}BaseAmount`, parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+    formik.setFieldValue(`${type}Amount`, parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+  }
+
+  const actions = [
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      disabled: !editMode
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode
+    }
+  ]
+
+  useEffect(() => {
+    formik.setFieldValue('templateId', '')
+  }, [formik.values.notes])
+
+  return (
+    <FormShell
+      resourceId={resourceId}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+      disabledSubmit={isPosted}
+      previewReport={true}
+    >
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.DocumentType.qry}
+                    parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
+                    name='dtId'
+                    label={labels.docType}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={editMode}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    values={formik.values}
+                    maxAccess={!editMode && maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='reference'
+                    label={labels.reference}
+                    value={formik.values.reference}
+                    readOnly={editMode || !formik.values.dtId}
+                    maxAccess={!editMode && maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('reference', '')}
+                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='date'
+                    label={labels.date}
+                    value={formik.values?.date}
+                    required={true}
+                    onChange={(name, newValue) => {
+                      formik.setFieldValue('date', newValue || null)
+                      onSelectionChange('to', formik.values.toCurrencyId, newValue, formik.values.amount)
+                      onSelectionChange('from', formik.values.fromCurrencyId, newValue, formik.values.amount)
+                    }}
+                    readOnly={isPosted}
+                    onClear={() => formik.setFieldValue('date', null)}
+                    error={formik.touched.date && Boolean(formik.errors.date)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Plant.qry}
+                    name='plantId'
+                    label={platformLabels.plant}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'plant Ref' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('plantId', newValue?.recordId || null)
+                    }}
+                    readOnly={isPosted}
+                    error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SaleRepository.SalesPerson.qry}
+                    name='spId'
+                    label={labels.salesPerson}
+                    columnsInDropDown={[
+                      { key: 'spRef', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('spId', newValue?.recordId || null)
+                    }}
+                    readOnly={isPosted}
+                    error={formik.touched.spId && Boolean(formik.errors.spId)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={FinancialRepository.Account.snapshot}
+                name='fromAccountId'
+                filter={{ isInactive: val => val !== true }}
+                required
+                label={labels.account}
+                valueField='reference'
+                displayField='name'
+                valueShow='fromAccountRef'
+                secondValueShow='fromAccountName'
+                displayFieldWidth={2}
+                form={formik}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'keywords', value: 'keywords' },
+                  { key: 'groupName', value: 'accountGroup' }
+                ]}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('fromAccountId', newValue?.recordId || null)
+                  formik.setFieldValue('fromAccountRef', newValue?.reference || '')
+                  formik.setFieldValue('fromAccountName', newValue?.name || '')
+                }}
+                readOnly={isPosted}
+                errorCheck='fromAccountId'
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Currency.qry}
+                    filter={item => item.currencyType === 2}
+                    name='fromCurrencyId'
+                    label={labels.fromCurrency}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Currency Ref' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('fromCurrencyId', newValue?.recordId || null)
+                      onSelectionChange('from', newValue?.recordId, formik.values?.date, formik.values.amount)
+                    }}
+                    readOnly={isPosted}
+                    error={formik.touched.fromCurrencyId && Boolean(formik.errors.fromCurrencyId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Currency.qry}
+                    filter={item => item.currencyType === 1}
+                    name='toCurrencyId'
+                    label={labels.toCurrency}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Currency Ref' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    readOnly
+                    error={formik.touched.toCurrencyId && Boolean(formik.errors.toCurrencyId)}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='fromAmount'
+                    label={labels.amount}
+                    value={formik.values.fromAmount}
+                    onChange={e => {
+                      formik.handleChange(e)
+
+                      const updatedRateRow = getRate({
+                        amount: e.target.value ?? 0,
+                        exRate: formik.values?.fromExRate,
+                        baseAmount: 0,
+                        rateCalcMethod: formik.values?.fromRateCalcMethod,
+                        dirtyField: DIRTYFIELD_RATE
+                      })
+                      formik.setFieldValue('fromBaseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+
+                      const updatedRateRowTo = getRate({
+                        amount: updatedRateRow?.baseAmount || 0,
+                        exRate: formik.values?.toExRate,
+                        baseAmount: formik.values?.toBaseAmount,
+                        rateCalcMethod: formik.values?.toRateCalcMethod,
+                        dirtyField: DIRTYFIELD_RATE
+                      })
+
+                      formik.setFieldValue('toAmount', parseFloat(updatedRateRowTo?.amount).toFixed(2) || 0)
+                      formik.setFieldValue('toBaseAmount', parseFloat(updatedRateRowTo?.baseAmount).toFixed(2) || 0)
+                    }}
+                    onClear={() => formik.setFieldValue('fromAmount', null)}
+                    required
+                    readOnly={isPosted}
+                    error={formik.touched.fromAmount && Boolean(formik.errors.fromAmount)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='fromBaseAmount'
+                    label={labels.baseAmount}
+                    value={formik.values.fromBaseAmount}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('fromBaseAmount', null)}
+                    readOnly
+                    required
+                    error={formik.touched.fromBaseAmount && Boolean(formik.errors.fromBaseAmount)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <CustomNumberField
+                name='fromExRate'
+                label={labels.rate}
+                value={formik.values.fromExRate}
+                onChange={e => {
+                  formik.setFieldValue('fromExRate', e.target.value || null)
+
+                  const updatedRateRow = getRate({
+                    amount: formik.values.fromAmount ?? 0,
+                    exRate: e.target.value,
+                    baseAmount: 0,
+                    rateCalcMethod: formik.values?.fromRateCalcMethod,
+                    dirtyField: DIRTYFIELD_RATE
+                  })
+
+                  formik.setFieldValue('fromBaseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                  formik.setFieldValue('toAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+
+                  const updatedRateRowTo = getRate({
+                    amount: updatedRateRow?.baseAmount || 0,
+                    exRate: formik.values?.toExRate,
+                    baseAmount: formik.values?.toBaseAmount,
+                    rateCalcMethod: formik.values?.toRateCalcMethod,
+                    dirtyField: DIRTYFIELD_RATE
+                  })
+
+                  formik.setFieldValue('toAmount', parseFloat(updatedRateRowTo?.amount).toFixed(2) || 0)
+                  formik.setFieldValue('toBaseAmount', parseFloat(updatedRateRowTo?.baseAmount).toFixed(2) || 0)
+                }}
+                readOnly={isPosted}
+                onClear={() => formik.setFieldValue('fromExRate', '')}
+                required
+                error={formik.touched.fromExRate && Boolean(formik.errors.fromExRate)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={FinancialRepository.DescriptionTemplate.qry}
+                name='templateId'
+                label={labels.descriptionTemplate}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  let notes = formik.values.notes
+                  notes += newValue?.name && formik.values.notes && '\n'
+                  notes += newValue?.name
+
+                  notes && formik.setFieldValue('notes', notes)
+                  newValue?.name && formik.setFieldValue('templateId', newValue?.recordId || null)
+                }}
+                readOnly={isPosted}
+                error={formik.touched.templateId && Boolean(formik.errors.templateId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextArea
+                name='notes'
+                type='text'
+                label={labels.notes}
+                value={formik.values.notes}
+                rows={3}
+                readOnly={isPosted}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('notes', '')}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </FormShell>
+  )
+}
