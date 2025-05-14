@@ -235,9 +235,6 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     }
   ]
 
-  console.log(access)
-  console.log(maxAccess)
-
   return (
     <FormShell
       resourceId={ResourceIds.ThreeDDesign}
