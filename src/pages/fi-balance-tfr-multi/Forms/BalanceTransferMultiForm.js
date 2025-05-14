@@ -376,7 +376,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 name='header.spId'
                 label={labels.salesPerson}
                 filter={item => item.plantId}
-                readOnly={!formik.values.header.plantId}
+                readOnly={!formik.values.header.plantId || isPosted}
                 valueField='recordId'
                 columnsInDropDown={[
                   { key: 'spRef', value: 'Reference' },
@@ -413,6 +413,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 secondValueShow='name'
                 label={labels.accountName}
                 displayFieldWidth={2}
+                readOnly={isPosted}
                 form={formik}
                 formObject={formik.values.header}
                 firstValue={formik.values.header.accountRef}
@@ -469,6 +470,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 label={labels.amount}
                 value={formik?.values?.header?.amount}
                 maxAccess={maxAccess}
+                readOnly={isPosted}
                 onChange={e => formik.setFieldValue('header.amount', e.target.value)}
                 onClear={() => formik.setFieldValue('header.amount', '')}
                 error={formik?.touched?.header?.amount && Boolean(formik?.errors?.header?.amount)}
