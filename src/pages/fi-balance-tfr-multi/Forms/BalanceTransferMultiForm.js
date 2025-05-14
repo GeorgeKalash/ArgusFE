@@ -111,8 +111,6 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
         extension: FinancialRepository.BalanceTransferMultiAccounts.set2,
         record: JSON.stringify(data)
       })
-      formik.setFieldValue('recordId', res.recordId)
-      formik.setFieldValue('header.recordId', res.recordId)
 
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
