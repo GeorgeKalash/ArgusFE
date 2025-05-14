@@ -36,7 +36,8 @@ const SalesOrder = () => {
     datasetId: ResourceIds.SalesOrder,
     filter: {
       filterFn: fetchWithFilter
-    }
+    },
+    labelAccess: { cache: true }
   })
 
   const columns = [

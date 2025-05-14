@@ -22,18 +22,18 @@ const ControlProvider = ({ children }) => {
   const [loading, setLoading] = useState(false)
   const errorModel = useError()
 
-  const [contextLabels, setContextLabels] = useState({})
-  const [contextAccess, setContextAccess] = useState({})
+  const [labels, selLabels] = useState({})
+  const [access, setAccess] = useState({})
 
-  const setLabels = (resourceId, labels) => {
-    setContextLabels(prevData => ({
+  const addLabels = (resourceId, labels) => {
+    selLabels(prevData => ({
       ...prevData,
       [resourceId]: labels
     }))
   }
 
-  const setAccess = (resourceId, access) => {
-    setContextAccess(prevData => ({
+  const addAccess = (resourceId, access) => {
+    setAccess(prevData => ({
       ...prevData,
       [resourceId]: access
     }))
@@ -159,16 +159,16 @@ const ControlProvider = ({ children }) => {
   }
 
   const getLabels = (resourceId, callback, cache = false) => {
-    if (cache && contextLabels?.[resourceId]) {
-      callback(contextLabels?.[resourceId])
+    if (cache && labels?.[resourceId]) {
+      callback(labels?.[resourceId])
     } else {
       var parameters = '_dataset=' + resourceId
       getRequest({
         extension: KVSRepository.getLabels,
         parameters: parameters
       }).then(res => {
-        if (cache && !contextLabels?.[resourceId]) {
-          setLabels(resourceId, res.list)
+        if (cache && !labels?.[resourceId]) {
+          addLabels(resourceId, res.list)
         }
         callback(res.list)
       })
@@ -176,16 +176,16 @@ const ControlProvider = ({ children }) => {
   }
 
   const getAccess = (resourceId, callback, cache) => {
-    if (cache && contextAccess?.[resourceId]) {
-      callback(contextAccess?.[resourceId])
+    if (cache && access?.[resourceId]) {
+      callback(access?.[resourceId])
     } else {
       var parameters = '_resourceId=' + resourceId
       getRequest({
         extension: AccessControlRepository.maxAccess,
         parameters: parameters
       }).then(res => {
-        if (cache && !contextAccess?.[resourceId]) {
-          setAccess(resourceId, res)
+        if (cache && !access?.[resourceId]) {
+          addAccess(resourceId, res)
         }
         callback(res)
       })
@@ -201,8 +201,7 @@ const ControlProvider = ({ children }) => {
     updateDefaults,
     userDefaultsData,
     setUserDefaultsData,
-    systemChecks,
-    contextData: contextLabels
+    systemChecks
   }
 
   return <ControlContext.Provider value={values}>{children}</ControlContext.Provider>

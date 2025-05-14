@@ -114,6 +114,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
 
   useEffect(() => {
     window.setTitle(labels.Sketch)
+    window.setSize({ width: 700, height: 700 })
   }, [labels.Sketch])
 
   const onClose = async () => {
@@ -181,7 +182,6 @@ export default function SketchForm({ recordId, invalidate, window }) {
   ]
 
   useEffect(() => {
-    window.setSize({ width: 700, height: 700 })
     ;(async function () {
       if (recordId) {
         await getData(recordId)

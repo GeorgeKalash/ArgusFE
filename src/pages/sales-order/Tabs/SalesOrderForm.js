@@ -1193,10 +1193,10 @@ export default function SalesOrderForm({ access, recordId, currency, window }) {
 
   useEffect(() => {
     window.setTitle(labels.salesOrder)
+    window.setSize({ width: 1300, height: 750 })
   }, [labels.salesOrder])
 
   useEffect(() => {
-    window.setSize({ width: 1300, height: 750 })
     ;(async function () {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
