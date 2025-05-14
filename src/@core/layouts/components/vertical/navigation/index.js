@@ -22,6 +22,8 @@ import IconButton from '@mui/material/IconButton'
 import Icon from 'src/@core/components/icon'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import { ControlContext } from 'src/providers/ControlContext'
+import { Remove } from '@mui/icons-material'
+import { Tooltip } from '@mui/material'
 
 function ArrowBackIcon() {
   return (
@@ -250,6 +252,10 @@ const Navigation = props => {
     setLastOpenedPage(node)
   }
 
+  const restartCollapse = () => {
+    setOpenFolders([])
+  }
+
   return (
     <ThemeProvider theme={darkTheme}>
       <Drawer {...props}>
@@ -286,6 +292,19 @@ const Navigation = props => {
             }}
           />
           <TextField sx={{ display: 'none' }} />
+          <Tooltip
+            sx={{
+              backgroundColor: '#231f20',
+              borderRadius: '4px',
+              height: '30px',
+              padding: '3px',
+              marginLeft: '10px'
+            }}
+            title={platformLabels.collapse}
+          >
+            <Remove onClick={restartCollapse} width={28} />
+          </Tooltip>
+
           <Dropdown
             Image={<SettingsIcon />}
             TooltipTitle={platformLabels.Gear}
