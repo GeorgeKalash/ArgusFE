@@ -332,7 +332,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         onChange={(event, newValue) => {
                           let transferUpdate = {
                             ...formik?.values?.transfer,
-                            jobId: newValue?.recordId || null,
                             jobRef: newValue?.reference || '',
                             jobName: newValue?.name || '',
                             itemId: newValue?.itemId || '',
@@ -342,13 +341,14 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                             designId: newValue?.designId || '',
                             designName: newValue?.designName || '',
                             jobDescription: newValue?.description || '',
-                            routingSeq: newValue?.routingSeqNo || null
+                            routingSeq: newValue?.routingSeqNo || null,
+                            jobId: newValue?.recordId || null
                           }
 
                           onJobSelection(newValue?.recordId, newValue?.routingSeqNo, transferUpdate)
                         }}
-                        errorCheck={'transfer.jobRef'}
                         maxAccess
+                        error={formik.touched.transfer?.jobId && Boolean(formik.errors.transfer?.jobId)}
                       />
                     </Grid>
                   </Grid>
