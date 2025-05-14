@@ -88,7 +88,9 @@ export const ResourceLookup = ({
     if (!form || !errorCheck) return false
     const fieldPath = errorCheck.split('.')
     if (fieldPath.length > 1) {
+      console.log('innn')
       const [parent, child] = fieldPath
+      console.log(parent, child, (form.touched?.[parent]?.[child] || true) && Boolean(form.errors?.[parent]?.[child]))
 
       return (form.touched?.[parent]?.[child] || true) && Boolean(form.errors?.[parent]?.[child])
     }

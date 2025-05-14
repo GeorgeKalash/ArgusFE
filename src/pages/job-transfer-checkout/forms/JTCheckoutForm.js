@@ -44,7 +44,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
   const { formik } = useForm({
     documentType: { key: 'transfer.dtId', value: documentType?.dtId },
     initialValues: {
-      recordId: recordId,
+      recordId: recordId || null,
       transfer: {
         dtId: null,
         recordId: null,
@@ -73,7 +73,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
     maxAccess,
     validationSchema: yup.object({
       transfer: yup.object({
-        jobId: yup.string().required(),
+        jobId: yup.number().required(),
         fromSeqNo: yup.string().required(),
         toWCId: yup.string().required()
       })
@@ -348,7 +348,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                           onJobSelection(newValue?.recordId, newValue?.routingSeqNo, transferUpdate)
                         }}
                         maxAccess
-                        error={formik.touched.transfer?.jobId && Boolean(formik.errors.transfer?.jobId)}
+                        errorCheck={'transfer.jobId'}
                       />
                     </Grid>
                   </Grid>
