@@ -295,6 +295,7 @@ export const ManufacturingRepository = {
   MeasurementScheduleMap: {
     qry: service + 'qryMSM',
     set: service + 'setMSM',
+    set2: service + 'set2MSM',
     del: service + 'delMSM'
   },
   JobCategory: {

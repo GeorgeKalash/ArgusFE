@@ -333,6 +333,8 @@ export const ResourceIds = {
   OpeningBalances: 30301,
   RawMaterialCategory: 42123,
   FoWorkCenters: 47101,
+  FoWaxes: 47300,
+  FoMoulds: 47200,
   SettingsResources: 20121,
   ItemPromotion: 50606,
   CreditCard: 33104,
@@ -397,6 +399,7 @@ export const ResourceIds = {
   GenerateProductionOrder: 51416,
   ProductionOrder: 42337,
   YearlyComparativeSales: 51550,
+  PurchaseTransactions: 50303,
   SManagement: 41213,
   OpenPOs: 50312,
   NotificationLabels: 23106,
@@ -412,4 +415,5 @@ export const ResourceIds = {
   JobCategory: 42122,
   DesignGroup: 42116,
   DesignFamilies: 42115,
+  SerialsTrackings: 41111,
 }
