@@ -56,14 +56,9 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       reference: '',
       source: null,
       sketchId: null,
-      sketchRef: '',
-      sketchName: '',
       designerId: null,
-      designerRef: '',
-      designerName: '',
       setPcs: 0,
       weight: 0,
-      statusName: '',
       castingType: null,
       notes: '',
       date: new Date(),
@@ -71,14 +66,8 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       endDate: null,
       fileReference: '',
       itemGroupId: null,
-      itemGroupRef: '',
-      itemGroupName: '',
       productionClassId: null,
-      productionClassRef: '',
-      productionClassName: '',
       productionStandardId: null,
-      productionStandardRef: '',
-      productionStandardName: '',
       metalId: null,
       collectionId: null
     },
@@ -87,7 +76,6 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       source: yup.number().required(),
-      designerId: yup.number().required(),
       sketchId: yup.number().required(),
       castingType: yup.number().required(),
       fileReference: yup.string().required()
@@ -247,6 +235,9 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     }
   ]
 
+  console.log(access)
+  console.log(maxAccess)
+
   return (
     <FormShell
       resourceId={ResourceIds.ThreeDDesign}
@@ -315,7 +306,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={ProductModelingRepository.Sketch.snapshot2}
-                    name='sketchRef'
+                    name='sketchId'
                     required
                     label={labels.sketchRef}
                     secondDisplayField={false}
@@ -344,14 +335,13 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                       })
                     }}
                     errorCheck={'sketchId'}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={ProductModelingRepository.Designer.snapshot}
-                    name='designerRef'
-                    required
+                    name='designerId'
                     label={labels.designer}
                     displayFieldWidth={2}
                     valueField='reference'
@@ -366,7 +356,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                         formik.setFieldValue('designerName', newValue?.name || '')
                     }}
                     errorCheck={'designerId'}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
