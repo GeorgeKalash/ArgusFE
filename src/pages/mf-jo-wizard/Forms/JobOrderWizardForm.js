@@ -388,9 +388,9 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 secondValueShow='sfItemName'
                 formObject={formik.values.header}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('header.sfItemId', newValue?.recordId)
-                  formik.setFieldValue('header.sfItemSku', newValue?.sku)
-                  formik.setFieldValue('header.sfItemName', newValue?.name)
+                  formik.setFieldValue('header.sfItemId', newValue?.recordId || null)
+                  formik.setFieldValue('header.sfItemSku', newValue?.sku || '')
+                  formik.setFieldValue('header.sfItemName', newValue?.name || '')
                 }}
                 error={formik?.touched?.header?.sfItemId && Boolean(formik?.errors?.header?.sfItemId)}
                 maxAccess={access}
