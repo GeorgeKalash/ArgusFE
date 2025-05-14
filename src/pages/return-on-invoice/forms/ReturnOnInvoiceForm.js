@@ -1390,7 +1390,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     value={formik.values?.isVattable}
                     onChange={event => formik.setFieldValue('isVattable', event.target.checked)}
                     label={labels.vat}
-                    disabled={isPosted}
+                    disabled
                     maxAccess={maxAccess}
                   />
                 </Grid>

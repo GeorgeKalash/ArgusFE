@@ -55,62 +55,65 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
       return item
     })
     if (updatedList.length == 0) return
-    updatedList?.forEach(async x => {
-      const itemPriceRow = getIPR({
-        priceType: x?.item?.priceType || 0,
-        basePrice: parseFloat(x?.item?.basePrice) || 0,
-        volume: parseFloat(x?.item?.volume),
-        weight: parseFloat(x?.item?.weight),
-        unitPrice: parseFloat(x?.item?.unitPrice || 0),
-        upo: 0,
-        qty: parseFloat(x?.item?.qty),
-        extendedPrice: parseFloat(x?.item?.extendedPrice),
-        mdAmount: parseFloat(x?.item?.mdAmount),
-        mdType: x?.item?.mdType,
-        baseLaborPrice: 0,
-        totalWeightPerG: 0,
-        mdValue: parseFloat(x?.item?.mdValue),
-        tdPct: x?.item?.values?.tdPct || 0,
-        dirtyField: DIRTYFIELD_QTY
+
+    const finalList = await Promise.all(
+      updatedList.map(async x => {
+        const itemPriceRow = getIPR({
+          priceType: x?.item?.priceType || 0,
+          basePrice: parseFloat(x?.item?.basePrice) || 0,
+          volume: parseFloat(x?.item?.volume),
+          weight: parseFloat(x?.item?.weight),
+          unitPrice: parseFloat(x?.item?.unitPrice || 0),
+          upo: 0,
+          qty: parseFloat(x?.item?.qty),
+          extendedPrice: parseFloat(x?.item?.extendedPrice),
+          mdAmount: parseFloat(x?.item?.mdAmount),
+          mdType: x?.item?.mdType,
+          baseLaborPrice: 0,
+          totalWeightPerG: 0,
+          mdValue: parseFloat(x?.item?.mdValue),
+          tdPct: x?.item?.values?.tdPct || 0,
+          dirtyField: DIRTYFIELD_QTY
+        })
+        const taxDetailsResponse = await getTaxDetails(x?.taxId)
+
+        const details = taxDetailsResponse?.map(item => ({
+          taxId: x?.taxId,
+          taxCodeId: item.taxCodeId,
+          taxBase: item.taxBase,
+          amount: item.amount
+        }))
+
+        const vatCalcRow = getVatCalc({
+          basePrice: itemPriceRow?.basePrice,
+          qty: x?.qty,
+          extendedPrice: parseFloat(itemPriceRow?.extendedPrice) || 0,
+          baseLaborPrice: itemPriceRow?.baseLaborPrice || 0,
+          vatAmount: 0,
+          tdPct: form.values.tdPct,
+          taxDetails: form.values.isVattable ? details : null
+        })
+
+        const updatedItem = {
+          ...x.item,
+          basePrice: itemPriceRow.basePrice,
+          unitPrice: itemPriceRow.unitPrice,
+          extendedPrice: itemPriceRow.extendedPrice,
+          mdValue: itemPriceRow.mdValue,
+          mdType: itemPriceRow.mdType,
+          baseLaborPrice: itemPriceRow.baseLaborPrice,
+          mdAmountPct: itemPriceRow.mdType,
+          vatAmount: vatCalcRow.vatAmount
+        }
+
+        return {
+          ...x,
+          item: updatedItem,
+          vatAmount: vatCalcRow.vatAmount
+        }
       })
-      console.log('vatttt', x)
-      const taxDetailsResponse = await getTaxDetails(x?.taxId)
-
-      const details = taxDetailsResponse.map(item => ({
-        taxId: x?.taxId,
-        taxCodeId: item.taxCodeId,
-        taxBase: item.taxBase,
-        amount: item.amount
-      }))
-
-      const vatCalcRow = getVatCalc({
-        basePrice: itemPriceRow?.basePrice,
-        qty: itemPriceRow?.qty,
-        extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
-        baseLaborPrice: itemPriceRow?.baseLaborPrice,
-        vatAmount: parseFloat(itemPriceRow?.vatAmount),
-        tdPct: x?.item?.tdPct,
-        taxDetails: form.values.isVattable ? details : null
-      })
-
-      const updatedItem = {
-        ...x.item,
-        basePrice: itemPriceRow.basePrice,
-        unitPrice: itemPriceRow.unitPrice,
-        extendedPrice: itemPriceRow.extendedPrice,
-        mdValue: itemPriceRow.mdValue,
-        mdType: itemPriceRow.mdType,
-        baseLaborPrice: itemPriceRow.baseLaborPrice,
-        mdAmountPct: itemPriceRow.mdType,
-        vatAmount: vatCalcRow.vatAmount
-      }
-
-      return {
-        ...x,
-        item: updatedItem
-      }
-    })
-    form.setFieldValue('items', updatedList)
+    )
+    form.setFieldValue('items', finalList)
     window.close()
   }
   async function importSelectedItems() {
@@ -133,62 +136,65 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
       })
 
     if (updatedList.length == 0) return
-    updatedList?.forEach(async x => {
-      const itemPriceRow = getIPR({
-        priceType: x?.item?.priceType || 0,
-        basePrice: parseFloat(x?.item?.basePrice) || 0,
-        volume: parseFloat(x?.item?.volume),
-        weight: parseFloat(x?.item?.weight),
-        unitPrice: parseFloat(x?.item?.unitPrice || 0),
-        upo: 0,
-        qty: parseFloat(x?.item?.qty),
-        extendedPrice: parseFloat(x?.item?.extendedPrice),
-        mdAmount: parseFloat(x?.item?.mdAmount),
-        mdType: x?.item?.mdType,
-        baseLaborPrice: 0,
-        totalWeightPerG: 0,
-        mdValue: parseFloat(x?.item?.mdValue),
-        tdPct: x?.item?.values?.tdPct || 0,
-        dirtyField: DIRTYFIELD_QTY
+
+    const finalList = await Promise.all(
+      updatedList.map(async x => {
+        const itemPriceRow = getIPR({
+          priceType: x?.item?.priceType || 0,
+          basePrice: parseFloat(x?.item?.basePrice) || 0,
+          volume: parseFloat(x?.item?.volume),
+          weight: parseFloat(x?.item?.weight),
+          unitPrice: parseFloat(x?.item?.unitPrice || 0),
+          upo: 0,
+          qty: parseFloat(x?.item?.qty),
+          extendedPrice: parseFloat(x?.item?.extendedPrice),
+          mdAmount: parseFloat(x?.item?.mdAmount),
+          mdType: x?.item?.mdType,
+          baseLaborPrice: 0,
+          totalWeightPerG: 0,
+          mdValue: parseFloat(x?.item?.mdValue),
+          tdPct: x?.item?.values?.tdPct || 0,
+          dirtyField: DIRTYFIELD_QTY
+        })
+        const taxDetailsResponse = await getTaxDetails(x?.taxId)
+
+        const details = taxDetailsResponse?.map(item => ({
+          taxId: x?.taxId,
+          taxCodeId: item.taxCodeId,
+          taxBase: item.taxBase,
+          amount: item.amount
+        }))
+
+        const vatCalcRow = getVatCalc({
+          basePrice: itemPriceRow?.basePrice,
+          qty: x?.qty,
+          extendedPrice: parseFloat(itemPriceRow?.extendedPrice) || 0,
+          baseLaborPrice: itemPriceRow?.baseLaborPrice || 0,
+          vatAmount: 0,
+          tdPct: form.values.tdPct,
+          taxDetails: form.values.isVattable ? details : null
+        })
+
+        const updatedItem = {
+          ...x.item,
+          basePrice: itemPriceRow.basePrice,
+          unitPrice: itemPriceRow.unitPrice,
+          extendedPrice: itemPriceRow.extendedPrice,
+          mdValue: itemPriceRow.mdValue,
+          mdType: itemPriceRow.mdType,
+          baseLaborPrice: itemPriceRow.baseLaborPrice,
+          mdAmountPct: itemPriceRow.mdType,
+          vatAmount: vatCalcRow.vatAmount
+        }
+
+        return {
+          ...x,
+          item: updatedItem,
+          vatAmount: vatCalcRow.vatAmount
+        }
       })
-      const taxDetailsResponse = await getTaxDetails(x?.taxId)
-
-      const details = taxDetailsResponse?.map(item => ({
-        taxId: x?.taxId,
-        taxCodeId: item.taxCodeId,
-        taxBase: item.taxBase,
-        amount: item.amount
-      }))
-
-      const vatCalcRow = getVatCalc({
-        basePrice: itemPriceRow?.basePrice,
-        qty: itemPriceRow?.qty,
-        extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
-        baseLaborPrice: itemPriceRow?.baseLaborPrice,
-        vatAmount: parseFloat(itemPriceRow?.vatAmount),
-        tdPct: x?.item?.tdPct,
-        taxDetails: form.values.isVattable ? details : null
-      })
-
-      const updatedItem = {
-        ...x.item,
-        basePrice: itemPriceRow.basePrice,
-        unitPrice: itemPriceRow.unitPrice,
-        extendedPrice: itemPriceRow.extendedPrice,
-        mdValue: itemPriceRow.mdValue,
-        mdType: itemPriceRow.mdType,
-        baseLaborPrice: itemPriceRow.baseLaborPrice,
-        mdAmountPct: itemPriceRow.mdType,
-        vatAmount: vatCalcRow.vatAmount
-      }
-
-      return {
-        ...x,
-        item: updatedItem
-      }
-    })
-
-    form.setFieldValue('items', updatedList)
+    )
+    form.setFieldValue('items', finalList)
     window.close()
   }
 
