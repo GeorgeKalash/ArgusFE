@@ -1,4 +1,5 @@
 export const ResourceIds = {
+  UserDashboard: 20117,
   GeneralLedger: 30303,
   JournalVoucher: 30302,
   FRT_DR_approvals: 10302,
@@ -332,6 +333,8 @@ export const ResourceIds = {
   OpeningBalances: 30301,
   RawMaterialCategory: 42123,
   FoWorkCenters: 47101,
+  FoWaxes: 47300,
+  FoMoulds: 47200,
   SettingsResources: 20121,
   ItemPromotion: 50606,
   CreditCard: 33104,
@@ -396,6 +399,7 @@ export const ResourceIds = {
   GenerateProductionOrder: 51416,
   ProductionOrder: 42337,
   YearlyComparativeSales: 51550,
+  PurchaseTransactions: 50303,
   SManagement: 41213,
   OpenPOs: 50312,
   NotificationLabels: 23106,
@@ -405,7 +409,11 @@ export const ResourceIds = {
   Batches: 20205,
   GenerateInvoices: 52302,
   GeneratePUInvoices: 50307,
+  MeasurementScheduleMaps: 42110,
+  AdjustItemCost: 41216,
+  JobCategory: 42122,
   DesignGroup: 42116,
   DesignFamilies: 42115,
+  SerialsTrackings: 41111,
   JobsInProcess: 42309
 }

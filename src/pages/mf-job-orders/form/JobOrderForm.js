@@ -62,7 +62,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     routingSeqNo: null,
     startingDT: null,
     endingDT: null,
-    description: null,
+    description: '',
     weight: 0,
     qty: 0,
     pcs: 0,
@@ -702,10 +702,11 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                         value={formik.values.description}
                         rows={2.5}
                         maxLength='100'
-                        readOnly={isCancelled || isPosted}
                         maxAccess={maxAccess}
-                        onChange={e => formik.setFieldValue('description', e.target.value)}
-                        onClear={() => formik.setFieldValue('description', null)}
+                        readOnly={isCancelled || isPosted}
+                        onChange={formik.handleChange}
+                        onClear={() => formik.setFieldValue('description', '')}
+                        error={formik.touched.description && Boolean(formik.errors.description)}
                       />
                     </Grid>
                     <Grid item>
