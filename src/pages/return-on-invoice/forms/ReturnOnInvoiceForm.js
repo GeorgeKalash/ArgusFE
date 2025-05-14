@@ -110,7 +110,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         id: 1,
         returnId: recordId || 0,
         seqNo: 1,
-        componentSeqNo: 1,
+        componentSeqNo: null,
         lotCategoryId: null,
         invoiceId: null,
         invoiceRef: null,
@@ -146,7 +146,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         notes: null,
         returnNowQty: 0,
         returnedQty: 0,
-        trackBy: null
+        trackBy: null,
+        isEditMode: false
       }
     ]
   }
@@ -735,7 +736,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                 vatAmount: parseFloat(item.vatAmount).toFixed(2),
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
                 returnNowQty: parseFloat(item.qty).toFixed(2),
-                taxDetails: taxDetailsResponse
+                taxDetails: taxDetailsResponse,
+                isEditMode: true
               }
             })
           )

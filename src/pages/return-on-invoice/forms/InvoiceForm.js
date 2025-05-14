@@ -73,6 +73,7 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
         tdPct: x?.item?.values?.tdPct || 0,
         dirtyField: DIRTYFIELD_QTY
       })
+      console.log('vatttt', x)
       const taxDetailsResponse = await getTaxDetails(x?.taxId)
 
       const details = taxDetailsResponse.map(item => ({
@@ -251,7 +252,15 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
       component: 'numberfield',
       label: labels.returnNow,
       flex: 2,
-      name: 'returnNow'
+      name: 'returnNow',
+      onChange({ row: { update, newRow } }) {
+        if (!newRow.returnNow) {
+          update({ returnNow: 0 })
+
+          return
+        }
+        update({ returnNow: newRow.returnNow > newRow.balanceQty ? 0 : newRow.returnNow, isEditMode: false })
+      }
     }
   ]
 
@@ -279,7 +288,7 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
       items = retItems.list.map(item => ({
         ...item,
         returnNowQty: item.qty,
-        componentSeqNo: item.componentSeqNo || 0
+        componentSeqNo: item.componentSeqNo
       }))
     }
 
@@ -327,11 +336,11 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
         updatedItem.checked = existsInFormValues
         updatedItem.returnNow = currentItem.returnNowQty
 
-        if (existsInFormValues) {
+        if (currentItem.isEditMode) {
           updatedItem.returnedQty = (updatedItem.returnedQty || 0) - updatedItem.returnNow || 0
           updatedItem.balanceQty = (updatedItem.balanceQty || 0) + updatedItem.returnNow || 0
 
-          if (!existsInFormValues) {
+          if (!currentItem.isEditMode) {
             updatedItem.returnNow = 0
           }
         } else {
