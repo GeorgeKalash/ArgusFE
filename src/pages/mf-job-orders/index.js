@@ -156,7 +156,8 @@ const JobOrder = () => {
       props: {
         labels,
         access,
-        recordId
+        recordId,
+        invalidate
       },
       width: 1150,
       height: 700,
