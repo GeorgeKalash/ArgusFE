@@ -58,7 +58,12 @@ const GridToolbar = ({
     }).then(res => {
       if (res?.list) {
         const formattedReports = res.list.map(item => ({
-          api_url: item.api,
+          api_url:
+            item.api.endsWith('_params=') && props?.reportParams
+              ? `${item.api}${props.reportParams}`
+              : props?.reportParams
+              ? `${item.api}&_params=${props.reportParams}`
+              : item.api,
           reportClass: item.instanceName,
           parameters: item.parameters,
           layoutName: item.layoutName,
@@ -81,7 +86,7 @@ const GridToolbar = ({
     }
 
     fetchReportLayout()
-  }, [])
+  }, [props?.reportParams])
 
   const buttons = getButtons(platformLabels)
 
