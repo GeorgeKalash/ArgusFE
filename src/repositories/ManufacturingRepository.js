@@ -311,7 +311,6 @@ export const ManufacturingRepository = {
     get: service + 'getDEG',
     del: service + 'delDEG',
     page: service + 'pageDEG'
-    page: service + 'pageDEG'
   },
   Components: {
     qry: service + 'qryDEM',
