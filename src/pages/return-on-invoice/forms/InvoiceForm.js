@@ -17,7 +17,7 @@ import { getIPR, DIRTYFIELD_QTY } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
-export default function InvoiceForm({ form, maxAccess, labels, window }) {
+export default function InvoiceForm({ form, maxAccess, labels, setReCal, window }) {
   const { getRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
@@ -37,146 +37,78 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
 
     return res?.list
   }
-  async function importAllItems() {
-    const updatedList = formik?.values?.items?.map((x, index) => {
-      const returnNow = x.balanceQty
 
-      const item = {
-        ...x.item,
-        id: index + 1,
-        returnedQty: x.returnedQty,
-        checked: true,
-        returnNowQty: returnNow,
-        invoiceSeqNo: x.item.seqNo,
-        extendedPrice:
-          x.item.extendedPrice !== 0 ? (returnNow * x.item.extendedPrice) / x.item.qty : x.item.extendedPrice
-      }
+  async function importItems(importAll) {
+    const rawItems = formik?.values?.items || []
 
-      return item
-    })
-    if (updatedList.length == 0) return
+    const filteredItems = rawItems
+      .filter(item => (!importAll ? item.checked === true && item.balanceQty > 0 : true))
+      .map((item, index) => {
+        const returnNow = importAll ? item.balanceQty : item.returnNow
+
+        return {
+          ...item,
+          item: {
+            ...item.item,
+            id: index + 1,
+            returnedQty: item.returnedQty,
+            returnNowQty: item.returnNow,
+            returnNow,
+            invoiceSeqNo: item.item.seqNo,
+            extendedPrice:
+              item.item.extendedPrice != 0
+                ? (returnNow * item.item.extendedPrice) / item.item.qty
+                : item.item.extendedPrice
+          }
+        }
+      })
+    console.log('itemmmss', filteredItems)
+    if (filteredItems.length === 0) return
 
     const finalList = await Promise.all(
-      updatedList.map(async x => {
+      filteredItems.map(async (entry, index) => {
+        const { item, taxId, qty, balanceQty, returnedQty } = entry
+
         const itemPriceRow = getIPR({
-          priceType: x?.item?.priceType || 0,
-          basePrice: parseFloat(x?.item?.basePrice) || 0,
-          volume: parseFloat(x?.item?.volume),
-          weight: parseFloat(x?.item?.weight),
-          unitPrice: parseFloat(x?.item?.unitPrice || 0),
+          priceType: item?.priceType || 0,
+          basePrice: parseFloat(item?.basePrice) || 0,
+          volume: parseFloat(item?.volume),
+          weight: parseFloat(item?.weight),
+          unitPrice: parseFloat(item?.unitPrice || 0),
           upo: 0,
-          qty: parseFloat(x?.item?.qty),
-          extendedPrice: parseFloat(x?.item?.extendedPrice),
-          mdAmount: parseFloat(x?.item?.mdAmount),
-          mdType: x?.item?.mdType,
+          qty: item?.returnNowQty == 0 ? parseFloat(balanceQty) : parseFloat(item?.returnNowQty),
+          extendedPrice: parseFloat(item?.extendedPrice),
+          mdAmount: parseFloat(item?.mdAmount),
+          mdType: parseInt(item?.mdType),
           baseLaborPrice: 0,
           totalWeightPerG: 0,
-          mdValue: parseFloat(x?.item?.mdValue),
-          tdPct: x?.item?.values?.tdPct || 0,
+          mdValue: parseFloat(item?.mdValue),
+          tdPct: item?.values?.tdPct || 0,
           dirtyField: DIRTYFIELD_QTY
         })
-        const taxDetailsResponse = await getTaxDetails(x?.taxId)
 
-        const details = taxDetailsResponse?.map(item => ({
-          taxId: x?.taxId,
-          taxCodeId: item.taxCodeId,
-          taxBase: item.taxBase,
-          amount: item.amount
+        const taxDetails = await getTaxDetails(taxId)
+
+        const taxDetailList = taxDetails?.map(t => ({
+          taxId,
+          taxCodeId: t.taxCodeId,
+          taxBase: t.taxBase,
+          amount: t.amount
         }))
 
         const vatCalcRow = getVatCalc({
-          basePrice: itemPriceRow?.basePrice,
-          qty: x?.qty,
-          extendedPrice: parseFloat(itemPriceRow?.extendedPrice) || 0,
-          baseLaborPrice: itemPriceRow?.baseLaborPrice || 0,
+          basePrice: itemPriceRow.basePrice,
+          qty,
+          extendedPrice: parseFloat(itemPriceRow.extendedPrice) || 0,
+          baseLaborPrice: itemPriceRow.baseLaborPrice || 0,
           vatAmount: 0,
           tdPct: form.values.tdPct,
-          taxDetails: form.values.isVattable ? details : null
+          taxDetails: form.values.isVattable ? taxDetailList : null
         })
 
-        const updatedItem = {
-          ...x.item,
-          basePrice: itemPriceRow.basePrice,
-          unitPrice: itemPriceRow.unitPrice,
-          extendedPrice: itemPriceRow.extendedPrice,
-          mdValue: itemPriceRow.mdValue,
-          mdType: itemPriceRow.mdType,
-          baseLaborPrice: itemPriceRow.baseLaborPrice,
-          mdAmountPct: itemPriceRow.mdType,
-          vatAmount: vatCalcRow.vatAmount
-        }
-
         return {
-          ...x,
-          item: updatedItem,
-          vatAmount: vatCalcRow.vatAmount
-        }
-      })
-    )
-    form.setFieldValue('items', finalList)
-    window.close()
-  }
-  async function importSelectedItems() {
-    const updatedList = formik?.values?.items
-      ?.filter(x => x.checked === true && x.balanceQty > 0)
-      .map((x, index) => {
-        const returnNow = x.balanceQty
-
-        const item = {
-          ...x.item,
+          ...item,
           id: index + 1,
-          returnedQty: x.returnedQty,
-          returnNowQty: returnNow,
-          invoiceSeqNo: x.item.seqNo,
-          extendedPrice:
-            x.item.extendedPrice !== 0 ? (returnNow * x.item.extendedPrice) / x.item.qty : x.item.extendedPrice
-        }
-
-        return item
-      })
-
-    if (updatedList.length == 0) return
-
-    const finalList = await Promise.all(
-      updatedList.map(async x => {
-        const itemPriceRow = getIPR({
-          priceType: x?.item?.priceType || 0,
-          basePrice: parseFloat(x?.item?.basePrice) || 0,
-          volume: parseFloat(x?.item?.volume),
-          weight: parseFloat(x?.item?.weight),
-          unitPrice: parseFloat(x?.item?.unitPrice || 0),
-          upo: 0,
-          qty: parseFloat(x?.item?.qty),
-          extendedPrice: parseFloat(x?.item?.extendedPrice),
-          mdAmount: parseFloat(x?.item?.mdAmount),
-          mdType: x?.item?.mdType,
-          baseLaborPrice: 0,
-          totalWeightPerG: 0,
-          mdValue: parseFloat(x?.item?.mdValue),
-          tdPct: x?.item?.values?.tdPct || 0,
-          dirtyField: DIRTYFIELD_QTY
-        })
-        const taxDetailsResponse = await getTaxDetails(x?.taxId)
-
-        const details = taxDetailsResponse?.map(item => ({
-          taxId: x?.taxId,
-          taxCodeId: item.taxCodeId,
-          taxBase: item.taxBase,
-          amount: item.amount
-        }))
-
-        const vatCalcRow = getVatCalc({
-          basePrice: itemPriceRow?.basePrice,
-          qty: x?.qty,
-          extendedPrice: parseFloat(itemPriceRow?.extendedPrice) || 0,
-          baseLaborPrice: itemPriceRow?.baseLaborPrice || 0,
-          vatAmount: 0,
-          tdPct: form.values.tdPct,
-          taxDetails: form.values.isVattable ? details : null
-        })
-
-        const updatedItem = {
-          ...x.item,
           basePrice: itemPriceRow.basePrice,
           unitPrice: itemPriceRow.unitPrice,
           extendedPrice: itemPriceRow.extendedPrice,
@@ -184,17 +116,14 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
           mdType: itemPriceRow.mdType,
           baseLaborPrice: itemPriceRow.baseLaborPrice,
           mdAmountPct: itemPriceRow.mdType,
-          vatAmount: vatCalcRow.vatAmount
-        }
-
-        return {
-          ...x,
-          item: updatedItem,
-          vatAmount: vatCalcRow.vatAmount
+          vatAmount: vatCalcRow.vatAmount,
+          returnedQty,
+          balanceQty
         }
       })
     )
     form.setFieldValue('items', finalList)
+    setReCal(true)
     window.close()
   }
 
@@ -274,14 +203,20 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
     {
       key: 'Import',
       condition: true,
-      onClick: importSelectedItems
+      onClick: () => {
+        importItems(false)
+      },
+      disabled: formik.values.items.every(item => !item.checked)
     },
     {
       key: 'ImportAll',
       condition: true,
-      onClick: importAllItems
+      onClick: () => {
+        importItems(true)
+      }
     }
   ]
+
   async function fetchGridData() {
     let items = []
 
@@ -294,7 +229,8 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
       items = retItems.list.map(item => ({
         ...item,
         returnNowQty: item.qty,
-        componentSeqNo: item.componentSeqNo
+        componentSeqNo: item.componentSeqNo || 0,
+        isEditMode: true
       }))
     }
 
@@ -336,6 +272,7 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
         itemName: x.item.itemName,
         qty: x.item.qty || 0
       }
+
       const currentItem = indexInAllLists != -1 ? allLists[indexInAllLists] : null
 
       if (currentItem) {
@@ -370,9 +307,7 @@ export default function InvoiceForm({ form, maxAccess, labels, window }) {
   }
 
   useEffect(() => {
-    ;(async function () {
-      fetchGridData()
-    })()
+    fetchGridData()
   }, [])
 
   return (

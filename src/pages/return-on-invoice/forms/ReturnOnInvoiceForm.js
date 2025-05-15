@@ -431,7 +431,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     },
     {
       component: 'numberfield',
-      label: labels.quantity,
+      label: labels.qty,
       name: 'returnNowQty',
       onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
@@ -1402,7 +1402,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                         props: {
                           form: formik,
                           maxAccess,
-                          labels
+                          labels,
+                          setReCal
                         },
                         width: 900,
                         height: 550,
