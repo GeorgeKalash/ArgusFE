@@ -44,7 +44,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
   const { formik } = useForm({
     documentType: { key: 'transfer.dtId', value: documentType?.dtId },
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       transfer: {
         dtId: null,
         recordId: null,
@@ -66,7 +66,8 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         sku: '',
         designRef: '',
         itemNmae: '',
-        designName: ''
+        designName: '',
+        totalQty: 0
       },
       categorySummary: []
     },
@@ -113,6 +114,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         categorySummary: res?.record?.categorySummary || []
       })
 
+      calculateTotal(res?.record?.categorySummary || [])
       imageUploadRef.current.value = res?.record?.transfer?.jobId
     })
   }
@@ -126,9 +128,13 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
   const isPosted = formik.values.transfer.status === 3
   const isClosed = formik.values.transfer.wip === 2
 
-  const totalQty = formik?.values?.categorySummary?.list
-    ? formik?.values?.categorySummary?.list?.reduce((op, item) => op + item?.qty, 0)
-    : 0
+  async function calculateTotal(categorySummaryList) {
+    formik.setFieldValue(
+      'transfer.totalQty',
+      categorySummaryList != [] ? categorySummaryList?.reduce((op, item) => op + item?.qty, 0) : 0
+    )
+  }
+
   const editMode = !!formik?.values?.transfer?.recordId
 
   const onPost = async () => {
@@ -213,6 +219,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
 
       imageUploadRef.current.value = null
       formik.setFieldValue('categorySummary', [])
+      calculateTotal([])
     }
   }
 
@@ -223,6 +230,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
     })
 
     formik.setFieldValue('categorySummary', itemsRes?.list || [])
+    calculateTotal(itemsRes?.list)
   }
 
   async function clearSelection(transferUpdate) {
@@ -386,7 +394,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                     label={labels.jobDesc}
                     value={formik.values.transfer.jobDescription}
                     rows={2}
-                    editMode={editMode}
                     readOnly
                     maxAccess
                     onChange={e => formik.setFieldValue('transfer.jobDescription', e.target.value)}
@@ -436,9 +443,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         label={labels.qty}
                         value={formik?.values?.transfer.qty}
                         maxAccess
-                        onChange={formik.handleChange}
-                        onClear={() => formik.setFieldValue('transfer.qty', 0)}
-                        error={formik.touched.transfer?.qty && Boolean(formik.errors.transfer?.qty)}
                         decimalScale={3}
                       />
                     </Grid>
@@ -502,9 +506,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         label={labels.pieces}
                         value={formik?.values?.transfer?.pcs}
                         maxAccess
-                        onChange={formik.handleChange}
-                        onClear={() => formik.setFieldValue('transfer.pcs', 0)}
-                        error={formik.touched.transfer?.pcs && Boolean(formik.errors.transfer?.pcs)}
                       />
                     </Grid>
 
@@ -539,7 +540,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='transfer.totalQty'
-                    value={totalQty}
+                    value={formik?.values?.transfer?.totalQty}
                     readOnly
                     label={labels.totalQty}
                     maxAccess
