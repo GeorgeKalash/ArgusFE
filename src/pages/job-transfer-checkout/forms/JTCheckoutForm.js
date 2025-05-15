@@ -73,6 +73,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
     maxAccess,
     validationSchema: yup.object({
       transfer: yup.object({
+        date: yup.string().required(),
         jobId: yup.number().required(),
         fromSeqNo: yup.string().required(),
         toWCId: yup.string().required()
@@ -358,10 +359,14 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                     <Grid item xs={12}>
                       <CustomDatePicker
                         name='transfer.date'
+                        required
                         readOnly={isClosed || isPosted}
                         label={labels.date}
                         value={formik.values.transfer?.date}
+                        onChange={formik.setFieldValue}
                         maxAccess
+                        onClear={() => formik.setFieldValue('date', null)}
+                        error={formik.touched.transfer?.date && Boolean(formik.errors.transfer?.date)}
                       />
                     </Grid>
 
