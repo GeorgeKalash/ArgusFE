@@ -1008,7 +1008,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       ...item,
       basePrice: parseFloat(item.basePrice) || 0,
       unitPrice: parseFloat(item.unitPrice) || 0,
-      vatAmount: parseFloat(item.vatAmount) || 0,
+      vatAmount: item?.vatAmount ? parseFloat(item.vatAmount) : 0,
       weight: parseFloat(item.weight) || 0,
       volume: parseFloat(item.volume) || 0,
       extendedPrice: parseFloat(item.extendedPrice) || 0
