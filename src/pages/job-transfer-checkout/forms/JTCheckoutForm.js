@@ -66,8 +66,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         sku: '',
         designRef: '',
         itemNmae: '',
-        designName: '',
-        totalQty: 0
+        designName: ''
       },
       categorySummary: []
     },
@@ -114,7 +113,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         categorySummary: res?.record?.categorySummary || []
       })
 
-      calculateTotal(res?.record?.categorySummary || [])
       imageUploadRef.current.value = res?.record?.transfer?.jobId
     })
   }
@@ -128,12 +126,8 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
   const isPosted = formik.values.transfer.status === 3
   const isClosed = formik.values.transfer.wip === 2
 
-  async function calculateTotal(categorySummaryList) {
-    formik.setFieldValue(
-      'transfer.totalQty',
-      categorySummaryList != [] ? categorySummaryList?.reduce((op, item) => op + item?.qty, 0) : 0
-    )
-  }
+  const totalQty =
+    formik?.values?.categorySummary != [] ? formik?.values?.categorySummary.reduce((op, item) => op + item?.qty, 0) : 0
 
   const editMode = !!formik?.values?.transfer?.recordId
 
@@ -219,7 +213,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
 
       imageUploadRef.current.value = null
       formik.setFieldValue('categorySummary', [])
-      calculateTotal([])
     }
   }
 
@@ -229,8 +222,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
       parameters: `_jobId=${jobId}`
     })
 
-    formik.setFieldValue('categorySummary', itemsRes?.list || [])
-    calculateTotal(itemsRes?.list)
+    formik.setFieldValue('categorySummary', itemsRes.list || [])
   }
 
   async function clearSelection(transferUpdate) {
@@ -540,7 +532,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='transfer.totalQty'
-                    value={formik?.values?.transfer?.totalQty}
+                    value={totalQty}
                     readOnly
                     label={labels.totalQty}
                     maxAccess
