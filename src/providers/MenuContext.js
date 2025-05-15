@@ -35,60 +35,56 @@ const MenuProvider = ({ children }) => {
 
   const buildMenu = (folders, commandLines, parentId = 0) => {
     const menu = []
-    folders &&
-      folders
-        .filter(folder => folder.parentId === parentId)
-        .forEach(folder => {
-          const folderItem = {
-            id: folder.id,
-            title: folder.name,
-            iconName: folder.iconName && folder.iconName,
-            icon: folder.nextIcon,
-            parentId: folder.parentId,
-            children: []
-          }
+    folders
+      ?.filter(folder => folder.parentId === parentId)
+      .forEach(folder => {
+        const folderItem = {
+          id: folder.id,
+          title: folder.name,
+          iconName: folder.iconName && folder.iconName,
+          icon: folder.nextIcon,
+          parentId: folder.parentId,
+          children: []
+        }
 
-          folderItem.children = buildMenu(folders, commandLines, folder.id)
+        folderItem.children = buildMenu(folders, commandLines, folder.id)
 
-          commandLines
-            .filter(commandLine => commandLine.folderId === folder.id)
-            .forEach(commandLine => {
-              if (commandLine.nextAPI)
-                folderItem.children.push({
-                  id: commandLine.id,
-                  title: commandLine.name,
-                  path: `/${commandLine.nextAPI}`,
-                  name: commandLine.name,
+        commandLines
+          .filter(commandLine => commandLine.folderId === folder.id)
+          .forEach(commandLine => {
+            if (commandLine.nextAPI)
+              folderItem.children.push({
+                id: commandLine.id,
+                title: commandLine.name,
+                path: `/${commandLine.nextAPI}`,
+                name: commandLine.name,
+                iconName: commandLine.addToBookmarks && 'FavIcon'
+              })
+          })
 
-                  // path: `/${commandLine.nextAPI ? commandLine.nextAPI : commandLine.api.replace(/\.aspx$/, "").toLowerCase()}`,
-                  iconName: commandLine.addToBookmarks && 'FavIcon'
-                })
-            })
-
-          menu.push(folderItem)
-        })
+        menu.push(folderItem)
+      })
 
     return menu
   }
 
   const buildGear = commandLines => {
     const Gear = []
-    commandLines &&
-      commandLines
-        .filter(commandLine => commandLine.folderId === 0)
-        .forEach(commandLine => {
-          if (commandLine.nextAPI) {
-            const GearItem = {
-              id: commandLine.id,
-              title: commandLine.name,
-              path: `/${commandLine.nextAPI}`,
-              name: commandLine.name,
-              folderId: commandLine.folderId,
-              iconName: commandLine.addToBookmarks && 'FavIcon'
-            }
-            Gear.push(GearItem)
+    commandLines
+      ?.filter(commandLine => commandLine.folderId === 0)
+      .forEach(commandLine => {
+        if (commandLine.nextAPI) {
+          const GearItem = {
+            id: commandLine.id,
+            title: commandLine.name,
+            path: `/${commandLine.nextAPI}`,
+            name: commandLine.name,
+            folderId: commandLine.folderId,
+            iconName: commandLine.addToBookmarks && 'FavIcon'
           }
-        })
+          Gear.push(GearItem)
+        }
+      })
 
     return Gear
   }

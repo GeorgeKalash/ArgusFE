@@ -74,9 +74,7 @@ export const DocumentReleaseRepository = {
     get: service + 'getTRX',
     set: service + 'setTRX',
     del: service + 'delTRX',
-    qry2: service + 'qry2TRX'
-  },
-  Approvals: {
+    qry2: service + 'qry2TRX',
     qry3: service + 'qry3TRX'
   },
   StrategyCode: {

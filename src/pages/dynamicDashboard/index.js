@@ -155,7 +155,7 @@ const DashboardLayout = () => {
           parameters: ``
         }).then(resSP => {
           return getRequest({
-            extension: DocumentReleaseRepository.Approvals.qry3,
+            extension: DocumentReleaseRepository.DocumentsOnHold.qry3,
             parameters: ``
           }).then(resDR => {
             setData({ dashboard: { ...res?.record }, sp: { ...resSP?.record }, authorization: { ...resDR } })
