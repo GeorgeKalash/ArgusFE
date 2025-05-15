@@ -32,7 +32,8 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.BalanceTransferMultiAccount,
     access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   const invalidate = useInvalidate({
@@ -79,8 +80,9 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
     validationSchema: yup.object({
       header: yup.object({
         plantId: yup.number().required(),
-        accountId: yup.number().required(),
+        accountId: yup.string().required(),
         currencyId: yup.number().required(),
+        date: yup.date().required(),
         amount: yup.number().required()
       }),
       rows: yup
@@ -165,8 +167,8 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
   }
 
   useEffect(() => {
-    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
-  }, [formik.values.dtId])
+    if (formik.values.header.dtId && !recordId) getDTD(formik?.values?.header?.dtId)
+  }, [formik.values.header.dtId])
 
   const columns = [
     {
@@ -209,8 +211,8 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
       name: 'amount',
       label: labels.amount,
       props: {
-        maxLength: 18,
-        decimalScale: 5
+        maxLength: 15,
+        decimalScale: 2
       }
     },
     {
@@ -225,12 +227,9 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
       extension: FinancialRepository.BalanceTransferMultiAccounts.unpost,
       record: JSON.stringify(formik.values.header)
     })
-
-    if (res?.recordId) {
-      toast.success(platformLabels.Unposted)
-      invalidate()
-      refetchForm(res?.recordId)
-    }
+    toast.success(platformLabels.Unposted)
+    invalidate()
+    refetchForm(res?.recordId)
   }
 
   async function refetchForm(recordId) {
@@ -239,25 +238,26 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
       parameters: `_recordId=${recordId}`
     })
 
-    if (res?.record?.header) {
-      const modifiedList = res?.record?.list?.map((item, index) => ({
-        ...item,
-        fromGroup: item.accountGroupName,
-        id: index + 1
-      }))
+    const modifiedList =
+      res.record.list.length > 0
+        ? res.record.list.map((item, index) => ({
+            ...item,
+            fromGroup: item.accountGroupName,
+            id: index + 1
+          }))
+        : formik.values.rows
 
-      formik.setValues({
-        recordId: res.record.header.recordId,
-        header: {
-          ...res.record.header,
-          fromGroup: res.record.header.accountGroupName,
-          date: formatDateFromApi(res?.record?.header?.date)
-        },
-        rows: modifiedList
-      })
+    formik.setValues({
+      recordId: res?.record?.header?.recordId,
+      header: {
+        ...res?.record?.header,
+        fromGroup: res?.record?.header?.accountGroupName,
+        date: formatDateFromApi(res?.record?.header?.date)
+      },
+      rows: modifiedList
+    })
 
-      return res?.record
-    }
+    return res?.record
   }
 
   useEffect(() => {
@@ -362,7 +362,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 value={formik?.values?.header?.reference}
                 maxAccess={!editMode && maxAccess}
                 maxLength='30'
-                readOnly={isPosted}
+                readOnly={editMode}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('header.reference', '')}
                 error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
@@ -373,7 +373,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 endpointId={SaleRepository.SalesPerson.qry}
                 name='header.spId'
                 label={labels.salesPerson}
-                filter={item => item.plantId}
+                filter={item => item.plantId === formik.values.header.plantId}
                 readOnly={!formik.values.header.plantId || isPosted}
                 valueField='recordId'
                 columnsInDropDown={[
@@ -405,30 +405,36 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
             <Grid item xs={6}>
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
-                valueField='recordId'
-                displayField='name'
                 name='header.accountId'
-                secondValueShow='name'
                 label={labels.accountName}
-                displayFieldWidth={2}
-                readOnly={isPosted}
-                form={formik}
+                valueField='reference'
+                displayField='name'
+                valueShow='accountRef'
+                secondValueShow='accountName'
                 formObject={formik.values.header}
-                firstValue={formik.values.header.accountRef}
-                secondValue={formik.values.header.accountName}
+                form={formik}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('header.accountId', newValue?.recordId || null)
-                  formik.setFieldValue('header.accountRef', newValue.reference || '')
-                  formik.setFieldValue('header.accountName', newValue.name || '')
-                  formik.setFieldValue('header.fromGroup', newValue.groupName || '')
+                  formik.setValues({
+                    ...formik.values,
+                    header: {
+                      ...formik.values.header,
+                      accountId: newValue?.recordId,
+                      accountName: newValue?.name,
+                      accountRef: newValue?.reference,
+                      fromGroup: newValue?.groupName
+                    }
+                  })
                 }}
-                required
                 errorCheck={'header.accountId'}
+                secondFieldName={'header.accountName'}
                 maxAccess={maxAccess}
+                required
+                readOnly={isPosted}
+                displayFieldWidth={3}
               />
             </Grid>
             <Grid item xs={6}>
@@ -472,8 +478,8 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                 onChange={e => formik.setFieldValue('header.amount', e.target.value)}
                 onClear={() => formik.setFieldValue('header.amount', '')}
                 error={formik?.touched?.header?.amount && Boolean(formik?.errors?.header?.amount)}
-                maxLength={18}
-                decimalScale={5}
+                maxLength={15}
+                decimalScale={2}
               />
             </Grid>
           </Grid>
@@ -509,7 +515,6 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                   notes += newValue?.name
 
                   notes && formik.setFieldValue('header.notes', notes)
-                  newValue?.name && formik.setFieldValue('header.templateId', newValue.recordId || null)
                 }}
                 error={formik?.touched?.header?.templateId && Boolean(formik?.errors?.header?.templateId)}
                 maxAccess={maxAccess}
@@ -519,7 +524,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
               <CustomTextField
                 name='header.totalAmount'
                 label={labels.totalAmount}
-                value={totalAmount}
+                value={totalAmount.toFixed(2)}
                 maxAccess={maxAccess}
                 readOnly
               />
