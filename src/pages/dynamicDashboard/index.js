@@ -155,10 +155,10 @@ const DashboardLayout = () => {
           parameters: ``
         }).then(resSP => {
           return getRequest({
-            extension: DocumentReleaseRepository.Approvals.qry2,
+            extension: DocumentReleaseRepository.Approvals.qry3,
             parameters: ``
           }).then(resDR => {
-            setData({ ...res?.record, ...resSP?.record, authorization: { ...resDR } })
+            setData({ dashboard: { ...res?.record }, sp: { ...resSP?.record }, authorization: { ...resDR } })
             debouncedCloseLoading()
           })
         })
@@ -185,15 +185,16 @@ const DashboardLayout = () => {
                 <Title>{labels.retailSales}</Title>
                 <strong>
                   {(
-                    data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_RETAIL_SALES)
-                      ?.amount ?? 0
+                    data?.dashboard?.summaryFigures?.find(
+                      f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_RETAIL_SALES
+                    )?.amount ?? 0
                   ).toLocaleString()}
                 </strong>
               </SummaryCard>
               <CompositeBarChartDark
                 id='retailSalesChart'
-                labels={data?.todaysRetailSales?.map(ws => ws.posRef) || []}
-                data={data?.todaysRetailSales?.map(ws => ws.sales) || []}
+                labels={data?.dashboard?.todaysRetailSales?.map(ws => ws.posRef) || []}
+                data={data?.dashboard?.todaysRetailSales?.map(ws => ws.sales) || []}
                 label={labels.retailSales}
                 ratio={5}
               />
@@ -208,9 +209,9 @@ const DashboardLayout = () => {
               </SummaryCard>
               <MixedBarChart
                 id='myYearlySalesPerformance'
-                labels={data?.myYearlySalesPerformanceList?.map(ws => ws.year) || []}
-                data1={data?.myYearlySalesPerformanceList?.map(ws => ws.sales) || []}
-                data2={data?.myYearlySalesPerformanceList?.map(ws => ws.target) || []}
+                labels={data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.year) || []}
+                data1={data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.sales) || []}
+                data2={data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.target) || []}
                 label1='sales'
                 label2='target'
                 ratio={5}
@@ -226,9 +227,9 @@ const DashboardLayout = () => {
               </SummaryCard>
               <MixedBarChart
                 id='myMonthlySalesPerformance'
-                labels={data?.myMonthlySalesPerformanceList?.map(ws => ws.monthName) || []}
-                data1={data?.myMonthlySalesPerformanceList?.map(ws => ws.sales) || []}
-                data2={data?.myMonthlySalesPerformanceList?.map(ws => ws.target) || []}
+                labels={data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.monthName) || []}
+                data1={data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.sales) || []}
+                data2={data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.target) || []}
                 label1='sales'
                 label2='target'
                 ratio={5}
@@ -244,8 +245,8 @@ const DashboardLayout = () => {
               </SummaryCard>
               <MixedColorsBarChartDark
                 id='myYearlyUnitsSoldChart'
-                labels={data?.myYearlyUnitsSoldList?.map(ws => ws.year) || []}
-                data={data?.myYearlyUnitsSoldList?.map(ws => ws.qty) || []}
+                labels={data?.sp?.myYearlyUnitsSoldList?.map(ws => ws.year) || []}
+                data={data?.sp?.myYearlyUnitsSoldList?.map(ws => ws.qty) || []}
                 label={labels.qty}
               />
             </ChartCard>
@@ -257,8 +258,8 @@ const DashboardLayout = () => {
               </SummaryCard>
               <MixedColorsBarChartDark
                 id='myYearlyGrowthUnitsSoldChart'
-                labels={data?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.year) || []}
-                data={data?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.qty) || []}
+                labels={data?.sp?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.year) || []}
+                data={data?.sp?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.qty) || []}
                 label={labels.qty}
               />
             </ChartCard>
@@ -270,8 +271,8 @@ const DashboardLayout = () => {
               </SummaryCard>
               <MixedColorsBarChartDark
                 id='myYearlyClientsAcquiredList'
-                labels={data?.myYearlyClientsAcquiredList?.map(ws => ws.year) || []}
-                data={data?.myYearlyClientsAcquiredList?.map(ws => ws.qty) || []}
+                labels={data?.sp?.myYearlyClientsAcquiredList?.map(ws => ws.year) || []}
+                data={data?.sp?.myYearlyClientsAcquiredList?.map(ws => ws.qty) || []}
                 label={labels.qty}
               />
             </ChartCard>
@@ -283,8 +284,8 @@ const DashboardLayout = () => {
               </SummaryCard>
               <MixedColorsBarChartDark
                 id='myYearlyGrowthInClientsAcquiredList'
-                labels={data?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.year) || []}
-                data={data?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.qty) || []}
+                labels={data?.sp?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.year) || []}
+                data={data?.sp?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.qty) || []}
                 label={labels.qty}
               />
             </ChartCard>
@@ -297,14 +298,14 @@ const DashboardLayout = () => {
                 <Title>{labels.todayPlantSales}</Title>
                 <strong>
                   {(
-                    data?.todaysCreditSales?.map(tcs => tcs.sales).reduce((acc, val) => acc + val, 0) || 0
+                    data?.dashboard?.todaysCreditSales?.map(tcs => tcs.sales).reduce((acc, val) => acc + val, 0) || 0
                   ).toLocaleString()}
                 </strong>
               </SummaryCard>
               <CompositeBarChartDark
                 id='todayPlantSales'
-                labels={data?.todaysCreditSales?.map(ws => ws.plantRef) || []}
-                data={data?.todaysCreditSales?.map(ws => ws.sales) || []}
+                labels={data?.dashboard?.todaysCreditSales?.map(ws => ws.plantRef) || []}
+                data={data?.dashboard?.todaysCreditSales?.map(ws => ws.sales) || []}
                 label={labels.todayPlantSales}
                 ratio={5}
               />
@@ -323,22 +324,26 @@ const DashboardLayout = () => {
                         {
                           label: labels.hoSalesOrders,
                           value:
-                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS)
-                              ?.amount ?? 0
+                            data?.dashboard?.summaryFigures?.find(
+                              f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS
+                            )?.amount ?? 0
                         },
                         {
                           label: labels.retailSales,
                           value:
-                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS)
-                              ?.amount ?? 0
+                            data?.dashboard?.summaryFigures?.find(
+                              f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS
+                            )?.amount ?? 0
                         },
                         {
                           label: labels.total,
                           value:
-                            (data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS)
-                              ?.amount ?? 0) +
-                            (data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS)
-                              ?.amount ?? 0)
+                            (data?.dashboard?.summaryFigures?.find(
+                              f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS
+                            )?.amount ?? 0) +
+                            (data?.dashboard?.summaryFigures?.find(
+                              f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS
+                            )?.amount ?? 0)
                         }
                       ]
                     },
@@ -348,22 +353,24 @@ const DashboardLayout = () => {
                         {
                           label: labels.hoSales,
                           value:
-                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.CREDIT_SALES_YTD)?.amount ??
-                            0
+                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.CREDIT_SALES_YTD)
+                              ?.amount ?? 0
                         },
                         {
                           label: labels.retailSales,
                           value:
-                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.RETAIL_SALES_YTD)?.amount ??
-                            0
+                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.RETAIL_SALES_YTD)
+                              ?.amount ?? 0
                         },
                         {
                           label: labels.total,
                           value:
-                            (data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.CREDIT_SALES_YTD)
-                              ?.amount ?? 0) +
-                            (data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.RETAIL_SALES_YTD)
-                              ?.amount ?? 0)
+                            (data?.dashboard?.summaryFigures?.find(
+                              f => f.itemId === SummaryFiguresItem.CREDIT_SALES_YTD
+                            )?.amount ?? 0) +
+                            (data?.dashboard?.summaryFigures?.find(
+                              f => f.itemId === SummaryFiguresItem.RETAIL_SALES_YTD
+                            )?.amount ?? 0)
                         }
                       ]
                     },
@@ -373,14 +380,16 @@ const DashboardLayout = () => {
                         {
                           label: labels.openSo,
                           value:
-                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.OPEN_SALES_ORDERS)
-                              ?.amount ?? 0
+                            data?.dashboard?.summaryFigures?.find(
+                              f => f.itemId === SummaryFiguresItem.OPEN_SALES_ORDERS
+                            )?.amount ?? 0
                         },
                         {
                           label: labels.returnSales,
                           value:
-                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.CREDIT_SALES_RETURNS_YTD)
-                              ?.amount ?? 0
+                            data?.dashboard?.summaryFigures?.find(
+                              f => f.itemId === SummaryFiguresItem.CREDIT_SALES_RETURNS_YTD
+                            )?.amount ?? 0
                         }
                       ]
                     },
@@ -389,12 +398,15 @@ const DashboardLayout = () => {
                       rows: [
                         {
                           label: labels.revenues,
-                          value: data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)?.amount ?? 0
+                          value:
+                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)
+                              ?.amount ?? 0
                         },
                         {
                           label: labels.profit,
                           value:
-                            data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)?.amount ?? 0
+                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)
+                              ?.amount ?? 0
                         }
                       ]
                     }
@@ -418,7 +430,8 @@ const DashboardLayout = () => {
                   <RedCenter>
                     {labels.newCostumers}:{' '}
                     {(
-                      data?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.NEW_CUSTOMERS_YTD)?.amount ?? 0
+                      data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.NEW_CUSTOMERS_YTD)
+                        ?.amount ?? 0
                     ).toLocaleString()}
                   </RedCenter>
                 </SummaryItem>
@@ -431,15 +444,15 @@ const DashboardLayout = () => {
                 <Title>{labels.avWeeklySales}</Title>
                 <strong>
                   {(
-                    (data?.weeklySales?.map(ws => ws.sales).reduce((acc, val) => acc + val, 0) || 0) /
-                    (data?.weeklySales?.length || 1)
+                    (data?.dashboard?.weeklySales?.map(ws => ws.sales).reduce((acc, val) => acc + val, 0) || 0) /
+                    (data?.dashboard?.weeklySales?.length || 1)
                   ).toLocaleString()}
                 </strong>
               </SummaryCard>
               <CompositeBarChartDark
                 id='weeklySalesChart'
-                labels={data?.weeklySales?.map(ws => ws.weekName) || []}
-                data={data?.weeklySales?.map(ws => ws.sales) || []}
+                labels={data?.dashboard?.weeklySales?.map(ws => ws.weekName) || []}
+                data={data?.dashboard?.weeklySales?.map(ws => ws.sales) || []}
                 label={labels.weeklySales}
               />
             </ChartCard>
@@ -450,15 +463,15 @@ const DashboardLayout = () => {
                 <Title>{labels.avMonthlySales}</Title>
                 <strong>
                   {(
-                    (data?.monthlySales?.map(ms => ms.sales).reduce((acc, val) => acc + val, 0) || 0) /
-                    (data?.monthlySales?.length || 1)
+                    (data?.dashboard?.monthlySales?.map(ms => ms.sales).reduce((acc, val) => acc + val, 0) || 0) /
+                    (data?.dashboard?.monthlySales?.length || 1)
                   ).toLocaleString()}
                 </strong>
               </SummaryCard>
               <CompositeBarChartDark
                 id='monthlySalesChart'
-                labels={data?.monthlySales?.map(ms => `${ms.year}/${ms.month}`) || []}
-                data={data?.monthlySales?.map(ms => ms.sales) || []}
+                labels={data?.dashboard?.monthlySales?.map(ms => `${ms.year}/${ms.month}`) || []}
+                data={data?.dashboard?.monthlySales?.map(ms => ms.sales) || []}
                 label={labels.monthlySales}
               />
             </ChartCard>
@@ -470,8 +483,8 @@ const DashboardLayout = () => {
               </SummaryCard>
               <CompositeBarChartDark
                 id='accumulatedRevenuesChart'
-                labels={data?.accumulatedMonthlySales?.map(ams => ams.monthName) || []}
-                data={data?.accumulatedMonthlySales?.map(ams => ams.sales) || []}
+                labels={data?.dashboard?.accumulatedMonthlySales?.map(ams => ams.monthName) || []}
+                data={data?.dashboard?.accumulatedMonthlySales?.map(ams => ams.sales) || []}
                 label={labels.accRevenues}
                 color='#ff6c02'
                 hoverColor='#fec106'
@@ -485,8 +498,10 @@ const DashboardLayout = () => {
               </SummaryCard>
               <HorizontalBarChartDark
                 id='Receivables'
-                labels={Object.keys(data?.receivables || {})}
-                data={Object.values(data?.receivables || {})}
+                labels={Object.keys(data?.dashboard?.receivables || {})}
+                data={Object.values(data?.dashboard?.receivables || {}).map(value =>
+                  typeof value === 'number' ? Math.ceil(value) : 0
+                )}
                 label={labels.receivables}
                 color='#6e87b6'
                 hoverColor='#818181'
@@ -500,8 +515,8 @@ const DashboardLayout = () => {
               </SummaryCard>
               <HorizontalBarChartDark
                 id='TopCustomers'
-                labels={data?.topCustomers?.map(c => c.clientName) || []}
-                data={data?.topCustomers?.map(c => c.amount) || []}
+                labels={data?.dashboard?.topCustomers?.map(c => c.clientName) || []}
+                data={data?.dashboard?.topCustomers?.map(c => c.amount) || []}
                 label={labels.revenue}
                 color='#d5b552'
                 hoverColor='#818181'
@@ -515,8 +530,8 @@ const DashboardLayout = () => {
               </SummaryCard>
               <LineChart
                 id='AverageRevenuePerItem'
-                labels={data?.avgUnitSales?.map(c => c.itemName) || []}
-                data={data?.avgUnitSales?.map(c => c.avgPrice) || []}
+                labels={data?.dashboard?.avgUnitSales?.map(c => c.itemName) || []}
+                data={data?.dashboard?.avgUnitSales?.map(c => c.avgPrice) || []}
                 label={labels.averageRevenue}
               />
             </ChartCard>

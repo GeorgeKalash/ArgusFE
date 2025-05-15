@@ -166,11 +166,37 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
               return barHeight >= 120 ? '#fff' : '#000'
             },
             offset: 0,
-            rotation: -90,
+            rotation: 0,
             font: {
               size: 14
             },
-            formatter: value => value.toLocaleString()
+            formatter: (value, context) => {
+              const dataset = context.dataset
+              const label = dataset.label || ''
+
+              const roundedValue = Math.ceil(value)
+
+              return `${label}:\n${roundedValue.toLocaleString()}`
+            }
+          },
+          legend: {
+            display: false
+          }
+        },
+
+        scales: {
+          y: {
+            ticks: {
+              callback: function (value) {
+                if (value >= 1e6) {
+                  return `${(value / 1e6).toFixed(1)}M`
+                } else if (value >= 1e3) {
+                  return `${(value / 1e3).toFixed(1)}K`
+                }
+
+                return value
+              }
+            }
           }
         }
       },
@@ -258,7 +284,14 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
             font: {
               size: 14
             },
-            formatter: value => value.toLocaleString()
+            formatter: (value, context) => {
+              const roundedValue = Math.ceil(value)
+
+              return `${roundedValue.toLocaleString()}`
+            }
+          },
+          legend: {
+            display: false
           }
         }
       },
@@ -342,6 +375,9 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
               size: 14
             },
             formatter: value => value.toLocaleString()
+          },
+          legend: {
+            display: false
           }
         }
       },
@@ -417,11 +453,20 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
               return barHeight >= 120 ? '#fff' : '#000'
             },
             offset: 0,
-            rotation: -90,
             font: {
               size: 14
             },
-            formatter: value => value.toLocaleString()
+            formatter: (value, context) => {
+              const dataset = context.dataset
+              const label = dataset.label || ''
+
+              const roundedValue = Math.ceil(value)
+
+              return `${label}:\n${roundedValue.toLocaleString()}`
+            }
+          },
+          legend: {
+            display: false
           }
         }
       },
@@ -541,6 +586,9 @@ export const LineChart = ({ id, labels, data, label }) => {
               size: 14
             },
             formatter: value => value.toLocaleString()
+          },
+          legend: {
+            display: false
           }
         }
       },
