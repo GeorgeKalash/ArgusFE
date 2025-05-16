@@ -47,16 +47,13 @@ export default function CategoryPriceGroupForm({ labels, maxAccess, record, reco
 
       if (!categoryId && !pgId) {
         toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: String(obj.pgId) + String(obj.categoryId)
-        })
       } else toast.success(platformLabels.Edited)
+      formik.setFieldValue('recordId', String(obj.pgId) + String(obj.categoryId))
 
       invalidate()
     }
   })
-  const editMode = !!formik.values.recordId || !!recordId
+  const editMode = !!formik.values.recordId
   useEffect(() => {
     ;(async function () {
       if (record && record.pgId && record.categoryId && recordId) {
