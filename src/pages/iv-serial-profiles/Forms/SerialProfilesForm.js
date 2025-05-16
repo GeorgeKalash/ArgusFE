@@ -29,7 +29,6 @@ export default function SerialProfilesForm({ labels, maxAccess, store, setStore 
       name: '',
       reference: ''
     },
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       reference: yup.string().required(),
