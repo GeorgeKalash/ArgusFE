@@ -418,16 +418,10 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
                   { key: 'name', value: 'Name' }
                 ]}
                 onChange={(event, newValue) => {
-                  formik.setValues({
-                    ...formik.values,
-                    header: {
-                      ...formik.values.header,
-                      accountId: newValue?.recordId,
-                      accountName: newValue?.name,
-                      accountRef: newValue?.reference,
-                      fromGroup: newValue?.groupName
-                    }
-                  })
+                  formik.setFieldValue('header.accountRef', newValue?.reference || '')
+                  formik.setFieldValue('header.accountName', newValue?.name || '')
+                  formik.setFieldValue('header.fromGroup', newValue?.groupName || '')
+                  formik.setFieldValue('header.accountId', newValue?.recordId || null)
                 }}
                 errorCheck={'header.accountId'}
                 secondFieldName={'header.accountName'}
