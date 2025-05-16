@@ -322,5 +322,11 @@ export const ManufacturingRepository = {
     get: service + 'getDEF',
     del: service + 'delDEF',
     page: service + 'pageDEF'
+  },
+  ProductionShifts: {
+    set: service + 'setSHI',
+    get: service + 'getSHI',
+    del: service + 'delSHI',
+    page: service + 'pageSHI'
   }
 }
