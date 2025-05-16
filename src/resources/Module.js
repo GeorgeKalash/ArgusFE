@@ -11,6 +11,7 @@ export const Module = {
   Inventory: 41,
   Manufacturing: 42,
   FixedAssets: 43,
+  StockCount: 44,
   RepairAndServices: 45,
   Replenishment: 46,
   Foundry: 47,

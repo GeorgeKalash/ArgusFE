@@ -599,7 +599,9 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       Component: ImportSerials,
       props: {
         endPoint: SaleRepository.DraftReturnSerial.batch,
-        draftId: formik?.values?.recordId,
+        header: {
+          draftId: formik?.values?.recordId
+        },
         onCloseimport: fillGrids,
         maxAccess: maxAccess
       },

@@ -30,7 +30,10 @@ export default function PreviewReport({
         resourceId === ResourceIds.PhysicalCountSerialSummary
       ) {
         parameters = `?_stockCountId=${scId}&_siteId=${siteId}`
-      } else if (resourceId === ResourceIds.IVPhysicalCountItemDetails) {
+      } else if (
+        resourceId === ResourceIds.IVPhysicalCountItemDetails ||
+        resourceId === ResourceIds.PhysicalCountSerialDetail
+      ) {
         parameters = `?_stockCountId=${scId}&_siteId=${siteId}&_controllerId=${controllerId}`
       } else {
         parameters = `?_recordId=${recordId}`

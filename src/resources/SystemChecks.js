@@ -33,6 +33,9 @@ export const SystemChecks = {
   ENABLE_PURCHASE_TAX: Module.Purchase * 100 + 1,
   ALLOW_ITEM_CREATION_FROM_PURCHASE: Module.Purchase * 100 + 2,
 
+  //Stock Count
+  AUTO_SAVE_CYCLE_COUNT: Module.StockCount * 100 + 1,
+
   //Point of Sales
   POS_JUMP_TO_NEXT_LINE: Module.PointOfSale * 100 + 1,
   SINGLE_CASH_POS: Module.PointOfSale * 100 + 2,
