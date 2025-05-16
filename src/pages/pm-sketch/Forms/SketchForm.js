@@ -113,8 +113,8 @@ export default function SketchForm({ recordId, invalidate, window }) {
   }
 
   useEffect(() => {
-    window.setTitle(labels.Sketch)
-    window.setSize({ width: 700, height: 700 })
+    window?.setTitle(labels.Sketch)
+    window?.setSize({ width: 700, height: 700 })
   }, [labels.Sketch])
 
   const onClose = async () => {
