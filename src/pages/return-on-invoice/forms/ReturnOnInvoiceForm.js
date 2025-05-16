@@ -1282,7 +1282,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     label={labels.invoice}
                     valueField='recordId'
                     displayField='reference'
-                    readOnly={isPosted}
+                    readOnly={editMode}
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('invoiceId', newValue?.recordId)
@@ -1356,7 +1356,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       { key: 'name', value: 'Name' }
                     ]}
                     required
-                    readOnly={isPosted || formik?.values?.items?.some(item => item.itemId)}
+                    readOnly={isPosted}
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
@@ -1635,6 +1635,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     decimalScale={2}
                     handleButtonClick={handleDiscountButtonClick}
                     ShowDiscountIcons={true}
+                    iconKey={cycleButtonState.text}
                     onChange={e => {
                       let discount = Number(e.target.value.replace(/,/g, ''))
                       if (formik.values.tdType == 1) {

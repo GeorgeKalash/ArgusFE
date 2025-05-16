@@ -114,7 +114,7 @@ export default function ChangeClient({ form, window }) {
               readOnly
               valueField='recordId'
               displayField={['reference', 'name']}
-              values={formik.values}
+              values={form.values}
             />
           </Grid>
           <Grid item xs={9}>

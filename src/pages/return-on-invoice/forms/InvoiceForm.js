@@ -62,7 +62,6 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           }
         }
       })
-    console.log('itemmmss', filteredItems)
     if (filteredItems.length === 0) return
 
     const finalList = await Promise.all(
@@ -75,8 +74,8 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           volume: parseFloat(item?.volume),
           weight: parseFloat(item?.weight),
           unitPrice: parseFloat(item?.unitPrice || 0),
-          upo: 0,
-          qty: item?.returnNowQty == 0 ? parseFloat(balanceQty) : parseFloat(item?.returnNowQty),
+          upo: item?.upo,
+          qty: item?.returnNow == 0 ? parseFloat(balanceQty) : parseFloat(item?.returnNow),
           extendedPrice: parseFloat(item?.extendedPrice),
           mdAmount: parseFloat(item?.mdAmount),
           mdType: parseInt(item?.mdType),
@@ -118,7 +117,8 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           mdAmountPct: itemPriceRow.mdType,
           vatAmount: vatCalcRow.vatAmount,
           returnedQty,
-          balanceQty
+          balanceQty,
+          returnNowQty: itemPriceRow.qty
         }
       })
     )
@@ -219,7 +219,6 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
 
   async function fetchGridData() {
     let items = []
-
     if (form?.values?.recordId) {
       const retItems = await getRequest({
         extension: SaleRepository.ReturnItem.qry,
@@ -236,7 +235,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
 
     const combined = items.length > 0 ? [...items, ...form.values.items] : form.values.items
 
-    const allLists =
+    const combinedList =
       items.length > 0
         ? Array.from(
             combined
@@ -251,6 +250,12 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
               .values()
           )
         : form.values.items
+
+    const allLists = combinedList.map(x => {
+      if (!x.isEditMode) x.isEditMode = false
+
+      return x
+    })
 
     const listReq = await getRequest({
       extension: SaleRepository.ReturnItem.balance,
@@ -277,7 +282,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
 
       if (currentItem) {
         updatedItem.checked = existsInFormValues
-        updatedItem.returnNow = currentItem.returnNowQty
+        updatedItem.returnNow = currentItem.returnNow || currentItem.returnNowQty
 
         if (currentItem.isEditMode) {
           updatedItem.returnedQty = (updatedItem.returnedQty || 0) - updatedItem.returnNow || 0
