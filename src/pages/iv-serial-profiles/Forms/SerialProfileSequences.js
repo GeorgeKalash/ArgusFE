@@ -24,12 +24,12 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
         {
           id: 1,
           spfId: recordId,
-          position: 0,
+          position: null,
           seqNo: 1,
           str: '',
           sectionType: null,
           oper: null,
-          size: 0
+          size: null
         }
       ]
     },
@@ -48,7 +48,7 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
 
               return value
             }),
-          size: yup.number().required()
+          size: yup.number().min(1).required()
         })
       )
     }),
