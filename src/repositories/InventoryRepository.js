@@ -328,7 +328,6 @@ export const InventoryRepository = {
     set2: service + 'set2MSM',
   },
   SerialsProfile: {
-    qry: service + 'qrySPF',
     set: service + 'setSPF',
     get: service + 'getSPF',
     del: service + 'delSPF',
@@ -337,9 +336,5 @@ export const InventoryRepository = {
   },
   SerialsProfileSequences: {
     qry: service + 'qrySPS',
-    set: service + 'setSPS',
-    get: service + 'getSPS',
-    del: service + 'delSPS',
-    page: service + 'pageSPS',
   }
 }

@@ -78,10 +78,6 @@ const SerialProfiles = () => {
   }
 
   const del = async obj => {
-    // await postRequest({
-    //   extension: InventoryRepository.SerialsProfile.del,
-    //   record: JSON.stringify({ machineId: obj.recordId })
-    // })
     await postRequest({
       extension: InventoryRepository.SerialsProfile.del,
       record: JSON.stringify(obj)
