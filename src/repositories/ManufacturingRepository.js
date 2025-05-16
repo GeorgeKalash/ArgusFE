@@ -341,5 +341,11 @@ export const ManufacturingRepository = {
     post: service + 'postTFR',
     close: service + 'closeTFR',
     reopen: service + 'reopenTFR'
+  },
+  LineItemCapacity: {
+    get: service + 'getLIT',
+    set2: service + 'set2LIT',
+    del: service + 'delLIT',
+    qry: service + 'qryLIT'
   }
 }
