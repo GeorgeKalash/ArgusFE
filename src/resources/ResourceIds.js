@@ -409,12 +409,14 @@ export const ResourceIds = {
   Batches: 20205,
   GenerateInvoices: 52302,
   GeneratePUInvoices: 50307,
+  JTCheckOut: 42305,
   MeasurementScheduleMaps: 42110,
   AdjustItemCost: 41216,
   JobCategory: 42122,
   DesignGroup: 42116,
   DesignFamilies: 42115,
   JobOrderWizard: 42339,
+  BalanceTransferMultiAccounts: 31340,
   SerialsTrackings: 41111,
   JobsInProcess: 42309
 }
