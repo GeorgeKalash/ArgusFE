@@ -118,6 +118,7 @@ export const SystemFunction = {
   Sketch: Module.ProductModeling * 100 + 1,
   Rubber: Module.ProductModeling * 100 + 6,
   DamageReturn: Module.Manufacturing * 100 + 13,
+  JobOrderWizard: Module.Manufacturing * 100 + 14,
   BalanceTransferMultiAccount: Module.Financials * 100 + 13,
 }
 

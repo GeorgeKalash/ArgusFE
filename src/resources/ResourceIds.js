@@ -415,6 +415,7 @@ export const ResourceIds = {
   JobCategory: 42122,
   DesignGroup: 42116,
   DesignFamilies: 42115,
+  JobOrderWizard: 42339,
   BalanceTransferMultiAccounts: 31340,
   SerialsTrackings: 41111,
   JobsInProcess: 42309
