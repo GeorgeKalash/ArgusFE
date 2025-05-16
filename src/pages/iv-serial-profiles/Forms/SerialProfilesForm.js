@@ -19,7 +19,7 @@ export default function SerialProfilesForm({ labels, maxAccess, store, setStore 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.Machine.page
+    endpointId: InventoryRepository.SerialsProfile.page
   })
 
   const { formik } = useForm({
