@@ -32,7 +32,7 @@ export default function BalanceTransferForm({ labels, access, recordId, function
     endpointId: FinancialRepository.BalanceTransfer.page
   })
 
-  const { maxAccess, changeDT } = useDocumentType({
+  const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access,
     enabled: !recordId
@@ -42,6 +42,7 @@ export default function BalanceTransferForm({ labels, access, recordId, function
   const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId,
       dtId: null,
@@ -50,8 +51,6 @@ export default function BalanceTransferForm({ labels, access, recordId, function
       plantId: parseInt(defaultPlant),
       spId: null,
       fromAccountId: null,
-      fromAccountRef: '',
-      fromAccountName: '',
       fromCurrencyId: null,
       toCurrencyId: parseInt(defaultCurrency),
       fromBaseAmount: null,
