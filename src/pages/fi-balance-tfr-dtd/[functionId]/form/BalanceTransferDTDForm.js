@@ -138,6 +138,7 @@ export default function BalanceTransferDTDForm({ labels, maxAccess, recordId, fu
                 onChange={(event, newValue) => {
                   formik.setFieldValue('spId', newValue?.recordId || null)
                 }}
+                maxAccess={maxAccess}
                 error={formik?.touched?.spId && Boolean(formik?.errors?.spId)}
               />
             </Grid>
