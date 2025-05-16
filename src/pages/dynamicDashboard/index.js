@@ -212,8 +212,8 @@ const DashboardLayout = () => {
                 labels={data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.year) || []}
                 data1={data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.sales) || []}
                 data2={data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.target) || []}
-                label1='sales'
-                label2='target'
+                label1={labels.sales}
+                label2={labels.target}
                 ratio={5}
               />
             </ChartCard>
@@ -230,8 +230,8 @@ const DashboardLayout = () => {
                 labels={data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.monthName) || []}
                 data1={data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.sales) || []}
                 data2={data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.target) || []}
-                label1='sales'
-                label2='target'
+                label1={labels.sales}
+                label2={labels.target}
                 ratio={5}
               />
             </ChartCard>
