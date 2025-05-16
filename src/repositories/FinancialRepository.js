@@ -201,13 +201,21 @@ export const FinancialRepository = {
     snapshot: service + 'snapshotAGD',
     rebuild: service + 'rebuildAGD'
   },
+  BalanceTransferMultiAccounts: {
+    page: service + 'pageTMA',
+    get2: service + 'get2TMA',
+    set2: service + 'set2TMA',
+    del: service + 'delTMA',
+    snapshot: service + 'snapshotTMA',
+    post: service + 'postTMA',
+    unpost: service + 'unpostTMA'
+  },
   BalanceTransfer: {
     get: service + 'getTFR',
     del: service + 'delTFR',
     set: service + 'setTFR',
     post: service + 'postTFR ',
     unpost: service + 'unpostTFR',
-    qry: service + 'qryTFR',
     page: service + 'pageTFR',
     snapshot: service + 'snapshotTFR'
   }

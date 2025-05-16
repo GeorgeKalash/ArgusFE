@@ -235,7 +235,7 @@ export default function BalanceTransferForm({ labels, maxAccess, recordId, funct
                     name='reference'
                     label={labels.reference}
                     value={formik.values.reference}
-                    readOnly={editMode || !formik.values.dtId}
+                    readOnly={editMode}
                     maxAccess={!editMode && maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
