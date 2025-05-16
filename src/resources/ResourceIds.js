@@ -459,5 +459,7 @@ export const ResourceIds = {
   JobOrderWizard: 42339,
   BalanceTransferMultiAccounts: 31340,
   SerialsTrackings: 41111,
-  JobsInProcess: 42309
+  JobsInProcess: 42309,
+  BalanceTransferPurchase: 31318,
+  BalanceTransferSales: 31319
 }

@@ -1625,7 +1625,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     value={formik.values.currentDiscount}
                     displayCycleButton={true}
                     readOnly={isClosed}
-                    iconKey={cycleButtonState.text}                 
+                    iconKey={cycleButtonState.text}
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
                     handleButtonClick={handleButtonClick}
