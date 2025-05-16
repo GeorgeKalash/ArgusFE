@@ -4,11 +4,12 @@ import AddressTab from './AddressTab'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
+import useResourceParams from 'src/hooks/useResourceParams'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 export const AddressFormShell = ({
   setAddress,
   address,
-  maxAccess,
   editMode,
   window,
   readOnly,
@@ -21,6 +22,10 @@ export const AddressFormShell = ({
   ...props
 }) => {
   const [required, setRequired] = useState(!optional)
+
+  const { access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.Address
+  })
 
   const initialValues = {
     recordId: address?.recordId || null,
@@ -122,7 +127,13 @@ export const AddressFormShell = ({
     >
       <VertLayout>
         <Fixed>
-          <AddressTab addressValidation={formik} readOnly={readOnly} required={required} {...props} />
+          <AddressTab
+            addressValidation={formik}
+            maxAccess={maxAccess}
+            readOnly={readOnly}
+            required={required}
+            {...props}
+          />
         </Fixed>
       </VertLayout>
     </FormShell>

@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { useWindow } from 'src/windows'
@@ -36,7 +35,7 @@ const ClientsCorporateList = () => {
     }
   })
 
-  async function fetchWithSearch({ options = {}, filters }) {
+  async function fetchWithSearch({ filters }) {
     return (
       filters.qry &&
       (await getRequest({
@@ -93,17 +92,13 @@ const ClientsCorporateList = () => {
     }
   ]
 
-  const addClient = async obj => {
-    try {
-      const plantId = await getPlantId()
-      if (plantId !== '') {
-        setEditMode(false)
-        openForm('')
-      } else {
-        stackError({ message: 'The user does not have a default plant' })
-      }
-    } catch (error) {
-      console.error(error)
+  const addClient = async () => {
+    const plantId = await getPlantId()
+    if (plantId !== '') {
+      setEditMode(false)
+      openForm('')
+    } else {
+      stackError({ message: 'The user does not have a default plant' })
     }
   }
 
@@ -113,23 +108,16 @@ const ClientsCorporateList = () => {
       : null
     const parameters = `_userId=${userData && userData.userId}&_key=plantId`
 
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: parameters
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: parameters
+    })
 
-      if (res.record.value) {
-        return res.record.value
-      }
-
-      return ''
-    } catch (error) {
-      // Handle errors if needed
-      stackError(error)
-
-      return ''
+    if (res.record.value) {
+      return res.record.value
     }
+
+    return ''
   }
 
   const editClient = obj => {

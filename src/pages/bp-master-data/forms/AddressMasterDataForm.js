@@ -7,7 +7,7 @@ import { useWindow } from 'src/windows'
 import BPAddressForm from './BPAddressForm'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props }) => {
+const AddressMasterDataForm = ({ store, labels, editMode, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([])
@@ -50,7 +50,6 @@ const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props })
       Component: BPAddressForm,
       props: {
         _labels: labels,
-        maxAccess: maxAccess,
         editMode: editMode,
         recordId: recordId,
         bpId: recordId,
@@ -77,7 +76,6 @@ const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props })
       delAddress={delAddress}
       editAddress={editAddress}
       labels={labels}
-      maxAccess={maxAccess}
       {...props}
     />
   )

@@ -1,5 +1,5 @@
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import { useState, useEffect, useContext } from 'react'
+import { Grid } from '@mui/material'
+import { useState, useEffect, useContext, useRef } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import AddressTab from 'src/components/Shared/AddressTab'
 import FieldSet from 'src/components/Shared/FieldSet'
@@ -7,7 +7,6 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { TextFieldReference } from 'src/components/Shared/TextFieldReference'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import FormShell from 'src/components/Shared/FormShell'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
@@ -23,12 +22,26 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { useForm } from 'src/hooks/form'
 
 const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [referenceRequired, setReferenceRequired] = useState(true)
   const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
+  const formikRef = useRef(null)
+
+  const handleMaxAccess = (access, validation) => {
+    if (!access?.record || !maxAccess) return
+
+    formikRef.current = {
+      maxAccess: {
+        ...maxAccess,
+        record: { ...maxAccess.record, controls: [...maxAccess.record.controls, ...(access.record.controls || [])] }
+      },
+      validation: { ...validation }
+    }
+  }
 
   const [initialValues, setInitialData] = useState({
     //ClientCorporate
@@ -51,7 +64,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
     stateId: null,
     cityDistrictId: null,
     cityDistrict: null,
-
     email1: null,
     email2: null,
     name1: null,
@@ -65,8 +77,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
     unitNo: null,
     bldgNo: '',
     poBox: null,
-
-    //end address
 
     //clientMaster
     category: null,
@@ -87,9 +97,10 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
     otp: null
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
     initialValues,
-    enableReinitialize: true,
+    maxAccess: formikRef.current?.maxAccess,
+    enableReinitialize: false,
     validateOnChange: true,
     validate: values => {
       const errors = {}
@@ -107,29 +118,23 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       return errors
     },
     validationSchema: yup.object({
-      reference: referenceRequired && yup.string().required(' '),
-      expiryDate: yup.date().required(' '),
-      countryId: yup.string().required(' '),
-      cityId: yup.string().required(' '),
-      name1: yup.string().required(' '),
-
-      // name: yup.string().required(' '),
-
-      nationalityId: yup.string().required(' '),
-      cellPhone: yup.string().required(' '),
-      capital: yup.string().required(' '),
-      lgsId: yup.string().required(' '),
-      industry: yup.string().required(' '),
-      activityId: yup.string().required(' '),
-      street1: yup.string().required(' '),
-      phone: yup.string().required(' ')
+      reference: referenceRequired && yup.string().required(),
+      expiryDate: yup.date().required(),
+      name1: yup.string().required(),
+      nationalityId: yup.string().required(),
+      cellPhone: yup.string().required(),
+      capital: yup.string().required(),
+      lgsId: yup.string().required(),
+      industry: yup.string().required(),
+      activityId: yup.string().required(),
+      ...formikRef.current?.validation
     }),
-    onSubmit: values => {
-      postRtDefault(values)
+    onSubmit: async values => {
+      await postRtDefault(values)
     }
   })
 
-  const postRtDefault = obj => {
+  const postRtDefault = async obj => {
     const date = new Date()
 
     const obj1 = {
@@ -187,81 +192,75 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       clientCorporate: obj1,
       address: obj3
     }
-    postRequest({
+    await postRequest({
       extension: CTCLRepository.ClientCorporate.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      toast.success(platformLabels.Submit)
+      setEditMode(true)
+      getClient(res.recordId)
     })
-      .then(res => {
-        toast.success(platformLabels.Submit)
-        setEditMode(true)
-        getClient(res.recordId)
-      })
-      .catch(error => {})
   }
 
   async function getClient(_recordId) {
-    try {
-      if (_recordId) {
-        setEditMode(true)
+    if (_recordId) {
+      setEditMode(true)
 
-        const res = await getRequest({
-          extension: CTCLRepository.ClientCorporate.get,
-          parameters: `_clientId=${_recordId}`
+      const res = await getRequest({
+        extension: CTCLRepository.ClientCorporate.get,
+        parameters: `_clientId=${_recordId}`
+      })
+      if (res) {
+        const obj = res?.record
+        setInitialData({
+          clientId: obj.clientCorporate?.clientId,
+          lgsId: obj.clientCorporate?.lgsId,
+          industry: obj.clientCorporate?.industry,
+          activityId: obj.clientCorporate?.activityId,
+          capital: obj.clientCorporate?.capital,
+          trading: obj.clientCorporate?.trading,
+          outward: obj.clientCorporate?.outward,
+          inward: obj.clientCorporate?.inward,
+
+          //address
+          countryId: obj.addressView?.countryId,
+          cityId: obj.addressView?.cityId,
+          city: obj.addressView?.city,
+          stateId: obj.addressView?.stateId,
+          cityDistrictId: obj.addressView?.cityDistrictId,
+          cityDistrict: obj.addressView?.cityDistrict,
+          email1: obj.addressView?.email1,
+          email2: obj.addressView?.email2,
+          name: obj.addressView?.name,
+          phone: obj.addressView?.phone,
+          phone2: obj.addressView?.phone2,
+          phone3: obj.addressView?.phone3,
+          postalCode: obj.addressView?.postalCode,
+          street1: obj.addressView?.street1,
+          street2: obj.addressView?.street2,
+          subNo: obj.addressView?.subNo,
+          unitNo: obj.addressView?.unitNo,
+          bldgNo: obj.addressView?.bldgNo,
+          poBox: obj.addressView?.poBox,
+
+          //clientMaster
+          oldReference: obj.clientMaster.oldReference,
+          category: obj.clientMaster?.category,
+          reference: obj.clientMaster?.reference,
+          name1: obj.clientMaster?.name,
+          flName: obj.clientMaster?.flName,
+          keyword: obj.clientMaster?.keyword,
+          nationalityId: obj.clientMaster?.nationalityId,
+          expiryDate: obj.clientMaster?.expiryDate && formatDateFromApi(obj.clientMaster?.expiryDate),
+          createdDate: obj.clientMaster?.createdDate && formatDateFromApi(obj.clientMaster?.createdDate),
+          status: obj.clientMaster?.status,
+          addressId: obj.clientMaster?.addressId,
+          plantId: obj.clientMaster?.plantId,
+          cellPhone: obj.clientMaster?.cellPhone,
+          otp: obj.clientMaster?.otp
         })
-        if (res) {
-          const obj = res?.record
-          setInitialData({
-            clientId: obj.clientCorporate?.clientId,
-            lgsId: obj.clientCorporate?.lgsId,
-            industry: obj.clientCorporate?.industry,
-            activityId: obj.clientCorporate?.activityId,
-            capital: obj.clientCorporate?.capital,
-            trading: obj.clientCorporate?.trading,
-            outward: obj.clientCorporate?.outward,
-            inward: obj.clientCorporate?.inward,
-
-            //address
-            countryId: obj.addressView?.countryId,
-            cityId: obj.addressView?.cityId,
-            city: obj.addressView?.city,
-            stateId: obj.addressView?.stateId,
-            cityDistrictId: obj.addressView?.cityDistrictId,
-            cityDistrict: obj.addressView?.cityDistrict,
-            email1: obj.addressView?.email1,
-            email2: obj.addressView?.email2,
-            name: obj.addressView?.name,
-            phone: obj.addressView?.phone,
-            phone2: obj.addressView?.phone2,
-            phone3: obj.addressView?.phone3,
-            postalCode: obj.addressView?.postalCode,
-            street1: obj.addressView?.street1,
-            street2: obj.addressView?.street2,
-            subNo: obj.addressView?.subNo,
-            unitNo: obj.addressView?.unitNo,
-            bldgNo: obj.addressView?.bldgNo,
-            poBox: obj.addressView?.poBox,
-
-            //end address
-
-            //clientMaster
-            oldReference: obj.clientMaster.oldReference,
-            category: obj.clientMaster?.category,
-            reference: obj.clientMaster?.reference,
-            name1: obj.clientMaster?.name,
-            flName: obj.clientMaster?.flName,
-            keyword: obj.clientMaster?.keyword,
-            nationalityId: obj.clientMaster?.nationalityId,
-            expiryDate: obj.clientMaster?.expiryDate && formatDateFromApi(obj.clientMaster?.expiryDate),
-            createdDate: obj.clientMaster?.createdDate && formatDateFromApi(obj.clientMaster?.createdDate),
-            status: obj.clientMaster?.status,
-            addressId: obj.clientMaster?.addressId,
-            plantId: obj.clientMaster?.plantId,
-            cellPhone: obj.clientMaster?.cellPhone,
-            otp: obj.clientMaster?.otp
-          })
-        }
       }
-    } catch (error) {}
+    }
   }
 
   useEffect(() => {
@@ -294,7 +293,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       actions={actions}
       form={formik}
       resourceId={ResourceIds.ClientCorporate}
-      maxAccess={maxAccess}
+      maxAccess={formikRef.current.maxAccess}
       recordId={recordId}
       disabledSubmit={editMode}
       editMode={editMode}
@@ -318,11 +317,9 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                     editMode={editMode}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
-                    helperText={formik.touched.reference && formik.errors.reference}
                     maxAccess={maxAccess}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='expiryDate'
@@ -337,7 +334,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                     maxAccess={maxAccess}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <Grid container xs={12}>
                     <FieldSet title={_labels.title}>
@@ -357,7 +353,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                             maxAccess={maxAccess}
                           />
                         </Grid>
-
                         <Grid item xs={12}>
                           <CustomTextField
                             name='name1'
@@ -371,7 +366,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                             maxAccess={maxAccess}
                           />
                         </Grid>
-
                         <Grid item xs={12}>
                           <CustomTextField
                             name='flName'
@@ -385,7 +379,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                             maxAccess={maxAccess}
                           />
                         </Grid>
-
                         <Grid item xs={12}>
                           <ResourceComboBox
                             endpointId={SystemRepository.Country.qry}
@@ -414,7 +407,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                             maxAccess={maxAccess}
                           />
                         </Grid>
-
                         <Grid item xs={12}>
                           <ResourceComboBox
                             name='status'
@@ -428,14 +420,13 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                               if (newValue) {
                                 formik.setFieldValue('status', newValue?.key)
                               } else {
-                                formik.setFieldValue('status', newValue?.key)
+                                formik.setFieldValue('status', null)
                               }
                             }}
                             error={formik.touched.status && Boolean(formik.errors.status)}
                             maxAccess={maxAccess}
                           />
                         </Grid>
-
                         <Grid item xs={12}>
                           <CustomTextField
                             name='oldReference'
@@ -449,7 +440,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                             maxAccess={maxAccess}
                           />
                         </Grid>
-
                         <Grid item xs={12}>
                           <ResourceComboBox
                             endpointId={BusinessPartnerRepository.LegalStatus.qry}
@@ -497,7 +487,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                             maxAccess={maxAccess}
                           />
                         </Grid>
-
                         <Grid item xs={12}>
                           <ResourceComboBox
                             endpointId={CurrencyTradingSettingsRepository.Activity.qry}
@@ -576,9 +565,10 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
               <FieldSet title={_labels.address}>
                 <AddressTab
                   labels={_labels}
-                  access={maxAccess}
+                  access={formikRef.current?.maxAccess}
                   addressValidation={formik}
                   readOnly={editMode && true}
+                  onMaxAccessChange={handleMaxAccess}
                 />
               </FieldSet>
               <Grid item xs={12}>
