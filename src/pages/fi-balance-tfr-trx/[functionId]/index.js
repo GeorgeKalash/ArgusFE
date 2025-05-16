@@ -59,6 +59,7 @@ const CashAccounts = () => {
     refetch,
     filterBy,
     invalidate,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -170,7 +171,7 @@ const CashAccounts = () => {
       props: {
         labels,
         recordId,
-        maxAccess: access,
+        access,
         functionId,
         resourceId
       },
@@ -196,8 +197,9 @@ const CashAccounts = () => {
           pageSize={50}
           maxAccess={access}
           deleteConfirmationType='strict'
+          paginationParameters={paginationParameters}
           refetch={refetch}
-          paginationType='client'
+          paginationType='api'
         />
       </Grow>
     </VertLayout>

@@ -22,16 +22,24 @@ import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from 'src/lib
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function BalanceTransferForm({ labels, maxAccess, recordId, functionId, resourceId }) {
+export default function BalanceTransferForm({ labels, access, recordId, functionId, resourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.BalanceTransfer.page
   })
 
+  const { maxAccess, changeDT } = useDocumentType({
+    functionId: functionId,
+    access,
+    enabled: !recordId
+  })
+
   const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
+  const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value
 
   const { formik } = useForm({
     initialValues: {
@@ -39,7 +47,7 @@ export default function BalanceTransferForm({ labels, maxAccess, recordId, funct
       dtId: null,
       reference: '',
       date: new Date(),
-      plantId: null,
+      plantId: parseInt(defaultPlant),
       spId: null,
       fromAccountId: null,
       fromAccountRef: '',
@@ -122,8 +130,8 @@ export default function BalanceTransferForm({ labels, maxAccess, recordId, funct
     })
 
     toast.success(platformLabels.Posted)
-    refetchForm()
     invalidate()
+    window.close()
   }
 
   const onUnpost = async () => {
@@ -153,19 +161,19 @@ export default function BalanceTransferForm({ labels, maxAccess, recordId, funct
   const onSelectionChange = async (type, currencyId, date, amount) => {
     const rate = await getRates(currencyId, date)
 
-    formik.setFieldValue(`${type}ExRate`, rate?.exRate)
+    formik.setFieldValue(`${type}ExRate`, rate?.exRate?.toFixed(2))
     formik.setFieldValue(`${type}RateCalcMethod`, rate?.rateCalcMethod)
 
     const updatedRateRow = getRate({
       amount: amount || 0,
-      exRate: rate?.exRate,
+      exRate: rate?.exRate.toFixed(2),
       baseAmount: 0,
       rateCalcMethod: rate?.rateCalcMethod,
       dirtyField: DIRTYFIELD_RATE
     })
 
-    formik.setFieldValue(`${type}BaseAmount`, parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-    formik.setFieldValue(`${type}Amount`, parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+    formik.setFieldValue(`${type}BaseAmount`, parseFloat(updatedRateRow?.baseAmount).toFixed(2))
+    formik.setFieldValue(`${type}Amount`, parseFloat(updatedRateRow?.amount).toFixed(2))
   }
 
   const actions = [
@@ -226,6 +234,7 @@ export default function BalanceTransferForm({ labels, maxAccess, recordId, funct
                     maxAccess={!editMode && maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || null)
+                      changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />
@@ -262,7 +271,7 @@ export default function BalanceTransferForm({ labels, maxAccess, recordId, funct
               </Grid>
             </Grid>
             <Grid item xs={6}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
@@ -286,6 +295,7 @@ export default function BalanceTransferForm({ labels, maxAccess, recordId, funct
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesPerson.qry}
+                    filter={item => item.plantId === formik.values.plantId}
                     name='spId'
                     label={labels.salesPerson}
                     columnsInDropDown={[
@@ -353,7 +363,7 @@ export default function BalanceTransferForm({ labels, maxAccess, recordId, funct
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('fromCurrencyId', newValue?.recordId || null)
-                      onSelectionChange('from', newValue?.recordId, formik.values?.date, formik.values.amount)
+                      onSelectionChange('from', newValue?.recordId, formik.values?.date, formik.values.fromAmount)
                     }}
                     readOnly={isPosted}
                     error={formik.touched.fromCurrencyId && Boolean(formik.errors.fromCurrencyId)}
@@ -380,7 +390,7 @@ export default function BalanceTransferForm({ labels, maxAccess, recordId, funct
               </Grid>
             </Grid>
             <Grid item xs={6}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='fromAmount'
@@ -409,7 +419,7 @@ export default function BalanceTransferForm({ labels, maxAccess, recordId, funct
                       formik.setFieldValue('toAmount', parseFloat(updatedRateRowTo?.amount).toFixed(2) || 0)
                       formik.setFieldValue('toBaseAmount', parseFloat(updatedRateRowTo?.baseAmount).toFixed(2) || 0)
                     }}
-                    onClear={() => formik.setFieldValue('fromAmount', null)}
+                    onClear={() => formik.setFieldValue('fromAmount', '')}
                     required
                     readOnly={isPosted}
                     error={formik.touched.fromAmount && Boolean(formik.errors.fromAmount)}
@@ -448,7 +458,6 @@ export default function BalanceTransferForm({ labels, maxAccess, recordId, funct
                   })
 
                   formik.setFieldValue('fromBaseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-                  formik.setFieldValue('toAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
 
                   const updatedRateRowTo = getRate({
                     amount: updatedRateRow?.baseAmount || 0,
