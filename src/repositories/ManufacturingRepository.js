@@ -128,6 +128,7 @@ export const ManufacturingRepository = {
   },
   MFJobOrder: {
     qry: service + 'qryJOB',
+    qry2: service + 'qryJOB2',
     set: service + 'setJOB',
     get: service + 'getJOB',
     del: service + 'delJOB',
@@ -328,6 +329,14 @@ export const ManufacturingRepository = {
     get: service + 'getSHI',
     del: service + 'delSHI',
     page: service + 'pageSHI'
+  },
+  JobOrderWizard: {
+    set2: service + 'set2JOZ',
+    get2: service + 'get2JOZ',
+    del: service + 'delJOZ',
+    page: service + 'pageJOZ',
+    snapshot: service + 'snapshotJOZ',
+    post: service + 'postJOZ'
   },
   JobTransfer: {
     get2: service + 'get2TFR',
