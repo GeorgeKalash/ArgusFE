@@ -9,13 +9,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import JobOrderWindow from './window/JobOrderWindow'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import BalanceTransferMultiForm from './Forms/BalanceTransferMultiForm'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
-const JobOrder = () => {
+const BalanceTransferMultiAccounts = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -30,8 +30,8 @@ const JobOrder = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.MFJobOrder.qry,
-    datasetId: ResourceIds.MFJobOrders,
+    endpointId: FinancialRepository.BalanceTransferMultiAccounts.page,
+    datasetId: ResourceIds.BalanceTransferMultiAccounts,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -44,75 +44,51 @@ const JobOrder = () => {
       flex: 1
     },
     {
+      field: 'dtName',
+      headerName: labels.documentType,
+      flex: 1
+    },
+    {
       field: 'date',
       headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
-      field: 'designRef',
-      headerName: labels.design,
+      field: 'plantName',
+      headerName: labels.plant,
       flex: 1
     },
     {
-      field: 'clientName',
-      headerName: labels.client,
+      field: 'accountRef',
+      headerName: labels.fromAccountRef,
       flex: 1
     },
     {
-      field: 'itemName',
-      headerName: labels.item,
+      field: 'accountName',
+      headerName: labels.fromAccountName,
       flex: 1
     },
     {
-      field: 'wcName',
-      headerName: labels.workCenter,
+      field: 'currencyName',
+      headerName: labels.currency,
       flex: 1
     },
     {
-      field: 'className',
-      headerName: labels.productionClass,
-      flex: 1
-    },
-    {
-      field: 'standardRef',
-      headerName: labels.productionStandard,
-      flex: 1
-    },
-    {
-      field: 'pcs',
-      headerName: labels.pcs,
+      field: 'amount',
+      headerName: labels.amount,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'qty',
-      headerName: labels.qty,
-      flex: 1,
-      type: 'number'
+      field: 'notes',
+      headerName: labels.notes,
+      flex: 2
     },
     {
       field: 'statusName',
       headerName: labels.status,
       flex: 1
-    },
-    {
-      field: 'startingDT',
-      headerName: labels.startingDate,
-      flex: 1,
-      type: 'date'
-    },
-    {
-      field: 'deliveryDate',
-      headerName: labels.deliveryDate,
-      flex: 1,
-      type: 'date'
-    },
-    {
-      field: 'endingDT',
-      headerName: labels.endingDate,
-      flex: 1,
-      type: 'date'
     }
   ]
 
@@ -120,54 +96,52 @@ const JobOrder = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: ManufacturingRepository.MFJobOrder.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+      extension: FinancialRepository.BalanceTransferMultiAccounts.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters.qry)
+    if (filters?.qry)
       return await getRequest({
-        extension: ManufacturingRepository.MFJobOrder.snapshot,
+        extension: FinancialRepository.BalanceTransferMultiAccounts.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.JobOrder,
-    action: openForm,
-    hasDT: false
+    functionId: SystemFunction.BalanceTransferMultiAccount,
+    action: openForm
   })
 
   const add = async () => {
-    proxyAction()
+    await proxyAction()
   }
 
-  const editJOB = obj => {
-    openForm(obj?.recordId)
+  const edit = obj => {
+    openForm(obj.recordId)
   }
 
   async function openForm(recordId) {
     stack({
-      Component: JobOrderWindow,
+      Component: BalanceTransferMultiForm,
       props: {
         labels,
         access,
-        recordId,
-        invalidate
+        recordId
       },
-      width: 1150,
-      height: 700,
-      title: labels.jobOrder
+      width: 1050,
+      height: 680,
+      title: labels.BalanceTransfer
     })
   }
 
-  const delJOB = async obj => {
+  const del = async obj => {
     await postRequest({
-      extension: ManufacturingRepository.MFJobOrder.del,
+      extension: FinancialRepository.BalanceTransferMultiAccounts.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -177,17 +151,16 @@ const JobOrder = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'MFJOB'} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'FITMA'} />
       </Fixed>
       <Grow>
         <Table
-          name='jobTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={editJOB}
+          onEdit={edit}
           refetch={refetch}
-          onDelete={delJOB}
+          onDelete={del}
           deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
@@ -200,4 +173,4 @@ const JobOrder = () => {
   )
 }
 
-export default JobOrder
+export default BalanceTransferMultiAccounts

@@ -30,14 +30,19 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
 
   const columns = [
     {
+      field: 'functionId',
+      headerName: labels.functionId,
+      flex: 1,
+    },
+    {
       field: 'sfName',
       headerName: labels.systemFunction,
-      flex: 1
+      flex: 2
     },
     {
       field: 'dtName',
       headerName: labels.docType,
-      flex: 1
+      flex: 2
     }
   ]
 
@@ -86,7 +91,8 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
     list: data.list.filter(
       item =>
         (item.sfName && item.sfName.toLowerCase().includes(value.toLowerCase())) ||
-        (item.dtName && item.dtName.toLowerCase().includes(value.toLowerCase()))
+        (item.dtName && item.dtName.toLowerCase().includes(value.toLowerCase())) ||
+        (item.functionId !== null && String(item.functionId).includes(value))
     )
   }
 

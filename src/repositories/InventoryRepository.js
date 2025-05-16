@@ -322,5 +322,9 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotACO',
     post: service + 'postACO',
     unpost: service + 'unpostACO',
+  },
+  MeasurementSerial: {
+    qry: service + 'qryMSM',
+    set2: service + 'set2MSM',
   }
 }

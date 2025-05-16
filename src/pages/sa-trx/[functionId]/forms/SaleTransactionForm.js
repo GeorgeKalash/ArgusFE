@@ -442,7 +442,7 @@ export default function SaleTransactionForm({
     if (currencyId && date && rateType) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
+        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${rateType}`
       })
 
       const updatedRateRow = getRate({
@@ -1780,15 +1780,11 @@ export default function SaleTransactionForm({
                     value={formik?.values?.header?.date}
                     onChange={async (e, newValue) => {
                       formik.setFieldValue('header.date', newValue)
-                      await getMultiCurrencyFormData(
-                        formik.values.header.currencyId,
-                        formatDateForGetApI(newValue),
-                        RateDivision.FINANCIALS
-                      )
+                      await getMultiCurrencyFormData(formik.values.header.currencyId, newValue, RateDivision.FINANCIALS)
                     }}
                     editMode={editMode}
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('header.date', '')}
+                    onClear={() => formik.setFieldValue('header.date', null)}
                     error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
                   />
                 </Grid>
@@ -1938,7 +1934,7 @@ export default function SaleTransactionForm({
                     onChange={async (event, newValue) => {
                       await getMultiCurrencyFormData(
                         newValue?.recordId,
-                        formatDateForGetApI(formik.values.header?.date),
+                        formik.values.header?.date,
                         RateDivision.FINANCIALS
                       )
                       formik.setFieldValue('header.currencyId', newValue?.recordId || null)

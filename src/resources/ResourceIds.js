@@ -1,4 +1,45 @@
 export const ResourceIds = {
+  //Dashboard
+  WeeklySalesYTD: 60100,
+  MonthlySalesYTD: 60101,
+  TopCustomers: 60102,
+  AccumulatedRevenuesYTD: 60103,
+  TodayPlantSales: 60104,
+  AverageRevenuePerItem: 60105,
+  NewCustomers: 60106,
+  TotalRevenuesYTD: 60107,
+  GrossProfitfromSalesYTD: 60108,
+  Receivables: 60109,
+  TodayRetailOrders: 60110,
+  TodaySalesOrders: 60111,
+  GlobalSalesYTD: 60112,
+
+  // inventory
+  InventoryBelowMinimum: 60200,
+
+  // HR
+  TodaysAttendance: 60300,
+  TodaysTimeVariations: 60301,
+  TodaysLeaves: 60302,
+  LatenessHistory: 60303,
+  HeadcountHistory: 60304,
+  BranchAvailability: 60306,
+  Alerts: 60307,
+  PendingPunches: 60308,
+
+  // Authorization Dashboard
+  PendingAuthorizationRequests: 60400,
+
+  // self service
+  MyYearlySalesPerformance: 60500,
+  MyMonthlySalesPerformance: 60501,
+  MyYearlyUnitsSoldList: 60502,
+  MyYearlyGrowthInUnitsSoldList: 60503,
+  MyYearlyClientsAcquiredList: 60504,
+  MyYearlyGrowthInClientsAcquiredList: 60505,
+
+  //end dashboard
+
   UserDashboard: 20117,
   GeneralLedger: 30303,
   JournalVoucher: 30302,
@@ -291,7 +332,7 @@ export const ResourceIds = {
   UserDefined: 41114,
   AvailabilitiesBySite: 41226,
   ProductionSheet: 42327,
-  ProdSheetDocumentTypeDefault: 42120,
+  ProdSheetDocumentTypeDefault: 42125,
   GenerateFiscalYear: 41503,
   UserSecretOTPQrCode: 23201,
   CurrentCosts: 41207,
@@ -409,10 +450,15 @@ export const ResourceIds = {
   Batches: 20205,
   GenerateInvoices: 52302,
   GeneratePUInvoices: 50307,
+  JTCheckOut: 42305,
   MeasurementScheduleMaps: 42110,
   AdjustItemCost: 41216,
   JobCategory: 42122,
   DesignGroup: 42116,
   DesignFamilies: 42115,
+  JobOrderWizard: 42339,
+  BalanceTransferMultiAccounts: 31340,
+  SerialsTrackings: 41111,
+  JobsInProcess: 42309,
   PhysicalCountSerialDetail: 44203
 }

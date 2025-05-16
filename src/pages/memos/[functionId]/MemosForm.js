@@ -273,7 +273,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     if (currencyId && date && rateType) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
+        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${rateType}`
       })
       const amountValue = amount === 0 ? 0 : amount ?? formik.values.amount
 
@@ -441,15 +441,11 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     value={formik.values.date}
                     onChange={async (e, newValue) => {
                       formik.setFieldValue('date', newValue)
-                      await getMultiCurrencyFormData(
-                        formik.values.currencyId,
-                        formatDateForGetApI(newValue),
-                        RateDivision.FINANCIALS
-                      )
+                      await getMultiCurrencyFormData(formik.values.currencyId, newValue, RateDivision.FINANCIALS)
                     }}
                     required
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('date', '')}
+                    onClear={() => formik.setFieldValue('date', null)}
                     error={formik.touched.date && Boolean(formik.errors.date)}
                   />
                 </Grid>
@@ -508,7 +504,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                         onChange={async (event, newValue) => {
                           await getMultiCurrencyFormData(
                             newValue?.recordId,
-                            formatDateForGetApI(formik.values.date),
+                            formik.values.date,
                             RateDivision.FINANCIALS
                           )
                           formik.setFieldValue('currencyId', newValue?.recordId)

@@ -9,52 +9,77 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
-import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import CastingForm from './Forms/CastingForm'
+import GridToolbar from 'src/components/Shared/GridToolbar'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import JobOrderWizardForm from './Forms/JobOrderWizardForm'
 
-const Casting = () => {
+const JobOrderWizard = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params } = options
+    const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: ProductModelingRepository.Casting.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
+      extension: ManufacturingRepository.JobOrderWizard.page,
+      parameters: `_filter=&_startAt=${_startAt}&&_pageSize=${_pageSize}`
     })
 
+    if (response && response?.list) {
+      response.list = response?.list?.map(item => ({
+        ...item,
+        producedWeight: item.pcs * item.avgWeight
+      }))
+    }
+
     return { ...response, _startAt: _startAt }
+  }
+
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: ManufacturingRepository.JobOrderWizard.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    if (response && response?.list) {
+      response.list = response?.list?.map(item => ({
+        ...item,
+        producedWeight: item.pcs * item.avgWeight
+      }))
+    }
+
+    return response
   }
 
   const {
     query: { data },
     labels,
+    search,
+    clear,
     paginationParameters,
     refetch,
     access,
-    invalidate,
-    filterBy
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ProductModelingRepository.Casting.page,
-    datasetId: ResourceIds.Casting,
-    filter: {
-      filterFn: fetchWithFilter
+    endpointId: ManufacturingRepository.JobOrderWizard.page,
+    datasetId: ResourceIds.JobOrderWizard,
+    search: {
+      searchFn: fetchWithSearch
     }
   })
 
-  async function fetchWithFilter({ filters, pagination }) {
-    if (filters.qry)
-      return await getRequest({
-        extension: ProductModelingRepository.Casting.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.JobOrderWizard,
+    action: openForm,
+    hasDT: false
+  })
+
+  const add = async () => {
+    await proxyAction()
   }
 
   const columns = [
@@ -70,29 +95,31 @@ const Casting = () => {
       type: 'date'
     },
     {
-      field: 'threeDPRef',
-      headerName: labels.threeDP,
+      field: 'jobRef',
+      headerName: labels.jobRef,
       flex: 1
     },
     {
-      field: 'laborRef',
-      headerName: labels.laborRef,
+      field: 'sfItemSku',
+      headerName: labels.semiFinishedSku,
       flex: 1
     },
     {
-      field: 'laborName',
-      headerName: labels.labor,
+      field: 'sfItemName',
+      headerName: labels.sfItemName,
       flex: 1
     },
     {
-      field: 'productionLineRef',
-      headerName: labels.productionLineRef,
-      flex: 1
+      field: 'pcs',
+      headerName: labels.producedPcs,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'productionLineName',
-      headerName: labels.productionLine,
-      flex: 1
+      field: 'producedWeight',
+      headerName: labels.producedWeight,
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'statusName',
@@ -101,36 +128,27 @@ const Casting = () => {
     }
   ]
 
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.Casting,
-    action: openForm
-  })
-
-  const add = async () => {
-    await proxyAction()
-  }
-
   const edit = obj => {
     openForm(obj?.recordId)
   }
 
   function openForm(recordId) {
     stack({
-      Component: CastingForm,
+      Component: JobOrderWizardForm,
       props: {
         labels,
         recordId,
         maxAccess: access
       },
-      width: 700,
-      height: 580,
-      title: labels.Casting
+      width: 1000,
+      height: 700,
+      title: labels.JobOrderWizard
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: ProductModelingRepository.Casting.del,
+      extension: ManufacturingRepository.JobOrderWizard.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -140,7 +158,14 @@ const Casting = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar labels={labels} maxAccess={access} filterBy={filterBy} onAdd={add} reportName={'PMCAS'} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
@@ -161,4 +186,4 @@ const Casting = () => {
   )
 }
 
-export default Casting
+export default JobOrderWizard

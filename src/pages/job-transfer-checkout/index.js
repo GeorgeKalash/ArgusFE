@@ -9,22 +9,22 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
-import { SystemFunction } from 'src/resources/SystemFunction'
-import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import JTCheckoutForm from './forms/JTCheckoutForm'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import CastingForm from './Forms/CastingForm'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
-const Casting = () => {
+const JTCheckout = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: ProductModelingRepository.Casting.page,
+      extension: ManufacturingRepository.JobTransfer.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
@@ -33,28 +33,31 @@ const Casting = () => {
 
   const {
     query: { data },
-    labels,
-    paginationParameters,
+    filterBy,
     refetch,
+    labels,
     access,
-    invalidate,
-    filterBy
+    paginationParameters,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ProductModelingRepository.Casting.page,
-    datasetId: ResourceIds.Casting,
+    endpointId: ManufacturingRepository.JobTransfer.page,
+    datasetId: ResourceIds.JTCheckOut,
     filter: {
       filterFn: fetchWithFilter
     }
   })
 
-  async function fetchWithFilter({ filters, pagination }) {
-    if (filters.qry)
-      return await getRequest({
-        extension: ProductModelingRepository.Casting.snapshot,
-        parameters: `_filter=${filters.qry}`
+  async function fetchWithFilter({ filters, pagination = {} }) {
+    const { _startAt = 0, _size = 50 } = pagination
+    if (filters.qry) {
+      const response = await getRequest({
+        extension: ManufacturingRepository.JobTransfer.snapshot,
+        parameters: `_filter=${filters.qry}&_startAt=${_startAt}&_size=${_size}`
       })
-    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+
+      return { ...response, _startAt: _startAt }
+    } else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const columns = [
@@ -70,67 +73,84 @@ const Casting = () => {
       type: 'date'
     },
     {
-      field: 'threeDPRef',
-      headerName: labels.threeDP,
+      field: 'jobRef',
+      headerName: labels.jobOrder,
       flex: 1
     },
     {
-      field: 'laborRef',
-      headerName: labels.laborRef,
+      field: 'designRef',
+      headerName: labels.designRef,
       flex: 1
     },
     {
-      field: 'laborName',
-      headerName: labels.labor,
+      field: 'itemName',
+      headerName: labels.item,
       flex: 1
     },
     {
-      field: 'productionLineRef',
-      headerName: labels.productionLineRef,
+      field: 'fromWCName',
+      headerName: labels.fromWorkCenter,
       flex: 1
     },
     {
-      field: 'productionLineName',
-      headerName: labels.productionLine,
+      field: 'toWCName',
+      headerName: labels.toWorkCenter,
       flex: 1
+    },
+    {
+      field: 'qty',
+      headerName: labels.qty,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'pcs',
+      headerName: labels.pieces,
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'statusName',
       headerName: labels.status,
       flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: labels.wip,
+      flex: 1
     }
   ]
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.Casting,
+    functionId: SystemFunction.JTCheckOut,
     action: openForm
   })
 
-  const add = async () => {
-    await proxyAction()
+  function openForm(obj) {
+    stack({
+      Component: JTCheckoutForm,
+      props: {
+        labels,
+        recordId: obj?.recordId,
+        access
+      },
+      width: 1200,
+      height: 700,
+      title: labels.jtCheckout
+    })
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj)
   }
 
-  function openForm(recordId) {
-    stack({
-      Component: CastingForm,
-      props: {
-        labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 700,
-      height: 580,
-      title: labels.Casting
-    })
+  const add = () => {
+    proxyAction()
   }
 
   const del = async obj => {
     await postRequest({
-      extension: ProductModelingRepository.Casting.del,
+      extension: ManufacturingRepository.JobTransfer.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -140,19 +160,20 @@ const Casting = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar labels={labels} maxAccess={access} filterBy={filterBy} onAdd={add} reportName={'PMCAS'} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'MFTFR'} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
+          deleteConfirmationType={'strict'}
           refetch={refetch}
           maxAccess={access}
         />
@@ -161,4 +182,4 @@ const Casting = () => {
   )
 }
 
-export default Casting
+export default JTCheckout

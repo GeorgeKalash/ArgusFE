@@ -1,12 +1,12 @@
 const service = 'MF.asmx/'
 
 export const ManufacturingRepository = {
-  DesignRawMaterial: { 
-    qry2: service + 'qryDRM2', 
-    qry: service + 'qryDRM', 
-    set2: service + 'set2DRM' 
+  DesignRawMaterial: {
+    qry2: service + 'qryDRM2',
+    qry: service + 'qryDRM',
+    set2: service + 'set2DRM'
   },
-  IssueOfMaterialsItems: { qry: service + 'qryIMI' },
+  IssueOfMaterialsItems: { qry: service + 'qryIMI', qry2: service + 'qryIMI2' },
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
     page: service + 'pageLBG',
@@ -97,7 +97,7 @@ export const ManufacturingRepository = {
     page: service + 'pageSTD',
     set: service + 'setSTD',
     get: service + 'getSTD',
-    del: service + 'delSTD',
+    del: service + 'delSTD'
   },
   ProductionClassSemiFinished: {
     qry: service + 'qryCSF',
@@ -128,6 +128,7 @@ export const ManufacturingRepository = {
   },
   MFJobOrder: {
     qry: service + 'qryJOB',
+    qry2: service + 'qryJOB2',
     set: service + 'setJOB',
     get: service + 'getJOB',
     del: service + 'delJOB',
@@ -136,7 +137,8 @@ export const ManufacturingRepository = {
     cancel: service + 'cancelJOB',
     post: service + 'postJOB',
     start: service + 'startJOB',
-    stop: service + 'stopJOB'
+    stop: service + 'stopJOB',
+    wip: service + 'wipJOB'
   },
   ProductionSheet: {
     page: service + 'pagePST',
@@ -295,7 +297,8 @@ export const ManufacturingRepository = {
   MeasurementScheduleMap: {
     qry: service + 'qryMSM',
     set: service + 'setMSM',
-    del: service + 'delMSM',
+    set2: service + 'set2MSM',
+    del: service + 'delMSM'
   },
   JobCategory: {
     set: service + 'setJCA',
@@ -308,17 +311,35 @@ export const ManufacturingRepository = {
     set: service + 'setDEG',
     get: service + 'getDEG',
     del: service + 'delDEG',
-    page: service + 'pageDEG',
+    page: service + 'pageDEG'
   },
   Components: {
     qry: service + 'qryDEM',
-    set2: service + 'set2DEM',
+    set2: service + 'set2DEM'
   },
   DesignFamily: {
     qry: service + 'qryDEF',
     set: service + 'setDEF',
     get: service + 'getDEF',
     del: service + 'delDEF',
-    page: service + 'pageDEF',
+    page: service + 'pageDEF'
+  },
+  JobOrderWizard: {
+    set2: service + 'set2JOZ',
+    get2: service + 'get2JOZ',
+    del: service + 'delJOZ',
+    page: service + 'pageJOZ',
+    snapshot: service + 'snapshotJOZ',
+    post: service + 'postJOZ'
+  },
+  JobTransfer: {
+    get2: service + 'get2TFR',
+    set2: service + 'set2TFR',
+    del: service + 'delTFR',
+    page: service + 'pageTFR',
+    snapshot: service + 'snapshotTFR',
+    post: service + 'postTFR',
+    close: service + 'closeTFR',
+    reopen: service + 'reopenTFR'
   }
 }
