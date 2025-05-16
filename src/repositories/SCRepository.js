@@ -76,6 +76,7 @@ export const SCRepository = {
     set2: service + 'set2SRL',
     qry: service + 'qrySRL',
     append: service + 'appendSRL',
-    del: service + 'delSRL'
+    del: service + 'delSRL',
+    batch: service + 'batchSRL'
   }
 }
