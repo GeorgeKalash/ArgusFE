@@ -23,7 +23,7 @@ const CategoryPriceGroup = () => {
 
     const response = await getRequest({
       extension: SaleRepository.CategoryPriceGroup.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=recordId desc`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -95,7 +95,7 @@ const CategoryPriceGroup = () => {
         labels,
         record,
         recordId: record
-          ? String(record.pgId) + String(record.categoryId)
+          ? String(record.pgId * 10) + String(record.categoryId)
           : null,
         maxAccess: access
       },

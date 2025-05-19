@@ -48,7 +48,7 @@ export default function CategoryPriceGroupForm({ labels, maxAccess, record, reco
       if (!categoryId && !pgId) {
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
-      formik.setFieldValue('recordId', String(obj.pgId) + String(obj.categoryId))
+      formik.setFieldValue('recordId', String(obj.pgId * 10) + String(obj.categoryId))
 
       invalidate()
     }
@@ -64,7 +64,7 @@ export default function CategoryPriceGroupForm({ labels, maxAccess, record, reco
 
         formik.setValues({
           ...res.record,
-          recordId: String(res.record.pgId) + String(res.record.categoryId)
+          recordId: String(res.record.pgId * 10) + String(res.record.categoryId)
         })
       }
     })()
