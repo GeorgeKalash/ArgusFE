@@ -156,6 +156,7 @@ const PostWorkCenterJob = () => {
           stackError({
             message: platformLabels.MandatoryRoutingSeqNo
           })
+          formik.resetForm()
         }
       })
     } else {
