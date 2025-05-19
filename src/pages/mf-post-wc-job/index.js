@@ -29,7 +29,7 @@ const PostWorkCenterJob = () => {
 
   const { formik } = useForm({
     initialValues: {
-
+      jobId: null,
       data: { list: [] }
     },
     maxAccess,
@@ -164,10 +164,10 @@ const PostWorkCenterJob = () => {
           stackError({
             message: platformLabels.MandatoryRoutingSeqNo
           })
-        } 
+        }
       })
     } else {
-        formik.resetForm()
+      formik.resetForm()
     }
   }
 
@@ -218,13 +218,7 @@ const PostWorkCenterJob = () => {
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
-              <CustomTextField
-                name='sku'
-                label={labels.sku}
-                value={formik.values.sku}
-                maxAccess={maxAccess}
-                readOnly
-              />
+              <CustomTextField name='sku' label={labels.sku} value={formik.values.sku} maxAccess={maxAccess} readOnly />
             </Grid>
             <Grid item xs={3}>
               <CustomTextField
@@ -255,7 +249,7 @@ const PostWorkCenterJob = () => {
               />
             </Grid>
             <Grid item xs={6}></Grid>
-             <Grid item xs={3}>
+            <Grid item xs={3}>
               <CustomTextField
                 name='workCenterRef'
                 label={labels.workCenter}
@@ -264,7 +258,7 @@ const PostWorkCenterJob = () => {
                 readOnly
               />
             </Grid>
-             <Grid item xs={3}>
+            <Grid item xs={3}>
               <CustomTextField
                 name='workCenterName'
                 label={labels.name}
