@@ -30,12 +30,7 @@ const CategoryPriceGroup = () => {
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters?.qry) {
-      return await getRequest({
-        extension: SaleRepository.CategoryPriceGroup.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    } else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
@@ -117,7 +112,7 @@ const CategoryPriceGroup = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'SAPGC'} filterBy={filterBy} previewReport={ResourceIds.CategoryPriceGroup}/>
+        <RPBGridToolbar onAdd={add} hasSearch={false} maxAccess={access} reportName={'SAPGC'} filterBy={filterBy} previewReport={ResourceIds.CategoryPriceGroup}/>
       </Fixed>
       <Grow>
         <Table
