@@ -341,5 +341,12 @@ export const ManufacturingRepository = {
     post: service + 'postTFR',
     close: service + 'closeTFR',
     reopen: service + 'reopenTFR'
+  },
+  JobWorkCenter: {
+    close: service + 'closeJWC',
+    reopen: service + 'reopenJWC'
+  },
+  WST: {
+    draft: service + 'draftWST',
   }
 }
