@@ -16,8 +16,6 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { getSequenceFromEmojiStringOrKeyword } from '@iconify/utils/lib/emoji/cleanup'
-import data from 'src/@fake-db/components/data'
 
 export default function LineItemCapacityForm({
   labels,
@@ -36,6 +34,26 @@ export default function LineItemCapacityForm({
     endpointId: ManufacturingRepository.LineItemCapacity.qry
   })
 
+  const conditionalRequired = fieldName =>
+    yup
+      .string()
+      .nullable()
+      .test(`${fieldName}-required`, 'required', function (value) {
+        const { data } = this.options.context || {}
+        const rowIndex = this.options.index
+        const row = data?.[rowIndex]
+
+        const isFirstRow = Array.isArray(data) && rowIndex === 0
+
+        const allEmpty = !row?.lineId && !row?.fullCapacityWgtPerHr && !row?.preparationHrs && !row?.nbOfLabors
+
+        if (isFirstRow && allEmpty) {
+          return true
+        }
+
+        return !!row?.[fieldName]
+      })
+
   const { formik } = useForm({
     initialValues: {
       itemId,
@@ -51,29 +69,10 @@ export default function LineItemCapacityForm({
       itemId: yup.number().required(),
       data: yup.array().of(
         yup.object().shape({
-          lineId: yup
-            .string()
-            .nullable()
-            .test('lineId-required', 'Line ID is required', function (value) {
-              const { data } = this.options.context || {}
-              const rowIndex = this.options.index
-
-              // Case: only one row
-              if (Array.isArray(data) && rowIndex === 0) {
-                const onlyRow = data[0]
-                if (!onlyRow?.lineId) {
-                  return true
-                }
-              } else {
-                const anyRowFilled = data?.some(row => !!row.lineId)
-                return !anyRowFilled && false
-              }
-
-              // Otherwise: require lineId if filled or other rows are filled
-              const anyRowFilled = data?.some(row => !!row.lineId)
-              const currentFilled = !!value
-              return !anyRowFilled || currentFilled
-            })
+          lineId: conditionalRequired('lineId'),
+          fullCapacityWgtPerHr: conditionalRequired('fullCapacityWgtPerHr'),
+          preparationHrs: conditionalRequired('preparationHrs'),
+          nbOfLabors: conditionalRequired('nbOfLabors')
         })
       )
     }),
@@ -100,7 +99,7 @@ export default function LineItemCapacityForm({
     }
   })
 
-  const editMode = !!formik.values.itemId
+  const editMode = !!itemId
 
   useEffect(() => {
     ;(async function () {
@@ -121,8 +120,6 @@ export default function LineItemCapacityForm({
     })()
   }, [])
 
-  console.log(formik)
-
   const columns = [
     {
       component: 'resourcecombobox',
@@ -130,14 +127,14 @@ export default function LineItemCapacityForm({
       name: 'lineId',
       props: {
         endpointId: ManufacturingRepository.ProductionLine.qry,
-        displayField: ['name', 'reference'],
+        displayField: 'reference',
         valueField: 'recordId',
+        displayFieldWidth: 1.5,
         mapping: [
           { from: 'recordId', to: 'lineId' },
           { from: 'name', to: 'lineName' },
           { from: 'reference', to: 'lineRef' }
         ],
-
         columnsInDropDown: [
           { key: 'name', value: 'Name' },
           { key: 'reference', value: 'Reference' }
@@ -146,20 +143,20 @@ export default function LineItemCapacityForm({
     },
     {
       component: 'numberfield',
-      label: labels.fullCapacityWgtPerHr,
+      label: labels.fullCapacity,
       name: 'fullCapacityWgtPerHr',
       props: { decimalScale: 2 }
     },
     {
       component: 'numberfield',
-      label: labels.preparationHrs,
+      label: labels.startStopHrs,
       name: 'preparationHrs',
       props: { decimalScale: 2 }
     },
 
     {
       component: 'numberfield',
-      label: labels.nbOfLabors,
+      label: labels.nbLabors,
       name: 'nbOfLabors',
       props: { decimalScale: 2 }
     }
@@ -189,6 +186,7 @@ export default function LineItemCapacityForm({
                   secondValueShow='itemName'
                   form={formik}
                   required
+                  displayFieldWidth={2}
                   columnsInDropDown={[
                     { key: 'sku', value: 'SKU' },
                     { key: 'name', value: 'Name' }
@@ -198,16 +196,14 @@ export default function LineItemCapacityForm({
                     formik.setFieldValue('itemName', newValue?.name || '')
                     formik.setFieldValue('sku', newValue?.sku || '')
                     if (newValue?.recordId) {
-                      const {
-                        record: { classId, classRef, className }
-                      } = await getRequest({
+                      const { record } = await getRequest({
                         extension: InventoryRepository.ItemProduction.get,
                         parameters: `_recordId=${newValue?.recordId}`
                       })
-                      formik.setFieldValue('classId', classId)
+                      formik.setFieldValue('classId', record?.classId)
 
-                      if (classId) {
-                        formik.setFieldValue('class', `${classRef} ${className}`)
+                      if (record?.classId) {
+                        formik.setFieldValue('class', `${record?.classRef} ${record?.className}`)
                       } else formik.setFieldValue('class', ``)
                     }
                   }}
@@ -217,7 +213,7 @@ export default function LineItemCapacityForm({
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <CustomTextField name='class' label={labels.class} readOnly value={formik.values.class} />
+              <CustomTextField name='class' label={labels.prodClass} readOnly value={formik.values.class} />
             </Grid>
           </Grid>
         </Fixed>
@@ -231,7 +227,6 @@ export default function LineItemCapacityForm({
             name={'data'}
             maxAccess={maxAccess}
             initialValues={formik.initialValues.data[0]}
-            allowAddNewLine={formik.values?.data.some(row => !!row.lineId)}
           />
         </Grow>
       </VertLayout>

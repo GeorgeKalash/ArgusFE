@@ -33,14 +33,14 @@ const LineItemCapacity = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     refetch,
     access,
     invalidate,
     filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.LineItemCapacity.page,
+    endpointId: ManufacturingRepository.LineItemCapacity.qry,
     datasetId: ResourceIds.LineItemCapacity,
     filter: {
       filterFn: fetchWithFilter
@@ -50,37 +50,37 @@ const LineItemCapacity = () => {
   const columns = [
     {
       field: 'sku',
-      headerName: _labels.sku,
+      headerName: labels.sku,
       flex: 1
     },
     {
       field: 'itemName',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'classRef',
-      headerName: _labels.prodClass,
+      headerName: labels.prodClass,
       flex: 1
     },
     {
       field: 'lineRef',
-      headerName: _labels.lineRef,
+      headerName: labels.lineRef,
       flex: 1
     },
     {
       field: 'fullCapacityWgtPerHr',
-      headerName: _labels.fullCapacityWgtPerHr,
+      headerName: labels.fullCapacity,
       flex: 1
     },
     {
       field: 'preparationHrs',
-      headerName: _labels.preparationHrs,
+      headerName: labels.startStopHrs,
       flex: 1
     },
     {
       field: 'nbOfLabors',
-      headerName: _labels.nbOfLabors,
+      headerName: labels.nbLabors,
       flex: 1
     }
   ]
@@ -103,11 +103,11 @@ const LineItemCapacity = () => {
   }
 
   function openForm(obj) {
-    const { itemId, itemName, sku, classId, classRef, className } = obj || {}
+    const { itemId, itemName, sku, classRef, className } = obj || {}
     stack({
       Component: LineItemCapacityForm,
       props: {
-        labels: _labels,
+        labels,
         maxAccess: access,
         itemId,
         itemName,
@@ -117,7 +117,7 @@ const LineItemCapacity = () => {
       },
       width: 750,
       height: 500,
-      title: _labels.exRate
+      title: labels.lineItemCapacity
     })
   }
 
