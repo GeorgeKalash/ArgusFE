@@ -116,7 +116,7 @@ const PostWorkCenterJob = () => {
 
   const getData = async (newValue, routingSeqNo) => {
     const response = await getRequest({
-      extension: ManufacturingRepository.WST.draft,
+      extension: ManufacturingRepository.Worksheet.draft,
       parameters: `_jobId=${newValue.recordId}&_seqNo=${routingSeqNo}`
     })
 
