@@ -1,79 +1,72 @@
-import React from 'react';
-import Box from '@mui/material/Box';
-import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import { useRouter } from 'next/router';
+import React from 'react'
+import Box from '@mui/material/Box'
+import Tooltip from '@mui/material/Tooltip'
+import IconButton from '@mui/material/IconButton'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import { useRouter } from 'next/router'
 
 function Dropdown({ Image, TooltipTitle, onClickAction, name, map, navCollapsed }) {
+  const router = useRouter()
 
-  const router = useRouter();
+  const [anchorEl, setAnchorEl] = React.useState(null)
+  const open = Boolean(anchorEl)
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-
-  const OpenItems = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const OpenItems = event => {
+    setAnchorEl(event.currentTarget)
+  }
 
   const handleClose = () => {
-    setAnchorEl(null);
-  };
+    setAnchorEl(null)
+  }
 
   return (
     <>
-      <Box sx={{
-        display: navCollapsed ? 'none' : 'flex',
-        flexDirection: 'row',
-        justifyContent: 'left',
-        alignItems: 'left',
-        backgroundColor: '#231f20',
-        borderRadius: '4px',
-        marginLeft: '10px',
-        padding: '0px',
-      }}>
-        <div
-          style={{
-            height:'30px',
-            paddingTop: '3px',
-            paddingLeft: '5px',
-            margin: '0px',
+      <Tooltip title={TooltipTitle}>
+        <Box
+          onClick={OpenItems}
+          sx={{
+            display: navCollapsed ? 'none' : 'flex',
+            flexDirection: 'row',
+            justifyContent: 'left',
+            alignItems: 'left',
+            backgroundColor: '#231f20',
+            borderRadius: '4px',
+            marginLeft: '10px',
+            padding: '0px'
           }}
         >
-          {Image}
-        </div>
-        <Tooltip title={TooltipTitle}>
-          <IconButton
-            onClick={OpenItems}
-            size="small"
+          <div
+            style={{
+              height: '30px',
+              padding: '3px',
+
+              margin: '0px'
+            }}
           >
-            <ExpandMoreIcon style={{ fontSize: 16 }} />
-          </IconButton>
-        </Tooltip>
-      </Box>
+            {Image}
+          </div>
+        </Box>
+      </Tooltip>
       <Menu
         anchorEl={anchorEl}
-        id="account-menu"
+        id='account-menu'
         open={open}
         onClose={handleClose}
         onClick={handleClose}
         transformOrigin={{ horizontal: 'left', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
-        {map && map.map((element, index) => (
-          <MenuItem key={index} onClick={() => onClickAction(element)}>
-            <div
-              style={{ display: navCollapsed ? 'none' : 'flex' }}
-            >
-              {element.name}
-            </div>
-          </MenuItem>
-        ))}
+        {map &&
+          map.map((element, index) => (
+            <MenuItem key={index} onClick={() => onClickAction(element)}>
+              <div style={{ display: navCollapsed ? 'none' : 'flex' }}>{element.name}</div>
+            </MenuItem>
+          ))}
       </Menu>
     </>
-  );
+  )
 }
 
-export default Dropdown;
+export default Dropdown
