@@ -132,6 +132,7 @@ const PostWorkCenterJob = () => {
         if (jobRes?.record?.routingSeqNo) {
           formik.setValues({
             ...formik.values,
+            ...jobRes?.record,
             workCenterName: jobRes?.record?.wcName || '',
             workCenterRef: jobRes?.record?.wcRef || '',
             pcs: jobRes?.record?.pcs || 0,
