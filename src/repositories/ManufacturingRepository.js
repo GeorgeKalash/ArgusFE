@@ -1,8 +1,12 @@
 const service = 'MF.asmx/'
 
 export const ManufacturingRepository = {
-  DesignRawMaterial: { qry2: service + 'qryDRM2' },
-  IssueOfMaterialsItems: { qry: service + 'qryIMI' },
+  DesignRawMaterial: {
+    qry2: service + 'qryDRM2',
+    qry: service + 'qryDRM',
+    set2: service + 'set2DRM'
+  },
+  IssueOfMaterialsItems: { qry: service + 'qryIMI', qry2: service + 'qryIMI2' },
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
     page: service + 'pageLBG',
@@ -89,7 +93,11 @@ export const ManufacturingRepository = {
     snapshot: service + 'qryCLS'
   },
   ProductionStandard: {
-    qry: service + 'qrySTD'
+    qry: service + 'qrySTD',
+    page: service + 'pageSTD',
+    set: service + 'setSTD',
+    get: service + 'getSTD',
+    del: service + 'delSTD'
   },
   ProductionClassSemiFinished: {
     qry: service + 'qryCSF',
@@ -107,6 +115,7 @@ export const ManufacturingRepository = {
     set: service + 'setOVH',
     get: service + 'getOVH',
     del: service + 'delOVH',
+    page: service + 'pageOVH',
     snapshot: service + 'snapshotOVH'
   },
   Design: {
@@ -114,10 +123,12 @@ export const ManufacturingRepository = {
     set: service + 'setDES',
     get: service + 'getDES',
     del: service + 'delDES',
-    snapshot: service + 'snapshotDES'
+    snapshot: service + 'snapshotDES',
+    page: service + 'pageDES'
   },
   MFJobOrder: {
     qry: service + 'qryJOB',
+    qry2: service + 'qryJOB2',
     set: service + 'setJOB',
     get: service + 'getJOB',
     del: service + 'delJOB',
@@ -126,7 +137,8 @@ export const ManufacturingRepository = {
     cancel: service + 'cancelJOB',
     post: service + 'postJOB',
     start: service + 'startJOB',
-    stop: service + 'stopJOB'
+    stop: service + 'stopJOB',
+    wip: service + 'wipJOB'
   },
   ProductionSheet: {
     page: service + 'pagePST',
@@ -243,7 +255,8 @@ export const ManufacturingRepository = {
     del: service + 'delPO',
     page: service + 'pagePO',
     snapshot: service + 'snapshotPO',
-    post: service + 'postPO'
+    post: service + 'postPO',
+    gen: service + 'genPO'
   },
   BillOfMaterials: {
     get: service + 'getBMA',
@@ -267,7 +280,8 @@ export const ManufacturingRepository = {
     page: service + 'pageASM',
     snapshot: service + 'snapshotASM',
     post: service + 'postASM',
-    unpost: service + 'unpostASM'
+    unpost: service + 'unpostASM',
+    generate: service + 'genASM'
   },
   AssemblyItems: {
     qry: service + 'qryASC'
@@ -279,5 +293,53 @@ export const ManufacturingRepository = {
   AssemblyOverhead: {
     qry: service + 'qryAOH',
     set2: service + 'set2AOH'
+  },
+  MeasurementScheduleMap: {
+    qry: service + 'qryMSM',
+    set: service + 'setMSM',
+    set2: service + 'set2MSM',
+    del: service + 'delMSM'
+  },
+  JobCategory: {
+    set: service + 'setJCA',
+    get: service + 'getJCA',
+    del: service + 'delJCA',
+    page: service + 'pageJCA'
+  },
+  DesignGroup: {
+    qry: service + 'qryDEG',
+    set: service + 'setDEG',
+    get: service + 'getDEG',
+    del: service + 'delDEG',
+    page: service + 'pageDEG'
+  },
+  Components: {
+    qry: service + 'qryDEM',
+    set2: service + 'set2DEM'
+  },
+  DesignFamily: {
+    qry: service + 'qryDEF',
+    set: service + 'setDEF',
+    get: service + 'getDEF',
+    del: service + 'delDEF',
+    page: service + 'pageDEF'
+  },
+  JobOrderWizard: {
+    set2: service + 'set2JOZ',
+    get2: service + 'get2JOZ',
+    del: service + 'delJOZ',
+    page: service + 'pageJOZ',
+    snapshot: service + 'snapshotJOZ',
+    post: service + 'postJOZ'
+  },
+  JobTransfer: {
+    get2: service + 'get2TFR',
+    set2: service + 'set2TFR',
+    del: service + 'delTFR',
+    page: service + 'pageTFR',
+    snapshot: service + 'snapshotTFR',
+    post: service + 'postTFR',
+    close: service + 'closeTFR',
+    reopen: service + 'reopenTFR'
   }
 }

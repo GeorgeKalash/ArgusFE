@@ -24,7 +24,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
         posStatusName: '',
         type: '',
         amount: '',
-        paidAmount: 0,
+        paidAmount: '',
         returnedAmount: 0,
         bankFees: '',
         receiptRef: '',
@@ -127,7 +127,6 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       component: 'numberfield',
       name: 'paidAmount',
       label: labels?.paidAmount,
-      defaultValue: '',
       async onChange({ row: { update, newRow, updateRow } }) {
         const totalPaidAmount =
           value
@@ -153,7 +152,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
           updateRow({
             id: index,
             changes: {
-              returnedAmount: returnValue,
+              returnedAmount: returnValue || 0,
               amount:
                 amount +
                 parseFloat(cashAmount || 0) -
@@ -163,7 +162,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
           })
         } else {
           update({
-            returnedAmount: returnValue,
+            returnedAmount: returnValue || 0,
             amount: (parseFloat(amount || 0) - parseFloat(totalPaidAmount || 0)).toFixed(2)
           })
         }
@@ -173,7 +172,6 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       component: 'numberfield',
       name: 'returnedAmount',
       label: labels.returnedAmount,
-      defaultValue: '',
       props: {
         readOnly: true
       }
@@ -182,7 +180,6 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       component: 'numberfield',
       name: 'amount',
       label: labels?.Amount,
-      defaultValue: '',
       props: {
         readOnly: isPosted
       }
