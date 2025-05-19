@@ -332,7 +332,7 @@ export const ResourceIds = {
   UserDefined: 41114,
   AvailabilitiesBySite: 41226,
   ProductionSheet: 42327,
-  ProdSheetDocumentTypeDefault: 42120,
+  ProdSheetDocumentTypeDefault: 42125,
   GenerateFiscalYear: 41503,
   UserSecretOTPQrCode: 23201,
   CurrentCosts: 41207,
@@ -460,6 +460,7 @@ export const ResourceIds = {
   BalanceTransferMultiAccounts: 31340,
   SerialsTrackings: 41111,
   JobsInProcess: 42309,
+  ProductionShifts: 42113,
   BalanceTransferPurchase: 31318,
   BalanceTransferSales: 31319
 }
