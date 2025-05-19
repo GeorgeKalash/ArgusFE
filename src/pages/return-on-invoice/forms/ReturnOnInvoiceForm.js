@@ -55,7 +55,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
   const [reCal, setReCal] = useState(false)
@@ -156,12 +156,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     endpointId: SaleRepository.ReturnOnInvoice.page
   })
 
-  const systemSite = defaultsData?.list?.find(({ key }) => key === 'siteId')?.value
   const systemSales = defaultsData?.list?.find(({ key }) => key === 'salesTD')?.value
   const systemPriceLevel = defaultsData?.list?.find(({ key }) => key === 'plId')?.value
-  const userPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value
-  const userSite = userDefaultsData?.list?.find(({ key }) => key === 'siteId')?.value
-  const userSalesPerson = userDefaultsData?.list?.find(({ key }) => key === 'spId')?.value
 
   const { formik } = useForm({
     maxAccess,
@@ -170,11 +166,11 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      currencyId: yup.string().required(),
+      currencyId: yup.number().required(),
       date: yup.string().required(),
-      clientId: yup.string().required(),
+      clientId: yup.number().required(),
       siteId: yup
-        .string()
+        .number()
         .nullable()
         .test(function (value) {
           const { dtId, commitItems } = this.parent
@@ -451,7 +447,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             props: {
               labels,
               disabled: isPosted,
-              row,
+              row: { ...row, qty: row.returnNowQty },
               siteId: null,
               maxAccess,
               checkForSiteId: row.qty < 0,
@@ -529,11 +525,17 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       label: labels.tax,
       onClick: (e, row) => {
         if (row?.taxId) {
+          const metalPrice = Number(formik.values.metalPrice) || 0
+          const metalPurity = Number(row.metalPurity) || 0
+
           stack({
             Component: TaxDetails,
             props: {
               taxId: row?.taxId,
-              obj: row
+              obj: {
+                ...row,
+                basePrice: metalPrice !== 0 ? metalPrice * metalPurity : 0
+              }
             },
             width: 1000,
             title: platformLabels.TaxDetails
@@ -649,8 +651,32 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     toast.success(platformLabels.Unposted)
     invalidate()
   }
+  async function verifyRecord() {
+    const copy = { ...formik.values, isVerified: !formik.values.isVerified }
+    delete copy.items
+    await postRequest({
+      extension: SaleRepository.ReturnOnInvoice.verify,
+      record: JSON.stringify(copy)
+    })
+
+    toast.success(formik.values.isVerified ? platformLabels.verified : platformLabels.unverified)
+    refetchForm(formik.values.recordId)
+    invalidate()
+  }
 
   const actions = [
+    {
+      key: 'Verify',
+      condition: !formik.values.isVerified,
+      onClick: verifyRecord,
+      disabled: formik.values.isVerified || !editMode || !isPosted
+    },
+    {
+      key: 'UnVerify',
+      condition: formik.values.isVerified,
+      onClick: verifyRecord,
+      disabled: !formik.values.isVerified
+    },
     {
       key: 'Metals',
       condition: true,
@@ -704,7 +730,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode
+      disabled: !editMode || formik.values.isVerified
     },
     {
       key: 'Unlocked',
@@ -713,7 +739,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       disabled: !editMode
     }
   ]
-
   async function fillForm(retHeader, retItems, isCommitted, clientDiscount) {
     const billAdd = await getAddress(retHeader?.record?.billAddressId)
 
@@ -924,6 +949,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     ?.filter(item => item.itemId !== undefined)
     .map(item => ({
       ...item,
+      qty: parseFloat(item.returnNowQty) || 0,
       basePrice: parseFloat(item.basePrice) || 0,
       unitPrice: parseFloat(item.unitPrice) || 0,
       upo: parseFloat(item.upo) || 0,
@@ -1093,10 +1119,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       parameters: `_dtId=${dtId}`
     })
     formik.setFieldValue('plantId', res?.record?.plantId || null)
-    formik.setFieldValue('siteId', res?.record?.siteId || null)
-    formik.setFieldValue('spId', res?.record?.spId || userSalesPerson || null)
+    formik.setFieldValue('spId', res?.record?.spId || null)
     formik.setFieldValue('postMetalToFinancials', res?.record?.postMetalToFinancials)
     formik.setFieldValue('commitItems', res?.record?.commitItems)
+    formik.setFieldValue('siteId', res?.record?.siteId || null)
     if (!res?.record?.commitItems) formik.setFieldValue('siteId', null)
 
     return res?.record?.commitItems
@@ -1171,9 +1197,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           setCycleButtonState({ text: '123', value: 1 })
           formik.setFieldValue('tdType', 1)
         }
-        formik.setFieldValue('siteId', parseInt(userSite || systemSite))
-        formik.setFieldValue('spId', parseInt(userSalesPerson))
-        formik.setFieldValue('plantId', parseInt(userPlant))
+
         formik.setFieldValue('plId', parseInt(systemPriceLevel))
       }
     })()
@@ -1268,6 +1292,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       formik.setFieldValue('billAddId', newValue?.billAddressId || '')
                       const billAdd = await getAddress(newValue?.billAddressId || '')
                       formik.setFieldValue('billAddress', billAdd || '')
+                      if (!newValue?.recordId) formik.setFieldValue('invoiceId', null)
                     }}
                     errorCheck={'clientId'}
                   />
@@ -1282,7 +1307,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     label={labels.invoice}
                     valueField='recordId'
                     displayField='reference'
-                    readOnly={editMode}
+                    readOnly={editMode || formik.values.items.some(item => item.itemId)}
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('invoiceId', newValue?.recordId)
@@ -1380,8 +1405,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       })
                     }}
                     image='popup.png'
-                    disabled={isPosted}
-                    label={platformLabels.add}
+                    disabled={isPosted || !formik.values.clientId}
+                    tooltipText={platformLabels.editClient}
                   />
                 </Grid>
                 <Grid item xs={9}>
@@ -1412,7 +1437,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     }}
                     tooltipText={platformLabels.import}
                     image={'import.png'}
-                    disabled={!formik.values.invoiceId}
+                    disabled={!formik.values.clientId || !formik.values.invoiceId}
                   />
                 </Grid>
               </Grid>
@@ -1542,10 +1567,11 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
+                    required={!formik?.values?.dtId || (formik?.values?.dtId && formik?.values?.commitItems)}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId)
-                      formik.setFieldValue('siteRef', newValue ? newValue.reference : null)
-                      formik.setFieldValue('siteName', newValue ? newValue.name : null)
+                      formik.setFieldValue('siteRef', newValue?.reference || null)
+                      formik.setFieldValue('siteName', newValue?.name || null)
+                      formik.setFieldValue('siteId', newValue?.recordId || null)
                     }}
                     error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                   />

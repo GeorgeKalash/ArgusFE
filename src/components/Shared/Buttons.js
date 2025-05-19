@@ -439,6 +439,20 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Verify',
+    label: platformLabels.Verify,
+    color: '#047DFA',
+    image: 'checkmark-icon.png',
+    main: false
+  },
+  {
+    key: 'UnVerify',
+    label: platformLabels.UnVerify,
+    color: '#047DFA',
+    image: 'unverify-icon.png',
+    main: false
+  },
+  {
     key: 'generated 2 FA',
     label: platformLabels.Generated2FA,
     color: '#231f20',

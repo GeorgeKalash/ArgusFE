@@ -15,7 +15,6 @@ const TaxDetails = props => {
   const { getRequest } = useContext(RequestsContext)
 
   const vatAmount = (taxDetail, taxItem) => {
-    console.log('check tax', taxDetail, taxItem)
     switch (taxDetail.taxBase) {
       case 1:
         return ((taxItem.extendedPrice * taxDetail.amount) / 100).toFixed(2)
