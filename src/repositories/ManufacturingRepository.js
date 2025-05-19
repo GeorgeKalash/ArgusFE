@@ -343,8 +343,5 @@ export const ManufacturingRepository = {
   JobWorkCenter: {
     close: service + 'closeJWC',
     reopen: service + 'reopenJWC'
-  },
-  WST: {
-    draft: service + 'draftWST',
   }
 }

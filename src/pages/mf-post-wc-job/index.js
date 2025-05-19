@@ -129,28 +129,19 @@ const PostWorkCenterJob = () => {
         extension: ManufacturingRepository.MFJobOrder.get,
         parameters: `_recordId=${newValue?.recordId}`
       }).then(async jobRes => {
-        formik.setValues({
-          ...formik.values,
-          sku: jobRes?.record?.sku || '',
-          itemName: jobRes?.record?.itemName || '',
-          designName: jobRes?.record?.designName || '',
-          designRef: jobRes?.record?.designRef || '',
-          workCenterName: jobRes?.record?.wcName || '',
-          workCenterRef: jobRes?.record?.wcRef || '',
-          workCenterId: jobRes?.record?.workCenterId || null,
-          routingId: jobRes?.record?.routingId || null,
-          routingRef: jobRes?.record?.routingRef || '',
-          routingName: jobRes?.record?.routingName || '',
-          pcs: jobRes?.record?.pcs || 0,
-          pcsIn: jobRes?.record?.expectedPcs || 0,
-          qty: jobRes?.record?.qty || 0,
-          qtyIn: jobRes?.record?.expectedQty || 0,
-          jobId: jobRes?.record?.recordId || null,
-          jobRef: jobRes?.record?.reference || '',
-          documentTypeID: jobRes?.record?.dtName || null
-        })
-
         if (jobRes?.record?.routingSeqNo) {
+          formik.setValues({
+            ...formik.values,
+            workCenterName: jobRes?.record?.wcName || '',
+            workCenterRef: jobRes?.record?.wcRef || '',
+            pcs: jobRes?.record?.pcs || 0,
+            pcsIn: jobRes?.record?.expectedPcs || 0,
+            qty: jobRes?.record?.qty || 0,
+            qtyIn: jobRes?.record?.expectedQty || 0,
+            jobId: jobRes?.record?.recordId || null,
+            jobRef: jobRes?.record?.reference || '',
+            documentTypeID: jobRes?.record?.dtName || null
+          })
           getJobRouting(jobRes?.record?.recordId, jobRes?.record?.routingSeqNo).then(routingRes => {
             formik.setFieldValue('status', routingRes?.status || null)
             formik.setFieldValue('statusName', routingRes?.statusName)
@@ -212,41 +203,22 @@ const PostWorkCenterJob = () => {
                 name='documentTypeID'
                 label={labels.documentTypeID}
                 value={formik.values.documentTypeID}
-                maxAccess={maxAccess}
                 readOnly
               />
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
-              <CustomTextField name='sku' label={labels.sku} value={formik.values.sku} maxAccess={maxAccess} readOnly />
+              <CustomTextField name='sku' label={labels.sku} value={formik.values.sku} readOnly />
             </Grid>
             <Grid item xs={3}>
-              <CustomTextField
-                name='itemName'
-                label={labels.itemName}
-                value={formik.values.itemName}
-                maxAccess={maxAccess}
-                readOnly
-              />
+              <CustomTextField name='itemName' label={labels.itemName} value={formik.values.itemName} readOnly />
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
-              <CustomTextField
-                name='routingRef'
-                label={labels.routing}
-                value={formik.values.routingRef}
-                maxAccess={maxAccess}
-                readOnly
-              />
+              <CustomTextField name='routingRef' label={labels.routing} value={formik.values.routingRef} readOnly />
             </Grid>
             <Grid item xs={3}>
-              <CustomTextField
-                name='routingName'
-                label={labels.name}
-                value={formik.values.routingName}
-                maxAccess={maxAccess}
-                readOnly
-              />
+              <CustomTextField name='routingName' label={labels.name} value={formik.values.routingName} readOnly />
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
@@ -254,7 +226,6 @@ const PostWorkCenterJob = () => {
                 name='workCenterRef'
                 label={labels.workCenter}
                 value={formik.values.workCenterRef}
-                maxAccess={maxAccess}
                 readOnly
               />
             </Grid>
@@ -263,57 +234,26 @@ const PostWorkCenterJob = () => {
                 name='workCenterName'
                 label={labels.name}
                 value={formik.values.workCenterName}
-                maxAccess={maxAccess}
                 readOnly
               />
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
-              <CustomNumberField
-                name='qtyIn'
-                label={labels.qtyIn}
-                value={formik.values.qtyIn}
-                maxAccess={maxAccess}
-                readOnly
-              />
+              <CustomNumberField name='qtyIn' label={labels.qtyIn} value={formik.values.qtyIn} readOnly />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField
-                name='qty'
-                label={labels.qty}
-                value={formik.values.qty}
-                maxAccess={maxAccess}
-                readOnly
-              />
+              <CustomNumberField name='qty' label={labels.qty} value={formik.values.qty} readOnly />
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
-              <CustomNumberField
-                name='pcsIn'
-                label={labels.pcsIn}
-                value={formik.values.pcsIn}
-                maxAccess={maxAccess}
-                readOnly
-              />
+              <CustomNumberField name='pcsIn' label={labels.pcsIn} value={formik.values.pcsIn} readOnly />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField
-                name='pcs'
-                label={labels.pcs}
-                value={formik.values.pcs}
-                maxAccess={maxAccess}
-                readOnly
-              />
+              <CustomNumberField name='pcs' label={labels.pcs} value={formik.values.pcs} readOnly />
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
-              <CustomTextField
-                name='statusName'
-                label={labels.status}
-                value={formik.values.statusName}
-                maxAccess={maxAccess}
-                readOnly
-              />
+              <CustomTextField name='statusName' label={labels.status} value={formik.values.statusName} readOnly />
             </Grid>
           </Grid>
         </Fixed>
