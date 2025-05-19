@@ -122,8 +122,8 @@ export const apiMappings = {
   },
   [ResourceIds.DocumentTypes]: {
     type: COMBOBOX,
-    endpoint: SystemRepository.DocumentType.qry,
-    parameters: '_startAt=0&_pageSize=2000', //_dgId appended
+    endpoint: SystemRepository.DocumentType.qry2,
+    parameters: '', //_functionIds appended
     valueField: 'recordId',
     displayField: 'name',
     displayField: ['reference', 'name'],
