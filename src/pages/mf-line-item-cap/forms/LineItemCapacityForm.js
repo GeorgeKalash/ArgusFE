@@ -16,6 +16,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function LineItemCapacityForm({
   labels,
@@ -34,25 +35,12 @@ export default function LineItemCapacityForm({
     endpointId: ManufacturingRepository.LineItemCapacity.qry
   })
 
-  const conditionalRequired = fieldName =>
-    yup
-      .string()
-      .nullable()
-      .test(`${fieldName}-required`, 'required', function (value) {
-        const { data } = this.options.context || {}
-        const rowIndex = this.options.index
-        const row = data?.[rowIndex]
-
-        const isFirstRow = Array.isArray(data) && rowIndex === 0
-
-        const allEmpty = !row?.lineId && !row?.fullCapacityWgtPerHr && !row?.preparationHrs && !row?.nbOfLabors
-
-        if (isFirstRow && allEmpty) {
-          return true
-        }
-
-        return !!row?.[fieldName]
-      })
+  const conditions = {
+    fullCapacityWgtPerHr: row => row?.fullCapacityWgtPerHr,
+    preparationHrs: row => row?.preparationHrs,
+    nbOfLabors: row => row?.nbOfLabors,
+    lineId: row => row?.lineId
+  }
 
   const { formik } = useForm({
     initialValues: {
@@ -67,14 +55,7 @@ export default function LineItemCapacityForm({
     validateOnChange: true,
     validationSchema: yup.object({
       itemId: yup.number().required(),
-      data: yup.array().of(
-        yup.object().shape({
-          lineId: conditionalRequired('lineId'),
-          fullCapacityWgtPerHr: conditionalRequired('fullCapacityWgtPerHr'),
-          preparationHrs: conditionalRequired('preparationHrs'),
-          nbOfLabors: conditionalRequired('nbOfLabors')
-        })
-      )
+      data: yup.array().of(createConditionalSchema(conditions))
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -82,7 +63,7 @@ export default function LineItemCapacityForm({
         record: JSON.stringify({
           ...obj,
           data: obj.data
-            .filter(item => item.lineId)
+            .filter(row => Object.values(conditions).every(fn => fn(row)))
             .map(({ id, lineName, lineRef, ...item }) => ({
               ...item,
               lineId: item.lineId || null,
@@ -91,9 +72,7 @@ export default function LineItemCapacityForm({
         })
       })
 
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-      } else toast.success(platformLabels.Edited)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
 
       invalidate()
     }
@@ -145,20 +124,20 @@ export default function LineItemCapacityForm({
       component: 'numberfield',
       label: labels.fullCapacity,
       name: 'fullCapacityWgtPerHr',
-      props: { decimalScale: 2 }
+      props: { decimalScale: 2, maxLength: 14 }
     },
     {
       component: 'numberfield',
       label: labels.startStopHrs,
       name: 'preparationHrs',
-      props: { decimalScale: 2 }
+      props: { decimalScale: 2, maxLength: 5 }
     },
 
     {
       component: 'numberfield',
       label: labels.nbLabors,
       name: 'nbOfLabors',
-      props: { decimalScale: 2 }
+      props: { decimalScale: 0, maxLength: 4 }
     }
   ]
 

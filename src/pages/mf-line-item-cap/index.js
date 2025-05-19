@@ -71,17 +71,20 @@ const LineItemCapacity = () => {
     {
       field: 'fullCapacityWgtPerHr',
       headerName: labels.fullCapacity,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'preparationHrs',
       headerName: labels.startStopHrs,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'nbOfLabors',
       headerName: labels.nbLabors,
-      flex: 1
+      flex: 1,
+      type: 'number'
     }
   ]
 
