@@ -171,15 +171,6 @@ export const ManufacturingRepository = {
     del: service + 'delRMC',
     page: service + 'pageRMC'
   },
-  Worksheet: {
-    snapshot: service + 'snapshotWST',
-    get: service + 'getWST',
-    set: service + 'setWST',
-    del: service + 'delWST',
-    page: service + 'pageWST',
-    summary: service + 'summaryWST',
-    post: service + 'postWST'
-  },
   WorksheetMaterials: {
     qry: service + 'qryIMA',
     get: service + 'getIMA',
@@ -218,7 +209,8 @@ export const ManufacturingRepository = {
     page: service + 'pageWST',
     summary: service + 'summaryWST',
     post: service + 'postWST',
-    qry2: service + 'qryWST2'
+    qry2: service + 'qryWST2',
+    draft: service + 'draftWST'
   },
   JobOverhead: {
     qry: service + 'qryJOH',
@@ -324,6 +316,12 @@ export const ManufacturingRepository = {
     del: service + 'delDEF',
     page: service + 'pageDEF'
   },
+  ProductionShifts: {
+    set: service + 'setSHI',
+    get: service + 'getSHI',
+    del: service + 'delSHI',
+    page: service + 'pageSHI'
+  },
   JobOrderWizard: {
     set2: service + 'set2JOZ',
     get2: service + 'get2JOZ',
@@ -341,5 +339,9 @@ export const ManufacturingRepository = {
     post: service + 'postTFR',
     close: service + 'closeTFR',
     reopen: service + 'reopenTFR'
+  },
+  JobWorkCenter: {
+    close: service + 'closeJWC',
+    reopen: service + 'reopenJWC'
   }
 }
