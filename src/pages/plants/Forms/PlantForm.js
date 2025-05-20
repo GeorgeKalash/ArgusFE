@@ -13,6 +13,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -40,7 +41,8 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
       groupName: null,
       segmentName: null,
       flName: '',
-      locationUrl: ''
+      locationUrl: '',
+      isInactive: false
     },
     enableReinitialize: false,
     validateOnChange: false,
@@ -61,22 +63,20 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
     await postRequest({
       extension: SystemRepository.Plant.set,
       record: JSON.stringify(obj)
+    }).then(res => {
+      if (!editMode) {
+        formik.setFieldValue('recordId', res.recordId)
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
+
+      setStore(prevStore => ({
+        ...prevStore,
+        plant: obj,
+        recordId: res.recordId
+      }))
+
+      invalidate()
     })
-      .then(res => {
-        if (!editMode) {
-          formik.setFieldValue('recordId', res.recordId)
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
-
-        setStore(prevStore => ({
-          ...prevStore,
-          plant: obj,
-          recordId: res.recordId
-        }))
-
-        invalidate()
-      })
-      .catch(error => {})
   }
 
   const actions = [
@@ -218,6 +218,15 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('locationUrl', '')}
             error={formik.touched.locationUrl && Boolean(formik.errors.locationUrl)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomCheckBox
+            name='isInactive'
+            value={formik.values?.isInactive}
+            onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
+            label={_labels.isInactive}
+            maxAccess={maxAccess}
           />
         </Grid>
       </Grid>
