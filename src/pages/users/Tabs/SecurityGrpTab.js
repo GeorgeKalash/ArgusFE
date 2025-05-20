@@ -6,9 +6,12 @@ import { useContext, useEffect } from 'react'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
+import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -18,6 +21,7 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
+      search: '',
       groups: [
         {
           id: 1,
@@ -55,60 +59,102 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
       toast.success(platformLabels.Updated)
     })
   }
-  useEffect(() => {
-    if (storeRecordId) {
-      getRequest({
-        extension: AccessControlRepository.SecurityGroupUser.qry,
-        parameters: `_userId=${storeRecordId}&_filter=&_sgId=0`
-      }).then(res => {
-        if (res?.list?.length > 0) {
-          const items = res.list.map((item, index) => ({
-            ...item,
-            id: index + 1
-          }))
-          formik.setValues({ groups: items })
-        }
-      })
+
+  const filteredData = formik.values.search
+    ? formik.values.groups.filter(
+        item => item.sgName && item.sgName.toString().toLowerCase().includes(formik.values.search.toLowerCase())
+      )
+    : formik.values.groups
+
+  async function fetchGridData() {
+    const res = await getRequest({
+      extension: AccessControlRepository.SecurityGroupUser.qry,
+      parameters: `_userId=${storeRecordId}&_filter=&_sgId=0`
+    })
+    if (res?.list?.length > 0) {
+      const items = res.list.map((item, index) => ({
+        ...item,
+        id: index + 1
+      }))
+      formik.setValues({ groups: items })
     }
-  }, [])
+  }
+
+  useEffect(() => {
+    ;(async function () {
+      if (storeRecordId) {
+        await fetchGridData()
+      }
+    })()
+  }, [storeRecordId])
+
+  function handleRowsChange(newValues) {
+    const updatedRows = formik.values.groups.map(row => {
+      const newValue = newValues.find(newRow => newRow.id === row.id)
+
+      return newValue ? newValue : row
+    })
+
+    formik.setFieldValue('groups', updatedRows)
+  }
+
+  const handleSearchChange = event => {
+    const { value } = event.target
+    formik.setFieldValue('search', value)
+  }
 
   return (
-    <>
-      <FormShell
-        form={formik}
-        resourceId={ResourceIds.Users}
-        maxAccess={maxAccess}
-        infoVisible={false}
-        editMode={!!storeRecordId}
-      >
-        <VertLayout>
-          <Grow>
-            <DataGrid
-              onChange={value => formik.setFieldValue('groups', value)}
-              value={formik.values.groups}
-              error={formik.errors.groups}
-              columns={[
-                {
-                  component: 'resourcecombobox',
-                  name: 'sgId',
-                  label: labels.group,
-                  props: {
-                    endpointId: AccessControlRepository.SecurityGroup.qry,
-                    parameters: '_startAt=0&_pageSize=1000',
-                    valueField: 'recordId',
-                    displayField: 'name',
-                    mapping: [
-                      { from: 'recordId', to: 'sgId' },
-                      { from: 'name', to: 'sgName' }
-                    ]
-                  }
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.Users}
+      maxAccess={maxAccess}
+      infoVisible={false}
+      editMode={!!storeRecordId}
+    >
+      <VertLayout>
+        <Fixed>
+          <Grid container>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='search'
+                value={formik.values.search}
+                label={labels.search}
+                onClear={() => {
+                  formik.setFieldValue('search', '')
+                }}
+                onChange={handleSearchChange}
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
+        <Grow>
+          <DataGrid
+            onChange={value => handleRowsChange(value)}
+            value={filteredData}
+            error={formik.errors.groups}
+            allowAddNewLine={false}
+            allowDelete={false}
+            columns={[
+              {
+                component: 'resourcecombobox',
+                name: 'sgId',
+                label: labels.group,
+                props: {
+                  endpointId: AccessControlRepository.SecurityGroup.qry,
+                  parameters: '_startAt=0&_pageSize=1000',
+                  valueField: 'recordId',
+                  displayField: 'name',
+                  mapping: [
+                    { from: 'recordId', to: 'sgId' },
+                    { from: 'name', to: 'sgName' }
+                  ]
                 }
-              ]}
-            />
-          </Grow>
-        </VertLayout>
-      </FormShell>
-    </>
+              }
+            ]}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 
