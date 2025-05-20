@@ -307,7 +307,7 @@ export const apiMappings = {
   [ResourceIds.Sites]: {
     type: COMBOBOX,
     endpoint: InventoryRepository.Site.qry,
-    parameters: '_filter=',
+    parameters: '_filter=&_pageSize=1000&_params=',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -1021,6 +1021,17 @@ export const apiMappings = {
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'jobRef', value: 'Job Order' }
+    ]
+  },
+  [ResourceIds.BPMasterData]: {
+    type: COMBOBOX,
+    endpoint: BusinessPartnerRepository.MasterData.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000&_sortBy=recordId`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
     ]
   }
 }
