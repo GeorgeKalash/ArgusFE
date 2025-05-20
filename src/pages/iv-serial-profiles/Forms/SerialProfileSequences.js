@@ -15,6 +15,42 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const createRowValidation = term =>
+    yup.mixed().test(function (value) {
+      const { position, str, sectionType, size, oper } = this.parent
+      const isAnyFieldFilled = !!(position || str || sectionType || size || oper)
+
+      if (term === 'oper') {
+        if (sectionType != 1) {
+          return true
+        }
+
+        return !!value
+      }
+
+      if (term === 'position') {
+        if (Number(position) > 20) {
+          return false
+        }
+
+        return !!value
+      }
+
+      return isAnyFieldFilled ? !!value : true
+    })
+
+  const components = yup
+    .array()
+    .of(
+      yup.object({
+        position: createRowValidation('position'),
+        str: createRowValidation(),
+        sectionType: createRowValidation(),
+        size: createRowValidation(),
+        oper: createRowValidation('oper')
+      })
+    )
+
   const { formik } = useForm({
     validateOnChange: true,
     maxAccess,
@@ -24,33 +60,12 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
         {
           id: 1,
           spfId: recordId,
-          position: null,
-          seqNo: 1,
-          str: '',
-          sectionType: null,
-          oper: null,
-          size: null
+          seqNo: 1
         }
       ]
     },
     validationSchema: yup.object({
-      components: yup.array().of(
-        yup.object({
-          position: yup.number().required(),
-          str: yup.string().required(),
-          sectionType: yup.string().required(),
-          oper: yup
-            .string()
-            .nullable()
-            .test(function (value) {
-              const { sectionType } = this.parent
-              if (sectionType != 1) return true
-
-              return value
-            }),
-          size: yup.number().min(1).required()
-        })
-      )
+      components
     }),
     onSubmit: async values => {
       const modifiedItems = values?.components.map((details, index) => {
@@ -95,7 +110,6 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
 
     formik.setValues({
       spfId: recordId,
-      recordId,
       components: updateItemsList
     })
   }
@@ -112,8 +126,8 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
       label: labels.position,
       name: 'position',
       props: {
-        maxLength: 4,
-        decimalScale: 0
+        decimalScale: 0,
+        allowNegative: false,
       }
     },
     {
@@ -182,6 +196,7 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
         value={formik.values.components}
         error={formik.errors.components}
         columns={columns}
+        maxAccess={maxAccess}
       />
     </FormShell>
   )
