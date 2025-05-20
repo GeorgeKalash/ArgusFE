@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -39,6 +39,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
+  const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
@@ -107,7 +108,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
           unitPrice: 0,
           taxId: null,
           taxDetails: null,
-          taxDetailsButton: false,
+          taxDetailsButton: true,
           priceType: 0,
           volume: 0
         }
@@ -130,6 +131,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
             name: 'srlNo-first-row-check',
             test(value, context) {
               const { parent } = context
+
               if (parent?.id == 1) return true
               if (parent?.id > 1 && !value) return false
 
@@ -206,6 +208,8 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
   }
 
   function getItemPriceRow(newRow, dirtyField) {
+    !reCal && setReCal(true)
+
     const itemPriceRow = getIPR({
       priceType: 3,
       basePrice: 0,
@@ -266,7 +270,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
   }
 
   const autoDelete = async row => {
-    if (!row?.itemName) return true
+    if (!row?.draftId) return true
 
     const LastSerPack = {
       draftId: formik?.values?.recordId,
@@ -387,9 +391,9 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 designRef: res?.record?.designRef || null,
                 volume: res?.record?.volume || 0,
                 baseLaborPrice: res?.record?.baseLaborPrice || 0,
-                unitPrice: res?.record?.unitPrice || 0,
+                unitPrice: parseFloat(res?.record?.unitPrice).toFixed(2) || 0,
                 vatPct: res?.record?.vatPct || 0,
-                vatAmount: parseFloat(res?.record?.vatAmount) || 0,
+                vatAmount: parseFloat(res?.record?.vatAmount).toFixed(2) || 0,
 
                 ...(res?.record?.taxId && {
                   taxId: formik.values?.taxId || res?.record?.taxId,
@@ -415,8 +419,6 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 ))
             }
 
-            addRow(lineObj)
-
             const successSave = formik?.values?.recordId
               ? await autoSave(formik?.values?.recordId, lineObj.changes)
               : await saveHeader(lineObj.changes)
@@ -424,8 +426,11 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
             if (!successSave) {
               update({
                 ...formik?.initialValues?.serials,
-                id: newRow?.id
+                id: newRow?.id,
+                srlNo: ''
               })
+            } else {
+              await addRow(lineObj)
             }
           }
         }
@@ -475,7 +480,6 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     {
       component: 'button',
       name: 'taxDetailsButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/tax-icon.png'
       },
@@ -581,7 +585,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode
+      disabled: isClosed || !editMode || !formik?.values?.serials?.[0]?.srlNo
     },
     {
       key: 'Reopen',
@@ -624,7 +628,16 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       })
     )
 
-    formik.setFieldValue('serials', modifiedList)
+    await formik.setValues({
+      ...formik.values,
+      ...diHeader.record,
+      plId: defplId || formik?.values?.plId,
+      amount: diHeader?.record?.amount,
+      vatAmount: diHeader?.record?.vatAmount,
+      subtotal: diHeader?.record?.subtotal,
+      weight: diHeader?.record?.weight,
+      serials: modifiedList.length ? modifiedList : formik?.initialValues?.serials
+    })
 
     assignStoreTaxDetails(modifiedList)
   }
@@ -651,10 +664,10 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       ...formik.values,
       ...diHeader.record,
       plId: defplId || formik?.values?.plId,
-      amount: parseFloat(diHeader?.record?.amount).toFixed(2),
-      vatAmount: parseFloat(diHeader?.record?.vatAmount).toFixed(2),
-      subtotal: parseFloat(diHeader?.record?.subtotal).toFixed(2),
-      totalWeight: parseFloat(diHeader?.record?.totalWeight).toFixed(2),
+      amount: diHeader?.record?.amount,
+      vatAmount: diHeader?.record?.vatAmount,
+      subtotal: diHeader?.record?.subtotal,
+      weight: diHeader?.record?.weight,
       serials: modifiedList.length ? modifiedList : formik?.initialValues?.serials
     })
 
@@ -687,6 +700,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
 
       updatedSerials = updatedSerials.filter(item => item.id !== row.id)
       formik.setFieldValue('serials', updatedSerials)
+      setReCal(true)
     } else {
       formik.setFieldValue('serials', value)
     }
@@ -749,27 +763,30 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     }
   }, [formik?.values?.serials])
 
-  const { subtotal, vatAmount, totalWeight } = formik?.values?.serials?.reduce(
+  const { subtotal, vatAmount, weight, amount } = formik?.values?.serials?.reduce(
     (acc, row) => {
       const subTot = parseFloat(row?.unitPrice) || 0
       const vatAmountTot = parseFloat(row?.vatAmount) || 0
       const totWeight = parseFloat(row?.weight) || 0
 
       return {
-        subtotal: acc?.subtotal + subTot,
-        vatAmount: acc?.vatAmount + vatAmountTot,
-        totalWeight: acc?.totalWeight + totWeight
+        subtotal: reCal ? parseFloat((acc?.subtotal + subTot).toFixed(2)) : formik.values?.subtotal || 0,
+        vatAmount: reCal ? parseFloat((acc?.vatAmount + vatAmountTot).toFixed(2)) : formik.values?.vatAmount || 0,
+        weight: reCal ? acc?.weight + totWeight : formik.values?.weight || 0,
+        amount: reCal
+          ? parseFloat((acc?.subtotal + subTot + acc?.vatAmount + vatAmountTot).toFixed(2))
+          : formik.values?.amount || 0
       }
     },
-    { subtotal: 0, vatAmount: 0, totalWeight: 0 }
+    { subtotal: 0, vatAmount: 0, weight: 0, amount: 0 }
   )
 
   useEffect(() => {
     formik.setFieldValue('subtotal', subtotal)
     formik.setFieldValue('vatAmount', vatAmount)
-    formik.setFieldValue('weight', totalWeight)
-    formik.setFieldValue('amount', subtotal + vatAmount)
-  }, [totalWeight, subtotal, vatAmount])
+    formik.setFieldValue('weight', weight)
+    formik.setFieldValue('amount', amount)
+  }, [weight, subtotal, vatAmount, amount])
 
   useEffect(() => {
     ;(async function () {
@@ -785,6 +802,24 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       }
     })()
   }, [])
+
+  async function onValidationRequired() {
+    if (Object.keys(await formik.validateForm()).length) {
+      const errors = await formik.validateForm()
+
+      const touchedFields = Object.keys(errors).reduce((acc, key) => {
+        if (!formik.touched[key]) {
+          acc[key] = true
+        }
+
+        return acc
+      }, {})
+
+      if (Object.keys(touchedFields).length) {
+        formik.setTouched(touchedFields, true)
+      }
+    }
+  }
 
   return (
     <FormShell
@@ -1055,13 +1090,19 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
             onChange={(value, action, row) => handleGridChange(value, action, row)}
             value={filteredData || []}
             error={formik.errors.serials}
+            initialValues={formik?.initialValues?.serials?.[0]}
             columns={serialsColumns}
             name='serials'
             maxAccess={maxAccess}
-            disabled={isClosed || !formik.values.clientId}
+            disabled={isClosed || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isClosed}
-            allowAddNewLine={!formik?.values?.search}
+            allowAddNewLine={
+              !formik?.values?.search &&
+              (formik.values?.serials?.length === 0 ||
+                !!formik.values?.serials?.[formik.values?.serials?.length - 1]?.srlNo)
+            }
             autoDelete={autoDelete}
+            onValidationRequired={onValidationRequired}
           />
         </Grow>
         <Grid container spacing={3}>
@@ -1085,7 +1126,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                   <Grid item xs={12}></Grid>
                   <Grid item xs={12}>
                     <CustomNumberField
-                      name='subTotal'
+                      name='subtotal'
                       maxAccess={maxAccess}
                       label={labels.subtotal}
                       value={subtotal}
@@ -1103,10 +1144,10 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                   </Grid>
                   <Grid item xs={12}>
                     <CustomNumberField
-                      name='total'
+                      name='amount'
                       maxAccess={maxAccess}
                       label={labels.total}
-                      value={formik?.values?.amount || 0}
+                      value={amount}
                       readOnly
                     />
                   </Grid>
@@ -1134,10 +1175,10 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
               <Grid item xs={12}></Grid>
               <Grid item xs={12}>
                 <CustomNumberField
-                  name='totalWeight'
+                  name='weight'
                   maxAccess={maxAccess}
                   label={labels.totalWeight}
-                  value={totalWeight}
+                  value={weight}
                   readOnly
                 />
               </Grid>

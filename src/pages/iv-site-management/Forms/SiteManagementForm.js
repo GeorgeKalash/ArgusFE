@@ -184,7 +184,6 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
       component: 'numberfield',
       name: 'firstBinLocation',
       label: labels.bin,
-      defaultValue: 0,
       props: {
         readOnly: true
       }
@@ -193,39 +192,33 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
       component: 'numberfield',
       name: 'onhand',
       label: labels.onhand,
-      defaultValue: 0,
       props: { readOnly: true }
     },
     {
       component: 'numberfield',
       name: 'committed',
       label: labels.committed,
-      defaultValue: 0,
       props: { readOnly: true }
     },
     {
       component: 'numberfield',
       name: 'ordered',
       label: labels.ordered,
-      defaultValue: 0,
       props: { readOnly: true }
     },
     {
       component: 'numberfield',
       name: 'siteMin',
-      defaultValue: 0,
       label: labels.min
     },
     {
       component: 'numberfield',
       name: 'siteMax',
-      defaultValue: 0,
       label: labels.max
     },
     {
       component: 'numberfield',
       name: 'siteRequired',
-      defaultValue: 0,
       label: labels.required
     }
   ]
@@ -235,7 +228,7 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
-      disabled: false
+      disabled: !editMode
     }
   ]
 
@@ -386,6 +379,7 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
             error={formik.errors.items}
             columns={columns}
             name='items'
+            initialValues={formik.initialValues.items[0]}
             allowDelete={false}
             allowAddNewLine={false}
             maxAccess={maxAccess}

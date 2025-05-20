@@ -265,6 +265,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Lots',
+    label: platformLabels.Lot,
+    color: '#D3D3D3',
+    image: 'lot.png',
+    main: false
+  },
+  {
     key: 'GL',
     label: platformLabels.GL,
     color: '#231f20',
@@ -559,6 +566,12 @@ export const getButtons = platformLabels => [
   {
     key: 'ORD',
     label: platformLabels.ord,
+    color: '#231f20',
+    main: false
+  },
+  {
+    key: 'SHP',
+    label: platformLabels.shp,
     color: '#231f20',
     main: false
   }
