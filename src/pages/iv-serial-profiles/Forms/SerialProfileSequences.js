@@ -39,17 +39,15 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
       return isAnyFieldFilled ? !!value : true
     })
 
-  const components = yup
-    .array()
-    .of(
-      yup.object({
-        position: createRowValidation('position'),
-        str: createRowValidation(),
-        sectionType: createRowValidation(),
-        size: createRowValidation(),
-        oper: createRowValidation('oper')
-      })
-    )
+  const components = yup.array().of(
+    yup.object({
+      position: createRowValidation('position'),
+      str: createRowValidation(),
+      sectionType: createRowValidation(),
+      size: createRowValidation(),
+      oper: createRowValidation('oper')
+    })
+  )
 
   const { formik } = useForm({
     validateOnChange: true,
@@ -102,7 +100,7 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
               return {
                 ...item,
                 id: index + 1,
-                sectionType: Number(item.sectionType)
+                oper: item.oper || 0
               }
             })
           )
@@ -127,7 +125,7 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
       name: 'position',
       props: {
         decimalScale: 0,
-        allowNegative: false,
+        allowNegative: false
       }
     },
     {
