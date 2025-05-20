@@ -28,8 +28,13 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const rowColumns = [
     {
       field: 'name',
-      headerName: '',
+      headerName: labels.name,
       flex: 2
+    },
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 2,
     }
   ]
 
@@ -112,6 +117,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
             return {
               recordId: item.recordId,
               name: item.name,
+              reference: item.reference,
               hasAccess: false
             }
           })
@@ -120,6 +126,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
             return {
               recordId: item.recordId,
               name: item.name,
+              reference: item.reference,
               hasAccess: false
             }
           })
@@ -128,6 +135,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
             return {
               recordId: item.recordId,
               name: item.name,
+              reference: item.spRef,
               hasAccess: false
             }
           })
@@ -135,7 +143,8 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
           rar = posRequestPromise.list?.map(item => {
             return {
               recordId: item.recordId,
-              name: item.reference,
+              name: item.name,
+              reference: item.reference,
               hasAccess: false
             }
           })
