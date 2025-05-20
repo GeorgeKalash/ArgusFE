@@ -478,12 +478,14 @@ export default function BalanceTransferForm({ labels, access, recordId, function
                 displayField='name'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  let notes = formik.values.notes || ''
-                  notes += newValue?.name && notes && '\n'
-                  notes += newValue?.name
+                  if (newValue?.name) {
+                    let notes = formik.values.notes
+                    notes += notes && '\n'
+                    notes += newValue?.name
 
-                  notes && formik.setFieldValue('notes', notes)
-                  newValue?.name && formik.setFieldValue('templateId', newValue?.recordId || null)
+                    notes && formik.setFieldValue('notes', notes)
+                    newValue?.name && formik.setFieldValue('templateId', newValue?.recordId || null)
+                  }
                 }}
                 readOnly={isPosted}
                 error={formik.touched.templateId && Boolean(formik.errors.templateId)}
