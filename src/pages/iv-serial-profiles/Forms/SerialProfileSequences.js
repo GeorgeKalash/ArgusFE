@@ -28,7 +28,7 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
         return !!value
       }
 
-      if (term === 'position') {
+      if (term === 'position' && !!position) {
         if (Number(position) > 20) {
           return false
         }
@@ -188,6 +188,7 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
       maxAccess={maxAccess}
       isCleared={false}
       editMode={editMode}
+      isInfo={false}
     >
       <DataGrid
         onChange={value => formik.setFieldValue('components', value)}
