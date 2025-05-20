@@ -80,20 +80,14 @@ export default function ChangeClient({ form, window }) {
   }
 
   return (
-    <FormShell form={formik} isInfo={false} isCleared={false}>
+    <FormShell resourceId={ResourceIds.ChangeClient} form={formik} isInfo={false} isCleared={false} maxAccess={access}>
       <VertLayout>
         <Grid container spacing={4}>
           <Grid item xs={12}>
-            <CustomTextField
-              name='reference'
-              label={labels.reference}
-              value={form?.values?.reference}
-              maxAccess={access}
-              readOnly
-            />
+            <CustomTextField name='reference' label={labels.reference} value={form?.values?.reference} readOnly />
           </Grid>
           <Grid item xs={12}>
-            <CustomDatePicker name='date' label={labels.date} value={form?.values?.date} readOnly maxAccess={access} />
+            <CustomDatePicker name='date' label={labels.date} value={form?.values?.date} readOnly />
           </Grid>
           <Grid item xs={12}>
             <CustomTextArea
@@ -103,7 +97,6 @@ export default function ChangeClient({ form, window }) {
               rows={3}
               maxLength='100'
               readOnly
-              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
@@ -118,13 +111,7 @@ export default function ChangeClient({ form, window }) {
             />
           </Grid>
           <Grid item xs={9}>
-            <CustomCheckBox
-              name='isVattable'
-              value={form.values?.isVattable}
-              label={labels.vat}
-              disabled={true}
-              maxAccess={access}
-            />
+            <CustomCheckBox name='isVattable' value={form.values?.isVattable} label={labels.vat} disabled={true} />
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
@@ -135,7 +122,6 @@ export default function ChangeClient({ form, window }) {
               displayField={['reference', 'name']}
               readOnly
               values={form.values}
-              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
@@ -151,7 +137,6 @@ export default function ChangeClient({ form, window }) {
               displayFieldWidth={4}
               valueShow='clientRef'
               secondValueShow='clientName'
-              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>

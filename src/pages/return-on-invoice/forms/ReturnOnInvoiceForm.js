@@ -56,8 +56,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData } = useContext(ControlContext)
+
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
-  const [address, setAddress] = useState({})
   const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -66,13 +66,19 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     enabled: !recordId
   })
 
+  const invalidate = useInvalidate({
+    endpointId: SaleRepository.ReturnOnInvoice.page
+  })
+
+  const systemSales = defaultsData?.list?.find(({ key }) => key === 'salesTD')?.value
+  const systemPriceLevel = defaultsData?.list?.find(({ key }) => key === 'plId')?.value
+
   const initialValues = {
     dtId: null,
-    reference: null,
+    reference: '',
     status: 1,
     releaseStatus: null,
     date: new Date(),
-    oDocId: null,
     currencyId: parseInt(currency),
     plantId: null,
     spId: null,
@@ -80,8 +86,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     siteId: null,
     invoiceId: null,
     clientId: null,
-    clientRef: null,
-    clientName: null,
+    clientRef: '',
+    clientName: '',
     exRate: 1,
     description: '',
     amount: 0,
@@ -104,6 +110,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     isVerified: false,
     metalPrice: 0,
     KGmetalPrice: 0,
+    hiddenkgMetalPrice: 0,
     clientDiscount: 0,
     items: [
       {
@@ -115,7 +122,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         invoiceId: null,
         invoiceRef: null,
         invoiceSeqNo: 1,
-        itemName: null,
+        itemName: '',
         muId: null,
         baseQty: 0,
         applyVat: false,
@@ -126,7 +133,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         taxId: 0,
         balanceQty: 0,
         pieces: 0,
-        taxCodes: [],
         itemId: null,
         sku: null,
         priceType: 1,
@@ -147,17 +153,11 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         returnNowQty: 0,
         returnedQty: 0,
         trackBy: null,
-        isEditMode: false
+        isEditMode: false,
+        serials: []
       }
     ]
   }
-
-  const invalidate = useInvalidate({
-    endpointId: SaleRepository.ReturnOnInvoice.page
-  })
-
-  const systemSales = defaultsData?.list?.find(({ key }) => key === 'salesTD')?.value
-  const systemPriceLevel = defaultsData?.list?.find(({ key }) => key === 'plId')?.value
 
   const { formik } = useForm({
     maxAccess,
@@ -203,17 +203,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
       if (copy.rateCalcMethod == 1) copy.baseAmount = Number(copy.amount) * copy.exRate
       else if (copy.rateCalcMethod == 2) copy.baseAmount = Number(copy.amount) / copy.exRate
-
-      if (copy.serializedAddress) {
-        const addressRes = await postRequest({
-          extension: SaleRepository.Address.set,
-          record: JSON.stringify({
-            clientId: copy.clientId,
-            address
-          })
-        })
-        copy.billAddressId = addressRes.recordId
-      }
 
       const updatedRows = formik.values.items.map((itemDetails, index) => ({
         ...itemDetails,
@@ -279,6 +268,24 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           { from: 'recordId', to: 'invoiceId' },
           { from: 'reference', to: 'invoiceRef' }
         ]
+      },
+      async onChange({ row: { update } }) {
+        if (!formik.values.currencyId) {
+          update({
+            invoiceId: null,
+            invoiceRef: null,
+            invoiceName: null
+          })
+
+          stackError({
+            message: labels.noCurrency
+          })
+
+          return
+        }
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row.invoiceId }
       }
     },
     {
@@ -306,79 +313,91 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         filter: { salesItem: true }
       },
       async onChange({ row: { update, newRow } }) {
-        if (!newRow.itemId) {
+        if (!newRow.itemId) return
+
+        let itemFound = {}
+        if (!systemPriceLevel && !formik.values.plId) {
+          stackError({ message: labels.noPriceLevel })
+
           return
         }
-        let itemFound = {}
         if (newRow.invoiceId) {
           const res = await getRequest({
             extension: SaleRepository.ReturnItem.balance,
             parameters: `_invoiceId=${newRow.invoiceId}`
           })
 
-          const invoiceList = (res.list || []).map(itemDetail => ({
-            ...itemDetail,
-            item: {
-              ...itemDetail.item,
-              invoiceId: newRow.invoiceId
-            }
-          }))
-          itemFound = invoiceList?.find(x => x.item.invoiceId == newRow.invoiceId)
+          itemFound = (res.list || []).find(x => x.item.itemId == newRow.itemId)
 
           if (!itemFound) {
-            update({
-              itemId: null,
-              itemName: null,
-              sku: null
-            })
-
-            stackError({
-              message: labels.itemNotInReturn
-            })
+            update({ itemId: null, itemName: null, sku: null })
+            stackError({ message: labels.itemNotInReturn })
 
             return
           }
+
+          const itemData = {
+            id: newRow?.id,
+            itemId: itemFound?.item?.itemId,
+            sku: itemFound?.item?.sku,
+            itemName: itemFound?.item?.itemName,
+            balanceQty: itemFound?.balanceQty,
+            taxId: itemFound?.item?.taxId,
+            vatPct: parseFloat(itemFound?.item?.vatPct || 0).toFixed(2),
+            vatAmount: parseFloat(itemFound?.item?.vatAmount || 0).toFixed(2),
+            unitPrice: parseFloat(itemFound?.item?.unitPrice || 0).toFixed(2),
+            unitCost: parseFloat(itemFound?.item?.unitCost || 0).toFixed(2),
+            pieces: itemFound?.item?.pieces,
+            mdType: itemFound?.item?.mdType,
+            mdAmount: itemFound?.item?.mdAmount,
+            mdValue: itemFound?.item?.mdValue,
+            pieces: itemFound?.item?.pieces,
+            priceType: itemFound?.item?.priceType,
+            basePrice: itemFound?.item?.basePrice,
+            baseLaborPrice: itemFound?.item?.baseLaborPrice,
+            weight: itemFound?.item?.weight,
+            volume: itemFound?.item?.volume,
+            isMetal: itemFound?.item?.isMetal || false,
+            metalid: itemFound?.item?.metalId,
+            metalPurity: itemFound?.item?.metalPurity,
+            applyVat: formik.values.isVattable
+          }
+
+          update(itemData)
+          getItemPriceRow(update, itemData, DIRTYFIELD_QTY)
+
+          return
         }
-        const itemPhysProp = await getItemPhysProp(newRow.itemId)
-        const itemInfo = await getItem(newRow.itemId)
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update)
+
+        const [itemPhysProp, itemInfo, ItemConvertPrice] = await Promise.all([
+          getItemPhysProp(newRow.itemId),
+          getItem(newRow.itemId),
+          getItemConvertPrice(newRow.itemId, update)
+        ])
+
         let rowTax = null
         let rowTaxDetails = null
+        const effectiveTaxId = formik.values.taxId || itemInfo.taxId
 
-        if (!formik.values.taxId) {
-          if (itemInfo.taxId) {
-            const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
-
-            const details = taxDetailsResponse.map(item => ({
-              taxId: itemInfo.taxId,
-              taxCodeId: item.taxCodeId,
-              taxBase: item.taxBase,
-              amount: item.amount
-            }))
-            rowTax = itemInfo.taxId
-            rowTaxDetails = details
-          }
-        } else {
-          const taxDetailsResponse = await getTaxDetails(formik.values.taxId)
-
-          const details = taxDetailsResponse.map(item => ({
-            taxId: formik.values.taxId,
+        if (effectiveTaxId) {
+          const taxDetailsResponse = await getTaxDetails(effectiveTaxId)
+          rowTax = effectiveTaxId
+          rowTaxDetails = taxDetailsResponse.map(item => ({
+            taxId: effectiveTaxId,
             taxCodeId: item.taxCodeId,
             taxBase: item.taxBase,
             amount: item.amount
           }))
-          rowTax = formik.values.taxId
-          rowTaxDetails = details
         }
 
         update({
-          itemId: itemFound?.item?.itemId || newRow?.itemId,
-          sku: itemFound?.item?.sku || newRow?.sku,
-          itemName: itemFound?.item?.itemName || newRow?.itemName,
-          balanceQty: itemFound?.balanceQty,
-          taxId: itemFound?.item?.taxId,
-          vatPct: parseFloat(itemFound?.item?.vatPct || 0).toFixed(2),
-          vatAmount: parseFloat(itemFound?.item?.vatAmount || 0).toFixed(2),
+          itemId: newRow?.itemId,
+          sku: newRow?.sku,
+          itemName: newRow?.itemName,
+          balanceQty: 0,
+          taxId: 0,
+          vatPct: 0,
+          vatAmount: 0,
           volume: parseFloat(itemPhysProp?.volume) || 0,
           weight: parseFloat(itemPhysProp?.weight || 0).toFixed(2),
           basePrice: !itemPhysProp?.isMetal
@@ -389,7 +408,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
               : (formik.values.KGMetalPrice || 0 * (itemPhysProp?.metalPurity || 0)) / 1000
             : 0,
           unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(2),
-          unitCost: parseFloat(itemFound?.item?.unitCost || 0).toFixed(2),
+          unitCost: 0,
           upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
           priceType: ItemConvertPrice?.priceType || 1,
           baseLaborPrice: 0,
@@ -401,19 +420,22 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           metalPurity: itemPhysProp?.metalPurity || 0,
           mdAmount: formik.values.clientDiscount || 0,
           qty: 0,
-          pieces: itemFound?.item?.pieces,
+          pieces: 0,
           msId: itemInfo?.msId,
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
           taxDetails: formik.values.isVattable ? rowTaxDetails : null,
-          mdType: itemFound?.item?.mdType || 1,
+          mdType: 1,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
           applyVat: formik.values.isVattable,
           taxDetailsButton: true,
           trackBy: newRow?.trackBy
         })
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row.itemId }
       }
     },
     {
@@ -429,8 +451,15 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       component: 'numberfield',
       label: labels.qty,
       name: 'returnNowQty',
+      updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
+        const { returnNowQty, balanceQty, invoiceId } = newRow
+        const validQty = Number(returnNowQty) > Number(balanceQty) ? balanceQty : returnNowQty
+
+        update({ returnNowQty: validQty })
+
+        getItemPriceRow(update, { ...newRow, returnNowQty: validQty }, DIRTYFIELD_QTY)
+        if (invoiceId && Number(returnNowQty) > Number(balanceQty)) stackError({ message: labels.invalidQty })
       }
     },
     {
@@ -527,7 +556,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         if (row?.taxId) {
           const metalPrice = Number(formik.values.metalPrice) || 0
           const metalPurity = Number(row.metalPurity) || 0
-
           stack({
             Component: TaxDetails,
             props: {
@@ -602,7 +630,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     getItemPriceRow(updateRow, newRow, DIRTYFIELD_MDTYPE, true)
     checkMdAmountPct(newRow, updateRow)
   }
-
   async function onWorkFlowClick() {
     stack({
       Component: WorkFlow,
@@ -739,6 +766,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       disabled: !editMode
     }
   ]
+
   async function fillForm(retHeader, retItems, isCommitted, clientDiscount) {
     const billAdd = await getAddress(retHeader?.record?.billAddressId)
 
@@ -767,6 +795,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             })
           )
         : formik.values.items
+
     rowsUpdate.current = modifiedList
     formik.setValues({
       ...retHeader.record,
@@ -840,20 +869,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     return res?.list
   }
 
-  async function getItemConvertPrice(itemId, update) {
-    if (!formik.values.currencyId) {
-      update({
-        itemId: null,
-        itemName: null,
-        sku: null
-      })
-
-      stackError({
-        message: labels.noCurrency
-      })
-
-      return
-    }
+  async function getItemConvertPrice(itemId) {
+    if (!itemId) return
 
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
@@ -896,6 +913,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       return newState
     })
   }
+
   function getItemPriceRow(update, newRow, dirtyField, iconClicked) {
     !reCal && setReCal(true)
 
@@ -906,7 +924,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
-      qty: parseFloat(newRow?.qty),
+      qty: parseFloat(newRow?.returnNowQty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: parseFloat(newRow?.mdAmount),
       mdType: newRow?.mdType,
@@ -1060,6 +1078,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       }
     }
   }
+
   async function getClientInfo(clientId) {
     if (!clientId) return
 
@@ -1078,11 +1097,13 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     const clientDiscount = await getClientInfo(retHeader.record.clientId)
     await fillForm(retHeader, retItems, isCommitted, clientDiscount)
   }
+
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
       formik.setFieldValue(key, value)
     })
   }
+
   function openAddressFilterForm() {
     stack({
       Component: AddressFilterForm,
@@ -1113,6 +1134,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
   async function onChangeDtId(dtId) {
     if (!dtId) return
+    formik.setFieldValue('KGmetalPrice', formik.values.hiddenkgMetalPrice)
+    formik.setFieldValue('defaultBaseMC', formik.values.hiddenkgMetalPrice)
+    formik.setFieldValue('metalPrice', formik.values.hiddenkgMetalPrice ? formik.values.hiddenkgMetalPrice / 1000 : 0)
 
     const res = await getRequest({
       extension: SaleRepository.DocumentTypeDefault.get,
@@ -1127,6 +1151,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
     return res?.record?.commitItems
   }
+
   async function setMetalPriceOperations() {
     const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
     const defaultRateType = defaultsData?.list?.find(({ key }) => key === 'mc_defaultRTSA')
@@ -1138,11 +1163,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
       return
     }
-    const kgMetalPriceValue = await fillMetalPrice(defaultMCbaseCU?.value)
-    formik.setFieldValue('KGmetalPrice', kgMetalPriceValue || 0)
-    formik.setFieldValue('defaultBaseMC', kgMetalPriceValue)
-    formik.setFieldValue('metalPrice', kgMetalPriceValue ? kgMetalPriceValue / 1000 : 0)
+    const hiddenkgMetalPrice = await fillMetalPrice(defaultMCbaseCU?.value)
+    formik.setFieldValue('hiddenkgMetalPrice', hiddenkgMetalPrice || 0)
   }
+
   async function fillMetalPrice(baseMetalCuId) {
     if (!baseMetalCuId) return
 
@@ -1155,17 +1179,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
     return res.record.exRate * 1000
   }
-  useEffect(() => {
-    let billAddress = ''
-    const { name, street1, street2, city, phone, phone2, email1 } = address
-    if (name || street1 || street2 || city || phone || phone2 || email1) {
-      billAddress = `${name || ''}\n${street1 || ''}\n${street2 || ''}\n${city || ''}\n${phone || ''}\n${
-        phone2 || ''
-      }\n${email1 || ''}`
-    }
-    formik.setFieldValue('billAddress', billAddress || '')
-    formik.setFieldValue('serializedAddress', billAddress || '')
-  }, [address])
 
   useEffect(() => {
     formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
@@ -1492,7 +1505,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     readOnly
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('taxId', newValue ? newValue.recordId : '')
+                      formik.setFieldValue('taxId', newValue?.recordId || null)
                     }}
                     error={formik.touched.taxId && Boolean(formik.errors.taxId)}
                     maxAccess={maxAccess}
@@ -1587,7 +1600,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     maxAccess={maxAccess}
                     viewDropDown={formik.values.clientId && !isPosted}
                     onChange={e => formik.setFieldValue('billAddress', e.target.value)}
-                    onClear={() => formik.setFieldValue('billAddress', '')}
+                    onClear={() => {
+                      formik.setFieldValue('billAddressId', null)
+                      formik.setFieldValue('billAddress', '')
+                    }}
                     onDropDown={() => openAddressFilterForm()}
                     error={formik?.touched.billAddress && Boolean(formik?.errors.billAddress)}
                   />
