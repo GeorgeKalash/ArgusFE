@@ -132,8 +132,6 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
             onChange={value => handleRowsChange(value)}
             value={filteredData}
             error={formik.errors.groups}
-            allowAddNewLine={false}
-            allowDelete={false}
             columns={[
               {
                 component: 'resourcecombobox',
