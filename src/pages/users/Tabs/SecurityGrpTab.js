@@ -131,6 +131,7 @@ const filteredData = isSearchActive
             onChange={value => handleRowsChange(value)}
             value={filteredData}
             error={formik.errors.groups}
+            allowAddNewLine={!formik.values.search}
             columns={[
               {
                 component: 'resourcecombobox',
