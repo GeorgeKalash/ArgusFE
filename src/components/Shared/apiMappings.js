@@ -25,6 +25,7 @@ import { PayrollRepository } from 'src/repositories/PayrollRepository'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
+import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 
 export const COMBOBOX = 1
@@ -121,8 +122,8 @@ export const apiMappings = {
   },
   [ResourceIds.DocumentTypes]: {
     type: COMBOBOX,
-    endpoint: SystemRepository.DocumentType.qry,
-    parameters: '_startAt=0&_pageSize=2000', //_dgId appended
+    endpoint: SystemRepository.DocumentType.qry2,
+    parameters: '', //_functionIds appended
     valueField: 'recordId',
     displayField: 'name',
     displayField: ['reference', 'name'],
@@ -306,7 +307,7 @@ export const apiMappings = {
   [ResourceIds.Sites]: {
     type: COMBOBOX,
     endpoint: InventoryRepository.Site.qry,
-    parameters: '_filter=',
+    parameters: '_filter=&_pageSize=1000&_params=',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -607,6 +608,13 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
+  },
+  [ResourceIds.FoMoulds]: {
+    type: COMBOBOX,
+    endpoint: FoundryRepository.Mould.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: 'reference'
   },
   [ResourceIds.PointOfSale]: {
     type: COMBOBOX,
@@ -1013,6 +1021,28 @@ export const apiMappings = {
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'jobRef', value: 'Job Order' }
+    ]
+  },
+  [ResourceIds.PriceGroups]: {
+    type: COMBOBOX,
+    endpoint: SaleRepository.PriceGroups.qry,
+    parameters: '_startAt=0&_pageSize=1000&_name=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.BPMasterData]: {
+    type: COMBOBOX,
+    endpoint: BusinessPartnerRepository.MasterData.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000&_sortBy=recordId`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
     ]
   }
 }

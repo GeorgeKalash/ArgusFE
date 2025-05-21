@@ -145,9 +145,11 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       })
 
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
-      invalidate()
-      refetchForm(res?.recordId)
+      if (res?.recordId) {
+        await refetchForm(res?.recordId)
+        toast.success(actionMessage)
+        invalidate()
+      }
     }
   })
 
@@ -321,7 +323,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         return {
           ...item,
           id: item.seqNo,
-          serials: serials.list.map((serialDetail, index) => {
+          serials: serials?.list?.map((serialDetail, index) => {
             return {
               ...serialDetail,
               id: index

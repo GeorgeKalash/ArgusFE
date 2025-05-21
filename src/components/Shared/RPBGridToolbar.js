@@ -88,7 +88,8 @@ const RPBGridToolbar = ({
       key: 'OpenRPB',
       condition: true,
       onClick: openRPB,
-      disabled: false
+      disabled: false,
+      hidden: !reportName
     },
     {
       key: 'GO',
@@ -104,11 +105,12 @@ const RPBGridToolbar = ({
       },
       disabled: false
     }
-  ]
+  ].filter(item => !item?.hidden)
 
   return (
     <GridToolbar
       onSearch={value => filters(value, reportParams)}
+      reportParams={reportParams}
       onSearchClear={() => {
         setSearch('')
         if (typeof filterBy === 'function') filterBy('params', reportParams)

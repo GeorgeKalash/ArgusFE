@@ -200,5 +200,14 @@ export const FinancialRepository = {
   AgingDoc: {
     snapshot: service + 'snapshotAGD',
     rebuild: service + 'rebuildAGD'
+  },
+  BalanceTransferMultiAccounts: {
+    page: service + 'pageTMA',
+    get2: service + 'get2TMA',
+    set2: service + 'set2TMA',
+    del: service + 'delTMA',
+    snapshot: service + 'snapshotTMA',
+    post: service + 'postTMA',
+    unpost: service + 'unpostTMA',
   }
 }
