@@ -31,7 +31,7 @@ export default function SerialProfilesForm({ labels, maxAccess, store, setStore 
     validateOnChange: false,
     validationSchema: yup.object({
       reference: yup.string().required(),
-      name: yup.string().required(),
+      name: yup.string().required()
     }),
     onSubmit: async values => {
       await postRequest({
@@ -39,13 +39,14 @@ export default function SerialProfilesForm({ labels, maxAccess, store, setStore 
         record: JSON.stringify(values)
       }).then(res => {
         toast.success(!values.recordId ? platformLabels.Added : platformLabels.Edited)
-        formik.setFieldValue('recordId', res.recordId)
 
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: res.recordId
-        }))
-
+        if (!values.recordId) {
+          formik.setFieldValue('recordId', res.recordId)
+          setStore(prevStore => ({
+            ...prevStore,
+            recordId: res.recordId
+          }))
+        }
         invalidate()
       })
     }

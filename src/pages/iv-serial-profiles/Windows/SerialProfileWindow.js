@@ -8,7 +8,7 @@ export default function SerialProfileWindow({ labels, maxAccess, recordId }) {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId
+    recordId: recordId || null,
   })
 
   const tabs = [{ label: labels.SerialNumbersProfiles }, { label: labels.SerialProfileSequences, disabled: !store.recordId }]
