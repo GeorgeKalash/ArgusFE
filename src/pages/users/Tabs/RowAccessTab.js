@@ -184,7 +184,11 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
 
   const filteredData = search
     ? {
-        list: data?.list?.filter(item => item?.name && item?.name?.toLowerCase().includes(search.toLowerCase()))
+        list: data?.list?.filter(
+          item =>
+            (item?.name && item?.name?.toLowerCase().includes(search.toLowerCase())) ||
+            (item?.reference && item?.reference?.toLowerCase().includes(search.toLowerCase()))
+        )
       }
     : data
 
