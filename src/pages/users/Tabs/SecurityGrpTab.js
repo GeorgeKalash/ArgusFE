@@ -60,24 +60,28 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
     })
   }
 
-  const filteredData = formik.values.search
-    ? formik.values.groups.filter(
-        item => item.sgName && item.sgName.toString().toLowerCase().includes(formik.values.search.toLowerCase())
-      )
-    : formik.values.groups
+  const isSearchActive = !!formik.values.search
+
+const filteredData = isSearchActive
+  ? formik.values.groups.filter(item =>
+      item.sgName?.toLowerCase().includes(formik.values.search.toLowerCase())
+    )
+  : formik.values.groups
 
   async function fetchGridData() {
     const res = await getRequest({
       extension: AccessControlRepository.SecurityGroupUser.qry,
       parameters: `_userId=${storeRecordId}&_filter=&_sgId=0`
     })
-    if (res?.list?.length > 0) {
-      const items = res.list.map((item, index) => ({
-        ...item,
-        id: index + 1
-      }))
-      formik.setValues({ groups: items })
-    }
+
+    const items = res.list.map((item, index) => ({
+      ...item,
+      id: index + 1
+    }))
+    formik.setValues(prev => ({
+      ...prev,
+      groups: items
+    }))
   }
 
   useEffect(() => {
@@ -89,13 +93,7 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
   }, [storeRecordId])
 
   function handleRowsChange(newValues) {
-    const updatedRows = formik.values.groups.map(row => {
-      const newValue = newValues.find(newRow => newRow.id === row.id)
-
-      return newValue ? newValue : row
-    })
-
-    formik.setFieldValue('groups', updatedRows)
+    formik.setFieldValue('groups', newValues)
   }
 
   const handleSearchChange = event => {
@@ -121,6 +119,7 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
                 label={labels.search}
                 onClear={() => {
                   formik.setFieldValue('search', '')
+                  fetchGridData()
                 }}
                 onChange={handleSearchChange}
               />
