@@ -58,6 +58,7 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
         {
           id: 1,
           spfId: recordId,
+          position: null,
           seqNo: 1
         }
       ]
@@ -100,6 +101,7 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
               return {
                 ...item,
                 id: index + 1,
+                position: item.position === 0 ? null : item.position,
                 oper: item.oper || 0
               }
             })
