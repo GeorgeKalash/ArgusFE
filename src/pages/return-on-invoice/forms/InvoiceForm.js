@@ -66,7 +66,8 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
 
     const finalList = await Promise.all(
       filteredItems.map(async (entry, index) => {
-        const { item, taxId, qty, balanceQty, returnedQty } = entry
+        const { item, qty, balanceQty, returnedQty } = entry
+        const { taxId } = item
 
         const itemPriceRow = getIPR({
           priceType: item?.priceType || 0,
@@ -85,7 +86,6 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           tdPct: item?.values?.tdPct || 0,
           dirtyField: DIRTYFIELD_QTY
         })
-
         const taxDetails = await getTaxDetails(taxId)
 
         const taxDetailList = taxDetails?.map(t => ({
@@ -96,7 +96,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
         }))
 
         const vatCalcRow = getVatCalc({
-          basePrice: itemPriceRow.basePrice,
+          basePrice: (form.values.metalPrice || 0) * (form.values.metalPurity || 0),
           qty,
           extendedPrice: parseFloat(itemPriceRow.extendedPrice) || 0,
           baseLaborPrice: itemPriceRow.baseLaborPrice || 0,
@@ -118,7 +118,8 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           vatAmount: vatCalcRow.vatAmount,
           returnedQty,
           balanceQty,
-          returnNowQty: itemPriceRow.qty
+          returnNowQty: itemPriceRow.qty,
+          taxDetails: form.values.isVattable ? taxDetailList : null
         }
       })
     )
