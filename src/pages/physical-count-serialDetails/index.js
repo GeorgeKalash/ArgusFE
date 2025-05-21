@@ -61,9 +61,11 @@ const PhysicalCountSerialDe = () => {
       ]
     },
     validationSchema: yup.object({
-      stockCountId: yup.string().required(),
-      siteId: yup.string().required(),
-      controllerId: yup.string().required(),
+      stockCountId: yup.number().required(),
+      scDate: yup.date().required(),
+      scRef: yup.number().required(),
+      siteId: yup.number().required(),
+      controllerId: yup.number().required(),
       rows: yup
         .array()
         .of(
@@ -117,11 +119,9 @@ const PhysicalCountSerialDe = () => {
   })
 
   async function fetchGridData(controllerId) {
-    const stockCountId = formik.values.stockCountId
-
     await getRequest({
       extension: SCRepository.StockCountSerialDetail.qry,
-      parameters: `_stockCountId=${stockCountId}&_siteId=${formik.values.siteId}&_controllerId=${
+      parameters: `_stockCountId=${formik.values.stockCountId}&_siteId=${formik.values.siteId}&_controllerId=${
         controllerId || formik?.values?.controllerId
       }`
     }).then(res => {
@@ -302,7 +302,7 @@ const PhysicalCountSerialDe = () => {
       record: JSON.stringify(StockCountControllerTab)
     })
 
-    status == 3 ? toast.success(platformLabels.Posted) : toast.success(platformLabels.Unposted)
+    toast.success(status == 3 ? platformLabels.Posted : platformLabels.Unposted)
   }
 
   const onClearGridConfirmation = async () => {
@@ -358,7 +358,7 @@ const PhysicalCountSerialDe = () => {
       condition: true,
       onClick: onClearGridConfirmation,
       onSuccess: clearGrid,
-      disabled: emptyGrid
+      disabled: !isSaved || emptyGrid
     },
     {
       key: 'ClearHG',
@@ -369,7 +369,7 @@ const PhysicalCountSerialDe = () => {
     {
       key: 'Import',
       condition: true,
-      onClick: () => onImportClick(),
+      onClick: onImportClick,
       disabled: !isSaved
     }
   ]
@@ -415,7 +415,6 @@ const PhysicalCountSerialDe = () => {
       form={formik}
       isInfo={false}
       isCleared={false}
-      isSavedClear={false}
       disabledSubmit={!isSaved}
       actions={actions}
       maxAccess={access}
@@ -440,7 +439,7 @@ const PhysicalCountSerialDe = () => {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('stockCountId', newValue?.recordId || null)
                   formik.setFieldValue('siteId', null)
-                  formik.setFieldValue('contollerId', null)
+                  formik.setFieldValue('controllerId', null)
                   setEditMode(false)
 
                   formik.setFieldValue('SCStatus', newValue?.status || null)
@@ -457,7 +456,7 @@ const PhysicalCountSerialDe = () => {
                 label={labels.stockCountDate}
                 value={formik?.values?.scDate}
                 readOnly
-                maxAccess={access}
+                required
                 error={formik.touched.scDate && Boolean(formik.errors.scDate)}
               />
             </Grid>
@@ -466,8 +465,8 @@ const PhysicalCountSerialDe = () => {
                 name='scRef'
                 label={labels.stockCountRef}
                 value={formik?.values?.scRef}
-                maxAccess={access}
                 readOnly
+                required
                 error={formik.touched.scRef && Boolean(formik.errors.scRef)}
               />
             </Grid>
@@ -568,10 +567,9 @@ const PhysicalCountSerialDe = () => {
                 name='totalCount'
                 label={labels.totalCount}
                 value={totalCount}
-                readOnly={true}
+                readOnly
                 hidden={!formik.values.controllerId}
-                maxAccess={access}
-                numberField={true}
+                numberField
               />
             </Grid>
             <Grid item xs={2}>
@@ -579,10 +577,9 @@ const PhysicalCountSerialDe = () => {
                 name='totalWeight'
                 label={labels.totalWeight}
                 value={getFormattedNumber(totalWeight.toFixed(2))}
-                readOnly={true}
+                readOnly
                 hidden={!formik.values.controllerId}
-                maxAccess={access}
-                numberField={true}
+                numberField
               />
             </Grid>
           </Grid>

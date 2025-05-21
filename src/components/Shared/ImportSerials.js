@@ -80,7 +80,6 @@ const ImportSerials = ({ endPoint, header, onCloseimport, maxAccess, window }) =
       ...header,
       serials: transformedSerials ? transformedSerials : parsedFileContent
     }
-    console.log('header', SerialsPack)
 
     await postRequest({
       extension: endPoint,
