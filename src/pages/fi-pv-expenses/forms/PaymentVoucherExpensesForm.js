@@ -33,9 +33,10 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PaymentVoucher,
@@ -61,7 +62,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     exRate: 1,
     rateCalcMethod: 1,
     baseAmount: null,
-    cashAccountId: null,
+    cashAccountId: parseInt(cashAccountId),
     dtId: null,
     status: 1,
     releaseStatus: null,
@@ -199,7 +200,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
 
       formik.setFieldValue('cashAccountId', res?.record?.cashAccountId)
       formik.setFieldValue('plantId', res?.record?.plantId || plantId)
-      const payment = await getCashAccountAndPayment(res?.record?.cashAccountId)
+      const payment = await getCashAccountAndPayment(res?.record?.cashAccountId || cashAccountId)
       formik.setFieldValue('paymentMethod', res?.record?.paymentMethod || payment)
     }
   }
@@ -231,6 +232,8 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
           const res = await getPaymentVouchers(recordId)
           res.record.date = formatDateFromApi(res.record.date)
           await getExpenses(res.record)
+        } else {
+          getCashAccountAndPayment(cashAccountId)
         }
         await getDefaultVAT()
       } catch (e) {}
