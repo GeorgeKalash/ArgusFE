@@ -1023,6 +1023,17 @@ export const apiMappings = {
       { key: 'jobRef', value: 'Job Order' }
     ]
   },
+  [ResourceIds.PriceGroups]: {
+    type: COMBOBOX,
+    endpoint: SaleRepository.PriceGroups.qry,
+    parameters: '_startAt=0&_pageSize=1000&_name=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
   [ResourceIds.BPMasterData]: {
     type: COMBOBOX,
     endpoint: BusinessPartnerRepository.MasterData.qry,
