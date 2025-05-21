@@ -461,5 +461,7 @@ export const ResourceIds = {
   SerialsTrackings: 41111,
   JobsInProcess: 42309,
   PostWorkCenterJob: 42330,
-  ProductionShifts: 42113
+  ProductionShifts: 42113,
+  ReturnOnInvoice: 51319,
+  ChangeClient: 51336
 }
