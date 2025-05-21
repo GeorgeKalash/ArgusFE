@@ -115,7 +115,7 @@ const Plants = () => {
       <Fixed>
         <RPBGridToolbar
           maxAccess={access}
-          reportName={'SYPLT '}
+          reportName={'SYPLT'}
           filterBy={filterBy}
           onAdd={addPlant}
           onSearch={search}
