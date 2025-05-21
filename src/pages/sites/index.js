@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
@@ -17,14 +17,15 @@ const Sites = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
-    const response = await getRequest({
+    return await getRequest({
       extension: InventoryRepository.Site.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_params=${params || ''}`
     })
-
-    return { ...response, _startAt: _startAt }
+  }
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
@@ -33,27 +34,17 @@ const Sites = () => {
     access,
     search,
     clear,
+    filterBy,
     refetch,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.Site.page,
     datasetId: ResourceIds.Sites,
-
-    search: {
-      endpointId: InventoryRepository.Site.snapshot,
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
   })
-
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: InventoryRepository.Site.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
-  }
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Site.page
@@ -79,6 +70,23 @@ const Sites = () => {
     {
       field: 'costCenterName',
       headerName: _labels.costCenter,
+      flex: 1
+    },
+    {
+      field: 'siteGroupName',
+      headerName: _labels.siteGroup,
+      flex: 1
+    },
+    {
+      field: 'allowNegativeLotQty',
+      headerName: _labels.anq,
+      type: 'checkbox',
+      flex: 1
+    },
+    {
+      field: 'isInactive',
+      headerName: _labels.isInactive,
+      type: 'checkbox',
       flex: 1
     }
   ]
@@ -117,11 +125,13 @@ const Sites = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
+        <RPBGridToolbar
           onAdd={add}
           maxAccess={access}
           onSearch={search}
           onSearchClear={clear}
+          reportName={'IVSI'}
+          filterBy={filterBy}
           labels={_labels}
           inputSearch={true}
           previewReport={ResourceIds.Sites}
