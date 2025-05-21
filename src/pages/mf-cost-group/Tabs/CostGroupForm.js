@@ -9,7 +9,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
@@ -20,7 +19,7 @@ export default function CostGroupForm({ labels, access: maxAccess, setStore, sto
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.CostGroup.qry
+    endpointId: ManufacturingRepository.CostGroup.page
   })
 
   const { formik } = useForm({
@@ -80,6 +79,7 @@ export default function CostGroupForm({ labels, access: maxAccess, setStore, sto
                 value={formik?.values?.reference}
                 maxAccess={maxAccess}
                 required
+                maxLength='10'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -93,6 +93,7 @@ export default function CostGroupForm({ labels, access: maxAccess, setStore, sto
                 value={formik?.values?.name}
                 maxAccess={maxAccess}
                 required
+                maxLength='40'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}

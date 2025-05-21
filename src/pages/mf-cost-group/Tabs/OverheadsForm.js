@@ -22,7 +22,7 @@ export default function OverheadsForm({ store, labels, maxAccess }) {
 
   const { formik } = useForm({
     initialValues: {
-      costGroupOverheads: [{ id: 1 }]
+      costGroupOverheads: [{ id: 1, amount: 0 }]
     },
     maxAccess,
     validateOnChange: true,
@@ -95,8 +95,6 @@ export default function OverheadsForm({ store, labels, maxAccess }) {
     }
   ]
 
-  console.log(formik)
-
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -105,14 +103,12 @@ export default function OverheadsForm({ store, labels, maxAccess }) {
           parameters: `_cgId=${recordId}`
         })
 
-        if (res?.list) {
-          const costGroupOverheads = res?.list?.map((item, index) => ({
-            ...item,
-            id: index + 1
-          }))
+        const costGroupOverheads = res?.list?.map((item, index) => ({
+          ...item,
+          id: index + 1
+        }))
 
-          formik.setFieldValue('costGroupOverheads', costGroupOverheads)
-        }
+        formik.setFieldValue('costGroupOverheads', costGroupOverheads)
       }
     })()
   }, [])
@@ -149,6 +145,7 @@ export default function OverheadsForm({ store, labels, maxAccess }) {
                 maxAccess={maxAccess}
                 label={labels.netAmount}
                 value={totalAmount?.toFixed(2)}
+                initialValues={formik.values.initialValues?.[0]}
                 readOnly
               />
             </Grid>

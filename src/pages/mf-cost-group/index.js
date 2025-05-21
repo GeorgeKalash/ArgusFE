@@ -23,10 +23,11 @@ const CostGroup = () => {
     refetch,
     labels,
     access,
-    invalidate
+    invalidate,
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.CostGroup.qry,
+    endpointId: ManufacturingRepository.CostGroup.page,
     datasetId: ResourceIds.CostGroup
   })
 
@@ -43,11 +44,15 @@ const CostGroup = () => {
     }
   ]
 
-  async function fetchGridData() {
-    return await getRequest({
-      extension: ManufacturingRepository.CostGroup.qry,
-      parameters: `_filter=`
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
+      extension: ManufacturingRepository.CostGroup.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const add = async () => {
@@ -98,7 +103,8 @@ const CostGroup = () => {
           isLoading={false}
           pageSize={50}
           maxAccess={access}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Grow>
     </VertLayout>

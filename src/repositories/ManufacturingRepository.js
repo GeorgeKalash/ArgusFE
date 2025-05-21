@@ -24,6 +24,10 @@ export const ManufacturingRepository = {
     del: service + 'delLIN'
   },
   CostGroup: {
+    page: service + 'pageCG',
+    set: service + 'setCG',
+    get: service + 'getCG',
+    del: service + 'delCG',
     qry: service + 'qryCG'
   },
   WorkCenter: {
@@ -343,13 +347,6 @@ export const ManufacturingRepository = {
   JobWorkCenter: {
     close: service + 'closeJWC',
     reopen: service + 'reopenJWC'
-  },
-  CostGroup: {
-    page: service + 'pageCG',
-    set: service + 'setCG',
-    get: service + 'getCG',
-    del: service + 'delCG',
-    qry: service + 'qryCG'
   },
   CostGroupOverhead: {
     set2: service + 'set2CGV',

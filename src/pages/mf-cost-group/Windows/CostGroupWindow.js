@@ -8,8 +8,7 @@ export default function CostGroupWindow({ labels, access, recordId }) {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId: recordId,
-    isClosed: false
+    recordId: recordId
   })
 
   const tabs = [{ label: labels.costGroup }, { label: labels.overheads, disabled: !store.recordId }]
