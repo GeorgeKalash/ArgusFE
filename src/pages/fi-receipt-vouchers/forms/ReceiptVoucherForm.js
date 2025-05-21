@@ -59,7 +59,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     maxAccess: maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId,
       reference: '',

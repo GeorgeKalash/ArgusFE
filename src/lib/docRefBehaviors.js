@@ -156,10 +156,13 @@ const documentType = async (
     if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired, objectName)
   }
 
+  const fieldName = objectName ? `${objectName}.reference` : 'reference'
+
   return {
     dtId,
+    resetReference: reference?.readOnly,
     dcTypeRequired,
-    reference,
+    reference: { fieldName: fieldName, isEmpty: !isExternal?.external },
     errorMessage,
     maxAccess,
     selectNraId

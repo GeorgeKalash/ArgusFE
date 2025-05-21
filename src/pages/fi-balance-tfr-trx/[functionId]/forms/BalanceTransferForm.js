@@ -42,7 +42,7 @@ export default function BalanceTransferForm({ labels, access, recordId, function
   const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId,
       dtId: null,
