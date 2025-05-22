@@ -142,6 +142,7 @@ export default function ChangeClient({ form, window }) {
           <Grid item xs={12}>
             <ResourceLookup
               endpointId={SaleRepository.Client.snapshot}
+              filter={{ isInactive: false }}
               valueField='reference'
               displayField='name'
               secondFieldLabel={labels.name}
@@ -162,9 +163,10 @@ export default function ChangeClient({ form, window }) {
               required
               onChange={async (event, newValue) => {
                 const isValid = isValidClient(newValue)
+
                 formik.setFieldValue('changeToId', isValid ? newValue?.recordId : null)
-                formik.setFieldValue('changeToName', isValid ? newValue?.name : '')
-                formik.setFieldValue('changeToRef', isValid ? newValue?.reference : '')
+                formik.setFieldValue('changeToName', isValid ? newValue?.name : null)
+                formik.setFieldValue('changeToRef', isValid ? newValue?.reference : null)
                 formik.setFieldValue('changeBillId', isValid ? newValue?.billAddressId : null)
                 formik.setFieldValue('changeBill', isValid ? newValue?.billAddress : '')
                 formik.setFieldValue('changeSzId', isValid ? newValue?.szId : null)

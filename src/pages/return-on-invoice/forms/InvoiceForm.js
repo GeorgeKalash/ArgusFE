@@ -226,7 +226,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
         parameters: `_returnId=${form.values.recordId}`
       })
 
-      items = retItems.list.map(item => ({
+      items = retItems?.list?.map(item => ({
         ...item,
         returnNowQty: item.qty,
         componentSeqNo: item.componentSeqNo || 0,
@@ -321,7 +321,6 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
       resourceId={ResourceIds.ReturnOnInvoice}
       functionId={SystemFunction.SalesReturn}
       form={formik}
-      isSavedClear={false}
       isCleared={false}
       isSaved={false}
       isInfo={false}
@@ -378,6 +377,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
             name='items'
             maxAccess={maxAccess}
             allowDelete={false}
+            allowAddNewLine={false}
           />
         </Grow>
       </VertLayout>

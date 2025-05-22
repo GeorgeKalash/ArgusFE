@@ -63,7 +63,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ReturnOnInvoice,
-    access: access,
+    access,
     enabled: !recordId
   })
 
@@ -155,6 +155,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         returnedQty: 0,
         trackBy: null,
         isEditMode: false,
+        taxDetailsButton: true,
         serials: []
       }
     ]
@@ -164,7 +165,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.number().required(),
@@ -565,7 +565,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     {
       component: 'button',
       name: 'taxDetailsButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/tax-icon.png'
       },
@@ -959,7 +958,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: parseFloat(newRow?.mdAmount),
       mdType: newRow?.mdType,
-      baseLaborPrice: 0,
+      baseLaborPrice: parseFloat(newRow.baseLaborPrice || 0),
       totalWeightPerG: 0,
       mdValue: parseFloat(newRow?.mdValue),
       tdPct: formik?.values?.tdPct || 0,
@@ -1024,10 +1023,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     miscAmount: miscValue
   })
 
-  const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.qty || 0
-  const amount = reCal ? _footerSummary?.net : formik.values?.amount || 0
-  const subtotal = reCal ? subTotal : formik.values?.subtotal || 0
-  const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.vatAmount || 0
+  const totalQty = reCal ? _footerSummary?.totalQty.toFixed(2) : formik.values?.qty || 0
+  const amount = reCal ? _footerSummary?.net.toFixed(2) : formik.values?.amount || 0
+  const subtotal = reCal ? subTotal.toFixed(2) : formik.values?.subtotal || 0
+  const vatAmount = reCal ? _footerSummary?.sumVat.toFixed(2) : formik.values?.vatAmount || 0
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
     const _discountObj = getDiscValues({
@@ -1263,7 +1262,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId)
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -1277,7 +1276,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     maxAccess={!editMode && maxAccess}
                     readOnly={editMode}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', null)}
+                    onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
                   />
                 </Grid>
@@ -1305,7 +1304,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       { key: 'cgName', value: 'Client Group' }
                     ]}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('clientId', newValue?.recordId)
+                      formik.setFieldValue('clientId', newValue?.recordId || null)
                       formik.setFieldValue('clientName', newValue?.name)
                       formik.setFieldValue('clientRef', newValue?.reference)
                       formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
@@ -1333,17 +1332,18 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     label={labels.invoice}
                     valueField='recordId'
                     displayField='reference'
+                    maxAccess={maxAccess}
                     readOnly={editMode || formik.values.items.some(item => item.itemId)}
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('invoiceId', newValue?.recordId)
-                      formik.setFieldValue('contactId', newValue?.contactId)
-                      formik.setFieldValue('currencyId', newValue?.currencyId)
+                      formik.setFieldValue('invoiceId', newValue?.recordId || null)
+                      formik.setFieldValue('contactId', newValue?.contactId || null)
+                      formik.setFieldValue('currencyId', newValue?.currencyId || null)
                       formik.setFieldValue('exRate', newValue?.exRate)
                       formik.setFieldValue('rateCalcMethod', newValue?.rateCalcMethod)
-                      formik.setFieldValue('plantId', newValue?.plantId)
-                      formik.setFieldValue('spId', newValue?.spId)
-                      formik.setFieldValue('szId', newValue?.szId)
+                      formik.setFieldValue('plantId', newValue?.plantId || null)
+                      formik.setFieldValue('spId', newValue?.spId || null)
+                      formik.setFieldValue('szId', newValue?.szId || null)
                       formik.setFieldValue('isVattable', newValue?.isVattable)
                       formik.setFieldValue('tdType', newValue?.tdType || 1)
                       formik.setFieldValue('tdAmount', newValue?.tdAmount)
@@ -1390,7 +1390,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('plantId', newValue?.recordId)
+                      formik.setFieldValue('plantId', newValue?.recordId || null)
                     }}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                   />
@@ -1411,8 +1411,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('currencyId', newValue?.recordId || null)
                       formik.setFieldValue('items', [{ id: 1 }])
+                      formik.setFieldValue('currencyId', newValue?.recordId || null)
                     }}
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
@@ -1482,10 +1482,11 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     readOnly={isPosted}
                     valueField='recordId'
                     displayField='name'
+                    maxAccess={maxAccess}
                     values={formik.values}
                     displayFieldWidth={1.5}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('spId', newValue?.recordId)
+                      formik.setFieldValue('spId', newValue?.recordId || null)
                     }}
                     error={formik.touched.spId && Boolean(formik.errors.spId)}
                   />
@@ -1533,8 +1534,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     displayField='name'
                     readOnly={isPosted}
                     values={formik.values}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('returnReasonId', newValue?.recordId)
+                      formik.setFieldValue('returnReasonId', newValue?.recordId || null)
                     }}
                     error={formik.touched.returnReasonId && Boolean(formik.errors.returnReasonId)}
                   />
@@ -1553,8 +1555,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     ]}
                     readOnly
                     values={formik.values}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('contactId', newValue?.recordId)
+                      formik.setFieldValue('contactId', newValue?.recordId || null)
                     }}
                     error={formik.touched.contactId && Boolean(formik.errors.contactId)}
                   />
@@ -1570,11 +1573,12 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     name='szId'
                     label={labels.salesZone}
                     valueField='recordId'
+                    maxAccess={maxAccess}
                     displayField='name'
                     readOnly={isPosted}
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('szId', newValue?.recordId)
+                      formik.setFieldValue('szId', newValue?.recordId || null)
                     }}
                     error={formik.touched.szId && Boolean(formik.errors.szId)}
                   />
@@ -1595,8 +1599,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     maxAccess={maxAccess}
                     required={!formik?.values?.dtId || (formik?.values?.dtId && formik?.values?.commitItems)}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('siteRef', newValue?.reference || null)
-                      formik.setFieldValue('siteName', newValue?.name || null)
+                      formik.setFieldValue('siteRef', newValue?.reference || '')
+                      formik.setFieldValue('siteName', newValue?.name || '')
                       formik.setFieldValue('siteId', newValue?.recordId || null)
                     }}
                     error={formik.touched.siteId && Boolean(formik.errors.siteId)}
