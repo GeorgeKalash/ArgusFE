@@ -33,7 +33,7 @@ export default function SyncJobOrdersForm({ _labels, access }) {
         .test(function (value) {
           const { endDate } = this.parent
 
-          return value.getTime() <= endDate?.getTime()
+          return endDate === null ? true : value.getTime() <= endDate?.getTime()
         }),
       endDate: yup
         .date()
@@ -41,7 +41,7 @@ export default function SyncJobOrdersForm({ _labels, access }) {
         .test(function (value) {
           const { startDate } = this.parent
 
-          return value.getTime() >= startDate?.getTime()
+          return startDate === null ? true : value.getTime() >= startDate?.getTime()
         })
     }),
     onSubmit: async obj => {
@@ -93,8 +93,9 @@ export default function SyncJobOrdersForm({ _labels, access }) {
                 max={formik.values.endDate}
                 value={formik.values?.startDate}
                 required
+                maxAccess={access}
                 onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('startDate', '')}
+                onClear={() => formik.setFieldValue('startDate', null)}
                 error={formik.touched.startDate && Boolean(formik.errors.startDate)}
               />
             </Grid>
@@ -106,7 +107,8 @@ export default function SyncJobOrdersForm({ _labels, access }) {
                 min={formik.values.startDate}
                 required
                 onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('endDate', '')}
+                maxAccess={access}
+                onClear={() => formik.setFieldValue('endDate', null)}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
               />
             </Grid>
