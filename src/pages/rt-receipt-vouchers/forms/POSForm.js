@@ -151,7 +151,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
                 value={1}
                 control={<Radio />}
                 label={labels.manualPOS}
-                disabled={formik.values.posSelected == 1}
+                disabled={formik.values.posSelected == 2}
               />
               <FormControlLabel
                 value={2}
