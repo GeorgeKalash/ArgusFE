@@ -60,7 +60,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
   ]
   async function onReceived() {
     setSubmitting(true)
-    const res = axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/start_PUR`, formik.values)
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/start_PUR`, formik.values)
     if (res.data) {
       setSubmitting(false)
       const formattedText = res.data.replace(/ /g, '\n')
