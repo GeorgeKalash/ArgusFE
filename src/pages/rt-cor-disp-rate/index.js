@@ -126,6 +126,14 @@ const CorrespondentDispersalRate = () => {
     },
     {
       component: 'textfield',
+      label: labels.defaultRate,
+      name: 'defaultRate',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
       label: labels.rcm,
       name: 'rateCalcMethodName',
       props: {
@@ -158,22 +166,19 @@ const CorrespondentDispersalRate = () => {
         maxLength: 15,
         decimalScale: 7
       }
-    },
-    {
-      component: 'textfield',
-      label: labels.defaultRate,
-      name: 'defaultRate',
-      props: {
-        readOnly: true
-      }
     }
   ]
 
-  const fetchPlants = async (plantId, plantName) => {
-    if (plantId) return [{ recordId: plantId, name: plantName }]
+  const fetchPlants = async () => {
     const plantRes = await getRequest({ extension: SystemRepository.Plant.qry })
 
     return plantRes?.list || []
+  }
+
+  const fetchPlant = async (plantId) => {
+    const plantRes = await getRequest({ extension: SystemRepository.Plant.get, parameters: `_recordId=${plantId}` })
+
+    return plantRes
   }
 
   const fetchData = async (corId, countryId, currencyId, plantId, dispersalType) => {
@@ -201,8 +206,9 @@ const CorrespondentDispersalRate = () => {
     const plants = await fetchPlants()
 
     if (!plants.length) return
+    const plant = plantId && await fetchPlant(plantId)
+    const filteredPlants = plantId ? [plant.record] : plants
 
-    const filteredPlants = plantId ? plants.filter(plant => plant.recordId === plantId) : plants
 
     const items = filteredPlants.map((plant, index) => {
       const existingItem = resData.find(item => item.plantId === plant.recordId)
@@ -362,9 +368,6 @@ const CorrespondentDispersalRate = () => {
               error={formik.touched.plantId && Boolean(formik.errors.plantId)}
             />
           </Grid>
-          {/* <Grid item xs={1}>
-            <CustomButton onClick={onPreview} image='preview.png' label={platformLabels.Preview} color='#231f20' />
-          </Grid> */}
           <Grid item xs={1}>
             <CustomButton
               onClick={() => copyRowValues(formik)}
