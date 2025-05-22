@@ -967,7 +967,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
               <CustomDatePicker
                 name='date'
                 required
-                label={labels.date}
+                label={labels.postingDate}
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 editMode={editMode}
