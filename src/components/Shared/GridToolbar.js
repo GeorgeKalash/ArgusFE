@@ -9,6 +9,9 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
+import ResourceComboBox from './ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
+import { generateReport } from 'src/utils/ReportUtils'
 
 const GridToolbar = ({
   onAdd,
@@ -27,13 +30,15 @@ const GridToolbar = ({
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const addBtnVisible = onAdd && maxAccess > TrxType.GET
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const [searchValue, setSearchValue] = useState('')
   const { platformLabels } = useContext(ControlContext)
   const [tooltip, setTooltip] = useState('')
   const { stack } = useWindow()
-  const [selectedReport, setSelectedReport] = useState(null)
+
+  //const [selectedReport, setSelectedReport] = useState(null)
   const [reportStore, setReportStore] = useState([])
+  const [report, setReport] = useState({ selectedFormat: '', selectedReport: '' })
 
   function clear() {
     setSearchValue('')
@@ -66,7 +71,10 @@ const GridToolbar = ({
         }))
         setReportStore(formattedReports)
         if (formattedReports.length > 0) {
-          setSelectedReport(formattedReports[0])
+          setReport(prevState => ({
+            ...prevState,
+            selectedReport: reportStore[0]
+          }))
         }
       }
     })
@@ -76,7 +84,11 @@ const GridToolbar = ({
     const fetchReportLayout = async () => {
       if (previewReport) {
         await getReportLayout()
-        if (reportStore.length > 0) setSelectedReport(reportStore[0])
+        if (reportStore.length > 0)
+          setReport(prevState => ({
+            ...prevState,
+            selectedReport: reportStore[0]
+          }))
       }
     }
 
@@ -207,32 +219,67 @@ const GridToolbar = ({
         {previewReport && (
           <Grid item>
             <Grid item sx={{ display: 'flex', mr: 2 }}>
+              <ResourceComboBox
+                datasetId={DataSets.EXPORT_FORMAT}
+                name='selectedFormat'
+                valueField='key'
+                displayField='value'
+                values={report}
+                required
+                defaultIndex={0}
+                onChange={(event, newValue) => {
+                  setReport(prevState => ({
+                    ...prevState,
+                    selectedFormat: newValue
+                  }))
+                }}
+              />
               <CustomComboBox
                 label={platformLabels.SelectReport}
                 valueField='caption'
                 displayField='layoutName'
                 store={reportStore}
-                value={selectedReport}
-                onChange={(e, newValue) => setSelectedReport(newValue)}
+                value={report.selectedReport}
+                onChange={(e, newValue) =>
+                  setReport(prevState => ({
+                    ...prevState,
+                    selectedReport: newValue
+                  }))
+                }
                 sx={{ width: 250 }}
                 disableClearable
               />
               <Button
                 variant='contained'
-                disabled={!selectedReport}
-                onClick={() =>
-                  stack({
-                    Component: PreviewReport,
-                    props: {
-                      selectedReport: selectedReport,
-                      outerGrid: true,
-                      onSuccess: () => {}
-                    },
-                    width: 1000,
-                    height: 500,
-                    title: platformLabels.PreviewReport
+                disabled={!report.selectedReport}
+                onClick={async () => {
+                  if (!report.selectedReport) return
+
+                  const result = await generateReport({
+                    postRequest,
+                    resourceId: previewReport,
+                    outerGrid: true,
+                    selectedReport: report.selectedReport,
+                    selectedFormat: report.selectedFormat.key
                   })
-                }
+                  switch (parseInt(report.selectedFormat.key)) {
+                    case 1:
+                      stack({
+                        Component: PreviewReport,
+                        props: {
+                          pdf: result
+                        },
+                        width: 1000,
+                        height: 500,
+                        title: platformLabels.PreviewReport
+                      })
+                      break
+
+                    default:
+                      window.location.href = result
+                      break
+                  }
+                }}
                 sx={{
                   ml: 2,
                   backgroundColor: '#231F20',
