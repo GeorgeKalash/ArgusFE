@@ -20,6 +20,7 @@ export const SystemRepository = {
   },
   DocumentType: {
     qry: service + 'qryDT',
+    qry2: service + 'qry2DT',
     get: service + 'getDT',
     set: service + 'setDT',
     snapshot: service + 'snapshotDT',
