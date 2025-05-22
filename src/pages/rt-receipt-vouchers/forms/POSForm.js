@@ -63,7 +63,9 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
     const res = await axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/start_PUR`, formik.values)
     if (res.data) {
       setSubmitting(false)
+
       const formattedText = res.data.replace(/ /g, '\n')
+
       stack({
         Component: PopupDialog,
         props: {
@@ -93,16 +95,16 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
     formik.setFieldValue('cashAccountName', res?.record?.name)
   }
 
-  useEffect(() => {
-    ;(async function () {
-      await fillCashAccount()
+  // useEffect(() => {
+  //   ;(async function () {
+  //     await fillCashAccount()
 
-      const response = await getRequestFullEndPoint({
-        endPoint: `${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/checkDevice?_port=${process.env.NEXT_PUBLIC_POS_PORT}`
-      })
-      formik.setFieldValue('posSelected', response?.data ? 2 : 1)
-    })()
-  }, [])
+  //     const response = await getRequestFullEndPoint({
+  //       endPoint: `${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/checkDevice?_port=${process.env.NEXT_PUBLIC_POS_PORT}`
+  //     })
+  //     formik.setFieldValue('posSelected', response?.data ? 2 : 1)
+  //   })()
+  // }, [])
 
   return (
     <FormShell
