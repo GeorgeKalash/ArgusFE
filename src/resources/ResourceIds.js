@@ -462,5 +462,6 @@ export const ResourceIds = {
   JobsInProcess: 42309,
   CategoryPriceGroup: 51119,
   PostWorkCenterJob: 42330,
-  ProductionShifts: 42113
+  ProductionShifts: 42113,
+  SyncMFTrx: 42316,
 }
