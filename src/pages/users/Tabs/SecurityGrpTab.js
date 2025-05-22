@@ -2,7 +2,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
@@ -16,6 +16,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [fullGroups, setFullGroups] = useState([])
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -36,15 +37,13 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
     }
   })
 
-  const postGroups = async obj => {
-    const groups = obj?.groups?.length
-      ? obj.groups
-          .filter(item => item.sgId)
-          .map(item => ({
-            sgId: item.sgId,
-            userId: storeRecordId
-          }))
-      : []
+  const postGroups = async () => {
+    const groups = fullGroups
+      .filter(item => item.sgId)
+      .map(item => ({
+        sgId: item.sgId,
+        userId: storeRecordId
+      }))
 
     const data = {
       userId: storeRecordId,
@@ -62,11 +61,9 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
 
   const isSearchActive = !!formik.values.search
 
-const filteredData = isSearchActive
-  ? formik.values.groups.filter(item =>
-      item.sgName?.toLowerCase().includes(formik.values.search.toLowerCase())
-    )
-  : formik.values.groups
+  const filteredData = isSearchActive
+    ? fullGroups.filter(item => item.sgName?.toLowerCase().includes(formik.values.search.toLowerCase()))
+    : fullGroups
 
   async function fetchGridData() {
     const res = await getRequest({
@@ -78,10 +75,8 @@ const filteredData = isSearchActive
       ...item,
       id: index + 1
     }))
-    formik.setValues(prev => ({
-      ...prev,
-      groups: items
-    }))
+
+    setFullGroups(items)
   }
 
   useEffect(() => {
@@ -92,8 +87,29 @@ const filteredData = isSearchActive
     })()
   }, [storeRecordId])
 
-  function handleRowsChange(newValues) {
-    formik.setFieldValue('groups', newValues)
+  function handleRowsChange(updatedFilteredRows) {
+    const isSearchActive = !!formik.values.search
+
+    if (!isSearchActive) {
+      setFullGroups(updatedFilteredRows)
+
+      return
+    }
+
+    const updatedMap = new Map(updatedFilteredRows.map(row => [row.id, row]))
+
+    const merged = fullGroups
+      .filter(row => {
+        const isFiltered = row.sgName?.toLowerCase().includes(formik.values.search.toLowerCase())
+        const stillExists = updatedMap.has(row.id)
+
+        return !isFiltered || stillExists
+      })
+      .map(row => {
+        return updatedMap.get(row.id) || row
+      })
+
+    setFullGroups(merged)
   }
 
   const handleSearchChange = event => {
@@ -128,9 +144,8 @@ const filteredData = isSearchActive
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => handleRowsChange(value)}
+            onChange={handleRowsChange}
             value={filteredData}
-            error={formik.errors.groups}
             allowAddNewLine={!formik.values.search}
             columns={[
               {
