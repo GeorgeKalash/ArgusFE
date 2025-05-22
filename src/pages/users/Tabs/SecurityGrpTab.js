@@ -16,21 +16,24 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [fullGroups, setFullGroups] = useState([])
+
+  const initialGroups = [
+    {
+      id: 1,
+      sgId: '',
+      sgName: '',
+      userId: storeRecordId
+    }
+  ]
+
+  const [fullGroups, setFullGroups] = useState(initialGroups)
 
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       search: '',
-      groups: [
-        {
-          id: 1,
-          sgId: '',
-          sgName: '',
-          userId: storeRecordId
-        }
-      ]
+      groups: initialGroups
     },
     onSubmit: async values => {
       await postGroups(values)
