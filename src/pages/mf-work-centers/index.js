@@ -34,6 +34,8 @@ const WorkCenter = () => {
     filterBy,
     labels: _labels,
     access,
+    paginationParameters,
+    refetch,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -135,11 +137,13 @@ const WorkCenter = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          refetch={refetch}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
           maxAccess={access}
         />
       </Grow>
