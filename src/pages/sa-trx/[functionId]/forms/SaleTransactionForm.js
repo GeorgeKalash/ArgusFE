@@ -60,6 +60,7 @@ import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
+import AccountSummary from 'src/components/Shared/AccountSummary'
 
 export default function SaleTransactionForm({
   labels,
@@ -957,6 +958,27 @@ export default function SaleTransactionForm({
       condition: true,
       onClick: 'onClientSalesTransaction',
       disabled: !formik.values.header?.clientId
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            clientInfo: {
+              clientId: formik.values.header.clientId,
+              clientRef: formik.values.header.clientRef,
+              clientName: formik.values.header.clientName
+            },
+            moduleId: 1
+          },
+          width: 700,
+          height: 500,
+          title: labels.accountSummary
+        })
+      },
+      disabled: false
     }
   ]
 
