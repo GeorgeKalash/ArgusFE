@@ -60,8 +60,8 @@ const SecurityGroup = () => {
     stack({
       Component: GroupInfoWindow,
       props: {
-        labels: labels,
-        recordId: recordId,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 900,
