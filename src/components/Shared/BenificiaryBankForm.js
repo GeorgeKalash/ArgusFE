@@ -177,7 +177,7 @@ export default function BenificiaryBankForm({
         })
 
         toast.success('Record Updated Successfully')
-        if (onSuccess) onSuccess(res.recordId, values.name)
+        if (onSuccess) onSuccess(res.recordId, values)
         setEditMode(true)
       }
     }

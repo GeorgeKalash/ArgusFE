@@ -33,6 +33,9 @@ export const RemittanceOutwardsRepository = {
     post: service + 'postOWO',
     snapshot: service + 'snapshotOWO'
   },
+  OutwardsRequest: {
+    get: service + 'getOWX'
+  },
   InwardSettlement: {
     qry: service + 'qryIWS',
     page: service + 'pageIWS',
@@ -190,6 +193,6 @@ export const RemittanceOutwardsRepository = {
     qry: service + 'qryOWRR',
     get: service + 'getOWRR',
     set: service + 'setOWRR',
-    del: service + 'delOWRR',
-  },
+    del: service + 'delOWRR'
+  }
 }
