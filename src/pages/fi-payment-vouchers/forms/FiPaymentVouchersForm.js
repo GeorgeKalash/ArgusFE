@@ -295,7 +295,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     }
   }
 
-    const onVerify = async () => {
+  const onVerify = async () => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentVouchers.verify,
       record: JSON.stringify(formik.values)
