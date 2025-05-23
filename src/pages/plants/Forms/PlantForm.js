@@ -123,7 +123,7 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-            maxLength='40'
+            maxLength='4'
             maxAccess={maxAccess}
           />
         </Grid>
