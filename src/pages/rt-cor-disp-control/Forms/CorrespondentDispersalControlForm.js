@@ -813,9 +813,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
             error={formik.errors.items}
             allowDelete={false}
             allowAddNewLine={false}
-            showSelectAll={true}
-            handleCheckboxChange={disableCondition}
-            showCheckboxColumn={true}
             columns={columns}
             maxAccess={maxAccess}
           />
