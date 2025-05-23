@@ -243,6 +243,7 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotCOS'
   },
   Availability: {
+    get: service + 'getAVA',
     qry: service + 'qryAVA'
   },
   Parts: {
@@ -321,10 +322,10 @@ export const InventoryRepository = {
     del: service + 'delACO',
     snapshot: service + 'snapshotACO',
     post: service + 'postACO',
-    unpost: service + 'unpostACO',
+    unpost: service + 'unpostACO'
   },
   MeasurementSerial: {
     qry: service + 'qryMSM',
-    set2: service + 'set2MSM',
+    set2: service + 'set2MSM'
   }
 }
