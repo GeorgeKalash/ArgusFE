@@ -95,14 +95,24 @@ export default function CurrencyTrading() {
 
   const columns = [
     {
+      field: 'plantName',
+      headerName: labels.plant,
+      flex: 1
+    },
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
       field: 'date',
       headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'accountRef',
+      headerName: labels.accountReference,
       flex: 1
     },
     {
@@ -111,8 +121,13 @@ export default function CurrencyTrading() {
       flex: 1
     },
     {
-      field: 'cashAccountName',
-      headerName: labels.CashAccount,
+      field: 'currencyName',
+      headerName: labels.currency,
+      flex: 1
+    },
+    {
+      field: 'paymentMethodName',
+      headerName: labels.receiptMethod,
       flex: 1
     },
     {
@@ -122,19 +137,24 @@ export default function CurrencyTrading() {
       type: 'number'
     },
     {
-      field: 'currencyName',
-      headerName: labels.currency,
+      field: 'cashAccountName',
+      headerName: labels.CashAccount,
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
+      field: 'notes',
+      headerName: labels.description,
       flex: 1
     },
     {
       field: 'isVerified',
       headerName: labels.isVerified,
       type: 'checkbox'
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
     }
   ]
 
@@ -153,6 +173,7 @@ export default function CurrencyTrading() {
           rowId={['recordId']}
           isLoading={false}
           refetch={refetch}
+          deleteConfirmationType={'strict'}
           paginationParameters={paginationParameters}
           pageSize={50}
           paginationType='api'
