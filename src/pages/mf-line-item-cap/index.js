@@ -18,17 +18,19 @@ const LineItemCapacity = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  async function fetchGridData(filters = {}) {
-    const { params } = filters
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params } = options
 
-    return await getRequest({
-      extension: ManufacturingRepository.LineItemCapacity.qry,
-      parameters: `_params=${params || ''}`
+    const response = await getRequest({
+      extension: ManufacturingRepository.LineItemCapacity.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithFilter({ filters }) {
-    return fetchGridData({ params: filters?.params })
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
@@ -37,10 +39,11 @@ const LineItemCapacity = () => {
     refetch,
     access,
     invalidate,
+    paginationParameters,
     filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.LineItemCapacity.qry,
+    endpointId: ManufacturingRepository.LineItemCapacity.page,
     datasetId: ResourceIds.LineItemCapacity,
     filter: {
       filterFn: fetchWithFilter
@@ -111,7 +114,7 @@ const LineItemCapacity = () => {
       Component: LineItemCapacityForm,
       props: {
         labels,
-        maxAccess: access,
+        access,
         itemId,
         itemName,
         sku,
@@ -138,8 +141,9 @@ const LineItemCapacity = () => {
           onDelete={del}
           maxAccess={access}
           refetch={refetch}
+          paginationParameters={paginationParameters}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
         />
       </Grow>
     </VertLayout>

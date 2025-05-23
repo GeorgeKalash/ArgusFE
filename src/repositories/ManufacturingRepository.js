@@ -352,6 +352,7 @@ export const ManufacturingRepository = {
     get: service + 'getLIT',
     set2: service + 'set2LIT',
     del: service + 'delLIT',
-    qry: service + 'qryLIT'
+    qry: service + 'qryLIT',
+    page: service + 'pageLIT'
   }
 }

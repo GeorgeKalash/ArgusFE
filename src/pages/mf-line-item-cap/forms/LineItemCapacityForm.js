@@ -20,11 +20,10 @@ import { createConditionalSchema } from 'src/lib/validation'
 
 export default function LineItemCapacityForm({
   labels,
-  maxAccess,
+  access: maxAccess,
   itemId,
   itemName,
   sku,
-  classId,
   classRef,
   className
 }) {
@@ -32,7 +31,7 @@ export default function LineItemCapacityForm({
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.LineItemCapacity.qry
+    endpointId: ManufacturingRepository.LineItemCapacity.page
   })
 
   const conditions = {
@@ -44,11 +43,10 @@ export default function LineItemCapacityForm({
 
   const { formik } = useForm({
     initialValues: {
-      itemId,
-      classId,
-      itemName,
-      sku,
-      class: classRef ? `${classRef} ${className}` : '',
+      itemId: null,
+      itemName: '',
+      sku: '',
+      class: '',
       data: [{ id: 1, lineId: null, fullCapacityWgtPerHr: 0, preparationHrs: 0, nbOfLabors: 0 }]
     },
     maxAccess,
@@ -83,6 +81,11 @@ export default function LineItemCapacityForm({
   useEffect(() => {
     ;(async function () {
       if (itemId) {
+        formik.setFieldValue('itemId', itemId)
+        formik.setFieldValue('itemName', itemName)
+        formik.setFieldValue('sku', sku)
+        formik.setFieldTouched('class', classRef ? `${classRef} ${className}` : '')
+
         const { list } = await getRequest({
           extension: ManufacturingRepository.LineItemCapacity.qry,
           parameters: `_params=1|${itemId}`
@@ -143,7 +146,7 @@ export default function LineItemCapacityForm({
 
   return (
     <FormShell
-      resourceId={ResourceIds.ExchangeRates}
+      resourceId={ResourceIds.LineItemCapacity}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -179,11 +182,8 @@ export default function LineItemCapacityForm({
                         extension: InventoryRepository.ItemProduction.get,
                         parameters: `_recordId=${newValue?.recordId}`
                       })
-                      formik.setFieldValue('classId', record?.classId)
 
-                      if (record?.classId) {
-                        formik.setFieldValue('class', `${record?.classRef} ${record?.className}`)
-                      } else formik.setFieldValue('class', ``)
+                      formik.setFieldValue('class', record?.classId ? `${record?.classRef} ${record?.className}` : '')
                     }
                   }}
                   errorCheck={'itemId'}
