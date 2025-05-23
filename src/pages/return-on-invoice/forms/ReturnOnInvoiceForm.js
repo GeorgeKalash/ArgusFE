@@ -1239,7 +1239,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
-      disabledSavedClear={isPosted}
     >
       <VertLayout>
         <Fixed>
@@ -1294,7 +1293,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     valueShow='clientRef'
                     secondValueShow='clientName'
                     maxAccess={maxAccess}
-                    editMode={editMode}
                     required={!formik.values.dpId}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -1498,7 +1496,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     label={labels.date}
                     value={formik?.values?.date}
                     onChange={formik.setFieldValue}
-                    editMode={editMode}
                     readOnly={isPosted}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('date', null)}
@@ -1654,7 +1651,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                   label={labels.description}
                   value={formik.values.description}
                   rows={3}
-                  editMode={editMode}
                   readOnly={isPosted}
                   maxAccess={maxAccess}
                   onChange={e => formik.setFieldValue('description', e.target.value)}
