@@ -189,10 +189,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
         labels: labels,
         recordId: formik?.values?.sketchId,
         maxAccess: access
-      },
-      width: 700,
-      height: 700,
-      title: labels.Sketch
+      }
     })
   }
 
