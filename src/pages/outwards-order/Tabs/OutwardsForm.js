@@ -28,7 +28,6 @@ import FieldSet from 'src/components/Shared/FieldSet'
 import { DataSets } from 'src/resources/DataSets'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import FormGrid from 'src/components/form/layout/FormGrid'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -50,7 +49,9 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
   const userData = getStorageData('userData')
 
-  const [sysDefault, setDefault] = useState({ countryRef: 'AE', currencyRef: 'AED' })
+  const vatPctValue = parseInt(defaultsData?.list?.find(obj => obj.key === 'vatPct')?.value) || 0
+
+  const [sysDefault, setDefault] = useState({ countryRef: '', currencyRef: '' })
 
   const { labels: RVLabels, access: RVAccess } = useResourceQuery({
     datasetId: ResourceIds.RemittanceReceiptVoucher
@@ -130,7 +131,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       tdAmount: 0,
       defaultCommission: 12,
       amount: 0,
-      taxPercent: null,
+      taxPercent: vatPctValue,
       poeId: '',
       nationalityId: null,
       receiptId: null,
@@ -144,13 +145,13 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       releaseStatus: null,
       date: new Date(),
       isVerified: null,
-      recordId: recordId || null,
+      recordId,
       branchCode: ''
     },
     products: [{}],
     ICRequest: [{}],
     tokenNo: '',
-    vatRate: null,
+    vatRate: vatPctValue,
     hiddenTrxAmount: '',
     hiddenTrxCount: '',
     agentCode: 'AE01BH',
@@ -239,7 +240,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
-        valueDate: yup.string().required(),
+        valueDate: yup.date().required(),
         countryId: yup.number().required(),
         dispersalType: yup.number().required(),
         currencyId: yup.number().required(),
@@ -276,15 +277,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         record: JSON.stringify(data)
       })
 
-      if (result.recordId) {
-        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
-        formik.setFieldValue('header.recordId', result.recordId)
-        formik.setFieldValue('recordId', result.recordId)
-        const res2 = await getOutwards(result.recordId)
-        formik.setFieldValue('header.reference', res2.record.headerView.reference)
+      toast.success(recordId ? platformLabels.Edited : platformLabels.Added)
+      await refetchForm(result.recordId)
 
-        invalidate()
-      }
+      invalidate()
     }
   })
 
@@ -322,13 +318,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         recordId: formik.values.header.recordId
       })
     })
-    if (res.recordId) {
-      toast.success(platformLabels.Closed)
+    toast.success(platformLabels.Closed)
 
-      getDefaultVAT()
-      const result = await refetchForm(res.recordId)
-      result?.record?.headerView?.status === 4 && openRV()
-    }
+    const result = await refetchForm(res?.recordId)
+    result?.record?.headerView?.status === 4 && openRV()
   }
 
   const onReopen = async () => {
@@ -349,11 +342,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       invalidate()
 
       refetchForm(res.recordId)
-      await getDefaultVAT()
     }
   }
 
-  const vatAmount = (formik.values.header?.commission * formik.values.header.vatRate) / 100
+  const vatAmount = (formik.values.header?.commission * formik.values.header.vatRate) / 100 || 0
 
   const amount = parseFloat(
     parseFloat(formik.values.header.lcAmount) +
@@ -363,37 +355,63 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   const onProductSubmit = productData => {
     formik.setFieldValue('products', productData?.list)
     const selectedRowData = productData?.list?.find(row => row.checked)
-    handleSelectedProduct(selectedRowData)
+    handleSelectedProduct(selectedRowData, null, { ...formik.values, products: productData?.list })
   }
 
-  function handleSelectedProduct(selectedRowData, clearAmounts) {
-    formik.setFieldValue('header.interfaceId', selectedRowData?.interfaceId)
-    formik.setFieldValue('header.productId', selectedRowData?.productId)
-    formik.setFieldValue('header.commission', selectedRowData?.fees)
-    formik.setFieldValue('header.defaultCommission', selectedRowData?.fees)
-    formik.setFieldValue('header.dispersalId', selectedRowData?.dispersalId)
-    formik.setFieldValue('header.exRate', parseFloat(selectedRowData?.exRate).toFixed(5))
-    formik.setFieldValue('header.rateCalcMethod', selectedRowData?.rateCalcMethod)
-    selectedRowData?.agentCode && formik.setFieldValue('agentCode', selectedRowData?.agentCode)
-    formik.setFieldValue('header.corId', selectedRowData?.corId)
-    formik.setFieldValue('header.corRef', selectedRowData?.corRef)
-    formik.setFieldValue('header.corName', selectedRowData?.corName)
-    formik.setFieldValue('header.rateTypeId', selectedRowData?.rateTypeId)
-    calculateValueDate(selectedRowData?.valueDays)
-    if (clearAmounts) {
-      formik.setFieldValue('header.lcAmount', null)
-      formik.setFieldValue('header.fcAmount', null)
-    } else {
-      formik.setFieldValue('header.lcAmount', formik.values.header.lcAmount || selectedRowData?.baseAmount)
-      formik.setFieldValue('header.fcAmount', formik.values.header.fcAmount || selectedRowData?.originAmount)
+  function handleSelectedProduct(selectedRowData, clearAmounts, data) {
+    const {
+      interfaceId,
+      productId,
+      fees,
+      dispersalId,
+      exRate,
+      rateCalcMethod,
+      agentCode,
+      corId,
+      corRef,
+      corName,
+      rateTypeId,
+      baseAmount,
+      originAmount,
+      valueDays
+    } = selectedRowData || {}
+
+    const prevData = data || formik.values
+
+    const updatedValues = {
+      ...prevData,
+      header: {
+        ...prevData.header,
+        interfaceId,
+        productId,
+        commission: fees,
+        defaultCommission: fees,
+        dispersalId,
+        exRate: parseFloat(exRate).toFixed(5),
+        rateCalcMethod,
+        corId,
+        corRef,
+        corName,
+        rateTypeId,
+        lcAmount: clearAmounts ? null : prevData?.header.lcAmount || baseAmount,
+        fcAmount: clearAmounts ? null : prevData?.header.fcAmount || originAmount
+      },
+      ...(agentCode && { agentCode })
     }
+
+    formik.setValues(updatedValues)
+
+    calculateValueDate(valueDays)
+
+    return updatedValues
   }
 
   const fillOutwardsData = async (data, dataRequest) => {
     const { headerView } = data
-    formik.setValues(prevValues => ({
-      ...prevValues,
-      products: prevValues.products,
+
+    const updatedValues = formik.values && {
+      ...formik.values,
+      products: formik.values.products,
       recordId: headerView.recordId,
       header: {
         ...headerView,
@@ -401,9 +419,19 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         defaultValueDate: formatDateFromApi(headerView.defaultValueDate),
         date: formatDateFromApi(headerView.date)
       },
-      ICRequest: headerView.interfaceId == 1 && JSON.parse(dataRequest?.requestLog),
-      terraPayDetails: headerView?.interfaceId == 2 && JSON.parse(dataRequest?.requestLog)
-    }))
+      ICRequest:
+        headerView.interfaceId == 1 && dataRequest?.requestLog
+          ? JSON.parse(dataRequest?.requestLog)
+          : formik.values.ICRequest,
+      terraPayDetails:
+        headerView.interfaceId == 2 && dataRequest?.requestLog
+          ? JSON.parse(dataRequest?.requestLog)
+          : formik.values.terraPayDetails
+    }
+
+    formik.setValues(updatedValues)
+
+    return updatedValues
   }
 
   function openRelevantWindow(formValues) {
@@ -466,45 +494,61 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     return res.record
   }
 
-  const chooseClient = async (clientId, category) => {
+  const chooseClient = async (clientId, category, data) => {
     if (category == 1) {
       const result = clientId ? await getClientInfo(clientId) : null
+
       if (clientId && !result?.clientRemittance) {
-        stackError({
-          message: `Chosen Client Has No KYC.`
-        })
+        stackError({ message: labels.clientHasNoKyc })
 
         return
       }
 
-      formik.setFieldValue('idNo', result?.clientIDView?.idNo)
-      formik.setFieldValue('expiryDate', formatDateFromApi(result?.clientIDView?.idExpiryDate))
-      formik.setFieldValue('firstName', result?.clientIndividual?.firstName)
-      formik.setFieldValue('middleName', result?.clientIndividual?.middleName)
-      formik.setFieldValue('lastName', result?.clientIndividual?.lastName)
-      formik.setFieldValue('familyName', result?.clientIndividual?.familyName)
-      formik.setFieldValue('fl_firstName', result?.clientIndividual?.fl_firstName)
-      formik.setFieldValue('fl_middleName', result?.clientIndividual?.fl_middleName)
-
-      formik.setFieldValue('fl_lastName', result?.clientIndividual?.fl_lastName)
-      formik.setFieldValue('fl_familyName', result?.clientIndividual?.fl_familyName)
-      formik.setFieldValue('professionId', result?.clientIndividual?.professionId)
-      formik.setFieldValue('header.cellPhone', result?.clientMaster?.cellPhone)
-      formik.setFieldValue('header.nationalityId', result?.clientMaster?.nationalityId)
-      formik.setFieldValue('hiddenTrxCount', result?.clientRemittance?.trxCountPerYear)
-      formik.setFieldValue('hiddenTrxAmount', result?.clientRemittance?.trxAmountPerYear)
-      formik.setFieldValue('ICRequest.remitter.employerName', result?.clientIndividual?.sponsorName)
+      formik.setValues({
+        ...data,
+        idNo: result?.clientIDView?.idNo,
+        expiryDate: formatDateFromApi(result?.clientIDView?.idExpiryDate),
+        firstName: result?.clientIndividual?.firstName,
+        middleName: result?.clientIndividual?.middleName,
+        lastName: result?.clientIndividual?.lastName,
+        familyName: result?.clientIndividual?.familyName,
+        fl_firstName: result?.clientIndividual?.fl_firstName,
+        fl_middleName: result?.clientIndividual?.fl_middleName,
+        fl_lastName: result?.clientIndividual?.fl_lastName,
+        fl_familyName: result?.clientIndividual?.fl_familyName,
+        professionId: result?.clientIndividual?.professionId,
+        hiddenTrxCount: result?.clientRemittance?.trxCountPerYear,
+        hiddenTrxAmount: result?.clientRemittance?.trxAmountPerYear,
+        ICRequest: {
+          ...data.ICRequest,
+          remitter: {
+            ...data.ICRequest?.remitter,
+            employerName: result?.clientIndividual?.sponsorName
+          }
+        },
+        header: {
+          ...data.header,
+          cellPhone: result?.clientMaster?.cellPhone,
+          nationalityId: result?.clientMaster?.nationalityId
+        }
+      })
     } else if (category == 2) {
-      const res = await getRequest({
+      const result = await getRequest({
         extension: CTCLRepository.ClientCorporate.get,
         parameters: `_clientId=${clientId}`
       })
-      if (!res) {
-        return
-      }
-      formik.setFieldValue('header.nationalityId', result?.clientMaster?.nationalityId)
-      formik.setFieldValue('header.cellPhone', result?.clientMaster?.cellPhone)
-      formik.setFieldValue('expiryDate', formatDateFromApi(result?.clientMaster?.expiryDate))
+
+      if (!result) return
+
+      formik.setValues(prev => ({
+        ...data,
+        expiryDate: formatDateFromApi(result?.clientMaster?.expiryDate),
+        header: {
+          ...data.header,
+          cellPhone: result?.clientMaster?.cellPhone,
+          nationalityId: result?.clientMaster?.nationalityId
+        }
+      }))
     }
   }
 
@@ -555,6 +599,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       disabled: !(formik.values.status == 4)
     }
   ]
+
   function openBeneficiaryWindow() {
     stack({
       Component: BeneficiaryListWindow,
@@ -575,14 +620,16 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       props: {
         maxAccess: maxAccess,
         labels: labels,
-        products: formik.values.products,
-        countryRef: formik.values.header.countryRef,
-        targetCurrency: formik.values.header.currencyRef,
-        defaultAgentCode: formik.values.agentCode,
-        fcAmount: formik.values.header.fcAmount,
-        lcAmount: formik.values.header.lcAmount,
-        productId: formik.values.header.productId,
-        sysDefault,
+        data: {
+          products: formik.values.products,
+          countryRef: formik.values.header.countryRef,
+          targetCurrency: formik.values.header.currencyRef,
+          defaultAgentCode: formik.values.agentCode,
+          fcAmount: formik.values.header.fcAmount,
+          lcAmount: formik.values.header.lcAmount,
+          productId: formik.values.header.productId,
+          sysDefault
+        },
         onProductSubmit,
         editMode
       },
@@ -596,7 +643,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     if (formik.values.header.interfaceId === 1) {
       const remitter = formik.values.ICRequest.remitter
       const beneficiary = formik.values.ICRequest.beneficiary
-      const selectRow = formik.values?.products?.find(row => row.checked)
+      const selectRow = formik.values?.products?.find(row => row?.checked)
 
       stack({
         Component: InstantCash,
@@ -608,10 +655,11 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
             amount: formik.values.header.amount || amount
           },
           sysDefault,
-          agentCode: formik.values.agentCode,
-          deliveryModeId: selectRow?.deliveryModeId || selectRow.agentDeliveryMode,
-          payingAgent: selectRow?.agentCode,
-          payingCurrency: selectRow?.payingCurrency || selectRow.agentPayingCurrency,
+          productData: {
+            deliveryModeId: selectRow?.deliveryModeId || selectRow?.agentDeliveryMode,
+            payingAgent: selectRow?.agentCode,
+            payingCurrency: selectRow?.payingCurrency || selectRow?.agentPayingCurrency
+          },
           clientData: {
             hiddenTrxAmount: formik.values.hiddenTrxAmount,
             hiddenTrxCount: formik.values.hiddenTrxCount,
@@ -634,18 +682,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         props: {
           onSubmit: onTerraPaySubmit,
           terraPay: formik.values.terraPayDetails,
-          outwardsData: {
-            countryId: formik.values.header.countryId,
-            countryRef: formik.values.header.countryRef,
-            amount: amount,
-            currencyId: formik.values.header.currencyId,
-            currencyRef: formik.values.header.currencyRef
-          },
-          beneficiary: {
-            beneficiaryName: formik.values.header.beneficiaryName,
-            branchCode: formik.values.header.branchCode
-          },
-          editMode
+          data: formik.values.header
         },
         width: 700,
         height: 500,
@@ -703,15 +740,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     })
   }
 
-  async function getDefaultVAT() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=vatPct`
-    })
-    formik.setFieldValue('header.vatRate', parseInt(res.record.value))
-    formik.setFieldValue('header.taxPercent', parseFloat(res.record.value))
-  }
-
   async function getDefaultCountry() {
     const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')?.value
 
@@ -748,8 +776,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   async function refetchForm(recordId) {
     const [res, resRequest] = await Promise.all([getOutwards(recordId), getOutwardsRequest(recordId)])
 
-    await fillOutwardsData(res.record, resRequest.record)
-    await chooseClient(res.record.headerView.clientId, res.record.headerView.category)
+    const data = await fillOutwardsData(res.record, resRequest.record)
+    await chooseClient(res.record.headerView.clientId, res.record.headerView.category, data)
 
     return res
   }
@@ -774,17 +802,18 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         })
 
         if (res?.list?.length > 0) {
+          await displayProduct(res.list, data.header?.productId, { ...formik.values, products: res.list })
           formik.setFieldValue('products', res.list)
-
-          await displayProduct(res.list, data.header?.productId)
         } else {
-          formik.setFieldValue('products', [])
-          !editMode && handleSelectedProduct(null, null)
+          !editMode &&
+            handleSelectedProduct(null, null, {
+              ...formik.values,
+              products: []
+            })
         }
       }
     } catch (error) {
-      formik.setFieldValue('products', [])
-      !editMode && handleSelectedProduct()
+      !editMode && handleSelectedProduct(null, null, { ...formik.values, products: [] })
     }
   }
 
@@ -799,8 +828,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
   async function displayProduct(data, productId) {
     if (data.length === 1) {
-      formik.setFieldValue('products[0].checked', true)
       !editMode && handleSelectedProduct(data[0])
+      formik.setFieldValue('products[0].checked', true)
     } else {
       !editMode && handleSelectedProduct()
       if (productId) {
@@ -819,7 +848,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         copy.lcAmount = 0
         await fillProducts(copy.headerView)
       }
-      getDefaultVAT()
     })()
   }, [])
 
@@ -922,16 +950,21 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       valueField='countryId'
                       values={formik.values.header}
                       onChange={(event, newValue) => {
-                        formik.setFieldValue('header.countryId', newValue ? newValue?.countryId : '')
-                        formik.setFieldValue('header.countryRef', newValue ? newValue?.countryRef : '')
-                        formik.setFieldValue('header.fcAmount', '')
-                        formik.setFieldValue('header.lcAmount', '')
-                        handleSelectedProduct(null, true)
-                        formik.setFieldValue('header.products', [])
-                        if (!newValue) {
-                          formik.setFieldValue('header.dispersalType', '')
-                          formik.setFieldValue('header.currencyId', '')
+                        const updatedValues = formik.values && {
+                          ...formik.values,
+                          header: {
+                            ...formik.values.header,
+                            countryId: newValue?.countryId || null,
+                            countryRef: newValue?.countryRef || '',
+                            fcAmount: '',
+                            lcAmount: '',
+                            products: [],
+                            dispersalType: newValue ? formik.values.header.dispersalType : '',
+                            currencyId: newValue ? formik.values.header.currencyId : ''
+                          }
                         }
+
+                        handleSelectedProduct(null, true, updatedValues)
                       }}
                       error={formik.touched.header?.countryId && Boolean(formik.errors.header?.countryId)}
                     />
@@ -948,15 +981,19 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       valueField='dispersalType'
                       values={formik.values.header}
                       onChange={(event, newValue) => {
-                        formik.setFieldValue('header.dispersalType', newValue ? newValue?.dispersalType : '')
-                        formik.setFieldValue('header.dispersalTypeName', newValue ? newValue?.dispersalTypeName : '')
-                        formik.setFieldValue('header.beneficiaryId', '')
-                        formik.setFieldValue('header.beneficiaryName', '')
-                        if (!newValue) {
-                          formik.setFieldValue('header.currencyId', '')
-                        }
-                        formik.setFieldValue('header.lcAmount', '')
-                        formik.setFieldValue('header.fcAmount', '')
+                        formik.setValues({
+                          ...formik.values,
+                          header: {
+                            ...formik.values.header,
+                            dispersalType: newValue?.dispersalType || '',
+                            dispersalTypeName: newValue?.dispersalTypeName || '',
+                            beneficiaryId: '',
+                            beneficiaryName: '',
+                            currencyId: newValue ? formik.values.header.currencyId : '',
+                            lcAmount: '',
+                            fcAmount: ''
+                          }
+                        })
                       }}
                       error={formik.touched.header?.dispersalType && Boolean(formik.errors.header?.dispersalType)}
                     />
@@ -994,12 +1031,18 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       values={formik.values.header}
                       readOnly={!formik.values.header.dispersalType || isClosed || isPosted || editMode}
                       onChange={(event, newValue) => {
-                        formik.setFieldValue('header.currencyId', newValue?.currencyId)
-                        formik.setFieldValue('header.currencyRef', newValue?.currencyRef)
-                        formik.setFieldValue('header.lcAmount', '')
-                        formik.setFieldValue('header.fcAmount', '')
+                        formik.setValues({
+                          ...formik.values,
+                          header: {
+                            ...formik.values.header,
+                            currencyId: newValue?.currencyId,
+                            currencyRef: newValue?.currencyRef,
+                            lcAmount: '',
+                            fcAmount: ''
+                          }
+                        })
                       }}
-                      error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
+                      error={formik.touched.header?.currencyId && Boolean(formik.errors.header?.currencyId)}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -1025,9 +1068,9 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       readOnly={formik.values.header.lcAmount || editMode}
                       maxAccess={maxAccess}
                       onChange={e => formik.setFieldValue('header.fcAmount', e.target.value)}
-                      onBlur={async () => {
+                      onBlur={e => {
                         if (!formik.values.header.lcAmount)
-                          await fillProducts({
+                          fillProducts({
                             countryId: formik.values.header.countryId,
                             currencyId: formik.values.header.currencyId,
                             dispersalType: formik.values.header.dispersalType,
@@ -1038,11 +1081,13 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                           })
                       }}
                       onClear={() => {
-                        formik.setFieldValue('header.fcAmount', '')
                         if (!formik.values.header.lcAmount) {
-                          handleSelectedProduct(null, true)
-                          formik.setFieldValue('products', [])
+                          handleSelectedProduct(null, true, {
+                            ...formik.values,
+                            products: []
+                          })
                         }
+                        formik.setFieldValue('header.fcAmount', '')
                       }}
                       error={formik.touched.header?.fcAmount && Boolean(formik.errors.header?.fcAmount)}
                       maxLength={10}
@@ -1058,7 +1103,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       readOnly={formik.values.header.fcAmount || editMode}
                       maxAccess={maxAccess}
                       onChange={e => formik.setFieldValue('header.lcAmount', e.target.value)}
-                      onBlur={async () => {
+                      onBlur={async e => {
                         if (!formik.values.header.fcAmount)
                           await fillProducts({
                             countryId: formik.values.header.countryId,
@@ -1071,11 +1116,13 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                           })
                       }}
                       onClear={() => {
-                        formik.setFieldValue('header.lcAmount', '')
                         if (!formik.values.header.fcAmount) {
-                          handleSelectedProduct(null, true)
-                          formik.setFieldValue('products', [])
+                          handleSelectedProduct(null, true, {
+                            ...formik.values,
+                            products: []
+                          })
                         }
+                        formik.setFieldValue('header.lcAmount', '')
                       }}
                       error={formik.touched.header?.lcAmount && Boolean(formik.errors.header?.lcAmount)}
                       maxLength={10}
@@ -1132,6 +1179,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       decimalScale={5}
                       maxAccess={maxAccess}
                       maxLength={10}
+                      error={formik.touched.header?.exRate && Boolean(formik.errors.header?.exRate)}
                     />
                   </Grid>
                   <Grid item xs={6}>
@@ -1140,7 +1188,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       decimalScale={5}
                       label={labels.exRateDivide}
                       value={formik.values.header?.exRate ? 1 / formik.values.header.exRate : ''}
-                      required
                       readOnly
                       maxAccess={maxAccess}
                       maxLength={10}
@@ -1192,6 +1239,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       readOnly
                       maxAccess={maxAccess}
                       maxLength={10}
+                      error={formik.touched.header?.amount && Boolean(formik.errors?.header?.amount)}
                     />
                   </Grid>
                 </Grid>
@@ -1224,7 +1272,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                           onChange={async (event, newValue) => {
                             if (newValue?.status == -1) {
                               stackError({
-                                message: `Chosen Client Must Be Active.`
+                                message: labels.ClientMustBeActive
                               })
 
                               return
@@ -1237,23 +1285,32 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             )
                             if (expiryDate < today) {
                               stackError({
-                                message: `Expired Client.`
+                                message: labels.expiredClient
                               })
 
                               return
                             }
 
-                            formik.setFieldValue('header.clientId', newValue?.recordId || null)
-                            formik.setFieldValue('header.clientName', newValue?.name || '')
-                            formik.setFieldValue('header.clientRef', newValue?.reference || '')
-                            formik.setFieldValue('header.category', newValue?.category || 1)
-                            await chooseClient(newValue?.recordId, newValue?.category || 1)
-                            formik.setFieldValue('header.beneficiaryId', null)
-                            formik.setFieldValue('header.beneficiaryName', '')
-                            formik.setFieldValue('header.beneficiarySeqNo', null)
-                            formik.setFieldValue('header.branchCode', '')
+                            const updatedValues = formik.values && {
+                              ...formik.values,
+                              header: {
+                                ...formik.values.header,
+                                clientId: newValue?.recordId || null,
+                                clientName: newValue?.name || '',
+                                clientRef: newValue?.reference || '',
+                                category: newValue?.category || 1,
+                                beneficiaryId: null,
+                                beneficiaryName: '',
+                                beneficiarySeqNo: null,
+                                branchCode: ''
+                              }
+                            }
+
+                            formik.setValues(updatedValues)
+
+                            await chooseClient(newValue?.recordId, newValue?.category || 1, updatedValues)
                           }}
-                          errorCheck={'clientId'}
+                          errorCheck={'header.clientId'}
                         />
                       </Grid>
                       <Grid item xs={3}>
@@ -1405,11 +1462,23 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                               ]}
                               values={formik.values.header}
                               onChange={(event, newValue) => {
-                                formik.setFieldValue('header.poeId', newValue?.recordId || null)
-                                formik.setFieldValue(
-                                  'terraPayDetails.transaction.internationalTransferInformation.remittancePurpose',
-                                  newValue?.name || ''
-                                )
+                                formik.setValues({
+                                  ...formik.values,
+                                  header: {
+                                    ...formik.values.header,
+                                    poeId: newValue?.recordId || null
+                                  },
+                                  terraPayDetails: {
+                                    ...formik.values.terraPayDetails,
+                                    transaction: {
+                                      ...formik.values.terraPayDetails?.transaction,
+                                      internationalTransferInformation: {
+                                        ...formik.values.terraPayDetails?.transaction?.internationalTransferInformation,
+                                        remittancePurpose: newValue?.name || ''
+                                      }
+                                    }
+                                  }
+                                })
                               }}
                               required
                               readOnly={editMode}
@@ -1468,7 +1537,11 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                     onClick={() => openBankWindow()}
                     label={labels.bankApi}
                     color='#000000'
-                    disabled={!formik.values.header.beneficiaryId || !formik.values.header.interfaceId}
+                    disabled={
+                      !formik.values.header.beneficiaryId ||
+                      !formik.values.header.interfaceId ||
+                      !formik.values.header.productId
+                    }
                   />
                 </Grid>
               </Grid>

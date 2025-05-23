@@ -52,9 +52,9 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
-      recordId: recordId,
+      recordId,
       header: {
-        recordId: recordId,
+        recordId,
         plantId: null,
         reference: '',
         accountId: null,

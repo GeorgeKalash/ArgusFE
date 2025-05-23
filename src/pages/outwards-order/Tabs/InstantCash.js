@@ -22,9 +22,7 @@ export default function InstantCash({
   cashData = {},
   window,
   clientData,
-  deliveryModeId,
-  payingAgent,
-  payingCurrency,
+  productData: { deliveryModeId, payingAgent, payingCurrency },
   outwardsData,
   sysDefault,
   editMode
@@ -40,7 +38,7 @@ export default function InstantCash({
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      deliveryModeId: deliveryModeId,
+      deliveryModeId,
       payingAgent: payingAgent,
       sourceCurrency: sysDefault.currencyRef,
       targetCurrency: payingCurrency,

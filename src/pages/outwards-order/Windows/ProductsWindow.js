@@ -15,15 +15,8 @@ const ProductsWindow = ({
   labels,
   maxAccess,
   onProductSubmit,
-  products,
   editMode,
-  targetCurrency,
-  countryRef,
-  sysDefault,
-  defaultAgentCode,
-  fcAmount,
-  lcAmount,
-  productId,
+  data: { products, targetCurrency, countryRef, sysDefault, defaultAgentCode, fcAmount, lcAmount, productId },
   window
 }) => {
   const [gridData, setGridData] = useState([])
@@ -40,8 +33,6 @@ const ProductsWindow = ({
       extension: RemittanceBankInterface.InstantCashRates.get,
       parameters: `_deliveryMode=${deliveryModeId}&_sourceCurrency=${sysDefault.currencyRef}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_targetAmount=${targetAmount}&_originatingCountry=${sysDefault.countryRef}&_destinationCountry=${countryRef}`
     })
-
-    const data = getRates.record
 
     const change = await getRequest({
       extension: RemittanceBankInterface.exchange.get,
@@ -63,7 +54,7 @@ const ProductsWindow = ({
             agentCode: agentCode,
             originAmount: result?.originalAmount,
             baseAmount: result?.baseAmount,
-            fees: data?.charge,
+            fees: getRates?.record?.charge,
             exRate: result.settlementRate,
             deliveryModeId: deliveryModeId,
             payingCurrency: payingCurrency
@@ -106,17 +97,19 @@ const ProductsWindow = ({
                   Component: SelectAgent,
                   props: {
                     setData,
-                    productId: params.data?.productId,
-                    agentId: params.data?.agentId,
-                    baseAmount: params.data?.baseAmount,
-                    originAmount: params.data?.originAmount,
-                    receivingCountry: countryRef,
-                    deliveryModeId: params.data?.deliveryModeId,
-                    defaultAgentCode,
-                    targetCurrency: targetCurrency,
-                    payingCurrency: params.data?.payingCurrency,
-                    agentCode: params.data?.agentCode,
-                    agentDeliveryMode: params.data?.agentDeliveryMode,
+                    values: {
+                      productId: params.data?.productId,
+                      agentId: params.data?.agentId,
+                      baseAmount: params.data?.baseAmount,
+                      originAmount: params.data?.originAmount,
+                      receivingCountry: countryRef,
+                      deliveryModeId: params.data?.deliveryModeId,
+                      defaultAgentCode,
+                      targetCurrency,
+                      payingCurrency: params.data?.payingCurrency,
+                      agentCode: params.data?.agentCode,
+                      agentDeliveryMode: params.data?.agentDeliveryMode
+                    },
                     labels,
                     maxAccess
                   },
@@ -156,22 +149,18 @@ const ProductsWindow = ({
   ]
 
   useEffect(() => {
-    ;(async function () {
-      try {
-        setGridData({
-          list: products.map(item => ({
-            ...item,
-            defaultAgentCode: item.agentCode,
-            defaultAgentName: item.agentName,
-            payingCurrency: item.agentPayingCurrency,
-            defaultPayoutCurrency: item.payingCurrency,
-            checked: item.productId === productId ? true : false,
-            originAmount: item.originAmount,
-            baseAmount: item.baseAmount
-          }))
-        })
-      } catch (error) {}
-    })()
+    setGridData({
+      list: products.map(item => ({
+        ...item,
+        defaultAgentCode: item.agentCode,
+        defaultAgentName: item.agentName,
+        payingCurrency: item.agentPayingCurrency,
+        defaultPayoutCurrency: item.payingCurrency,
+        checked: item.productId === productId,
+        originAmount: item.originAmount,
+        baseAmount: item.baseAmount
+      }))
+    })
   }, [])
 
   return (

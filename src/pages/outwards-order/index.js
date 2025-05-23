@@ -21,7 +21,6 @@ import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 const OutwardsOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const userData = getStorageData('userData')
 
@@ -29,7 +28,6 @@ const OutwardsOrder = () => {
     query: { data },
     filterBy,
     refetch,
-    clearFilter,
     labels: _labels,
     access,
     invalidate
@@ -41,17 +39,6 @@ const OutwardsOrder = () => {
       filterFn: fetchWithFilter
     }
   })
-
-  async function fetchWithSearch({ filters }) {
-    if (!filters.qry) {
-      return { list: [] }
-    } else {
-      return await getRequest({
-        extension: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    }
-  }
 
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
@@ -74,31 +61,19 @@ const OutwardsOrder = () => {
   async function openForm(recordId) {
     const plantId = await getPlantId()
 
-    // if (!plantId && !recordId) {
-    //   stackError({
-    //     message: _labels.PlantDefaultError
-    //   })
-    // } else {
-    //   const dtId = await getDefaultDT()
-
     stack({
       Component: OutwardsForm,
       props: {
-        plantId: plantId,
+        plantId,
         userId: userData?.userId,
         access,
         labels: _labels,
-        recordId: recordId
-
-        // invalidate,
-        // dtId
+        recordId
       },
       width: 1100,
       height: 600,
       title: _labels.OutwardsOrder
     })
-
-    // }
   }
 
   const columns = [
@@ -159,19 +134,6 @@ const OutwardsOrder = () => {
     action: openForm,
     hasDT: false
   })
-
-  const getDefaultDT = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserFunction.get,
-        parameters: `_userId=${userData.userId}&_functionId=${SystemFunction.OutwardsOrder}`
-      })
-
-      return res?.record?.dtId
-    } catch (error) {
-      return ''
-    }
-  }
 
   const addOutwards = async () => {
     await proxyAction()

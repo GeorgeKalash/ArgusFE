@@ -11,30 +11,32 @@ import * as yup from 'yup'
 export default function SelectAgent({
   labels,
   maxAccess,
-  originAmount,
-  baseAmount,
-  productId,
-  payingCurrency,
-  receivingCountry,
-  agentCode,
   setData,
-  targetCurrency,
-  agentDeliveryMode,
+  values: {
+    originAmount,
+    baseAmount,
+    productId,
+    payingCurrency,
+    receivingCountry,
+    agentCode,
+    targetCurrency,
+    agentDeliveryMode
+  },
   window
 }) {
   const { formik } = useForm({
     initialValues: {
-      agentCode: agentCode,
+      agentCode,
       agentName: '',
-      productId: productId,
+      productId,
       fees: '',
       exRate: '',
-      originAmount: originAmount,
-      baseAmount: baseAmount,
+      originAmount,
+      baseAmount,
       bankName: '',
       bankNameCode: '',
       deliveryModeId: agentDeliveryMode,
-      payingCurrency: payingCurrency
+      payingCurrency
     },
     maxAccess,
     validateOnChange: true,
@@ -46,8 +48,6 @@ export default function SelectAgent({
       window.close()
     }
   })
-
-  console.log(formik)
 
   return (
     <FormShell form={formik} isCleared={false} infoVisible={false}>
