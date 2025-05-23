@@ -295,6 +295,19 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     }
   }
 
+    const onVerify = async () => {
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentVouchers.verify,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res) {
+      toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+      invalidate()
+      window.close()
+    }
+  }
+
   const actions = [
     {
       key: 'Locked',
@@ -308,6 +321,18 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode || isCancelled
+    },
+    {
+      key: 'Verify',
+      condition: !formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
     },
     {
       key: 'Cancel',
@@ -492,36 +517,35 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                   formik.setFieldValue('accountId', newValue?.recordId || '')
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
+                  formik.setFieldValue('groupName', newValue?.groupName || '')
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
+            <Grid item xs={6}>
+              <CustomTextField name='groupName' label={labels.accountGroup} value={formik.values.groupName} readOnly />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=0`}
                 name='cashAccountId'
-                readOnly={isPosted || isCancelled}
-                label={labels.cash}
-                valueField='reference'
-                displayField='name'
-                valueShow='cashAccountRef'
-                secondValueShow='cashAccountName'
-                form={formik}
+                readOnly={isCancelled || isPosted}
                 required
-                onChange={(event, newValue) => {
-                  formik.setValues({
-                    ...formik.values,
-                    cashAccountId: newValue?.recordId || '',
-                    cashAccountRef: newValue?.reference || '',
-                    cashAccountName: newValue?.name || ''
-                  })
-                }}
-                errorCheck={'cashAccountId'}
+                label={labels.cashAccount}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
                 maxAccess={maxAccess}
+                onChange={async (_, newValue) => {
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
+                }}
+                error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -531,6 +555,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                     endpointId={SystemRepository.Currency.qry}
                     name='currencyId'
                     label={labels.currency}
+                    filter={item => item.currencyType === 1}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
