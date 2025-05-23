@@ -123,7 +123,7 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-            maxLength='4'
+            maxLength='40'
             maxAccess={maxAccess}
           />
         </Grid>
@@ -148,7 +148,7 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('licenseNo', '')}
             error={formik.touched.licenseNo && Boolean(formik.errors.licenseNo)}
-            maxLength='40'
+            maxLength='20'
             maxAccess={maxAccess}
           />
         </Grid>
@@ -160,7 +160,7 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('crNo', '')}
             error={formik.touched.crNo && Boolean(formik.errors.crNo)}
-            maxLength='40'
+            maxLength='20'
             maxAccess={maxAccess}
           />
         </Grid>
