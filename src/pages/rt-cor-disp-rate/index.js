@@ -99,7 +99,7 @@ const CorrespondentDispersalRate = () => {
       items: yup.array().of(itemSchema).required()
     }),
     onSubmit: async obj => {
-      const filteredItems = (obj.items || []).filter(
+      const filteredItems = obj?.items?.filter(
         item => item.rate != null || item.minRate != null || item.maxRate != null
       )
 
@@ -169,14 +169,13 @@ const CorrespondentDispersalRate = () => {
     }
   ]
 
-  const fetchPlants = async () => {
-    const plantRes = await getRequest({ extension: SystemRepository.Plant.qry })
-
-    return plantRes?.list || []
-  }
-
-  const fetchPlant = async (plantId) => {
-    const plantRes = await getRequest({ extension: SystemRepository.Plant.get, parameters: `_recordId=${plantId}` })
+  const fetchPlants = async plantId => {
+    let plantRes = []
+    if (plantId) {
+      plantRes = await getRequest({ extension: SystemRepository.Plant.get, parameters: `_recordId=${plantId}` })
+    } else {
+      plantRes = await getRequest({ extension: SystemRepository.Plant.qry })
+    }
 
     return plantRes
   }
@@ -203,14 +202,11 @@ const CorrespondentDispersalRate = () => {
     const resData = (await fetchData(corId, countryId, currencyId, plantId, dispersalType))?.list || []
     const { fxRate, rateCalcMethodName, rateCalcMethod } = (await fetchATPExchangeRate(currencyId))?.record || []
 
-    const plants = await fetchPlants()
+    const plants = await fetchPlants(plantId)
 
-    if (!plants.length) return
-    const plant = plantId && await fetchPlant(plantId)
-    const filteredPlants = plantId ? [plant.record] : plants
+    const filteredPlants = plantId ? [plants.record] : plants?.list
 
-
-    const items = filteredPlants.map((plant, index) => {
+    const items = filteredPlants?.map((plant, index) => {
       const existingItem = resData.find(item => item.plantId === plant.recordId)
 
       return {
@@ -282,6 +278,12 @@ const CorrespondentDispersalRate = () => {
                 formik.setFieldValue('interfaceId', newValue?.interfaceId || '')
                 formik.setFieldValue('corName', newValue?.name || '')
                 formik.setFieldValue('corRef', newValue?.reference || '')
+                if (!newValue) {
+                  formik.setFieldValue('currencyId', null)
+                  formik.setFieldValue('currencyName', '')
+                  formik.setFieldValue('countryId', null)
+                  formik.setFieldValue('countryName', '')
+                }
               }}
               error={formik.touched.corId && Boolean(formik.errors.corId)}
             />
@@ -304,7 +306,12 @@ const CorrespondentDispersalRate = () => {
               onChange={(event, newValue) => {
                 formik.setFieldValue('countryId', newValue?.recordId || null)
                 formik.setFieldValue('countryName', newValue?.name || '')
+                if (!newValue) {
+                  formik.setFieldValue('currencyId', null)
+                  formik.setFieldValue('currencyName', '')
+                }
               }}
+              readOnly={!formik.values.corId}
               error={formik.touched.countryId && Boolean(formik.errors.countryId)}
               maxAccess={maxAccess}
             />
@@ -328,6 +335,7 @@ const CorrespondentDispersalRate = () => {
                 formik.setFieldValue('currencyId', newValue?.recordId || null)
                 formik.setFieldValue('currencyName', newValue?.name || '')
               }}
+              readOnly={!formik.values.corId || !formik.values.countryId}
               error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
             />
           </Grid>
