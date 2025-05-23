@@ -39,7 +39,7 @@ export default function InstantCash({
     maxAccess,
     initialValues: {
       deliveryModeId,
-      payingAgent: payingAgent,
+      payingAgent,
       sourceCurrency: sysDefault.currencyRef,
       targetCurrency: payingCurrency,
       sourceAmount: outwardsData?.amount || 0,
@@ -95,7 +95,7 @@ export default function InstantCash({
           })
           if (!res.record?.isoCode1) {
             stackError({
-              message: `Please assign iso code1 to ${res.record.name}`
+              message: `${_labels.assignIsoCode1} ${res.record.name}`
             })
 
             return

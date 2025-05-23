@@ -159,7 +159,7 @@ const BenificiaryCashForm = ({
 
         setEditMode(true)
         toast.success('Record Updated Successfully')
-        if (onSuccess) onSuccess(res.recordId, values.name)
+        if (onSuccess) onSuccess(res.recordId, values)
       }
     }
   })

@@ -69,7 +69,7 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, data }) {
 
         !res.record.isoCode &&
           stackError({
-            message: `Please assign iso code1 to ${res.record.name}`
+            message: `${labels.assignIsoCode1} ${res.record.name}`
           })
 
         formik.setFieldValue('quotation.requestCurrency', res?.record?.isoCode)
@@ -155,16 +155,10 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, data }) {
                 required
                 readOnly={editMode}
                 onChange={async (event, newValue) => {
-                  formik.setValues(prevValues => ({
-                    ...prevValues,
-                    transaction: {
-                      ...prevValues.transaction,
-                      bankName: newValue?.bankName || '',
-                      creditorBankSubCode: newValue?.bankCode || '',
-                      providerCode: newValue?.providerCode || '',
-                      creditorOrganisationid: newValue?.bankName || ''
-                    }
-                  }))
+                  formik.setFieldValue('transaction.bankName', newValue?.bankName || '')
+                  formik.setFieldValue('transaction.providerCode', newValue?.providerCode || '')
+                  formik.setFieldValue('transaction.creditorOrganisationid', newValue?.bankName || '')
+                  formik.setFieldValue('transaction.creditorBankSubCode', newValue?.bankCode || '')
 
                   const result = await getRequest({
                     extension: RemittanceBankInterface.Combos.terrapayAccountStatus,
