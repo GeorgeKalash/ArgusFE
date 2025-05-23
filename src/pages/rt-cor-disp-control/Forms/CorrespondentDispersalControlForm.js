@@ -2,6 +2,7 @@ import { Grid } from '@mui/material'
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DataSets } from 'src/resources/DataSets'
+import * as yup from 'yup'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import toast from 'react-hot-toast'
@@ -37,6 +38,9 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     initialValues,
     maxAccess,
     validateOnChange: true,
+    validationSchema: yup.object({
+      corId: yup.number().required()
+    }),
     onSubmit: async obj => {
       const filteredObj = {
         ...obj,
@@ -592,12 +596,31 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
     return !data?.corDeliveryModeName
   }
 
+  const isCheckedAll =
+    formik.values.items?.filter(item => !disableCondition(item))?.length > 0 &&
+    formik.values.items?.filter(item => !disableCondition(item))?.every(item => item?.isActive)
+
   const columns = [
     {
       component: 'checkbox',
       label: labels.isActive,
       flex: 0.4,
       name: 'isActive',
+      checkAll: {
+        value: isCheckedAll,
+        visible: true,
+        onChange({ checked }) {
+          const items = formik.values.items.map(item => {
+            if (!disableCondition(item)) {
+              return { ...item, isActive: checked }
+            }
+
+            return item
+          })
+
+          formik.setFieldValue('items', items)
+        }
+      },
       props: {
         disableCondition
       }
@@ -681,6 +704,25 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
           <Grid container spacing={2}>
             <Grid item xs={2.75}>
               <ResourceComboBox
+                endpointId={RemittanceSettingsRepository.Correspondent.qry2}
+                name='corId'
+                label={labels.corName}
+                valueField='recordId'
+                displayField={'name'}
+                values={formik.values}
+                maxAccess={maxAccess}
+                required
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('corId', newValue?.recordId || '')
+                  formik.setFieldValue('interfaceId', newValue?.interfaceId || '')
+                  formik.setFieldValue('corName', newValue?.name || '')
+                  formik.setFieldValue('corRef', newValue?.reference || '')
+                }}
+                error={formik.touched.corId && Boolean(formik.errors.corId)}
+              />
+            </Grid>
+            <Grid item xs={2.75}>
+              <ResourceComboBox
                 endpointId={RemittanceBankInterface.Countries.qry}
                 parameters={`_interfaceId=${formik.values.interfaceId || 0}`}
                 name='countryId'
@@ -752,24 +794,6 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-            <Grid item xs={2.75}>
-              <ResourceComboBox
-                endpointId={RemittanceSettingsRepository.Correspondent.qry2}
-                name='corId'
-                label={labels.corName}
-                valueField='recordId'
-                displayField={'name'}
-                values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('corId', newValue?.recordId || '')
-                  formik.setFieldValue('interfaceId', newValue?.interfaceId || '')
-                  formik.setFieldValue('corName', newValue.name || '')
-                  formik.setFieldValue('corRef', newValue.reference || '')
-                }}
-                error={formik.touched.corId && Boolean(formik.errors.corId)}
-              />
-            </Grid>
             <Grid item xs={1}>
               <CustomButton
                 onClick={formik.values.interfaceId === 2 ? onPreviewInterfaceIsTwo : onPreview}
@@ -789,6 +813,9 @@ const CorrespondentDispersalForm = ({ recordId, labels, maxAccess, interfaceId, 
             error={formik.errors.items}
             allowDelete={false}
             allowAddNewLine={false}
+            showSelectAll={true}
+            handleCheckboxChange={disableCondition}
+            showCheckboxColumn={true}
             columns={columns}
             maxAccess={maxAccess}
           />
