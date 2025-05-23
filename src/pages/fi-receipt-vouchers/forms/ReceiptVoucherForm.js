@@ -503,8 +503,31 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('checkNo', '')}
                 error={formik.touched.checkNo && Boolean(formik.errors.checkNo)}
-                readOnly={formik.values.paymentMethod != 3}
-                required={formik.values.paymentMethod == 3}
+                readOnly={formik.values.paymentMethod !== 3}
+                required={formik.values.paymentMethod === 3}
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=${formik.values.paymentMethod == 2 ? 1 : 0}`}
+                name='cashAccountId'
+                readOnly={isCancelled || isPosted}
+                required
+                label={labels.cashAccount}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={async (_, newValue) => {
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
+                }}
+                error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -526,28 +549,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   formik.setFieldValue('contactId', newValue?.recordId || null)
                 }}
                 error={formik.touched.contactId && Boolean(formik.errors.contactId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={CashBankRepository.CashAccount.qry}
-                parameters={`_type=${formik.values.paymentMethod == 2 ? 1 : 0}`}
-                name='cashAccountId'
-                readOnly={isCancelled || isPosted}
-                required
-                label={labels.cashAccount}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
-                }}
-                error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
               />
             </Grid>
             <Grid item xs={6}>
