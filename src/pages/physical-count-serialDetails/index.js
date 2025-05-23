@@ -52,7 +52,7 @@ const PhysicalCountSerialDe = () => {
         {
           id: 1,
           seqNo: 1,
-          srlNo: null,
+          srlNo: '',
           weight: 0,
           sku: '',
           itemId: null,
@@ -63,7 +63,7 @@ const PhysicalCountSerialDe = () => {
     validationSchema: yup.object({
       stockCountId: yup.number().required(),
       scDate: yup.date().required(),
-      scRef: yup.number().required(),
+      scRef: yup.string().required(),
       siteId: yup.number().required(),
       controllerId: yup.number().required(),
       rows: yup
@@ -104,7 +104,7 @@ const PhysicalCountSerialDe = () => {
         siteId: obj.siteId,
         controllerId: obj.controllerId,
         stockCountId: obj.stockCountId,
-        stockCountSerials: items.length > 0 ? items : []
+        stockCountSerials: items
       }
 
       await postRequest({
@@ -263,13 +263,6 @@ const PhysicalCountSerialDe = () => {
     }
   ]
 
-  const clearGrid = () => {
-    formik.setFieldValue('rows', formik.initialValues.rows)
-
-    setEditMode(false)
-    setCombosDisabled(false)
-  }
-
   const isPosted = formik.values.status === 3
   const emptyGrid = formik?.values?.rows?.filter(row => row?.srlNo)?.length === 0
 
@@ -302,36 +295,21 @@ const PhysicalCountSerialDe = () => {
       record: JSON.stringify(StockCountControllerTab)
     })
 
-    toast.success(status == 3 ? platformLabels.Posted : platformLabels.Unposted)
+    toast.success(status === 3 ? platformLabels.Posted : platformLabels.Unposted)
   }
 
-  const onClearGridConfirmation = async () => {
-    stack({
-      Component: ClearGridConfirmation,
-      props: {
-        open: { flag: true },
-        fullScreen: false,
-        onConfirm: clearGrid,
-        dialogText: platformLabels.DeleteGridConf
-      },
-      width: 570,
-      height: 170,
-      title: platformLabels.Clear
-    })
-  }
-
-  const onClearAllConfirmation = async () => {
+  const onClearConfirmation = async clearOption => {
     stack({
       Component: ClearGridConfirmation,
       props: {
         open: { flag: true },
         fullScreen: false,
         onConfirm: () => {
-          formik.resetForm()
+          clearOption === 'clearAll' ? formik.resetForm() : formik.setFieldValue('rows', formik.initialValues.rows)
           setCombosDisabled(false)
           setEditMode(false)
         },
-        dialogText: platformLabels.ClearFormGrid
+        dialogText: clearOption === 'clearAll' ? platformLabels.ClearFormGrid : platformLabels.DeleteGridConf
       },
       width: 570,
       height: 170,
@@ -356,14 +334,13 @@ const PhysicalCountSerialDe = () => {
     {
       key: 'ClearGrid',
       condition: true,
-      onClick: onClearGridConfirmation,
-      onSuccess: clearGrid,
+      onClick: () => onClearConfirmation(),
       disabled: !isSaved || emptyGrid
     },
     {
       key: 'ClearHG',
       condition: true,
-      onClick: onClearAllConfirmation,
+      onClick: () => onClearConfirmation('clearAll'),
       disabled: !(formik.values.controllerId || formik.values.siteId || formik.values.stockCountId)
     },
     {
