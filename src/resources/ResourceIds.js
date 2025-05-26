@@ -460,6 +460,9 @@ export const ResourceIds = {
   BalanceTransferMultiAccounts: 31340,
   SerialsTrackings: 41111,
   JobsInProcess: 42309,
+  SerialNumber: 41109,
+  CategoryPriceGroup: 51119,
   PostWorkCenterJob: 42330,
-  ProductionShifts: 42113
+  ProductionShifts: 42113,
+  SyncMFTrx: 42316,
 }

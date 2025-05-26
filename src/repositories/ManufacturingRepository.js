@@ -138,7 +138,8 @@ export const ManufacturingRepository = {
     post: service + 'postJOB',
     start: service + 'startJOB',
     stop: service + 'stopJOB',
-    wip: service + 'wipJOB'
+    wip: service + 'wipJOB',
+    sync: service + 'syncJOB'
   },
   ProductionSheet: {
     page: service + 'pagePST',
