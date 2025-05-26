@@ -47,6 +47,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
   const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId },
@@ -68,7 +69,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       exRate: 1,
       rateCalcMethod: 1,
       baseAmount: null,
-      cashAccountId: null,
+      cashAccountId: parseInt(cashAccountId),
       dtId: null,
       status: 1,
       releaseStatus: null,
@@ -135,7 +136,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
         extension: CashBankRepository.CbBankAccounts.get,
         parameters: `_recordId=${cashAccountId}`
       })
-
+      formik.setFieldValue('cashAccountId', cashAccountResult?.recordId)
       formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
       formik.setFieldValue('cashAccountName', cashAccountResult.name)
 
@@ -239,9 +240,8 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('cashAccountId', res?.record?.cashAccountId)
       formik.setFieldValue('plantId', res?.record?.plantId || plantId)
-      const payment = await getCashAccountAndPayment(res?.record?.cashAccountId)
+      const payment = await getCashAccountAndPayment(res?.record?.cashAccountId || cashAccountId)
       formik.setFieldValue('paymentMethod', res?.record?.paymentMethod || payment)
     }
   }
@@ -262,6 +262,8 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
           ...res.record,
           date: formatDateFromApi(res.record.date)
         })
+      } else {
+        getCashAccountAndPayment(cashAccountId)
       }
     })()
   }, [])
