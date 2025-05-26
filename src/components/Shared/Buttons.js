@@ -581,5 +581,19 @@ export const getButtons = platformLabels => [
     label: platformLabels.shp,
     color: '#231f20',
     main: false
+  },
+  {
+    key: 'Verify',
+    label: platformLabels.Verify,
+    color: '#047DFA',
+    image: 'checkmark-icon.png',
+    main: false
+  },
+  {
+    key: 'Unverify',
+    label: platformLabels.Unverify,
+    color: '#047DFA',
+    image: 'unverify-icon.png',
+    main: false
   }
 ]
