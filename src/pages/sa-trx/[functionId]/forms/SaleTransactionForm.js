@@ -978,7 +978,7 @@ export default function SaleTransactionForm({
           title: labels.accountSummary
         })
       },
-      disabled: false
+      disabled: !formik.values.header.clientId
     }
   ]
 
