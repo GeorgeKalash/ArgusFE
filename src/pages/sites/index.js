@@ -78,7 +78,7 @@ const Sites = () => {
       flex: 1
     },
     {
-      field: 'allowNegativeLotQty',
+      field: 'allowNegativeQty',
       headerName: _labels.anq,
       type: 'checkbox',
       flex: 1
