@@ -630,6 +630,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
   function openProductWindow() {
     const {
+      recordId,
       products,
       header: { countryRef, currencyRef, agentCode, fcAmount, lcAmount, productId }
     } = formik.values
@@ -640,6 +641,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         maxAccess,
         labels,
         data: {
+          recordId,
           products: products,
           countryRef,
           targetCurrency: currencyRef,
@@ -649,8 +651,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           productId,
           sysDefault
         },
-        onProductSubmit,
-        editMode
+        onProductSubmit
       },
       width: 900,
       height: 500,
@@ -660,6 +661,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
   function openBankWindow() {
     const {
+      recordId,
       header: { interfaceId, countryId },
       ICRequest,
       products,
@@ -679,6 +681,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           onSubmit: onInstantCashSubmit,
           cashData: ICRequest,
           outwardsData: {
+            recordId,
             countryId,
             amount
           },
@@ -697,8 +700,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
             otherRelation: remitter?.otherRelation,
             employerName: remitter?.employerName,
             employerStatus: remitter?.employerStatus
-          },
-          editMode
+          }
         },
         width: 740,
         height: 320,
@@ -847,15 +849,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     }
   }
 
-  useEffect(() => {
-    ;(async function () {
-      const countryRef = await getDefaultCountry()
-      const currencyRef = await getDefaultCurrency()
-
-      setDefault({ countryRef, currencyRef })
-    })()
-  }, [])
-
   async function displayProduct(data, productId) {
     if (data.length === 1) {
       !editMode && handleSelectedProduct(data[0])
@@ -871,6 +864,11 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
   useEffect(() => {
     ;(async function () {
+      const countryRef = await getDefaultCountry()
+      const currencyRef = await getDefaultCurrency()
+
+      setDefault({ countryRef, currencyRef })
+
       if (recordId) {
         const res = await refetchForm(recordId)
 

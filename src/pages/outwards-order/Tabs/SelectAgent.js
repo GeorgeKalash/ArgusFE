@@ -30,7 +30,7 @@ export default function SelectAgent({
       agentName: '',
       productId,
       fees: '',
-      exRate: '',
+      exRate: 1,
       originAmount,
       baseAmount,
       bankName: '',

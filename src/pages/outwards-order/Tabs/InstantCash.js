@@ -24,16 +24,19 @@ export default function InstantCash({
   clientData,
   productData: { deliveryModeId, payingAgent, payingCurrency },
   outwardsData,
-  sysDefault,
-  editMode
+  sysDefault
 }) {
   const { getRequest } = useContext(RequestsContext)
 
   const { stack: stackError } = useError()
 
+  const editMode = !!outwardsData?.recordId
+
   const { labels: _labels, maxAccess } = useResourceQuery({
     datasetId: ResourceIds.InstantCash
   })
+
+  console.log(clientData?.employerStatus)
 
   const { formik } = useForm({
     maxAccess,
@@ -86,23 +89,21 @@ export default function InstantCash({
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (cashData.deliveryModeId) formik.setValues(cashData)
-        if (outwardsData.countryId) {
-          const res = await getRequest({
-            extension: SystemRepository.Country.get,
-            parameters: `_recordId=${outwardsData.countryId}`
+      if (cashData.deliveryModeId) formik.setValues(cashData)
+      if (outwardsData.countryId) {
+        const res = await getRequest({
+          extension: SystemRepository.Country.get,
+          parameters: `_recordId=${outwardsData.countryId}`
+        })
+        if (!res.record?.isoCode1) {
+          stackError({
+            message: `${_labels.assignIsoCode1} ${res.record.name}`
           })
-          if (!res.record?.isoCode1) {
-            stackError({
-              message: `${_labels.assignIsoCode1} ${res.record.name}`
-            })
 
-            return
-          }
-          formik.setFieldValue('toCountryId', res?.record?.isoCode1.trim())
+          return
         }
-      } catch (error) {}
+        formik.setFieldValue('toCountryId', res?.record?.isoCode1.trim())
+      }
     })()
   }, [])
 
@@ -167,7 +168,7 @@ export default function InstantCash({
                     readOnly={editMode}
                     valueField='name'
                     displayField='name'
-                    value={formik.values.remitter.employerStatus}
+                    values={formik.values.remitter.employerStatus}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('remitter.employerStatus', newValue ? newValue?.name : '')
                     }}

@@ -15,13 +15,14 @@ const ProductsWindow = ({
   labels,
   maxAccess,
   onProductSubmit,
-  editMode,
-  data: { products, targetCurrency, countryRef, sysDefault, defaultAgentCode, fcAmount, lcAmount, productId },
+  data: { products, targetCurrency, countryRef, sysDefault, defaultAgentCode, fcAmount, lcAmount, productId, recordId },
   window
 }) => {
   const [gridData, setGridData] = useState([])
   const { stack } = useWindow()
   const { getRequest } = useContext(RequestsContext)
+
+  const editMode = !!recordId
 
   const { stack: stackError } = useError()
 
@@ -41,7 +42,7 @@ const ProductsWindow = ({
 
     const result = change?.record
     if (!result) {
-      stackError({ message: 'This agent is not available for use.' })
+      stackError({ message: labels.agentIsNotAvailable })
 
       return
     }
