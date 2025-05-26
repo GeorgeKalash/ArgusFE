@@ -632,7 +632,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={9}>
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
@@ -641,6 +641,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 displayField='name'
                 valueShow='accountRef'
                 secondValueShow='accountName'
+                firstFieldWidth={4}
                 required
                 errorCheck={'accountId'}
                 form={formik}
@@ -664,7 +665,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                   formik.setFieldValue('accountName', newValue?.name)
                 }}
               />
-              <Grid item xs={5}>
+              <Grid item xs={3}>
                 {/* <ResourceLookup
                   endpointId={FinancialRepository.Account.snapshot}
                   name='accountId'
