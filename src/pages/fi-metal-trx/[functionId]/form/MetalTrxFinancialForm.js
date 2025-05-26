@@ -63,7 +63,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       description: '',
       dtId: null,
       functionId: functionId,
-      isVerified: null,
+      isVerified: false,
       plantId,
       qty: null,
       pcs: null,
@@ -72,7 +72,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       releaseStatus: null,
       siteId: siteId || null,
       status: 1,
-      groupName: '',
+      accountGroupName: '',
       items: [
         {
           id: 1,
@@ -428,7 +428,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     },
     {
       component: 'numberfield',
-      name: 'onHand',
+      name: 'onhand',
       label: labels.qtyOnHand,
       props: { readOnly: true }
     }
@@ -689,17 +689,17 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                   formik.setFieldValue('accountId', newValue?.recordId)
                   formik.setFieldValue('accountRef', newValue?.reference)
                   formik.setFieldValue('accountName', newValue?.name)
-                  formik.setFieldValue('groupName', newValue?.groupName)
+                  formik.setFieldValue('accountGroupName', newValue?.groupName)
                 }}
               />
             </Grid>
             <Grid item xs={3}>
               <CustomTextField
-                name='groupName'
+                name='accountGroupName'
                 label={labels.groupName}
-                value={formik.values.groupName}
+                value={formik.values.accountGroupName}
                 readOnly
-                error={formik.touched.groupName && Boolean(formik.errors.groupName)}
+                error={formik.touched.accountGroupName && Boolean(formik.errors.accountGroupName)}
               />
             </Grid>
           </Grid>
