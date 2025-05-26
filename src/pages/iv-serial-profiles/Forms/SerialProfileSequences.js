@@ -36,7 +36,7 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
         return value !== null
       }
 
-      return isAnyFieldFilled ? value !== null : true
+      return isAnyFieldFilled ? value !== null && value !== undefined : true
     })
 
   const components = yup.array().of(
@@ -58,6 +58,7 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
         {
           id: 1,
           spfId: recordId,
+          sectionType: null,
           position: null,
           seqNo: 1
         }
