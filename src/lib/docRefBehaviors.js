@@ -162,7 +162,10 @@ const documentType = async (
     dtId,
     resetReference: reference?.readOnly,
     dcTypeRequired,
-    reference: { fieldName: fieldName, isEmpty: !isExternal?.external },
+    reference: {
+      fieldName: fieldName,
+      isEmpty: isExternal?.external !== undefined && !isExternal?.external ? true : false
+    },
     errorMessage,
     maxAccess,
     selectNraId
