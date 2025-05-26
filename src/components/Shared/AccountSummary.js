@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useContext, useState } from 'react'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { useFormik } from 'formik'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -15,14 +15,28 @@ import FormShell from './FormShell'
 import CustomButton from '../Inputs/CustomButton'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
-import { DataGrid } from './DataGrid'
 import * as yup from 'yup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import Table from './Table'
+import { RGFinancialRepository } from 'src/repositories/RGFinancialRepository'
 
 export default function AccountSummary({ clientInfo, moduleId }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [columns, setColumns] = useState([])
+  const [data, setData] = useState([])
+
+  const { labels, access } = useResourceQuery({
+    datasetId: ResourceIds.AccountSummary
+  })
+  const baseColumns = [{ field: 'days', headerName: labels.days, flex: 1, type: 'number' }]
+
+  const [columns, setColumns] = useState([
+    {
+      field: 'days',
+      headerName: labels.days,
+      flex: 1
+    }
+  ])
 
   const formik = useFormik({
     initialValues: {
@@ -30,8 +44,7 @@ export default function AccountSummary({ clientInfo, moduleId }) {
       clientRef: clientInfo?.clientRef,
       clientName: clientInfo?.clientName,
       agpId: null,
-      moduleId,
-      accSum: [{ id: 1 }]
+      moduleId
     },
     validateOnChange: true,
     validationSchema: yup.object({
@@ -41,17 +54,29 @@ export default function AccountSummary({ clientInfo, moduleId }) {
 
   async function getDynamicColumns() {
     let currencyItems
+    let colcounts = 2
+    let dynamicColumns = [...baseColumns]
 
     const currecnyList = await getRequest({
       extension: SystemRepository.Currency.qry,
       parameters: `_filter=`
     })
-    if (moduleId == 1) currencyItems = currecnyList?.list?.map(currency => currency.sale)
-    else if (moduleId == 2) currencyItems = currecnyList?.list?.map(currency => currency.purchase)
+    if (moduleId == 1) currencyItems = currecnyList?.list?.filter(currency => currency.sale)
+    else if (moduleId == 2) currencyItems = currecnyList?.list?.filter(currency => currency.purchase)
+
+    currencyItems?.forEach((cur, index) => {
+      dynamicColumns.push({
+        field: `column${index + 1}`,
+        headerName: cur.reference,
+        flex: 1,
+        type: 'number'
+      })
+    })
+    setColumns(dynamicColumns)
 
     const agingLegList = await getRequest({
       extension: FinancialRepository.AgingLeg.qry,
-      parameters: `_agpId=9`
+      parameters: `_agpId=${formik.values.agpId}`
     })
 
     let listObject = agingLegList?.list?.map(item => {
@@ -61,21 +86,49 @@ export default function AccountSummary({ clientInfo, moduleId }) {
 
       return obj
     })
-    console.log('listObject', listObject)
+
+    for (const cur of currencyItems || []) {
+      const summaryRes = await getRequest({
+        extension: RGFinancialRepository.AccountSummary.AccFI405b,
+        parameters: `_agpId=${formik.values.agpId}&_currencyId=${cur.recordId}&_accountId=${formik.values.clientId}`
+      })
+      summaryRes?.list?.forEach(y => {
+        listObject?.forEach(ob => {
+          if (ob[1] == y.seqDays) ob[colcounts] = y.amount
+        })
+      })
+      colcounts++
+    }
+
+    const Lobj = new Array(currencyItems.length + 2).fill(null)
+    for (let co = 2; co < currencyItems.length + 2; co++) {
+      let sum = 0
+      listObject?.map(ob => {
+        sum += Number(ob[co] || 0)
+      })
+      Lobj[co] = sum
+    }
+
+    const newList = listObject
+      .filter(item => item[1] !== null)
+      .map(item => {
+        const [_, days, ...columns] = item
+        const rowObject = { days }
+        columns.forEach((value, index) => {
+          rowObject[`column${index + 1}`] = value
+        })
+
+        return rowObject
+      })
+
+    let totalRow = []
+    for (let i = 0; i < currencyItems.length; i++) {
+      totalRow[`column${i + 1}`] = Lobj[i + 2] ?? 0
+    }
+    newList.push(totalRow)
+
+    setData({ list: newList })
   }
-
-  useEffect(() => {
-    getDynamicColumns()
-  }, [])
-
-  const {
-    query: { data },
-    labels,
-    access,
-    refetch
-  } = useResourceQuery({
-    datasetId: ResourceIds.AccountSummary
-  })
 
   return (
     <FormShell
@@ -117,6 +170,7 @@ export default function AccountSummary({ clientInfo, moduleId }) {
                 required
                 onChange={(event, newValue) => {
                   formik.setFieldValue('agpId', newValue?.recordId || null)
+                  if (!newValue?.recordId) setData({ list: [] })
                 }}
                 error={formik?.touched?.agpId && Boolean(formik.errors?.agpId)}
               />
@@ -133,21 +187,17 @@ export default function AccountSummary({ clientInfo, moduleId }) {
               />
             </Grid>
             <Grid item xs={4}>
-              <CustomButton onClick={refetch} image={'preview.png'} tooltipText={platformLabels.Preview} />
+              <CustomButton
+                onClick={getDynamicColumns}
+                image={'preview.png'}
+                disabled={!formik.values.agpId}
+                tooltipText={platformLabels.Preview}
+              />
             </Grid>
           </Grid>
         </Fixed>
         <Grow>
-          <DataGrid
-            name='AccountSummary'
-            maxAccess={access}
-            onChange={value => formik.setFieldValue('accSum', value)}
-            value={formik.values?.accSum}
-            error={formik.errors?.accSum}
-            columns={columns}
-            allowDelete={false}
-            allowAddNewLine={false}
-          />
+          <Table columns={columns} gridData={data} isLoading={false} pagination={false} />
         </Grow>
       </VertLayout>
     </FormShell>

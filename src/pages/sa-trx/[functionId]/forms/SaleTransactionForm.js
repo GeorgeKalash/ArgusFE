@@ -973,7 +973,7 @@ export default function SaleTransactionForm({
             },
             moduleId: 1
           },
-          width: 700,
+          width: 1000,
           height: 500,
           title: labels.accountSummary
         })
