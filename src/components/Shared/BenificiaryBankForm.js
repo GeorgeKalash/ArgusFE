@@ -26,6 +26,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { HIDDEN } from 'src/services/api/maxAccess'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
 import { Fixed } from './Layouts/Fixed'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function BenificiaryBankForm({
   viewBtns = true,
@@ -51,6 +52,7 @@ export default function BenificiaryBankForm({
   const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
   const hiddenIsInActive = useRef(false)
   const hiddenIsBlocked = useRef(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const initialValues = {
     //RTBEN
@@ -176,7 +178,8 @@ export default function BenificiaryBankForm({
           record: JSON.stringify(data)
         })
 
-        toast.success('Record Updated Successfully')
+        toast.success(platformLabels.Added)
+
         if (onSuccess) onSuccess(res.recordId, values)
         setEditMode(true)
       }

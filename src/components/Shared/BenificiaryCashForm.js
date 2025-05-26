@@ -25,6 +25,7 @@ import { HIDDEN } from 'src/services/api/maxAccess'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
 import { Fixed } from './Layouts/Fixed'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const BenificiaryCashForm = ({
   viewBtns = true,
@@ -51,6 +52,7 @@ const BenificiaryCashForm = ({
   const [notArabic, setNotArabic] = useState(true)
   const hiddenIsInActive = useRef(false)
   const hiddenIsBlocked = useRef(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const initialValues = {
     //RTBEN
@@ -158,7 +160,7 @@ const BenificiaryCashForm = ({
         })
 
         setEditMode(true)
-        toast.success('Record Updated Successfully')
+        toast.success(platformLabels.Added)
         if (onSuccess) onSuccess(res.recordId, values)
       }
     }

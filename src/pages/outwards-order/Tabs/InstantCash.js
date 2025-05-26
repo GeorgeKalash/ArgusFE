@@ -36,8 +36,6 @@ export default function InstantCash({
     datasetId: ResourceIds.InstantCash
   })
 
-  console.log(clientData?.employerStatus)
-
   const { formik } = useForm({
     maxAccess,
     initialValues: {
