@@ -50,7 +50,6 @@ export default function MetalTrxFinancial() {
     refetch,
     labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     access,
     invalidate

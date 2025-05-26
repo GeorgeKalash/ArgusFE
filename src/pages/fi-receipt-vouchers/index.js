@@ -13,9 +13,11 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import toast from 'react-hot-toast'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function CurrencyTrading() {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   function openForm(recordId) {
@@ -90,7 +92,7 @@ export default function CurrencyTrading() {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   const columns = [

@@ -72,6 +72,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       releaseStatus: null,
       siteId: siteId || null,
       status: 1,
+      groupName: '',
       items: [
         {
           id: 1,
@@ -433,6 +434,19 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     }
   ]
 
+  const onVerify = async () => {
+    const res = await postRequest({
+      extension: FinancialRepository.MetalTrx.verify,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res) {
+      toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+      invalidate()
+      window.close()
+    }
+  }
+
   const actions = [
     {
       key: 'Locked',
@@ -458,6 +472,18 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       condition: true,
       onClick: 'onClickGL',
       disabled: !editMode
+    },
+    {
+      key: 'Verify',
+      condition: !formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
     }
   ]
 
@@ -663,41 +689,18 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                   formik.setFieldValue('accountId', newValue?.recordId)
                   formik.setFieldValue('accountRef', newValue?.reference)
                   formik.setFieldValue('accountName', newValue?.name)
+                  formik.setFieldValue('groupName', newValue?.groupName)
                 }}
               />
-              <Grid item xs={3}>
-                {/* <ResourceLookup
-                  endpointId={FinancialRepository.Account.snapshot}
-                  name='accountId'
-                  label={labels.accountRef}
-                  valueField='reference'
-                  displayField='name'
-                  valueShow='accountRef'
-                  secondValueShow='accountName'
-                  required
-                  errorCheck={'accountId'}
-                  form={formik}
-                  secondDisplayField={true}
-                  firstValue={formik.values.accountRef}
-                  secondValue={formik.values.accountName}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Account Ref' },
-                    { key: 'name', value: 'Name' },
-                    { key: 'keywords', value: 'Keywords' }
-                  ]}
-                  displayFieldWidth={3}
-                  maxAccess={maxAccess}
-                  filter={{
-                    isInactive: val => val !== true
-                  }}
-                  readOnly={isPosted}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('accountId', newValue?.recordId)
-                    formik.setFieldValue('accountRef', newValue?.reference)
-                    formik.setFieldValue('accountName', newValue?.name)
-                  }}
-                /> */}
-              </Grid>
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='groupName'
+                label={labels.groupName}
+                value={formik.values.groupName}
+                readOnly
+                error={formik.touched.groupName && Boolean(formik.errors.groupName)}
+              />
             </Grid>
           </Grid>
         </Fixed>
