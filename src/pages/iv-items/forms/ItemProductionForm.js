@@ -136,7 +136,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={InventoryRepository.SerialProfile.qry}
+                endpointId={InventoryRepository.SerialsProfile.qry}
                 values={formik.values}
                 name='spfId'
                 label={labels.sprofile}

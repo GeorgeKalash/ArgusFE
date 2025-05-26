@@ -136,7 +136,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
         extension: CashBankRepository.CbBankAccounts.get,
         parameters: `_recordId=${cashAccountId}`
       })
-
+      formik.setFieldValue('cashAccountId', cashAccountResult?.recordId)
       formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
       formik.setFieldValue('cashAccountName', cashAccountResult.name)
 
@@ -240,7 +240,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('cashAccountId', res?.record?.cashAccountId)
       formik.setFieldValue('plantId', res?.record?.plantId || plantId)
       const payment = await getCashAccountAndPayment(res?.record?.cashAccountId || cashAccountId)
       formik.setFieldValue('paymentMethod', res?.record?.paymentMethod || payment)

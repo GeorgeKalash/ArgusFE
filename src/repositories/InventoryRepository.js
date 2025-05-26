@@ -104,11 +104,6 @@ export const InventoryRepository = {
     del: service + 'delDI'
   },
   DimensionId: { set: service + 'set2ID', get: service + 'getID' },
-
-  SerialNumber: {
-    qry: service + 'qrySPF'
-  },
-
   CategoryCurrency: {
     get: service + 'getCAC',
     qry: service + 'qryCAC',
@@ -139,9 +134,6 @@ export const InventoryRepository = {
     get: service + 'getOQ',
     set: service + 'setOQ',
     del: service + 'delOQ'
-  },
-  SerialProfile: {
-    qry: service + 'qrySPF'
   },
   ItemProduction: {
     get: service + 'getMFR',
@@ -327,5 +319,16 @@ export const InventoryRepository = {
   MeasurementSerial: {
     qry: service + 'qryMSM',
     set2: service + 'set2MSM'
+  },
+  SerialsProfile: {
+    qry: service + 'qrySPF',
+    set: service + 'setSPF',
+    get: service + 'getSPF',
+    del: service + 'delSPF',
+    page: service + 'pageSPF',
+    set2: service + 'set2SPF',
+  },
+  SerialsProfileSequences: {
+    qry: service + 'qrySPS',
   }
 }
