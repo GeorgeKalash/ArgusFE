@@ -96,7 +96,7 @@ export default function BalanceTransferForm({ labels, access, recordId, function
   const refetchForm = async recordId => {
     const { record } = await getRequest({
       extension: FinancialRepository.BalanceTransfer.get,
-      parameters: `_recordId=${recordId || formik.values.recordId}`
+      parameters: `_recordId=${recordId}`
     })
 
     const updatedRateRow = getRate({
@@ -112,7 +112,7 @@ export default function BalanceTransferForm({ labels, access, recordId, function
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        refetchForm()
+        refetchForm(recordId)
       } else onSelectionChange('to', defaultCurrency, formik.values?.date)
     })()
   }, [])
@@ -197,7 +197,7 @@ export default function BalanceTransferForm({ labels, access, recordId, function
   const onChangeValue = (exRate, amount) => {
     const updatedRateRow = getRate({
       amount: amount ?? 0,
-      exRate: exRate,
+      exRate,
       baseAmount: 0,
       rateCalcMethod: formik.values?.fromRateCalcMethod,
       dirtyField: DIRTYFIELD_RATE

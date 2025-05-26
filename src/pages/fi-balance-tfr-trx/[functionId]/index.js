@@ -16,7 +16,7 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import BalanceTransferForm from './forms/BalanceTransferForm'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 
-const CashAccounts = () => {
+const BalanceTfrTrx = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -206,4 +206,4 @@ const CashAccounts = () => {
   )
 }
 
-export default CashAccounts
+export default BalanceTfrTrx

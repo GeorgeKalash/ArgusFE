@@ -163,7 +163,7 @@ const documentType = async (
     resetReference: reference?.readOnly,
     dcTypeRequired,
     reference: {
-      fieldName: fieldName,
+      fieldName,
       isEmpty: isExternal?.external !== undefined && !isExternal?.external ? true : false
     },
     errorMessage,
