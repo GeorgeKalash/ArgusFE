@@ -96,7 +96,9 @@ const CustomTextField = ({
       fullWidth={fullWidth}
       autoFocus={focus}
       onFocus={() => setIsFocused(true)}
-      onBlur={() => setIsFocused(false)}
+      onBlur={() => {
+        setIsFocused(false), setFocus(false)
+      }}
       inputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
@@ -123,7 +125,15 @@ const CustomTextField = ({
               </IconButton>
             )}
             {!clearable && !readOnly && (value || value === 0) && (
-              <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
+              <IconButton
+                tabIndex={-1}
+                edge='end'
+                onClick={e => {
+                  onClear(e)
+                  setFocus(true)
+                }}
+                aria-label='clear input'
+              >
                 <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
               </IconButton>
             )}

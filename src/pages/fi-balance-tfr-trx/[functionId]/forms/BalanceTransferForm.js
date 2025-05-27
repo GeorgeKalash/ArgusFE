@@ -110,11 +110,9 @@ export default function BalanceTransferForm({ labels, access, recordId, function
   }
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        refetchForm(recordId)
-      } else onSelectionChange('to', defaultCurrency, formik.values?.date)
-    })()
+    if (recordId) {
+      refetchForm(recordId)
+    } else onSelectionChange('to', defaultCurrency, formik.values?.date)
   }, [])
 
   const { fromAccountName, fromAccountRef, templateId, ...rest } = formik.values
@@ -253,7 +251,7 @@ export default function BalanceTransferForm({ labels, access, recordId, function
                     values={formik.values}
                     maxAccess={!editMode && maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId || null)
+                      formik.setFieldValue('dtId', newValue?.recordId)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
