@@ -39,18 +39,16 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
     })
   }
 
-  const { access } = useResourceQuery({
-    datasetId: datasetId
-  })
-
   const {
     query: { data },
-    labels: _labels
+    labels: _labels,
+    access
   } = useResourceQuery({
     filter: {
       filterFn: fetchGridData,
       default: { functionId }
     },
+    DatasetIdAccess: datasetId,
     datasetId: ResourceIds.GeneralLedger
   })
 
