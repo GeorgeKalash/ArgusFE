@@ -1875,6 +1875,7 @@ export default function SaleTransactionForm({
                 secondValueShow='clientName'
                 formObject={formik.values.header}
                 form={formik}
+                firstFieldWidth={4}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' },
@@ -1992,19 +1993,6 @@ export default function SaleTransactionForm({
             <Grid item xs={4} container direction='column' spacing={2}>
               <Grid item>
                 <CustomTextArea
-                  name='header.description'
-                  label={labels.description}
-                  value={formik.values.header.description}
-                  rows={3}
-                  editMode={editMode}
-                  maxAccess={maxAccess}
-                  onChange={e => formik.setFieldValue('header.description', e.target.value)}
-                  onClear={() => formik.setFieldValue('header.description', '')}
-                  error={formik?.touched?.header?.description && Boolean(formik?.errors?.header?.description)}
-                />
-              </Grid>
-              <Grid item>
-                <CustomTextArea
                   name='header.billAddress'
                   label={labels.billTo}
                   value={formik.values.header.billAddress}
@@ -2019,6 +2007,19 @@ export default function SaleTransactionForm({
                   onDropDown={() => openAddressFilterForm()}
                   handleAddAction={() => openAddressForm()}
                   error={formik?.touched?.header?.billAddress && Boolean(formik?.errors?.header?.billAddress)}
+                />
+              </Grid>
+              <Grid item>
+                <CustomTextArea
+                  name='header.description'
+                  label={labels.description}
+                  value={formik.values.header.description}
+                  rows={3}
+                  editMode={editMode}
+                  maxAccess={maxAccess}
+                  onChange={e => formik.setFieldValue('header.description', e.target.value)}
+                  onClear={() => formik.setFieldValue('header.description', '')}
+                  error={formik?.touched?.header?.description && Boolean(formik?.errors?.header?.description)}
                 />
               </Grid>
             </Grid>
