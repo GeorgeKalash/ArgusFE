@@ -59,7 +59,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
       toAccountId: null,
       fromCurrencyId: null,
       fromBaseAmount: 0,
-      fromAmount: 0,
+      fromAmount: null,
       fromExRate: 0,
       status: 1,
       notes: '',
@@ -70,7 +70,6 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      plantId: yup.number().required(),
       fromAccountId: yup.number().required(),
       toAccountId: yup.number().required(),
       fromCurrencyId: yup.number().required(),
@@ -104,23 +103,20 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
   })
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
-  const isReleased = formik.values.status == 4
 
   const refetchForm = async recordId => {
     const { record } = await getRequest({
       extension: FinancialRepository.BalanceTransfer.get,
-      parameters: `_recordId=${recordId || formik.values.recordId}`
+      parameters: `_recordId=${recordId}`
     })
 
     formik.setValues({ ...record, date: formatDateFromApi(record.date) })
   }
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        await refetchForm()
-      }
-    })()
+    if (recordId) {
+      refetchForm(recordId)
+    }
   }, [])
 
   const onPost = async () => {
@@ -149,7 +145,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
     })
 
     toast.success(platformLabels.Unposted)
-    refetchForm()
+    refetchForm(recordId)
     invalidate()
   }
 
@@ -180,8 +176,8 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
       dirtyField: DIRTYFIELD_RATE
     })
 
-    formik.setFieldValue(`$fromBaseAmount`, parseFloat(updatedRateRow?.baseAmount).toFixed(2))
-    formik.setFieldValue(`$fromAmount`, parseFloat(updatedRateRow?.amount).toFixed(2))
+    formik.setFieldValue('fromBaseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2))
+    formik.setFieldValue('fromAmount', parseFloat(updatedRateRow?.amount).toFixed(2))
   }
 
   const actions = [
@@ -218,7 +214,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      disabledSubmit={isPosted || isReleased}
+      disabledSubmit={isPosted}
       previewReport={editMode}
     >
       <VertLayout>
@@ -270,7 +266,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                       formik.setFieldValue('date', newValue || null)
                       onSelectionChange(formik.values.fromCurrencyId, newValue, formik.values.fromAmount)
                     }}
-                    readOnly={isPosted || isReleased}
+                    readOnly={isPosted}
                     onClear={() => formik.setFieldValue('date', null)}
                     error={formik.touched.date && Boolean(formik.errors.date)}
                     maxAccess={maxAccess}
@@ -284,7 +280,6 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
                     name='plantId'
-                    required
                     label={labels.plant}
                     valueField='recordId'
                     displayField={['reference', 'name']}
@@ -297,7 +292,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                       formik.setFieldValue('plantId', newValue?.recordId || null)
                       !newValue?.recordId && formik.setFieldValue('spId', null)
                     }}
-                    readOnly={isPosted || isReleased}
+                    readOnly={isPosted}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                     maxAccess={maxAccess}
                   />
@@ -318,7 +313,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                     onChange={(event, newValue) => {
                       formik.setFieldValue('spId', newValue?.recordId || null)
                     }}
-                    readOnly={isPosted || isReleased || !formik.values.plantId}
+                    readOnly={isPosted || !formik.values.plantId}
                     error={formik.touched.spId && Boolean(formik.errors.spId)}
                     maxAccess={maxAccess}
                   />
@@ -343,15 +338,12 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                       displayField={['reference', 'name']}
                       values={formik.values}
                       onChange={(event, newValue) => {
-                        formik.setValues({
-                          ...formik.values,
-                          fromGroupId: newValue?.recordId || null,
-                          fromAccountId: null,
-                          fromAccountRef: '',
-                          fromAccountName: ''
-                        })
+                        formik.setFieldValue('fromGroupId', newValue?.recordId || null)
+                        formik.setFieldValue('fromAccountId', null)
+                        formik.setFieldValue('fromAccountRef', '')
+                        formik.setFieldValue('fromAccountName', '')
                       }}
-                      readOnly={isPosted || isReleased}
+                      readOnly={isPosted}
                       maxAccess={maxAccess}
                       error={formik.touched.fromGroupId && Boolean(formik.errors.fromGroupId)}
                     />
@@ -379,14 +371,11 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                         { key: 'groupName', value: 'account Group' }
                       ]}
                       onChange={(event, newValue) => {
-                        formik.setValues({
-                          ...formik.values,
-                          fromAccountId: newValue?.recordId || null,
-                          fromAccountRef: newValue?.reference || '',
-                          fromAccountName: newValue?.name || ''
-                        })
+                        formik.setFieldValue('fromAccountId', newValue?.recordId || null)
+                        formik.setFieldValue('fromAccountRef', newValue?.reference || '')
+                        formik.setFieldValue('fromAccountName', newValue?.name || '')
                       }}
-                      readOnly={isPosted || isReleased || !formik.values.fromGroupId}
+                      readOnly={isPosted || !formik.values.fromGroupId}
                       errorCheck='fromAccountId'
                       maxAccess={maxAccess}
                     />
@@ -411,15 +400,12 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                       displayField={['reference', 'name']}
                       values={formik.values}
                       onChange={(event, newValue) => {
-                        formik.setValues({
-                          ...formik.values,
-                          toGroupId: newValue?.recordId || null,
-                          toAccountId: null,
-                          toAccountRef: '',
-                          toAccountName: ''
-                        })
+                        formik.setFieldValue('toGroupId', newValue?.recordId || null)
+                        formik.setFieldValue('toAccountId', null)
+                        formik.setFieldValue('toAccountRef', '')
+                        formik.setFieldValue('toAccountName', '')
                       }}
-                      readOnly={isPosted || isReleased}
+                      readOnly={isPosted}
                       maxAccess={maxAccess}
                       error={formik.touched.toGroupId && Boolean(formik.errors.toGroupId)}
                     />
@@ -447,14 +433,11 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                         { key: 'groupName', value: 'account Group' }
                       ]}
                       onChange={(event, newValue) => {
-                        formik.setValues({
-                          ...formik.values,
-                          toAccountId: newValue?.recordId || null,
-                          toAccountRef: newValue?.reference || '',
-                          toAccountName: newValue?.name || ''
-                        })
+                        formik.setFieldValue('toAccountId', newValue?.recordId || null)
+                        formik.setFieldValue('toAccountRef', newValue?.reference || '')
+                        formik.setFieldValue('toAccountName', newValue?.name || '')
                       }}
-                      readOnly={isPosted || isReleased || !formik.values.toGroupId}
+                      readOnly={isPosted || !formik.values.toGroupId}
                       errorCheck='toAccountId'
                       maxAccess={maxAccess}
                     />
@@ -482,7 +465,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                       formik.setFieldValue('fromCurrencyId', newValue?.recordId || null)
                       onSelectionChange(newValue?.recordId, formik.values?.date, formik.values.fromAmount)
                     }}
-                    readOnly={isPosted || isReleased}
+                    readOnly={isPosted}
                     error={formik.touched.fromCurrencyId && Boolean(formik.errors.fromCurrencyId)}
                   />
                 </Grid>
@@ -506,7 +489,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                     }}
                     onClear={() => formik.setFieldValue('fromAmount', 0)}
                     required
-                    readOnly={isPosted || isReleased}
+                    readOnly={isPosted}
                     error={formik.touched.fromAmount && Boolean(formik.errors.fromAmount)}
                     maxAccess={maxAccess}
                   />
@@ -526,14 +509,14 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                     onChange={(event, newValue) => {
                       if (newValue?.name) {
                         let notes = formik.values.notes
-                        notes += newValue?.name
                         notes += notes && '\n'
+                        notes += newValue?.name
 
                         notes && formik.setFieldValue('notes', notes)
                         newValue?.name && formik.setFieldValue('templateId', newValue?.recordId || null)
                       }
                     }}
-                    readOnly={isPosted || isReleased}
+                    readOnly={isPosted}
                     error={formik.touched.templateId && Boolean(formik.errors.templateId)}
                     maxAccess={maxAccess}
                   />
@@ -545,10 +528,11 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                     label={labels.notes}
                     value={formik.values.notes}
                     rows={3}
-                    readOnly={isPosted || isReleased}
+                    readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('notes', '')}
+                    error={formik.touched.notes && Boolean(formik.errors.notes)}
                   />
                 </Grid>
               </Grid>

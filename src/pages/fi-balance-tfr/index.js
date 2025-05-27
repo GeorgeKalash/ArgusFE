@@ -126,7 +126,8 @@ const BalanceTrfBetweenAcc = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.BalanceTransfer,
-    action: openForm
+    action: openForm,
+    hasDT: true
   })
 
   const del = async obj => {
@@ -167,6 +168,7 @@ const BalanceTrfBetweenAcc = () => {
       <Grow>
         <Table
           columns={columns}
+          name={'balance-tfr'}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
