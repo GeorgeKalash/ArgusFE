@@ -122,7 +122,9 @@ export const FinancialRepository = {
     snapshot: service + 'snapshotRV',
     cancel: service + 'cancelRV',
     post: service + 'postRV',
-    unpost: service + 'unpostRV'
+    unpost: service + 'unpostRV',
+    verify: service + 'verifyRV',
+    unverify: service + 'unverifyRV'
   },
   Contact: {
     qry: service + 'qryContact'
