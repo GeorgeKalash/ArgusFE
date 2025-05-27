@@ -1668,186 +1668,203 @@ export default function SaleTransactionForm({
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={9} container direction='column' gap={2}>
-              <Grid container spacing={2}>
-                <Grid item xs={3}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
-                    name='header.dtId'
-                    readOnly={editMode}
-                    label={labels.documentType}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    values={formik.values.header}
-                    maxAccess={maxAccess}
-                    onChange={async (_, newValue) => {
-                      const recordId = newValue ? newValue.recordId : null
-                      await formik.setFieldValue('header.dtId', recordId)
-                      if (!newValue) {
-                        formik.setFieldValue('header.dtId', null)
-                        formik.setFieldValue('header.siteId', null)
-                        formik.setFieldValue('header.metalPrice', 0)
-                        formik.setFieldValue('header.KGmetalPrice', 0)
-                        setmetalPriceVisibility(false)
-                      }
-                    }}
-                    error={formik?.touched?.header?.dtId && Boolean(formik?.errors?.header?.dtId)}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ResourceComboBox
-                    endpointId={SaleRepository.SalesPerson.qry}
-                    name='header.spId'
-                    readOnly={isPosted}
-                    label={labels.salesPerson}
-                    columnsInDropDown={[
-                      { key: 'spRef', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    valueField='recordId'
-                    displayField='name'
-                    values={formik.values.header}
-                    maxAccess={maxAccess}
-                    displayFieldWidth={1.5}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.spId', newValue ? newValue.recordId : null)
-                    }}
-                    error={formik?.touched?.header?.spId && Boolean(formik?.errors?.header?.spId)}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <CustomNumberField
-                    name='header.creditLimit'
-                    maxAccess={maxAccess}
-                    label={labels.creditLimit}
-                    value={formik.values.header.creditLimit}
-                    readOnly
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Plant.qry}
-                    name='header.plantId'
-                    label={labels.plant}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    readOnly={isPosted}
-                    values={formik.values.header}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.plantId', newValue ? newValue.recordId : null)
-                    }}
-                    displayFieldWidth={2}
-                    error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
-                  />
-                </Grid>
-              </Grid>
-              <Grid container spacing={2}>
-                <Grid item xs={3}>
-                  <CustomTextField
-                    name='header.reference'
-                    label={labels.reference}
-                    value={formik?.values?.header?.reference}
-                    maxAccess={!editMode && maxAccess}
-                    readOnly={editMode}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('header.reference', '')}
-                    error={formik?.touched?.header?.reference && Boolean(formik?.errors?.header?.reference)}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <CustomDatePicker
-                    name='header.date'
-                    required
-                    label={labels.date}
-                    readOnly={isPosted}
-                    value={formik?.values?.header?.date}
-                    onChange={async (e, newValue) => {
-                      formik.setFieldValue('header.date', newValue)
-                      await getMultiCurrencyFormData(formik.values.header.currencyId, newValue, RateDivision.FINANCIALS)
-                    }}
-                    editMode={editMode}
-                    maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('header.date', null)}
-                    error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ResourceComboBox
-                    endpointId={SaleRepository.SalesZone.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
-                    name='header.szId'
-                    label={labels.saleZone}
-                    readOnly={isPosted}
-                    columnsInDropDown={[{ key: 'name', value: 'Name' }]}
-                    valueField='recordId'
-                    displayField='name'
-                    values={formik.values.header}
-                    maxAccess={maxAccess}
-                    displayFieldWidth={1.5}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.szId', newValue ? newValue.recordId : null)
-                    }}
-                    error={formik?.touched?.header?.szId && Boolean(formik?.errors?.header?.szId)}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ResourceComboBox
-                    endpointId={InventoryRepository.Site.qry}
-                    name='header.siteId'
-                    label={labels.site}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik.values.header}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    maxAccess={maxAccess}
-                    displayFieldWidth={2}
-                    readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
-                    required={
-                      !formik?.values?.header.dtId ||
-                      (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
-                    }
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.siteId', newValue ? newValue.recordId : null)
-                      formik.setFieldValue('header.siteRef', newValue ? newValue.reference : null)
-                      formik.setFieldValue('header.siteName', newValue ? newValue.name : null)
-                    }}
-                    error={formik?.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
             <Grid item xs={3}>
-              <CustomTextArea
-                name='header.billAddress'
-                label={labels.billTo}
-                value={formik.values.header.billAddress}
-                rows={3}
-                maxLength='100'
-                readOnly={!formik.values.header.clientId || isPosted}
+              <ResourceComboBox
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
+                name='header.dtId'
+                readOnly={editMode}
+                label={labels.documentType}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values.header}
                 maxAccess={maxAccess}
-                viewDropDown={formik.values.header.clientId}
-                viewAdd={formik.values.header.clientId && !editMode}
-                onChange={e => formik.setFieldValue('header.billAddress', e.target.value)}
-                onClear={() => formik.setFieldValue('header.billAddress', '')}
-                onDropDown={() => openAddressFilterForm()}
-                handleAddAction={() => openAddressForm()}
-                error={formik?.touched?.header?.billAddress && Boolean(formik?.errors?.header?.billAddress)}
+                onChange={async (_, newValue) => {
+                  const recordId = newValue ? newValue.recordId : null
+                  await formik.setFieldValue('header.dtId', recordId)
+                  if (!newValue) {
+                    formik.setFieldValue('header.dtId', null)
+                    formik.setFieldValue('header.siteId', null)
+                    formik.setFieldValue('header.metalPrice', 0)
+                    formik.setFieldValue('header.KGmetalPrice', 0)
+                    setmetalPriceVisibility(false)
+                  }
+                }}
+                error={formik?.touched?.header?.dtId && Boolean(formik?.errors?.header?.dtId)}
               />
             </Grid>
             <Grid item xs={3}>
+              <ResourceComboBox
+                endpointId={SaleRepository.SalesPerson.qry}
+                name='header.spId'
+                readOnly={isPosted}
+                label={labels.salesPerson}
+                columnsInDropDown={[
+                  { key: 'spRef', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values.header}
+                maxAccess={maxAccess}
+                displayFieldWidth={1.5}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.spId', newValue ? newValue.recordId : null)
+                }}
+                error={formik?.touched?.header?.spId && Boolean(formik?.errors?.header?.spId)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Plant.qry}
+                name='header.plantId'
+                label={labels.plant}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                readOnly={isPosted}
+                values={formik.values.header}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.plantId', newValue ? newValue.recordId : null)
+                }}
+                displayFieldWidth={2}
+                error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='header.currencyId'
+                label={labels.currency}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                readOnly={isPosted}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                required
+                values={formik.values.header}
+                maxAccess={maxAccess}
+                onChange={async (event, newValue) => {
+                  await getMultiCurrencyFormData(
+                    newValue?.recordId,
+                    formik.values.header?.date,
+                    RateDivision.FINANCIALS
+                  )
+                  formik.setFieldValue('header.currencyId', newValue?.recordId || null)
+                  formik.setFieldValue('header.currencyName', newValue?.name)
+                }}
+                error={formik.touched?.header?.currencyId && Boolean(formik.errors?.header?.currencyId)}
+              />
+            </Grid>
+            <Grid item xs={1}>
+              <Grid container spacing={1} alignItems='center'>
+                <Grid item xs={4}>
+                  <Button
+                    variant='contained'
+                    size='small'
+                    onClick={() => openMCRForm(formik.values.header)}
+                    disabled={formik.values.header.currencyId === defaultsDataState?.currencyId}
+                  >
+                    <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
+                  </Button>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={2}>
+              <CustomTextField
+                name='header.reference'
+                label={labels.reference}
+                value={formik?.values?.header?.reference}
+                maxAccess={!editMode && maxAccess}
+                readOnly={editMode}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('header.reference', '')}
+                error={formik?.touched?.header?.reference && Boolean(formik?.errors?.header?.reference)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomDatePicker
+                name='header.date'
+                required
+                label={labels.date}
+                readOnly={isPosted}
+                value={formik?.values?.header?.date}
+                onChange={async (e, newValue) => {
+                  formik.setFieldValue('header.date', newValue)
+                  await getMultiCurrencyFormData(formik.values.header.currencyId, newValue, RateDivision.FINANCIALS)
+                }}
+                editMode={editMode}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('header.date', null)}
+                error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Site.qry}
+                name='header.siteId'
+                label={labels.site}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values.header}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                displayFieldWidth={2}
+                readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
+                required={
+                  !formik?.values?.header.dtId ||
+                  (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
+                }
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.siteId', newValue ? newValue.recordId : null)
+                  formik.setFieldValue('header.siteRef', newValue ? newValue.reference : null)
+                  formik.setFieldValue('header.siteName', newValue ? newValue.name : null)
+                }}
+                error={formik?.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomNumberField
+                name='header.creditLimit'
+                maxAccess={maxAccess}
+                label={labels.creditLimit}
+                value={formik.values.header.creditLimit}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                endpointId={SaleRepository.SalesZone.qry}
+                parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
+                name='header.szId'
+                label={labels.saleZone}
+                readOnly={isPosted}
+                columnsInDropDown={[{ key: 'name', value: 'Name' }]}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values.header}
+                maxAccess={maxAccess}
+                displayFieldWidth={1.5}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.szId', newValue ? newValue.recordId : null)
+                }}
+                error={formik?.touched?.header?.szId && Boolean(formik?.errors?.header?.szId)}
+              />
+            </Grid>
+            <Grid item xs={5}>
               <ResourceLookup
                 endpointId={SaleRepository.Client.snapshot}
                 name='header.clientId'
@@ -1908,47 +1925,6 @@ export default function SaleTransactionForm({
               />
             </Grid>
             <Grid item xs={2}>
-              <Grid container spacing={1} alignItems='center'>
-                <Grid item xs={8}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
-                    name='header.currencyId'
-                    label={labels.currency}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    readOnly={isPosted}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    required
-                    values={formik.values.header}
-                    maxAccess={maxAccess}
-                    onChange={async (event, newValue) => {
-                      await getMultiCurrencyFormData(
-                        newValue?.recordId,
-                        formik.values.header?.date,
-                        RateDivision.FINANCIALS
-                      )
-                      formik.setFieldValue('header.currencyId', newValue?.recordId || null)
-                      formik.setFieldValue('header.currencyName', newValue?.name)
-                    }}
-                    error={formik.touched?.header?.currencyId && Boolean(formik.errors?.header?.currencyId)}
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <Button
-                    variant='contained'
-                    size='small'
-                    onClick={() => openMCRForm(formik.values.header)}
-                    disabled={formik.values.header.currencyId === defaultsDataState?.currencyId}
-                  >
-                    <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
-                  </Button>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={formik?.values?.header?.clientId && SaleRepository.Contact.qry}
                 parameters={`_clientId=${formik?.values?.header?.clientId}`}
@@ -1970,6 +1946,15 @@ export default function SaleTransactionForm({
               />
             </Grid>
             <Grid item xs={2}>
+              <CustomTextField
+                name='header.search'
+                label={labels.search}
+                value={formik?.values?.header?.search}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('header.search', '')}
+              />
+            </Grid>
+            <Grid item xs={3}>
               {metalPriceVisibility && (
                 <CustomNumberField
                   name='header.KGmetalPrice'
@@ -2004,165 +1989,192 @@ export default function SaleTransactionForm({
         </Grow>
         <Fixed>
           <Grid container spacing={2} sx={{ pt: 2 }}>
-            <Grid item xs={6}>
-              <CustomTextArea
-                name='header.description'
-                label={labels.description}
-                value={formik.values.header.description}
-                rows={3}
-                editMode={editMode}
-                maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('header.description', e.target.value)}
-                onClear={() => formik.setFieldValue('header.description', '')}
-                error={formik?.touched?.header?.description && Boolean(formik?.errors?.header?.description)}
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.qty'
-                    maxAccess={maxAccess}
-                    label={labels.totQty}
-                    value={totalQty}
-                    readOnly
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.volume'
-                    maxAccess={maxAccess}
-                    label={labels.totVolume}
-                    value={totalVolume}
-                    readOnly
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.weight'
-                    maxAccess={maxAccess}
-                    label={labels.totWeight}
-                    value={totalWeight}
-                    readOnly
-                  />
-                </Grid>
-                <Grid item>
-                  <CustomNumberField
-                    name='header.balance'
-                    maxAccess={maxAccess}
-                    label={labels.balance}
-                    value={formik.values.header.balance}
-                    readOnly
-                  />
-                </Grid>
+            <Grid item xs={4} container direction='column' spacing={2}>
+              <Grid item>
+                <CustomTextArea
+                  name='header.description'
+                  label={labels.description}
+                  value={formik.values.header.description}
+                  rows={3}
+                  editMode={editMode}
+                  maxAccess={maxAccess}
+                  onChange={e => formik.setFieldValue('header.description', e.target.value)}
+                  onClear={() => formik.setFieldValue('header.description', '')}
+                  error={formik?.touched?.header?.description && Boolean(formik?.errors?.header?.description)}
+                />
+              </Grid>
+              <Grid item>
+                <CustomTextArea
+                  name='header.billAddress'
+                  label={labels.billTo}
+                  value={formik.values.header.billAddress}
+                  rows={3}
+                  maxLength='100'
+                  readOnly={!formik.values.header.clientId || isPosted}
+                  maxAccess={maxAccess}
+                  viewDropDown={formik.values.header.clientId}
+                  viewAdd={formik.values.header.clientId && !editMode}
+                  onChange={e => formik.setFieldValue('header.billAddress', e.target.value)}
+                  onClear={() => formik.setFieldValue('header.billAddress', '')}
+                  onDropDown={() => openAddressFilterForm()}
+                  handleAddAction={() => openAddressForm()}
+                  error={formik?.touched?.header?.billAddress && Boolean(formik?.errors?.header?.billAddress)}
+                />
               </Grid>
             </Grid>
-            <Grid item xs={3}>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.subTotal'
-                    maxAccess={maxAccess}
-                    label={labels.subtotal}
-                    value={subtotal}
-                    readOnly
-                  />
+            <Grid item xs={2} container direction='column'></Grid>
+            <Grid container spacing={2} xs={6} direction='row' sx={{ p: 2 }}>
+              <Grid item xs={6} container direction='column'>
+                <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='header.qty'
+                      maxAccess={maxAccess}
+                      label={labels.totQty}
+                      value={totalQty}
+                      readOnly
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='header.volume'
+                      maxAccess={maxAccess}
+                      label={labels.totVolume}
+                      value={totalVolume}
+                      readOnly
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='header.weight'
+                      maxAccess={maxAccess}
+                      label={labels.totWeight}
+                      value={totalWeight}
+                      readOnly
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='header.balance'
+                      maxAccess={maxAccess}
+                      label={labels.balance}
+                      value={formik.values.header.balance}
+                      readOnly
+                    />
+                  </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.discount'
-                    maxAccess={maxAccess}
-                    label={labels.discount}
-                    value={formik.values.header.currentDiscount}
-                    displayCycleButton={true}
-                    cycleButtonLabel={cycleButtonState.text}
-                    decimalScale={2}
-                    readOnly={isPosted}
-                    handleButtonClick={handleButtonClick}
-                    iconKey={cycleButtonState.text}
-                    ShowDiscountIcons={true}
-                    onChange={e => {
-                      let discount = Number(e.target.value.replace(/,/g, ''))
-                      if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
-                        if (discount < 0 || discount > 100) discount = 0
-                        formik.setFieldValue('header.tdPct', discount)
-                      } else {
-                        if (discount < 0 || formik.values.header.subtotal < discount) {
-                          discount = 0
+              </Grid>
+
+              <Grid item xs={6} container direction='column'>
+                <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='header.subTotal'
+                      maxAccess={maxAccess}
+                      label={labels.subtotal}
+                      value={subtotal}
+                      readOnly
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='header.discount'
+                      maxAccess={maxAccess}
+                      label={labels.discount}
+                      value={formik.values.header.currentDiscount}
+                      displayCycleButton={true}
+                      cycleButtonLabel={cycleButtonState.text}
+                      decimalScale={2}
+                      readOnly={isPosted}
+                      handleButtonClick={handleButtonClick}
+                      iconKey={cycleButtonState.text}
+                      ShowDiscountIcons={true}
+                      onChange={e => {
+                        let discount = Number(e.target.value.replace(/,/g, ''))
+                        if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
+                          if (discount < 0 || discount > 100) discount = 0
+                          formik.setFieldValue('header.tdPct', discount)
+                        } else {
+                          if (discount < 0 || formik.values.header.subtotal < discount) {
+                            discount = 0
+                          }
+                          formik.setFieldValue('header.tdAmount', discount)
                         }
-                        formik.setFieldValue('header.tdAmount', discount)
-                      }
-                      formik.setFieldValue('header.currentDiscount', discount)
-                    }}
-                    onBlur={async e => {
-                      let discountAmount = Number(e.target.value.replace(/,/g, ''))
-                      let tdPct = Number(e.target.value.replace(/,/g, ''))
-                      let tdAmount = Number(e.target.value.replace(/,/g, ''))
+                        formik.setFieldValue('header.currentDiscount', discount)
+                      }}
+                      onBlur={async e => {
+                        let discountAmount = Number(e.target.value.replace(/,/g, ''))
+                        let tdPct = Number(e.target.value.replace(/,/g, ''))
+                        let tdAmount = Number(e.target.value.replace(/,/g, ''))
 
-                      if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
-                        tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
-                        formik.setFieldValue('header.tdPct', tdPct)
-                      }
+                        if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
+                          tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
+                          formik.setFieldValue('header.tdPct', tdPct)
+                        }
 
-                      if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
-                        tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
-                        formik.setFieldValue('header.tdAmount', tdAmount)
-                      }
-                      setReCal(true)
+                        if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
+                          tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
+                          formik.setFieldValue('header.tdAmount', tdAmount)
+                        }
+                        setReCal(true)
 
-                      await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, discountAmount)
-                    }}
-                    onClear={() => {
-                      formik.setFieldValue('header.tdAmount', 0)
-                      formik.setFieldValue('header.tdPct', 0)
-                      recalcGridVat(formik.values.header.tdType, 0, 0, 0)
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.miscAmount'
-                    maxAccess={maxAccess}
-                    label={labels.misc}
-                    value={formik.values.header.miscAmount}
-                    decimalScale={2}
-                    readOnly={isPosted}
-                    onChange={e => {
-                      formik.setFieldValue('header.miscAmount', e.target.value)
+                        await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, discountAmount)
+                      }}
+                      onClear={() => {
+                        formik.setFieldValue('header.tdAmount', 0)
+                        formik.setFieldValue('header.tdPct', 0)
+                        recalcGridVat(formik.values.header.tdType, 0, 0, 0)
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='header.miscAmount'
+                      maxAccess={maxAccess}
+                      label={labels.misc}
+                      value={formik.values.header.miscAmount}
+                      decimalScale={2}
+                      readOnly={isPosted}
+                      onChange={e => {
+                        formik.setFieldValue('header.miscAmount', e.target.value)
 
-                      const updatedRateRow = getRate({
-                        amount: e.target.value ?? 0,
-                        exRate: formik.values?.exRate,
-                        baseAmount: 0,
-                        rateCalcMethod: formik.values?.rateCalcMethod,
-                        dirtyField: DIRTYFIELD_RATE
-                      })
-                      formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-                    }}
-                    onBlur={async () => {
-                      setReCal(true)
-                    }}
-                    onClear={() => formik.setFieldValue('header.miscAmount', 0)}
-                    error={formik?.touched?.header?.miscAmount && Boolean(formik?.errors?.header?.miscAmount)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.vatAmount'
-                    maxAccess={maxAccess}
-                    label={labels.VAT}
-                    value={vatAmount}
-                    readOnly
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.amount'
-                    maxAccess={maxAccess}
-                    label={labels.net}
-                    value={amount}
-                    readOnly
-                  />
+                        const updatedRateRow = getRate({
+                          amount: e.target.value ?? 0,
+                          exRate: formik.values?.exRate,
+                          baseAmount: 0,
+                          rateCalcMethod: formik.values?.rateCalcMethod,
+                          dirtyField: DIRTYFIELD_RATE
+                        })
+                        formik.setFieldValue(
+                          'header.baseAmount',
+                          parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0
+                        )
+                      }}
+                      onBlur={async () => {
+                        setReCal(true)
+                      }}
+                      onClear={() => formik.setFieldValue('header.miscAmount', 0)}
+                      error={formik?.touched?.header?.miscAmount && Boolean(formik?.errors?.header?.miscAmount)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='header.vatAmount'
+                      maxAccess={maxAccess}
+                      label={labels.VAT}
+                      value={vatAmount}
+                      readOnly
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='header.amount'
+                      maxAccess={maxAccess}
+                      label={labels.net}
+                      value={amount}
+                      readOnly
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
