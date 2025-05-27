@@ -182,7 +182,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                 label={labels.cashAccount}
                 valueField='accountNo'
                 displayField='name'
-                firstFieldWidth='30%'
+                firstFieldWidth={4}
                 displayFieldWidth={1.5}
                 valueShow='cashAccountRef'
                 secondValueShow='cashAccountName'
