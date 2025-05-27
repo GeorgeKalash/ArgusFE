@@ -1,6 +1,5 @@
 import React, { useContext, useState } from 'react'
 import Grid from '@mui/system/Unstable_Grid/Grid'
-import { useFormik } from 'formik'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceLookup } from './ResourceLookup'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -15,7 +14,7 @@ import FormShell from './FormShell'
 import CustomButton from '../Inputs/CustomButton'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
-import * as yup from 'yup'
+import { useForm } from 'src/hooks/form'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import Table from './Table'
 import { RGFinancialRepository } from 'src/repositories/RGFinancialRepository'
@@ -31,18 +30,15 @@ export default function AccountSummary({ clientInfo, moduleId }) {
   const baseColumns = [{ field: 'days', headerName: labels.days, flex: 1, type: 'number' }]
   const [columns, setColumns] = useState(baseColumns)
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess: access,
     initialValues: {
       clientId: clientInfo?.clientId,
       clientRef: clientInfo?.clientRef,
       clientName: clientInfo?.clientName,
       agpId: null,
       moduleId
-    },
-    validateOnChange: true,
-    validationSchema: yup.object({
-      agpId: yup.number().required()
-    })
+    }
   })
 
   async function getDynamicColumns() {
