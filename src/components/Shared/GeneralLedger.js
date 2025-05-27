@@ -43,8 +43,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
     datasetId: datasetId
   })
 
-  console.log(access, datasetId)
-
   const {
     query: { data },
     labels: _labels
