@@ -714,7 +714,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       record: JSON.stringify(copy)
     })
 
-    toast.success(formik.values.isVerified ? platformLabels.verified : platformLabels.unverified)
+    toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
     refetchForm(formik.values.recordId)
     invalidate()
   }

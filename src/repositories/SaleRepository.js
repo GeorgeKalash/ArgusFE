@@ -285,6 +285,12 @@ export const SaleRepository = {
     qry: service + 'qryPLI',
     snapshot: service + 'snapshotPLI'
   },
+  CategoryPriceGroup: {
+    get: service + 'getPGC',
+    set: service + 'setPGC',
+    del: service + 'delPGC',
+    page: service + 'pagePGC'
+  },
   ReturnOnInvoice: {
     snapshot: service + 'snapshotRET',
     page: service + 'pageRET',
