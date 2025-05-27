@@ -465,4 +465,5 @@ export const ResourceIds = {
   PostWorkCenterJob: 42330,
   ProductionShifts: 42113,
   SyncMFTrx: 42316,
+  PhysicalCountSerialDetail: 44203
 }
