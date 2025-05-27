@@ -331,11 +331,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       condition: formik.values.isVerified,
       onClick: onVerify,
       disabled: !isPosted
-    },
-    {
-      field: 'isVerified',
-      headerName: labels.isVerified,
-      type: 'checkbox'
     }
   ]
 

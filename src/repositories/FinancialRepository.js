@@ -197,6 +197,7 @@ export const FinancialRepository = {
     unpost: service + 'unpostMTX',
     qry: service + 'qryMTX',
     page: service + 'pageMTX',
+    verify: service + 'verifyMTX',
     snapshot: service + 'snapshotMTX'
   },
   AgingDoc: {
