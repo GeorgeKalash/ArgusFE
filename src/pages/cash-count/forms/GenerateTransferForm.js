@@ -88,7 +88,7 @@ export default function GenerateTransferForm({ cashCountId, fromPlantId, labels,
                   _type: 0
                 }}
                 filter={{ plantId: formik.values.toPlantId }}
-                firstFieldWidth='40%'
+                firstFieldWidth={5}
                 valueField='accountNo'
                 displayField='name'
                 name='toAccountId'
