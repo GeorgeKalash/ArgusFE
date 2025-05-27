@@ -354,7 +354,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       component: 'textfield',
       label: labels.srlNo,
       name: 'srlNo',
-      flex: 2,
+      flex: 1.2,
       ...(formik?.values?.autoSrlNo && { updateOn: 'blur' }),
       jumpToNextLine: jumpToNextLine,
       disableDuplicate: true,
@@ -465,6 +465,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       component: 'textfield',
       label: labels.metalRef,
       name: 'metalRef',
+      flex: 0.6,
       props: {
         readOnly: true
       }
@@ -480,6 +481,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     {
       component: 'button',
       name: 'taxDetailsButton',
+      flex: 0.75,
       props: {
         imgSrc: '/images/buttonsIcons/tax-icon.png'
       },
@@ -686,7 +688,13 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
   }
 
   const filteredData = formik.values.search
-    ? formik.values.serials.filter(item => item.srlNo?.toString()?.includes(formik.values.search.toLowerCase()))
+    ? formik.values.serials.filter(
+        item =>
+          item.srlNo?.toString()?.includes(formik.values.search) ||
+          item.sku?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
+          item.itemName?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
+          item.weight?.toString()?.includes(formik.values.search)
+      )
     : formik.values.serials
 
   const handleSearchChange = event => {
@@ -889,9 +897,10 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
+                filter={item => item.currencyType === 1}
                 name='currencyId'
                 label={labels.currency}
                 valueField='recordId'
@@ -908,6 +917,19 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                   formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomTextField
+                name='search'
+                value={formik.values.search}
+                label={platformLabels.Search}
+                onClear={() => {
+                  formik.setFieldValue('search', '')
+                }}
+                onChange={handleSearchChange}
+                onSearch={e => formik.setFieldValue('search', e)}
+                search={true}
               />
             </Grid>
             <Grid item xs={4}>
@@ -1017,64 +1039,50 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 error={formik.touched.taxId && Boolean(formik.errors.taxId)}
               />
             </Grid>
-            <Grid item xs={6}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={SaleRepository.Client.snapshot}
-                    filter={{ isInactive: false }}
-                    valueField='reference'
-                    displayField='name'
-                    secondFieldLabel={labels.name}
-                    name='clientId'
-                    label={labels.client}
-                    form={formik}
-                    required
-                    readOnly={isClosed}
-                    displayFieldWidth={2}
-                    valueShow='clientRef'
-                    secondValueShow='clientName'
-                    maxAccess={maxAccess}
-                    editMode={editMode}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' },
-                      { key: 'szName', value: 'Sales Zone' },
-                      { key: 'keywords', value: 'Keywords' },
-                      { key: 'cgName', value: 'Client Group' }
-                    ]}
-                    onChange={async (event, newValue) => {
-                      formik.setFieldValue('clientName', newValue?.name)
-                      formik.setFieldValue('clientRef', newValue?.reference)
-                      formik.setFieldValue('accountId', newValue?.accountId)
-                      formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
-                      formik.setFieldValue('taxId', newValue?.taxId)
-                      formik.setFieldValue('clientId', newValue?.recordId || null)
-                    }}
-                    errorCheck={'clientId'}
-                  />
-                </Grid>
-                <Grid item xs={5}>
-                  <CustomTextField
-                    name='search'
-                    value={formik.values.search}
-                    label={platformLabels.Search}
-                    onClear={() => {
-                      formik.setFieldValue('search', '')
-                    }}
-                    onChange={handleSearchChange}
-                    onSearch={e => formik.setFieldValue('search', e)}
-                    search={true}
-                  />
-                </Grid>
+            <Grid item xs={8}>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={SaleRepository.Client.snapshot}
+                  filter={{ isInactive: false }}
+                  valueField='reference'
+                  displayField='name'
+                  secondFieldLabel={labels.name}
+                  name='clientId'
+                  label={labels.client}
+                  form={formik}
+                  required
+                  readOnly={isClosed}
+                  displayFieldWidth={2}
+                  firstFieldWidth={4}
+                  valueShow='clientRef'
+                  secondValueShow='clientName'
+                  maxAccess={maxAccess}
+                  editMode={editMode}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'szName', value: 'Sales Zone' },
+                    { key: 'keywords', value: 'Keywords' },
+                    { key: 'cgName', value: 'Client Group' }
+                  ]}
+                  onChange={async (event, newValue) => {
+                    formik.setFieldValue('clientName', newValue?.name)
+                    formik.setFieldValue('clientRef', newValue?.reference)
+                    formik.setFieldValue('accountId', newValue?.accountId)
+                    formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
+                    formik.setFieldValue('taxId', newValue?.taxId)
+                    formik.setFieldValue('clientId', newValue?.recordId || null)
+                  }}
+                  errorCheck={'clientId'}
+                />
               </Grid>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <CustomTextArea
                 name='description'
                 label={labels.description}
                 value={formik.values.description}
-                rows={2}
+                rows={1.25}
                 editMode={editMode}
                 readOnly={isClosed}
                 maxAccess={maxAccess}
@@ -1106,71 +1114,36 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
           />
         </Grow>
         <Grid container spacing={3}>
-          <Grid item xs={9}>
-            <Grid container spacing={3}>
-              <Grid item xs={9} height={132} sx={{ display: 'flex', flex: 1 }}>
-                <Table
-                  gridData={{ count: 1, list: formik?.values?.metalGridData }}
-                  maxAccess={access}
-                  columns={[
-                    { field: 'metal', headerName: labels.metal, flex: 1 },
-                    { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
-                    { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
-                  ]}
-                  rowId={['metal']}
-                  pagination={false}
-                />
-              </Grid>
-              <Grid item xs={3}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}></Grid>
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      name='subtotal'
-                      maxAccess={maxAccess}
-                      label={labels.subtotal}
-                      value={subtotal}
-                      readOnly
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      name='vatAmount'
-                      maxAccess={maxAccess}
-                      label={labels.vat}
-                      value={vatAmount}
-                      readOnly
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      name='amount'
-                      maxAccess={maxAccess}
-                      label={labels.total}
-                      value={amount}
-                      readOnly
-                    />
-                  </Grid>
-                </Grid>
-              </Grid>
-              <Grid item xs={12} height={132} sx={{ display: 'flex', flex: 1 }}>
-                <Table
-                  columns={[
-                    { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 1 },
-                    { field: 'sku', headerName: labels.sku, flex: 1 },
-                    { field: 'itemName', headerName: labels.itemDesc, flex: 2 },
-                    { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
-                    { field: 'weight', headerName: labels.weight, type: 'number', flex: 1 }
-                  ]}
-                  gridData={{ count: 1, list: formik?.values?.itemGridData }}
-                  rowId={['sku']}
-                  maxAccess={access}
-                  pagination={false}
-                />
-              </Grid>
-            </Grid>
+          <Grid item xs={6.5} sx={{ display: 'flex', flex: 1 }}>
+            <Table
+              columns={[
+                { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 0.75 },
+                { field: 'sku', headerName: labels.sku, flex: 1 },
+                { field: 'itemName', headerName: labels.itemDesc, flex: 2 },
+                { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
+                { field: 'weight', headerName: labels.weight, type: 'number', flex: 1 }
+              ]}
+              gridData={{ count: 1, list: formik?.values?.itemGridData }}
+              rowId={['sku']}
+              maxAccess={access}
+              pagination={false}
+            />
           </Grid>
-          <Grid item xs={2.5}>
+          <Grid item xs={3} sx={{ display: 'flex', flex: 1 }}>
+            <Table
+              gridData={{ count: 1, list: formik?.values?.metalGridData }}
+              maxAccess={access}
+              columns={[
+                { field: 'metal', headerName: labels.metal, flex: 1 },
+                { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
+                { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
+              ]}
+              rowId={['metal']}
+              pagination={false}
+            />
+          </Grid>
+          <Grid item xs={0.5}></Grid>
+          <Grid item xs={2}>
             <Grid container spacing={2}>
               <Grid item xs={12}></Grid>
               <Grid item xs={12}>
@@ -1181,6 +1154,28 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                   value={weight}
                   readOnly
                 />
+              </Grid>
+              <Grid item xs={12}></Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='subtotal'
+                  maxAccess={maxAccess}
+                  label={labels.subtotal}
+                  value={subtotal}
+                  readOnly
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='vatAmount'
+                  maxAccess={maxAccess}
+                  label={labels.vat}
+                  value={vatAmount}
+                  readOnly
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField name='amount' maxAccess={maxAccess} label={labels.total} value={amount} readOnly />
               </Grid>
             </Grid>
           </Grid>
