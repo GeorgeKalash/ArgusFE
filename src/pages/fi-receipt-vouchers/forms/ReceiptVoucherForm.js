@@ -59,7 +59,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     maxAccess: maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId,
       reference: '',
@@ -332,11 +332,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       condition: formik.values.isVerified,
       onClick: onVerify,
       disabled: !isPosted
-    },
-    {
-      field: 'isVerified',
-      headerName: labels.isVerified,
-      type: 'checkbox'
     }
   ]
 

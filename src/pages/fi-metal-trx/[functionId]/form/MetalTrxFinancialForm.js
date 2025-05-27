@@ -63,14 +63,16 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       description: '',
       dtId: null,
       functionId: functionId,
-      isVerified: null,
+      isVerified: false,
       plantId,
       qty: null,
+      pcs: null,
       recordId: null,
       reference: '',
       releaseStatus: null,
       siteId: siteId || null,
       status: 1,
+      accountGroupName: '',
       items: [
         {
           id: 1,
@@ -88,7 +90,9 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           metalValue: null,
           totalCredit: 0,
           trackBy: null,
-          trxId: recordId || 0
+          pcs: 0,
+          trxId: recordId || 0,
+          onhand: 0
         }
       ]
     },
@@ -117,7 +121,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
       const updatedHeader = {
         ...header,
-        qty: originalItems?.reduce((sum, item) => sum + item.qty, 0) || 0
+        qty: originalItems?.reduce((sum, item) => sum + item.qty, 0) || 0,
+        pcs: originalItems?.reduce((sum, item) => sum + item.pcs, 0) || 0
       }
 
       const items = originalItems?.map(item => ({
@@ -126,6 +131,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         metalId: item.metalId,
         itemId: item.itemId,
         qty: item.qty,
+        pcs: item.pcs,
         creditAmount: item.creditAmount,
         purity: item.purity / 1000,
         totalCredit: item.totalCredit,
@@ -153,6 +159,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const isPosted = formik.values.status === 3
   const calculateTotal = key => formik.values.items.reduce((sum, item) => sum + (parseFloat(item[key]) || 0), 0)
   const totalQty = calculateTotal('qty')
+  const totalPcs = calculateTotal('pcs')
   const totalLabor = calculateTotal('totalCredit')
   const totalMetal = calculateTotal('metalValue')
 
@@ -178,6 +185,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       record: JSON.stringify({
         ...restValues,
         qty: totalQty,
+        pcs: totalPcs,
         creditAmount: totalLabor
       })
     })
@@ -195,6 +203,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       record: JSON.stringify({
         ...restValues,
         qty: totalQty,
+        pcs: totalPcs,
         creditAmount: totalLabor
       })
     })
@@ -328,13 +337,19 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           parameters: `_recordId=${newRow?.itemId}`
         })
 
+        const res2 = await getRequest({
+          extension: InventoryRepository.Availability.get,
+          parameters: `_siteId=${formik.values?.siteId}&_itemId=${newRow?.itemId}&_seqNo=0`
+        })
+
         if (!purityValue) return
         const totalCredit = newRow.qty * newRow.creditAmount * (purityValue / newRow.stdPurity)
         update({
           purity: purityValue === newRow.stdPurity ? purityValue : purityValue * 1000,
           totalCredit,
           trackBy: res.record.trackBy,
-          purityFromItem: true
+          purityFromItem: true,
+          onhand: res2?.record?.onhand || 0
         })
       }
     },
@@ -345,6 +360,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       props: {
         readOnly: true
       }
+    },
+    {
+      component: 'numberfield',
+      name: 'pcs',
+      label: labels.pcs,
+      props: { allowNegative: false }
     },
     {
       component: 'numberfield',
@@ -404,8 +425,27 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       name: 'totalCredit',
       label: labels.totalLabor,
       props: { allowNegative: false, readOnly: true }
+    },
+    {
+      component: 'numberfield',
+      name: 'onhand',
+      label: labels.qtyOnHand,
+      props: { readOnly: true }
     }
   ]
+
+  const onVerify = async () => {
+    const res = await postRequest({
+      extension: FinancialRepository.MetalTrx.verify,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res) {
+      toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+      invalidate()
+      window.close()
+    }
+  }
 
   const actions = [
     {
@@ -433,6 +473,18 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       onClick: 'onClickGL',
       datasetId: getGLResourceId(functionId),
       disabled: !editMode
+    },
+    {
+      key: 'Verify',
+      condition: !formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
     }
   ]
 
@@ -546,7 +598,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 error={formik.touched.contactId && Boolean(formik.errors.contactId)}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <CustomTextField
                 name='reference'
                 label={labels.reference}
@@ -558,7 +610,19 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
+              <CustomDatePicker
+                name='date'
+                required
+                readOnly={isPosted}
+                label={labels.date}
+                value={formik.values.date}
+                onChange={formik.setFieldValue}
+                onClear={() => formik.setFieldValue('date', '')}
+                error={formik.touched.date && Boolean(formik.errors.date)}
+              />
+            </Grid>
+            <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'
@@ -579,7 +643,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={LogisticsRepository.LoCollector.qry}
                 name='collectorId'
@@ -595,19 +659,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={4}>
-              <CustomDatePicker
-                name='date'
-                required
-                readOnly={isPosted}
-                label={labels.date}
-                value={formik.values.date}
-                onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('date', '')}
-                error={formik.touched.date && Boolean(formik.errors.date)}
-              />
-            </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={9}>
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
@@ -616,6 +668,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 displayField='name'
                 valueShow='accountRef'
                 secondValueShow='accountName'
+                firstFieldWidth={4}
                 required
                 errorCheck={'accountId'}
                 form={formik}
@@ -637,7 +690,17 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                   formik.setFieldValue('accountId', newValue?.recordId)
                   formik.setFieldValue('accountRef', newValue?.reference)
                   formik.setFieldValue('accountName', newValue?.name)
+                  formik.setFieldValue('accountGroupName', newValue?.groupName)
                 }}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='accountGroupName'
+                label={labels.groupName}
+                value={formik.values.accountGroupName}
+                readOnly
+                error={formik.touched.accountGroupName && Boolean(formik.errors.accountGroupName)}
               />
             </Grid>
           </Grid>
@@ -659,8 +722,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           />
         </Grow>
         <Fixed>
-          <Grid container justifyContent='space-between'>
-            <Grid item xs={5}>
+          <Grid container spacing={2}>
+            <Grid item xs={4}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
@@ -693,16 +756,19 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
+              <CustomNumberField label={labels.totalPcs} value={totalPcs} decimalScale={2} readOnly />
+            </Grid>
+            <Grid item xs={4}>
               <Grid container spacing={2}>
-                <Grid item xs={7}>
+                <Grid item xs={12}>
                   <CustomNumberField label={labels.totalQty} value={totalQty} decimalScale={2} readOnly />
                 </Grid>
-                <Grid item xs={7}>
+                <Grid item xs={12}>
                   <CustomNumberField label={labels.totalLabor} value={totalLabor} decimalScale={2} readOnly />
                 </Grid>
                 {metal?.reference && (
-                  <Grid item xs={7}>
+                  <Grid item xs={12}>
                     <CustomNumberField
                       label={`${labels.total} ${metal.reference}`}
                       value={totalMetal}

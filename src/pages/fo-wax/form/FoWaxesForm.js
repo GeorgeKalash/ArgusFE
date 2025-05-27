@@ -42,7 +42,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId: null,
       header: {
