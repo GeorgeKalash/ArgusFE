@@ -442,9 +442,11 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountType', newValue?.key)
-                  formik.setFieldValue('accountId', null)
-                  formik.setFieldValue('accountRef', '')
-                  formik.setFieldValue('accountName', '')
+                  if (!newValue?.key) {
+                    formik.setFieldValue('accountId', null)
+                    formik.setFieldValue('accountRef', '')
+                    formik.setFieldValue('accountName', '')
+                  }
                 }}
                 error={formik.touched.accountType && Boolean(formik.errors.accountType)}
               />

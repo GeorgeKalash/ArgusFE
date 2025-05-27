@@ -86,13 +86,13 @@ const FiPaymentVouchers = () => {
       type: 'date'
     },
     {
-      field: 'accountTypeRef',
-      headerName: labels.accountTypeRef,
+      field: 'accountRef',
+      headerName: labels.account,
       flex: 1
     },
     {
-      field: 'accountTypeName',
-      headerName: labels.accountType,
+      field: 'accountName',
+      headerName: labels.accountName,
       flex: 1
     },
     {
@@ -111,16 +111,7 @@ const FiPaymentVouchers = () => {
       flex: 1,
       type: 'number'
     },
-    {
-      field: 'accountRef',
-      headerName: labels.account,
-      flex: 1
-    },
-    {
-      field: 'accountName',
-      headerName: labels.accountName,
-      flex: 1
-    },
+
     {
       field: 'cashAccountName',
       headerName: labels.cashAccount,
