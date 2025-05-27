@@ -45,8 +45,16 @@ const Plants = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
     })
   }
+
   async function fetchWithFilter({ filters, pagination }) {
-    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    if (filters?.qry) {
+      return await getRequest({
+        extension: SystemRepository.Plant.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
 
   const columns = [
