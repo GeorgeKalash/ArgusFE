@@ -1452,10 +1452,13 @@ export default function SaleTransactionForm({
     }
   }
 
-  async function refetchForm(recordId) {
+  async function refetchForm(recordId, callDt) {
+    let dtInfo = {}
     const saTrxpack = await getSalesTransactionPack(recordId)
-    await fillForm(saTrxpack)
+    if (callDt) dtInfo = await getDTD(saTrxpack.header.dtId)
+    await fillForm(saTrxpack, dtInfo)
   }
+
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
       formik.setFieldValue(`header.${key}`, value)
@@ -1583,23 +1586,13 @@ export default function SaleTransactionForm({
           setCycleButtonState({ text: '123', value: 1 })
           formik.setFieldValue('header.tdType', 1)
         }
-      }
+      } else if (muList?.list) await refetchForm(recordId, true)
     })()
   }, [])
 
   useEffect(() => {
     if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
   }, [formik.values?.header.dtId])
-
-  useEffect(() => {
-    ;(async function () {
-      if (recordId && measurements) {
-        const transactionPack = await getSalesTransactionPack(recordId)
-        const dtInfo = await getDTD(transactionPack.header.dtId)
-        await fillForm(transactionPack, dtInfo)
-      }
-    })()
-  }, [recordId, measurements])
 
   useEffect(() => {
     defaultsDataState && setDefaultFields()
