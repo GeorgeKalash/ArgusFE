@@ -344,7 +344,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
         <Grow>
           <DataGrid
             onChange={value => formik2.setFieldValue('glTransactions', value)}
-            allowDelete={!!isRaw}
+            allowDelete={!isRaw}
             allowAddNewLine={!!isRaw}
             value={formik2?.values.glTransactions}
             error={formik2?.errors.glTransactions}
