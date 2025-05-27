@@ -29,14 +29,7 @@ export default function AccountSummary({ clientInfo, moduleId }) {
     datasetId: ResourceIds.AccountSummary
   })
   const baseColumns = [{ field: 'days', headerName: labels.days, flex: 1, type: 'number' }]
-
-  const [columns, setColumns] = useState([
-    {
-      field: 'days',
-      headerName: labels.days,
-      flex: 1
-    }
-  ])
+  const [columns, setColumns] = useState(baseColumns)
 
   const formik = useFormik({
     initialValues: {
@@ -64,6 +57,8 @@ export default function AccountSummary({ clientInfo, moduleId }) {
     if (moduleId == 1) currencyItems = currecnyList?.list?.filter(currency => currency.sale)
     else if (moduleId == 2) currencyItems = currecnyList?.list?.filter(currency => currency.purchase)
 
+    if (currencyItems.length == 0) return
+
     currencyItems?.forEach((cur, index) => {
       dynamicColumns.push({
         field: `column${index + 1}`,
@@ -87,26 +82,31 @@ export default function AccountSummary({ clientInfo, moduleId }) {
       return obj
     })
 
-    for (const cur of currencyItems || []) {
-      const summaryRes = await getRequest({
+    const promises = (currencyItems || []).map(cur =>
+      getRequest({
         extension: RGFinancialRepository.AccountSummary.AccFI405b,
         parameters: `_agpId=${formik.values.agpId}&_currencyId=${cur.recordId}&_accountId=${formik.values.clientId}`
-      })
+      }).then(summaryRes => ({ summaryRes }))
+    )
+
+    const results = await Promise.all(promises)
+
+    results.forEach(({ summaryRes }) => {
       summaryRes?.list?.forEach(y => {
         listObject?.forEach(ob => {
           if (ob[1] == y.seqDays) ob[colcounts] = y.amount
         })
       })
       colcounts++
-    }
+    })
 
-    const Lobj = new Array(currencyItems.length + 2).fill(null)
+    const modifiedListObj = new Array(currencyItems.length + 2).fill(null)
     for (let co = 2; co < currencyItems.length + 2; co++) {
       let sum = 0
       listObject?.map(ob => {
         sum += Number(ob[co] || 0)
       })
-      Lobj[co] = sum
+      modifiedListObj[co] = sum
     }
 
     const newList = listObject
@@ -121,9 +121,9 @@ export default function AccountSummary({ clientInfo, moduleId }) {
         return rowObject
       })
 
-    let totalRow = []
+    let totalRow = {}
     for (let i = 0; i < currencyItems.length; i++) {
-      totalRow[`column${i + 1}`] = Lobj[i + 2] ?? 0
+      totalRow[`column${i + 1}`] = modifiedListObj[i + 2] ?? 0
     }
     newList.push(totalRow)
 
@@ -142,7 +142,7 @@ export default function AccountSummary({ clientInfo, moduleId }) {
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={SaleRepository.Client.snapshot}
