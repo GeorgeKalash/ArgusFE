@@ -23,72 +23,19 @@ const CorrespondentDispersalRate = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const initialValues = {
-    corId: null,
-    currencyId: null,
-    plantId: 0,
-    countryId: null,
-    dispersalType: null,
-    items: []
-  }
-
   const { labels: labels, maxAccess } = useResourceQuery({
     datasetId: ResourceIds.CorrespondentDispersalRate
   })
 
-  const itemSchema = yup.object().shape({
-    minRate: yup
-      .number()
-      .nullable()
-      .transform(value => (value === '' ? null : value))
-      .test('min-required-if-any', 'minRate is required', function (minRate) {
-        const { maxRate, rate } = this.parent
-        const anyFilled = maxRate != null || rate != null
-        if (anyFilled && minRate == null) {
-          return false
-        }
-
-        return true
-      }),
-    maxRate: yup
-      .number()
-      .nullable()
-      .transform(value => (value === '' ? null : value))
-      .test('max-required-if-any', 'maxRate is required', function (maxRate) {
-        const { minRate, rate } = this.parent
-        const anyFilled = minRate != null || rate != null
-        if (anyFilled && maxRate == null) {
-          return false
-        }
-
-        return true
-      }),
-
-    rate: yup
-      .number()
-      .nullable()
-      .transform(value => (value === '' ? null : value))
-      .test('rate-required-if-any', 'rate is required', function (rate) {
-        const { minRate, maxRate } = this.parent
-        const anyFilled = minRate != null || maxRate != null
-        if (anyFilled && rate == null) {
-          return false
-        }
-
-        return true
-      })
-      .test('rate-between', 'rate must be between minRate and maxRate', function (rate) {
-        const { minRate, maxRate } = this.parent
-        if (rate != null && minRate != null && maxRate != null && !(minRate <= rate && rate <= maxRate)) {
-          return false
-        }
-
-        return true
-      })
-  })
-
   const { formik } = useForm({
-    initialValues,
+    initialValues: {
+      corId: null,
+      currencyId: null,
+      plantId: 0,
+      countryId: null,
+      dispersalType: null,
+      items: []
+    },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -96,7 +43,61 @@ const CorrespondentDispersalRate = () => {
       corId: yup.number().required(),
       currencyId: yup.number().required(),
       dispersalType: yup.number().required(),
-      items: yup.array().of(itemSchema).required()
+      items: yup
+        .array()
+        .of(
+          yup.object().shape({
+            minRate: yup
+              .number()
+              .nullable()
+              .transform(value => (value === '' ? null : value))
+              .test('min-required-if-any', 'minRate is required', function (minRate) {
+                const { maxRate, rate } = this.parent
+                const anyFilled = maxRate != null || rate != null
+                if (anyFilled && minRate == null) {
+                  return false
+                }
+
+                return true
+              }),
+            maxRate: yup
+              .number()
+              .nullable()
+              .transform(value => (value === '' ? null : value))
+              .test('max-required-if-any', 'maxRate is required', function (maxRate) {
+                const { minRate, rate } = this.parent
+                const anyFilled = minRate != null || rate != null
+                if (anyFilled && maxRate == null) {
+                  return false
+                }
+
+                return true
+              }),
+
+            rate: yup
+              .number()
+              .nullable()
+              .transform(value => (value === '' ? null : value))
+              .test('rate-required-if-any', 'rate is required', function (rate) {
+                const { minRate, maxRate } = this.parent
+                const anyFilled = minRate != null || maxRate != null
+                if (anyFilled && rate == null) {
+                  return false
+                }
+
+                return true
+              })
+              .test('rate-between', 'rate must be between minRate and maxRate', function (rate) {
+                const { minRate, maxRate } = this.parent
+                if (rate != null && minRate != null && maxRate != null && !(minRate <= rate && rate <= maxRate)) {
+                  return false
+                }
+
+                return true
+              })
+          })
+        )
+        .required()
     }),
     onSubmit: async obj => {
       const filteredItems = obj?.items?.filter(
