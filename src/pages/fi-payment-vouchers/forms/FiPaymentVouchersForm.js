@@ -441,7 +441,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 readOnly={isPosted || isCancelled}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('accountType', newValue?.key)
+                  formik.setFieldValue('accountType', newValue?.key || null)
                   if (!newValue?.key) {
                     formik.setFieldValue('accountId', null)
                     formik.setFieldValue('accountRef', '')
@@ -584,7 +584,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
             <Grid item xs={6}>
               <CustomNumberField
                 name='amount'
-                type='text'
                 required
                 label={labels.amount}
                 maxLength={'10'}
