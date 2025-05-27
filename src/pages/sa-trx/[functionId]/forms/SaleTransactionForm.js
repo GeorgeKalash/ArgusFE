@@ -895,6 +895,19 @@ export default function SaleTransactionForm({
     return metalItemsList || []
   }
 
+  async function verifyRecord() {
+    const copy = { ...formik.values.header, isVerified: !formik.values.header.isVerified }
+    delete copy.items
+    await postRequest({
+      extension: SaleRepository.SalesTransaction.verify,
+      record: JSON.stringify(copy)
+    })
+
+    toast.success(!formik.values.header.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+    refetchForm(formik.values.header.recordId)
+    invalidate()
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -944,7 +957,7 @@ export default function SaleTransactionForm({
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !isPosted
+      disabled: !isPosted || formik.values.header.isVerified
     },
     {
       key: 'Unlocked',
@@ -957,6 +970,18 @@ export default function SaleTransactionForm({
       condition: true,
       onClick: 'onClientSalesTransaction',
       disabled: !formik.values.header?.clientId
+    },
+    {
+      key: 'Verify',
+      condition: !formik.values.header.isVerified,
+      onClick: verifyRecord,
+      disabled: formik.values.header.isVerified || !editMode || !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: formik.values.header.isVerified,
+      onClick: verifyRecord,
+      disabled: !formik.values.header.isVerified
     }
   ]
 
