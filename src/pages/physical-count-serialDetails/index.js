@@ -176,6 +176,8 @@ const PhysicalCountSerialDe = () => {
     })
 
     toast.success(platformLabels.Deleted)
+
+    return true
   }
 
   const handleGridChange = (value, action, row) => {
@@ -295,7 +297,7 @@ const PhysicalCountSerialDe = () => {
       record: JSON.stringify(StockCountControllerTab)
     })
 
-    toast.success(status === 3 ? platformLabels.Posted : platformLabels.Unposted)
+    toast.success(isPosted ? platformLabels.Posted : platformLabels.Unposted)
   }
 
   const onClearConfirmation = async clearOption => {
@@ -381,7 +383,7 @@ const PhysicalCountSerialDe = () => {
   const filtered = formik.values.search
     ? formik.values.rows.filter(
         item =>
-          (item.sku && item.sku?.toString()?.includes(formik.values.search?.toLowerCase())) ||
+          (item.sku && item.sku?.toLowerCase().toString()?.includes(formik.values.search?.toLowerCase())) ||
           (item.srlNo && item.srlNo?.toString()?.includes(formik.values.search?.toLowerCase())) ||
           (item.weight && item.weight?.toString()?.includes(formik.values.search?.toLowerCase()))
       )
