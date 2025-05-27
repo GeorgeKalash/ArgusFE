@@ -267,6 +267,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLWorksheet,
       disabled: !editMode
     },
     {

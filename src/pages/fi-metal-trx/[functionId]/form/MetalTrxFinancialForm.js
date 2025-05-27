@@ -26,7 +26,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 
-export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, window }) {
+export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, getGLResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const [metal, setMetal] = useState({})
@@ -431,6 +431,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: getGLResourceId(functionId),
       disabled: !editMode
     }
   ]

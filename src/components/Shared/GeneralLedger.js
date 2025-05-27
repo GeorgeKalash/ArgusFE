@@ -25,7 +25,7 @@ import { Fixed } from './Layouts/Fixed'
 import { VertLayout } from './Layouts/VertLayout'
 import { useForm } from 'src/hooks/form'
 
-const GeneralLedger = ({ functionId, values, valuesPath }) => {
+const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [formik, setformik] = useState(null)
   const [baseGridData, setBaseGridData] = useState({ credit: 0, debit: 0, balance: 0 })
@@ -39,10 +39,15 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
     })
   }
 
+  const { access } = useResourceQuery({
+    datasetId: datasetId
+  })
+
+  console.log(access, datasetId)
+
   const {
     query: { data },
-    labels: _labels,
-    access
+    labels: _labels
   } = useResourceQuery({
     filter: {
       filterFn: fetchGridData,

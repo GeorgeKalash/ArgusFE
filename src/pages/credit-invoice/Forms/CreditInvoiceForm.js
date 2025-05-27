@@ -483,6 +483,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLCreditInvoice,
       disabled: !editMode
     },
     {

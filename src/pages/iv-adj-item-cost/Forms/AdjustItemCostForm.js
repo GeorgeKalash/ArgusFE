@@ -252,6 +252,7 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLAdjustItemCost,
       disabled: !editMode
     },
     {

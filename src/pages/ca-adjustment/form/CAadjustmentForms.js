@@ -288,6 +288,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLIncreaseDecreaseAdj,
       disabled: !editMode
     },
     {

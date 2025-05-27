@@ -331,6 +331,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLPaymentVouchers,
       disabled: !editMode
     },
     {

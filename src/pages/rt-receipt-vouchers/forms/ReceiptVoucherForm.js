@@ -324,6 +324,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLRemittanceReceiptVoucher,
       disabled: !editMode
     }
   ]

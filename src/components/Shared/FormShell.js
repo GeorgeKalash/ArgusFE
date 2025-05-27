@@ -192,13 +192,15 @@ export default function FormShell({
           break
         case 'onClickGL':
           action.onClick = () => {
+            console.log(action.datasetId)
             stack({
               Component: GeneralLedger,
               props: {
                 values: form.values,
                 recordId: form.values?.recordId,
                 functionId: functionId,
-                valuesPath: action.valuesPath
+                valuesPath: action.valuesPath,
+                datasetId: action.datasetId
               },
               width: 1000,
               height: 620,

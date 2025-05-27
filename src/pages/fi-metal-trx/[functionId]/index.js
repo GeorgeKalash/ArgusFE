@@ -45,6 +45,18 @@ export default function MetalTrxFinancial() {
     }
   }
 
+  const getGLResourceId = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.MetalReceiptVoucher:
+        return ResourceIds.GLMetalReceiptVoucher
+      case SystemFunction.MetalPaymentVoucher:
+        return ResourceIds.GLMetalPaymentVoucher
+      default:
+        return null
+    }
+  }
+
   const {
     query: { data },
     refetch,
@@ -160,7 +172,8 @@ export default function MetalTrxFinancial() {
         labels,
         recordId,
         access,
-        functionId
+        functionId,
+        getGLResourceId
       },
       width: 900,
       height: 670,
