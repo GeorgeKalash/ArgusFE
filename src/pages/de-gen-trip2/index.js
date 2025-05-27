@@ -371,12 +371,18 @@ const GenerateOutboundTransportation2 = () => {
   const handleRowDragEnd = event => {
     if (!event.api) return
 
-    let allNodes = []
-    event.api.forEachNode(node => allNodes.push(node))
+    setTimeout(() => {
+      const rowCount = event.api.getDisplayedRowCount()
+      const newOrder = []
 
-    const newOrder = allNodes.sort((a, b) => a.rowIndex - b.rowIndex).map(node => node.data)
+      for (let i = 0; i < rowCount; i++) {
+        const rowNode = event.api.getDisplayedRowAtIndex(i)
+        if (rowNode) newOrder.push(rowNode.data)
+      }
 
-    setSortedZones(newOrder)
+      setSortedZones(newOrder)
+      setSelectedSaleZones({ list: newOrder })
+    }, 0)
   }
 
   const sortedZoneIds = useMemo(() => {
