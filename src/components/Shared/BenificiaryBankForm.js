@@ -44,21 +44,22 @@ export default function BenificiaryBankForm({
   onChange,
   setValidSubmit,
   onSuccess,
-  submitMainForm = true
+  submitMainForm = true,
+  forceDisable,
+  recordId
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
-  const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
+
   const hiddenIsInActive = useRef(false)
   const hiddenIsBlocked = useRef(false)
   const { platformLabels } = useContext(ControlContext)
 
   const initialValues = {
-    //RTBEN
     clientId: client?.clientId || '',
-    beneficiaryId: 0,
-    recordId: '',
+    beneficiaryId: beneficiary.beneficiaryId || 0,
+    recordId: recordId,
     name: '',
     dispersalType: dispersalType || '',
     nationalityId: null,
@@ -180,39 +181,19 @@ export default function BenificiaryBankForm({
 
         toast.success(platformLabels.Added)
 
+        const [clientId, beneficiaryId, seqNo] = res.recordId.split(',')
         if (onSuccess) onSuccess(res.recordId, values)
-        setEditMode(true)
+
+        formik.setFieldValue('recordId', (clientId * 100).toString() + (beneficiaryId * 10).toString() + seqNo)
       }
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
-      if (formik.values.countryId && dispersalType) {
-        const qryCCL = await getRequest({
-          extension: RemittanceSettingsRepository.CorrespondentControl.qry,
-          parameters: `_countryId=${formik.values.countryId}&_corId=${corId || 0}&_resourceId=${
-            ResourceIds.BeneficiaryBank
-          }`
-        })
-
-        const controls = { controls: qryCCL.list }
-        const maxAccess = { record: controls }
-        setMaxAccess(maxAccess)
-
-        const isInActiveAccessLevel = (maxAccess?.record?.controls ?? []).find(
-          ({ controlId }) => controlId === 'isInactive'
-        )
-
-        const isBlockedAccessLevel = (maxAccess?.record?.controls ?? []).find(
-          ({ controlId }) => controlId === 'isBlocked'
-        )
-
-        hiddenIsInActive.current = isInActiveAccessLevel?.accessLevel === HIDDEN
-        hiddenIsBlocked.current = isBlockedAccessLevel?.accessLevel === HIDDEN
-      }
-
-      if (beneficiary?.beneficiaryId && client?.clientId) {
+      if (recordId) {
         const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -227,8 +208,12 @@ export default function BenificiaryBankForm({
           //RTBEN
           clientId: client?.clientId,
           beneficiaryId: beneficiary?.beneficiaryId,
-          recordId: client?.clientId * 1000 + beneficiary?.beneficiaryId,
           name: RTBEN?.record?.name,
+
+          recordId:
+            (RTBEN?.record.clientId * 100).toString() +
+            (RTBEN?.record.beneficiaryId * 10).toString() +
+            RTBEN?.record?.seqNo,
           dispersalType: dispersalType,
           nationalityId: RTBEN?.record?.nationalityId,
           isBlocked: RTBEN?.record?.isBlocked,
@@ -271,7 +256,35 @@ export default function BenificiaryBankForm({
         formik.setValues(obj)
       }
     })()
-  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId, formik.values.countryId])
+  }, [])
+
+  useEffect(() => {
+    ;(async function () {
+      if (formik.values.countryId && dispersalType) {
+        const qryCCL = await getRequest({
+          extension: RemittanceSettingsRepository.CorrespondentControl.qry,
+          parameters: `_countryId=${formik.values.countryId}&_corId=${corId || 0}&_resourceId=${
+            ResourceIds.BeneficiaryBank
+          }`
+        })
+
+        const controls = { controls: qryCCL.list }
+        const maxAccess = { record: controls }
+        setMaxAccess(maxAccess)
+
+        const isInActiveAccessLevel = (maxAccess?.record?.controls ?? []).find(
+          ({ controlId }) => controlId === 'isInactive'
+        )
+
+        const isBlockedAccessLevel = (maxAccess?.record?.controls ?? []).find(
+          ({ controlId }) => controlId === 'isBlocked'
+        )
+
+        hiddenIsInActive.current = isInActiveAccessLevel?.accessLevel === HIDDEN
+        hiddenIsBlocked.current = isBlockedAccessLevel?.accessLevel === HIDDEN
+      }
+    })()
+  }, [formik.values.countryId])
 
   useEffect(() => {
     if (resetForm) {
@@ -355,11 +368,9 @@ export default function BenificiaryBankForm({
       resourceId={ResourceIds.BeneficiaryBank}
       form={formik}
       editMode={editMode}
-      setEditMode={setEditMode}
       maxAccess={maxAccess}
       disabledSubmit={editMode}
-      isCleared={viewBtns}
-      isInfo={viewBtns}
+      isCleared={forceDisable ? false : viewBtns}
       isSaved={viewBtns}
     >
       <VertLayout>

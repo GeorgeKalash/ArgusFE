@@ -63,6 +63,7 @@ const BeneficiaryBank = () => {
       props: {
         client: { clientId: obj.clientId },
         beneficiary: { beneficiaryId: obj.beneficiaryId, beneficiarySeqNo: obj.seqNo },
+        recordId: (obj.clientId * 100).toString() + (obj.beneficiaryId * 10).toString() + obj?.seqNo,
         dispersalType: 2
       },
       width: 700,

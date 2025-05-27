@@ -24,6 +24,17 @@ const OutwardsOrder = () => {
   const { platformLabels } = useContext(ControlContext)
   const userData = getStorageData('userData')
 
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params } = options
+
+    const response = await getRequest({
+      extension: RemittanceOutwardsRepository.OutwardsOrder.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+
   const {
     query: { data },
     filterBy,
@@ -32,8 +43,9 @@ const OutwardsOrder = () => {
     access,
     invalidate
   } = useResourceQuery({
-    endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
+    endpointId: RemittanceOutwardsRepository.OutwardsOrder.page,
     datasetId: ResourceIds.OutwardsOrder,
+    queryFn: fetchGridData,
     filter: {
       endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
       filterFn: fetchWithFilter

@@ -43,11 +43,12 @@ const BenificiaryCashForm = ({
   onChange,
   setValidSubmit,
   onSuccess,
-  submitMainForm = true
+  submitMainForm = true,
+  recordId,
+  forceDisable
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
-  const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [notArabic, setNotArabic] = useState(true)
   const hiddenIsInActive = useRef(false)
@@ -57,8 +58,8 @@ const BenificiaryCashForm = ({
   const initialValues = {
     //RTBEN
     clientId: client?.clientId || '',
-    recordId: '',
-    beneficiaryId: 0,
+    recordId,
+    beneficiaryId: beneficiary.beneficiaryId || 0,
     name: '',
     dispersalType: dispersalType || '',
     nationalityId: null,
@@ -96,14 +97,7 @@ const BenificiaryCashForm = ({
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
-    validateOnBlur: true,
-    validate: values => {
-      const errors = {}
-
-      return errors
-    },
     validationSchema: yup.object({
       clientId: yup.string().required(),
       countryId: yup.string().required(),
@@ -159,16 +153,49 @@ const BenificiaryCashForm = ({
           record: JSON.stringify(data)
         })
 
-        setEditMode(true)
         toast.success(platformLabels.Added)
+
+        const [clientId, beneficiaryId, seqNo] = res.recordId.split(',')
+
+        formik.setFieldValue('recordId', (clientId * 100).toString() + (beneficiaryId * 10).toString() + seqNo)
+
         if (onSuccess) onSuccess(res.recordId, values)
       }
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryCash
   })
+  useEffect(() => {
+    ;(async function () {
+      if (formik.values.countryId && dispersalType) {
+        const qryCCL = await getRequest({
+          extension: RemittanceSettingsRepository.CorrespondentControl.qry,
+          parameters: `_countryId=${formik.values.countryId}&_corId=${corId || 0}&_resourceId=${
+            ResourceIds.BeneficiaryCash
+          }`
+        })
+
+        const controls = { controls: qryCCL.list }
+        const maxAccess = { record: controls }
+        setMaxAccess(maxAccess)
+
+        const isInActiveAccessLevel = (maxAccess?.record?.controls ?? []).find(
+          ({ controlId }) => controlId === 'isInactive'
+        )
+
+        const isBlockedAccessLevel = (maxAccess?.record?.controls ?? []).find(
+          ({ controlId }) => controlId === 'isBlocked'
+        )
+
+        hiddenIsInActive.current = isInActiveAccessLevel?.accessLevel === HIDDEN
+        hiddenIsBlocked.current = isBlockedAccessLevel?.accessLevel === HIDDEN
+      }
+    })()
+  }, [formik.values.countryId])
 
   useEffect(() => {
     ;(async function () {
@@ -212,7 +239,7 @@ const BenificiaryCashForm = ({
         const obj = {
           //RTBEN
           clientId: client?.clientId,
-          recordId: client?.clientId * 1000 + beneficiary?.beneficiaryId,
+          recordId: (client?.clientId * 10).toString() + beneficiary?.beneficiaryId,
           beneficiaryId: beneficiary?.beneficiaryId,
           name: RTBEN?.record?.name,
           dispersalType: dispersalType,
@@ -250,7 +277,7 @@ const BenificiaryCashForm = ({
         formik.setValues(obj)
       }
     })()
-  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId, formik.values.countryId])
+  }, [])
 
   useEffect(() => {
     if (resetForm) {
@@ -393,8 +420,7 @@ const BenificiaryCashForm = ({
       editMode={editMode}
       maxAccess={maxAccess}
       disabledSubmit={editMode}
-      isCleared={viewBtns}
-      isInfo={viewBtns}
+      isCleared={forceDisable ? false : viewBtns}
       isSaved={viewBtns}
     >
       <VertLayout>

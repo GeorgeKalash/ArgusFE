@@ -117,7 +117,7 @@ export default function InstantCash({
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
-            <Grid item container xs={12} sx={{ px: 2, pt: 2 }}>
+            <Grid item container xs={12}>
               <Grid hideonempty xs={6}>
                 <CustomNumberField
                   name='sourceAmount'

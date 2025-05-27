@@ -240,6 +240,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
+        date: yup.date().required(),
         valueDate: yup.date().required(),
         countryId: yup.number().required(),
         dispersalType: yup.number().required(),
@@ -248,6 +249,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         productId: yup.number().required(),
         commission: yup.number().required(),
         lcAmount: yup.number().required(),
+        amount: yup.number().required(),
         exRate: yup.number().required(),
         clientId: yup.number().required(),
         poeId: yup.number().required(),
@@ -261,6 +263,18 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     }),
     onSubmit: async values => {
       const header = values.header
+
+      if (
+        (header.interfaceId === 1 &&
+          !values.ICRequest?.beneficiary?.bankDetails?.bankName &&
+          !values.ICRequest?.remitter?.employerStatus) ||
+        (header.interfaceId === 2 &&
+          !values.terraPayDetails.transaction.internationalTransferInformation?.relationshipSender)
+      ) {
+        openBankWindow()
+
+        return
+      }
 
       const data = {
         header: {
@@ -396,8 +410,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         corRef,
         corName,
         rateTypeId,
-        lcAmount: clearAmounts ? null : header.lcAmount || baseAmount,
-        fcAmount: clearAmounts ? null : header.fcAmount || originAmount
+        lcAmount: clearAmounts ? '' : header.lcAmount || baseAmount,
+        fcAmount: clearAmounts ? '' : header.fcAmount || originAmount
       },
       ...(agentCode && { agentCode })
     }
@@ -467,6 +481,11 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
             beneficiaryId,
             beneficiarySeqNo
           },
+          recordId:
+            clientId && beneficiaryId && beneficiarySeqNo
+              ? (clientId * 100).toString() + (beneficiaryId * 10).toString() + beneficiarySeqNo
+              : null,
+          forceDisable: !!formik.values.recordId && !!beneficiaryId,
           onSuccess: (response, values) => HandleAddedBenificiary(response, values)
         },
         width: 700,
@@ -499,6 +518,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
         return
       }
+      if (!result) return
 
       const {
         clientIDView: { idExpiryDate, idNo },
@@ -516,7 +536,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         },
         clientRemittance: { trxCountPerYear, trxAmountPerYear },
         clientMaster: { cellPhone, nationalityId }
-      } = result
+      } = result || {}
 
       formik.setValues({
         ...data,
@@ -911,7 +931,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           <Grid container xs={12} spacing={2}>
             <FormGrid item hideonempty xs={2}>
               <CustomTextField
-                name='reference'
+                name='header.reference'
                 label={labels.Reference}
                 value={formik?.values?.header.reference}
                 maxAccess={!editMode && maxAccess}
@@ -923,7 +943,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
             </FormGrid>
             <FormGrid item hideonempty xs={2}>
               <CustomDatePicker
-                name='date'
+                name='header.date'
                 required
                 label={labels.date}
                 value={formik?.values?.header?.date}
@@ -931,14 +951,14 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                 editMode={editMode}
                 readOnly={isClosed || isPosted || editMode}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('header.date', '')}
+                onClear={() => formik.setFieldValue('header.date', null)}
                 error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
               />
             </FormGrid>
             <FormGrid item hideonempty xs={2}>
               <ResourceComboBox
                 datasetId={DataSets.DOCUMENT_STATUS}
-                name='status'
+                name='header.status'
                 label={labels.docStatus}
                 readOnly
                 valueField='key'
@@ -948,7 +968,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
             </FormGrid>
             <FormGrid item hideonempty xs={2}>
               <CustomDatePicker
-                name='valueDate'
+                name='header.valueDate'
                 label={labels.valueDate}
                 value={formik?.values?.header.valueDate}
                 onChange={formik.setFieldValue}
@@ -1239,6 +1259,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       readOnly
                       maxAccess={maxAccess}
                       maxLength={10}
+                      error={formik.touched.header?.commission && Boolean(formik.errors?.header?.commission)}
                     />
                   </Grid>
                   <Grid item xs={12}>
