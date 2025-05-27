@@ -28,7 +28,7 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import PreviewReport from 'src/components/Shared/PreviewReport'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId, form }) {
+export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId, form = null }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -52,9 +52,9 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
-      recordId: recordId,
+      recordId,
       header: {
-        recordId: null,
+        recordId,
         plantId: null,
         reference: '',
         accountId: null,
@@ -112,7 +112,9 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         }
       })
 
-      invalidate()
+      if (!form) {
+        invalidate()
+      }
     }
   })
 
@@ -198,12 +200,12 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
           ...prevValues,
           header: {
             ...prevValues.header,
-            amount: form.values.amount,
-            owoId: form.values.recordId,
-            owoRef: form.values.reference,
-            clientId: form.values.clientId,
-            cellPhone: form.values.cellPhone,
-            plantId: form.values.plantId
+            amount: form.amount,
+            owoId: form.recordId,
+            owoRef: form.reference,
+            clientId: form.clientId,
+            cellPhone: form.cellPhone,
+            plantId: form.plantId
           }
         }))
       }
@@ -324,6 +326,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      valuesPath: formik.values.header,
       disabled: !editMode
     }
   ]

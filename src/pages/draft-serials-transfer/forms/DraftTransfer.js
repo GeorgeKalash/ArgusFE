@@ -395,7 +395,9 @@ export default function DraftTransfer({ labels, access, recordId }) {
       Component: ImportSerials,
       props: {
         endPoint: InventoryRepository.BatchDraftTransferSerial.batch,
-        draftId: formik?.values?.recordId,
+        header: {
+          draftId: formik?.values?.recordId
+        },
         onCloseimport: fillGrids,
         maxAccess: maxAccess
       },

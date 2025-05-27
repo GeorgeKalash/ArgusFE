@@ -50,7 +50,6 @@ export default function MetalTrxFinancial() {
     refetch,
     labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     access,
     invalidate
@@ -120,6 +119,12 @@ export default function MetalTrxFinancial() {
       flex: 1
     },
     {
+      field: 'pcs',
+      headerName: labels.pcs,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'qty',
       headerName: labels.qty,
       flex: 1,
@@ -131,7 +136,12 @@ export default function MetalTrxFinancial() {
       flex: 1,
       type: 'number'
     },
-
+    {
+      field: 'isVerified',
+      headerName: labels.isVerified,
+      type: 'checkbox',
+      flex: 1
+    },
     {
       field: 'statusName',
       headerName: labels.status,
@@ -162,7 +172,7 @@ export default function MetalTrxFinancial() {
         access,
         functionId
       },
-      width: 900,
+      width: 1100,
       height: 670,
       title: getcorrectLabel(parseInt(functionId))
     })

@@ -15,7 +15,7 @@ import toast from 'react-hot-toast'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomButton from '../Inputs/CustomButton'
 
-const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) => {
+const ImportSerials = ({ endPoint, header, onCloseimport, maxAccess, window }) => {
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const imageInputRef = useRef(null)
@@ -77,7 +77,7 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
     const transformedSerials = formik.values.serials?.replace(/\n/g, ',\r\n')
 
     const SerialsPack = {
-      draftId: draftId,
+      ...header,
       serials: transformedSerials ? transformedSerials : parsedFileContent
     }
 
