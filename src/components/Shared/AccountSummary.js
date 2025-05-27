@@ -157,7 +157,7 @@ export default function AccountSummary({ clientInfo, moduleId }) {
                 required
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={FinancialRepository.AgingProfile.qry}
                 parameters={`_startAt=0&_pageSize=1000&filter=`}
@@ -175,7 +175,7 @@ export default function AccountSummary({ clientInfo, moduleId }) {
                 error={formik?.touched?.agpId && Boolean(formik.errors?.agpId)}
               />
             </Grid>
-            <Grid item xs={8}>
+            <Grid item xs={5}>
               <ResourceComboBox
                 datasetId={DataSets.FI_AGING_MODULE}
                 label={labels.module}
@@ -186,7 +186,7 @@ export default function AccountSummary({ clientInfo, moduleId }) {
                 readOnly
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={1}>
               <CustomButton
                 onClick={getDynamicColumns}
                 image={'preview.png'}
