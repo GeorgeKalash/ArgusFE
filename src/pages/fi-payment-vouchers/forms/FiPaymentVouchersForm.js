@@ -31,7 +31,7 @@ import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import { RateDivision } from 'src/resources/RateDivision'
 import AccountSummary from 'src/components/Shared/AccountSummary'
 
-export default function FiPaymentVouchersForm({ labels, maxAccess: access, recordId }) {
+export default function FiPaymentVouchersForm({ labels, maxAccess: access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -315,7 +315,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || isCancelled
+      disabled: !editMode || isCancelled || formik.values.isVerified
     },
     {
       key: 'Unlocked',
@@ -383,7 +383,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
           },
           width: 1000,
           height: 500,
-          title: labels.accountSummary
+          title: platformLabels.AccountSummary
         })
       },
       disabled: !formik.values.accountId
@@ -515,7 +515,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 error={formik.touched.contactId && Boolean(formik.errors.contactId)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
@@ -531,6 +531,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                   { key: 'name', value: 'Name' },
                   { key: 'keywords', value: 'Keywords' }
                 ]}
+                firstFieldWidth={4}
                 displayFieldWidth={2}
                 filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
                 onChange={(event, newValue) => {
