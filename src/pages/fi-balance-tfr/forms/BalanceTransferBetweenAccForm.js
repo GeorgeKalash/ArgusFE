@@ -371,9 +371,9 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                         { key: 'groupName', value: 'account Group' }
                       ]}
                       onChange={(event, newValue) => {
-                        formik.setFieldValue('fromAccountId', newValue?.recordId || null)
                         formik.setFieldValue('fromAccountRef', newValue?.reference || '')
                         formik.setFieldValue('fromAccountName', newValue?.name || '')
+                        formik.setFieldValue('fromAccountId', newValue?.recordId || null)
                       }}
                       readOnly={isPosted || !formik.values.fromGroupId}
                       errorCheck='fromAccountId'
@@ -433,9 +433,9 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                         { key: 'groupName', value: 'account Group' }
                       ]}
                       onChange={(event, newValue) => {
-                        formik.setFieldValue('toAccountId', newValue?.recordId || null)
                         formik.setFieldValue('toAccountRef', newValue?.reference || '')
                         formik.setFieldValue('toAccountName', newValue?.name || '')
+                        formik.setFieldValue('toAccountId', newValue?.recordId || null)
                       }}
                       readOnly={isPosted || !formik.values.toGroupId}
                       errorCheck='toAccountId'
@@ -476,8 +476,6 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                     value={formik.values.fromAmount}
                     decimalScale={2}
                     onChange={e => {
-                      formik.handleChange(e)
-
                       const updatedRateRow = getRate({
                         amount: e.target.value ?? 0,
                         exRate: formik.values?.fromExRate || 0,
@@ -486,8 +484,9 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                         dirtyField: DIRTYFIELD_RATE
                       })
                       formik.setFieldValue('fromBaseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                      formik.setFieldValue('fromAmount', e.target.value)
                     }}
-                    onClear={() => formik.setFieldValue('fromAmount', 0)}
+                    onClear={() => formik.setFieldValue('fromAmount', null)}
                     required
                     readOnly={isPosted}
                     error={formik.touched.fromAmount && Boolean(formik.errors.fromAmount)}
