@@ -900,8 +900,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }, [])
 
   useEffect(() => {
-    formik.setFieldValue('header.amount', amount)
     formik.setFieldValue('header.vatAmount', vatAmount)
+    formik.setFieldValue('header.amount', amount)
   }, [amount])
 
   const onChangeBeneficiary = newValue => {
@@ -1292,7 +1292,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                     <CustomNumberField
                       name='amount'
                       label={labels.NetToPay}
-                      value={amount}
+                      value={header.amount}
                       required
                       readOnly
                       maxAccess={maxAccess}
