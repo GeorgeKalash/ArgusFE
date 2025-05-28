@@ -92,7 +92,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           trackBy: null,
           pcs: 0,
           trxId: recordId || 0,
-          onhand: 0
+          qtyOnHand: 0
         }
       ]
     },
@@ -136,7 +136,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         purity: item.purity / 1000,
         totalCredit: item.totalCredit,
         trackBy: item.trackBy || 0,
-        baseSalesMetalValue: item.baseSalesMetalValue
+        baseSalesMetalValue: item.baseSalesMetalValue,
+        qtyOnHand: item?.qtyOnHand || 0
       }))
 
       const payload = {
@@ -349,9 +350,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           totalCredit,
           trackBy: res.record.trackBy,
           purityFromItem: true,
-          onhand: res2?.record?.onhand || 0
+          qtyOnHand: res2?.record?.onhand || 0
         })
-      }
+      },
+      flex: 1.5
     },
     {
       component: 'textfield',
@@ -359,7 +361,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       name: 'itemName',
       props: {
         readOnly: true
-      }
+      },
+      flex: 3.5
     },
     {
       component: 'numberfield',
@@ -428,7 +431,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     },
     {
       component: 'numberfield',
-      name: 'onhand',
+      name: 'qtyOnHand',
       label: labels.qtyOnHand,
       props: { readOnly: true }
     }

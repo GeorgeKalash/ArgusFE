@@ -68,10 +68,9 @@ const FiPaymentVouchers = () => {
 
   const columns = [
     {
-      field: 'date',
-      headerName: _labels.date,
-      flex: 1,
-      type: 'date'
+      field: 'plantName',
+      headerName: _labels.plant,
+      flex: 1
     },
     {
       field: 'reference',
@@ -79,23 +78,19 @@ const FiPaymentVouchers = () => {
       flex: 1
     },
     {
-      field: 'accountTypeName',
-      headerName: _labels.accountType,
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'currencyRef',
+      headerName: _labels.currency,
       flex: 1
     },
     {
-      field: 'accountRef',
-      headerName: _labels.account,
-      flex: 1
-    },
-    {
-      field: 'accountName',
-      headerName: _labels.accountName,
-      flex: 1
-    },
-    {
-      field: 'cashAccountName',
-      headerName: _labels.cashAccount,
+      field: 'paymentMethodName',
+      headerName: _labels.paymentMethod,
       flex: 1
     },
     {
@@ -105,8 +100,8 @@ const FiPaymentVouchers = () => {
       type: 'number'
     },
     {
-      field: 'currencyRef',
-      headerName: _labels.currency,
+      field: 'cashAccountName',
+      headerName: _labels.cashAccount,
       flex: 1
     },
     {
@@ -115,14 +110,14 @@ const FiPaymentVouchers = () => {
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: _labels.status,
-      flex: 1
-    },
-    {
       field: 'isVerified',
       headerName: _labels.isVerified,
       type: 'checkbox'
+    },
+    {
+      field: 'statusName',
+      headerName: _labels.status,
+      flex: 1
     }
   ]
 
@@ -163,7 +158,7 @@ const FiPaymentVouchers = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar labels={_labels} onAdd={add} maxAccess={access} reportName={'FIPV'} filterBy={filterBy} />
+        <RPBGridToolbar labels={_labels} onAdd={add} maxAccess={access} reportName={'FIPVb'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
@@ -174,6 +169,7 @@ const FiPaymentVouchers = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
+          deleteConfirmationType={'strict'}
           paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}

@@ -966,11 +966,7 @@ export default function SaleTransactionForm({
         stack({
           Component: AccountSummary,
           props: {
-            clientInfo: {
-              clientId: formik.values.header.clientId,
-              clientRef: formik.values.header.clientRef,
-              clientName: formik.values.header.clientName
-            },
+            accountId: parseInt(formik.values.header.accountId),
             moduleId: 1
           },
           width: 1000,
@@ -1035,6 +1031,10 @@ export default function SaleTransactionForm({
         }
       })
     )
+
+    itemsUpdate.current = modifiedList
+    const res = await getClientInfo(saTrxHeader.clientId)
+    getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
     formik.setValues({
       ...formik.values,
       recordId: saTrxHeader.recordId || null,
@@ -1047,15 +1047,13 @@ export default function SaleTransactionForm({
           saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
         KGmetalPrice: saTrxHeader?.metalPrice * 1000,
         subtotal: saTrxHeader?.subtotal.toFixed(2),
+        accountId: res?.record?.accountId,
         commitItems: dtInfo?.record?.commitItems
       },
       items: modifiedList,
       taxes: [...saTrxTaxes]
     })
-    itemsUpdate.current = modifiedList
 
-    const res = await getClientInfo(saTrxHeader.clientId)
-    getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
     !formik.values.recordId &&
       lockRecord({
         recordId: saTrxHeader.recordId,
