@@ -24,8 +24,16 @@ const Sites = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_params=${params || ''}`
     })
   }
+
   async function fetchWithFilter({ filters, pagination }) {
-    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    if (filters?.qry) {
+      return await getRequest({
+        extension: InventoryRepository.Site.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
 
   const {

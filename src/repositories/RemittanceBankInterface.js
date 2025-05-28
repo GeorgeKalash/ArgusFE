@@ -24,5 +24,8 @@ export const RemittanceBankInterface = {
   },
   DeliveryMode: {
     qry: service + 'qryBIDVRow'
-  }
+  },
+  ATPExchangeRate: {
+    get2: service + 'getATPExchangeRate2'
+  },
 }

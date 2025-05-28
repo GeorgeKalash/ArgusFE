@@ -212,5 +212,14 @@ export const FinancialRepository = {
     snapshot: service + 'snapshotTMA',
     post: service + 'postTMA',
     unpost: service + 'unpostTMA'
+  },
+  BalanceTransfer: {
+    get: service + 'getTFR',
+    del: service + 'delTFR',
+    set: service + 'setTFR',
+    post: service + 'postTFR ',
+    unpost: service + 'unpostTFR',
+    page: service + 'pageTFR',
+    snapshot: service + 'snapshotTFR'
   }
 }
