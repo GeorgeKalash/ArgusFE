@@ -327,7 +327,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       disabled: !isPosted
     },
     {
-      key: 'UnVerify',
+      key: 'Unverify',
       condition: formik.values.isVerified,
       onClick: onVerify,
       disabled: !isPosted

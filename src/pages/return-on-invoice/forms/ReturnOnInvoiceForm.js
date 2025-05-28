@@ -78,7 +78,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     dtId: null,
     reference: '',
     status: 1,
-    releaseStatus: null,
     date: new Date(),
     currencyId: parseInt(currency),
     plantId: null,
@@ -364,7 +363,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             taxId: itemFound?.item?.taxId,
             vatPct: parseFloat(itemFound?.item?.vatPct || 0).toFixed(2),
             vatAmount: parseFloat(itemFound?.item?.vatAmount || 0).toFixed(2),
-            unitPrice: parseFloat(itemFound?.item?.unitPrice || 0).toFixed(2),
+            unitPrice: parseFloat(itemFound?.item?.unitPrice || 0).toFixed(3),
             unitCost: parseFloat(itemFound?.item?.unitCost || 0).toFixed(2),
             pieces: itemFound?.item?.pieces,
             mdType: itemFound?.item?.mdType,
@@ -426,7 +425,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
               ? 0
               : (formik.values.KGMetalPrice || 0 * (itemPhysProp?.metalPurity || 0)) / 1000
             : 0,
-          unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(2),
+          unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
           unitCost: 0,
           upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
           priceType: ItemConvertPrice?.priceType || 1,
@@ -727,7 +726,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       disabled: formik.values.isVerified || !editMode || !isPosted
     },
     {
-      key: 'UnVerify',
+      key: 'Unverify',
       condition: formik.values.isVerified,
       onClick: verifyRecord,
       disabled: !formik.values.isVerified

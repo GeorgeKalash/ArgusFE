@@ -165,7 +165,7 @@ export default function ChangeClient({ form, window }) {
                 const isValid = isValidClient(newValue)
 
                 formik.setFieldValue('changeToId', isValid ? newValue?.recordId : null)
-                formik.setFieldValue('changeToName', isValid ? newValue?.name : null)
+                formik.setFieldValue('changeToName', isValid ? newValue?.name : '')
                 formik.setFieldValue('changeToRef', isValid ? newValue?.reference : null)
                 formik.setFieldValue('changeBillId', isValid ? newValue?.billAddressId : null)
                 formik.setFieldValue('changeBill', isValid ? newValue?.billAddress : '')

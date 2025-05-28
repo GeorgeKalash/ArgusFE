@@ -446,7 +446,7 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'UnVerify',
+    key: 'Unverify',
     label: platformLabels.Unverify,
     color: '#047DFA',
     image: 'unverify-icon.png',
