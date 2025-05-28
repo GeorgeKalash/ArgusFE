@@ -29,6 +29,7 @@ import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import { RateDivision } from 'src/resources/RateDivision'
+import AccountSummary from 'src/components/Shared/AccountSummary'
 
 export default function FiPaymentVouchersForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -369,6 +370,23 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       condition: true,
       onClick: onWorkFlowClick,
       disabled: !editMode
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.accountId),
+            moduleId: 1
+          },
+          width: 1000,
+          height: 500,
+          title: labels.accountSummary
+        })
+      },
+      disabled: !formik.values.accountId
     }
   ]
 
@@ -519,14 +537,14 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                   formik.setFieldValue('accountId', newValue?.recordId || '')
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
-                  formik.setFieldValue('groupName', newValue?.groupName || '')
+                  formik.setFieldValue('accountGroupName', newValue?.groupName || '')
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField name='groupName' label={labels.accountGroup} value={formik.values.groupName} readOnly />
+              <CustomTextField name='accountGroupName' label={labels.accountGroup} value={formik.values.accountGroupName} readOnly />
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
