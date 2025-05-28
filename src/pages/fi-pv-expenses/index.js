@@ -10,16 +10,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { useError } from 'src/error'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import FiPaymentVoucherExpensesForm from './forms/PaymentVoucherExpensesForm'
-import { getStorageData } from 'src/storage/storage'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
-  const { stack: stackError } = useError()
   const { stack } = useWindow()
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
@@ -138,7 +134,7 @@ const FiPaymentVouchers = () => {
     openForm(obj?.recordId)
   }
 
-  function openOutWardsWindow(recordId) {
+  function openForm(recordId) {
     stack({
       Component: FiPaymentVoucherExpensesForm,
       props: {
@@ -151,14 +147,6 @@ const FiPaymentVouchers = () => {
       height: 700,
       title: _labels.paymentVoucherExpenses
     })
-  }
-
-  async function openForm(recordId) {
-    plantId
-      ? openOutWardsWindow(recordId)
-      : stackError({
-          message: platformLabels.noDefaultPlant
-        })
   }
 
   const del = async obj => {
