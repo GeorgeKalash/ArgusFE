@@ -27,12 +27,14 @@ const OutwardsOrder = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
-    const response = await getRequest({
-      extension: RemittanceOutwardsRepository.OutwardsOrder.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
-    })
+    if (params) {
+      const response = await getRequest({
+        extension: RemittanceOutwardsRepository.OutwardsOrder.page,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
+      })
 
-    return { ...response, _startAt: _startAt }
+      return { ...response, _startAt: _startAt }
+    } else return
   }
 
   const {
@@ -43,8 +45,9 @@ const OutwardsOrder = () => {
     access,
     invalidate
   } = useResourceQuery({
-    endpointId: RemittanceOutwardsRepository.OutwardsOrder.page,
+    endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
     datasetId: ResourceIds.OutwardsOrder,
+    queryFn: fetchGridData,
     filter: {
       endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
       filterFn: fetchWithFilter

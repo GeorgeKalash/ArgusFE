@@ -198,9 +198,9 @@ export default function InstantCash({
                     maxAccess={maxAccess}
                     secondDisplayField={false}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('beneficiary.bankDetails.bankName', newValue?.name)
                       formik.setFieldValue('beneficiary.bankDetails.bankCode', newValue?.recordId)
                       formik.setFieldValue('beneficiary.bankDetails.bankAddress1', newValue?.address1)
+                      formik.setFieldValue('beneficiary.bankDetails.bankName', newValue?.name || '')
                     }}
                     error={
                       formik.touched.beneficiary?.bankDetails?.bankName &&

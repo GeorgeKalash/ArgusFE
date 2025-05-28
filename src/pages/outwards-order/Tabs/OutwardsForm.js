@@ -261,9 +261,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         })
       })
     }),
-    onSubmit: async values => {
+    onSubmit: async (values, actions) => {
       const header = values.header
 
+      console.log(actions)
       if (
         (header.interfaceId === 1 &&
           !values.ICRequest?.beneficiary?.bankDetails?.bankName &&
@@ -272,8 +273,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           !values.terraPayDetails.transaction.internationalTransferInformation?.relationshipSender)
       ) {
         openBankWindow()
-
-        return
+        throw { silent: true }
       }
 
       const data = {
@@ -1009,7 +1009,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       valueField='countryId'
                       values={header}
                       onChange={(event, newValue) => {
-                        const updatedValues = formik.values && {
+                        const updatedValues = {
                           ...formik.values,
                           header: {
                             ...header,
@@ -1022,8 +1022,9 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             currencyId: newValue ? header.currencyId : ''
                           }
                         }
-
                         handleSelectedProduct(null, true, updatedValues)
+
+                        formik.setTouched('countryId', true)
                       }}
                       error={formik.touched.header?.countryId && Boolean(formik.errors.header?.countryId)}
                     />
