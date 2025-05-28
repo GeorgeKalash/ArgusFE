@@ -1035,13 +1035,6 @@ export default function SaleTransactionForm({
     itemsUpdate.current = modifiedList
     const res = await getClientInfo(saTrxHeader.clientId)
     getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
-
-    !formik.values.recordId &&
-      lockRecord({
-        recordId: saTrxHeader.recordId,
-        reference: saTrxHeader.reference,
-        resourceId: getResourceId(parseInt(functionId))
-      })
     formik.setValues({
       ...formik.values,
       recordId: saTrxHeader.recordId || null,
@@ -1060,6 +1053,13 @@ export default function SaleTransactionForm({
       items: modifiedList,
       taxes: [...saTrxTaxes]
     })
+
+    !formik.values.recordId &&
+      lockRecord({
+        recordId: saTrxHeader.recordId,
+        reference: saTrxHeader.reference,
+        resourceId: getResourceId(parseInt(functionId))
+      })
   }
 
   async function getSalesTransactionPack(transactionId) {

@@ -9,7 +9,6 @@ import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 import ResourceComboBox from './ResourceComboBox'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import FormShell from './FormShell'
 import CustomButton from '../Inputs/CustomButton'
 import { DataSets } from 'src/resources/DataSets'
@@ -33,9 +32,9 @@ export default function AccountSummary({ accountId, moduleId }) {
   const { formik } = useForm({
     maxAccess: access,
     initialValues: {
-      clientId: null,
-      clientRef: '',
-      clientName: '',
+      accountId: null,
+      accountRef: '',
+      accountName: '',
       agpId: null,
       moduleId
     }
@@ -81,7 +80,7 @@ export default function AccountSummary({ accountId, moduleId }) {
     const promises = (currencyItems || []).map(cur =>
       getRequest({
         extension: RGFinancialRepository.AccountSummary.AccFI405b,
-        parameters: `_agpId=${formik.values.agpId}&_currencyId=${cur.recordId}&_accountId=${formik.values.clientId}`
+        parameters: `_agpId=${formik.values.agpId}&_currencyId=${cur.recordId}&_accountId=${formik.values.accountId}`
       }).then(summaryRes => ({ summaryRes }))
     )
 
@@ -133,9 +132,9 @@ export default function AccountSummary({ accountId, moduleId }) {
           extension: FinancialRepository.Account.get,
           parameters: `_recordId=${accountId}`
         })
-        formik.setFieldValue('clientId', account?.record?.recordId)
-        formik.setFieldValue('clientRef', account?.record?.reference)
-        formik.setFieldValue('clientName', account?.record?.name)
+        formik.setFieldValue('accountId', account?.record?.recordId)
+        formik.setFieldValue('accountRef', account?.record?.reference)
+        formik.setFieldValue('accountName', account?.record?.name)
       }
     })()
   }, [])
@@ -155,15 +154,15 @@ export default function AccountSummary({ accountId, moduleId }) {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={SaleRepository.Client.snapshot}
-                name='clientId'
+                endpointId={FinancialRepository.Account.snapshot}
+                name='accountId'
                 label={labels.account}
                 valueField='reference'
                 displayField='name'
-                valueShow='clientRef'
-                secondValueShow='clientName'
+                valueShow='accountRef'
+                secondValueShow='accountName'
                 form={formik}
-                readOnly={formik.values.clientId}
+                readOnly={formik.values.accountId}
                 required
                 maxAccess={access}
                 columnsInDropDown={[
@@ -171,9 +170,9 @@ export default function AccountSummary({ accountId, moduleId }) {
                   { key: 'name', value: 'Name' }
                 ]}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('clientId', newValue?.recordId || null)
-                  formik.setFieldValue('clientName', newValue?.name)
-                  formik.setFieldValue('clientRef', newValue?.reference)
+                  formik.setFieldValue('accountId', newValue?.recordId || null)
+                  formik.setFieldValue('accountName', newValue?.name)
+                  formik.setFieldValue('accountRef', newValue?.reference)
                 }}
               />
             </Grid>
@@ -214,7 +213,7 @@ export default function AccountSummary({ accountId, moduleId }) {
               <CustomButton
                 onClick={getDynamicColumns}
                 image={'preview.png'}
-                disabled={!formik.values.agpId && !formik.values.moduleId && !formik.values.clientId}
+                disabled={!formik.values.agpId || !formik.values.moduleId || !formik.values.accountId}
                 tooltipText={platformLabels.Preview}
               />
             </Grid>
