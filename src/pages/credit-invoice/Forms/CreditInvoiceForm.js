@@ -832,7 +832,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
                 name='corId'
                 label={_labels.correspondent}
                 form={formik}
-                firstFieldWidth='30%'
+                firstFieldWidth={4}
                 required
                 valueShow='corRef'
                 secondValueShow='corName'
@@ -855,7 +855,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
                 parameters={{
                   _type: 0
                 }}
-                firstFieldWidth='30%'
+                firstFieldWidth={4}
                 valueField='accountNo'
                 displayField='name'
                 name='cashAccountId'
