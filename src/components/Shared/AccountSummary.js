@@ -19,7 +19,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import Table from './Table'
 import { RGFinancialRepository } from 'src/repositories/RGFinancialRepository'
 
-export default function AccountSummary({ clientId, moduleId }) {
+export default function AccountSummary({ accountId, moduleId }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
@@ -128,10 +128,10 @@ export default function AccountSummary({ clientId, moduleId }) {
 
   useEffect(() => {
     ;(async function () {
-      if (clientId && moduleId) {
+      if (accountId && moduleId) {
         const account = await getRequest({
           extension: FinancialRepository.Account.get,
-          parameters: `_recordId=${clientId}`
+          parameters: `_recordId=${accountId}`
         })
         formik.setFieldValue('clientId', account?.record?.recordId)
         formik.setFieldValue('clientRef', account?.record?.reference)
