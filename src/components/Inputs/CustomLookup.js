@@ -26,7 +26,7 @@ const CustomLookup = ({
   onChange,
   onKeyDown,
   error,
-  firstFieldWidth = secondDisplayField ? '50%' : '100%',
+  firstFieldWidth = secondDisplayField ? 6 : 12,
   displayFieldWidth = 1,
   helperText,
   variant = 'outlined',
@@ -82,7 +82,7 @@ const CustomLookup = ({
     <></>
   ) : (
     <Grid container spacing={0} sx={{ width: '100%' }}>
-      <Grid item xs={secondDisplayField ? 6 : 12}>
+      <Grid item xs={firstFieldWidth}>
         <Autocomplete
           ref={autocompleteRef}
           onFocus={() => setIsFocused(true)}
@@ -324,7 +324,7 @@ const CustomLookup = ({
         />
       </Grid>
       {secondDisplayField && (
-        <Grid item xs={6}>
+        <Grid item xs={12 - firstFieldWidth}>
           <TextField
             size={size}
             variant={variant}

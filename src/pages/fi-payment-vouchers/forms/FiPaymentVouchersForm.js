@@ -466,10 +466,12 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 readOnly={isPosted || isCancelled}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('accountType', newValue?.key)
-                  formik.setFieldValue('accountId', null)
-                  formik.setFieldValue('accountRef', '')
-                  formik.setFieldValue('accountName', '')
+                  formik.setFieldValue('accountType', newValue?.key || null)
+                  if (!newValue?.key) {
+                    formik.setFieldValue('accountId', null)
+                    formik.setFieldValue('accountRef', '')
+                    formik.setFieldValue('accountName', '')
+                  }
                 }}
                 error={formik.touched.accountType && Boolean(formik.errors.accountType)}
               />
@@ -597,9 +599,11 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 readOnly={isPosted || isCancelled}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('paymentMethod', newValue?.key || '')
-                  formik.setFieldValue('checkNo', '')
-                  formik.setFieldValue('checkbookId', null)
+                  formik.setFieldValue('paymentMethod', newValue?.key || null)
+                  if (!newValue?.key) {
+                    formik.setFieldValue('checkNo', '')
+                    formik.setFieldValue('checkbookId', null)
+                  }
                 }}
                 error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
               />
@@ -607,7 +611,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
             <Grid item xs={6}>
               <CustomNumberField
                 name='amount'
-                type='text'
                 required
                 label={labels.amount}
                 maxLength={'10'}
@@ -617,8 +620,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 maxAccess={maxAccess}
                 thousandSeparator={false}
                 onChange={async e => {
-                  formik.setFieldValue('amount', e.target.value)
-
                   const updatedRateRow = getRate({
                     amount: e.target.value ?? 0,
                     exRate: formik.values?.exRate,
@@ -627,6 +628,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                     dirtyField: DIRTYFIELD_RATE
                   })
                   formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                  formik.setFieldValue('amount', e.target.value)
                 }}
                 onClear={async () => {
                   formik.setFieldValue('amount', 0)

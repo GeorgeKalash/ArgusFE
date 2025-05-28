@@ -464,5 +464,11 @@ export const ResourceIds = {
   CategoryPriceGroup: 51119,
   PostWorkCenterJob: 42330,
   ProductionShifts: 42113,
+  CorrespondentDispersalRate: 36138,
   SyncMFTrx: 42316,
+  AccountSummary: 31600,
+  PhysicalCountSerialDetail: 44203,
+  PhysicalCountSerialDetail: 44203,
+  BalanceTransferPurchase: 31318,
+  BalanceTransferSales: 31319
 }

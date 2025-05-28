@@ -208,7 +208,7 @@ const BeneficiaryFields = () => {
               label={labels.correspondent}
               form={formik}
               displayFieldWidth={2}
-              firstFieldWidth='40%'
+              firstFieldWidth={5}
               valueShow='corRef'
               secondValueShow='corName'
               maxAccess={access}
