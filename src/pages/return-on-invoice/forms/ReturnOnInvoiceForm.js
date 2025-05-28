@@ -76,6 +76,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
   const initialValues = {
     dtId: null,
+    commitItems: false,
+    isDefaultDtPresent: false,
     reference: '',
     status: 1,
     date: new Date(),
@@ -173,13 +175,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         .number()
         .nullable()
         .test(function (value) {
-          const { dtId, commitItems } = this.parent
-          if (!dtId) {
-            return !!value
-          }
-          if (dtId && commitItems) {
-            return !!value
-          }
+          const { dtId, commitItems, isDefaultDtPresent } = this.parent
+          if (!dtId) return !!value
+          if (!isDefaultDtPresent) return !!value
+          if (dtId && commitItems) return !!value
 
           return true
         }),
@@ -794,7 +793,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     }
   ]
 
-  async function fillForm(retHeader, retItems, isCommitted, clientDiscount) {
+  async function fillForm(retHeader, retItems, dtInfo, clientDiscount) {
     const billAdd = await getAddress(retHeader?.record?.billAddressId)
 
     retHeader?.record?.tdType == 1 || retHeader?.record?.tdType == null
@@ -832,7 +831,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           : retHeader?.record?.tdPct,
       amount: parseFloat(retHeader?.record?.amount).toFixed(2),
       billAddress: billAdd || '',
-      commitItems: isCommitted,
+      commitItems: dtInfo?.commitItems,
+      isDefaultDtPresent: dtInfo?.dtId,
       clientDiscount: clientDiscount.tdPct || 0,
       items: modifiedList
     })
@@ -1034,7 +1034,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       tdPct: typeChange == 2,
       tdType: typeChange,
       subtotal: subtotal,
-      currentDiscount: currentDiscount,
+      currentDiscount,
       hiddenTdPct: tdPct,
       hiddenTdAmount: parseFloat(tdAmount),
       typeChange: typeChange
@@ -1104,9 +1104,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   async function refetchForm(recordId) {
     const retHeader = await getRetailInvoice(recordId)
     const retItems = await getRetailInvoiceItems(recordId)
-    const isCommitted = await onChangeDtId(retHeader.record.dtId)
+    const dtInfo = await onChangeDtId(retHeader.record.dtId)
     const clientDiscount = await getClientInfo(retHeader.record.clientId)
-    await fillForm(retHeader, retItems, isCommitted, clientDiscount)
+    await fillForm(retHeader, retItems, dtInfo, clientDiscount)
   }
 
   function setAddressValues(obj) {
@@ -1157,10 +1157,11 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     formik.setFieldValue('spId', res?.record?.spId || null)
     formik.setFieldValue('postMetalToFinancials', res?.record?.postMetalToFinancials)
     formik.setFieldValue('commitItems', res?.record?.commitItems)
+    formik.setFieldValue('isDefaultDtPresent', res?.record?.dtId)
     formik.setFieldValue('siteId', res?.record?.siteId || null)
     if (!res?.record?.commitItems) formik.setFieldValue('siteId', null)
 
-    return res?.record?.commitItems
+    return res?.record
   }
 
   async function setMetalPriceOperations() {
@@ -1325,7 +1326,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                       formik.setFieldValue('taxId', newValue?.taxId)
                       formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
-                      formik.setFieldValue('tdPct', newValue?.tdPct)
                       formik.setFieldValue('clientDiscount', newValue?.tdPct)
                       formik.setFieldValue('plId', newValue?.plId)
                       formik.setFieldValue('currencyId', newValue?.currencyId)
@@ -1362,7 +1362,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       formik.setFieldValue('isVattable', newValue?.isVattable)
                       formik.setFieldValue('tdType', newValue?.tdType || 1)
                       formik.setFieldValue('tdAmount', newValue?.tdAmount)
-                      formik.setFieldValue('tdPct', newValue?.tdPct)
                     }}
                     error={formik.touched.invoiceId && Boolean(formik.errors.invoiceId)}
                   />
@@ -1601,7 +1600,11 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
-                    readOnly={isPosted || (formik?.values?.dtId && !formik?.values?.commitItems)}
+                    readOnly={
+                      isPosted || formik.values.isDefaultDtPresent
+                        ? formik?.values?.dtId && !formik?.values?.commitItems
+                        : false
+                    }
                     label={labels.sites}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -1611,7 +1614,11 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
-                    required={!formik?.values?.dtId || (formik?.values?.dtId && formik?.values?.commitItems)}
+                    required={
+                      formik.values.isDefaultDtPresent
+                        ? !formik?.values?.dtId || (formik?.values?.dtId && formik?.values?.commitItems)
+                        : true
+                    }
                     onChange={(event, newValue) => {
                       formik.setFieldValue('siteRef', newValue?.reference || '')
                       formik.setFieldValue('siteName', newValue?.name || '')
