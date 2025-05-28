@@ -50,7 +50,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
   const marginDefault = parseInt(defaultsData?.list?.find(obj => obj.key === 'POSHPVarPct')?.value) || 0
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       header: {

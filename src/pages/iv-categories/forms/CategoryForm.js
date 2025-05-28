@@ -376,7 +376,7 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                 {(formik.values.trackBy === '1' || formik.values.trackBy === 1) && (
                   <Grid item xs={12}>
                     <ResourceComboBox
-                      endpointId={InventoryRepository.SerialNumber.qry}
+                      endpointId={InventoryRepository.SerialsProfile.qry}
                       name='spfId'
                       required={formik.values.trackBy === '1' || formik.values.trackBy === 1}
                       label={labels.spf}
