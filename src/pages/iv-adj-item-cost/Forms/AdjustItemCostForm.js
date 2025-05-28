@@ -253,6 +253,7 @@ export default function AdjustItemCostForm({ labels, access, recordId }) {
       condition: true,
       onClick: 'onClickGL',
       datasetId: ResourceIds.GLAdjustItemCost,
+      valuesPath: formik.values.header,
       disabled: !editMode
     },
     {
