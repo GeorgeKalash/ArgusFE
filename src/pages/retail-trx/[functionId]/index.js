@@ -169,6 +169,22 @@ const RetailTrx = () => {
     }
   }
 
+  const getGLResource = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.RetailInvoice:
+        return ResourceIds.GLRetailInvoice
+      case SystemFunction.RetailReturn:
+        return ResourceIds.GLRetailInvoiceReturn
+      case SystemFunction.RetailPurchase:
+        return ResourceIds.GLRetailPurchase
+      case SystemFunction.RetailPurchaseReturn:
+        return ResourceIds.GLRetailPurchaseReturn
+      default:
+        return null
+    }
+  }
+
   async function openForm(recordId) {
     stack({
       Component: RetailTransactionsForm,
@@ -177,7 +193,8 @@ const RetailTrx = () => {
         recordId,
         access,
         posUser: posObj?.current,
-        functionId
+        functionId,
+        getGLResource
       },
       width: 1200,
       height: 725,

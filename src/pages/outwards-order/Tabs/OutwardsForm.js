@@ -457,6 +457,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLOutwardsOrder,
       disabled: !editMode
     },
     {

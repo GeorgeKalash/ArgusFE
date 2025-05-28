@@ -280,6 +280,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLReceiptVoucher,
       disabled: !editMode
     },
 

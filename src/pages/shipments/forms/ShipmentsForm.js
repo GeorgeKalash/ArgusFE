@@ -329,6 +329,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       condition: true,
       onClick: 'onClickGL',
       valuesPath: formik.values.header,
+      datasetId: ResourceIds.GLShipments,
       disabled: !editMode
     },
     {
