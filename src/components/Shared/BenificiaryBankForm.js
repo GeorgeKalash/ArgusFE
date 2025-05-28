@@ -30,7 +30,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 
 export default function BenificiaryBankForm({
   viewBtns = true,
-  editable = false,
   client,
   beneficiary,
   dispersalType,
@@ -58,8 +57,8 @@ export default function BenificiaryBankForm({
 
   const initialValues = {
     clientId: client?.clientId || '',
-    beneficiaryId: beneficiary.beneficiaryId || 0,
-    recordId: recordId,
+    beneficiaryId: 0,
+    recordId,
     name: '',
     dispersalType: dispersalType || '',
     nationalityId: null,
@@ -370,7 +369,7 @@ export default function BenificiaryBankForm({
       editMode={editMode}
       maxAccess={maxAccess}
       disabledSubmit={editMode}
-      isCleared={forceDisable ? false : viewBtns}
+      isCleared={!forceDisable && viewBtns}
       isSaved={viewBtns}
     >
       <VertLayout>

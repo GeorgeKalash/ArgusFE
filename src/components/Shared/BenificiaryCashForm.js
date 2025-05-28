@@ -37,7 +37,6 @@ const BenificiaryCashForm = ({
   corId,
   currencyId,
   countryId,
-  editable = false,
   resetForm,
   setResetForm,
   onChange,
@@ -59,7 +58,7 @@ const BenificiaryCashForm = ({
     //RTBEN
     clientId: client?.clientId || '',
     recordId,
-    beneficiaryId: beneficiary.beneficiaryId || 0,
+    beneficiaryId: 0,
     name: '',
     dispersalType: dispersalType || '',
     nationalityId: null,
@@ -199,31 +198,7 @@ const BenificiaryCashForm = ({
 
   useEffect(() => {
     ;(async function () {
-      if (formik.values.countryId && dispersalType) {
-        const qryCCL = await getRequest({
-          extension: RemittanceSettingsRepository.CorrespondentControl.qry,
-          parameters: `_countryId=${formik.values.countryId}&_corId=${corId || 0}&_resourceId=${
-            ResourceIds.BeneficiaryCash
-          }`
-        })
-
-        const controls = { controls: qryCCL.list }
-        const maxAccess = { record: controls }
-        setMaxAccess(maxAccess)
-
-        const isInActiveAccessLevel = (maxAccess?.record?.controls ?? []).find(
-          ({ controlId }) => controlId === 'isInactive'
-        )
-
-        const isBlockedAccessLevel = (maxAccess?.record?.controls ?? []).find(
-          ({ controlId }) => controlId === 'isBlocked'
-        )
-
-        hiddenIsInActive.current = isInActiveAccessLevel?.accessLevel === HIDDEN
-        hiddenIsBlocked.current = isBlockedAccessLevel?.accessLevel === HIDDEN
-      }
-
-      if (beneficiary?.beneficiaryId && client?.clientId) {
+      if (recordId) {
         const RTBEC = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -240,6 +215,7 @@ const BenificiaryCashForm = ({
           //RTBEN
           clientId: client?.clientId,
           recordId: (client?.clientId * 10).toString() + beneficiary?.beneficiaryId,
+
           beneficiaryId: beneficiary?.beneficiaryId,
           name: RTBEN?.record?.name,
           dispersalType: dispersalType,
@@ -420,7 +396,7 @@ const BenificiaryCashForm = ({
       editMode={editMode}
       maxAccess={maxAccess}
       disabledSubmit={editMode}
-      isCleared={forceDisable ? false : viewBtns}
+      isCleared={!forceDisable && viewBtns}
       isSaved={viewBtns}
     >
       <VertLayout>

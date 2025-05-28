@@ -45,7 +45,6 @@ const OutwardsOrder = () => {
   } = useResourceQuery({
     endpointId: RemittanceOutwardsRepository.OutwardsOrder.page,
     datasetId: ResourceIds.OutwardsOrder,
-    queryFn: fetchGridData,
     filter: {
       endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
       filterFn: fetchWithFilter
