@@ -49,7 +49,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
-      recordId,
+      recordId: recordId || '',
       dtId: null,
       reference: '',
       date: new Date(),
@@ -59,7 +59,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
       toAccountId: null,
       fromCurrencyId: null,
       fromBaseAmount: 0,
-      fromAmount: null,
+      fromAmount: '',
       fromExRate: 0,
       status: 1,
       notes: '',
@@ -486,7 +486,7 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
                       formik.setFieldValue('fromBaseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
                       formik.setFieldValue('fromAmount', e.target.value)
                     }}
-                    onClear={() => formik.setFieldValue('fromAmount', null)}
+                    onClear={() => formik.setFieldValue('fromAmount', '')}
                     required
                     readOnly={isPosted}
                     error={formik.touched.fromAmount && Boolean(formik.errors.fromAmount)}

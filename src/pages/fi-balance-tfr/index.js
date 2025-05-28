@@ -168,7 +168,7 @@ const BalanceTrfBetweenAcc = () => {
       <Grow>
         <Table
           columns={columns}
-          name={'balanceTfr-acc'}
+          name='balanceTfr-acc'
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
