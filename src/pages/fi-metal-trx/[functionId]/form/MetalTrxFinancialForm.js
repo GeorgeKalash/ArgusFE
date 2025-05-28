@@ -352,7 +352,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           purityFromItem: true,
           qtyOnHand: res2?.record?.onhand || 0
         })
-      }
+      },
+      flex: 1.5
     },
     {
       component: 'textfield',
@@ -360,7 +361,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       name: 'itemName',
       props: {
         readOnly: true
-      }
+      },
+      flex: 3.5
     },
     {
       component: 'numberfield',
