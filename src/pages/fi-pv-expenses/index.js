@@ -168,7 +168,7 @@ const FiPaymentVouchers = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar labels={_labels} onAdd={add} maxAccess={access} reportName={'FIPV'} filterBy={filterBy} />
+        <RPBGridToolbar labels={_labels} onAdd={add} maxAccess={access} reportName={'FIPVE'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
