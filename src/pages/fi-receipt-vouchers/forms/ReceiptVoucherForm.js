@@ -449,7 +449,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField name='accountGroupName' label={labels.accountGroup} value={formik.values.accountGroupName} readOnly />{' '}
+              <CustomTextField name='accountGroupName' label={labels.accountGroup} value={formik.values.accountGroupName} readOnly />
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
