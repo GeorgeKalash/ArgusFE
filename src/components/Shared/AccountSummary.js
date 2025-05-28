@@ -171,8 +171,8 @@ export default function AccountSummary({ accountId, moduleId }) {
                 ]}
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || null)
-                  formik.setFieldValue('accountName', newValue?.name)
-                  formik.setFieldValue('accountRef', newValue?.reference)
+                  formik.setFieldValue('accountName', newValue?.name || '')
+                  formik.setFieldValue('accountRef', newValue?.reference || '')
                 }}
               />
             </Grid>
