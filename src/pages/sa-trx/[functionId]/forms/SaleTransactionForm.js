@@ -966,11 +966,7 @@ export default function SaleTransactionForm({
         stack({
           Component: AccountSummary,
           props: {
-            clientInfo: {
-              clientId: formik.values.header.clientId,
-              clientRef: formik.values.header.clientRef,
-              clientName: formik.values.header.clientName
-            },
+            clientId: parseInt(formik.values.header.clientId),
             moduleId: 1
           },
           width: 1000,

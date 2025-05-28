@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceLookup } from './ResourceLookup'
@@ -19,7 +19,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import Table from './Table'
 import { RGFinancialRepository } from 'src/repositories/RGFinancialRepository'
 
-export default function AccountSummary({ clientInfo, moduleId }) {
+export default function AccountSummary({ clientId, moduleId }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
@@ -33,9 +33,9 @@ export default function AccountSummary({ clientInfo, moduleId }) {
   const { formik } = useForm({
     maxAccess: access,
     initialValues: {
-      clientId: clientInfo?.clientId,
-      clientRef: clientInfo?.clientRef,
-      clientName: clientInfo?.clientName,
+      clientId: null,
+      clientRef: '',
+      clientName: '',
       agpId: null,
       moduleId
     }
@@ -126,6 +126,20 @@ export default function AccountSummary({ clientInfo, moduleId }) {
     setData({ list: newList })
   }
 
+  useEffect(() => {
+    ;(async function () {
+      if (clientId && moduleId) {
+        const account = await getRequest({
+          extension: FinancialRepository.Account.get,
+          parameters: `_recordId=${clientId}`
+        })
+        formik.setFieldValue('clientId', account?.record?.recordId)
+        formik.setFieldValue('clientRef', account?.record?.reference)
+        formik.setFieldValue('clientName', account?.record?.name)
+      }
+    })()
+  }, [])
+
   return (
     <FormShell
       resourceId={ResourceIds.AccountSummary}
@@ -149,8 +163,18 @@ export default function AccountSummary({ clientInfo, moduleId }) {
                 valueShow='clientRef'
                 secondValueShow='clientName'
                 form={formik}
-                readOnly
+                readOnly={formik.values.clientId}
                 required
+                maxAccess={access}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('clientId', newValue?.recordId || null)
+                  formik.setFieldValue('clientName', newValue?.name)
+                  formik.setFieldValue('clientRef', newValue?.reference)
+                }}
               />
             </Grid>
             <Grid item xs={6}>
@@ -168,7 +192,6 @@ export default function AccountSummary({ clientInfo, moduleId }) {
                   formik.setFieldValue('agpId', newValue?.recordId || null)
                   if (!newValue?.recordId) setData({ list: [] })
                 }}
-                error={formik?.touched?.agpId && Boolean(formik.errors?.agpId)}
               />
             </Grid>
             <Grid item xs={5}>
@@ -179,14 +202,19 @@ export default function AccountSummary({ clientInfo, moduleId }) {
                 values={formik.values}
                 valueField='key'
                 displayField='value'
-                readOnly
+                maxAccess={access}
+                required
+                readOnly={formik.values.moduleId}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('moduleId', newValue?.key || null)
+                }}
               />
             </Grid>
             <Grid item xs={1}>
               <CustomButton
                 onClick={getDynamicColumns}
                 image={'preview.png'}
-                disabled={!formik.values.agpId}
+                disabled={!formik.values.agpId && !formik.values.moduleId && !formik.values.clientId}
                 tooltipText={platformLabels.Preview}
               />
             </Grid>
