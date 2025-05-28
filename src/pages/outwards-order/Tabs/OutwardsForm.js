@@ -343,16 +343,20 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }
 
   const onReopen = async () => {
-    const copy = { ...formik.values }
-    delete copy.instantCashDetails
-    copy.header.date = formatDateToApi(copy.date)
-    copy.header.valueDate = formatDateToApi(copy.valueDate)
-    copy.header.defaultValueDate = formatDateToApi(copy.defaultValueDate)
-    copy.header.expiryDate = formatDateToApi(copy.expiryDate)
+    const obj = {
+      ...formik.values,
+      header: {
+        ...header,
+        date: formatDateToApi(header.date),
+        valueDate: formatDateToApi(header.valueDate),
+        defaultValueDate: formatDateToApi(header.defaultValueDate),
+        expiryDate: formatDateToApi(header.expiryDate)
+      }
+    }
 
     const res = await postRequest({
       extension: RemittanceOutwardsRepository.OutwardsOrder.reopen,
-      record: JSON.stringify(copy)
+      record: JSON.stringify(obj)
     })
 
     if (res.recordId) {
@@ -997,7 +1001,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={RemittanceOutwardsRepository.Country.qry}
-                      name='countryId'
+                      name='header.countryId'
                       label={labels.Country}
                       required
                       readOnly={isClosed || isPosted || editMode}
@@ -1019,12 +1023,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             lcAmount: '',
                             products: [],
                             dispersalType: newValue ? header.dispersalType : '',
-                            currencyId: newValue ? header.currencyId : ''
+                            currencyId: newValue ? header.currencyId : null
                           }
                         }
                         handleSelectedProduct(null, true, updatedValues)
 
-                        formik.setTouched('countryId', true)
+                        formik.setFieldValue('header.countryId', newValue?.countryId || null)
                       }}
                       error={formik.touched.header?.countryId && Boolean(formik.errors.header?.countryId)}
                     />
@@ -1036,7 +1040,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       label={labels.DispersalType}
                       required
                       readOnly={isClosed || isPosted || !header.countryId || editMode}
-                      name='dispersalType'
+                      name='header.dispersalType'
                       displayField='dispersalTypeName'
                       valueField='dispersalType'
                       values={header}
@@ -1072,7 +1076,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       }
                       label={labels.Currency}
                       required
-                      name='currencyId'
+                      name='header.currencyId'
                       displayField={editMode ? ['reference', 'name'] : ['currencyRef', 'currencyName']}
                       columnsInDropDown={
                         editMode
@@ -1107,7 +1111,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                     <CustomSwitch
                       readOnly={header.lcAmount || header.fcAmount || editMode}
                       label={labels.includeTransferFees}
-                      name='includingFees'
+                      name='header,includingFees'
                       checked={header.includingFees}
                       onChange={e => {
                         formik.setFieldValue('header.includingFees', e.target.checked)
@@ -1118,7 +1122,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   </Grid>
                   <Grid item xs={12}>
                     <CustomNumberField
-                      name='fcAmount'
+                      name='header.fcAmount'
                       label={labels.fcAmount}
                       value={header.fcAmount}
                       required
@@ -1153,7 +1157,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   </Grid>
                   <Grid item xs={12}>
                     <CustomNumberField
-                      name='lcAmount'
+                      name='header.lcAmount'
                       label={labels.lcAmount}
                       value={header.lcAmount}
                       required
@@ -1209,7 +1213,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   </Grid>
                   <Grid item xs={6}>
                     <CustomTextField
-                      name='corRef'
+                      name='header.corRef'
                       label={labels.corRef}
                       value={formik.values?.header.corRef}
                       readOnly
@@ -1219,7 +1223,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   </Grid>
                   <Grid item xs={6}>
                     <CustomTextField
-                      name='corName'
+                      name='header.corName'
                       label={labels.corName}
                       value={formik.values?.header?.corName}
                       readOnly
@@ -1229,7 +1233,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   </Grid>
                   <Grid item xs={6}>
                     <CustomNumberField
-                      name='exRate'
+                      name='header.exRate'
                       label={labels.exRateMultiply}
                       value={header.exRate}
                       required
@@ -1242,7 +1246,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   </Grid>
                   <Grid item xs={6}>
                     <CustomNumberField
-                      name='exRate2'
+                      name='header.exRate2'
                       decimalScale={5}
                       label={labels.exRateDivide}
                       value={header?.exRate ? 1 / header.exRate : ''}
@@ -1253,7 +1257,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   </Grid>
                   <Grid item xs={12}>
                     <CustomNumberField
-                      name='commission'
+                      name='header.commission'
                       label={labels.commission}
                       value={header.commission}
                       required
@@ -1265,7 +1269,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   </Grid>
                   <Grid item xs={12}>
                     <CustomNumberField
-                      name='vatAmount'
+                      name='header.vatAmount'
                       label={labels.vatRate}
                       value={vatAmount}
                       readOnly
@@ -1275,7 +1279,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   </Grid>
                   <Grid item xs={12}>
                     <CustomNumberField
-                      name='tdAmount'
+                      name='header.tdAmount'
                       label={labels.discount}
                       value={header.tdAmount}
                       maxAccess={maxAccess}
@@ -1291,7 +1295,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   </Grid>
                   <Grid item xs={12}>
                     <CustomNumberField
-                      name='amount'
+                      name='header.amount'
                       label={labels.NetToPay}
                       value={header.amount}
                       required
@@ -1317,7 +1321,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                           }}
                           valueField='reference'
                           displayField='name'
-                          name='clientId'
+                          name='header.clientId'
                           label={labels.Client}
                           form={formik}
                           formObject={header}
@@ -1458,7 +1462,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             <ResourceComboBox
                               endpointId={SystemRepository.Country.qry}
                               label={labels.Nationality}
-                              name='nationalityId'
+                              name='header.nationalityId'
                               displayField={['reference', 'name']}
                               valueField='recordId'
                               values={header}
@@ -1485,7 +1489,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                           </Grid>
                           <Grid item xs={3}>
                             <CustomTextField
-                              name='cellPhone'
+                              name='header.cellPhone'
                               phone={true}
                               label={labels.cellPhone}
                               value={formik.values?.cellPhone}
@@ -1510,7 +1514,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                           <Grid item xs={6}>
                             <ResourceComboBox
                               endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
-                              name='poeId'
+                              name='header.poeId'
                               label={labels.purposeOfExchange}
                               valueField='recordId'
                               displayField={['reference', 'name']}
@@ -1558,7 +1562,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                     }}
                     valueField='name'
                     displayField='name'
-                    name='beneficiaryName'
+                    name='header.beneficiaryName'
                     label={labels.Beneficiary}
                     form={formik}
                     formObject={header}
