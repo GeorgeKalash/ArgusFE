@@ -1191,6 +1191,24 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     return res.record.exRate * 1000
   }
 
+  async function onValidationRequired() {
+    if (Object.keys(await formik.validateForm()).length) {
+      const errors = await formik.validateForm()
+
+      const touchedFields = Object.keys(errors).reduce((acc, key) => {
+        if (!formik.touched[key]) {
+          acc[key] = true
+        }
+
+        return acc
+      }, {})
+
+      if (Object.keys(touchedFields).length) {
+        formik.setTouched(touchedFields, true)
+      }
+    }
+  }
+
   useEffect(() => {
     formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
     formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
@@ -1639,6 +1657,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             maxAccess={maxAccess}
             disabled={!formik.values.clientId || formik.values.invoiceId || isPosted}
             allowDelete={!isPosted && !formik.values.invoiceId}
+            onValidationRequired={onValidationRequired}
           />
         </Grow>
         <Fixed>
