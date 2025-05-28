@@ -162,7 +162,7 @@ export default function AccountSummary({ accountId, moduleId }) {
                 valueShow='accountRef'
                 secondValueShow='accountName'
                 form={formik}
-                readOnly={formik.values.accountId}
+                readOnly={formik.values.accountId && formik.values.moduleId}
                 required
                 maxAccess={access}
                 columnsInDropDown={[
