@@ -158,6 +158,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
   const editMode = !!formik.values?.recordId
   const isPosted = formik.values.status === 3
+  const isVerified = formik.values.isVerified
   const calculateTotal = key => formik.values.items.reduce((sum, item) => sum + (parseFloat(item[key]) || 0), 0)
   const totalQty = calculateTotal('qty')
   const totalPcs = calculateTotal('pcs')
@@ -444,7 +445,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     })
 
     if (res) {
-      toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+      toast.success(!isVerified ? platformLabels.Verified : platformLabels.Unverfied)
       invalidate()
       window.close()
     }
@@ -456,7 +457,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || formik.values.isVerified
+      disabled: !editMode || isVerified
     },
     {
       key: 'Unlocked',
@@ -479,13 +480,13 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     },
     {
       key: 'Verify',
-      condition: !formik.values.isVerified,
+      condition: !isVerified,
       onClick: onVerify,
       disabled: !isPosted
     },
     {
       key: 'Unverify',
-      condition: formik.values.isVerified,
+      condition: isVerified,
       onClick: onVerify,
       disabled: !isPosted
     }
