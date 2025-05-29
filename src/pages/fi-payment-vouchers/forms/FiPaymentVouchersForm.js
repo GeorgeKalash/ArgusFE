@@ -29,8 +29,9 @@ import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import { RateDivision } from 'src/resources/RateDivision'
+import AccountSummary from 'src/components/Shared/AccountSummary'
 
-export default function FiPaymentVouchersForm({ labels, maxAccess: access, recordId }) {
+export default function FiPaymentVouchersForm({ labels, maxAccess: access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -295,19 +296,44 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     }
   }
 
+  const onVerify = async () => {
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentVouchers.verify,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res) {
+      toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+      invalidate()
+      window.close()
+    }
+  }
+
   const actions = [
     {
       key: 'Locked',
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || isCancelled
+      disabled: !editMode || isCancelled || formik.values.isVerified
     },
     {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode || isCancelled
+    },
+    {
+      key: 'Verify',
+      condition: !formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
     },
     {
       key: 'Cancel',
@@ -345,6 +371,23 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       condition: true,
       onClick: onWorkFlowClick,
       disabled: !editMode
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.accountId),
+            moduleId: 1
+          },
+          width: 1000,
+          height: 500,
+          title: platformLabels.AccountSummary
+        })
+      },
+      disabled: !formik.values.accountId
     }
   ]
 
@@ -473,7 +516,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 error={formik.touched.contactId && Boolean(formik.errors.contactId)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
@@ -489,42 +532,42 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                   { key: 'name', value: 'Name' },
                   { key: 'keywords', value: 'Keywords' }
                 ]}
+                firstFieldWidth={4}
                 displayFieldWidth={2}
                 filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
+                  formik.setFieldValue('accountGroupName', newValue?.groupName || '')
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
+            <Grid item xs={6}>
+              <CustomTextField name='accountGroupName' label={labels.accountGroup} value={formik.values.accountGroupName} readOnly />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=0`}
                 name='cashAccountId'
-                readOnly={isPosted || isCancelled}
-                label={labels.cash}
-                valueField='reference'
-                displayField='name'
-                valueShow='cashAccountRef'
-                secondValueShow='cashAccountName'
-                form={formik}
+                readOnly={isCancelled || isPosted}
                 required
-                onChange={(event, newValue) => {
-                  formik.setValues({
-                    ...formik.values,
-                    cashAccountId: newValue?.recordId || '',
-                    cashAccountRef: newValue?.reference || '',
-                    cashAccountName: newValue?.name || ''
-                  })
-                }}
-                errorCheck={'cashAccountId'}
+                label={labels.cashAccount}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
                 maxAccess={maxAccess}
+                onChange={async (_, newValue) => {
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
+                }}
+                error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -534,6 +577,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                     endpointId={SystemRepository.Currency.qry}
                     name='currencyId'
                     label={labels.currency}
+                    filter={item => item.currencyType === 1}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     columnsInDropDown={[

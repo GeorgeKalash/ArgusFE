@@ -150,7 +150,7 @@ const FiPaymentVouchers = () => {
         recordId,
         maxAccess: access
       },
-      width: 950,
+      width: 1250,
       height: 550,
       title: labels.paymentVoucher
     })
