@@ -459,7 +459,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode
+      disabled: !editMode || formik.values.isVerified
     },
     {
       key: 'Unlocked',
