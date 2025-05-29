@@ -547,7 +547,12 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField name='accountGroupName' label={labels.accountGroup} value={formik.values.accountGroupName} readOnly />
+              <CustomTextField
+                name='accountGroupName'
+                label={labels.accountGroup}
+                value={formik.values.accountGroupName}
+                readOnly
+              />
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
@@ -639,7 +644,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 readOnly={isPosted || isCancelled}
                 value={formik.values.amount}
                 maxAccess={maxAccess}
-                thousandSeparator={false}
                 onChange={async e => {
                   const updatedRateRow = getRate({
                     amount: e.target.value ?? 0,
@@ -706,6 +710,19 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 disabled={formik.values.paymentMethod != 3}
               />
             </Grid>
+
+            <Grid item xs={6}>
+              <CustomTextField
+                name='sourceReference'
+                label={labels.sourceReference}
+                value={formik.values.sourceReference}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('sourceReference', '')}
+                maxLength='20'
+                maxAccess={maxAccess}
+                error={formik.touched.sourceReference && Boolean(formik.errors.sourceReference)}
+              />
+            </Grid>
             <Grid item xs={6}>
               <CustomTextArea
                 name='notes'
@@ -721,15 +738,23 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField
-                name='sourceReference'
-                label={labels.sourceReference}
-                value={formik.values.sourceReference}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('sourceReference', '')}
-                maxLength='20'
+              <ResourceComboBox
+                endpointId={FinancialRepository.PaymentReasons.qry}
+                name='paymentReasonId'
+                readOnly={isPosted || isCancelled}
+                label={labels.paymentReasons}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
                 maxAccess={maxAccess}
-                error={formik.touched.sourceReference && Boolean(formik.errors.sourceReference)}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('paymentReasonId', newValue?.recordId || null)
+                }}
+                error={formik.touched.paymentReasonId && Boolean(formik.errors.paymentReasonId)}
               />
             </Grid>
           </Grid>

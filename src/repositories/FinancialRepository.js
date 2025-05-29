@@ -225,6 +225,7 @@ export const FinancialRepository = {
     snapshot: service + 'snapshotTFR'
   },
   PaymentReasons: {
+    qry: service + 'qryPR',
     get: service + 'getPR',
     del: service + 'delPR',
     set: service + 'setPR',
