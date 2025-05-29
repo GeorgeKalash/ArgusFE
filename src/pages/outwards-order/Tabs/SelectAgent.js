@@ -29,7 +29,7 @@ export default function SelectAgent({
       agentCode,
       agentName: '',
       productId,
-      fees: '',
+      fees: null,
       exRate: 1,
       originAmount,
       baseAmount,

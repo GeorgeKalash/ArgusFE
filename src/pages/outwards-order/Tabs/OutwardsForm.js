@@ -264,7 +264,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     onSubmit: async (values, actions) => {
       const header = values.header
 
-      console.log(actions)
       if (
         (header.interfaceId === 1 &&
           !values.ICRequest?.beneficiary?.bankDetails?.bankName &&
@@ -980,7 +979,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                 readOnly={isClosed || isPosted || editMode}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('header.valueDate', '')}
+                onClear={() => formik.setFieldValue('header.valueDate', null)}
                 error={formik.touched.header?.valueDate && Boolean(formik.errors.header?.valueDate)}
               />
             </FormGrid>

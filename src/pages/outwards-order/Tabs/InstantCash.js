@@ -133,7 +133,7 @@ export default function InstantCash({
               </Grid>
             </Grid>
             <Grid item xs={6}>
-              <FieldSet title='Remitter'>
+              <FieldSet title={_labels.remitter}>
                 <Grid item xs={12}>
                   <CustomTextField
                     name='otherRelation'
@@ -176,8 +176,8 @@ export default function InstantCash({
                 </Grid>
               </FieldSet>
             </Grid>
-            <Grid item xs={6} sx={{ height: '50%' }}>
-              <FieldSet title='Beneficiary'>
+            <Grid item xs={6}>
+              <FieldSet title={_labels.beneficiary}>
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={RemittanceBankInterface.Bank.snapshot}
