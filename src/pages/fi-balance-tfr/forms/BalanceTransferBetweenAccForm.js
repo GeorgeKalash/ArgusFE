@@ -185,7 +185,8 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
-      disabled: !editMode
+      disabled: !editMode,
+      datasetId: ResourceIds.GLBalanceTransferBetweenAccounts
     },
     {
       key: 'Unlocked',
