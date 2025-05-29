@@ -639,7 +639,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
-                    readOnly={isPosted || isCancelled}
+                    readOnly={editMode}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
@@ -648,7 +648,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                     ]}
                     values={formik.values}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId || '')
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -660,8 +660,9 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                     name='reference'
                     label={labels.reference}
                     value={formik.values.reference}
-                    readOnly={isPosted || isCancelled}
-                    maxAccess={maxAccess}
+                    readOnly={editMode}
+                    maxAccess={!editMode && maxAccess}
+                    maxLength='15'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
