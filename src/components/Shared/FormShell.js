@@ -71,7 +71,6 @@ export default function FormShell({
   isParentWindow = true
 }) {
   const { stack } = useWindow()
-  const [selectedReport, setSelectedReport] = useState(null)
   const { clear, open } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
@@ -479,24 +478,6 @@ export default function FormShell({
               title: platformLabels.TransactionLog
             })
           }
-          onGenerateReport={() =>
-            stack({
-              Component: PreviewReport,
-              props: {
-                selectedReport: selectedReport,
-                recordId: form.values?.recordId,
-                functionId: form.values?.functionId,
-                resourceId: resourceId,
-                scId: form.values?.stockCountId,
-                siteId: form.values?.siteId,
-                controllerId: form.values?.controllerId,
-                onSuccess: previewBtnClicked
-              },
-              width: 1150,
-              height: 700,
-              title: platformLabels.PreviewReport
-            })
-          }
           isSaved={isSaved}
           isSavedClear={isSavedClearVisible}
           isInfo={isInfo}
@@ -513,8 +494,6 @@ export default function FormShell({
           addClientRelation={addClientRelation}
           resourceId={resourceId}
           recordId={form.values?.recordId}
-          selectedReport={selectedReport}
-          setSelectedReport={setSelectedReport}
           previewReport={previewReport}
           visibleClear={visibleClear}
           functionId={functionId}

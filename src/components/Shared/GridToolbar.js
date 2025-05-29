@@ -1,17 +1,12 @@
-import { Box, Button, Grid, Tooltip, DialogActions } from '@mui/material'
+import { Button, Grid, Tooltip, DialogActions } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
-import { useState, useContext, useEffect } from 'react'
+import { useState, useContext } from 'react'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ControlContext } from 'src/providers/ControlContext'
 import { getButtons } from './Buttons'
-import CustomComboBox from '../Inputs/CustomComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { useWindow } from 'src/windows'
-import PreviewReport from './PreviewReport'
-import ResourceComboBox from './ResourceComboBox'
-import { DataSets } from 'src/resources/DataSets'
-import { generateReport } from 'src/utils/ReportUtils'
+import ReportGenerator from './ReportGenerator'
 
 const GridToolbar = ({
   onAdd,
@@ -30,34 +25,25 @@ const GridToolbar = ({
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const addBtnVisible = onAdd && maxAccess > TrxType.GET
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
   const [searchValue, setSearchValue] = useState('')
   const { platformLabels } = useContext(ControlContext)
   const [tooltip, setTooltip] = useState('')
-  const { stack } = useWindow()
-
-  //const [selectedReport, setSelectedReport] = useState(null)
   const [reportStore, setReportStore] = useState([])
-  const [report, setReport] = useState({ selectedFormat: '', selectedReport: '' })
 
-  function clear() {
+  const clear = () => {
     setSearchValue('')
     onSearch('')
     if (onSearchClear) onSearchClear()
   }
 
-  const handleButtonMouseEnter = text => {
-    setTooltip(text)
-  }
+  const handleButtonMouseEnter = text => setTooltip(text)
+  const handleButtonMouseLeave = () => setTooltip(null)
 
-  const handleButtonMouseLeave = () => {
-    setTooltip(null)
-  }
-
-  const getReportLayout = () => {
+  const getReportLayout = async setReport => {
     setReportStore([])
 
-    getRequest({
+    await getRequest({
       extension: SystemRepository.ReportLayout,
       parameters: `_resourceId=${previewReport}`
     }).then(res => {
@@ -74,29 +60,14 @@ const GridToolbar = ({
         }))
         setReportStore(formattedReports)
         if (formattedReports.length > 0) {
-          setReport(prevState => ({
-            ...prevState,
-            selectedReport: reportStore[0]
+          setReport(prev => ({
+            ...prev,
+            selectedReport: formattedReports[0]
           }))
         }
       }
     })
   }
-
-  useEffect(() => {
-    const fetchReportLayout = async () => {
-      if (previewReport) {
-        await getReportLayout()
-        if (reportStore.length > 0)
-          setReport(prevState => ({
-            ...prevState,
-            selectedReport: reportStore[0]
-          }))
-      }
-    }
-
-    fetchReportLayout()
-  }, [props?.reportParams])
 
   const buttons = getButtons(platformLabels)
 
@@ -220,88 +191,12 @@ const GridToolbar = ({
           </Grid>
         </Grid>
         {previewReport && (
-          <Grid item>
-            <Grid item sx={{ display: 'flex', mr: 2 }}>
-              <ResourceComboBox
-                datasetId={DataSets.EXPORT_FORMAT}
-                name='selectedFormat'
-                valueField='key'
-                displayField='value'
-                values={report}
-                required
-                defaultIndex={0}
-                onChange={(event, newValue) => {
-                  setReport(prevState => ({
-                    ...prevState,
-                    selectedFormat: newValue
-                  }))
-                }}
-              />
-              <CustomComboBox
-                label={platformLabels.SelectReport}
-                valueField='caption'
-                displayField='layoutName'
-                store={reportStore}
-                value={report.selectedReport}
-                onChange={(e, newValue) =>
-                  setReport(prevState => ({
-                    ...prevState,
-                    selectedReport: newValue
-                  }))
-                }
-                sx={{ width: 250 }}
-                disableClearable
-              />
-              <Button
-                variant='contained'
-                disabled={!report.selectedReport}
-                onClick={async () => {
-                  if (!report.selectedReport) return
-
-                  const result = await generateReport({
-                    postRequest,
-                    resourceId: previewReport,
-                    outerGrid: true,
-                    selectedReport: report.selectedReport,
-                    selectedFormat: report.selectedFormat.key
-                  })
-                  switch (parseInt(report.selectedFormat.key)) {
-                    case 1:
-                      stack({
-                        Component: PreviewReport,
-                        props: {
-                          pdf: result
-                        },
-                        width: 1000,
-                        height: 500,
-                        title: platformLabels.PreviewReport
-                      })
-                      break
-
-                    default:
-                      window.location.href = result
-                      break
-                  }
-                }}
-                sx={{
-                  ml: 2,
-                  backgroundColor: '#231F20',
-                  '&:hover': {
-                    backgroundColor: '#231F20',
-                    opacity: 0.8
-                  },
-                  width: 'auto',
-                  height: '35px',
-                  objectFit: 'contain'
-                }}
-                size='small'
-              >
-                <Tooltip title={platformLabels.Preview}>
-                  <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
-                </Tooltip>
-              </Button>
-            </Grid>
-          </Grid>
+          <ReportGenerator
+            getReportLayout={getReportLayout}
+            previewReport={previewReport}
+            condition={props?.reportParams}
+            reportStore={reportStore}
+          />
         )}
       </Grid>
       <Grid item>{rightSection}</Grid>
