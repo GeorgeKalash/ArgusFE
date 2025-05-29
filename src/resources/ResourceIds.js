@@ -472,6 +472,7 @@ export const ResourceIds = {
   PhysicalCountSerialDetail: 44203,
   BalanceTransferPurchase: 31318,
   BalanceTransferSales: 31319,
+  PaymentReasons: 31116,
 
   // GL
   GLSalesInvoice: 51604,
