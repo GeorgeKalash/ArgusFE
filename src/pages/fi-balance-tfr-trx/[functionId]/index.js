@@ -165,6 +165,17 @@ const BalanceTfrTrx = () => {
   const edit = obj => {
     openForm(obj?.recordId)
   }
+
+  const getGLResourceId = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.BalanceTransferPurchase:
+        return ResourceIds.GLBalanceTransferPurchase
+      case SystemFunction.BalanceTransferSales:
+        return ResourceIds.GLBalanceTransferSales
+    }
+  }
+
   function openForm(recordId) {
     stack({
       Component: BalanceTransferForm,
@@ -173,7 +184,8 @@ const BalanceTfrTrx = () => {
         recordId,
         access,
         functionId,
-        resourceId
+        resourceId,
+        getGLResourceId
       },
       width: 800,
       height: 550,

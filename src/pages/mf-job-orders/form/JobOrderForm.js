@@ -178,6 +178,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLMFJobOrders,
       disabled: !editMode
     },
     {

@@ -218,6 +218,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLInwardTransfer,
       disabled: !editMode
     },
     {

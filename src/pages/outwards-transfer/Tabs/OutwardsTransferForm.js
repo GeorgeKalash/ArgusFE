@@ -121,6 +121,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLOutwardsTransfer,
       disabled: false
     }
   ]

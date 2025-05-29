@@ -299,6 +299,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLPaymentVoucherExpenses,
       disabled: !editMode
     },
     {

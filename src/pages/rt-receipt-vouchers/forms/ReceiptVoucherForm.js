@@ -326,6 +326,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLRemittanceReceiptVoucher,
       valuesPath: formik.values.header,
       disabled: !editMode
     }

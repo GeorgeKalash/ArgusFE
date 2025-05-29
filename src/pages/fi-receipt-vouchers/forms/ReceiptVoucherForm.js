@@ -280,6 +280,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLReceiptVoucher,
       disabled: !editMode
     },
 
@@ -312,7 +313,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || isCancelled
+      disabled: !editMode || isCancelled || formik.values.isVerified
     },
     {
       key: 'Unlocked',
@@ -416,11 +417,12 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 required
                 name='accountId'
+                firstFieldWidth={4}
                 readOnly={isCancelled || isPosted}
                 label={labels.accountReference}
                 valueField='reference'
@@ -441,10 +443,14 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   formik.setFieldValue('accountName', newValue?.name || '')
                   formik.setFieldValue('spId', newValue?.spId || '')
                   formik.setFieldValue('sptId', newValue?.sptId || '')
+                  formik.setFieldValue('accountGroupName', newValue?.groupName || '')
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
               />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField name='accountGroupName' label={labels.accountGroup} value={formik.values.accountGroupName} readOnly />
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
