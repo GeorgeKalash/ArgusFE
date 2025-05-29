@@ -191,6 +191,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLPuCostAllocation,
       disabled: !editMode
     },
     {

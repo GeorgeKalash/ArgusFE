@@ -280,6 +280,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLReceiptVoucher,
       disabled: !editMode
     },
 
@@ -312,7 +313,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || isCancelled
+      disabled: !editMode || isCancelled || formik.values.isVerified
     },
     {
       key: 'Unlocked',

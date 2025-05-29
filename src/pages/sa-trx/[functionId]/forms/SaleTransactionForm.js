@@ -69,7 +69,8 @@ export default function SaleTransactionForm({
   functionId,
   window,
   lockRecord,
-  getResourceId
+  getResourceId,
+  getGLResource
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -932,6 +933,7 @@ export default function SaleTransactionForm({
       condition: true,
       onClick: 'onClickGL',
       valuesPath: formik.values.header,
+      datasetId: getGLResource(functionId),
       disabled: !editMode
     },
     {

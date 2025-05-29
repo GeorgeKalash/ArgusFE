@@ -28,7 +28,7 @@ import { useWindow } from 'src/windows'
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 
-export default function MemosForm({ labels, access, recordId, functionId, getEndpoint }) {
+export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
@@ -294,6 +294,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: getGLResourceId(parseInt(formik.values.functionId)),
       disabled: !editMode
     },
     {
