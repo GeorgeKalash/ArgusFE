@@ -401,7 +401,14 @@ export default function SaleTransactionForm({
         itemId: ItemConvertPrice?.itemId
       })
     }
-
+    let categoryName
+    if (itemInfo.categoryId) {
+      const category = await getRequest({
+        extension: InventoryRepository.Category.get,
+        parameters: `_recordId=${itemInfo.categoryId}`
+      })
+      categoryName = category?.record?.name
+    }
     update({
       isMetal: isMetal,
       metalId: metalId,
@@ -421,6 +428,8 @@ export default function SaleTransactionForm({
       priceType: ItemConvertPrice?.priceType || 1,
       qty: 0,
       msId: itemInfo?.msId,
+      categoryId: itemInfo.categoryId,
+      categoryName,
       muRef: filteredMeasurements?.[0]?.reference,
       muId: filteredMeasurements?.[0]?.recordId,
       mdAmount: formik.values.header.maxDiscount ? parseFloat(formik.values.header.maxDiscount).toFixed(2) : 0,
@@ -547,6 +556,23 @@ export default function SaleTransactionForm({
       name: 'itemName',
       flex: 3,
       props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.category,
+      name: 'categoryName',
+      flex: 3,
+      props: {
+        endpointId: InventoryRepository.Category.qry,
+        parameters: `_pagesize=100&_startAt=0&_name=`,
+        displayField: 'name',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'recordId', to: 'categoryId' },
+          { from: 'name', to: 'categoryName' }
+        ],
         readOnly: true
       }
     },
@@ -1025,18 +1051,18 @@ export default function SaleTransactionForm({
 
     const modifiedList = await Promise.all(
       saTrxItems?.map(async (item, index) => {
-        const taxDetailsResponse = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
+        const taxDetails = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
         const serials = await getSerials(recordId, item.seqNo)
 
-        const updatedSaTrxTaxes =
-          saTrxTaxes?.map(tax => {
-            const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
+        // const updatedSaTrxTaxes =
+        //   saTrxTaxes?.map(tax => {
+        //     const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
 
-            return {
-              ...tax,
-              taxBase: matchingTaxDetail ? matchingTaxDetail.taxBase : tax.taxBase
-            }
-          }) || null
+        //     return {
+        //       ...tax,
+        //       taxBase: matchingTaxDetail ? matchingTaxDetail.taxBase : tax.taxBase
+        //     }
+        //   }) || null
 
         return {
           ...item,
@@ -1053,8 +1079,7 @@ export default function SaleTransactionForm({
               id: index
             }
           }),
-          taxDetails:
-            updatedSaTrxTaxes?.filter(tax => saTrxItems?.some(responseTax => responseTax.seqNo != tax.seqNo)) || null
+          taxDetails
         }
       })
     )
@@ -1568,6 +1593,20 @@ export default function SaleTransactionForm({
     return res
   }
 
+  const handleSearchChange = event => {
+    const { value } = event.target
+    formik.setFieldValue('header.search', value)
+  }
+
+  const filteredData = formik.values.header.search
+    ? formik.values.items.filter(
+        item =>
+          item.barcode?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
+          item.sku?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
+          item.itemName?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase())
+      )
+    : formik.values.items
+
   async function onChangeDtId(recordId) {
     const dtd = await getDTD(recordId)
     if (dtd?.record != null) {
@@ -1791,6 +1830,7 @@ export default function SaleTransactionForm({
                 endpointId={SystemRepository.Currency.qry}
                 name='header.currencyId'
                 label={labels.currency}
+                filter={item => item.currencyType == 1}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 readOnly={isPosted}
@@ -1996,10 +2036,14 @@ export default function SaleTransactionForm({
             <Grid item xs={2}>
               <CustomTextField
                 name='header.search'
-                label={labels.search}
-                value={formik?.values?.header?.search}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('header.search', '')}
+                value={formik.values.header.search}
+                label={platformLabels.Search}
+                onClear={() => {
+                  formik.setFieldValue('header.search', '')
+                }}
+                onChange={handleSearchChange}
+                onSearch={e => formik.setFieldValue('header.search', e)}
+                search={true}
               />
             </Grid>
             <Grid item xs={3}>
@@ -2022,7 +2066,7 @@ export default function SaleTransactionForm({
               itemsUpdate.current = value
               action === 'delete' && setReCal(true)
             }}
-            value={formik?.values?.items}
+            value={filteredData || formik?.initialValues?.items[0]}
             error={formik.errors.items}
             initialValues={formik?.initialValues?.items[0]}
             onSelectionChange={(row, update, field) => {
@@ -2143,9 +2187,7 @@ export default function SaleTransactionForm({
                           if (discount < 0 || discount > 100) discount = 0
                           formik.setFieldValue('header.tdPct', discount)
                         } else {
-                          if (discount < 0 || formik.values.header.subtotal < discount) {
-                            discount = 0
-                          }
+                          if (discount < 0 || formik.values.header.subtotal < discount) discount = 0
                           formik.setFieldValue('header.tdAmount', discount)
                         }
                         formik.setFieldValue('header.currentDiscount', discount)
@@ -2165,7 +2207,6 @@ export default function SaleTransactionForm({
                           formik.setFieldValue('header.tdAmount', tdAmount)
                         }
                         setReCal(true)
-
                         await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, discountAmount)
                       }}
                       onClear={() => {
