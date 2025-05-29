@@ -770,6 +770,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLReturnOnInvoice,
       disabled: !editMode
     },
     {
