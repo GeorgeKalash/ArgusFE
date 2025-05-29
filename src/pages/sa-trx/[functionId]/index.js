@@ -201,6 +201,18 @@ const SaTrx = () => {
     }
   }
 
+  const getGLResource = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.GLSalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.GLSalesReturn
+      default:
+        return null
+    }
+  }
+
   function openStack(recordId) {
     stack({
       Component: SaleTransactionForm,
@@ -210,13 +222,15 @@ const SaTrx = () => {
         access,
         functionId: functionId,
         lockRecord,
-        getResourceId
+        getResourceId,
+        getGLResource
       },
       width: 1330,
       height: 720,
       title: getCorrectLabel(parseInt(functionId))
     })
   }
+
 
   async function openForm(recordId, reference, status) {
     if (recordId && status !== 3) {

@@ -254,6 +254,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLCashTransfers,
       disabled: !editMode
     },
     {

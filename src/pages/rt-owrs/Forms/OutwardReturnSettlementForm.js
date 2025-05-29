@@ -267,6 +267,7 @@ export default function OutwardReturnSettlementForm({
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLOutwardReturnSettlement,
       disabled: !editMode
     }
   ]
