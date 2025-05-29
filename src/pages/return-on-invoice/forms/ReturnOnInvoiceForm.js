@@ -114,6 +114,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     KGmetalPrice: 0,
     hiddenkgMetalPrice: 0,
     clientDiscount: 0,
+    currentDiscount: 0,
     items: [
       {
         id: 1,
@@ -1034,17 +1035,19 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       tdPlain: typeChange == 1,
       tdPct: typeChange == 2,
       tdType: typeChange,
-      subtotal,
+      subtotal: parseFloat(subtotal),
       currentDiscount,
       hiddenTdPct: tdPct,
       hiddenTdAmount: parseFloat(tdAmount),
       typeChange
     })
-
-    formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
-    formik.setFieldValue('tdType', _discountObj?.tdType)
-    formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
-    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct)
+    formik.setFieldValue(
+      'tdAmount',
+      parseInt(subtotal) != 0 ? (_discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0) : 0
+    )
+    formik.setFieldValue('tdType', parseInt(subtotal) != 0 ? _discountObj?.tdType : 0)
+    formik.setFieldValue('currentDiscount', parseInt(subtotal) != 0 ? _discountObj?.currentDiscount || 0 : 0)
+    formik.setFieldValue('tdPct', parseInt(subtotal) != 0 ? _discountObj?.hiddenTdPct : 0)
   }
 
   function recalcNewVat(tdPct) {
@@ -1733,12 +1736,12 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       let discountAmount = Number(e.target.value.replace(/,/g, ''))
                       let tdPct = Number(e.target.value.replace(/,/g, ''))
                       let tdAmount = Number(e.target.value.replace(/,/g, ''))
-                      if (parseFloat(subtotal) == 0 && discountAmount != 0) {
-                        discountAmount = tdAmount = tdPct = 0
-                      } else if (formik.values.tdType == 1) {
+                      if (formik.values.tdType == 1) {
                         tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
                         formik.setFieldValue('tdPct', tdPct)
-                      } else if (formik.values.tdType == 2) {
+                      }
+
+                      if (formik.values.tdType == 2) {
                         tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
                         formik.setFieldValue('tdAmount', tdAmount)
                       }
