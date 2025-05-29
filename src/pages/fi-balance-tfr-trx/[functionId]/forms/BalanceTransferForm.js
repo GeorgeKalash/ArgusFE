@@ -24,7 +24,7 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function BalanceTransferForm({ labels, access, recordId, functionId, resourceId, window }) {
+export default function BalanceTransferForm({ labels, access, recordId, functionId, resourceId, getGLResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
 
@@ -175,6 +175,7 @@ export default function BalanceTransferForm({ labels, access, recordId, function
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: getGLResourceId(functionId),
       disabled: !editMode
     },
     {

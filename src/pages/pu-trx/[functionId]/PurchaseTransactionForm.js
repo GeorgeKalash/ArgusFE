@@ -58,7 +58,7 @@ import ItemPromotion from 'src/components/Shared/ItemPromotion'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 
-export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window, getResourceId }) {
+export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window, getResourceId, getGLResource }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
@@ -732,6 +732,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       condition: true,
       onClick: 'onClickGL',
       valuesPath: formik.values.header,
+      datasetId: getGLResource(functionId),
       disabled: !editMode
     },
     {

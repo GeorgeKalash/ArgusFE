@@ -116,6 +116,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'AccountSummary',
+    label: platformLabels.AccountSummary,
+    color: '#90278e',
+    image: 'accountBalanceWhite.png',
+    main: false
+  },
+  {
     key: 'WorkFlow',
     label: platformLabels.WorkFlow,
     color: '#231f20',

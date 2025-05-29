@@ -269,6 +269,8 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      valuesPath: formik.values.header,
+      datasetId: ResourceIds.GLBalanceTransferMultiAccounts,
       disabled: !editMode
     },
     {

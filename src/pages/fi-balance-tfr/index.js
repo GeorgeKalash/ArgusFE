@@ -10,48 +10,37 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import { Router } from 'src/lib/useRouter'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import BalanceTransferForm from './forms/BalanceTransferForm'
+import BalanceTransferBetweenAccForm from './forms/BalanceTransferBetweenAccForm'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 
-const BalanceTfrTrx = () => {
+const BalanceTrfBetweenAcc = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: FinancialRepository.BalanceTransfer.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_functionId=${functionId}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_functionId=${
+        SystemFunction.BalanceTransfer
+      }`
     })
 
     return { ...response, _startAt: _startAt }
-  }
-
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.BalanceTransferPurchase:
-        return ResourceIds.BalanceTransferPurchase
-      case SystemFunction.BalanceTransferSales:
-        return ResourceIds.BalanceTransferSales
-    }
   }
 
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
       return await getRequest({
         extension: FinancialRepository.BalanceTransfer.snapshot,
-        parameters: `_filter=${filters.qry}&_functionId=${functionId}`
+        parameters: `_filter=${filters.qry}&_functionId=${SystemFunction.BalanceTransfer}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
-
-  const resourceId = getResourceId(parseInt(functionId))
 
   const {
     query: { data },
@@ -64,11 +53,9 @@ const BalanceTfrTrx = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.BalanceTransfer.page,
-    datasetId: ResourceIds.BalanceTransferPurchase,
-    DatasetIdAccess: resourceId,
+    datasetId: ResourceIds.FIBalanceTfr,
     filter: {
-      filterFn: fetchWithFilter,
-      default: { functionId }
+      filterFn: fetchWithFilter
     }
   })
 
@@ -79,7 +66,7 @@ const BalanceTfrTrx = () => {
       flex: 1
     },
     {
-      field: 'dtName',
+      field: 'dtRef',
       headerName: labels.docType,
       flex: 1
     },
@@ -96,22 +83,27 @@ const BalanceTfrTrx = () => {
     },
     {
       field: 'fromAccountRef',
-      headerName: labels.accountRef,
+      headerName: labels.fromAccountRef,
       flex: 1
     },
     {
       field: 'fromAccountName',
-      headerName: labels.accountName,
+      headerName: labels.fromAccountName,
       flex: 1
     },
     {
-      field: 'fromCurrencyName',
-      headerName: labels.fromCurrency,
+      field: 'toAccountRef',
+      headerName: labels.toAccountRef,
+      flex: 1
+    },
+    {
+      field: 'toAccountName',
+      headerName: labels.toAccountName,
       flex: 1
     },
     {
       field: 'toCurrencyName',
-      headerName: labels.toCurrency,
+      headerName: labels.currency,
       flex: 1
     },
     {
@@ -119,18 +111,6 @@ const BalanceTfrTrx = () => {
       headerName: labels.amount,
       flex: 1,
       type: { field: 'number', decimal: 2 }
-    },
-    {
-      field: 'fromBaseAmount',
-      headerName: labels.baseAmount,
-      flex: 1,
-      type: { field: 'number', decimal: 2 }
-    },
-    {
-      field: 'fromExRate',
-      headerName: labels.rate,
-      flex: 1,
-      type: 'number'
     },
     {
       field: 'notes',
@@ -145,8 +125,9 @@ const BalanceTfrTrx = () => {
   ]
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: functionId,
-    action: openForm
+    functionId: SystemFunction.BalanceTransfer,
+    action: openForm,
+    hasDT: true
   })
 
   const del = async obj => {
@@ -165,29 +146,15 @@ const BalanceTfrTrx = () => {
   const edit = obj => {
     openForm(obj?.recordId)
   }
-
-  const getGLResourceId = functionId => {
-    const fn = Number(functionId)
-    switch (fn) {
-      case SystemFunction.BalanceTransferPurchase:
-        return ResourceIds.GLBalanceTransferPurchase
-      case SystemFunction.BalanceTransferSales:
-        return ResourceIds.GLBalanceTransferSales
-    }
-  }
-
   function openForm(recordId) {
     stack({
-      Component: BalanceTransferForm,
+      Component: BalanceTransferBetweenAccForm,
       props: {
         labels,
         recordId,
-        access,
-        functionId,
-        resourceId,
-        getGLResourceId
+        access
       },
-      width: 800,
+      width: 1100,
       height: 550,
       title: labels.balanceTransfer
     })
@@ -201,6 +168,7 @@ const BalanceTfrTrx = () => {
       <Grow>
         <Table
           columns={columns}
+          name='balanceTfr-acc'
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
@@ -218,4 +186,4 @@ const BalanceTfrTrx = () => {
   )
 }
 
-export default BalanceTfrTrx
+export default BalanceTrfBetweenAcc
