@@ -25,7 +25,8 @@ export const FinancialRepository = {
     set: service + 'setACC',
     del: service + 'delACC',
     page: service + 'pageACC',
-    snapshot: service + 'snapshotACC'
+    snapshot: service + 'snapshotACC',
+    snapshot2: service + 'snapshotACC2'
   },
   Group: {
     qry: service + 'qryGRP',
