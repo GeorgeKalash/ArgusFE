@@ -183,6 +183,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   const editMode = !!formik.values.recordId
   const isCancelled = formik.values.status === -1
   const isPosted = formik.values.status === 3
+  const isVerified = formik.values.isVerified
 
   const getCashAccount = async cashAccountId => {
     if (!cashAccountId) {
@@ -269,7 +270,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     })
 
     if (res) {
-      toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+      toast.success(!isVerified ? platformLabels.Verified : platformLabels.Unverfied)
       invalidate()
       window.close()
     }
@@ -312,7 +313,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || isCancelled || formik.values.isVerified
+      disabled: !editMode || isCancelled || isVerified
     },
     {
       key: 'Unlocked',
@@ -322,13 +323,13 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     },
     {
       key: 'Verify',
-      condition: !formik.values.isVerified,
+      condition: !isVerified,
       onClick: onVerify,
       disabled: !isPosted
     },
     {
       key: 'Unverify',
-      condition: formik.values.isVerified,
+      condition: isVerified,
       onClick: onVerify,
       disabled: !isPosted
     }

@@ -196,6 +196,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
   const isPosted = formik.values.status === 3
   const isCancelled = formik.values.status === -1
   const editMode = !!formik.values.recordId
+  const isVerified = formik.values.isVerified
 
   async function getPaymentVouchers(recordId) {
     return await getRequest({
@@ -303,7 +304,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     })
 
     if (res) {
-      toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+      toast.success(!isVerified ? platformLabels.Verified : platformLabels.Unverfied)
       invalidate()
       window.close()
     }
@@ -315,7 +316,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || isCancelled || formik.values.isVerified
+      disabled: !editMode || isCancelled || isVerified
     },
     {
       key: 'Unlocked',
@@ -325,13 +326,13 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     },
     {
       key: 'Verify',
-      condition: !formik.values.isVerified,
+      condition: !isVerified,
       onClick: onVerify,
       disabled: !isPosted
     },
     {
       key: 'Unverify',
-      condition: formik.values.isVerified,
+      condition: isVerified,
       onClick: onVerify,
       disabled: !isPosted
     },
