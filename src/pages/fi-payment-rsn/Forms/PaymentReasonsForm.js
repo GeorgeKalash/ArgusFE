@@ -27,7 +27,6 @@ export default function PaymentReasonsForm({ labels, maxAccess, recordId }) {
       name: '',
       reference: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
