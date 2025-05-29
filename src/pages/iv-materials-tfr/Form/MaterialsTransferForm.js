@@ -691,6 +691,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLMaterialsTransfer,
       disabled: !editMode
     },
     {

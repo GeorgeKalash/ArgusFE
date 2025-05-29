@@ -572,7 +572,9 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       Component: ImportSerials,
       props: {
         endPoint: SaleRepository.DraftInvoiceSerial.batch,
-        draftId: formik?.values?.recordId,
+        header: {
+          draftId: formik?.values?.recordId
+        },
         onCloseimport: fillGrids,
         maxAccess: maxAccess
       },

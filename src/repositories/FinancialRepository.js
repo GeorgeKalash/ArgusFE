@@ -122,7 +122,9 @@ export const FinancialRepository = {
     snapshot: service + 'snapshotRV',
     cancel: service + 'cancelRV',
     post: service + 'postRV',
-    unpost: service + 'unpostRV'
+    unpost: service + 'unpostRV',
+    verify: service + 'verifyRV',
+    unverify: service + 'unverifyRV'
   },
   Contact: {
     qry: service + 'qryContact'
@@ -151,7 +153,8 @@ export const FinancialRepository = {
     post: service + 'postPV',
     cancel: service + 'cancelPV',
     snapshot: service + 'snapshotPV',
-    unpost: service + 'unpostPV'
+    unpost: service + 'unpostPV',
+    verify: service + 'verifyPV'
   },
   AgingProfile: {
     qry: service + 'qryAGP',
@@ -195,6 +198,7 @@ export const FinancialRepository = {
     unpost: service + 'unpostMTX',
     qry: service + 'qryMTX',
     page: service + 'pageMTX',
+    verify: service + 'verifyMTX',
     snapshot: service + 'snapshotMTX'
   },
   AgingDoc: {
@@ -208,6 +212,15 @@ export const FinancialRepository = {
     del: service + 'delTMA',
     snapshot: service + 'snapshotTMA',
     post: service + 'postTMA',
-    unpost: service + 'unpostTMA',
+    unpost: service + 'unpostTMA'
+  },
+  BalanceTransfer: {
+    get: service + 'getTFR',
+    del: service + 'delTFR',
+    set: service + 'setTFR',
+    post: service + 'postTFR ',
+    unpost: service + 'unpostTFR',
+    page: service + 'pageTFR',
+    snapshot: service + 'snapshotTFR'
   }
 }
