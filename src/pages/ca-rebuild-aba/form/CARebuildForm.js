@@ -23,7 +23,7 @@ export default function CARebuildAccountBalance({ _labels, access }) {
     validateOnChange: true,
 
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(' ')
+      fiscalYear: yup.string().required()    
     }),
     onSubmit: async obj => {
       try {
@@ -90,24 +90,23 @@ export default function CARebuildAccountBalance({ _labels, access }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 2
-                }}
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=2`}
                 name='cashAccountId'
                 label={_labels.account}
-                valueField='reference'
-                displayField='name'
-                valueShow='cashAccountRef'
-                secondValueShow='cashAccountName'
-                form={formik}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : 0)
-                  formik.setFieldValue('cashAccountRef', newValue ? newValue.reference : '')
-                  formik.setFieldValue('cashAccountName', newValue ? newValue.name : '')
-                }}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
                 maxAccess={access}
+                onChange={async (_, newValue) => {
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || 0)
+                }}
+                error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
               />
             </Grid>
           </Grid>

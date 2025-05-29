@@ -139,25 +139,23 @@ export default function PVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
             </Grid>
 
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=0`}
                 name='cashAccountId'
                 label={labels.cashAccount}
-                valueField='reference'
-                displayField='name'
-                valueShow='cashAccountRef'
-                secondValueShow='cashAccountName'
-                form={formik}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : '' || '')
-                  formik.setFieldValue('cashAccountRef', newValue ? newValue.accountNo : '')
-                  formik.setFieldValue('cashAccountName', newValue ? newValue.name : '')
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={async (_, newValue) => {
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
-                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

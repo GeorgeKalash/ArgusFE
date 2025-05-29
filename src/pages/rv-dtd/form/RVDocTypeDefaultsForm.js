@@ -27,14 +27,13 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    initialValues: { accountId: '', plantId: '', dtId: '', recordId: recordId || null },
+    initialValues: { cashAccountId: '', plantId: '', dtId: '', recordId: recordId || null },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      dtId: yup.string().required(' '),
-
-      cashAccountId: yup.string().required(' ')
+      dtId: yup.string().required(),
+      cashAccountId: yup.number().required()
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -95,23 +94,21 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=0`}
                 required
                 name='cashAccountId'
                 label={labels.cashAccount}
-                valueField='reference'
-                displayField='name'
-                valueShow='cashAccountRef'
-                secondValueShow='cashAccountName'
-                form={formik}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : '' || '')
-                  formik.setFieldValue('cashAccountRef', newValue ? newValue.accountNo : '')
-                  formik.setFieldValue('cashAccountName', newValue ? newValue.name : '')
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={async (_, newValue) => {
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
                 maxAccess={maxAccess}

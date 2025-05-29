@@ -16,6 +16,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 export default function CheckbookForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -91,26 +92,24 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
-                required
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=0`}
                 name='bankAccountId'
                 label={labels.bank}
-                valueField='reference'
-                displayField='name'
-                valueShow='bankAccountRef'
-                secondValueShow='bankAccountName'
-                form={formik}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('bankAccountId', newValue?.recordId || '')
-                  formik.setFieldValue('bankAccountRef', newValue?.reference || '')
-                  formik.setFieldValue('bankAccountName', newValue?.name || '')
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={async (_, newValue) => {
+                  formik.setFieldValue('bankAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.bankAccountId && Boolean(formik.errors.bankAccountId)}
-                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
