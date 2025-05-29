@@ -18,28 +18,15 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { createConditionalSchema } from 'src/lib/validation'
 
-export default function LineItemCapacityForm({
-  labels,
-  access: maxAccess,
-  itemId,
-  itemName,
-  sku,
-  classRef,
-  className
-}) {
+export default function LineItemCapacityForm({ labels, access: maxAccess, obj }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const { itemId, itemName, sku, classRef, className } = obj || {}
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.LineItemCapacity.page
   })
-
-  const conditions = {
-    fullCapacityWgtPerHr: row => row?.fullCapacityWgtPerHr,
-    preparationHrs: row => row?.preparationHrs,
-    nbOfLabors: row => row?.nbOfLabors,
-    lineId: row => row?.lineId
-  }
 
   const { formik } = useForm({
     initialValues: {
@@ -47,13 +34,20 @@ export default function LineItemCapacityForm({
       itemName: '',
       sku: '',
       class: '',
-      data: [{ id: 1, lineId: null, fullCapacityWgtPerHr: 0, preparationHrs: 0, nbOfLabors: 0 }]
+      data: [{ id: 1, lineId: null, fullCapacityWgtPerHr: null, preparationHrs: null, nbOfLabors: null }]
     },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       itemId: yup.number().required(),
-      data: yup.array().of(createConditionalSchema(conditions))
+      data: yup.array().of(
+        createConditionalSchema({
+          fullCapacityWgtPerHr: row => row?.fullCapacityWgtPerHr,
+          preparationHrs: row => row?.preparationHrs && row?.preparationHrs > 0 && row?.preparationHrs < 9,
+          nbOfLabors: row => row?.nbOfLabors,
+          lineId: row => row?.lineId
+        })
+      )
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -203,9 +197,10 @@ export default function LineItemCapacityForm({
             columns={columns}
             value={formik.values.data}
             error={formik.errors.data}
-            name={'data'}
+            name='data'
             maxAccess={maxAccess}
-            initialValues={formik.initialValues.data[0]}
+
+            // initialValues={formik.initialValues.data[0]}
           />
         </Grow>
       </VertLayout>

@@ -6,26 +6,40 @@ function conditionalField(fieldValidators) {
     const currentField = this.path
     const fieldKey = currentField.split('.').pop()
 
+    console.log('ffff', fieldValidators(row))
+
+    if (typeof fieldValidators === 'function') {
+      return fieldValidators(row)
+    }
+
+    if (row[fieldKey] !== null && fieldValidators[fieldKey] !== '' && !fieldValidators[fieldKey](row)) {
+      return false
+    }
+
     const isAnyFieldFilled = Object.entries(fieldValidators).some(([, fn]) => {
       return !!fn(row)
     })
 
     if (!isAnyFieldFilled) return true
 
-    const isCurrentFieldFilled = fieldValidators[fieldKey] ? !!fieldValidators[fieldKey](row) : !!value
-
-    return isCurrentFieldFilled
+    return !!fieldValidators[fieldKey](row)
   }
 }
 
-function createConditionalSchema(fieldValidators) {
-  return yup.object().shape(
-    Object.keys(fieldValidators).reduce((shape, field) => {
-      shape[field] = yup.mixed().nullable().test(conditionalField(fieldValidators))
+function createConditionalSchema(fieldValidators, otherValidation, isRequired) {
+  if (typeof fieldValidators === 'function') {
+    console.log('ffff')
 
-      return shape
-    }, {})
-  )
+    return conditionalField(fieldValidators)
+  } else
+    return yup.object().shape({
+      ...Object.keys(fieldValidators).reduce((shape, field) => {
+        shape[field] = yup.mixed().nullable().test(conditionalField(fieldValidators, isRequired))
+
+        return shape
+      }, {}),
+      ...otherValidation
+    })
 }
 
 export { createConditionalSchema }

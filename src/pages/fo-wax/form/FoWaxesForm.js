@@ -24,6 +24,11 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { createConditionalSchema } from 'src/lib/validation'
+
+const conditions = {
+  pieces: row => row?.pieces > 0 && row?.pieces <= row?.jobPc
+}
 
 export default function FoWaxesForm({ labels, access, recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -103,14 +108,28 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
             pieces: yup
               .number()
               .required()
-              .test(function (value) {
-                const { jobPcs } = this.parent
-
-                return !!!jobPcs ? true : value <= jobPcs && value >= 0
-              })
+              .test(
+                createConditionalSchema(row => (!!!row.jobPcs ? true : row.pieces <= row.jobPcs && row.pieces >= 0))
+              )
           })
         )
         .required()
+
+      // items: yup.array().of(createConditionalSchema(
+
+      // ), { jobRef: yup.string().required() }, true).required()
+
+      // yup.object().shape({
+      //   jobRef: yup.string().required(),
+      //   pieces: yup
+      //     .number()
+      //     .required()
+      //     .test(function (value) {
+      //       const { jobPcs } = this.parent
+
+      //       return !!!jobPcs ? true : value <= jobPcs && value >= 0
+      //     })
+      // })
     }),
     onSubmit: async obj => {
       const { items: originalItems, header } = obj

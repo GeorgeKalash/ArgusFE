@@ -109,17 +109,12 @@ const LineItemCapacity = () => {
   }
 
   function openForm(obj) {
-    const { itemId, itemName, sku, classRef, className } = obj || {}
     stack({
       Component: LineItemCapacityForm,
       props: {
         labels,
         access,
-        itemId,
-        itemName,
-        sku,
-        classRef,
-        className
+        obj
       },
       width: 750,
       height: 500,
@@ -134,6 +129,7 @@ const LineItemCapacity = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['itemId']}
