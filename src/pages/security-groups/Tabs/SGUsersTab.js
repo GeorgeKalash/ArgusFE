@@ -18,7 +18,6 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   const recordId = storeRecordId
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       groups: yup.array().of(
