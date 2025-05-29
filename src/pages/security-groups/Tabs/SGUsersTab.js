@@ -77,7 +77,6 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   const postGroups = async obj => {
     const groups = obj?.groups?.length
       ? obj.groups
-          .filter(item => item.sgId)
           .map(item => ({
             sgId: recordId,
             userId: item.userId
