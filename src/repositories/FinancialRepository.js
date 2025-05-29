@@ -223,5 +223,12 @@ export const FinancialRepository = {
     unpost: service + 'unpostTFR',
     page: service + 'pageTFR',
     snapshot: service + 'snapshotTFR'
+  },
+  PaymentReasons: {
+    get: service + 'getPR',
+    del: service + 'delPR',
+    set: service + 'setPR',
+    page: service + 'pagePR',
+    snapshot: service + 'snapshotPR'
   }
 }
