@@ -1034,11 +1034,11 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       tdPlain: typeChange == 1,
       tdPct: typeChange == 2,
       tdType: typeChange,
-      subtotal: subtotal,
+      subtotal,
       currentDiscount,
       hiddenTdPct: tdPct,
       hiddenTdAmount: parseFloat(tdAmount),
-      typeChange: typeChange
+      typeChange
     })
 
     formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
@@ -1720,9 +1720,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     onChange={e => {
                       let discount = Number(e.target.value.replace(/,/g, ''))
                       if (formik.values.tdType == 1) {
-                        if (discount < 0 || subtotal < discount) {
-                          discount = 0
-                        }
+                        if (discount < 0 || parseInt(subtotal) < discount) discount = 0
                         formik.setFieldValue('tdAmount', discount)
                       } else {
                         if (discount < 0 || discount > 100) discount = 0
@@ -1735,12 +1733,12 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       let discountAmount = Number(e.target.value.replace(/,/g, ''))
                       let tdPct = Number(e.target.value.replace(/,/g, ''))
                       let tdAmount = Number(e.target.value.replace(/,/g, ''))
-                      if (formik.values.tdType == 1) {
+                      if (parseFloat(subtotal) == 0 && discountAmount != 0) {
+                        discountAmount = tdAmount = tdPct = 0
+                      } else if (formik.values.tdType == 1) {
                         tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
                         formik.setFieldValue('tdPct', tdPct)
-                      }
-
-                      if (formik.values.tdType == 2) {
+                      } else if (formik.values.tdType == 2) {
                         tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
                         formik.setFieldValue('tdAmount', tdAmount)
                       }
