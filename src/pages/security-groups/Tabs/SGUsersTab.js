@@ -1,5 +1,6 @@
 import { useForm } from 'src/hooks/form'
 import { useContext, useEffect } from 'react'
+import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -9,6 +10,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -18,6 +20,13 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
+    validationSchema: yup.object({
+      groups: yup.array().of(
+        yup.object({
+          userId: yup.number().required()
+        })
+      )
+    }),
     initialValues: {
       groups: [
         {
@@ -37,22 +46,20 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   const columns = [
     {
       component: 'resourcecombobox',
-      name: 'sgId',
+      name: 'userId',
       label: labels.name,
       props: {
-        endpointId: AccessControlRepository.SecurityGroupUser.qry,
-        parameters: `_userId=0&_filter=&_sgId=0`,
-        valueField: 'sgId',
+        endpointId: SystemRepository.Users.qry,
+        parameters: `_startAt=0&_pageSize=100&_size=50&_sortBy=fullName&_filter=`,
+        valueField: 'recordId',
         displayField: 'fullName',
         columnsInDropDown: [
           { key: 'fullName', value: 'Name' },
           { key: 'email', value: 'Email' }
         ],
         mapping: [
-          { from: 'sgId', to: 'sgId' },
-          { from: 'sgName', to: 'sgName' },
           { from: 'email', to: 'email' },
-          { from: 'userId', to: 'userId' },
+          { from: 'recordId', to: 'userId' },
           { from: 'fullName', to: 'fullName' }
         ]
       }
