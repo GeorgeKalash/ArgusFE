@@ -17,7 +17,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { DataSets } from 'src/resources/DataSets'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
@@ -32,7 +31,7 @@ import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access, recordId, plantId }) {
+export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access, recordId, plantId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -170,6 +169,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
   const isPosted = formik.values.status === 3
   const isCancelled = formik.values.status === -1
   const editMode = !!formik.values.recordId
+  const isVerified = formik.values.isVerified
 
   async function getPaymentVouchers(recordId) {
     return await getRequest({
@@ -284,13 +284,41 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     })
 
     if (res) {
-      toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+      toast.success(!isVerified ? platformLabels.Verified : platformLabels.Unverfied)
       invalidate()
       window.close()
     }
   }
 
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentVouchers.unpost,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res?.recordId) {
+      toast.success(platformLabels.Unposted)
+      invalidate()
+      const res2 = await getPaymentVouchers(res.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
+      await getExpenses(res2.record)
+    }
+  }
+
   const actions = [
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode || isCancelled || isVerified
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode || isCancelled
+    },
     {
       key: 'Post',
       condition: true,
@@ -329,13 +357,13 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     },
     {
       key: 'Verify',
-      condition: !formik.values.isVerified,
+      condition: !isVerified,
       onClick: onVerify,
       disabled: !isPosted
     },
     {
       key: 'Unverify',
-      condition: formik.values.isVerified,
+      condition: isVerified,
       onClick: onVerify,
       disabled: !isPosted
     }
@@ -393,7 +421,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         }
       }
     },
-        {
+    {
       component: 'numberfield',
       label: labels.amount,
       name: 'amount',
@@ -415,7 +443,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         }
       }
     },
-        {
+    {
       component: 'numberfield',
       label: labels.vat,
       name: 'vatAmount',
@@ -431,7 +459,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         readOnly: true
       }
     },
-
 
     {
       component: 'textfield',
@@ -615,9 +642,9 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
                     values={formik.values}
                     onChange={async (event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || '')
