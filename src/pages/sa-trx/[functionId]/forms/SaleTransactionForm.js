@@ -60,6 +60,7 @@ import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
+import AccountSummary from 'src/components/Shared/AccountSummary'
 
 export default function SaleTransactionForm({
   labels,
@@ -68,7 +69,8 @@ export default function SaleTransactionForm({
   functionId,
   window,
   lockRecord,
-  getResourceId
+  getResourceId,
+  getGLResource
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -931,6 +933,7 @@ export default function SaleTransactionForm({
       condition: true,
       onClick: 'onClickGL',
       valuesPath: formik.values.header,
+      datasetId: getGLResource(functionId),
       disabled: !editMode
     },
     {
@@ -957,6 +960,23 @@ export default function SaleTransactionForm({
       condition: true,
       onClick: 'onClientSalesTransaction',
       disabled: !formik.values.header?.clientId
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.header.accountId),
+            moduleId: 1
+          },
+          width: 1000,
+          height: 500,
+          title: labels.accountSummary
+        })
+      },
+      disabled: !formik.values.header.clientId
     }
   ]
 
@@ -1013,6 +1033,10 @@ export default function SaleTransactionForm({
         }
       })
     )
+
+    itemsUpdate.current = modifiedList
+    const res = await getClientInfo(saTrxHeader.clientId)
+    getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
     formik.setValues({
       ...formik.values,
       recordId: saTrxHeader.recordId || null,
@@ -1025,15 +1049,13 @@ export default function SaleTransactionForm({
           saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
         KGmetalPrice: saTrxHeader?.metalPrice * 1000,
         subtotal: saTrxHeader?.subtotal.toFixed(2),
+        accountId: res?.record?.accountId,
         commitItems: dtInfo?.record?.commitItems
       },
       items: modifiedList,
       taxes: [...saTrxTaxes]
     })
-    itemsUpdate.current = modifiedList
 
-    const res = await getClientInfo(saTrxHeader.clientId)
-    getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
     !formik.values.recordId &&
       lockRecord({
         recordId: saTrxHeader.recordId,
