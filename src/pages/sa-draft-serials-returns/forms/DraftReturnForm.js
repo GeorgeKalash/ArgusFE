@@ -35,6 +35,7 @@ import { getIPR, DIRTYFIELD_UNIT_PRICE } from 'src/utils/ItemPriceCalculator'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import { useError } from 'src/error'
 import CustomButton from 'src/components/Inputs/CustomButton'
+import AccountSummary from 'src/components/Shared/AccountSummary'
 
 export default function DraftReturnForm({ labels, access, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -191,7 +192,13 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       parameters: `_recordId=${diId}`
     })
 
+    const clientRes = await getRequest({
+      extension: SaleRepository.Client.get,
+      parameters: `_recordId=${res.record.clientId}`
+    })
+
     res.record.date = formatDateFromApi(res?.record?.date)
+    res.record.accountId = clientRes.record.accountId
 
     return res
   }
@@ -637,6 +644,23 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       condition: true,
       onClick: onImportClick,
       disabled: !editMode || formik.values.status != 1 || isClosed
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.accountId),
+            moduleId: 1
+          },
+          width: 1000,
+          height: 500,
+          title: labels.accountSummary
+        })
+      },
+      disabled: !formik.values.clientId
     }
   ]
 
@@ -1157,7 +1181,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 required
                 readOnly={isClosed}
                 displayFieldWidth={2}
-                firstFieldWidth={4}
+                firstFieldWidth={3}
                 valueShow='clientRef'
                 secondValueShow='clientName'
                 maxAccess={maxAccess}
