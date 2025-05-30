@@ -103,7 +103,7 @@ export default function CARebuildAccountBalance({ _labels, access }) {
                 ]}
                 values={formik.values}
                 maxAccess={access}
-                onChange={async (_, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('cashAccountId', newValue?.recordId || 0)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}

@@ -416,7 +416,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                   readOnly
                   required
                   maxAccess={maxAccess}
-                  onChange={async (_, newValue) => {
+                  onChange={(_, newValue) => {
                     formik.setFieldValue('fromCashAccountId', newValue?.recordId || null)
                   }}
                   error={formik.touched.fromCashAccountId && Boolean(formik.errors.fromCashAccountId)}
@@ -479,7 +479,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                   filter={item => item.plantId === formik.values.toPlantId}
                   readOnly={!formik.values.toPlantId || isClosed}
                   maxAccess={maxAccess}
-                  onChange={async (_, newValue) => {
+                  onChange={(_, newValue) => {
                     formik.setFieldValue('toCashAccountId', newValue?.recordId || null)
                   }}
                   error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}

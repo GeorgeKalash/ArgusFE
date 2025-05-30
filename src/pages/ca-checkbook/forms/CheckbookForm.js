@@ -106,7 +106,7 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('bankAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.bankAccountId && Boolean(formik.errors.bankAccountId)}

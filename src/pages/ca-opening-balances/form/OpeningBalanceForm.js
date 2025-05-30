@@ -128,7 +128,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
                 ]}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}

@@ -125,7 +125,7 @@ export default function AdjDocTypeDefaultsForm({ labels, maxAccess, recordId, fu
                 ]}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}

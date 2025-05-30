@@ -107,7 +107,7 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, recordId }) {
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                onChange={async (_, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}

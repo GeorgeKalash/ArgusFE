@@ -57,7 +57,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       currencyId: parseInt(getDefaultsData()?.currencyId),
       currencyName: '',
       status: 1,
-      cashAccountId,
+      cashAccountId: cashAccountId || null,
       amount: '',
       baseAmount: '',
       exRate: 1,
@@ -166,7 +166,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
 
       const cashAccountValue = res?.record?.cashAccountId ? res?.record?.cashAccountId : cashAccountId
 
-      formik.setFieldValue('cashAccountId', cashAccountValue)
+      formik.setFieldValue('cashAccountId', cashAccountValue || null)
       getCashAccount(cashAccountValue)
 
       formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
@@ -457,7 +457,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 ]}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}

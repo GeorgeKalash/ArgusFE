@@ -146,7 +146,7 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
                 ]}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('fromCashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.fromCashAccountId && Boolean(formik.errors.fromCashAccountId)}
@@ -166,7 +166,7 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
                 ]}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('toCashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
