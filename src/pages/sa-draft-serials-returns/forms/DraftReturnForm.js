@@ -88,6 +88,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       disSkuLookup: false,
       invoiceId: null,
       invoiceRef: '',
+      returnReasonId: null,
       search: '',
       serials: [
         {
@@ -1168,87 +1169,109 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={6.5}>
-              <ResourceLookup
-                endpointId={SaleRepository.Client.snapshot}
-                filter={{ isInactive: false }}
-                valueField='reference'
-                displayField='name'
-                secondFieldLabel={labels.name}
-                name='clientId'
-                label={labels.client}
-                form={formik}
-                required
-                readOnly={isClosed}
-                displayFieldWidth={2}
-                firstFieldWidth={3}
-                valueShow='clientRef'
-                secondValueShow='clientName'
-                maxAccess={maxAccess}
-                editMode={editMode}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
-                  { key: 'szName', value: 'Sales Zone' },
-                  { key: 'keywords', value: 'Keywords' },
-                  { key: 'cgName', value: 'Client Group' }
-                ]}
-                onChange={async (event, newValue) => {
-                  formik.setFieldValue('clientName', newValue?.name || null)
-                  formik.setFieldValue('clientRef', newValue?.reference || null)
-                  formik.setFieldValue('accountId', newValue?.accountId || null)
-                  formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
-                  formik.setFieldValue('taxId', newValue?.taxId || null)
-                  formik.setFieldValue('invoiceId', null)
-                  formik.setFieldValue('invoiceRef', '')
-                  formik.setFieldValue('clientId', newValue?.recordId || null)
-                }}
-                errorCheck={'clientId'}
-              />
-            </Grid>
-            <Grid item xs={1.5}>
-              <ResourceComboBox
-                key={`${formik.values.clientId}-${formik.values.date?.toISOString()}-${formik.values.currencyId}`}
-                endpointId={
-                  formik?.values?.clientId && formik?.values?.date && SaleRepository.InvoiceReturnBalance.balance
-                }
-                parameters={`_clientId=${formik?.values?.clientId}&_returnDate=${formik?.values?.date?.toISOString()}`}
-                filter={item => item.currencyId == formik?.values?.currencyId}
-                name='invoiceId'
-                label={labels.salesInv}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                displayFieldWidth={2}
-                readOnly={isClosed}
-                values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('invoiceId', newValue?.recordId || null)
-                  formik.setFieldValue('invoiceRef', newValue?.reference || '')
-                }}
-                error={formik.touched.invoiceId && Boolean(formik.errors.invoiceId)}
-              />
-            </Grid>
-            <Grid item xs={0.6}>
-              <CustomButton
-                onClick={() => importSerials()}
-                label={platformLabels.import}
-                image={'import.png'}
-                color='#000'
-                disabled={!formik?.values?.invoiceId || isClosed}
-              />
-            </Grid>
+            <Grid item xs={8}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={SaleRepository.Client.snapshot}
+                    filter={{ isInactive: false }}
+                    valueField='reference'
+                    displayField='name'
+                    secondFieldLabel={labels.name}
+                    name='clientId'
+                    label={labels.client}
+                    form={formik}
+                    required
+                    readOnly={isClosed}
+                    displayFieldWidth={2}
+                    firstFieldWidth={3}
+                    valueShow='clientRef'
+                    secondValueShow='clientName'
+                    maxAccess={maxAccess}
+                    editMode={editMode}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' },
+                      { key: 'szName', value: 'Sales Zone' },
+                      { key: 'keywords', value: 'Keywords' },
+                      { key: 'cgName', value: 'Client Group' }
+                    ]}
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('clientName', newValue?.name || null)
+                      formik.setFieldValue('clientRef', newValue?.reference || null)
+                      formik.setFieldValue('accountId', newValue?.accountId || null)
+                      formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
+                      formik.setFieldValue('taxId', newValue?.taxId || null)
+                      formik.setFieldValue('invoiceId', null)
+                      formik.setFieldValue('invoiceRef', '')
+                      formik.setFieldValue('clientId', newValue?.recordId || null)
+                    }}
+                    errorCheck={'clientId'}
+                  />
+                </Grid>
+                <Grid item xs={5.2}>
+                  <ResourceComboBox
+                    key={`${formik.values.clientId}-${formik.values.date?.toISOString()}-${formik.values.currencyId}`}
+                    endpointId={
+                      formik?.values?.clientId && formik?.values?.date && SaleRepository.InvoiceReturnBalance.balance
+                    }
+                    parameters={`_clientId=${
+                      formik?.values?.clientId
+                    }&_returnDate=${formik?.values?.date?.toISOString()}`}
+                    filter={item => item.currencyId == formik?.values?.currencyId}
+                    name='invoiceId'
+                    label={labels.salesInv}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    displayFieldWidth={2}
+                    readOnly={isClosed}
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('invoiceId', newValue?.recordId || null)
+                      formik.setFieldValue('invoiceRef', newValue?.reference || '')
+                    }}
+                    error={formik.touched.invoiceId && Boolean(formik.errors.invoiceId)}
+                  />
+                </Grid>
 
-            <Grid item xs={3.4}>
+                <Grid item xs={1}>
+                  <CustomButton
+                    onClick={() => importSerials()}
+                    label={platformLabels.import}
+                    image={'import.png'}
+                    color='#000'
+                    disabled={!formik?.values?.invoiceId || isClosed}
+                  />
+                </Grid>
+                <Grid item xs={5.8}>
+                  <ResourceComboBox
+                    endpointId={SaleRepository.ReturnReasons.qry}
+                    name='returnReasonId'
+                    label={labels.reason}
+                    valueField='recordId'
+                    displayField='name'
+                    readOnly={isClosed}
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('returnReasonId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.returnReasonId && Boolean(formik.errors.returnReasonId)}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={4}>
               <CustomTextArea
                 name='description'
                 label={labels.description}
                 value={formik.values.description}
-                rows={1.25}
+                rows={2.4}
                 editMode={editMode}
                 readOnly={isClosed}
                 maxAccess={maxAccess}
