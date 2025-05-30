@@ -38,8 +38,9 @@ import PaymentGrid from 'src/components/Shared/PaymentGrid'
 import { DataSets } from 'src/resources/DataSets'
 import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
 import CustomRadioButtonGroup from 'src/components/Inputs/CustomRadioButtonGroup'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function TransactionForm({ recordId, labels, access, plantId }) {
+export default function TransactionForm({ recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
@@ -72,6 +73,16 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const invalidate = useInvalidate({
     endpointId: CTTRXrepository.CurrencyTrading.snapshot
   })
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.CashInvoice,
+    cache: true
+  })
+
+  useEffect(() => {
+    window.setTitle(labels.CurrencyTrading)
+    window.setSize({ width: 1200, height: 600 })
+  }, [labels.CurrencyTrading])
 
   const initialValues = {
     recordId: null,
@@ -795,7 +806,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       form={formik}
       initialValues={initialValues}
       setIDInfoAutoFilled={resetAutoFilled}
-      resourceId={ResourceIds.CashInvoice}
+      resourceId={ResourceIds.CurrencyTrading}
       editMode={editMode}
       isClosed={isClosed}
       disabledSubmit={balance > 0 && true}
@@ -1496,7 +1507,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
                             return
                           }
-                      },
+                      }
                     },
                     {
                       component: 'numberfield',
@@ -1517,7 +1528,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           update({
                             fcAmount: fcAmount.toFixed(2)
                           })
-                      },
+                      }
                     }
                   ]}
                 />

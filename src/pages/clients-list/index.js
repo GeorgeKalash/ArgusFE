@@ -32,7 +32,8 @@ const ClientsList = () => {
       endpointId: CTCLRepository.CtClientIndividual.snapshot,
       filterFn: fetchWithSearch,
       default: { category: 1 }
-    }
+    },
+    labelAccess: { cache: true }
   })
   async function fetchWithSearch({ options = {}, filters }) {
     return (
@@ -103,14 +104,9 @@ const ClientsList = () => {
     stack({
       Component: ClientTemplateForm,
       props: {
-        labels: labels,
-        maxAccess: access,
         recordId: recordId ? recordId : null,
-        plantId: _plantId,
-        maxAccess: access
-      },
-      width: 1100,
-      title: labels.pageTitle
+        plantId: _plantId
+      }
     })
   }
 

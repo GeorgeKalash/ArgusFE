@@ -34,15 +34,16 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 import BeneficiaryListWindow from '../Windows/BeneficiaryListWindow'
 import { getStorageData } from 'src/storage/storage'
 import ReceiptVoucherForm from 'src/pages/rt-receipt-vouchers/forms/ReceiptVoucherForm'
 import CustomSwitch from 'src/components/Inputs/CustomSwitch'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function OutwardsForm({ labels, access, recordId, plantId, userId, dtId, window }) {
+export default function OutwardsForm({ recordId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -50,8 +51,9 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   const DEFAULT_DELIVERYMODE = 7
   const userData = getStorageData('userData')
 
-  const { labels: RVLabels, access: RVAccess } = useResourceQuery({
-    datasetId: ResourceIds.RemittanceReceiptVoucher
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.OutwardsOrder,
+    cache: true
   })
 
   const { maxAccess } = useDocumentType({
@@ -59,6 +61,11 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     access,
     hasDT: false
   })
+
+  useEffect(() => {
+    window.setTitle(labels.OutwardsOrder)
+    window.setSize({ width: 1100, height: 600 })
+  }, [labels.OutwardsOrder])
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot
@@ -534,15 +541,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     stack({
       Component: ReceiptVoucherForm,
       props: {
-        labels: RVLabels,
-        maxAccess: RVAccess,
         recordId: formik.values.receiptId || '',
         cashAccountId: cashAccountId,
         form: formik.values.receiptId ? null : formik
-      },
-      width: 1200,
-      height: 500,
-      title: RVLabels.receiptVoucher
+      }
     })
   }
 

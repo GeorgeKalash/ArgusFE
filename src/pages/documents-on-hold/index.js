@@ -60,7 +60,6 @@ const DocumentsOnHold = () => {
     filterBy,
     clearFilter,
     refetch,
-    clear,
     paginationParameters,
     access
   } = useResourceQuery({
@@ -123,29 +122,13 @@ const DocumentsOnHold = () => {
       case SystemFunction.CreditInvoiceSales:
       case SystemFunction.CreditInvoicePurchase:
         relevantComponent = CreditInvoiceForm
-        labels = await getLabels(ResourceIds.CreditInvoice)
-        relevantAccess = await getAccess(ResourceIds.CreditInvoice)
-
-        windowWidth = 950
-        title = labels[1]
         break
       case SystemFunction.CashCountTransaction:
         relevantComponent = CashCountForm
-        labels = await getLabels(ResourceIds.CashCountTransaction)
-        relevantAccess = await getAccess(ResourceIds.CashCountTransaction)
-
-        windowWidth = 1100
-        windowHeight = 700
-        title = labels.CashCount
         break
       case SystemFunction.CurrencyPurchase:
       case SystemFunction.CurrencySale:
         relevantComponent = TransactionForm
-        labels = await getLabels(ResourceIds.CashInvoice)
-        relevantAccess = await getAccess(ResourceIds.CashInvoice)
-
-        windowWidth = 1200
-        title = labels.cashInvoice
         break
 
       case SystemFunction.KYC:
@@ -157,21 +140,10 @@ const DocumentsOnHold = () => {
         })
 
         relevantComponent = ClientTemplateForm
-        labels = await getLabels(ResourceIds.ClientMaster)
-        relevantAccess = await getAccess(ResourceIds.ClientMaster)
-
-        windowWidth = 1100
-        title = labels.pageTitle
-
         break
 
       case SystemFunction.OutwardsOrder:
         relevantComponent = OutwardsForm
-        labels = await getLabels(ResourceIds.OutwardsOrder)
-        relevantAccess = await getAccess(ResourceIds.OutwardsOrder)
-
-        windowWidth = 1100
-        title = labels.OutwardsOrder
         break
 
       case SystemFunction.CashTransfer:
@@ -220,19 +192,15 @@ const DocumentsOnHold = () => {
         windowWidth = 1200
         title = labels.InwardSettlement
         break
+
       case SystemFunction.Sketch:
         relevantComponent = SketchForm
-        labels = await getLabels(ResourceIds.Sketch)
-        relevantAccess = await getAccess(ResourceIds.Sketch)
-
-        windowWidth = 700
-        windowHeight = 700
-        title = labels.Sketch
         break
+
       case SystemFunction.SalesOrder:
         relevantComponent = SalesOrderForm
-
         break
+
       case SystemFunction.ThreeDDesign:
         relevantComponent = ThreeDDesignForm
         labels = await getLabels(ResourceIds.ThreeDDesign)

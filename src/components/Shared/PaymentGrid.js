@@ -1,15 +1,16 @@
 import React, { useEffect } from 'react'
 import { DataSets } from 'src/resources/DataSets'
 import { DataGrid } from './DataGrid'
-import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import { useWindow } from 'src/windows'
 import POSForm from 'src/pages/rt-receipt-vouchers/forms/POSForm'
+import useResourceParams from 'src/hooks/useResourceParams'
 
 export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
-  const { labels: labels } = useResourceQuery({
-    datasetId: ResourceIds?.POSPayment
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds?.POSPayment,
+    cache: true
   })
   const { stack } = useWindow()
 
@@ -235,6 +236,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     <DataGrid
       {...rest}
       columns={columns}
+      maxAccess={access}
       onChange={(value, action) => {
         rest.onChange(value, action)
         if (action === 'delete' && Array.isArray(value)) {

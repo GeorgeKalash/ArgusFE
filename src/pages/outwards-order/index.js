@@ -39,7 +39,8 @@ const OutwardsOrder = () => {
     filter: {
       endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
       filterFn: fetchWithFilter
-    }
+    },
+    labelAccess: { cache: true }
   })
 
   async function fetchWithSearch({ filters }) {
@@ -84,15 +85,10 @@ const OutwardsOrder = () => {
         props: {
           plantId: plantId,
           userId: userData.userId,
-          access,
-          labels: _labels,
           recordId: recordId,
           invalidate,
           dtId
-        },
-        width: 1100,
-        height: 600,
-        title: _labels.OutwardsOrder
+        }
       })
     }
   }

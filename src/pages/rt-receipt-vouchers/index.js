@@ -53,7 +53,8 @@ export default function RtReceiptVouchers() {
     datasetId: ResourceIds.RemittanceReceiptVoucher,
     filter: {
       filterFn: fetchWithFilter
-    }
+    },
+    labelAccess: { cache: true }
   })
 
   async function openForm(recordId) {
@@ -61,14 +62,9 @@ export default function RtReceiptVouchers() {
     stack({
       Component: ReceiptVoucherForm,
       props: {
-        labels,
-        access: access,
         recordId: recordId || null,
         cashAccountId: cashAccountId
-      },
-      width: 1200,
-      height: 500,
-      title: labels.receiptVoucher
+      }
     })
   }
 

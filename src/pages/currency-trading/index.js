@@ -10,6 +10,7 @@ import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
@@ -19,13 +20,8 @@ export default function CurrencyTrading() {
     stack({
       Component: TransactionForm,
       props: {
-        labels,
-        maxAccess: access,
         recordId
-      },
-      width: 1200,
-      height: 600,
-      title: 'Cash Invoice'
+      }
     })
   }
 
@@ -38,12 +34,14 @@ export default function CurrencyTrading() {
     access
   } = useResourceQuery({
     endpointId: CTTRXrepository.CurrencyTrading.snapshot,
-    datasetId: 35208,
+    datasetId: ResourceIds.CashInvoice,
     filter: {
       endpointId: CTTRXrepository.CurrencyTrading.snapshot,
       filterFn: fetchWithSearch
-    }
+    },
+    labelAccess: { cache: true }
   })
+
   async function fetchWithSearch({ options = {}, filters }) {
     return await getRequest({
       extension: CTTRXrepository.CurrencyTrading.snapshot,

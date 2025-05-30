@@ -28,8 +28,9 @@ import GenerateTransferForm from './GenerateTransferForm'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function CashCountForm({ labels, maxAccess: access, recordId }) {
+export default function CashCountForm({ recordId, window }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [editMode, setEditMode] = useState(!!recordId)
@@ -80,12 +81,22 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
     endpointId: CashCountRepository.CashCountTransaction.qry
   })
 
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.CashCountTransaction,
+    cache: true
+  })
+
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.CashCountTransaction,
     access: access,
     hasDT: false,
     enabled: !editMode
   })
+
+  useEffect(() => {
+    window.setTitle(labels.cashCount)
+    window.setSize({ width: 1100, height: 700 })
+  }, [labels.cashCount])
 
   const { formik } = useForm({
     maxAccess,
@@ -483,8 +494,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
                 label={labels.forceNotesCount}
                 maxAccess={maxAccess}
                 disabled={
-                  formik.values.items &&
-                  (formik.values?.items[0]?.currencyId || formik.values?.items[0]?.currencyId)
+                  formik.values.items && (formik.values?.items[0]?.currencyId || formik.values?.items[0]?.currencyId)
                 }
               />
             </Grid>

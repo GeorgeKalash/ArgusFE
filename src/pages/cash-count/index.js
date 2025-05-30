@@ -43,7 +43,8 @@ const CashCount = () => {
     filter: {
       endpointId: CashCountRepository.CashCountTransaction.snapshot,
       filterFn: fetchWithSearch
-    }
+    },
+    labelAccess: { cache: true }
   })
 
   const columns = [
@@ -104,13 +105,8 @@ const CashCount = () => {
     stack({
       Component: CashCountForm,
       props: {
-        labels: _labels,
-        recordId: recordId ? recordId : null,
-        maxAccess: access
-      },
-      width: 1100,
-      height: 700,
-      title: _labels.cashCount
+        recordId
+      }
     })
   }
 
