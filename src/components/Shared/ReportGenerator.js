@@ -79,7 +79,7 @@ const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStor
       />
       <CustomButton
         onClick={cycleFormat}
-        label={`${report.selectedFormat?.value}`}
+        label={`${report.selectedFormat?.value || 'PDF'}`}
         border='1px solid #ccc'
         disabled={exportFormats.length === 0 || !report.selectedReport}
         style={{ width: '75px', marginLeft: '8px' }}

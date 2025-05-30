@@ -19,7 +19,6 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack: stackError } = useError()
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -144,7 +143,7 @@ const FiPaymentVouchers = () => {
         recordId,
         maxAccess: access
       },
-      width: 950,
+      width: 1050,
       height: 550,
       title: labels.paymentVoucher
     })
