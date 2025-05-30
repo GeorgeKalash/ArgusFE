@@ -147,6 +147,7 @@ export const FinancialRepository = {
   PaymentVouchers: {
     qry: service + 'qryPV',
     page: service + 'pagePV',
+    page2: service + 'pagePV2',
     get: service + 'getPV',
     set2: service + 'set2PV',
     set: service + 'setPV',
