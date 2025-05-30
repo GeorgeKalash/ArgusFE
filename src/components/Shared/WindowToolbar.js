@@ -106,7 +106,7 @@ const WindowToolbar = ({
   return (
     <Box sx={{ padding: '8px !important' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-        {previewReport && (
+        {previewReport ? (
           <ReportGenerator
             previewReport={previewReport}
             condition={previewReport}
@@ -114,6 +114,8 @@ const WindowToolbar = ({
             getReportLayout={getReportLayout}
             recordId={recordId}
           />
+        ) : (
+          <Box></Box>
         )}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {buttons
