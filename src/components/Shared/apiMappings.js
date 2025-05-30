@@ -1055,5 +1055,15 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  }
+  },
+    [ResourceIds.PaymentReasons]: {
+    type: COMBOBOX,
+    endpoint: FinancialRepository.PaymentReasons.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
 }
