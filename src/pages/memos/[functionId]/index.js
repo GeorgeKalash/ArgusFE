@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -187,7 +187,7 @@ const Financial = () => {
         functionId: functionId,
         getEndpoint
       },
-      width: 900,
+      width: 1000,
       height: 670,
       title: getcorrectLabel(parseInt(functionId))
     })

@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react'
-import { Autocomplete, Box, TextField } from '@mui/material'
+import { Autocomplete, Box, Grid, TextField } from '@mui/material'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { VertLayout } from './Layouts/VertLayout'
@@ -95,41 +95,45 @@ const ReportViewer = ({ resourceId }) => {
           hasSearch={false}
           reportName={report.selectedReport?.parameters}
           leftSection={
-            <Box sx={{ display: 'flex', padding: 2, justifyContent: 'space-between' }}>
-              <Autocomplete
-                size='small'
-                options={reportStore}
-                value={report.selectedReport}
-                PopperComponent={PopperComponent}
-                getOptionLabel={option => option.layoutName || option.caption || ''}
-                onChange={(e, newValue) =>
-                  setReport(prevState => ({
-                    ...prevState,
-                    selectedReport: newValue
-                  }))
-                }
-                renderInput={params => (
-                  <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
-                )}
-                sx={{ width: 300, height: 35 }}
-                disableClearable
-              />
-              <ResourceComboBox
-                datasetId={DataSets.EXPORT_FORMAT}
-                name='selectedFormat'
-                valueField='key'
-                displayField='value'
-                values={report}
-                required
-                defaultIndex={0}
-                onChange={(event, newValue) => {
-                  setReport(prevState => ({
-                    ...prevState,
-                    selectedFormat: newValue
-                  }))
-                }}
-              />
-            </Box>
+            <Grid item xs={5}>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    store={reportStore}
+                    label='Select a report template'
+                    name='selectedReport'
+                    valueField='layoutName'
+                    displayField='layoutName'
+                    values={report}
+                    required
+                    defaultIndex={0}
+                    onChange={(e, newValue) =>
+                      setReport(prevState => ({
+                        ...prevState,
+                        selectedReport: newValue
+                      }))
+                    }
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    datasetId={DataSets.EXPORT_FORMAT}
+                    name='selectedFormat'
+                    valueField='key'
+                    displayField='value'
+                    values={report}
+                    required
+                    defaultIndex={0}
+                    onChange={(event, newValue) => {
+                      setReport(prevState => ({
+                        ...prevState,
+                        selectedFormat: newValue
+                      }))
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
           }
         />
       </Fixed>

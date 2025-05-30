@@ -99,7 +99,7 @@ const GridToolbar = ({
         `}
       </style>
       <Grid container spacing={2} sx={{ display: 'flex', px: 2, width: '100%', justifyContent: 'space-between' }}>
-        <Grid item>
+        <Grid item xs={previewReport ? 6 : 9}>
           <Grid container spacing={2}>
             {leftSection}
             {onAdd && addBtnVisible && (
@@ -199,7 +199,9 @@ const GridToolbar = ({
           />
         )}
       </Grid>
-      <Grid item>{rightSection}</Grid>
+      <Grid item xs={3}>
+        {rightSection}
+      </Grid>
       {bottomSection}
     </DialogActions>
   )

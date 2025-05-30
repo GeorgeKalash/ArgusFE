@@ -19,8 +19,6 @@ const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStor
   const [formatIndex, setFormatIndex] = useState(0)
   const [report, setReport] = useState({ selectedFormat: '', selectedReport: '' })
 
-  console.log(recordId, 'recordId')
-
   const getExportFormats = async () => {
     await getAllKvsByDataset({
       _dataset: DataSets.EXPORT_FORMAT,
@@ -63,7 +61,7 @@ const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStor
   }
 
   return (
-    <Grid item sx={{ display: 'flex', mr: 2 }}>
+    <Grid item xs={3} sx={{ display: 'flex', mr: 2 }}>
       <CustomComboBox
         label={platformLabels.SelectReport}
         valueField='caption'
@@ -83,7 +81,7 @@ const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStor
         onClick={cycleFormat}
         label={`${report.selectedFormat?.value}`}
         border='1px solid #ccc'
-        disabled={exportFormats.length === 0}
+        disabled={exportFormats.length === 0 || !report.selectedReport}
         style={{ width: '75px', marginLeft: '8px' }}
       />
       <CustomButton
@@ -94,7 +92,7 @@ const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStor
           const result = await generateReport({
             postRequest,
             resourceId: previewReport,
-            outerGrid: !recordId ? true : false,
+            outerGrid: !recordId,
             selectedReport: report.selectedReport,
             selectedFormat: report.selectedFormat.key,
             recordId: recordId || null
