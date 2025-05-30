@@ -77,7 +77,8 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       plantId: parseInt(plantId),
       contactId: null,
       isVerified: false,
-      sourceReference: ''
+      sourceReference: '',
+      paymentReasonId: null
     },
     maxAccess,
     enableReinitialize: false,
@@ -719,6 +720,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('sourceReference', '')}
                 maxLength='20'
+                readOnly={isPosted || isCancelled}
                 maxAccess={maxAccess}
                 error={formik.touched.sourceReference && Boolean(formik.errors.sourceReference)}
               />
