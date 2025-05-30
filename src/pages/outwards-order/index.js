@@ -34,7 +34,7 @@ const OutwardsOrder = () => {
       })
 
       return { ...response, _startAt: _startAt }
-    } else return
+    } else return { list: [], _startAt: 0 }
   }
 
   const {
@@ -43,7 +43,8 @@ const OutwardsOrder = () => {
     refetch,
     labels: _labels,
     access,
-    invalidate
+    invalidate,
+    paginationParameters
   } = useResourceQuery({
     endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
     datasetId: ResourceIds.OutwardsOrder,
@@ -178,7 +179,8 @@ const OutwardsOrder = () => {
           onEdit={editOutwards}
           onDelete={delOutwards}
           pageSize={50}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
           refetch={refetch}
         />
