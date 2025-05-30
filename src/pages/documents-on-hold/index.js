@@ -31,6 +31,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import OutwardsForm from '../outwards-order/Tabs/OutwardsForm'
 import SketchForm from '../pm-sketch/Forms/SketchForm'
 import ThreeDDesignForm from '../pm-3d-design/forms/ThreeDDesignForm'
+import SalesOrderForm from '../sales-order/Tabs/SalesOrderForm'
 
 const DocumentsOnHold = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -233,6 +234,10 @@ const DocumentsOnHold = () => {
         windowHeight = 700
         title = labels.Sketch
         break
+      case SystemFunction.SalesOrder:
+        relevantComponent = SalesOrderForm
+
+        break
       case SystemFunction.ThreeDDesign:
         relevantComponent = ThreeDDesignForm
         labels = await getLabels(ResourceIds.ThreeDDesign)
@@ -246,12 +251,13 @@ const DocumentsOnHold = () => {
         break
     }
 
-    if (relevantComponent && labels && relevantAccess) {
+    if (relevantComponent) {
       stack({
         Component: relevantComponent,
         props: {
           recordId: recordId,
-          labels: labels,
+
+          // labels: labels,
           maxAccess: relevantAccess,
           plantId: plantId,
           userData: userData

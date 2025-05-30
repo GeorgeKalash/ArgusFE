@@ -24,14 +24,15 @@ import { DataSets } from 'src/resources/DataSets'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function SketchForm({ recordId, invalidate }) {
+export default function SketchForm({ recordId, invalidate, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
   const systemFunction = SystemFunction.Sketch
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.Sketch
+    datasetId: ResourceIds.Sketch,
+    cache: true
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -109,6 +110,11 @@ export default function SketchForm({ recordId, invalidate }) {
       ...res.record
     })
   }
+
+  useEffect(() => {
+    window?.setTitle(labels.Sketch)
+    window?.setSize({ width: 700, height: 700 })
+  }, [labels.Sketch])
 
   const onClose = async () => {
     await postRequest({

@@ -36,7 +36,8 @@ const SalesOrder = () => {
     datasetId: ResourceIds.SalesOrder,
     filter: {
       filterFn: fetchWithFilter
-    }
+    },
+    labelAccess: { cache: true }
   })
 
   const columns = [
@@ -166,10 +167,7 @@ const SalesOrder = () => {
         access,
         currency,
         recordId
-      },
-      width: 1300,
-      height: 730,
-      title: labels.salesOrder
+      }
     })
   }
 
