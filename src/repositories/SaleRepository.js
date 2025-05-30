@@ -263,9 +263,6 @@ export const SaleRepository = {
     import: service + 'importSRL',
     qry: service + 'qrySRL'
   },
-  InvoiceReturnBalance: {
-    balance: service + 'balanceRET'
-  },
   VerifyIntegrity: {
     check: service + 'checkTRX'
   },
@@ -273,7 +270,7 @@ export const SaleRepository = {
     page: service + 'pagePRC',
     get: service + 'getPRC',
     set: service + 'setPRC',
-    del: service + 'delPRC',
+    del: service + 'delPRC'
   },
   PriceListUpdate: {
     page: service + 'pagePLU',
@@ -282,11 +279,11 @@ export const SaleRepository = {
     del: service + 'delPLU',
     post: service + 'postPLU',
     unpost: service + 'unpostPLU',
-    generate: service + 'generatePLU',
+    generate: service + 'generatePLU'
   },
   PriceListItem: {
     qry: service + 'qryPLI',
-    snapshot: service + 'snapshotPLI',
+    snapshot: service + 'snapshotPLI'
   },
   CategoryPriceGroup: {
     get: service + 'getPGC',
@@ -294,4 +291,19 @@ export const SaleRepository = {
     del: service + 'delPGC',
     page: service + 'pagePGC'
   },
+  ReturnOnInvoice: {
+    snapshot: service + 'snapshotRET',
+    page: service + 'pageRET',
+    get: service + 'getRET',
+    set2: service + 'set2RET',
+    del: service + 'delRET',
+    verify: service + 'verifyRET',
+    post: service + 'postRET',
+    unpost: service + 'unpostRET',
+    balance: service + 'balanceRET'
+  },
+  ReturnItem: {
+    qry: service + 'qryREI',
+    balance: service + 'balanceREI'
+  }
 }
