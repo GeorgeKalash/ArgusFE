@@ -63,6 +63,7 @@ const Window = React.memo(
     const paperRef = useRef(null)
     const { loading } = useContext(RequestsContext)
     const [showOverlay, setShowOverlay] = useState(false)
+    const memoizedChildren = useMemo(() => children, [])
 
     const maxAccess = props.maxAccess?.record.maxAccess
 
@@ -71,9 +72,9 @@ const Window = React.memo(
       [editMode, maxAccess]
     )
 
-    const containerWidth = `calc(100vw - ${navCollapsed ? '10px' : '310px'})`
-    const containerHeight = `calc(100vh - 40px)`
-    const containerHeightPanel = `calc(100vh - 180px)`
+    const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '10px' : '310px'})`
+    const containerHeight = `calc(calc(100 * var(--vh)) - 40px)`
+    const containerHeightPanel = `calc(calc(100 * var(--vh)) - 180px)`
     const heightPanel = height - 120
 
     useEffect(() => {
@@ -95,11 +96,12 @@ const Window = React.memo(
 
     const handleExpandToggle = useCallback(() => {
       setExpanded(prev => !prev)
-    }, [])
+    }, [expanded])
 
     const handleMinimizeToggle = useCallback(() => {
+      if (expanded) setExpanded(false)
       setMinimized(prev => !prev)
-    }, [])
+    }, [expanded])
 
     return (
       <CacheDataProvider>
@@ -121,7 +123,7 @@ const Window = React.memo(
             handle='#draggable-dialog-title'
             cancel={'[class*="MuiDialogContent-root"]'}
             bounds='parent'
-            position={expanded && !minimized ? { x: 0, y: 0 } : undefined}
+            position={expanded || minimized ? { x: 0, y: 0 } : undefined}
             onStart={() => draggable}
           >
             <Box
@@ -135,9 +137,9 @@ const Window = React.memo(
                 ref={paperRef}
                 tabIndex={-1}
                 sx={{
-                  transition: 'all 0.3s',
+                  transition: 'width 0.3s, height 0.3s',
                   width: expanded ? containerWidth : width,
-                  height: minimized ? '40px' : 'auto',
+                  height: minimized && '40px',
                   display: controlled ? 'flex' : 'block',
                   flexDirection: controlled ? 'column' : 'unset',
                   overflow: 'hidden'
@@ -173,7 +175,7 @@ const Window = React.memo(
                     >
                       <MinimizeIcon />
                     </IconButton>
-                    {expandable && (
+                    {expandable && !minimized && (
                       <IconButton
                         tabIndex={-1}
                         edge='end'
@@ -213,7 +215,7 @@ const Window = React.memo(
 
                     {!controlled ? (
                       <>
-                        <DialogContent sx={{ p: 2 }}>{children}</DialogContent>
+                        <DialogContent sx={{ p: 2 }}>{memoizedChildren}</DialogContent>
                         {windowToolbarVisible && (
                           <WindowToolbar
                             onSave={onSave}
@@ -227,7 +229,7 @@ const Window = React.memo(
                         )}
                       </>
                     ) : (
-                      React.Children.map(children, child => {
+                      React.Children.map(memoizedChildren, child => {
                         return React.cloneElement(child, {
                           expanded: expanded,
                           height: expanded ? containerHeightPanel : heightPanel
