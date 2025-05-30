@@ -27,6 +27,7 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { useWindow } from 'src/windows'
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
+import AccountSummary from 'src/components/Shared/AccountSummary'
 
 export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -327,6 +328,23 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       condition: true,
       onClick: onCancel,
       disabled: !editMode || isCancelled || isPosted
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.accountId),
+            moduleId: 1
+          },
+          width: 1000,
+          height: 500,
+          title: platformLabels.AccountSummary
+        })
+      },
+      disabled: !formik.values.accountId
     }
   ]
 

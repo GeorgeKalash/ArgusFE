@@ -24,10 +24,13 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import AccountSummary from 'src/components/Shared/AccountSummary'
+import { useWindow } from 'src/windows'
 
 export default function BalanceTransferMultiForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.BalanceTransferMultiAccount,
@@ -291,6 +294,23 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.header.accountId),
+            moduleId: 1
+          },
+          width: 1000,
+          height: 500,
+          title: platformLabels.AccountSummary
+        })
+      },
+      disabled: !formik.values.header.accountId
     }
   ]
 
