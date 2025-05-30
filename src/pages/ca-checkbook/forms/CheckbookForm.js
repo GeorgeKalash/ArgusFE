@@ -33,9 +33,7 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
       size: '',
       firstCheckNo: '',
       lastCheckNo: '',
-      issueDate: null,
-      bankAccountRef: null,
-      bankAccountName: null
+      issueDate: null
     },
     maxAccess,
     enableReinitialize: true,

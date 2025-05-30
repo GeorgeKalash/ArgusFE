@@ -29,9 +29,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
       plantId: '',
       spId: '',
       workCenterId: '',
-      cashAccountId: '',
-      cashAccountRef: '',
-      cashAccountName: ''
+      cashAccountId: ''
     },
     onSubmit: async obj => {
       const postField = async field => {

@@ -35,6 +35,7 @@ export default function PVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
       plantId: '',
       recordId: dtId,
       paymentMethod: '',
+      cashAccountId: null,
       disableExpenseGrid: false
     },
     maxAccess,

@@ -27,7 +27,8 @@ export default function AdjDocTypeDefaultsForm({ labels, maxAccess, recordId, fu
     initialValues: {
       dtId: '',
       plantId: '',
-      recordId: recordId || ''
+      recordId: recordId || '',
+      cashAccountId: null,
     },
     maxAccess,
     enableReinitialize: true,

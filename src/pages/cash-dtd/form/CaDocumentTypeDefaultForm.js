@@ -33,11 +33,7 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
       recordId: recordId || null,
       cashAccountId: '',
       fromCashAccountId: '',
-      toCashAccountId: '',
-      fromCashAccountRef: '',
-      fromCashAccountName: '',
-      toCashAccountName: '',
-      toCashAccountRef: ''
+      toCashAccountId: ''
     },
     maxAccess,
     enableReinitialize: false,
