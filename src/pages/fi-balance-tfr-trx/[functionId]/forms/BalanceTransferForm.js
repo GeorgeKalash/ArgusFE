@@ -24,7 +24,15 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function BalanceTransferForm({ labels, access, recordId, functionId, resourceId, getGLResourceId, window }) {
+export default function BalanceTransferForm({
+  labels,
+  access,
+  recordId,
+  functionId,
+  resourceId,
+  getGLResourceId,
+  window
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
 
@@ -135,7 +143,7 @@ export default function BalanceTransferForm({ labels, access, recordId, function
     })
 
     toast.success(platformLabels.Unposted)
-    refetchForm()
+    refetchForm(recordId)
     invalidate()
   }
 
