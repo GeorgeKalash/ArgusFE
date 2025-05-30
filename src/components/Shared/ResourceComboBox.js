@@ -76,7 +76,7 @@ export default function ResourceComboBox({
               queryKey: [datasetId || endpointId, parameters],
               queryFn: () => fetch({ datasetId, endpointId, parameters, refresh })
             })
-          : await fetch({ datasetId, endpointId, parameters })
+          : await fetch({ datasetId, endpointId, parameters, refresh })
 
       setApiResponse(!!datasetId ? { list: data } : data)
 
