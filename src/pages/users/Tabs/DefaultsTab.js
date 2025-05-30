@@ -14,6 +14,7 @@ import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
 const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
   const editMode = !!storeRecordId
@@ -27,6 +28,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
       siteId: '',
       plantId: '',
       spId: '',
+      workCenterId: '',
       cashAccountId: '',
       cashAccountRef: '',
       cashAccountName: ''
@@ -44,7 +46,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
         })
       }
 
-      const fields = ['cashAccountId', 'plantId', 'siteId', 'spId'].map(postField)
+      const fields = ['cashAccountId', 'plantId', 'siteId', 'spId', 'workCenterId'].map(postField)
 
       await Promise.all(fields)
 
@@ -78,7 +80,8 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
           cashAccountId: null,
           cashAccountRef: null,
           cashAccountName: null,
-          spId: null
+          spId: null,
+          workCenterId: null
         }
 
         await Promise.all(
@@ -96,6 +99,9 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                 break
               case 'spId':
                 UserDocObject.spId = x.value ? parseInt(x.value) : null
+                break
+              case 'workCenterId':
+                UserDocObject.workCenterId = x.value ? parseInt(x.value) : null
                 break
               default:
                 break
@@ -176,7 +182,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                 label={labels.cashAccount}
                 valueField='accountNo'
                 displayField='name'
-                firstFieldWidth='30%'
+                firstFieldWidth={4}
                 displayFieldWidth={1.5}
                 valueShow='cashAccountRef'
                 secondValueShow='cashAccountName'
@@ -208,6 +214,25 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                   formik.setFieldValue('spId', newValue ? newValue.recordId : '')
                 }}
                 error={formik.touched.spId && Boolean(formik.errors.spId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.WorkCenter.qry}
+                name='workCenterId'
+                label={labels.workCenter}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('workCenterId', newValue?.recordId || null)
+                }}
+                error={formik.touched.workCenterId && formik.errors.workCenterId}
               />
             </Grid>
           </Grid>

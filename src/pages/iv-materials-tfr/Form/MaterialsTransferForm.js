@@ -401,7 +401,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     {
       component: 'button',
       name: 'details',
-      defaultValue: !!formik.values?.plId,
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png'
       },
@@ -692,6 +691,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLMaterialsTransfer,
       disabled: !editMode
     },
     {
@@ -973,6 +973,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     onChange={(event, newValue) => {
                       formik.setFieldValue('toSiteId', newValue?.recordId || null)
                       formik.setFieldValue('plId', newValue?.plId || null)
+                      if (newValue?.plId) {
+                        formik.setFieldValue('details', true)
+                      }
                     }}
                     error={formik.touched.toSiteId && Boolean(formik.errors.toSiteId)}
                   />

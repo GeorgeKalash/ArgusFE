@@ -23,7 +23,13 @@ export default function Samples({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     initialValues: {
       jobId: recordId,
-      data: []
+      data: [
+        {
+          id: 1,
+          jobId: recordId,
+          itemWeight: 0
+        }
+      ]
     },
     onSubmit: async obj => {
       const modifiedData = obj.data
@@ -54,8 +60,7 @@ export default function Samples({ labels, maxAccess, recordId }) {
     {
       component: 'numberfield',
       label: labels.itemWgt,
-      name: 'itemWeight',
-      defaultValue: 0
+      name: 'itemWeight'
     }
   ]
 
@@ -103,6 +108,7 @@ export default function Samples({ labels, maxAccess, recordId }) {
             onChange={value => formik.setFieldValue('data', value)}
             value={formik.values?.data}
             error={formik.errors?.data}
+            initialValues={formik?.initialValues?.data?.[0]}
             columns={columns}
             name='data'
             maxAccess={maxAccess}

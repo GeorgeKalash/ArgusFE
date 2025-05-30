@@ -25,7 +25,8 @@ export const FinancialRepository = {
     set: service + 'setACC',
     del: service + 'delACC',
     page: service + 'pageACC',
-    snapshot: service + 'snapshotACC'
+    snapshot: service + 'snapshotACC',
+    snapshot2: service + 'snapshotACC2'
   },
   Group: {
     qry: service + 'qryGRP',
@@ -122,7 +123,9 @@ export const FinancialRepository = {
     snapshot: service + 'snapshotRV',
     cancel: service + 'cancelRV',
     post: service + 'postRV',
-    unpost: service + 'unpostRV'
+    unpost: service + 'unpostRV',
+    verify: service + 'verifyRV',
+    unverify: service + 'unverifyRV'
   },
   Contact: {
     qry: service + 'qryContact'
@@ -151,7 +154,8 @@ export const FinancialRepository = {
     post: service + 'postPV',
     cancel: service + 'cancelPV',
     snapshot: service + 'snapshotPV',
-    unpost: service + 'unpostPV'
+    unpost: service + 'unpostPV',
+    verify: service + 'verifyPV'
   },
   AgingProfile: {
     qry: service + 'qryAGP',
@@ -195,10 +199,37 @@ export const FinancialRepository = {
     unpost: service + 'unpostMTX',
     qry: service + 'qryMTX',
     page: service + 'pageMTX',
+    verify: service + 'verifyMTX',
     snapshot: service + 'snapshotMTX'
   },
   AgingDoc: {
     snapshot: service + 'snapshotAGD',
     rebuild: service + 'rebuildAGD'
+  },
+  BalanceTransferMultiAccounts: {
+    page: service + 'pageTMA',
+    get2: service + 'get2TMA',
+    set2: service + 'set2TMA',
+    del: service + 'delTMA',
+    snapshot: service + 'snapshotTMA',
+    post: service + 'postTMA',
+    unpost: service + 'unpostTMA'
+  },
+  BalanceTransfer: {
+    get: service + 'getTFR',
+    del: service + 'delTFR',
+    set: service + 'setTFR',
+    post: service + 'postTFR ',
+    unpost: service + 'unpostTFR',
+    page: service + 'pageTFR',
+    snapshot: service + 'snapshotTFR'
+  },
+  PaymentReasons: {
+    qry: service + 'qryPR',
+    get: service + 'getPR',
+    del: service + 'delPR',
+    set: service + 'setPR',
+    page: service + 'pagePR',
+    snapshot: service + 'snapshotPR'
   }
 }

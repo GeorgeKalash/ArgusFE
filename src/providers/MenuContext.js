@@ -26,8 +26,8 @@ const MenuProvider = ({ children }) => {
       extension: SystemRepository.mainMenu,
       parameters: parameters
     }).then(async res => {
-      const builtMenu = buildMenu(res.record.folders, res.record.commandLines)
-      const builtGear = buildGear(res.record.commandLines)
+      const builtMenu = buildMenu(res?.record?.folders, res?.record?.commandLines)
+      const builtGear = buildGear(res?.record?.commandLines)
       setGear(builtGear)
       setMenu(builtMenu)
     })
@@ -35,9 +35,8 @@ const MenuProvider = ({ children }) => {
 
   const buildMenu = (folders, commandLines, parentId = 0) => {
     const menu = []
-
     folders
-      .filter(folder => folder.parentId === parentId)
+      ?.filter(folder => folder.parentId === parentId)
       .forEach(folder => {
         const folderItem = {
           id: folder.id,
@@ -59,8 +58,6 @@ const MenuProvider = ({ children }) => {
                 title: commandLine.name,
                 path: `/${commandLine.nextAPI}`,
                 name: commandLine.name,
-
-                // path: `/${commandLine.nextAPI ? commandLine.nextAPI : commandLine.api.replace(/\.aspx$/, "").toLowerCase()}`,
                 iconName: commandLine.addToBookmarks && 'FavIcon'
               })
           })
@@ -74,7 +71,7 @@ const MenuProvider = ({ children }) => {
   const buildGear = commandLines => {
     const Gear = []
     commandLines
-      .filter(commandLine => commandLine.folderId === 0)
+      ?.filter(commandLine => commandLine.folderId === 0)
       .forEach(commandLine => {
         if (commandLine.nextAPI) {
           const GearItem = {

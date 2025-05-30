@@ -4,6 +4,7 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import React, { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const CustomComboBox = ({
   type = 'text',
@@ -169,6 +170,12 @@ const CustomComboBox = ({
               )}
               <li {...props}>
                 {columnsInDropDown.map((header, i) => {
+                  let displayValue = option[header.key]
+
+                  if (header?.type && header?.type === 'date' && displayValue) {
+                    displayValue = formatDateDefault(displayValue)
+                  }
+
                   return (
                     <Box
                       key={i}
@@ -180,7 +187,7 @@ const CustomComboBox = ({
                         display: 'flex'
                       }}
                     >
-                      {option[header.key]}
+                      {displayValue}
                     </Box>
                   )
                 })}

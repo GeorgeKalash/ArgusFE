@@ -98,7 +98,9 @@ export function useResourceQuery({
       query.refetch()
     },
     invalidate: () => {
-      queryClient.invalidateQueries([endpointId])
+      queryClient.invalidateQueries({
+        queryKey: [endpointId]
+      })
     }
   }
 }

@@ -8,6 +8,25 @@ export const FoundryRepository = {
     get: service + 'getWCT',
     del: service + 'delWCT'
   },
+  Wax: {
+    page: service + 'pageWAX',
+    snapshot: service + 'snapshotWAX',
+    set: service + 'setWAX',
+    set2: service + 'set2WAX',
+    get: service + 'getWAX',
+    del: service + 'delWAX',
+    post: service + 'postWAX',
+    unpost: service + 'unpostWAX',
+    close: service + 'closeWAX',
+    reopen: service + 'reopenWAX'
+  },
+  WaxJob: {
+    qry: service + 'qryWAJ',
+    qry2: service + 'qry2WAJ'
+  },
+  Mould: {
+    qry: service + 'qryMOU'
+  },
   MetalSettings: {
     page: service + 'pageMTS',
     set: service + 'setMTS',

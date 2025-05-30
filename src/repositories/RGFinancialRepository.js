@@ -6,5 +6,8 @@ export const RGFinancialRepository = {
   },
   FiAging: {
     qry: service + 'FI404'
+  },
+  AccountSummary: {
+    AccFI405b: service + 'FI405b'
   }
 }

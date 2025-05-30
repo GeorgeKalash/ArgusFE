@@ -50,7 +50,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
   const marginDefault = parseInt(defaultsData?.list?.find(obj => obj.key === 'POSHPVarPct')?.value) || 0
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       header: {
@@ -329,6 +329,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       condition: true,
       onClick: 'onClickGL',
       valuesPath: formik.values.header,
+      datasetId: ResourceIds.GLShipments,
       disabled: !editMode
     },
     {
@@ -553,7 +554,6 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       component: 'button',
       hidden: true,
       name: 'lotButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/TableIcons/lot.png'
       },
@@ -793,6 +793,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
             }}
             value={formik?.values?.items}
             error={formik?.errors?.items}
+            initialValues={formik?.initialValues?.items?.[0]}
             columns={columns}
             maxAccess={maxAccess}
             name='shippedItems'
