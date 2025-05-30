@@ -118,11 +118,6 @@ const DocumentsOnHold = () => {
       case SystemFunction.CurrencyCreditOrderSale:
       case SystemFunction.CurrencyCreditOrderPurchase:
         relevantComponent = CreditOrderForm
-        labels = await getLabels(ResourceIds.CreditOrder)
-        relevantAccess = await getAccess(ResourceIds.CreditOrder)
-
-        windowWidth = 950
-        title = labels[1]
         break
 
       case SystemFunction.CreditInvoiceSales:

@@ -47,7 +47,7 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function SalesOrderForm({ access, recordId, currency, window }) {
+export default function SalesOrderForm({ recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -59,15 +59,15 @@ export default function SalesOrderForm({ access, recordId, currency, window }) {
   const [reCal, setReCal] = useState(false)
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
 
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.SalesOrder,
+    cache: true
+  })
+
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesOrder,
     access: access,
     enabled: !recordId
-  })
-
-  const { labels } = useResourceParams({
-    datasetId: ResourceIds.SalesOrder,
-    cache: true
   })
 
   const initialValues = {

@@ -163,8 +163,6 @@ const SalesOrder = () => {
     stack({
       Component: SalesOrderForm,
       props: {
-        labels,
-        access,
         currency,
         recordId
       }
