@@ -55,6 +55,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       accountId: null,
+      paymentReasonId: null,
       batchId: null,
       collectorId: null,
       contactId: null,
@@ -761,7 +762,47 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <CustomNumberField label={labels.totalPcs} value={totalPcs} decimalScale={2} readOnly />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomNumberField label={labels.totalPcs} value={totalPcs} decimalScale={2} readOnly />
+                </Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={FinancialRepository.PaymentReasons.snapshot}
+                    name='paymentReasonId'
+                    label={labels.paymentReason}
+                    valueField='reference'
+                    displayField='name'
+                    valueShow='paymentReasonRef'
+                    secondValueShow='paymentReasonName'
+                    errorCheck={'paymentReasonId'}
+                    form={formik}
+                    secondDisplayField={true}
+                    firstValue={formik.values.paymentReasonRef}
+                    secondValue={formik.values.paymentReasonName}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'payment Reason Ref' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    displayFieldWidth={3}
+                    maxAccess={maxAccess}
+                    filter={{
+                      isInactive: val => val !== true
+                    }}
+                    readOnly={isPosted}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('paymentReasonId', newValue?.recordId)
+                      formik.setFieldValue('paymentReasonRef', newValue?.reference)
+                      formik.setFieldValue('paymentReasonName', newValue?.name)
+                    }}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={4}>
               <Grid container spacing={2}>
