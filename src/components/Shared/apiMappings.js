@@ -63,7 +63,7 @@ export const apiMappings = {
     valueOnSelection: 'recordId',
     secondField: 'name',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.Category]: {
     //Item Category
@@ -118,12 +118,12 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 2,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.DocumentTypes]: {
     type: COMBOBOX,
-    endpoint: SystemRepository.DocumentType.qry,
-    parameters: '_startAt=0&_pageSize=2000', //_dgId appended
+    endpoint: SystemRepository.DocumentType.qry2,
+    parameters: '', //_functionIds appended
     valueField: 'recordId',
     displayField: 'name',
     displayField: ['reference', 'name'],
@@ -225,7 +225,7 @@ export const apiMappings = {
     valueOnSelection: 'recordId',
     secondField: 'name',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.FlAccountGroups]: {
     type: COMBOBOX,
@@ -295,7 +295,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.FIAgingProfile]: {
     type: COMBOBOX,
@@ -307,7 +307,7 @@ export const apiMappings = {
   [ResourceIds.Sites]: {
     type: COMBOBOX,
     endpoint: InventoryRepository.Site.qry,
-    parameters: '_filter=',
+    parameters: '_filter=&_pageSize=1000&_params=',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -322,7 +322,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.WorkCenters]: {
     type: COMBOBOX,
@@ -341,7 +341,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.Machines]: {
     type: COMBOBOX,
@@ -370,7 +370,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%',
+    firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' },
@@ -387,7 +387,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondValueShow: false,
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.Expense_Types]: {
     type: LOOKUP,
@@ -396,7 +396,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.PriceLevels]: {
     type: COMBOBOX,
@@ -461,7 +461,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%',
+    firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' },
@@ -475,7 +475,7 @@ export const apiMappings = {
     valueOnSelection: 'recordId',
     secondValueShow: false,
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.SalesPerson]: {
     type: COMBOBOX,
@@ -592,7 +592,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'itemName',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%',
+    firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'itemName', value: 'Name' },
@@ -629,7 +629,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%',
+    firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
@@ -689,7 +689,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%',
+    firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
@@ -787,7 +787,7 @@ export const apiMappings = {
     secondField: 'fullName',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%',
+    firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'fullName', value: 'Name' }
@@ -1022,5 +1022,48 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'jobRef', value: 'Job Order' }
     ]
-  }
+  },
+  [ResourceIds.PriceGroups]: {
+    type: COMBOBOX,
+    endpoint: SaleRepository.PriceGroups.qry,
+    parameters: '_startAt=0&_pageSize=1000&_name=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.BPMasterData]: {
+    type: COMBOBOX,
+    endpoint: BusinessPartnerRepository.MasterData.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000&_sortBy=recordId`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.LoCollectors]: {
+    type: COMBOBOX,
+    endpoint: LogisticsRepository.LoCollector.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+    [ResourceIds.PaymentReasons]: {
+    type: COMBOBOX,
+    endpoint: FinancialRepository.PaymentReasons.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
 }

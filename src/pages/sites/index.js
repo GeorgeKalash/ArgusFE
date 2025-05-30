@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
@@ -11,49 +11,52 @@ import SitesForm from './forms/SitesForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Sites = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext) 
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: InventoryRepository.Site.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: InventoryRepository.Site.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
+  }
+
   const {
     query: { data },
-    labels: _labels,
+    labels,
     access,
     search,
     clear,
+    filterBy,
     refetch,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.Site.page,
     datasetId: ResourceIds.Sites,
-
-    search: {
-      endpointId: InventoryRepository.Site.snapshot,
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
   })
-
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: InventoryRepository.Site.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
-  }
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Site.page
@@ -62,23 +65,40 @@ const Sites = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     ,
     {
       field: 'plantName',
-      headerName: _labels.plant,
+      headerName: labels.plant,
       flex: 1
     },
     {
       field: 'costCenterName',
-      headerName: _labels.costCenter,
+      headerName: labels.costCenter,
+      flex: 1
+    },
+    {
+      field: 'siteGroupName',
+      headerName: labels.siteGroup,
+      flex: 1
+    },
+    {
+      field: 'allowNegativeQty',
+      headerName: labels.anq,
+      type: 'checkbox',
+      flex: 1
+    },
+    {
+      field: 'isInactive',
+      headerName: labels.isInactive,
+      type: 'checkbox',
       flex: 1
     }
   ]
@@ -89,7 +109,7 @@ const Sites = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   const edit = obj => {
@@ -104,25 +124,27 @@ const Sites = () => {
     stack({
       Component: SitesForm,
       props: {
-        labels: _labels,
-        recordId: recordId ? recordId : null,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 500,
       height: 580,
-      title: _labels.sites
+      title: labels.sites
     })
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
+        <RPBGridToolbar
           onAdd={add}
           maxAccess={access}
           onSearch={search}
           onSearchClear={clear}
-          labels={_labels}
+          reportName={'IVSI'}
+          filterBy={filterBy}
+          labels={labels}
           inputSearch={true}
           previewReport={ResourceIds.Sites}
         />

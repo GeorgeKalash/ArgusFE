@@ -406,7 +406,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                   parameters={{
                     _type: 0
                   }}
-                  firstFieldWidth='40%'
+                  firstFieldWidth={5}
                   valueField='accountNo'
                   displayField='name'
                   name='fromCashAccountId'
@@ -472,7 +472,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                   parameters={{
                     _type: 0
                   }}
-                  firstFieldWidth='40%'
+                  firstFieldWidth={5}
                   valueField='accountNo'
                   displayField='name'
                   name='toCashAccountId'
