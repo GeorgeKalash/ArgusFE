@@ -54,7 +54,8 @@ const ThreeDDesign = () => {
     datasetId: ResourceIds.ThreeDDesign,
     filter: {
       filterFn: fetchWithFilter
-    }
+    },
+    labelAccess: { cache: true }
   })
 
   const columns = [
@@ -115,13 +116,8 @@ const ThreeDDesign = () => {
     stack({
       Component: ThreeDDesignForm,
       props: {
-        labels,
-        recordId: obj?.recordId,
-        access
-      },
-      width: 1200,
-      height: 700,
-      title: labels.ThreeDDesign
+        recordId: obj?.recordId
+      }
     })
   }
 

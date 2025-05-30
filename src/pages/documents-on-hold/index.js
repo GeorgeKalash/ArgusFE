@@ -100,12 +100,6 @@ const DocumentsOnHold = () => {
   const popupComponent = async obj => {
     let relevantComponent
     let recordId = obj.recordId
-    let labels
-    let relevantAccess
-
-    let windowWidth
-    let windowHeight
-    let title
 
     const userData = window.sessionStorage.getItem('userData')
       ? JSON.parse(window.sessionStorage.getItem('userData'))
@@ -148,49 +142,23 @@ const DocumentsOnHold = () => {
 
       case SystemFunction.CashTransfer:
         relevantComponent = CashTransferTab
-        labels = await getLabels(ResourceIds.CashTransfer)
-        relevantAccess = await getAccess(ResourceIds.CashTransfer)
-
-        windowWidth = 1100
-        title = labels.CashTransfer
         break
 
       case SystemFunction.OutwardsModification:
         relevantComponent = OutwardsModificationForm
-        labels = await getLabels(ResourceIds.OutwardsModification)
-        relevantAccess = await getAccess(ResourceIds.OutwardsModification)
-
-        windowWidth = 1260
-        windowHeight = 720
-        title = labels.outwardsModification
         break
 
       case SystemFunction.OutwardsReturn:
         relevantComponent = OutwardsReturnForm
-        labels = await getLabels(ResourceIds.OutwardsReturn)
-        relevantAccess = await getAccess(ResourceIds.OutwardsReturn)
-
-        windowWidth = 800
-        windowHeight = 630
-        title = labels.outwardsReturn
         break
 
       case SystemFunction.InwardTransfer:
         relevantComponent = InwardTransferForm
-        labels = await getLabels(ResourceIds.InwardTransfer)
-        relevantAccess = await getAccess(ResourceIds.InwardTransfer)
-
-        windowWidth = 1200
-        title = labels.InwardTransfer
         break
 
       case SystemFunction.InwardSettlement:
         relevantComponent = InwardSettlementForm
-        labels = await getLabels(ResourceIds.InwardSettlement)
-        relevantAccess = await getAccess(ResourceIds.InwardSettlement)
 
-        windowWidth = 1200
-        title = labels.InwardSettlement
         break
 
       case SystemFunction.Sketch:
@@ -203,12 +171,6 @@ const DocumentsOnHold = () => {
 
       case SystemFunction.ThreeDDesign:
         relevantComponent = ThreeDDesignForm
-        labels = await getLabels(ResourceIds.ThreeDDesign)
-        relevantAccess = await getAccess(ResourceIds.ThreeDDesign)
-
-        windowWidth = 800
-        windowHeight = 650
-        title = labels.ThreeDDesign
       default:
         // Handle default case if needed
         break
@@ -219,15 +181,9 @@ const DocumentsOnHold = () => {
         Component: relevantComponent,
         props: {
           recordId: recordId,
-
-          // labels: labels,
-          maxAccess: relevantAccess,
           plantId: plantId,
           userData: userData
-        },
-        width: windowWidth,
-        height: windowHeight,
-        title: title
+        }
       })
     }
   }

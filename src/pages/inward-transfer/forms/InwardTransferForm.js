@@ -30,12 +30,23 @@ import { ControlContext } from 'src/providers/ControlContext'
 import AuditForm from './AuditForm'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function InwardTransferForm({ labels, recordId, access, plantId, userId, dtId }) {
+export default function InwardTransferForm({ recordId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels, defaultsData } = useContext(ControlContext)
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.InwardTransfer,
+    cache: true
+  })
+
+  useEffect(() => {
+    window.setTitle(labels.InwardTransfer)
+    window.setSize({ width: 1200, height: 650 })
+  }, [labels.InwardTransfer])
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot

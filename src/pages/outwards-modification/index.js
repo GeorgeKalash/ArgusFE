@@ -48,7 +48,8 @@ const OutwardsModification = () => {
     filter: {
       endpointId: RemittanceOutwardsRepository.OutwardsModification.snapshot,
       filterFn: fetchWithSearch
-    }
+    },
+    labelAccess: { cache: true }
   })
 
   const columns = [
@@ -89,13 +90,8 @@ const OutwardsModification = () => {
     stack({
       Component: OutwardsModificationForm,
       props: {
-        labels: _labels,
-        recordId,
-        access
-      },
-      width: 1200,
-      height: 650,
-      title: _labels.outwardsModification
+        recordId
+      }
     })
   }
 

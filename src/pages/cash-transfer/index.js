@@ -48,7 +48,8 @@ const CashTransfer = () => {
     filter: {
       endpointId: CashBankRepository.CashTransfer.snapshot,
       filterFn: fetchWithSearch
-    }
+    },
+    labelAccess: { cache: true }
   })
   async function fetchWithSearch({ filters }) {
     return await getRequest({
@@ -206,15 +207,11 @@ const CashTransfer = () => {
     stack({
       Component: CashTransferTab,
       props: {
-        plantId: plantId,
-        cashAccountId: cashAccountId,
-        dtId: dtId,
-        access,
-        labels: _labels,
-        recordId: recordId ? recordId : null
-      },
-      width: 950,
-      title: _labels.cashTransfer
+        plantId,
+        cashAccountId,
+        dtId,
+        recordId
+      }
     })
   }
 

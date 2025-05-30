@@ -30,8 +30,9 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_AMOUNT, getRate } from 'src/utils/RateCalculator'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function CashTransferTab({ labels, recordId, access, plantId, cashAccountId, dtId }) {
+export default function CashTransferTab({ recordId, plantId, cashAccountId, dtId, window }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -42,6 +43,16 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.CashTransfer.page
   })
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.CashTransfer,
+    cache: true
+  })
+
+  useEffect(() => {
+    window.setTitle(labels.cashTransfer)
+    window.setSize({ width: 1100, height: 650 })
+  }, [labels.cashTransfer])
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,

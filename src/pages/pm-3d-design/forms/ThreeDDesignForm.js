@@ -28,8 +28,9 @@ import { useWindow } from 'src/windows'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function ThreeDDesignForm({ labels, access, recordId }) {
+export default function ThreeDDesignForm({ recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -39,6 +40,16 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
   const invalidate = useInvalidate({
     endpointId: ProductModelingRepository.ThreeDDesign.page
   })
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.ThreeDDesign,
+    cache: true
+  })
+
+  useEffect(() => {
+    window.setTitle(labels.ThreeDDesign)
+    window.setSize({ width: 800, height: 650 })
+  }, [labels.ThreeDDesign])
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,

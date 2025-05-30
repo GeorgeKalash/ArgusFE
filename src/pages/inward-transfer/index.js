@@ -39,7 +39,8 @@ const InwardTransfer = () => {
     filter: {
       endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
       filterFn: fetchWithSearch
-    }
+    },
+    labelAccess: { cache: true }
   })
 
   async function fetchWithSearch({ filters }) {
@@ -175,13 +176,9 @@ const InwardTransfer = () => {
       props: {
         plantId,
         dtId,
-        access,
         userId,
-        labels: _labels,
         recordId
-      },
-      width: 1200,
-      title: _labels.InwardTransfer
+      }
     })
   }
 

@@ -58,7 +58,8 @@ const OutwardsReturn = () => {
     datasetId: ResourceIds.OutwardsReturn,
     filter: {
       filterFn: fetchWithFilter
-    }
+    },
+    labelAccess: { cache: true }
   })
 
   const columns = [
@@ -140,15 +141,10 @@ const OutwardsReturn = () => {
     stack({
       Component: OutwardsReturnForm,
       props: {
-        labels: _labels,
         recordId,
         plantId,
-        maxAccess: access,
         dtId
-      },
-      width: 1200,
-      height: 630,
-      title: _labels.outwardsReturn
+      }
     })
   }
 

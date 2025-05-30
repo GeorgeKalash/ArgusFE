@@ -38,7 +38,8 @@ const InwardSettlement = () => {
     filter: {
       endpointId: RemittanceOutwardsRepository.InwardSettlement.snapshot,
       filterFn: fetchWithSearch
-    }
+    },
+    labelAccess: { cache: true }
   })
 
   async function fetchWithSearch({ filters }) {
@@ -111,12 +112,8 @@ const InwardSettlement = () => {
           plantId,
           cashAccountId,
           dtId,
-          access,
-          labels: _labels,
           recordId
-        },
-        width: 1200,
-        title: _labels.InwardSettlement
+        }
       })
     } else {
       if (!plantId) {
