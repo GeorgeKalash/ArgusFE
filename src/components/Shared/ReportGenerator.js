@@ -40,11 +40,6 @@ const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStor
       if (previewReport) {
         await getExportFormats()
         await getReportLayout(setReport)
-        if (reportStore.length > 0)
-          setReport(prevState => ({
-            ...prevState,
-            selectedReport: reportStore[0]
-          }))
       }
     }
 
