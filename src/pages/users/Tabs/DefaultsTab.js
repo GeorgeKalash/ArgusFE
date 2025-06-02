@@ -29,9 +29,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
       plantId: '',
       spId: '',
       workCenterId: '',
-      cashAccountId: '',
-      cashAccountRef: '',
-      cashAccountName: ''
+      cashAccountId: ''
     },
     onSubmit: async obj => {
       const postField = async field => {
@@ -170,28 +168,22 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _size: 50,
-                  _startAt: 0,
-                  _type: 0
-                }}
-                filter={formik.values.plantId && { plantId: formik.values.plantId }}
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=0&_size=50&_startAt=0`}
                 name='cashAccountId'
                 label={labels.cashAccount}
-                valueField='accountNo'
-                displayField='name'
-                firstFieldWidth='30%'
-                displayFieldWidth={1.5}
-                valueShow='cashAccountRef'
-                secondValueShow='cashAccountName'
-                form={formik}
+                filter={item => item.plantId === formik.values.plantId}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('cashAccountRef', newValue ? newValue.accountNo : '')
-                  formik.setFieldValue('cashAccountName', newValue ? newValue.name : '')
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
               />

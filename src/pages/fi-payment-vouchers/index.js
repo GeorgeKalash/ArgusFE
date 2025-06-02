@@ -69,10 +69,9 @@ const FiPaymentVouchers = () => {
 
   const columns = [
     {
-      field: 'date',
-      headerName: labels.date,
-      flex: 1,
-      type: 'date'
+      field: 'plantName',
+      headerName: labels.plant,
+      flex: 1
     },
     {
       field: 'reference',
@@ -80,9 +79,10 @@ const FiPaymentVouchers = () => {
       flex: 1
     },
     {
-      field: 'accountTypeName',
-      headerName: labels.accountType,
-      flex: 1
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
     },
     {
       field: 'accountRef',
@@ -95,8 +95,13 @@ const FiPaymentVouchers = () => {
       flex: 1
     },
     {
-      field: 'cashAccountName',
-      headerName: labels.cashAccount,
+      field: 'currencyRef',
+      headerName: labels.currency,
+      flex: 1
+    },
+    {
+      field: 'paymentMethodName',
+      headerName: labels.paymentMethod,
       flex: 1
     },
     {
@@ -105,9 +110,10 @@ const FiPaymentVouchers = () => {
       flex: 1,
       type: 'number'
     },
+
     {
-      field: 'currencyRef',
-      headerName: labels.currency,
+      field: 'cashAccountName',
+      headerName: labels.cashAccount,
       flex: 1
     },
     {
@@ -116,14 +122,14 @@ const FiPaymentVouchers = () => {
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
-      flex: 1
-    },
-    {
       field: 'isVerified',
       headerName: labels.isVerified,
       type: 'checkbox'
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
     }
   ]
 
@@ -143,7 +149,7 @@ const FiPaymentVouchers = () => {
         recordId,
         maxAccess: access
       },
-      width: 1050,
+      width: 1250,
       height: 550,
       title: labels.paymentVoucher
     })
@@ -181,6 +187,7 @@ const FiPaymentVouchers = () => {
           onEdit={edit}
           onDelete={del}
           isLoading={false}
+          deleteConfirmationType={'strict'}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

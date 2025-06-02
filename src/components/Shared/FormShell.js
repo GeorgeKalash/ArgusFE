@@ -90,7 +90,7 @@ export default function FormShell({
       if (!loading && editMode) {
         const timer = setTimeout(() => {
           setShowOverlay(true)
-        }, 100)
+        }, 150)
 
         return () => clearTimeout(timer)
       } else if (!editMode && !loading) {
@@ -197,7 +197,8 @@ export default function FormShell({
                 values: form.values,
                 recordId: form.values?.recordId,
                 functionId: functionId,
-                valuesPath: action.valuesPath
+                valuesPath: action.valuesPath,
+                datasetId: action.datasetId
               },
               width: 1000,
               height: 620,

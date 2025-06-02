@@ -877,7 +877,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 label={labels.correspondent}
                 form={formik}
                 required
-                firstFieldWidth='30%'
+                firstFieldWidth={4}
                 displayFieldWidth={1.5}
                 valueShow='corRef'
                 secondValueShow='corName'
