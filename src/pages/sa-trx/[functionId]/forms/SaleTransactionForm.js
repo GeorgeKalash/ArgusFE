@@ -1064,16 +1064,6 @@ export default function SaleTransactionForm({
         const taxDetails = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
         const serials = await getSerials(recordId, item.seqNo)
 
-        // const updatedSaTrxTaxes =
-        //   saTrxTaxes?.map(tax => {
-        //     const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
-
-        //     return {
-        //       ...tax,
-        //       taxBase: matchingTaxDetail ? matchingTaxDetail.taxBase : tax.taxBase
-        //     }
-        //   }) || null
-
         return {
           ...item,
           id: index + 1,
