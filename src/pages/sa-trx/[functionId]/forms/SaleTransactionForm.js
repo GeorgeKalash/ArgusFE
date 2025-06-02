@@ -410,11 +410,12 @@ export default function SaleTransactionForm({
       categoryName = category?.record?.name
     }
     update({
-      isMetal: isMetal,
-      metalId: metalId,
-      metalPurity: metalPurity,
+      isMetal,
+      metalId,
+      metalPurity,
+      metalRef: itemPhysProp?.metalRef || '',
       volume: parseFloat(itemPhysProp?.volume) || 0,
-      weight: weight,
+      weight,
       basePrice:
         isMetal === false
           ? parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5)
@@ -422,8 +423,8 @@ export default function SaleTransactionForm({
           ? basePriceValue
           : 0,
       baseLaborPrice: 0,
-      TotPricePerG: TotPricePerG,
-      unitPrice: unitPrice,
+      TotPricePerG,
+      unitPrice,
       upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
       priceType: ItemConvertPrice?.priceType || 1,
       qty: 0,
@@ -648,6 +649,15 @@ export default function SaleTransactionForm({
       component: 'numberfield',
       label: labels.weight,
       name: 'weight',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.metal,
+      name: 'metalRef',
+      flex: 3,
       props: {
         readOnly: true
       }
@@ -1378,6 +1388,7 @@ export default function SaleTransactionForm({
       upo: parseFloat(itemPriceRow?.upo).toFixed(2),
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
+      baseLaborPrice: itemPriceRow?.baseLaborPrice ? parseFloat(itemPriceRow.baseLaborPrice).toFixed(2) : 0,
       mdAmount: itemPriceRow?.mdAmount ? parseFloat(itemPriceRow.mdAmount).toFixed(2) : 0,
       vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0
     }
@@ -1909,7 +1920,6 @@ export default function SaleTransactionForm({
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                displayFieldWidth={2}
                 readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
                 required={
                   !formik?.values?.header.dtId ||
