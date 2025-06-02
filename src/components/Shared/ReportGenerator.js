@@ -121,7 +121,6 @@ const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStor
         label={platformLabels.Preview}
         image={'preview.png'}
         disabled={!report.selectedReport}
-        tooltipText={platformLabels.Preview}
       />
     </Grid>
   )
