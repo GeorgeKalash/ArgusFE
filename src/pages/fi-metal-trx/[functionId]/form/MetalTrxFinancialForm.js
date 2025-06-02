@@ -785,11 +785,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                     readOnly={isPosted}
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('paymentReasonId', newValue?.recordId)
-                      } else {
-                        formik.setFieldValue('paymentReasonId', '')
-                      }
+                      formik.setFieldValue('paymentReasonId', newValue?.recordId || null)
                     }}
                     error={formik.touched.paymentReasonId && Boolean(formik.errors.paymentReasonId)}
                     maxAccess={maxAccess}
