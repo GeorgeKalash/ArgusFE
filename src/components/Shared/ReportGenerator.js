@@ -46,6 +46,14 @@ const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStor
     fetchReportLayout()
   }, [condition])
 
+  useEffect(() => {
+    if (reportStore.length > 0)
+      setReport(prevState => ({
+        ...prevState,
+        selectedReport: reportStore[0]
+      }))
+  }, [reportStore])
+
   const cycleFormat = () => {
     const nextIndex = (formatIndex + 1) % exportFormats.length
     setFormatIndex(nextIndex)
