@@ -1,20 +1,40 @@
 import { useEffect, useState, useContext } from 'react'
-import { Autocomplete, Box, Grid, TextField } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import RPBGridToolbar from './RPBGridToolbar'
-import PopperComponent from './Popper/PopperComponent'
 import ResourceComboBox from './ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import { generateReport } from 'src/utils/ReportUtils'
+import CustomButton from '../Inputs/CustomButton'
+import { CommonContext } from 'src/providers/CommonContext'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
   const [reportStore, setReportStore] = useState([])
   const [report, setReport] = useState({ selectedFormat: '', selectedReport: '' })
   const [pdf, setPDF] = useState(null)
+  const [exportFormats, setExportFormats] = useState([])
+  const [formatIndex, setFormatIndex] = useState(0)
+
+  const getExportFormats = async () => {
+    await getAllKvsByDataset({
+      _dataset: DataSets.EXPORT_FORMAT,
+      callback: res => {
+        if (res.length > 0) {
+          setExportFormats(res)
+          setFormatIndex(0)
+          setReport(prev => ({
+            ...prev,
+            selectedFormat: res[0]
+          }))
+        }
+      }
+    })
+  }
 
   const getReportLayout = () => {
     var parameters = `_resourceId=${resourceId}`
@@ -57,6 +77,7 @@ const ReportViewer = ({ resourceId }) => {
   useEffect(() => {
     getReportLayout()
     getReportTemplate()
+    getExportFormats()
   }, [])
 
   useEffect(() => {
@@ -87,6 +108,15 @@ const ReportViewer = ({ resourceId }) => {
     }
   }
 
+  const cycleFormat = () => {
+    const nextIndex = (formatIndex + 1) % exportFormats.length
+    setFormatIndex(nextIndex)
+    setReport(prev => ({
+      ...prev,
+      selectedFormat: exportFormats[nextIndex]
+    }))
+  }
+
   return (
     <VertLayout>
       <Fixed>
@@ -95,9 +125,9 @@ const ReportViewer = ({ resourceId }) => {
           hasSearch={false}
           reportName={report.selectedReport?.parameters}
           leftSection={
-            <Grid item xs={5}>
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
+            <Grid item xs={3}>
+              <Grid container spacing={1}>
+                <Grid item xs={10}>
                   <ResourceComboBox
                     store={reportStore}
                     label='Select a report template'
@@ -115,21 +145,12 @@ const ReportViewer = ({ resourceId }) => {
                     }
                   />
                 </Grid>
-                <Grid item xs={6}>
-                  <ResourceComboBox
-                    datasetId={DataSets.EXPORT_FORMAT}
-                    name='selectedFormat'
-                    valueField='key'
-                    displayField='value'
-                    values={report}
-                    required
-                    defaultIndex={0}
-                    onChange={(event, newValue) => {
-                      setReport(prevState => ({
-                        ...prevState,
-                        selectedFormat: newValue
-                      }))
-                    }}
+                <Grid item xs={2}>
+                  <CustomButton
+                    onClick={cycleFormat}
+                    image={`${report.selectedFormat?.value || 'PDF'}.png`}
+                    border='1px solid black'
+                    disabled={exportFormats.length === 0 || !report.selectedReport}
                   />
                 </Grid>
               </Grid>
