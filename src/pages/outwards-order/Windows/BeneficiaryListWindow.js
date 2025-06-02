@@ -6,23 +6,20 @@ import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutward
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useFormik } from 'formik'
 
-const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
+const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const formik = useFormik({
-    initialValues: { clientId: form.values.clientId, benList: [] },
+    initialValues: { clientId: form.clientId, benList: [] },
     validateOnChange: true,
-    validateOnBlur: true,
     onSubmit: values => {
-      const checkedBeneficiary = values.benList.find(ben => ben.checked)
-
-      form.setValues({
-        ...form.values,
+      const checkedBeneficiary = values?.benList?.find(ben => ben?.checked)
+      onSubmit({
         beneficiaryId: checkedBeneficiary?.beneficiaryId || null,
         beneficiaryName: checkedBeneficiary?.name || null,
-        beneficiarySeqNo: checkedBeneficiary?.seqNo || null
+        beneficiarySeqNo: checkedBeneficiary?.seqNo || null,
+        branchCode: checkedBeneficiary?.branchCode
       })
-
       window.close()
     }
   })
@@ -30,11 +27,11 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
   async function fetchGridData() {
     const res = await getRequest({
       extension: RemittanceOutwardsRepository.Beneficiary.qry3,
-      parameters: `_clientId=${form.values.clientId}&_dispersalId=${form.values.dispersalType}&_countryId=${form.values.countryId}`
+      parameters: `_clientId=${form.clientId}&_dispersalId=${form.dispersalType}&_countryId=${form.countryId}`
     })
 
     res.list = res.list.map(item => {
-      if (item.beneficiaryId == form.values.beneficiaryId) item.checked = true
+      if (item.beneficiaryId == form.beneficiaryId) item.checked = true
 
       return item
     })

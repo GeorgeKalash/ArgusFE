@@ -23,6 +23,8 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import AccountSummary from 'src/components/Shared/AccountSummary'
+import { useWindow } from 'src/windows'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 export default function BalanceTransferForm({
@@ -36,6 +38,7 @@ export default function BalanceTransferForm({
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.BalanceTransfer.page
@@ -202,6 +205,23 @@ export default function BalanceTransferForm({
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
       disabled: !editMode
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.fromAccountId),
+            moduleId: 1
+          },
+          width: 1000,
+          height: 500,
+          title: platformLabels.AccountSummary
+        })
+      },
+      disabled: !formik.values.fromAccountId
     }
   ]
 
