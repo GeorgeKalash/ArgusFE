@@ -924,8 +924,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       qty: itemPriceRow?.qty,
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
-      vatAmount: parseFloat(itemPriceRow?.vatAmount),
-      tdPct: formik?.values?.tdPct,
+      vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
+      tdPct: formik?.values?.tdPct || 0,
       taxDetails: formik.values.isVattable ? newRow.taxDetails : null
     })
 
