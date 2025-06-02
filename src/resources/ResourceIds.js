@@ -473,6 +473,7 @@ export const ResourceIds = {
   BalanceTransferPurchase: 31318,
   BalanceTransferSales: 31319,
   PaymentReasons: 31116,
+  IVSerials: 41224,
 
   // GL
   GLSalesInvoice: 51604,
