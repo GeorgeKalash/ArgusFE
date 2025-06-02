@@ -84,12 +84,10 @@ const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStor
       <CustomButton
         onClick={cycleFormat}
         image={`${report.selectedFormat?.value || 'PDF'}.png`}
-        border='1px solid #ccc'
         disabled={exportFormats.length === 0 || !report.selectedReport}
-        style={{ marginLeft: '8px' }}
+        style={{ marginLeft: '6px' }}
       />
       <CustomButton
-        style={{ ml: 1 }}
         onClick={async () => {
           if (!report.selectedReport) return
 

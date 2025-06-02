@@ -1,7 +1,7 @@
 import { Button } from '@mui/material'
 import { useState } from 'react'
 
-const CustomButton = ({ onClick, label, image, color = 'black', border, disabled, tooltipText, style, ...props }) => {
+const CustomButton = ({ onClick, label, image, color, border, disabled, tooltipText, style, ...props }) => {
   const [tooltip, setTooltip] = useState('')
 
   const handleButtonMouseEnter = () => {

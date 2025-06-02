@@ -7,6 +7,7 @@ import { getButtons } from './Buttons'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ReportGenerator from './ReportGenerator'
+import CustomButton from '../Inputs/CustomButton'
 
 const GridToolbar = ({
   onAdd,
@@ -104,29 +105,17 @@ const GridToolbar = ({
             {leftSection}
             {onAdd && addBtnVisible && (
               <Grid item sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-                <Tooltip title={platformLabels.add}>
-                  <Button
-                    onClick={onAdd}
-                    variant='contained'
-                    style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
-                    disabled={disableAdd}
-                    sx={{
-                      mr: 1,
-                      '&:hover': {
-                        opacity: 0.8
-                      },
-                      width: '20px',
-                      height: '33px',
-                      objectFit: 'contain'
-                    }}
-                  >
-                    <img src='/images/buttonsIcons/add.png' alt={platformLabels.add} />
-                  </Button>
-                </Tooltip>
+                <CustomButton
+                  onClick={onAdd}
+                  style={{ border: '1px solid #4eb558' }}
+                  color={'transparent'}
+                  disabled={disableAdd}
+                  image={'add.png'}
+                />
               </Grid>
             )}
             {inputSearch && (
-              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', m: '0px !important' }}>
+              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', mt: '1px !important' }}>
                 <CustomTextField
                   name='search'
                   value={searchValue}
@@ -153,37 +142,12 @@ const GridToolbar = ({
 
                   return (
                     isVisible && (
-                      <div
-                        className='button-container'
-                        onMouseEnter={() => (isDisabled ? null : handleButtonMouseEnter(button.label))}
-                        onMouseLeave={handleButtonMouseLeave}
-                        key={index}
-                      >
-                        <Button
-                          onClick={handleClick}
-                          variant='contained'
-                          sx={{
-                            mr: 1,
-                            backgroundColor: button.color,
-                            '&:hover': {
-                              backgroundColor: button.color,
-                              opacity: 0.8
-                            },
-                            border: button.border,
-                            width: 'auto',
-                            height: '33px',
-                            objectFit: 'contain'
-                          }}
-                          disabled={isDisabled}
-                        >
-                          {button.image ? (
-                            <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
-                          ) : (
-                            button.label
-                          )}
-                        </Button>
-                        {button.image ? tooltip && <div className='toast'>{tooltip}</div> : null}
-                      </div>
+                      <CustomButton
+                        onClick={handleClick}
+                        image={button.image}
+                        tooltip={button.label}
+                        disabled={isDisabled}
+                      />
                     )
                   )
                 })}

@@ -149,7 +149,6 @@ const ReportViewer = ({ resourceId }) => {
                   <CustomButton
                     onClick={cycleFormat}
                     image={`${report.selectedFormat?.value || 'PDF'}.png`}
-                    border='1px solid black'
                     disabled={exportFormats.length === 0 || !report.selectedReport}
                   />
                 </Grid>
