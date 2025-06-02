@@ -772,34 +772,27 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 <Grid item xs={12}></Grid>
                 <Grid item xs={12}></Grid>
                 <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={FinancialRepository.PaymentReasons.snapshot}
+                  <ResourceComboBox
+                    endpointId={FinancialRepository.PaymentReasons.qry}
                     name='paymentReasonId'
                     label={labels.paymentReason}
-                    valueField='reference'
-                    displayField='name'
-                    valueShow='paymentReasonRef'
-                    secondValueShow='paymentReasonName'
-                    errorCheck={'paymentReasonId'}
-                    form={formik}
-                    secondDisplayField={true}
-                    firstValue={formik.values.paymentReasonRef}
-                    secondValue={formik.values.paymentReasonName}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
                     columnsInDropDown={[
-                      { key: 'reference', value: 'payment Reason Ref' },
+                      { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    displayFieldWidth={3}
-                    maxAccess={maxAccess}
-                    filter={{
-                      isInactive: val => val !== true
-                    }}
                     readOnly={isPosted}
+                    values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('paymentReasonId', newValue?.recordId)
-                      formik.setFieldValue('paymentReasonRef', newValue?.reference)
-                      formik.setFieldValue('paymentReasonName', newValue?.name)
+                      if (newValue) {
+                        formik.setFieldValue('paymentReasonId', newValue?.recordId)
+                      } else {
+                        formik.setFieldValue('paymentReasonId', '')
+                      }
                     }}
+                    error={formik.touched.paymentReasonId && Boolean(formik.errors.paymentReasonId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
