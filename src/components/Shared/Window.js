@@ -159,6 +159,17 @@ const Window = React.memo(
                     </Typography>
                   </Box>
                   <Box>
+                    {props?.onRefresh && (
+                      <IconButton
+                        tabIndex={-1}
+                        edge='end'
+                        onClick={props?.onRefresh}
+                        aria-label='refresh'
+                        sx={{ color: 'white !important' }}
+                      >
+                        <RefreshIcon />
+                      </IconButton>
+                    )}
                     {expandable && (
                       <IconButton
                         tabIndex={-1}
@@ -169,17 +180,6 @@ const Window = React.memo(
                         sx={{ color: 'white !important' }}
                       >
                         <OpenInFullIcon />
-                      </IconButton>
-                    )}
-                    {props?.onRefresh && (
-                      <IconButton
-                        tabIndex={-1}
-                        edge='end'
-                        onClick={props?.onRefresh}
-                        aria-label='refresh'
-                        sx={{ color: 'white !important' }}
-                      >
-                        <RefreshIcon />
                       </IconButton>
                     )}
                     {closable && (

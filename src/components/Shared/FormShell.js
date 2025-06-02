@@ -72,7 +72,7 @@ export default function FormShell({
 }) {
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
-  const { clear, open } = useGlobalRecord() || {}
+  const { clear, open, setRecordId } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
   const { loading } = useContext(RequestsContext)
@@ -103,6 +103,12 @@ export default function FormShell({
       }
     }
   }, [loading, editMode, maxAccess])
+
+  useEffect(() => {
+    if (form?.values.recordId && typeof setRecordId === 'function') {
+      setRecordId(form?.values.recordId)
+    }
+  }, [form?.values.recordId])
 
   actions?.filter(Boolean)?.forEach(action => {
     if (typeof action?.onClick !== 'function') {

@@ -121,6 +121,21 @@ export function WindowProvider({ children }) {
                 } else {
                   setRerenderFlag(!rerenderFlag)
                 }
+              },
+              setRecordId: newId => {
+                setStack(stack => {
+                  return stack.map(window =>
+                    window.id === id
+                      ? {
+                          ...window,
+                          props: {
+                            ...window.props,
+                            recordId: newId
+                          }
+                        }
+                      : window
+                  )
+                })
               }
             }}
           >
