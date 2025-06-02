@@ -147,6 +147,7 @@ export const FinancialRepository = {
   PaymentVouchers: {
     qry: service + 'qryPV',
     page: service + 'pagePV',
+    page2: service + 'pagePV2',
     get: service + 'getPV',
     set2: service + 'set2PV',
     set: service + 'setPV',
@@ -223,5 +224,13 @@ export const FinancialRepository = {
     unpost: service + 'unpostTFR',
     page: service + 'pageTFR',
     snapshot: service + 'snapshotTFR'
+  },
+  PaymentReasons: {
+    qry: service + 'qryPR',
+    get: service + 'getPR',
+    del: service + 'delPR',
+    set: service + 'setPR',
+    page: service + 'pagePR',
+    snapshot: service + 'snapshotPR'
   }
 }

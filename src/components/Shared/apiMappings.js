@@ -54,16 +54,15 @@ export const apiMappings = {
     displayField: 'fiscalYear'
   },
   [ResourceIds.CashAccount]: {
-    type: LOOKUP,
-    endpoint: CashBankRepository.CashAccount.snapshot,
-    parameters: {
-      _type: 0
-    },
-    firstField: 'reference',
-    valueOnSelection: 'recordId',
-    secondField: 'name',
-    displayFieldWidth: 1,
-    firstFieldWidth: 5
+    type: COMBOBOX,
+    endpoint: CashBankRepository.CashAccount.qry,
+    parameters: '_type=0',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   },
   [ResourceIds.Category]: {
     //Item Category
@@ -1055,5 +1054,15 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  }
+  },
+    [ResourceIds.PaymentReasons]: {
+    type: COMBOBOX,
+    endpoint: FinancialRepository.PaymentReasons.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
 }

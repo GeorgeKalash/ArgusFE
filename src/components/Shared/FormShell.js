@@ -91,7 +91,7 @@ export default function FormShell({
       if (!loading && editMode) {
         const timer = setTimeout(() => {
           setShowOverlay(true)
-        }, 100)
+        }, 150)
 
         return () => clearTimeout(timer)
       } else if (!editMode && !loading) {

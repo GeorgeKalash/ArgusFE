@@ -1,13 +1,12 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from 'src/lib/date-helper'
-import { Grid, FormControlLabel, Checkbox, Stack } from '@mui/material'
+import { Grid, Stack } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -57,8 +56,17 @@ import { CommonContext } from 'src/providers/CommonContext'
 import ItemPromotion from 'src/components/Shared/ItemPromotion'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
+import { useError } from 'src/error'
 
-export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window, getResourceId, getGLResource }) {
+export default function PurchaseTransactionForm({
+  labels,
+  access,
+  recordId,
+  functionId,
+  window,
+  getResourceId,
+  getGLResource
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
@@ -70,6 +78,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const [defaultsDataState, setDefaultsDataState] = useState(null)
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
+  const { stack: stackError } = useError()
 
   const [cycleButtonState, setCycleButtonState] = useState({
     text: '%',
@@ -359,7 +368,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
           { from: 'trackBy', to: 'trackBy' },
-          { from: 'msId', to: 'msId' }
+          { from: 'msId', to: 'msId' },
+          { from: 'isInactive', to: 'isInactive' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -372,6 +382,17 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         if (!newRow?.itemId) {
           update({
             enabled: false
+          })
+
+          return
+        }
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.items[0],
+            id: newRow.id
+          })
+          stackError({
+            message: labels.inactiveItem
           })
 
           return
@@ -1160,7 +1181,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
-
       const vatCalcRow = getVatCalc({
         basePrice: parseFloat(item?.basePrice),
         qty: parseFloat(item?.qty),
