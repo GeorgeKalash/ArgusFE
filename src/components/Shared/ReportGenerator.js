@@ -77,15 +77,16 @@ const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStor
             selectedReport: newValue
           }))
         }
+        refresh={false}
         sx={{ width: 250 }}
         disableClearable
       />
       <CustomButton
         onClick={cycleFormat}
-        label={`${report.selectedFormat?.value || 'PDF'}`}
+        image={`${report.selectedFormat?.value || 'PDF'}.png`}
         border='1px solid #ccc'
         disabled={exportFormats.length === 0 || !report.selectedReport}
-        style={{ width: '75px', marginLeft: '8px' }}
+        style={{ marginLeft: '8px' }}
       />
       <CustomButton
         style={{ ml: 1 }}
