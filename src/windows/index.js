@@ -134,6 +134,10 @@ export function WindowProvider({ children }) {
                 closeWindow()
                 if (onClose) onClose()
               }}
+              onRefresh={() => {
+                closeWindowById(id)
+                openWindow(id)
+              }}
               width={width}
               height={height}
               expandable={expandable}

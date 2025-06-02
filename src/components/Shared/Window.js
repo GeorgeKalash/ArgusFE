@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef, useContext } 
 import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
+import RefreshIcon from '@mui/icons-material/Refresh'
 import Draggable from 'react-draggable'
 import WindowToolbar from './WindowToolbar'
 import { useSettings } from 'src/@core/hooks/useSettings'
@@ -168,6 +169,17 @@ const Window = React.memo(
                         sx={{ color: 'white !important' }}
                       >
                         <OpenInFullIcon />
+                      </IconButton>
+                    )}
+                    {props?.onRefresh && (
+                      <IconButton
+                        tabIndex={-1}
+                        edge='end'
+                        onClick={props?.onRefresh}
+                        aria-label='refresh'
+                        sx={{ color: 'white !important' }}
+                      >
+                        <RefreshIcon />
                       </IconButton>
                     )}
                     {closable && (
