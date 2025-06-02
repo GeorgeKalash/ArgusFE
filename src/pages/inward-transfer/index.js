@@ -39,8 +39,7 @@ const InwardTransfer = () => {
     filter: {
       endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
       filterFn: fetchWithSearch
-    },
-    labelAccess: { cache: true }
+    }
   })
 
   async function fetchWithSearch({ filters }) {

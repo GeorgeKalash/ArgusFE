@@ -87,8 +87,7 @@ export default function CreditOrderForm({ recordId, plantId, userData, window })
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CreditOrder,
-    cache: true
+    datasetId: ResourceIds.CreditOrder
   })
 
   const { maxAccess } = useDocumentType({
@@ -103,7 +102,6 @@ export default function CreditOrderForm({ recordId, plantId, userData, window })
 
   useEffect(() => {
     window.setTitle(labels?.creditOrder)
-    window.setSize({ width: 950, height: 600 })
   }, [labels.creditOrder])
 
   const { formik } = useForm({

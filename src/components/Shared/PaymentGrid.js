@@ -9,8 +9,7 @@ import useResourceParams from 'src/hooks/useResourceParams'
 
 export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds?.POSPayment,
-    cache: true
+    datasetId: ResourceIds?.POSPayment
   })
   const { stack } = useWindow()
 

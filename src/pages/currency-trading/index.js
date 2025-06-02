@@ -38,8 +38,7 @@ export default function CurrencyTrading() {
     filter: {
       endpointId: CTTRXrepository.CurrencyTrading.snapshot,
       filterFn: fetchWithSearch
-    },
-    labelAccess: { cache: true }
+    }
   })
 
   async function fetchWithSearch({ options = {}, filters }) {

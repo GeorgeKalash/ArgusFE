@@ -42,8 +42,7 @@ export default function CreditInvoiceForm({ recordId, plantId, userData, cashAcc
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CreditInvoice,
-    cache: true
+    datasetId: ResourceIds.CreditInvoice
   })
 
   const invalidate = useInvalidate({
@@ -104,7 +103,6 @@ export default function CreditInvoiceForm({ recordId, plantId, userData, cashAcc
 
   useEffect(() => {
     window.setTitle(labels.creditInvoice)
-    window.setSize({ width: 1000, height: 650 })
   }, [labels.creditInvoice])
 
   const { formik } = useForm({

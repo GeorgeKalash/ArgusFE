@@ -109,7 +109,7 @@ const Window = React.memo(
             width: spacing ? containerWidth : '100%',
             height: spacing ? containerHeight : '100%',
             backgroundColor: 'rgba(0, 0, 0, 0.1)',
-            display: props.styles?.display ? props.styles.display : 'flex',
+            display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             zIndex: 2

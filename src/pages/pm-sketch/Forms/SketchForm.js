@@ -31,8 +31,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
   const systemFunction = SystemFunction.Sketch
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.Sketch,
-    cache: true
+    datasetId: ResourceIds.Sketch
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({

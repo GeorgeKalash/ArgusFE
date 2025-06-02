@@ -45,13 +45,11 @@ export default function CashTransferTab({ recordId, plantId, cashAccountId, dtId
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CashTransfer,
-    cache: true
+    datasetId: ResourceIds.CashTransfer
   })
 
   useEffect(() => {
     window.setTitle(labels.cashTransfer)
-    window.setSize({ width: 1100, height: 650 })
   }, [labels.cashTransfer])
 
   const [initialValues, setInitialData] = useState({

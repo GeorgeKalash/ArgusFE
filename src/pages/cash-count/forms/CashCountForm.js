@@ -82,8 +82,7 @@ export default function CashCountForm({ recordId, window }) {
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CashCountTransaction,
-    cache: true
+    datasetId: ResourceIds.CashCountTransaction
   })
 
   const { maxAccess } = useDocumentType({
@@ -95,7 +94,6 @@ export default function CashCountForm({ recordId, window }) {
 
   useEffect(() => {
     window.setTitle(labels.cashCount)
-    window.setSize({ width: 1100, height: 700 })
   }, [labels.cashCount])
 
   const { formik } = useForm({

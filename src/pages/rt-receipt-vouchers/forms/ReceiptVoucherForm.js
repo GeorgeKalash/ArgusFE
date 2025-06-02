@@ -37,8 +37,7 @@ export default function ReceiptVoucherForm({ recordId, cashAccountId, form = nul
   const [selectedReport, setSelectedReport] = useState(null)
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.RemittanceReceiptVoucher,
-    cache: true
+    datasetId: ResourceIds.RemittanceReceiptVoucher
   })
 
   const { documentType, maxAccess } = useDocumentType({
@@ -50,7 +49,6 @@ export default function ReceiptVoucherForm({ recordId, cashAccountId, form = nul
 
   useEffect(() => {
     window.setTitle(labels.receiptVoucher)
-    window.setSize({ width: 1200, height: 500 })
   }, [labels.receiptVoucher])
 
   const invalidate = useInvalidate({

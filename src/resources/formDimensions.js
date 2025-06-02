@@ -1,0 +1,20 @@
+export const formDimensions = new Map([
+  ['SalesOrderForm', { width: 1300, height: 750 }],
+  ['ClientTemplateForm', { width: 1100, height: 700 }],
+  ['CashCountForm', { width: 1100, height: 700 }],
+  ['CashTransferTab', { width: 1100, height: 650 }],
+  ['CreditInvoiceForm', { width: 1000, height: 650 }],
+  ['TransactionForm', { width: 1200, height: 600 }],
+  ['InwardSettlementForm', { width: 1200, height: 650 }],
+  ['InwardTransferForm', { width: 1200, height: 650 }],
+  ['OutwardsModificationForm', { width: 1200, height: 650 }],
+  ['OutwardsForm', { width: 1100, height: 600 }],
+  ['OutwardsForm', { width: 1200, height: 630 }],
+  ['OutwardsReturnForm', { width: 1200, height: 630 }],
+  ['ThreeDDesignForm', { width: 800, height: 650 }],
+  ['ReceiptVoucherForm', { width: 1200, height: 500 }],
+  ['ClientCorporateForm', { width: 1100 }],
+  ['SalesTrxForm', { width: 1000 }],
+  ['TaxDetails', { width: 1000 }],
+  ['DraftForm', { width: 1300, height: 750 }]
+])

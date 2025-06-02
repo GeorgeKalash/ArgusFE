@@ -48,8 +48,7 @@ const OutwardsModification = () => {
     filter: {
       endpointId: RemittanceOutwardsRepository.OutwardsModification.snapshot,
       filterFn: fetchWithSearch
-    },
-    labelAccess: { cache: true }
+    }
   })
 
   const columns = [

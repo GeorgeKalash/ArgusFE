@@ -67,13 +67,11 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   const trialDays = defaultsData?.list?.find(({ key }) => key === 'ct-client-trial-days')?.value
 
   const { labels, access: maxAccess } = useResourceParams({
-    datasetId: ResourceIds.ClientMaster,
-    cache: true
+    datasetId: ResourceIds.ClientMaster
   })
 
   useEffect(() => {
     window.setTitle(labels.pageTitle)
-    window.setSize({ width: 1100, height: 700 })
   }, [labels.pageTitle])
 
   const initialValues = {

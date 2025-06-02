@@ -63,7 +63,8 @@ export default function SalesOrderForm({ recordId, currency, window }) {
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.SalesOrder,
-    cache: true
+    window,
+    titleKey: 'salesOrder'
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -565,7 +566,6 @@ export default function SalesOrderForm({ recordId, currency, window }) {
             itemId: row?.itemId,
             clientId: formik?.values?.clientId
           },
-          width: 1000,
           title: labels?.salesTrx
         })
       }
@@ -1203,10 +1203,9 @@ export default function SalesOrderForm({ recordId, currency, window }) {
     if (formik.values?.dtId & !recordId) onChangeDtId(formik.values?.dtId)
   }, [formik.values?.dtId])
 
-  useEffect(() => {
-    window.setTitle(labels.salesOrder)
-    window.setSize({ width: 1300, height: 750 })
-  }, [labels.salesOrder])
+  // useEffect(() => {
+  //   window.setTitle(labels.salesOrder)
+  // }, [labels.salesOrder])
 
   useEffect(() => {
     ;(async function () {

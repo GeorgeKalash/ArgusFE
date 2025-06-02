@@ -35,13 +35,11 @@ export default function OutwardsReturnForm({ recordId, plantId, dtId, isOpenOutw
   const { stack } = useWindow()
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.OutwardsReturn,
-    cache: true
+    datasetId: ResourceIds.OutwardsReturn
   })
 
   useEffect(() => {
     window.setTitle(labels.outwardsReturn)
-    window.setSize({ width: 1200, height: 630 })
   }, [labels.outwardsReturn])
 
   const { maxAccess } = useDocumentType({

@@ -75,13 +75,11 @@ export default function TransactionForm({ recordId, plantId }) {
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CashInvoice,
-    cache: true
+    datasetId: ResourceIds.CashInvoice
   })
 
   useEffect(() => {
     window.setTitle(labels.CurrencyTrading)
-    window.setSize({ width: 1200, height: 600 })
   }, [labels.CurrencyTrading])
 
   const initialValues = {

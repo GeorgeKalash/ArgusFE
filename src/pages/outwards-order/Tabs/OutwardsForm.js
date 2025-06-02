@@ -52,8 +52,7 @@ export default function OutwardsForm({ recordId, plantId, userId, dtId, window }
   const userData = getStorageData('userData')
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.OutwardsOrder,
-    cache: true
+    datasetId: ResourceIds.OutwardsOrder
   })
 
   const { maxAccess } = useDocumentType({
@@ -64,7 +63,6 @@ export default function OutwardsForm({ recordId, plantId, userId, dtId, window }
 
   useEffect(() => {
     window.setTitle(labels.OutwardsOrder)
-    window.setSize({ width: 1100, height: 600 })
   }, [labels.OutwardsOrder])
 
   const invalidate = useInvalidate({

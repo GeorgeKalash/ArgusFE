@@ -45,8 +45,7 @@ const Sketch = () => {
     datasetId: ResourceIds.Sketch,
     filter: {
       filterFn: fetchWithFilter
-    },
-    labelAccess: { cache: true }
+    }
   })
 
   async function fetchWithFilter({ filters, pagination }) {

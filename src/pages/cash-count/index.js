@@ -43,8 +43,7 @@ const CashCount = () => {
     filter: {
       endpointId: CashCountRepository.CashCountTransaction.snapshot,
       filterFn: fetchWithSearch
-    },
-    labelAccess: { cache: true }
+    }
   })
 
   const columns = [

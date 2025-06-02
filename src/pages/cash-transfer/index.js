@@ -48,8 +48,7 @@ const CashTransfer = () => {
     filter: {
       endpointId: CashBankRepository.CashTransfer.snapshot,
       filterFn: fetchWithSearch
-    },
-    labelAccess: { cache: true }
+    }
   })
   async function fetchWithSearch({ filters }) {
     return await getRequest({

@@ -39,13 +39,11 @@ export default function InwardTransferForm({ recordId, plantId, userId, dtId, wi
   const { platformLabels, defaultsData } = useContext(ControlContext)
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.InwardTransfer,
-    cache: true
+    datasetId: ResourceIds.InwardTransfer
   })
 
   useEffect(() => {
     window.setTitle(labels.InwardTransfer)
-    window.setSize({ width: 1200, height: 650 })
   }, [labels.InwardTransfer])
 
   const invalidate = useInvalidate({

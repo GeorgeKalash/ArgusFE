@@ -38,8 +38,7 @@ const InwardSettlement = () => {
     filter: {
       endpointId: RemittanceOutwardsRepository.InwardSettlement.snapshot,
       filterFn: fetchWithSearch
-    },
-    labelAccess: { cache: true }
+    }
   })
 
   async function fetchWithSearch({ filters }) {

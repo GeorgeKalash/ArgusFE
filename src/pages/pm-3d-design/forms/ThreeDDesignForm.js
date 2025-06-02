@@ -42,13 +42,11 @@ export default function ThreeDDesignForm({ recordId, window }) {
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.ThreeDDesign,
-    cache: true
+    datasetId: ResourceIds.ThreeDDesign
   })
 
   useEffect(() => {
     window.setTitle(labels.ThreeDDesign)
-    window.setSize({ width: 800, height: 650 })
   }, [labels.ThreeDDesign])
 
   const { documentType, maxAccess, changeDT } = useDocumentType({

@@ -53,8 +53,7 @@ export default function RtReceiptVouchers() {
     datasetId: ResourceIds.RemittanceReceiptVoucher,
     filter: {
       filterFn: fetchWithFilter
-    },
-    labelAccess: { cache: true }
+    }
   })
 
   async function openForm(recordId) {

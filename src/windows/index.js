@@ -3,6 +3,7 @@ import Window from 'src/components/Shared/Window'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { formDimensions } from 'src/resources/formDimensions'
 import { v4 as uuidv4 } from 'uuid'
 
 const WindowContext = React.createContext(null)
@@ -87,8 +88,19 @@ export function WindowProvider({ children }) {
   }
 
   function addToStack(options) {
-    setStack(stack => [...stack, { ...options, id: uuidv4() }])
+    setStack(stack => [
+      ...stack,
+      {
+        ...options,
+        id: uuidv4(),
+        ...formDimensions.get(options.Component.name),
+        name: options.Component.name
+      }
+    ])
   }
+
+  console.log(stack)
+
   function updateWindow(id, updates) {
     setStack(prev => prev.map(w => (w.id === id ? { ...w, ...updates } : w)))
   }
@@ -142,7 +154,7 @@ export function WindowProvider({ children }) {
               expandable={expandable}
               draggable={draggable}
               closable={closable}
-              styles={{ display: !height ? 'none' : '', ...styles }}
+              styles={styles}
             >
               <Component
                 {...props}

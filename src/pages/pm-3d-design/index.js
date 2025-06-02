@@ -54,8 +54,7 @@ const ThreeDDesign = () => {
     datasetId: ResourceIds.ThreeDDesign,
     filter: {
       filterFn: fetchWithFilter
-    },
-    labelAccess: { cache: true }
+    }
   })
 
   const columns = [

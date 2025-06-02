@@ -37,13 +37,11 @@ export default function OutwardsModificationForm({ recordId, window }) {
   const [validSubmit, setValidSubmit] = useState(false)
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.OutwardsModification,
-    cache: true
+    datasetId: ResourceIds.OutwardsModification
   })
 
   useEffect(() => {
     window.setTitle(labels.outwardsModification)
-    window.setSize({ width: 1200, height: 650 })
   }, [labels.outwardsModification])
 
   const { maxAccess } = useDocumentType({

@@ -33,9 +33,9 @@ const ClientsList = () => {
       endpointId: CTCLRepository.CtClientIndividual.snapshot,
       filterFn: fetchWithSearch,
       default: { category: 1 }
-    },
-    labelAccess: { cache: true }
+    }
   })
+
   async function fetchWithSearch({ options = {}, filters }) {
     const { _startAt = 0, _pageSize = 50 } = options
 

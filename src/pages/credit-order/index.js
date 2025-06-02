@@ -68,8 +68,7 @@ const CreditOrder = () => {
     search: {
       endpointId: CTTRXrepository.CreditOrder.snapshot,
       searchFn: fetchWithSearch
-    },
-    labelAccess: { cache: true }
+    }
   })
 
   const { proxyAction } = useDocumentTypeProxy({

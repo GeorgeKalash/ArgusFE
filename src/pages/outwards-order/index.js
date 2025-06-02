@@ -39,8 +39,7 @@ const OutwardsOrder = () => {
     filter: {
       endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
       filterFn: fetchWithFilter
-    },
-    labelAccess: { cache: true }
+    }
   })
 
   async function fetchWithSearch({ filters }) {

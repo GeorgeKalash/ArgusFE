@@ -8,6 +8,7 @@ import axios from 'axios'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
 import { debounce } from 'lodash'
+import { commonResourceIds } from 'src/resources/commonResourceIds'
 
 const ControlContext = createContext()
 
@@ -158,7 +159,8 @@ const ControlProvider = ({ children }) => {
       })
   }
 
-  const getLabels = (resourceId, callback, cache = false) => {
+  const getLabels = (resourceId, callback) => {
+    const cache = commonResourceIds.includes(resourceId)
     if (cache && labels?.[resourceId]) {
       callback(labels?.[resourceId])
     } else {
@@ -175,7 +177,9 @@ const ControlProvider = ({ children }) => {
     }
   }
 
-  const getAccess = (resourceId, callback, cache) => {
+  const getAccess = (resourceId, callback) => {
+    const cache = commonResourceIds.includes(resourceId)
+
     if (cache && access?.[resourceId]) {
       callback(access?.[resourceId])
     } else {

@@ -58,8 +58,7 @@ const OutwardsReturn = () => {
     datasetId: ResourceIds.OutwardsReturn,
     filter: {
       filterFn: fetchWithFilter
-    },
-    labelAccess: { cache: true }
+    }
   })
 
   const columns = [

@@ -41,13 +41,11 @@ export default function InwardSettlementForm({ recordId, plantId, cashAccountId,
   const [mismatchedFields, setMismatchedFields] = useState([])
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.InwardSettlement,
-    cache: true
+    datasetId: ResourceIds.InwardSettlement
   })
 
   useEffect(() => {
     window.setTitle(labels.InwardSettlement)
-    window.setSize({ width: 1200, height: 650 })
   }, [labels.InwardSettlement])
 
   const invalidate = useInvalidate({
