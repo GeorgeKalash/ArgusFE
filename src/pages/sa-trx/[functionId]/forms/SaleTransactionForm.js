@@ -1854,18 +1854,14 @@ export default function SaleTransactionForm({
               />
             </Grid>
             <Grid item xs={1}>
-              <Grid container spacing={1} alignItems='center'>
-                <Grid item xs={4}>
-                  <Button
-                    variant='contained'
-                    size='small'
-                    onClick={() => openMCRForm(formik.values.header)}
-                    disabled={formik.values.header.currencyId === defaultsDataState?.currencyId}
-                  >
-                    <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
-                  </Button>
-                </Grid>
-              </Grid>
+              <Button
+                variant='contained'
+                size='small'
+                onClick={() => openMCRForm(formik.values.header)}
+                disabled={formik.values.header.currencyId === defaultsDataState?.currencyId}
+              >
+                <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
+              </Button>
             </Grid>
             <Grid item xs={2}>
               <CustomTextField
@@ -2080,189 +2076,185 @@ export default function SaleTransactionForm({
         </Grow>
         <Fixed>
           <Grid container spacing={2} sx={{ pt: 2 }}>
-            <Grid item xs={4} container direction='column' spacing={2}>
-              <Grid item>
-                <CustomTextArea
-                  name='header.billAddress'
-                  label={labels.billTo}
-                  value={formik.values.header.billAddress}
-                  rows={3}
-                  maxLength='100'
-                  readOnly={!formik.values.header.clientId || isPosted}
-                  maxAccess={maxAccess}
-                  viewDropDown={formik.values.header.clientId}
-                  viewAdd={formik.values.header.clientId && !editMode}
-                  onChange={e => formik.setFieldValue('header.billAddress', e.target.value)}
-                  onClear={() => formik.setFieldValue('header.billAddress', '')}
-                  onDropDown={() => openAddressFilterForm()}
-                  handleAddAction={() => openAddressForm()}
-                  error={formik?.touched?.header?.billAddress && Boolean(formik?.errors?.header?.billAddress)}
-                />
-              </Grid>
-              <Grid item>
-                <CustomTextArea
-                  name='header.description'
-                  label={labels.description}
-                  value={formik.values.header.description}
-                  rows={3}
-                  editMode={editMode}
-                  maxAccess={maxAccess}
-                  onChange={e => formik.setFieldValue('header.description', e.target.value)}
-                  onClear={() => formik.setFieldValue('header.description', '')}
-                  error={formik?.touched?.header?.description && Boolean(formik?.errors?.header?.description)}
-                />
-              </Grid>
-            </Grid>
-            <Grid item xs={2} container direction='column'></Grid>
-            <Grid container spacing={2} xs={6} direction='row' sx={{ p: 2 }}>
-              <Grid item xs={6} container direction='column'>
-                <Grid container spacing={3}>
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      name='header.qty'
-                      maxAccess={maxAccess}
-                      label={labels.totQty}
-                      value={totalQty}
-                      readOnly
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      name='header.volume'
-                      maxAccess={maxAccess}
-                      label={labels.totVolume}
-                      value={totalVolume}
-                      readOnly
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      name='header.weight'
-                      maxAccess={maxAccess}
-                      label={labels.totWeight}
-                      value={totalWeight}
-                      readOnly
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      name='header.balance'
-                      maxAccess={maxAccess}
-                      label={labels.balance}
-                      value={formik.values.header.balance}
-                      readOnly
-                    />
-                  </Grid>
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='header.billAddress'
+                    label={labels.billTo}
+                    value={formik.values.header.billAddress}
+                    rows={3}
+                    maxLength='100'
+                    readOnly={!formik.values.header.clientId || isPosted}
+                    maxAccess={maxAccess}
+                    viewDropDown={formik.values.header.clientId}
+                    viewAdd={formik.values.header.clientId && !editMode}
+                    onChange={e => formik.setFieldValue('header.billAddress', e.target.value)}
+                    onClear={() => formik.setFieldValue('header.billAddress', '')}
+                    onDropDown={() => openAddressFilterForm()}
+                    handleAddAction={() => openAddressForm()}
+                    error={formik?.touched?.header?.billAddress && Boolean(formik?.errors?.header?.billAddress)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='header.description'
+                    label={labels.description}
+                    value={formik.values.header.description}
+                    rows={3}
+                    editMode={editMode}
+                    maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('header.description', e.target.value)}
+                    onClear={() => formik.setFieldValue('header.description', '')}
+                    error={formik?.touched?.header?.description && Boolean(formik?.errors?.header?.description)}
+                  />
                 </Grid>
               </Grid>
+            </Grid>
+            <Grid item xs={2} container></Grid>
+            <Grid item xs={3}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.qty'
+                    maxAccess={maxAccess}
+                    label={labels.totQty}
+                    value={totalQty}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.volume'
+                    maxAccess={maxAccess}
+                    label={labels.totVolume}
+                    value={totalVolume}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.weight'
+                    maxAccess={maxAccess}
+                    label={labels.totWeight}
+                    value={totalWeight}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.balance'
+                    maxAccess={maxAccess}
+                    label={labels.balance}
+                    value={formik.values.header.balance}
+                    readOnly
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={3}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.subTotal'
+                    maxAccess={maxAccess}
+                    label={labels.subtotal}
+                    value={subtotal}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.discount'
+                    maxAccess={maxAccess}
+                    label={labels.discount}
+                    value={formik.values.header.currentDiscount}
+                    displayCycleButton={true}
+                    cycleButtonLabel={cycleButtonState.text}
+                    decimalScale={2}
+                    readOnly={isPosted}
+                    handleButtonClick={handleButtonClick}
+                    iconKey={cycleButtonState.text}
+                    ShowDiscountIcons={true}
+                    onChange={e => {
+                      let discount = Number(e.target.value.replace(/,/g, ''))
+                      if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
+                        if (discount < 0 || discount > 100) discount = 0
+                        formik.setFieldValue('header.tdPct', discount)
+                      } else {
+                        if (discount < 0 || formik.values.header.subtotal < discount) discount = 0
+                        formik.setFieldValue('header.tdAmount', discount)
+                      }
+                      formik.setFieldValue('header.currentDiscount', discount)
+                    }}
+                    onBlur={async e => {
+                      let discountAmount = Number(e.target.value.replace(/,/g, ''))
+                      let tdPct = Number(e.target.value.replace(/,/g, ''))
+                      let tdAmount = Number(e.target.value.replace(/,/g, ''))
 
-              <Grid item xs={6} container direction='column'>
-                <Grid container spacing={3}>
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      name='header.subTotal'
-                      maxAccess={maxAccess}
-                      label={labels.subtotal}
-                      value={subtotal}
-                      readOnly
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      name='header.discount'
-                      maxAccess={maxAccess}
-                      label={labels.discount}
-                      value={formik.values.header.currentDiscount}
-                      displayCycleButton={true}
-                      cycleButtonLabel={cycleButtonState.text}
-                      decimalScale={2}
-                      readOnly={isPosted}
-                      handleButtonClick={handleButtonClick}
-                      iconKey={cycleButtonState.text}
-                      ShowDiscountIcons={true}
-                      onChange={e => {
-                        let discount = Number(e.target.value.replace(/,/g, ''))
-                        if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
-                          if (discount < 0 || discount > 100) discount = 0
-                          formik.setFieldValue('header.tdPct', discount)
-                        } else {
-                          if (discount < 0 || formik.values.header.subtotal < discount) discount = 0
-                          formik.setFieldValue('header.tdAmount', discount)
-                        }
-                        formik.setFieldValue('header.currentDiscount', discount)
-                      }}
-                      onBlur={async e => {
-                        let discountAmount = Number(e.target.value.replace(/,/g, ''))
-                        let tdPct = Number(e.target.value.replace(/,/g, ''))
-                        let tdAmount = Number(e.target.value.replace(/,/g, ''))
+                      if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
+                        tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
+                        formik.setFieldValue('header.tdPct', tdPct)
+                      }
 
-                        if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
-                          tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
-                          formik.setFieldValue('header.tdPct', tdPct)
-                        }
+                      if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
+                        tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
+                        formik.setFieldValue('header.tdAmount', tdAmount)
+                      }
+                      setReCal(true)
+                      await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, discountAmount)
+                    }}
+                    onClear={() => {
+                      formik.setFieldValue('header.tdAmount', 0)
+                      formik.setFieldValue('header.tdPct', 0)
+                      recalcGridVat(formik.values.header.tdType, 0, 0, 0)
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.miscAmount'
+                    maxAccess={maxAccess}
+                    label={labels.misc}
+                    value={formik.values.header.miscAmount}
+                    decimalScale={2}
+                    readOnly={isPosted}
+                    onChange={e => {
+                      formik.setFieldValue('header.miscAmount', e.target.value)
 
-                        if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
-                          tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
-                          formik.setFieldValue('header.tdAmount', tdAmount)
-                        }
-                        setReCal(true)
-                        await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, discountAmount)
-                      }}
-                      onClear={() => {
-                        formik.setFieldValue('header.tdAmount', 0)
-                        formik.setFieldValue('header.tdPct', 0)
-                        recalcGridVat(formik.values.header.tdType, 0, 0, 0)
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      name='header.miscAmount'
-                      maxAccess={maxAccess}
-                      label={labels.misc}
-                      value={formik.values.header.miscAmount}
-                      decimalScale={2}
-                      readOnly={isPosted}
-                      onChange={e => {
-                        formik.setFieldValue('header.miscAmount', e.target.value)
-
-                        const updatedRateRow = getRate({
-                          amount: e.target.value ?? 0,
-                          exRate: formik.values?.exRate,
-                          baseAmount: 0,
-                          rateCalcMethod: formik.values?.rateCalcMethod,
-                          dirtyField: DIRTYFIELD_RATE
-                        })
-                        formik.setFieldValue(
-                          'header.baseAmount',
-                          parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0
-                        )
-                      }}
-                      onBlur={async () => {
-                        setReCal(true)
-                      }}
-                      onClear={() => formik.setFieldValue('header.miscAmount', 0)}
-                      error={formik?.touched?.header?.miscAmount && Boolean(formik?.errors?.header?.miscAmount)}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      name='header.vatAmount'
-                      maxAccess={maxAccess}
-                      label={labels.VAT}
-                      value={vatAmount}
-                      readOnly
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      name='header.amount'
-                      maxAccess={maxAccess}
-                      label={labels.net}
-                      value={amount}
-                      readOnly
-                    />
-                  </Grid>
+                      const updatedRateRow = getRate({
+                        amount: e.target.value ?? 0,
+                        exRate: formik.values?.exRate,
+                        baseAmount: 0,
+                        rateCalcMethod: formik.values?.rateCalcMethod,
+                        dirtyField: DIRTYFIELD_RATE
+                      })
+                      formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                    }}
+                    onBlur={async () => {
+                      setReCal(true)
+                    }}
+                    onClear={() => formik.setFieldValue('header.miscAmount', 0)}
+                    error={formik?.touched?.header?.miscAmount && Boolean(formik?.errors?.header?.miscAmount)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.vatAmount'
+                    maxAccess={maxAccess}
+                    label={labels.VAT}
+                    value={vatAmount}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.amount'
+                    maxAccess={maxAccess}
+                    label={labels.net}
+                    value={amount}
+                    readOnly
+                  />
                 </Grid>
               </Grid>
             </Grid>
