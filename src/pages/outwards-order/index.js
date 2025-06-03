@@ -98,6 +98,12 @@ const OutwardsOrder = () => {
       flex: 1
     },
     {
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
       field: 'countryRef',
       headerName: _labels.CountryRef,
       flex: 1

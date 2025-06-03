@@ -679,7 +679,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         },
         onProductSubmit
       },
-      width: 1100,
+      width: 1200,
       height: 500,
       title: labels.products
     })
@@ -729,7 +729,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           }
         },
         width: 740,
-        height: 320,
+        height: 345,
         title: labels.instantCash
       })
     } else if (interfaceId === 2) {
@@ -1057,7 +1057,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             beneficiaryName: '',
                             currencyId: newValue ? header.currencyId : '',
                             lcAmount: '',
-                            fcAmount: ''
+                            fcAmount: '',
+                            corRef: '',
+                            corName: '',
+                            exRate: 1,
+                            exRate2: 1,
+                            commission: 0
                           }
                         })
                       }}
@@ -1102,7 +1107,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             currencyId: newValue?.currencyId,
                             currencyRef: newValue?.currencyRef,
                             lcAmount: '',
-                            fcAmount: ''
+                            fcAmount: '',
+                            corRef: '',
+                            corName: '',
+                            exRate: 1,
+                            exRate2: 1,
+                            commission: 0
                           }
                         })
                       }}

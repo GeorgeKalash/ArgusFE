@@ -85,7 +85,7 @@ const ProductsWindow = ({
     {
       field: '',
       headerName: '',
-      flex: 0.9,
+      flex: 0.65,
       cellRenderer: params => {
         if (params.data.interfaceId === 1)
           return (
@@ -93,7 +93,7 @@ const ProductsWindow = ({
               variant='contained'
               size='small'
               disabled={!!recordId}
-              style={{ height: 25 }}
+              style={{ height: 25, width: 40 }}
               onClick={() =>
                 stack({
                   Component: SelectAgent,
@@ -129,18 +129,19 @@ const ProductsWindow = ({
     {
       field: 'fees',
       headerName: labels.Fees,
-      flex: 1
+      flex: 0.5,
+      type: 'number'
     },
     {
       field: 'originAmount',
       headerName: labels.originAmount,
-      flex: 1,
+      flex: 0.8,
       type: { field: 'number', decimal: 2 }
     },
     {
       field: 'baseAmount',
       headerName: labels.BaseAmount,
-      flex: 1,
+      flex: 0.8,
       type: { field: 'number', decimal: 2 }
     },
     {
