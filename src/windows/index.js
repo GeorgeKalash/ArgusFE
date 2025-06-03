@@ -93,13 +93,10 @@ export function WindowProvider({ children }) {
       {
         ...options,
         id: uuidv4(),
-        ...formDimensions.get(options.Component.name),
-        name: options.Component.name
+        ...formDimensions.get(options.Component.name)
       }
     ])
   }
-
-  console.log(stack)
 
   function updateWindow(id, updates) {
     setStack(prev => prev.map(w => (w.id === id ? { ...w, ...updates } : w)))
@@ -163,10 +160,7 @@ export function WindowProvider({ children }) {
                   : { access: { ...props.access, editMode: !!props.recordId } })}
                 window={{
                   close: () => closeWindowById(id),
-                  setTitle: newTitle => updateWindow(id, { title: newTitle }),
-                  setSize: ({ width, height }) => {
-                    updateWindow(id, { width, height })
-                  }
+                  setTitle: newTitle => updateWindow(id, { title: newTitle })
                 }}
               />
             </Window>

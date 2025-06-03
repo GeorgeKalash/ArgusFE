@@ -28,6 +28,7 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import FieldSet from 'src/components/Shared/FieldSet'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function OutwardsReturnForm({ recordId, plantId, dtId, isOpenOutwards = false, refetch, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -38,9 +39,7 @@ export default function OutwardsReturnForm({ recordId, plantId, dtId, isOpenOutw
     datasetId: ResourceIds.OutwardsReturn
   })
 
-  useEffect(() => {
-    window.setTitle(labels.outwardsReturn)
-  }, [labels.outwardsReturn])
+  useSetWindow({ labels, window, titleKey: 'outwardsReturn' })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsReturn,

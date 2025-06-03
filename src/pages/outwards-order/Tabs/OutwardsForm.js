@@ -41,6 +41,7 @@ import ReceiptVoucherForm from 'src/pages/rt-receipt-vouchers/forms/ReceiptVouch
 import CustomSwitch from 'src/components/Inputs/CustomSwitch'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function OutwardsForm({ recordId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -58,15 +59,13 @@ export default function OutwardsForm({ recordId, plantId, userId, dtId, window }
     datasetId: ResourceIds.OutwardsOrder
   })
 
+  useSetWindow({ labels, window, titleKey: 'OutwardsOrder' })
+
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsOrder,
     access,
     hasDT: false
   })
-
-  useEffect(() => {
-    window.setTitle(labels.OutwardsOrder)
-  }, [labels.OutwardsOrder])
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot

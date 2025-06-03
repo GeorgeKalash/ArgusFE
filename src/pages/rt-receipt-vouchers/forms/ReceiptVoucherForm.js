@@ -28,6 +28,7 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import PreviewReport from 'src/components/Shared/PreviewReport'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function ReceiptVoucherForm({ recordId, cashAccountId, form = null, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -40,16 +41,14 @@ export default function ReceiptVoucherForm({ recordId, cashAccountId, form = nul
     datasetId: ResourceIds.RemittanceReceiptVoucher
   })
 
+  useSetWindow({ labels, window, titleKey: 'receiptVoucher' })
+
   const { documentType, maxAccess } = useDocumentType({
     functionId: SystemFunction.RemittanceReceiptVoucher,
     access: access,
     enabled: !recordId,
     objectName: 'header'
   })
-
-  useEffect(() => {
-    window.setTitle(labels.receiptVoucher)
-  }, [labels.receiptVoucher])
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.ReceiptVouchers.page

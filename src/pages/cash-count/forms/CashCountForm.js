@@ -29,6 +29,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function CashCountForm({ recordId, window }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -85,16 +86,14 @@ export default function CashCountForm({ recordId, window }) {
     datasetId: ResourceIds.CashCountTransaction
   })
 
+  useSetWindow({ labels, window, titleKey: 'cashCount' })
+
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.CashCountTransaction,
     access: access,
     hasDT: false,
     enabled: !editMode
   })
-
-  useEffect(() => {
-    window.setTitle(labels.cashCount)
-  }, [labels.cashCount])
 
   const { formik } = useForm({
     maxAccess,

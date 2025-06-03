@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function useResourceParams({ datasetId, DatasetIdAccess, window, titleKey }) {
+export default function useResourceParams({ datasetId, DatasetIdAccess }) {
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
 
@@ -20,13 +20,6 @@ export default function useResourceParams({ datasetId, DatasetIdAccess, window, 
   }, [access])
 
   const _labels = labels ? Object.fromEntries(labels?.map(({ key, value }) => [key, value])) : {}
-  const title = _labels?.[titleKey]
-
-  useEffect(() => {
-    if (title) {
-      window.setTitle(title)
-    }
-  }, [title])
 
   return {
     labels: _labels,

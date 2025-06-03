@@ -29,6 +29,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function ThreeDDesignForm({ recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -45,9 +46,7 @@ export default function ThreeDDesignForm({ recordId, window }) {
     datasetId: ResourceIds.ThreeDDesign
   })
 
-  useEffect(() => {
-    window.setTitle(labels.ThreeDDesign)
-  }, [labels.ThreeDDesign])
+  useSetWindow({ labels, window, titleKey: 'ThreeDDesign' })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,

@@ -41,6 +41,7 @@ import MoreDetails from './MoreDetails'
 import CustomPhoneNumber from 'src/components/Inputs/CustomPhoneNumber'
 import { isValidPhoneNumber } from 'libphonenumber-js'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) => {
   const { stack } = useWindow()
@@ -70,9 +71,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
     datasetId: ResourceIds.ClientMaster
   })
 
-  useEffect(() => {
-    window.setTitle(labels.pageTitle)
-  }, [labels.pageTitle])
+  useSetWindow({ labels, window, titleKey: 'pageTitle' })
 
   const initialValues = {
     //clientIDView

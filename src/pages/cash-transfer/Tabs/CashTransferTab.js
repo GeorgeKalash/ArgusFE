@@ -31,6 +31,7 @@ import { DIRTYFIELD_AMOUNT, getRate } from 'src/utils/RateCalculator'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function CashTransferTab({ recordId, plantId, cashAccountId, dtId, window }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -48,9 +49,7 @@ export default function CashTransferTab({ recordId, plantId, cashAccountId, dtId
     datasetId: ResourceIds.CashTransfer
   })
 
-  useEffect(() => {
-    window.setTitle(labels.cashTransfer)
-  }, [labels.cashTransfer])
+  useSetWindow({ labels, window, titleKey: 'cashTransfer' })
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,

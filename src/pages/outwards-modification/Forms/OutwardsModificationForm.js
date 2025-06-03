@@ -27,6 +27,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function OutwardsModificationForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -40,9 +41,7 @@ export default function OutwardsModificationForm({ recordId, window }) {
     datasetId: ResourceIds.OutwardsModification
   })
 
-  useEffect(() => {
-    window.setTitle(labels.outwardsModification)
-  }, [labels.outwardsModification])
+  useSetWindow({ labels, window, titleKey: 'outwardsModification' })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsModification,

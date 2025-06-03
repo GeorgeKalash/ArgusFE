@@ -39,6 +39,7 @@ import { DataSets } from 'src/resources/DataSets'
 import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
 import CustomRadioButtonGroup from 'src/components/Inputs/CustomRadioButtonGroup'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function TransactionForm({ recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -78,9 +79,7 @@ export default function TransactionForm({ recordId, plantId }) {
     datasetId: ResourceIds.CashInvoice
   })
 
-  useEffect(() => {
-    window.setTitle(labels.CurrencyTrading)
-  }, [labels.CurrencyTrading])
+  useSetWindow({ labels, window, titleKey: 'CurrencyTrading' })
 
   const initialValues = {
     recordId: null,

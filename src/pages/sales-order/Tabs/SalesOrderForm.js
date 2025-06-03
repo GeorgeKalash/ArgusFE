@@ -48,6 +48,7 @@ import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function SalesOrderForm({ recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -62,10 +63,10 @@ export default function SalesOrderForm({ recordId, currency, window }) {
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.SalesOrder,
-    window,
-    titleKey: 'salesOrder'
+    datasetId: ResourceIds.SalesOrder
   })
+
+  useSetWindow({ labels, window, titleKey: 'salesOrder' })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesOrder,
@@ -1202,10 +1203,6 @@ export default function SalesOrderForm({ recordId, currency, window }) {
   useEffect(() => {
     if (formik.values?.dtId & !recordId) onChangeDtId(formik.values?.dtId)
   }, [formik.values?.dtId])
-
-  // useEffect(() => {
-  //   window.setTitle(labels.salesOrder)
-  // }, [labels.salesOrder])
 
   useEffect(() => {
     ;(async function () {

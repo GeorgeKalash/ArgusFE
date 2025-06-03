@@ -34,6 +34,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { LOTransportationForm } from 'src/components/Shared/LOTransportationForm'
 import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function CreditOrderForm({ recordId, plantId, userData, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -90,6 +91,8 @@ export default function CreditOrderForm({ recordId, plantId, userData, window })
     datasetId: ResourceIds.CreditOrder
   })
 
+  useSetWindow({ labels, window, titleKey: 'creditOrder' })
+
   const { maxAccess } = useDocumentType({
     functionId: selectedFunctionId,
     access: access,
@@ -99,10 +102,6 @@ export default function CreditOrderForm({ recordId, plantId, userData, window })
   const invalidate = useInvalidate({
     endpointId: CTTRXrepository.CreditOrder.page
   })
-
-  useEffect(() => {
-    window.setTitle(labels?.creditOrder)
-  }, [labels.creditOrder])
 
   const { formik } = useForm({
     maxAccess,

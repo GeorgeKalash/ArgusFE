@@ -32,6 +32,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function CreditInvoiceForm({ recordId, plantId, userData, cashAccountId, window }) {
   const { stack } = useWindow()
@@ -101,9 +102,7 @@ export default function CreditInvoiceForm({ recordId, plantId, userData, cashAcc
     enabled: !recordId
   })
 
-  useEffect(() => {
-    window.setTitle(labels.creditInvoice)
-  }, [labels.creditInvoice])
+  useSetWindow({ labels, window, titleKey: 'creditInvoice' })
 
   const { formik } = useForm({
     initialValues,

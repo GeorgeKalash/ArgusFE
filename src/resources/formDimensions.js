@@ -16,5 +16,6 @@ export const formDimensions = new Map([
   ['ClientCorporateForm', { width: 1100 }],
   ['SalesTrxForm', { width: 1000 }],
   ['TaxDetails', { width: 1000 }],
-  ['DraftForm', { width: 1300, height: 750 }]
+  ['DraftForm', { width: 1300, height: 750 }],
+  ['SelectAgent', { width: 500, height: 200 }]
 ])
