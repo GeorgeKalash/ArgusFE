@@ -181,7 +181,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
             }),
             qty: yup.string().test(function (value) {
               const row = this.parent
-              const isAnyFieldFilled = row.sku || row.itemName
+              const isAnyFieldFilled = row.itemId
 
               if (this.options.from[1]?.value?.items?.length === 1) {
                 if (isNaN(value)) return false
@@ -189,8 +189,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
                 return true
               }
+              if (isAnyFieldFilled) return isNaN(value) ? false : value != 0
 
-              return isNaN(value) ? false : value != 0
+              return true
             }),
             itemName: yup.string().test(function (value) {
               const row = this.parent
