@@ -28,6 +28,8 @@ const WindowToolbar = ({
   resourceId,
   previewReport,
   recordId,
+  form,
+  previewBtnClicked,
   actions = []
 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -109,10 +111,13 @@ const WindowToolbar = ({
         {previewReport ? (
           <ReportGenerator
             previewReport={previewReport}
+            form={form}
+            resourceId={resourceId}
             condition={previewReport}
             reportStore={reportStore}
             getReportLayout={getReportLayout}
             recordId={recordId}
+            previewBtnClicked={previewBtnClicked}
           />
         ) : (
           <Box></Box>

@@ -7,13 +7,14 @@ export const generateReport = async ({
   selectedReport,
   selectedFormat,
   resourceId,
-  outerGrid,
-  isReport,
+  params,
+  isReport = false,
   recordId,
   functionId,
   scId,
   siteId,
-  controllerId
+  controllerId,
+  previewBtnClicked
 }) => {
   const buildParameters = () => {
     switch (resourceId) {
@@ -23,16 +24,15 @@ export const generateReport = async ({
       case ResourceIds.PhysicalCountSerialSummary:
         return `?_stockCountId=${scId}&_siteId=${siteId}`
       case ResourceIds.IVPhysicalCountItemDetails:
+      case ResourceIds.PhysicalCountSerialDetail:
         return `?_stockCountId=${scId}&_siteId=${siteId}&_controllerId=${controllerId}`
       default:
-        return `?_recordId=${recordId}`
+        return recordId ? `?_recordId=${recordId}` : ''
     }
   }
 
-  const parameters = !outerGrid ? (!isReport ? buildParameters() : '?_params=') : ''
-
   const payload = {
-    api_url: selectedReport.api_url + parameters,
+    api_url: selectedReport.api_url + (isReport ? '?_params=' + params || '' : buildParameters()),
     assembly: selectedReport.assembly,
     format: selectedFormat,
     reportClass: selectedReport.reportClass,
@@ -45,6 +45,7 @@ export const generateReport = async ({
     extension: DevExpressRepository.generate,
     record: JSON.stringify(payload)
   })
+  previewBtnClicked && previewBtnClicked()
 
   return response.recordId
 }

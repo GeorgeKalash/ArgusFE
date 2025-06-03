@@ -304,26 +304,6 @@ export default function FormShell({
             })
           }
           break
-        case 'onGenerateReport':
-          action.onClick = () => {
-            stack({
-              Component: PreviewReport,
-              props: {
-                selectedReport: selectedReport,
-                recordId: form.values?.recordId,
-                functionId: form.values?.functionId,
-                resourceId: resourceId,
-                scId: form.values?.stockCountId,
-                siteId: form.values?.siteId,
-                controllerId: form.values?.controllerId,
-                onSuccess: previewBtnClicked
-              },
-              width: 1150,
-              height: 700,
-              title: platformLabels.PreviewReport
-            })
-          }
-          break
         case 'onClickAging':
           action.onClick = () => {
             stack({
@@ -459,6 +439,8 @@ export default function FormShell({
       </DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
+          form={form}
+          previewBtnClicked={previewBtnClicked}
           print={print}
           onSave={() => {
             form?.handleSubmit()

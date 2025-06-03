@@ -10,11 +10,21 @@ import { generateReport } from 'src/utils/ReportUtils'
 import { CommonContext } from 'src/providers/CommonContext'
 import CustomButton from '../Inputs/CustomButton'
 
-const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStore, recordId }) => {
+const ReportGenerator = ({
+  previewReport,
+  condition,
+  getReportLayout,
+  reportStore,
+  recordId,
+  form,
+  resourceId,
+  previewBtnClicked
+}) => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const { stack } = useWindow()
+
   const [exportFormats, setExportFormats] = useState([])
   const [formatIndex, setFormatIndex] = useState(0)
   const [report, setReport] = useState({ selectedFormat: '', selectedReport: '' })
@@ -47,11 +57,12 @@ const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStor
   }, [condition])
 
   useEffect(() => {
-    if (reportStore.length > 0)
-      setReport(prevState => ({
-        ...prevState,
+    if (reportStore.length > 0) {
+      setReport(prev => ({
+        ...prev,
         selectedReport: reportStore[0]
       }))
+    }
   }, [reportStore])
 
   const cycleFormat = () => {
@@ -61,6 +72,38 @@ const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStor
       ...prev,
       selectedFormat: exportFormats[nextIndex]
     }))
+  }
+
+  const handlePreviewClick = async () => {
+    if (!report.selectedReport) return
+
+    const result = await generateReport({
+      postRequest,
+      resourceId: resourceId,
+      selectedReport: report.selectedReport,
+      selectedFormat: report.selectedFormat.key,
+      functionId: form?.values?.functionId || null,
+      scId: form?.values?.stockCountId || null,
+      siteId: form?.values?.siteId || null,
+      controllerId: form?.values?.controllerId || null,
+      recordId: recordId || null,
+      previewBtnClicked: previewBtnClicked
+    })
+
+    switch (parseInt(report.selectedFormat.key)) {
+      case 1:
+        stack({
+          Component: PreviewReport,
+          props: { pdf: result },
+          width: 1000,
+          height: 500,
+          title: platformLabels.PreviewReport
+        })
+        break
+      default:
+        window.location.href = result
+        break
+    }
   }
 
   return (
@@ -88,37 +131,9 @@ const ReportGenerator = ({ previewReport, condition, getReportLayout, reportStor
         style={{ marginLeft: '6px' }}
       />
       <CustomButton
-        onClick={async () => {
-          if (!report.selectedReport) return
-
-          const result = await generateReport({
-            postRequest,
-            resourceId: previewReport,
-            outerGrid: !recordId,
-            selectedReport: report.selectedReport,
-            selectedFormat: report.selectedFormat.key,
-            recordId: recordId || null
-          })
-          switch (parseInt(report.selectedFormat.key)) {
-            case 1:
-              stack({
-                Component: PreviewReport,
-                props: {
-                  pdf: result
-                },
-                width: 1000,
-                height: 500,
-                title: platformLabels.PreviewReport
-              })
-              break
-
-            default:
-              window.location.href = result
-              break
-          }
-        }}
+        onClick={handlePreviewClick}
         label={platformLabels.Preview}
-        image={'preview.png'}
+        image='preview.png'
         disabled={!report.selectedReport}
       />
     </Grid>

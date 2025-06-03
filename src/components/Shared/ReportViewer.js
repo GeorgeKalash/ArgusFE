@@ -42,16 +42,17 @@ const ReportViewer = ({ resourceId }) => {
       extension: SystemRepository.ReportLayout,
       parameters: parameters
     }).then(res => {
-      setReportStore(prevReportStore => [
-        ...prevReportStore,
-        ...res.list.map(item => ({
-          api_url: item.api,
-          reportClass: item.instanceName,
-          parameters: item.parameters,
-          layoutName: item.layoutName,
-          assembly: 'ArgusRPT.dll'
-        }))
-      ])
+      res.list &&
+        setReportStore(prevReportStore => [
+          ...prevReportStore,
+          ...res?.list?.map(item => ({
+            api_url: item.api,
+            reportClass: item.instanceName,
+            parameters: item.parameters,
+            layoutName: item.layoutName,
+            assembly: 'ArgusRPT.dll'
+          }))
+        ])
     })
   }
 
@@ -88,12 +89,13 @@ const ReportViewer = ({ resourceId }) => {
       }))
   }, [reportStore])
 
-  const onApply = async ({ paramsDict }) => {
+  const onApply = async ({ rpbParams, paramsDict }) => {
     const result = await generateReport({
+      isReport: true,
       postRequest,
       paramsDict: paramsDict,
+      params: rpbParams,
       resourceId,
-      isReport: true,
       selectedReport: report.selectedReport,
       selectedFormat: report.selectedFormat.key
     })
