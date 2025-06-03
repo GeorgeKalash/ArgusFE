@@ -43,7 +43,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
   })
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.PaymentVouchers.page
+    endpointId: FinancialRepository.PaymentVouchers.page3
   })
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
