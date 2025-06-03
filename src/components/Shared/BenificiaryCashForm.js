@@ -25,6 +25,7 @@ import { HIDDEN } from 'src/services/api/maxAccess'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
 import { Fixed } from './Layouts/Fixed'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const BenificiaryCashForm = ({
   viewBtns = true,
@@ -36,26 +37,27 @@ const BenificiaryCashForm = ({
   corId,
   currencyId,
   countryId,
-  editable = false,
   resetForm,
   setResetForm,
   onChange,
   setValidSubmit,
   onSuccess,
-  submitMainForm = true
+  submitMainForm = true,
+  recordId,
+  forceDisable
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
-  const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [notArabic, setNotArabic] = useState(true)
   const hiddenIsInActive = useRef(false)
   const hiddenIsBlocked = useRef(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const initialValues = {
     //RTBEN
     clientId: client?.clientId || '',
-    recordId: '',
+    recordId,
     beneficiaryId: 0,
     name: '',
     dispersalType: dispersalType || '',
@@ -94,14 +96,7 @@ const BenificiaryCashForm = ({
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
-    validateOnBlur: true,
-    validate: values => {
-      const errors = {}
-
-      return errors
-    },
     validationSchema: yup.object({
       clientId: yup.string().required(),
       countryId: yup.string().required(),
@@ -157,17 +152,22 @@ const BenificiaryCashForm = ({
           record: JSON.stringify(data)
         })
 
-        setEditMode(true)
-        toast.success('Record Updated Successfully')
-        if (onSuccess) onSuccess(res.recordId, values.name)
+        toast.success(platformLabels.Added)
+
+        const [clientId, beneficiaryId, seqNo] = res.recordId.split(',')
+
+        formik.setFieldValue('recordId', (clientId * 100).toString() + (beneficiaryId * 10).toString() + seqNo)
+
+        if (onSuccess) onSuccess(res.recordId, values)
       }
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryCash
   })
-
   useEffect(() => {
     ;(async function () {
       if (formik.values.countryId && dispersalType) {
@@ -193,8 +193,12 @@ const BenificiaryCashForm = ({
         hiddenIsInActive.current = isInActiveAccessLevel?.accessLevel === HIDDEN
         hiddenIsBlocked.current = isBlockedAccessLevel?.accessLevel === HIDDEN
       }
+    })()
+  }, [formik.values.countryId])
 
-      if (beneficiary?.beneficiaryId && client?.clientId) {
+  useEffect(() => {
+    ;(async function () {
+      if (recordId) {
         const RTBEC = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -210,7 +214,8 @@ const BenificiaryCashForm = ({
         const obj = {
           //RTBEN
           clientId: client?.clientId,
-          recordId: client?.clientId * 1000 + beneficiary?.beneficiaryId,
+          recordId: (client?.clientId * 10).toString() + beneficiary?.beneficiaryId,
+
           beneficiaryId: beneficiary?.beneficiaryId,
           name: RTBEN?.record?.name,
           dispersalType: dispersalType,
@@ -248,7 +253,7 @@ const BenificiaryCashForm = ({
         formik.setValues(obj)
       }
     })()
-  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId, formik.values.countryId])
+  }, [])
 
   useEffect(() => {
     if (resetForm) {
@@ -391,8 +396,7 @@ const BenificiaryCashForm = ({
       editMode={editMode}
       maxAccess={maxAccess}
       disabledSubmit={editMode}
-      isCleared={viewBtns}
-      isInfo={viewBtns}
+      isCleared={!forceDisable && viewBtns}
       isSaved={viewBtns}
     >
       <VertLayout>

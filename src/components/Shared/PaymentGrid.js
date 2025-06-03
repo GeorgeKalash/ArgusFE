@@ -204,7 +204,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     },
     {
       component: 'resourcecombobox',
-      label: labels?.posStatusName,
+      label: labels?.posStatus,
       name: 'posStatusName',
       props: {
         readOnly: true,
