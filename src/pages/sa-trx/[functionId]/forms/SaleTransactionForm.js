@@ -657,7 +657,6 @@ export default function SaleTransactionForm({
       component: 'textfield',
       label: labels.metal,
       name: 'metalRef',
-      flex: 3,
       props: {
         readOnly: true
       }
