@@ -1,23 +1,21 @@
 import * as yup from 'yup'
 
-function conditionalField(fieldValidators) {
-  return function (value) {
+function conditionalField(fieldValidators, fieldKey) {
+  return function () {
     const row = this.parent
-    const currentField = this.path
-    const fieldKey = currentField.split('.').pop()
 
-    console.log('ffff', fieldValidators(row))
-
-    if (typeof fieldValidators === 'function') {
-      return fieldValidators(row)
-    }
-
-    if (row[fieldKey] !== null && fieldValidators[fieldKey] !== '' && !fieldValidators[fieldKey](row)) {
+    if (
+      row[fieldKey] !== null &&
+      row[fieldKey] !== undefined &&
+      row[fieldKey] !== 0 &&
+      fieldValidators[fieldKey] !== '' &&
+      !fieldValidators[fieldKey](row)
+    ) {
       return false
     }
 
     const isAnyFieldFilled = Object.entries(fieldValidators).some(([, fn]) => {
-      return !!fn(row)
+      return !!(fn(row) && row[fieldKey] !== 0)
     })
 
     if (!isAnyFieldFilled) return true
@@ -26,20 +24,14 @@ function conditionalField(fieldValidators) {
   }
 }
 
-function createConditionalSchema(fieldValidators, otherValidation, isRequired) {
-  if (typeof fieldValidators === 'function') {
-    console.log('ffff')
+function createConditionalSchema(fieldValidators) {
+  return yup.object().shape({
+    ...Object.keys(fieldValidators).reduce((shape, field) => {
+      shape[field] = yup.mixed().nullable().test(conditionalField(fieldValidators, field))
 
-    return conditionalField(fieldValidators)
-  } else
-    return yup.object().shape({
-      ...Object.keys(fieldValidators).reduce((shape, field) => {
-        shape[field] = yup.mixed().nullable().test(conditionalField(fieldValidators, isRequired))
-
-        return shape
-      }, {}),
-      ...otherValidation
-    })
+      return shape
+    }, {})
+  })
 }
 
 export { createConditionalSchema }

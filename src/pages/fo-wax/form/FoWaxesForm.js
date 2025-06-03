@@ -100,36 +100,12 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         netWgt: yup.number().min(0).required(),
         suggestedWgt: yup.number().required()
       }),
-      items: yup
-        .array()
-        .of(
-          yup.object().shape({
-            jobRef: yup.string().required(),
-            pieces: yup
-              .number()
-              .required()
-              .test(
-                createConditionalSchema(row => (!!!row.jobPcs ? true : row.pieces <= row.jobPcs && row.pieces >= 0))
-              )
-          })
-        )
-        .required()
-
-      // items: yup.array().of(createConditionalSchema(
-
-      // ), { jobRef: yup.string().required() }, true).required()
-
-      // yup.object().shape({
-      //   jobRef: yup.string().required(),
-      //   pieces: yup
-      //     .number()
-      //     .required()
-      //     .test(function (value) {
-      //       const { jobPcs } = this.parent
-
-      //       return !!!jobPcs ? true : value <= jobPcs && value >= 0
-      //     })
-      // })
+      items: yup.array().of(
+        createConditionalSchema({
+          jobRef: row => row.jobRef,
+          pieces: row => (!!!row.jobPcs ? true : row.pieces <= row.jobPcs && row.pieces >= 0)
+        })
+      )
     }),
     onSubmit: async obj => {
       const { items: originalItems, header } = obj

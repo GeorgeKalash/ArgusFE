@@ -42,10 +42,10 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
       itemId: yup.number().required(),
       data: yup.array().of(
         createConditionalSchema({
+          lineId: row => row?.lineId,
           fullCapacityWgtPerHr: row => row?.fullCapacityWgtPerHr,
           preparationHrs: row => row?.preparationHrs && row?.preparationHrs > 0 && row?.preparationHrs < 9,
-          nbOfLabors: row => row?.nbOfLabors,
-          lineId: row => row?.lineId
+          nbOfLabors: row => row?.nbOfLabors
         })
       )
     }),
@@ -69,6 +69,8 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
       invalidate()
     }
   })
+
+  console.log(formik)
 
   const editMode = !!itemId
 
