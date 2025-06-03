@@ -89,7 +89,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
   }
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.PaymentVouchers.page
+    endpointId: FinancialRepository.PaymentVouchers.page2
   })
 
   const { formik } = useForm({

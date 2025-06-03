@@ -21,37 +21,39 @@ import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 const OutwardsOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const userData = getStorageData('userData')
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params } = options
+
+    if (params) {
+      const response = await getRequest({
+        extension: RemittanceOutwardsRepository.OutwardsOrder.page,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
+      })
+
+      return { ...response, _startAt: _startAt }
+    } else return { list: [], _startAt: 0 }
+  }
 
   const {
     query: { data },
     filterBy,
     refetch,
-    clearFilter,
     labels: _labels,
     access,
-    invalidate
+    invalidate,
+    paginationParameters
   } = useResourceQuery({
     endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
     datasetId: ResourceIds.OutwardsOrder,
+    queryFn: fetchGridData,
     filter: {
       endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
       filterFn: fetchWithFilter
     }
   })
-
-  async function fetchWithSearch({ filters }) {
-    if (!filters.qry) {
-      return { list: [] }
-    } else {
-      return await getRequest({
-        extension: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    }
-  }
 
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
@@ -73,23 +75,15 @@ const OutwardsOrder = () => {
 
   async function openForm(recordId) {
     const plantId = await getPlantId()
-    if (!plantId && !recordId) {
-      stackError({
-        message: _labels.PlantDefaultError
-      })
-    } else {
-      const dtId = await getDefaultDT()
-      stack({
-        Component: OutwardsForm,
-        props: {
-          plantId: plantId,
-          userId: userData.userId,
-          recordId: recordId,
-          invalidate,
-          dtId
-        }
-      })
-    }
+
+    stack({
+      Component: OutwardsForm,
+      props: {
+        plantId,
+        userId: userData?.userId,
+        recordId
+      }
+    })
   }
 
   const columns = [
@@ -151,19 +145,6 @@ const OutwardsOrder = () => {
     hasDT: false
   })
 
-  const getDefaultDT = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserFunction.get,
-        parameters: `_userId=${userData.userId}&_functionId=${SystemFunction.OutwardsOrder}`
-      })
-
-      return res?.record?.dtId
-    } catch (error) {
-      return ''
-    }
-  }
-
   const addOutwards = async () => {
     await proxyAction()
   }
@@ -193,7 +174,8 @@ const OutwardsOrder = () => {
           onEdit={editOutwards}
           onDelete={delOutwards}
           pageSize={50}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
           refetch={refetch}
         />

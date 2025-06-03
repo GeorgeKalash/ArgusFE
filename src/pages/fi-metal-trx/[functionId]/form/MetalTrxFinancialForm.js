@@ -25,6 +25,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import AccountSummary from 'src/components/Shared/AccountSummary'
+import { useWindow } from 'src/windows'
 
 export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, getGLResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -32,6 +34,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const [metal, setMetal] = useState({})
   const [allMetals, setAllMetals] = useState([])
   const filteredItems = useRef()
+  const { stack } = useWindow()
 
   const getEndpoint = {
     [SystemFunction.MetalReceiptVoucher]: FinancialRepository.MetalReceiptVoucher.set2,
@@ -490,6 +493,23 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       condition: isVerified,
       onClick: onVerify,
       disabled: !isPosted
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.accountId),
+            moduleId: 1
+          },
+          width: 1000,
+          height: 500,
+          title: platformLabels.AccountSummary
+        })
+      },
+      disabled: !formik.values.accountId
     }
   ]
 
@@ -772,34 +792,23 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 <Grid item xs={12}></Grid>
                 <Grid item xs={12}></Grid>
                 <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={FinancialRepository.PaymentReasons.snapshot}
+                  <ResourceComboBox
+                    endpointId={FinancialRepository.PaymentReasons.qry}
                     name='paymentReasonId'
                     label={labels.paymentReason}
-                    valueField='reference'
-                    displayField='name'
-                    valueShow='paymentReasonRef'
-                    secondValueShow='paymentReasonName'
-                    errorCheck={'paymentReasonId'}
-                    form={formik}
-                    secondDisplayField={true}
-                    firstValue={formik.values.paymentReasonRef}
-                    secondValue={formik.values.paymentReasonName}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
                     columnsInDropDown={[
-                      { key: 'reference', value: 'payment Reason Ref' },
+                      { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    displayFieldWidth={3}
-                    maxAccess={maxAccess}
-                    filter={{
-                      isInactive: val => val !== true
-                    }}
                     readOnly={isPosted}
+                    values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('paymentReasonId', newValue?.recordId)
-                      formik.setFieldValue('paymentReasonRef', newValue?.reference)
-                      formik.setFieldValue('paymentReasonName', newValue?.name)
+                      formik.setFieldValue('paymentReasonId', newValue?.recordId || null)
                     }}
+                    error={formik.touched.paymentReasonId && Boolean(formik.errors.paymentReasonId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
