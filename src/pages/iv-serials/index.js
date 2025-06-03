@@ -32,10 +32,7 @@ const IvSerials = () => {
       itemId: null,
       srlNo: ''
     },
-    validateOnChange: true,
-    validationSchema: yup.object({
-      itemId: yup.string().required()
-    })
+    validateOnChange: true
   })
 
   async function fetchGridData(options = {}) {
@@ -44,9 +41,9 @@ const IvSerials = () => {
     if (formik.values.itemId || formik.values.srlNo) {
       const response = await getRequest({
         extension: InventoryRepository.Serial.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_itemId=${formik.values.itemId || 0}&_srlNo=${
-          formik.values.srlNo || 0
-        }`
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_itemId=${
+          formik.values.itemId || 0
+        }&_srlNo=${formik.values.srlNo || 0}`
       })
 
       return { ...response, _startAt: _startAt }
@@ -138,16 +135,6 @@ const IvSerials = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const go = () => {
-    if (!formik.values.itemId && !formik.values.srlNo) {
-      stackError({
-        message: platformLabels.FillAtLeastOneField
-      })
-    } else {
-      refetch()
-    }
-  }
-
   return (
     <VertLayout>
       <Fixed>
@@ -157,50 +144,53 @@ const IvSerials = () => {
           labels={labels}
           refetch={refetch}
           middleSection={
-            <Grid item sx={{ display: 'flex', mr: 2 }}>
-              <Grid item xs={4} sx={{ ml: 2 }}>
-                <CustomTextField
-                  name='srlNo'
-                  label={labels.srlNo}
-                  value={formik.values.srlNo}
-                  maxLength='20'
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('srlNo', null)}
-                  maxAccess={access}
-                />
-              </Grid>
-              <Grid item xs={8} sx={{ ml: 2 }}>
-                <ResourceLookup
-                  endpointId={InventoryRepository.Item.snapshot}
-                  filter={{ trackBy: 1 }}
-                  name='itemId'
-                  label={labels?.sku}
-                  valueField='recordId'
-                  displayField='name'
-                  valueShow='itemRef'
-                  secondValueShow='itemName'
-                  form={formik}
-                  columnsInDropDown={[
-                    { key: 'sku', value: 'SKU' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('itemId', newValue?.recordId)
-                    formik.setFieldValue('itemName', newValue?.name)
-                    formik.setFieldValue('sku', newValue?.sku)
-                    formik.setFieldValue('itemRef', newValue?.sku)
-                  }}
-                  displayFieldWidth={2}
-                  maxAccess={access}
-                />
-              </Grid>
-              <Grid item xs={1} sx={{ ml: 2 }}>
-                <CustomButton
-                  onClick={go}
-                  label={platformLabels.Apply}
-                  color='#231F20'
-                  image='go.png'
-                />
+            <Grid item>
+              <Grid container spacing={2}>
+                <Grid item xs={4}>
+                  <CustomTextField
+                    name='srlNo'
+                    label={labels.srlNo}
+                    value={formik.values.srlNo}
+                    maxLength='20'
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('srlNo', null)}
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={7}>
+                  <ResourceLookup
+                    endpointId={InventoryRepository.Item.snapshot}
+                    filter={{ trackBy: 1 }}
+                    name='itemId'
+                    label={labels.sku}
+                    valueField='recordId'
+                    displayField='name'
+                    valueShow='itemRef'
+                    secondValueShow='itemName'
+                    form={formik}
+                    columnsInDropDown={[
+                      { key: 'sku', value: 'SKU' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('itemId', newValue?.recordId)
+                      formik.setFieldValue('itemName', newValue?.name)
+                      formik.setFieldValue('sku', newValue?.sku)
+                      formik.setFieldValue('itemRef', newValue?.sku)
+                    }}
+                    displayFieldWidth={2}
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={1}>
+                  <CustomButton
+                    onClick={refetch}
+                    label={platformLabels.Apply}
+                    color='#231F20'
+                    image='go.png'
+                    disabled={!formik.values.itemId && !formik.values.srlNo}
+                  />
+                </Grid>
               </Grid>
             </Grid>
           }

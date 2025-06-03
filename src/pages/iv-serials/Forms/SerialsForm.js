@@ -51,8 +51,7 @@ export default function SerialsForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       srlNo: yup.string().required(),
-      itemId: yup.string().required(),
-      weight: yup.number().required()
+      itemId: yup.string().required()
     }),
     onSubmit: async values => {
       const data = {
@@ -205,6 +204,7 @@ export default function SerialsForm({ labels, maxAccess, recordId }) {
                 label={labels.productionDate}
                 value={formik.values.productionDate}
                 onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('productionDate', null)}
                 error={formik.touched.productionDate && Boolean(formik.errors.productionDate)}
               />
@@ -229,12 +229,19 @@ export default function SerialsForm({ labels, maxAccess, recordId }) {
                 label={labels.admissionDate}
                 value={formik.values.admissionDate}
                 onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('admissionDate', null)}
                 error={formik.touched.admissionDate && Boolean(formik.errors.admissionDate)}
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField name='siteName' label={labels.site} value={formik.values?.siteName} readOnly />
+              <CustomTextField
+                name='siteName'
+                label={labels.site}
+                value={formik.values?.siteName}
+                readOnly
+                maxAccess={maxAccess}
+              />
             </Grid>
             <Grid item xs={6}>
               <CustomDatePicker
@@ -242,6 +249,7 @@ export default function SerialsForm({ labels, maxAccess, recordId }) {
                 label={labels.warrantyStartDate}
                 value={formik.values.warrantyStartDate}
                 onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
                 max={formik.values.warrantyEndDate}
                 onClear={() => formik.setFieldValue('warrantyStartDate', null)}
                 error={formik.touched.warrantyStartDate && Boolean(formik.errors.warrantyStartDate)}
@@ -280,13 +288,20 @@ export default function SerialsForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField name='metalRef' label={labels.metal} value={formik.values?.metalRef} readOnly />
+              <CustomTextField
+                name='metalRef'
+                label={labels.metal}
+                value={formik.values?.metalRef}
+                readOnly
+                maxAccess={maxAccess}
+              />
             </Grid>
             <Grid item xs={6}>
               <CustomDatePicker
                 name='expirationDate'
                 label={labels.expirationDate}
                 value={formik.values.expirationDate}
+                maxAccess={maxAccess}
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('expirationDate', null)}
                 error={formik.touched.expirationDate && Boolean(formik.errors.expirationDate)}
@@ -297,6 +312,7 @@ export default function SerialsForm({ labels, maxAccess, recordId }) {
                 name='metalPurity'
                 label={labels.metalPurity}
                 value={formik.values?.metalPurity}
+                maxAccess={maxAccess}
                 readOnly
               />
             </Grid>
