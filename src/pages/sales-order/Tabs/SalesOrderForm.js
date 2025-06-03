@@ -190,7 +190,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 return true
               }
 
-              return !!value
+              return isNaN(value) ? false : value != 0
             }),
             itemName: yup.string().test(function (value) {
               const row = this.parent
