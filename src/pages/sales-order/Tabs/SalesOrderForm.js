@@ -151,6 +151,25 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     endpointId: SaleRepository.SalesOrder.page
   })
 
+  const createRowValidation = term =>
+    yup.mixed().test(function (value) {
+      const { sku, itemName } = this.parent
+      const isAnyFieldFilled = !!(sku || itemName)
+      if (term === 'qty') {
+        if (isAnyFieldFilled) return isNaN(value) ? false : value != 0
+
+        return value != 0 || !value
+      }
+
+      return isAnyFieldFilled ? value !== null && value !== undefined : true
+    })
+
+  const rowValidationSchema = yup.object({
+    sku: createRowValidation(),
+    itemName: createRowValidation(),
+    qty: createRowValidation('qty')
+  })
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
@@ -161,55 +180,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       date: yup.string().required(),
       currencyId: yup.string().required(),
       clientId: yup.string().required(),
-      items: yup
-        .array()
-        .of(
-          yup.object().shape({
-            sku: yup.string().test(function (value) {
-              const row = this.parent
-              const isAnyFieldFilled = row.sku || row.itemName
-
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled || row.qty > 0) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            }),
-            qty: yup.string().test(function (value) {
-              const row = this.parent
-              const isAnyFieldFilled = row.itemId
-
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isNaN(value)) return false
-                if (isAnyFieldFilled) return value != 0
-
-                return true
-              }
-              if (isAnyFieldFilled) return isNaN(value) ? false : value != 0
-
-              return true
-            }),
-            itemName: yup.string().test(function (value) {
-              const row = this.parent
-              const isAnyFieldFilled = row.sku || row.itemName
-
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled || row.qty > 0) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            })
-          })
-        )
-        .required()
+      items: yup.array().of(rowValidationSchema)
     }),
     onSubmit: async obj => {
       const copy = { ...obj }
