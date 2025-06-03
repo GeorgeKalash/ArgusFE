@@ -60,6 +60,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsOrder,
     access,
+    objectName: 'header',
     hasDT: false
   })
 
@@ -339,6 +340,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
     const result = await refetchForm(res?.recordId)
     result?.record?.headerView?.status === 4 && openRV()
+    invalidate()
   }
 
   const onReopen = async () => {
@@ -626,7 +628,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       key: 'Receipt Voucher',
       condition: true,
       onClick: openRV,
-      disabled: !(formik.values.status == 4)
+      disabled: !(formik.values.header.status == 4)
     }
   ]
 
@@ -677,7 +679,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         },
         onProductSubmit
       },
-      width: 900,
+      width: 1200,
       height: 500,
       title: labels.products
     })
@@ -727,7 +729,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           }
         },
         width: 740,
-        height: 320,
+        height: 345,
         title: labels.instantCash
       })
     } else if (interfaceId === 2) {
@@ -1055,7 +1057,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             beneficiaryName: '',
                             currencyId: newValue ? header.currencyId : '',
                             lcAmount: '',
-                            fcAmount: ''
+                            fcAmount: '',
+                            corRef: '',
+                            corName: '',
+                            exRate: 1,
+                            exRate2: 1,
+                            commission: 0
                           }
                         })
                       }}
@@ -1100,7 +1107,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             currencyId: newValue?.currencyId,
                             currencyRef: newValue?.currencyRef,
                             lcAmount: '',
-                            fcAmount: ''
+                            fcAmount: '',
+                            corRef: '',
+                            corName: '',
+                            exRate: 1,
+                            exRate2: 1,
+                            commission: 0
                           }
                         })
                       }}

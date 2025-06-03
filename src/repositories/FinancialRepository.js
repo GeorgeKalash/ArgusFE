@@ -225,6 +225,12 @@ export const FinancialRepository = {
     page: service + 'pageTFR',
     snapshot: service + 'snapshotTFR'
   },
+  BalanceTransferSales: {
+    set: service + 'setTFS'
+  },
+  BalanceTransferPurchases: {
+    set: service + 'setTFP'
+  },
   PaymentReasons: {
     qry: service + 'qryPR',
     get: service + 'getPR',
