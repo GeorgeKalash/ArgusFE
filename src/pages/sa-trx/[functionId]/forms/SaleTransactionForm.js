@@ -1939,7 +1939,6 @@ export default function SaleTransactionForm({
                 displayField='name'
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                displayFieldWidth={1.5}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.szId', newValue ? newValue.recordId : null)
                 }}
@@ -2111,7 +2110,7 @@ export default function SaleTransactionForm({
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={2} container></Grid>
+            <Grid item xs={2}></Grid>
             <Grid item xs={3}>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
