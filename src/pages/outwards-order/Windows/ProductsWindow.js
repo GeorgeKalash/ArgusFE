@@ -85,13 +85,14 @@ const ProductsWindow = ({
     {
       field: '',
       headerName: '',
-      flex: 1,
+      flex: 0.9,
       cellRenderer: params => {
         if (params.data.interfaceId === 1)
           return (
             <Button
               variant='contained'
               size='small'
+              disabled={!!recordId}
               style={{ height: 25 }}
               onClick={() =>
                 stack({
@@ -177,6 +178,9 @@ const ProductsWindow = ({
           pagination={false}
           showCheckboxColumn={true}
           ChangeCheckedRow={setGridData}
+          disable={() => {
+            return !!recordId
+          }}
         />
       </Grow>
       <Fixed>
