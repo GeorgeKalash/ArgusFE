@@ -105,12 +105,14 @@ export default function SerialsForm({ labels, maxAccess, recordId }) {
   const editMode = !!formik.values.recordId
 
   async function getMetal(itemId) {
-    const res = await getRequest({
-      extension: InventoryRepository.Physical.get,
-      parameters: `_itemId=${itemId}`
-    })
-    formik.setFieldValue('metalRef', res?.record.metalRef || '')
-    formik.setFieldValue('metalPurity', res?.record.metalPurity || '')
+    if (itemId) {
+      const res = await getRequest({
+        extension: InventoryRepository.Physical.get,
+        parameters: `_itemId=${itemId}`
+      })
+      formik.setFieldValue('metalRef', res?.record?.metalRef || '')
+      formik.setFieldValue('metalPurity', res?.record?.metalPurity || '')
+    }
   }
 
   async function checkSrlNo(srlNo) {
