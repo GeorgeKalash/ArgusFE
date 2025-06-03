@@ -184,9 +184,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
               const isAnyFieldFilled = row.sku || row.itemName
 
               if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled || row.qty > 0) {
-                  return !!value
-                }
+                if (isNaN(value)) return false
+                if (isAnyFieldFilled) return value != 0
 
                 return true
               }
