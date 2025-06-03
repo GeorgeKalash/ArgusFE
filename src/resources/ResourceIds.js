@@ -173,7 +173,7 @@ export const ResourceIds = {
   CashCountTransaction: 37301,
   ExchangeRates: 32103,
   CbBankAccounts: 33105,
-  Terrapay : 36307,
+  Terrapay: 36307,
   CashNote: 37101,
   OutwardsModification: 36308,
   POSUsers: 54104,
@@ -474,6 +474,7 @@ export const ResourceIds = {
   BalanceTransferPurchase: 31318,
   BalanceTransferSales: 31319,
   PaymentReasons: 31116,
+  WorkCenterConsumptions: 42315,
 
   // GL
   GLSalesInvoice: 51604,
