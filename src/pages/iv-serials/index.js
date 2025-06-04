@@ -8,7 +8,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import * as yup from 'yup'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
@@ -18,12 +17,10 @@ import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import SerialsForm from './Forms/SerialsForm'
 import CustomButton from 'src/components/Inputs/CustomButton'
-import { useError } from 'src/error'
 
 const IvSerials = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack: stackError } = useError()
 
   const { stack } = useWindow()
 
@@ -31,8 +28,7 @@ const IvSerials = () => {
     initialValues: {
       itemId: null,
       srlNo: ''
-    },
-    validateOnChange: true
+    }
   })
 
   async function fetchGridData(options = {}) {
