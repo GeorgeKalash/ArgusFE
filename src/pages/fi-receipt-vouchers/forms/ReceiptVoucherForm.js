@@ -451,10 +451,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 form={formik}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Account Ref' },
-                  { key: 'name', value: 'Name' },
+                  { key: 'name', value: 'Name', width: '500px' },
                   { key: 'keywords', value: 'Keywords' }
                 ]}
-                displayFieldWidth={3}
+                displayFieldWidth={4}
                 filter={{ isInactive: val => val !== true }}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue ? newValue.recordId : null)
