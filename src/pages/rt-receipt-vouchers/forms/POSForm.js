@@ -14,6 +14,8 @@ import { ControlContext } from 'src/providers/ControlContext'
 import axios from 'axios'
 import { useWindow } from 'src/windows'
 import PopupDialog from 'src/components/Shared/PopupDialog'
+import * as yup from 'yup'
+import { useError } from 'src/error'
 
 export default function POSForm({ labels, form, maxAccess, amount }) {
   const { getRequestFullEndPoint, getRequest } = useContext(RequestsContext)
@@ -21,11 +23,10 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
   const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
   const [isSubmitting, setSubmitting] = useState(false)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   const { formik } = useForm({
-    maxAccess: maxAccess,
-    enableReinitialize: false,
-    validateOnChange: true,
+    maxAccess,
     initialValues: {
       msgid: null,
       ecrno: process.env.NEXT_PUBLIC_ECRNO,
@@ -42,7 +43,12 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
       cashAccountId: null,
       cashAccountRef: null,
       cashAccountName: null
-    }
+    },
+    validateOnChange: true,
+    validationSchema: yup.object({
+      cashAccountId: yup.number().required(),
+      posRef: yup.string().required()
+    })
   })
 
   const actions = [
@@ -59,28 +65,51 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
     }
   ]
   async function onReceived() {
-    setSubmitting(true)
-    const res = await axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/start_PUR`, formik.values)
-    if (res.data) {
+    try {
+      const errors = await formik.validateForm()
+      formik.setTouched({ cashAccountId: true, posRef: true })
+      if (Object.keys(errors).length > 0) {
+        return
+      }
+      setSubmitting(true)
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/start_PUR`, formik.values)
+      if (res.data) {
+        setSubmitting(false)
+
+        const formattedText = res.data.replace(/ /g, '\n')
+
+        stack({
+          Component: PopupDialog,
+          props: {
+            DialogText: formattedText
+          },
+          width: 550,
+          height: 250,
+          expandable: false,
+          closable: false
+        })
+      }
+    } catch (error) {
       setSubmitting(false)
-
-      const formattedText = res.data.replace(/ /g, '\n')
-
-      stack({
-        Component: PopupDialog,
-        props: {
-          DialogText: formattedText
-        },
-        width: 600,
-        height: formattedText.length,
-        expandable: false,
-        closable: false
+      stackError({
+        message: error?.message
       })
     }
   }
   async function onCancel() {
-    setSubmitting(false)
-    await axios.get(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/cancelTransaction`)
+    try {
+      const errors = await formik.validateForm()
+      formik.setTouched({ cashAccountId: true, posRef: true })
+      if (Object.keys(errors).length > 0) {
+        return
+      }
+      setSubmitting(false)
+      await axios.get(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/cancelTransaction`)
+    } catch (error) {
+      stackError({
+        message: error?.message
+      })
+    }
   }
 
   async function fillCashAccount() {
@@ -175,16 +204,16 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
               label={labels.posAccount}
               form={formik}
               readOnly={formik.values.posSelected == 2}
-              displayFieldWidth={6}
+              displayFieldWidth={2}
               valueShow='cashAccountRef'
               secondValueShow='cashAccountName'
               editMode={true}
               maxAccess={maxAccess}
               errorCheck={'cashAccountId'}
               onChange={(event, newValue) => {
-                formik.setFieldValue('cashAccountId', newValue?.recordId)
                 formik.setFieldValue('cashAccountRef', newValue?.reference)
                 formik.setFieldValue('cashAccountName', newValue?.name)
+                formik.setFieldValue('cashAccountId', newValue?.recordId || null)
               }}
             />
           </Grid>
@@ -205,6 +234,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
               value={formik?.posRef}
               maxAccess={maxAccess}
               readOnly={formik.values.posSelected == 2}
+              onChange={formik.handleChange}
               error={formik.touched.posRef && Boolean(formik.errors.posRef)}
             />
           </Grid>

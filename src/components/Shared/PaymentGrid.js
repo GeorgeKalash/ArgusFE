@@ -120,7 +120,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
 
         const currentAmount = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
 
-        update({ amount: currentAmount, POS: newRow.type === '1' })
+        update({ amount: currentAmount, pos: newRow.type != 3 })
       }
     },
     {

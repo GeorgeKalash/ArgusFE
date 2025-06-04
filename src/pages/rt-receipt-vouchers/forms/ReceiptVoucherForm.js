@@ -69,7 +69,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         clientId: null,
         cellPhone: null
       },
-      cash: formikSettings.initialValuePayment || []
+      cash: formikSettings.initialValuePayment || [{ id: 1, pos: true }]
     },
 
     validationSchema: yup.object({
@@ -242,7 +242,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       return res.record
     }
   }
-  console.log('check formik', formik.values)
+
   async function onReopen() {
     const obj = formik.values
 

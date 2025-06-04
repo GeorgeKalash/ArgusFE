@@ -1,6 +1,6 @@
-import { Box, Button } from '@mui/material'
-import { useContext } from 'react'
+import { Button, Box } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
+import { useContext } from 'react'
 
 const PopupDialog = ({ DialogText, window }) => {
   const { platformLabels } = useContext(ControlContext)
@@ -8,34 +8,35 @@ const PopupDialog = ({ DialogText, window }) => {
   return (
     <Box
       sx={{
-        backgroundColor: 'white',
-        padding: 4,
         display: 'flex',
         flexDirection: 'column',
-        minHeight: '120px',
-        maxHeight: `${DialogText.length}px`
+        height: '100%',
+        maxHeight: '100vh',
+        p: 3,
+        boxSizing: 'border-box',
+        overflow: 'hidden'
       }}
     >
       <Box
         sx={{
+          flexGrow: 1,
           overflowY: 'auto',
-          whiteSpace: 'pre-wrap',
-          mb: 2,
-          flexGrow: 1
+          minHeight: 0
         }}
       >
         {DialogText}
       </Box>
 
-      <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
-        <Button
-          onClick={() => {
-            window.close()
-          }}
-          color='primary'
-          variant='contained'
-        >
-          {platformLabels?.OK}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          pt: 2,
+          flexShrink: 0
+        }}
+      >
+        <Button onClick={() => window.close()} color='primary'>
+          {platformLabels.OK}
         </Button>
       </Box>
     </Box>
