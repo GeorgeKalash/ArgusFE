@@ -121,6 +121,28 @@ export function WindowProvider({ children }) {
                 } else {
                   setRerenderFlag(!rerenderFlag)
                 }
+              },
+              setRecord: (recordId, record) => {
+                setStack(prevStack => {
+                  const nextStack = prevStack.map(window =>
+                    window.id === id
+                      ? {
+                          ...window,
+                          props: {
+                            ...window.props,
+                            ...record,
+                            recordId,
+                            ...(record &&
+                            Object.values(record).some(value => value !== '' && value !== null && value !== undefined)
+                              ? { record }
+                              : {})
+                          }
+                        }
+                      : window
+                  )
+                  
+                  return nextStack
+                })
               }
             }}
           >
@@ -133,6 +155,10 @@ export function WindowProvider({ children }) {
               onClose={() => {
                 closeWindow()
                 if (onClose) onClose()
+              }}
+              onRefresh={() => {
+                closeWindowById(id)
+                openWindow(id)
               }}
               width={width}
               height={height}

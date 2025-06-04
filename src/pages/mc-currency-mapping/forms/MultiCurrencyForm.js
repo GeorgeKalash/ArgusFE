@@ -30,7 +30,6 @@ export default function MultiCurrencyForm({ labels, maxAccess, record, recordId 
       exId: null
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.string().required(),
