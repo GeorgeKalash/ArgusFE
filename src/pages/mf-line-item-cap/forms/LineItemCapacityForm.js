@@ -28,34 +28,35 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
     endpointId: ManufacturingRepository.LineItemCapacity.page
   })
 
+  const conditions = {
+    lineId: row => row?.lineId,
+    fullCapacityWgtPerHr: row => row?.fullCapacityWgtPerHr,
+    preparationHrs: row => row?.preparationHrs && row?.preparationHrs > 0 && row?.preparationHrs < 9,
+    nbOfLabors: row => row?.nbOfLabors
+  }
+
   const { formik } = useForm({
     initialValues: {
       itemId: null,
       itemName: '',
       sku: '',
       class: '',
-      data: [{ id: 1, lineId: null, fullCapacityWgtPerHr: null, preparationHrs: null, nbOfLabors: null }]
+      data: [{ id: 1, lineId: null, fullCapacityWgtPerHr: 0, preparationHrs: 0, nbOfLabors: 0 }]
     },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       itemId: yup.number().required(),
-      data: yup.array().of(
-        createConditionalSchema({
-          lineId: row => row?.lineId,
-          fullCapacityWgtPerHr: row => row?.fullCapacityWgtPerHr,
-          preparationHrs: row => row?.preparationHrs && row?.preparationHrs > 0 && row?.preparationHrs < 9,
-          nbOfLabors: row => row?.nbOfLabors
-        })
-      )
+      data: yup.array().of(createConditionalSchema(conditions))
     }),
     onSubmit: async obj => {
+      console.log(obj?.data)
       await postRequest({
         extension: ManufacturingRepository.LineItemCapacity.set2,
         record: JSON.stringify({
           ...obj,
           data: obj.data
-            .filter(row => Object.values(conditions).every(fn => fn(row)))
+            .filter(row => Object.values(conditions)?.every(fn => fn(row)))
             .map(({ id, lineName, lineRef, ...item }) => ({
               ...item,
               lineId: item.lineId || null,

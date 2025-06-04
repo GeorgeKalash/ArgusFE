@@ -10,6 +10,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
+import { createConditionalSchema } from 'src/lib/validation'
 
 const RoutingSeqForm = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -20,31 +21,18 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
 
   const filteredOperations = useRef([])
 
-  function createRowValidation() {
-    return yup.mixed().test(function (value) {
-      const { seqNo, name, workCenterId, operationId } = this.parent
-      const isAnyFieldFilled = !!(seqNo || name || workCenterId || operationId)
-
-      if (isAnyFieldFilled) {
-        return !!value
-      }
-
-      return true
-    })
-  }
-
-  const rowValidationSchema = yup.object({
-    seqNo: createRowValidation(),
-    name: createRowValidation(),
-    workCenterId: createRowValidation(),
-    operationId: createRowValidation()
-  })
-
   const { formik } = useForm({
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      data: yup.array().of(rowValidationSchema)
+      data: yup.array().of(
+        createConditionalSchema({
+          seqNo: row => row.seqNo,
+          name: row => row.name,
+          workCenterId: row => row.workCenterId,
+          operationId: row => row.operationId
+        })
+      )
     }),
     initialValues: {
       data: [{ id: 1, seqNo: 0 }]
@@ -67,6 +55,8 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
       toast.success(platformLabels.Edited)
     }
   })
+
+  console.log(formik)
 
   async function getFilteredOperations(workCenterId) {
     console.log(operations)

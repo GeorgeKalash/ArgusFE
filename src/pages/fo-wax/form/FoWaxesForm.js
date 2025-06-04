@@ -46,6 +46,11 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     endpointId: FoundryRepository.Wax.page
   })
 
+  const conditions = {
+    jobId: row => row?.jobId > 0,
+    pieces: row => row?.pieces <= row?.jobPcs
+  }
+
   const { formik } = useForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
@@ -73,7 +78,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         {
           id: 1,
           jobId: null,
-          waxId: recordId,
+          waxId: recordId || 0,
           pieces: 0,
           jobPcs: 0,
           classId: null,
@@ -100,26 +105,16 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         netWgt: yup.number().min(0).required(),
         suggestedWgt: yup.number().required()
       }),
-      items: yup.array().of(
-        createConditionalSchema({
-          jobRef: row => row.jobRef,
-          pieces: row => (!!!row.jobPcs ? true : row.pieces <= row.jobPcs && row.pieces >= 0)
-        })
-      )
+      items: yup.array().of(createConditionalSchema(conditions))
     }),
     onSubmit: async obj => {
-      const { items: originalItems, header } = obj
-
-      const items = originalItems?.map(item => ({
-        ...item,
-        waxId: obj.recordId || 0
-      }))
+      const { items, header } = obj
 
       const response = await postRequest({
         extension: FoundryRepository.Wax.set2,
         record: JSON.stringify({
           header,
-          items
+          items: items.filter(row => Object.values(conditions)?.every(fn => fn(row)))
         })
       })
       const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
@@ -128,6 +123,8 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       invalidate()
     }
   })
+
+  console.log(formik.values, 'test')
 
   const editMode = !!formik.values?.recordId
   const isPosted = formik?.values?.header?.status === 3
@@ -285,7 +282,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     {
       component: 'resourcelookup',
       label: labels.jobOrder,
-      name: 'jobRef',
+      name: 'jobId',
       flex: 1,
       props: {
         endpointId: ManufacturingRepository.MFJobOrder.snapshot2,

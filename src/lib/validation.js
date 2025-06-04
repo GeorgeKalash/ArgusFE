@@ -1,7 +1,7 @@
 import * as yup from 'yup'
 
 function conditionalField(fieldValidators, fieldKey) {
-  return function () {
+  return function (value) {
     const row = this.parent
 
     if (
@@ -15,12 +15,12 @@ function conditionalField(fieldValidators, fieldKey) {
     }
 
     const isAnyFieldFilled = Object.entries(fieldValidators).some(([, fn]) => {
-      return !!(fn(row) && row[fieldKey] !== 0)
+      return !!(fn(row) || value === '0')
     })
 
     if (!isAnyFieldFilled) return true
 
-    return !!fieldValidators[fieldKey](row)
+    return !!fieldValidators[fieldKey](row) && value !== '0' && value !== undefined
   }
 }
 
