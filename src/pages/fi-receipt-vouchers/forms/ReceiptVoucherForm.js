@@ -454,7 +454,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   { key: 'name', value: 'Name' },
                   { key: 'keywords', value: 'Keywords' }
                 ]}
-                displayFieldWidth={2}
+                displayFieldWidth={3}
                 filter={{ isInactive: val => val !== true }}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue ? newValue.recordId : null)
