@@ -138,6 +138,7 @@ const ReportViewer = ({ resourceId }) => {
                     displayField='layoutName'
                     values={report}
                     required
+                    displayFieldWidth={1.5}
                     defaultIndex={0}
                     onChange={(e, newValue) =>
                       setReport(prevState => ({
