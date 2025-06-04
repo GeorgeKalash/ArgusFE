@@ -26,7 +26,7 @@ const FiPaymentVouchers = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.PaymentVouchers.page,
+      extension: FinancialRepository.PaymentVouchers.page3,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&filter=`
     })
 
@@ -61,7 +61,7 @@ const FiPaymentVouchers = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.PaymentVouchers.page,
+    endpointId: FinancialRepository.PaymentVouchers.page3,
     datasetId: ResourceIds.PaymentVouchers,
     filter: {
       filterFn: fetchWithFilter

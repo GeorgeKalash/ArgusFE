@@ -148,6 +148,7 @@ export const FinancialRepository = {
     qry: service + 'qryPV',
     page: service + 'pagePV',
     page2: service + 'pagePV2',
+    page3: service + 'pagePV3',
     get: service + 'getPV',
     set2: service + 'set2PV',
     set: service + 'setPV',
