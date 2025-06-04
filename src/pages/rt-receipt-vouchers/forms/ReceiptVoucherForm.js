@@ -436,7 +436,12 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
             allowAddNewLine={!isPosted}
             amount={formik.values.header.amount}
             setFormik={setFormik}
-            formik={formik}
+            data={{
+              recordId: formik.values.header.recordId,
+              reference: formik.values.header.reference,
+              clientName: formik.values.header.clientName,
+              beneficiaryName: formik.values.header.beneficiaryName
+            }}
             name='cash'
           />
         </Grow>

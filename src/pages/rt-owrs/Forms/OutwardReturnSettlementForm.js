@@ -401,6 +401,11 @@ export default function OutwardReturnSettlementForm({
             allowAddNewLine={!isPosted}
             amount={formik.values.amount}
             setFormik={setFormik}
+            data={{
+              recordId: formik.values?.recordId,
+              reference: formik.values?.reference,
+              clientName: formik.values?.clientName
+            }}
             name='items'
           />
         </Grow>

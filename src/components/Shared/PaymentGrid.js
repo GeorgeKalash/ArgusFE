@@ -8,6 +8,8 @@ import { useWindow } from 'src/windows'
 import POSForm from 'src/pages/rt-receipt-vouchers/forms/POSForm'
 
 export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
+  const editMode = !!rest.data.recordId
+
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds?.POSPayment
   })
@@ -120,7 +122,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
 
         const currentAmount = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
 
-        update({ amount: currentAmount, pos: newRow.type != 3 })
+        update({ amount: currentAmount, pos: !editMode || newRow.type !== 3 })
       }
     },
     {
@@ -227,7 +229,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       onClick: (e, row, update, updateRow) => {
         stack({
           Component: POSForm,
-          props: { labels, form: rest.formik, amount: row?.amount, maxAccess: access },
+          props: { labels, data: rest.data, amount: row?.amount, maxAccess: access },
           width: 700,
           title: labels?.pos
         })

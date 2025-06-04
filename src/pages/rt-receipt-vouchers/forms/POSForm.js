@@ -17,7 +17,7 @@ import PopupDialog from 'src/components/Shared/PopupDialog'
 import * as yup from 'yup'
 import { useError } from 'src/error'
 
-export default function POSForm({ labels, form, maxAccess, amount }) {
+export default function POSForm({ labels, data, maxAccess, amount }) {
   const { getRequestFullEndPoint, getRequest } = useContext(RequestsContext)
   const { userDefaultsData } = useContext(ControlContext)
   const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
@@ -30,7 +30,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
     initialValues: {
       msgid: null,
       ecrno: process.env.NEXT_PUBLIC_ECRNO,
-      ecR_RCPT: form?.values?.header?.reference,
+      ecR_RCPT: data?.reference,
       amount: (amount * 100).toString(),
       a1: 'E',
       a2: '',
@@ -124,16 +124,16 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
     formik.setFieldValue('cashAccountName', res?.record?.name)
   }
 
-  useEffect(() => {
-    ;(async function () {
-      await fillCashAccount()
+  // useEffect(() => {
+  //   ;(async function () {
+  //     await fillCashAccount()
 
-      const response = await getRequestFullEndPoint({
-        endPoint: `${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/checkDevice?_port=${process.env.NEXT_PUBLIC_POS_PORT}`
-      })
-      formik.setFieldValue('posSelected', response?.data ? 2 : 1)
-    })()
-  }, [])
+  //     const response = await getRequestFullEndPoint({
+  //       endPoint: `${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/checkDevice?_port=${process.env.NEXT_PUBLIC_POS_PORT}`
+  //     })
+  //     formik.setFieldValue('posSelected', response?.data ? 2 : 1)
+  //   })()
+  // }, [])
 
   return (
     <FormShell
@@ -152,7 +152,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
               readOnly
               label={labels?.reference}
               maxAccess={maxAccess}
-              value={form?.values?.header?.reference}
+              value={data?.reference}
             />
           </Grid>
           <Grid item container spacing={2}>
@@ -161,7 +161,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
                 name='clientName'
                 readOnly
                 label={labels?.client}
-                value={form?.values?.header?.clientName}
+                value={data?.clientName}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -170,7 +170,7 @@ export default function POSForm({ labels, form, maxAccess, amount }) {
                 name='beneficiaryName'
                 readOnly
                 label={labels?.beneficiary}
-                value={form?.values?.header?.beneficiaryName}
+                value={data?.beneficiaryName}
                 maxAccess={maxAccess}
               />
             </Grid>

@@ -1496,7 +1496,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
                             return
                           }
-                      },
+                      }
                     },
                     {
                       component: 'numberfield',
@@ -1517,7 +1517,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           update({
                             fcAmount: fcAmount.toFixed(2)
                           })
-                      },
+                      }
                     }
                   ]}
                 />
@@ -1534,6 +1534,11 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       error={formik.errors.amount}
                       name={'amount'}
                       setFormik={setFormik}
+                      data={{
+                        recordId: formik.values?.recordId,
+                        reference: formik.values?.reference,
+                        clientName: formik.values?.clientName
+                      }}
                       amount={total}
                       disabled={isClosed}
                     />
