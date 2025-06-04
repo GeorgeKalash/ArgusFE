@@ -34,27 +34,23 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
           extension: SystemRepository.UserFunction.set,
           record: JSON.stringify({ userId: obj.userId, functionId: obj.functionId, dtId: obj.dtId || null })
         })
-        data.list.map(async obj => {
-          if (obj.checked) {
-            await postRequest({
-              extension: AccessControlRepository.RowAccessUserView.set,
-              record: JSON.stringify({
-                userId: storeRecordId,
-                resourceId: ResourceIds.DocumentTypes,
-                recordId: obj.recordId
-              })
-            })
-          } else {
-            await postRequest({
-              extension: AccessControlRepository.RowAccessUserView.del,
-              record: JSON.stringify({
-                userId: storeRecordId,
-                resourceId: ResourceIds.DocumentTypes,
-                recordId: obj.recordId
-              })
-            })
-          }
+
+        const accessPayload = {
+          userId: storeRecordId,
+          functionId: obj.functionId,
+          items: data.list.map(item => ({
+            userId: storeRecordId,
+            dtId: item.recordId,
+            functionId: obj.functionId,
+            isChecked: item.checked
+          }))
+        }
+
+        await postRequest({
+          extension: SystemRepository.UserFunction.set2,
+          record: JSON.stringify(accessPayload)
         })
+
         toast.success(platformLabels.Updated)
         window.close()
         invalidate()
@@ -66,7 +62,7 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
     {
       field: 'reference',
       headerName: labels.reference,
-      flex: 2
+      flex: 1
     },
     {
       field: 'name',
@@ -133,7 +129,11 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
               name='dtId'
               label={labels.docType}
               valueField='recordId'
-              displayField='name'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               values={formik.values}
               onChange={async (event, newValue) => {
                 formik.setFieldValue('dtId', newValue?.recordId)

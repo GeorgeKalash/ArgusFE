@@ -6,6 +6,7 @@ import { IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { checkAccess } from 'src/lib/maxAccess'
+import { iconMap } from 'src/utils/iconMap'
 
 const CustomNumberField = ({
   variant = 'outlined',
@@ -24,6 +25,7 @@ const CustomNumberField = ({
   error,
   helperText,
   hasBorder = true,
+  autoSelect = false,
   editMode = false,
   maxLength = 1000,
   thousandSeparator = ',',
@@ -35,13 +37,12 @@ const CustomNumberField = ({
   align = 'left',
   handleButtonClick,
   cycleButtonLabel = '',
+  iconMapIndex = 0,
   ...props
 }) => {
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
-  const [isFocused, setIsFocused] = useState(false)
-  const inputRef = useRef(null)
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/
@@ -89,14 +90,11 @@ const CustomNumberField = ({
       onChange(e)
     }
   }
+
   const displayButtons = (!_readOnly || allowClear) && !props.disabled && (value || value === 0)
+
   useEffect(() => {
     if (value) formatNumber({ target: { value } })
-  }, [])
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.select()
-    }
   }, [])
 
   return _hidden ? (
@@ -117,18 +115,15 @@ const CustomNumberField = ({
       helperText={helperText}
       required={_required}
       onInput={handleInput}
-      onFocus={() => setIsFocused(true)}
+      onFocus={e => autoSelect && e.target.select()}
       onBlur={e => {
         onBlur(e)
         if (e.target.value?.endsWith('.')) {
           e.target.value = e.target.value.slice(0, -1)
           handleNumberChangeValue(e)
         }
-        setIsFocused(false)
       }}
       InputProps={{
-        inputRef,
-        autoFocus: false,
         inputProps: {
           min: min,
           max: max,
@@ -140,9 +135,9 @@ const CustomNumberField = ({
         readOnly: _readOnly,
         endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (
           <InputAdornment position='end'>
-            {props.ShowDiscountIcons && (
-              <IconButton onClick={handleButtonClick}>
-                {props.isPercentIcon ? <PercentIcon /> : <PinIcon sx={{ minWidth: '40px', height: '70px' }} />}
+            {iconMap[props?.iconKey] && (
+              <IconButton tabIndex={iconMapIndex} onClick={handleButtonClick}>
+                {iconMap[props?.iconKey]}
               </IconButton>
             )}
             {displayButtons && (value || value === 0) && (

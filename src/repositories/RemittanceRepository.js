@@ -178,5 +178,9 @@ export const RemittanceSettingsRepository = {
     get: service + 'getCDM',
     del: service + 'delCDM',
     set2: service + 'set2CDM'
+  },
+  CorrespondentDispersalRate: {
+    qry: service + 'qryCDR',
+    set2: service + 'set2CDR',
   }
 }

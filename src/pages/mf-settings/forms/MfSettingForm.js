@@ -90,7 +90,7 @@ const MfSettingForm = () => {
             <ResourceComboBox
               endpointId={InventoryRepository.Site.qry}
               name='mf_ava_siteId'
-              label={labels.rawMaterialsSite}
+              label={labels.availabilitySite}
               valueField='recordId'
               displayField={['reference', 'name']}
               columnsInDropDown={[
@@ -108,7 +108,7 @@ const MfSettingForm = () => {
             <ResourceComboBox
               endpointId={InventoryRepository.Site.qry}
               name='mf_rm_siteId'
-              label={labels.availabilitySite}
+              label={labels.rawMaterialsSite}
               valueField='recordId'
               displayField={['reference', 'name']}
               columnsInDropDown={[

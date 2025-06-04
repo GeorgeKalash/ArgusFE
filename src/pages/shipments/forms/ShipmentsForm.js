@@ -50,7 +50,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
   const marginDefault = parseInt(defaultsData?.list?.find(obj => obj.key === 'POSHPVarPct')?.value) || 0
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       header: {
@@ -329,6 +329,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       condition: true,
       onClick: 'onClickGL',
       valuesPath: formik.values.header,
+      datasetId: ResourceIds.GLShipments,
       disabled: !editMode
     },
     {
@@ -371,7 +372,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
 
     const filteredData = array
       .filter(item => item.poId === poId)
-      .map(({ poId, poSeqNo, itemId, sku, itemName, qty, trackBy, lotCategoryId, msId }) => ({
+      .map(({ poId, poSeqNo, itemId, sku, itemName, qty, trackBy, lotCategoryId, msId, isInactive }) => ({
         poId,
         poSeqNo,
         itemId,
@@ -380,7 +381,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         qty,
         trackBy,
         lotCategoryId,
-        msId
+        msId,
+        isInactive
       }))
 
     skuStore.current = filteredData
@@ -452,7 +454,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
           { from: 'qty', to: 'qty' },
           { from: 'qty', to: 'shippedNowQty' },
           { from: 'trackBy', to: 'trackBy' },
-          { from: 'lotCategoryId', to: 'lotCategoryId' }
+          { from: 'lotCategoryId', to: 'lotCategoryId' },
+          { from: 'isInactive', to: 'isInactive' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -468,6 +471,21 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
             muId: null,
             baseQty: 0,
             muQty: 0
+          })
+
+          return
+        }
+
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.items[0],
+            poId: newRow?.poId,
+            poRef: newRow?.poRef,
+            id: newRow.id
+          })
+
+          stackError({
+            message: labels.inactiveItem
           })
 
           return
@@ -553,7 +571,6 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       component: 'button',
       hidden: true,
       name: 'lotButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/TableIcons/lot.png'
       },
@@ -793,6 +810,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
             }}
             value={formik?.values?.items}
             error={formik?.errors?.items}
+            initialValues={formik?.initialValues?.items?.[0]}
             columns={columns}
             maxAccess={maxAccess}
             name='shippedItems'

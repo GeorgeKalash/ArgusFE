@@ -133,8 +133,8 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
     }
   }, [])
 
-  if (apiDetails?.endpoint === SystemRepository.DocumentType.qry) {
-    newParams += `&_dgId=${field?.data}`
+  if (apiDetails?.endpoint === SystemRepository.DocumentType.qry2) {
+    newParams += `&_functionIds=${field?.data}`
   } else if (apiDetails?.endpoint === InventoryRepository.Dimension.qry) {
     newParams = `_dimension=${field?.data}`
   } else if (apiDetails?.endpoint === FinancialRepository.FIDimension.qry) {
@@ -352,7 +352,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
       extension: SystemRepository.ParameterDefinition,
       parameters: parameters
     }).then(res => {
-      setParameters(res.list)
+      if (res?.list) setParameters(res.list)
     })
   }
 

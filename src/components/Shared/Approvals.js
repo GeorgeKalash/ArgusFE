@@ -17,7 +17,7 @@ const Approvals = props => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.Approvals.qry,
+    endpointId: DocumentReleaseRepository.DocumentsOnHold.qry2,
     datasetId: ResourceIds.FRT_DR_approvals
   })
 
@@ -64,7 +64,7 @@ const Approvals = props => {
 
   async function fetchGridData() {
     return await getRequest({
-      extension: DocumentReleaseRepository.Approvals.qry,
+      extension: DocumentReleaseRepository.DocumentsOnHold.qry2,
       parameters: `_recordId=${recordId}&_functionId=${functionId}`
     })
   }

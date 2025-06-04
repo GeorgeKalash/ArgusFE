@@ -122,7 +122,7 @@ const Rubber = () => {
         access
       },
       width: 550,
-      height: 650,
+      height: 600,
       title: labels?.rubber
     })
   }
