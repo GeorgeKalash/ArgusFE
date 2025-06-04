@@ -122,19 +122,26 @@ export function WindowProvider({ children }) {
                   setRerenderFlag(!rerenderFlag)
                 }
               },
-              setRecordId: newId => {
-                setStack(stack => {
-                  return stack.map(window =>
+              setRecord: (recordId, record) => {
+                setStack(prevStack => {
+                  const nextStack = prevStack.map(window =>
                     window.id === id
                       ? {
                           ...window,
                           props: {
                             ...window.props,
-                            recordId: newId
+                            ...record,
+                            recordId,
+                            ...(record &&
+                            Object.values(record).some(value => value !== '' && value !== null && value !== undefined)
+                              ? { record }
+                              : {})
                           }
                         }
                       : window
                   )
+                  
+                  return nextStack
                 })
               }
             }}
