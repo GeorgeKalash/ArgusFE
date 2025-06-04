@@ -76,11 +76,9 @@ export default function SerialsForm({ labels, maxAccess, recordId }) {
   })
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        await fetchData(recordId)
-      }
-    })()
+    if (recordId) {
+      fetchData(recordId)
+    }
   }, [])
 
   async function fetchData(recordId) {
