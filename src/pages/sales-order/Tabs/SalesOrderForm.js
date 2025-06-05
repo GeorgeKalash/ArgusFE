@@ -159,6 +159,25 @@ export default function SalesOrderForm({ recordId, currency, window }) {
     endpointId: SaleRepository.SalesOrder.page
   })
 
+  const createRowValidation = term =>
+    yup.mixed().test(function (value) {
+      const { sku, itemName } = this.parent
+      const isAnyFieldFilled = !!(sku || itemName)
+      if (term === 'qty') {
+        if (isAnyFieldFilled) return isNaN(value) ? false : value != 0
+
+        return value != 0 || !value
+      }
+
+      return isAnyFieldFilled ? value !== null && value !== undefined : true
+    })
+
+  const rowValidationSchema = yup.object({
+    sku: createRowValidation(),
+    itemName: createRowValidation(),
+    qty: createRowValidation('qty')
+  })
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
@@ -169,55 +188,7 @@ export default function SalesOrderForm({ recordId, currency, window }) {
       date: yup.string().required(),
       currencyId: yup.string().required(),
       clientId: yup.string().required(),
-      items: yup
-        .array()
-        .of(
-          yup.object().shape({
-            sku: yup.string().test(function (value) {
-              const row = this.parent
-              const isAnyFieldFilled = row.sku || row.itemName
-
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled || row.qty > 0) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            }),
-            qty: yup.string().test(function (value) {
-              const row = this.parent
-              const isAnyFieldFilled = row.sku || row.itemName
-
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled || row.qty > 0) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            }),
-            itemName: yup.string().test(function (value) {
-              const row = this.parent
-              const isAnyFieldFilled = row.sku || row.itemName
-
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled || row.qty > 0) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            })
-          })
-        )
-        .required()
+      items: yup.array().of(rowValidationSchema)
     }),
     onSubmit: async obj => {
       const copy = { ...obj }
@@ -931,8 +902,8 @@ export default function SalesOrderForm({ recordId, currency, window }) {
       qty: itemPriceRow?.qty,
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
-      vatAmount: parseFloat(itemPriceRow?.vatAmount),
-      tdPct: formik?.values?.tdPct,
+      vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
+      tdPct: formik?.values?.tdPct || 0,
       taxDetails: formik.values.isVattable ? newRow.taxDetails : null
     })
 

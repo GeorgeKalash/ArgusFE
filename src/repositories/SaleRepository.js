@@ -192,7 +192,8 @@ export const SaleRepository = {
     get: service + 'getTR',
     get2: service + 'get2TR',
     set2: service + 'set2TRX',
-    del: service + 'delTR'
+    del: service + 'delTR',
+    verify: service + 'verifyTRX'
   },
   SalesTransactionItems: {
     qry: service + 'qryIT'
@@ -273,7 +274,7 @@ export const SaleRepository = {
     page: service + 'pagePRC',
     get: service + 'getPRC',
     set: service + 'setPRC',
-    del: service + 'delPRC',
+    del: service + 'delPRC'
   },
   PriceListUpdate: {
     page: service + 'pagePLU',
@@ -282,16 +283,16 @@ export const SaleRepository = {
     del: service + 'delPLU',
     post: service + 'postPLU',
     unpost: service + 'unpostPLU',
-    generate: service + 'generatePLU',
+    generate: service + 'generatePLU'
   },
   PriceListItem: {
     qry: service + 'qryPLI',
-    snapshot: service + 'snapshotPLI',
+    snapshot: service + 'snapshotPLI'
   },
   CategoryPriceGroup: {
     get: service + 'getPGC',
     set: service + 'setPGC',
     del: service + 'delPGC',
     page: service + 'pagePGC'
-  },
+  }
 }
