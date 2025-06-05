@@ -24,7 +24,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function SketchForm({ recordId, invalidate }) {
+export default function SketchForm({ recordId, invalidate, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
@@ -109,6 +109,8 @@ export default function SketchForm({ recordId, invalidate }) {
       ...res.record
     })
   }
+
+  useSetWindow({ title: labels?.Sketch, window })
 
   const onClose = async () => {
     await postRequest({

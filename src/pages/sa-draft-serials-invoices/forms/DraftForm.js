@@ -494,7 +494,6 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
               taxId: row?.taxId,
               obj: row
             },
-            width: 1000,
             title: platformLabels.TaxDetails
           })
         }

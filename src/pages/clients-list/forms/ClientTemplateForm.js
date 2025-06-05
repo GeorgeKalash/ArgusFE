@@ -40,8 +40,10 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 import MoreDetails from './MoreDetails'
 import CustomPhoneNumber from 'src/components/Inputs/CustomPhoneNumber'
 import { isValidPhoneNumber } from 'libphonenumber-js'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
+const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) => {
   const { stack } = useWindow()
   const { getRequestFullEndPoint, getRequest, postRequest } = useContext(RequestsContext)
   const { systemChecks, defaultsData } = useContext(ControlContext)
@@ -64,6 +66,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const { platformLabels } = useContext(ControlContext)
 
   const trialDays = defaultsData?.list?.find(({ key }) => key === 'ct-client-trial-days')?.value
+
+  const { labels, access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.ClientMaster
+  })
+
+  useSetWindow({ title: labels.pageTitle, window })
 
   const initialValues = {
     //clientIDView

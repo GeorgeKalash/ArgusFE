@@ -19,7 +19,7 @@ export default function useResourceParams({ datasetId, DatasetIdAccess }) {
     }
   }, [access])
 
-  const _labels = labels ? Object.fromEntries(labels.map(({ key, value }) => [key, value])) : {}
+  const _labels = labels ? Object.fromEntries(labels?.map(({ key, value }) => [key, value])) : {}
 
   return {
     labels: _labels,

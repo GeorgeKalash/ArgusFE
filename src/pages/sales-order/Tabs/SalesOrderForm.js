@@ -47,8 +47,10 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
+export default function SalesOrderForm({ recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -59,6 +61,12 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.SalesOrder
+  })
+
+  useSetWindow({ title: labels.salesOrder, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesOrder,
@@ -530,7 +538,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
             itemId: row?.itemId,
             clientId: formik?.values?.clientId
           },
-          width: 1000,
           title: labels?.salesTrx
         })
       }

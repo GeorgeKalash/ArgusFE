@@ -27,13 +27,21 @@ import PaymentGrid from 'src/components/Shared/PaymentGrid'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import PreviewReport from 'src/components/Shared/PreviewReport'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId, form = null }) {
+export default function ReceiptVoucherForm({ recordId, cashAccountId, form = null, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const [formikSettings, setFormik] = useState({})
   const [selectedReport, setSelectedReport] = useState(null)
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.RemittanceReceiptVoucher
+  })
+
+  useSetWindow({ title: labels.receiptVoucher, window })
 
   const { documentType, maxAccess } = useDocumentType({
     functionId: SystemFunction.RemittanceReceiptVoucher,
@@ -430,8 +438,6 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
             onChange={value => formik.setFieldValue('cash', value)}
             value={formik.values.cash}
             error={formik.errors.cash}
-            labels={labels}
-            maxAccess={maxAccess}
             allowDelete={!isPosted}
             allowAddNewLine={!isPosted}
             amount={formik.values.header.amount}
