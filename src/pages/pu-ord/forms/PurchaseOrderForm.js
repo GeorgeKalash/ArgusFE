@@ -139,7 +139,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         spId: null,
         qty: 0,
         baseQty: 0,
-        unitPrice: 0,
+        unitPrice: null,
         baseLaborPrice: 0,
         isMetal: false,
         metalId: null,
@@ -200,7 +200,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         currencyId: yup.number().required(),
         vendorId: yup.number().required()
       }),
-      items: yup.array().of(createConditionalSchema(conditions, true))
+      items: yup.array().of(createConditionalSchema(conditions, true, maxAccess, 'items'))
     }),
     onSubmit: async obj => {
       const payload = {
