@@ -66,7 +66,7 @@ export default function SalesOrderForm({ recordId, currency, window }) {
     datasetId: ResourceIds.SalesOrder
   })
 
-  useSetWindow({ labels, window, titleKey: 'salesOrder' })
+  useSetWindow({ title: labels.salesOrder, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesOrder,

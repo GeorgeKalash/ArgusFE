@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 
-export default function useSetWindow({ labels, window, titleKey }) {
+export default function useSetWindow({ title, window }) {
   useEffect(() => {
-    if (labels?.[titleKey]) {
-      window.setTitle(labels?.[titleKey])
+    if (title) {
+      window.setTitle(title)
     }
-  }, [labels?.[titleKey]])
+  }, [title])
 }

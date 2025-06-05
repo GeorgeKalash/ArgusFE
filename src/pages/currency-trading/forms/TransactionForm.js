@@ -79,7 +79,7 @@ export default function TransactionForm({ recordId, plantId }) {
     datasetId: ResourceIds.CashInvoice
   })
 
-  useSetWindow({ labels, window, titleKey: 'CurrencyTrading' })
+  useSetWindow({ title: labels.CurrencyTrading, window })
 
   const initialValues = {
     recordId: null,

@@ -102,7 +102,7 @@ export default function CreditInvoiceForm({ recordId, plantId, userData, cashAcc
     enabled: !recordId
   })
 
-  useSetWindow({ labels, window, titleKey: 'creditInvoice' })
+  useSetWindow({ title: labels.creditInvoice, window })
 
   const { formik } = useForm({
     initialValues,

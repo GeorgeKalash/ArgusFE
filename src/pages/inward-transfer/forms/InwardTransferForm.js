@@ -43,7 +43,7 @@ export default function InwardTransferForm({ recordId, plantId, userId, dtId, wi
     datasetId: ResourceIds.InwardTransfer
   })
 
-  useSetWindow({ labels, window, titleKey: 'InwardTransfer' })
+  useSetWindow({ title: labels.InwardTransfer, window })
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot

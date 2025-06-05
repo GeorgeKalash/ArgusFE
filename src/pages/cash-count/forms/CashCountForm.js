@@ -86,7 +86,7 @@ export default function CashCountForm({ recordId, window }) {
     datasetId: ResourceIds.CashCountTransaction
   })
 
-  useSetWindow({ labels, window, titleKey: 'cashCount' })
+  useSetWindow({ title: labels.cashCount, window })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.CashCountTransaction,

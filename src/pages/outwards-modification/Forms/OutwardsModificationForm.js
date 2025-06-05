@@ -41,7 +41,7 @@ export default function OutwardsModificationForm({ recordId, window }) {
     datasetId: ResourceIds.OutwardsModification
   })
 
-  useSetWindow({ labels, window, titleKey: 'outwardsModification' })
+  useSetWindow({ title: labels.outwardsModification, window })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsModification,

@@ -71,7 +71,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
     datasetId: ResourceIds.ClientMaster
   })
 
-  useSetWindow({ labels, window, titleKey: 'pageTitle' })
+  useSetWindow({ title: labels.pageTitle, window })
 
   const initialValues = {
     //clientIDView

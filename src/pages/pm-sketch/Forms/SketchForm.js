@@ -110,10 +110,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
     })
   }
 
-  useEffect(() => {
-    window?.setTitle(labels.Sketch)
-    window?.setSize({ width: 700, height: 700 })
-  }, [labels.Sketch])
+  useSetWindow({ title: labels?.Sketch, window })
 
   const onClose = async () => {
     await postRequest({

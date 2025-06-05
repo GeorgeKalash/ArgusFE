@@ -59,7 +59,7 @@ export default function OutwardsForm({ recordId, plantId, userId, dtId, window }
     datasetId: ResourceIds.OutwardsOrder
   })
 
-  useSetWindow({ labels, window, titleKey: 'OutwardsOrder' })
+  useSetWindow({ title: labels.OutwardsOrder, window })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsOrder,

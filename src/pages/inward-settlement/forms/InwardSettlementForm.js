@@ -44,7 +44,7 @@ export default function InwardSettlementForm({ recordId, plantId, cashAccountId,
     datasetId: ResourceIds.InwardSettlement
   })
 
-  useSetWindow({ labels, window, titleKey: 'InwardSettlement' })
+  useSetWindow({ title: labels.InwardSettlement, window })
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.InwardSettlement.snapshot

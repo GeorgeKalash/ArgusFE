@@ -46,7 +46,7 @@ export default function ThreeDDesignForm({ recordId, window }) {
     datasetId: ResourceIds.ThreeDDesign
   })
 
-  useSetWindow({ labels, window, titleKey: 'ThreeDDesign' })
+  useSetWindow({ title: labels.ThreeDDesign, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,

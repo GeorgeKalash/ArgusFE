@@ -49,7 +49,7 @@ export default function CashTransferTab({ recordId, plantId, cashAccountId, dtId
     datasetId: ResourceIds.CashTransfer
   })
 
-  useSetWindow({ labels, window, titleKey: 'cashTransfer' })
+  useSetWindow({ title: labels.cashTransfer, window })
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,

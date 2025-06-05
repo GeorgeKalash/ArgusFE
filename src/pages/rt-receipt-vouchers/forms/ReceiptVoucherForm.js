@@ -41,7 +41,7 @@ export default function ReceiptVoucherForm({ recordId, cashAccountId, form = nul
     datasetId: ResourceIds.RemittanceReceiptVoucher
   })
 
-  useSetWindow({ labels, window, titleKey: 'receiptVoucher' })
+  useSetWindow({ title: labels.receiptVoucher, window })
 
   const { documentType, maxAccess } = useDocumentType({
     functionId: SystemFunction.RemittanceReceiptVoucher,

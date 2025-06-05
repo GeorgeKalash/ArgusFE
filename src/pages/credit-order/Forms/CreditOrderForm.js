@@ -91,7 +91,7 @@ export default function CreditOrderForm({ recordId, plantId, userData, window })
     datasetId: ResourceIds.CreditOrder
   })
 
-  useSetWindow({ labels, window, titleKey: 'creditOrder' })
+  useSetWindow({ title: labels.creditOrder, window })
 
   const { maxAccess } = useDocumentType({
     functionId: selectedFunctionId,

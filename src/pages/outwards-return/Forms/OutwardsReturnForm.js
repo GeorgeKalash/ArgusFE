@@ -39,7 +39,7 @@ export default function OutwardsReturnForm({ recordId, plantId, dtId, isOpenOutw
     datasetId: ResourceIds.OutwardsReturn
   })
 
-  useSetWindow({ labels, window, titleKey: 'outwardsReturn' })
+  useSetWindow({ title: labels.outwardsReturn, window })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsReturn,
