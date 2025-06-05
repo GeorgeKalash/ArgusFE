@@ -27,8 +27,9 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { useWindow } from 'src/windows'
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
+import AccountSummary from 'src/components/Shared/AccountSummary'
 
-export default function MemosForm({ labels, access, recordId, functionId, getEndpoint }) {
+export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
@@ -273,7 +274,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     if (currencyId && date && rateType) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
+        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${rateType}`
       })
       const amountValue = amount === 0 ? 0 : amount ?? formik.values.amount
 
@@ -294,6 +295,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: getGLResourceId(parseInt(formik.values.functionId)),
       disabled: !editMode
     },
     {
@@ -326,6 +328,23 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       condition: true,
       onClick: onCancel,
       disabled: !editMode || isCancelled || isPosted
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.accountId),
+            moduleId: 1
+          },
+          width: 1000,
+          height: 500,
+          title: platformLabels.AccountSummary
+        })
+      },
+      disabled: !formik.values.accountId
     }
   ]
 
@@ -373,13 +392,12 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
       formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
 
-
       return res
     }
   }
 
   useEffect(() => {
-    getDTD(formik?.values?.dtId)
+    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
   }, [formik.values.dtId])
 
   return (
@@ -415,8 +433,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       changeDT(newValue)
-                      formik && formik.setFieldValue('dtId', newValue?.recordId || '')
-                      formik && formik.setFieldValue('status', newValue?.activeStatus)
+                      formik.setFieldValue('dtId', newValue?.recordId || '')
+                      formik.setFieldValue('status', newValue?.activeStatus)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />
@@ -442,15 +460,11 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     value={formik.values.date}
                     onChange={async (e, newValue) => {
                       formik.setFieldValue('date', newValue)
-                      await getMultiCurrencyFormData(
-                        formik.values.currencyId,
-                        formatDateForGetApI(newValue),
-                        RateDivision.FINANCIALS
-                      )
+                      await getMultiCurrencyFormData(formik.values.currencyId, newValue, RateDivision.FINANCIALS)
                     }}
                     required
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('date', '')}
+                    onClear={() => formik.setFieldValue('date', null)}
                     error={formik.touched.date && Boolean(formik.errors.date)}
                   />
                 </Grid>
@@ -509,7 +523,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                         onChange={async (event, newValue) => {
                           await getMultiCurrencyFormData(
                             newValue?.recordId,
-                            formatDateForGetApI(formik.values.date),
+                            formik.values.date,
                             RateDivision.FINANCIALS
                           )
                           formik.setFieldValue('currencyId', newValue?.recordId)
@@ -621,11 +635,12 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 secondValueShow='accountName'
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
+                  { key: 'name', value: 'Name', width: '500px' },
                   { key: 'keywords', value: 'Keywords' },
                   { key: 'groupName', value: 'Account Group' }
                 ]}
                 maxAccess={maxAccess}
+                displayFieldWidth={2}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue ? newValue.recordId : '')
                   formik.setFieldValue('accountRef', newValue ? newValue.reference : '')

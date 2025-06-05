@@ -91,7 +91,6 @@ export const InventoryRepository = {
     get: service + 'getITC',
     set: service + 'setITC'
   },
-
   MeasurementUnit: {
     qry: service + 'qryMU',
     get: service + 'getMU',
@@ -105,11 +104,6 @@ export const InventoryRepository = {
     del: service + 'delDI'
   },
   DimensionId: { set: service + 'set2ID', get: service + 'getID' },
-
-  SerialNumber: {
-    qry: service + 'qrySPF'
-  },
-
   CategoryCurrency: {
     get: service + 'getCAC',
     qry: service + 'qryCAC',
@@ -141,9 +135,6 @@ export const InventoryRepository = {
     set: service + 'setOQ',
     del: service + 'delOQ'
   },
-  SerialProfile: {
-    qry: service + 'qrySPF'
-  },
   ItemProduction: {
     get: service + 'getMFR',
     set: service + 'setMFR'
@@ -165,9 +156,6 @@ export const InventoryRepository = {
   },
   MaterialsTransferItems: {
     qry: service + 'qryTFI'
-  },
-  Cost: {
-    get: service + 'getCOS'
   },
   ItemPhysProp: {
     get: service + 'getPP'
@@ -209,6 +197,7 @@ export const InventoryRepository = {
   },
   AvailabilitySerial: {
     qry: service + 'qryAVS',
+    get: service + 'getAVS',
     page: service + 'pageAVS'
   },
   AvailabilityLot: {
@@ -246,6 +235,7 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotCOS'
   },
   Availability: {
+    get: service + 'getAVA',
     qry: service + 'qryAVA'
   },
   Parts: {
@@ -263,7 +253,14 @@ export const InventoryRepository = {
   },
   Serial: {
     qry: service + 'qrySRL',
-    get2: service + 'get2SRL'
+    get2: service + 'get2SRL',
+    get: service + 'getSRL'
+  },
+  MaterialTransferSerial: {
+    qry: service + 'qryTFS'
+  },
+  MaterialAdjustmentSerial: {
+    qry: service + 'qryADS'
   },
   DraftTransfer: {
     page: service + 'pageDTF',
@@ -294,5 +291,44 @@ export const InventoryRepository = {
     qry: service + 'qryCOL',
     del: service + 'delCOL',
     set: service + 'setCOL'
+  },
+  Management: {
+    get: service + 'getMAN',
+    set2: service + 'set2MAN'
+  },
+  SManagement: {
+    qry: service + 'qrySMA'
+  },
+  Replacement: {
+    qry: service + 'qryRPL'
+  },
+  Lot: {
+    get: service + 'getLOT',
+    set: service + 'setLOT'
+  },
+  AdjustItemCost: {
+    page: service + 'pageACO',
+    qry: service + 'qryACO',
+    get2: service + 'get2ACO',
+    set2: service + 'set2ACO',
+    del: service + 'delACO',
+    snapshot: service + 'snapshotACO',
+    post: service + 'postACO',
+    unpost: service + 'unpostACO'
+  },
+  MeasurementSerial: {
+    qry: service + 'qryMSM',
+    set2: service + 'set2MSM'
+  },
+  SerialsProfile: {
+    qry: service + 'qrySPF',
+    set: service + 'setSPF',
+    get: service + 'getSPF',
+    del: service + 'delSPF',
+    page: service + 'pageSPF',
+    set2: service + 'set2SPF',
+  },
+  SerialsProfileSequences: {
+    qry: service + 'qrySPS',
   }
 }

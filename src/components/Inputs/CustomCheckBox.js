@@ -36,11 +36,13 @@ const CustomCheckBox = ({
           disabled={_disabled}
           inputProps={{ 'aria-label': label }}
           sx={{ ml: 2, '& .MuiSvgIcon-root': { fontSize: 15 }, '&.aria-label': { fontSize: 15 } }}
+          {...props}
         />
       }
       label={label}
       dir={dir}
       componentsProps={{ typography: { sx: { fontSize: 15 } } }}
+      {...props}
     />
   )
 }

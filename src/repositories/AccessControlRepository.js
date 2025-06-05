@@ -57,6 +57,7 @@ export const AccessControlRepository = {
   ModuleClass: {
     qry: service + 'qryRES',
     qry0: service + 'qryRES0',
+    qry2: service + 'qryRES2',
     set: service + 'setRES',
     set2: service + 'set2RES'
   },
@@ -69,6 +70,7 @@ export const AccessControlRepository = {
     set2: service + 'set2USI'
   },
   NotificationLabel: {
+    page: service + 'pageNLB',
     qry: service + 'qryNLB',
     get: service + 'getNLB',
     set: service + 'setNLB',

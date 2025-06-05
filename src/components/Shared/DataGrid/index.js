@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import { Box, IconButton } from '@mui/material'
+import { Box, Checkbox, Grid, IconButton } from '@mui/material'
 import components from './components'
 import { CacheStoreProvider } from 'src/providers/CacheStoreContext'
 import { GridDeleteIcon } from '@mui/x-data-grid'
@@ -9,6 +9,7 @@ import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export function DataGrid({
   name, // maxAccess
@@ -25,7 +26,9 @@ export function DataGrid({
   onSelectionChange,
   rowSelectionModel,
   autoDelete,
-  bg
+  initialValues,
+  bg,
+  onValidationRequired
 }) {
   const gridApiRef = useRef(null)
 
@@ -107,16 +110,14 @@ export function DataGrid({
           ? value.reduce((max, current) => (max.id > current.id ? max : current)).id + 1
           : 1
 
-        const defaultValues = Object.fromEntries(
-          columns?.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
-        )
         rows = [
           ...value.map(row => (row.id === updatedRow.id ? updatedRow : row)),
           {
-            id: highestIndex,
-            ...defaultValues
+            ...initialValues,
+            id: highestIndex
           }
         ]
+
         onChange(rows)
 
         setTimeout(() => {
@@ -199,35 +200,12 @@ export function DataGrid({
     }
   }, [rowSelectionModel])
 
-  useEffect(() => {
-    if (gridApiRef.current && rowSelectionModel) {
-      const rowNode = gridApiRef.current.getRowNode(rowSelectionModel)
-      if (rowNode) {
-        rowNode.setSelected(true)
-      }
-    }
-  }, [rowSelectionModel])
-
   const addNewRow = () => {
     const highestIndex = Math.max(...value?.map(item => item.id), 0) + 1
 
-    const defaultValues = allColumns
-      .filter(({ name }) => name !== 'id')
-      .reduce((acc, { name, defaultValue }) => {
-        if (typeof defaultValue === 'object' && defaultValue !== null) {
-          Object.entries(defaultValue).forEach(([key, value]) => {
-            acc[key] = value
-          })
-        } else {
-          acc[name] = defaultValue
-        }
-
-        return acc
-      }, {})
-
     const newRow = {
-      id: highestIndex,
-      ...defaultValues
+      ...initialValues,
+      id: highestIndex
     }
 
     const res = gridApiRef.current?.applyTransaction({ add: [newRow] })
@@ -245,6 +223,7 @@ export function DataGrid({
             colKey: allColumns[0].name
           })
         }
+        if (typeof onValidationRequired === 'function') onValidationRequired()
       }, 0)
     }
   }
@@ -266,28 +245,35 @@ export function DataGrid({
       (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
   )
 
-  const condition = i => {
+  const condition = (i, data) => {
     return (
-      (!allColumns?.[i]?.props?.readOnly &&
+      ((!allColumns?.[i]?.props?.readOnly &&
         accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED) ||
-      (allColumns?.[i]?.props?.readOnly &&
-        (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
-          accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))
+        (allColumns?.[i]?.props?.readOnly &&
+          (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
+            accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
+      (typeof allColumns?.[i]?.props?.disableCondition !== 'function' ||
+        !allColumns?.[i]?.props?.disableCondition(data)) &&
+      (typeof allColumns?.[i]?.props?.onCondition !== 'function' || !allColumns?.[i]?.props?.onCondition(data)?.hidden)
     )
   }
 
-  const findNextEditableColumn = (columnIndex, rowIndex, direction) => {
+  const getUpdatedRowData = (rowIndex, api) => {
+    return api.getDisplayedRowAtIndex(rowIndex)?.data || {}
+  }
+
+  const findNextEditableColumn = (columnIndex, rowIndex, direction, api) => {
     const limit = direction > 0 ? allColumns.length : -1
     const step = direction > 0 ? 1 : -1
 
     for (let i = columnIndex + step; i !== limit; i += step) {
-      if (condition(i)) {
+      if (condition(i, getUpdatedRowData(rowIndex, api))) {
         return { columnIndex: i, rowIndex }
       }
     }
 
     for (let i = direction > 0 ? 0 : allColumns.length - 1; i !== limit; i += step) {
-      if (condition(i)) {
+      if (condition(i, getUpdatedRowData(rowIndex + direction, api))) {
         return {
           columnIndex: i,
           rowIndex: rowIndex + direction
@@ -296,10 +282,10 @@ export function DataGrid({
     }
   }
 
-  const nextColumn = columnIndex => {
+  const nextColumn = (columnIndex, data) => {
     let count = 0
     for (let i = columnIndex + 1; i < allColumns.length; i++) {
-      if (condition(i)) {
+      if (condition(i, data)) {
         count++
       }
     }
@@ -345,7 +331,7 @@ export function DataGrid({
       }
     }
 
-    const countColumn = nextColumn(nextCell.columnIndex)
+    const countColumn = nextColumn(nextCell.columnIndex, data)
 
     if (
       (currentColumnIndex === allColumns.length - 1 - skip || !countColumn) &&
@@ -357,15 +343,28 @@ export function DataGrid({
       }
     }
 
+    const currentCell = api.getFocusedCell()
+    if (currentCell) {
+      const focusElement = document.querySelector('[tabindex="1"]')
+
+      if (event.target.tabIndex === 0 && document.querySelector('.ag-root') && focusElement && !event.shiftKey) {
+        event.preventDefault()
+
+        focusElement.focus()
+
+        return
+      }
+    }
+
     const columns = gridApiRef.current.getColumnDefs()
     if (!event.shiftKey) {
-      const skipReadOnlyTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, 1)
+      const skipReadOnlyTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, 1, api)
       const { columnIndex, rowIndex } = skipReadOnlyTab(nextCell.columnIndex, nextCell.rowIndex)
 
       nextCell.columnIndex = columnIndex
       nextCell.rowIndex = rowIndex
     } else {
-      const skipReadOnlyShiftTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, -1)
+      const skipReadOnlyShiftTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, -1, api)
       const { columnIndex, rowIndex } = skipReadOnlyShiftTab(nextCell.columnIndex, nextCell.rowIndex)
 
       nextCell.columnIndex = columnIndex
@@ -468,7 +467,7 @@ export function DataGrid({
       }
     }
 
-    const updateRow = ({ changes }) => {
+    const updateRow = ({ changes, commitOnBlur }) => {
       const oldRow = params.data
 
       setCurrentValue(changes || '')
@@ -481,7 +480,7 @@ export function DataGrid({
         return
       }
 
-      if (column.colDef.updateOn !== 'blur') {
+      if (column.colDef.updateOn !== 'blur' || commitOnBlur) {
         commit(changes)
 
         process(params, oldRow, setData)
@@ -555,6 +554,32 @@ export function DataGrid({
       sortable: false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
+      ...(column?.checkAll?.visible && {
+        headerComponent: params => {
+          const selectAll = e => {
+            if (column?.checkAll?.onChange) {
+              column?.checkAll?.onChange({ checked: e.target?.checked })
+            }
+          }
+
+          return (
+            <Grid container justifyContent='center' alignItems='center'>
+              <CustomCheckBox
+                checked={column?.checkAll?.value}
+                onChange={e => {
+                  selectAll(e)
+                }}
+                sx={{
+                  width: '20%',
+                  height: '20%',
+                  marginLeft: '0px !important'
+                }}
+                disabled={column.checkAll?.disabled}
+              />
+            </Grid>
+          )
+        }
+      }),
       cellEditorParams: { maxAccess },
       cellStyle: getCellStyle,
       suppressKeyboardEvent: params => {
@@ -583,7 +608,9 @@ export function DataGrid({
     onChange(updatedGridData)
   }
 
-  const onCellClicked = params => {
+  const onCellClicked = async params => {
+    if (typeof onValidationRequired === 'function') onValidationRequired()
+
     const { colDef, rowIndex, api } = params
 
     api.startEditingCell({
@@ -610,11 +637,12 @@ export function DataGrid({
   useEffect(() => {
     function handleBlur(event) {
       if (
-        gridContainerRef.current &&
-        !gridContainerRef.current.contains(event.target) &&
-        gridApiRef.current?.getEditingCells()?.length > 0 &&
-        !event.target.classList.contains('MuiBox-root') &&
-        !event.target.classList.contains('MuiAutocomplete-option')
+        (gridContainerRef.current &&
+          !gridContainerRef.current.contains(event.target) &&
+          gridApiRef.current?.getEditingCells()?.length > 0 &&
+          !event.target.classList.contains('MuiBox-root') &&
+          !event.target.classList.contains('MuiAutocomplete-option')) ||
+        event.target.closest('.ag-header-row')
       ) {
         gridApiRef.current?.stopEditing()
       } else {
@@ -691,13 +719,15 @@ export function DataGrid({
   const onCellEditingStopped = params => {
     const cellId = `${params.node.id}-${params.column.colId}`
     const { data, colDef } = params
-    let value = params?.data[params.column.colId]
+    let newValue = params?.data[params.column.colId]
+    let currentValue = value?.[params.rowIndex]?.[params.column.colId]
+    if (newValue == currentValue) return
 
-    if (value?.toString()?.endsWith('.') && colDef.component === 'numberfield') {
-      value = value.slice(0, -1).replace(/,/g, '')
+    if (newValue?.toString()?.endsWith('.') && colDef.component === 'numberfield') {
+      newValue = newValue.slice(0, -1).replace(/,/g, '')
 
       const changes = {
-        [colDef?.field]: value || undefined
+        [colDef?.field]: newValue || undefined
       }
       setData(changes, params)
       commit(changes)
@@ -706,12 +736,13 @@ export function DataGrid({
 
     if (lastCellStopped.current == cellId) return
     lastCellStopped.current = cellId
-    if (colDef.updateOn === 'blur' && data[colDef?.field] !== value[params?.columnIndex]?.[colDef?.field]) {
+    if (colDef.updateOn === 'blur' && data[colDef?.field] !== newValue?.[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
         stackDuplicate(params)
 
         return
       }
+
       process(params, data, setData)
     }
   }

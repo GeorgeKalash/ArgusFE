@@ -36,7 +36,8 @@ import {
   DIRTYFIELD_MDTYPE,
   DIRTYFIELD_UPO,
   DIRTYFIELD_EXTENDED_PRICE,
-  MDTYPE_PCT
+  MDTYPE_PCT,
+  MDTYPE_AMOUNT
 } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
 import {
@@ -58,6 +59,8 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import TaxDetails from 'src/components/Shared/TaxDetails'
+import { SerialsForm } from 'src/components/Shared/SerialsForm'
+import AccountSummary from 'src/components/Shared/AccountSummary'
 
 export default function SaleTransactionForm({
   labels,
@@ -66,7 +69,8 @@ export default function SaleTransactionForm({
   functionId,
   window,
   lockRecord,
-  getResourceId
+  getResourceId,
+  getGLResource
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -190,7 +194,7 @@ export default function SaleTransactionForm({
           taxDetails: null,
           notes: '',
           saTrx: true,
-          taxDetailsButton: false
+          taxDetailsButton: true
         }
       ],
       serials: [],
@@ -238,8 +242,35 @@ export default function SaleTransactionForm({
           extension: SaleRepository.Address.set,
           record: JSON.stringify(addressData)
         })
+
         obj.header.billAddressId = addressRes.recordId
       }
+
+      let serialsValues = []
+
+      const updatedRows = obj.items.map(({ id, isVattable, taxDetails, ...rest }) => {
+        const { serials, ...restDetails } = rest
+
+        if (serials) {
+          const updatedSerials = serials.map((serialDetail, idx) => ({
+            ...serialDetail,
+            srlSeqNo: 0,
+            id: idx,
+            componentSeqNo: 0,
+            trxId: formik.values.recordId || 0,
+            itemId: rest?.itemId,
+            seqNo: id
+          }))
+
+          serialsValues = [...serialsValues, ...updatedSerials]
+        }
+
+        return {
+          ...restDetails,
+          seqNo: id,
+          applyVat: isVattable
+        }
+      })
 
       const payload = {
         header: {
@@ -247,11 +278,8 @@ export default function SaleTransactionForm({
           date: formatDateToApi(obj.header.date),
           dueDate: formatDateToApi(obj.header.dueDate)
         },
-        items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
-          seqNo: id,
-          applyVat: isVattable,
-          ...rest
-        })),
+        items: updatedRows,
+        serials: serialsValues,
         taxes: Object.values(
           [
             ...obj.taxes,
@@ -270,7 +298,7 @@ export default function SaleTransactionForm({
           }, {})
         ),
 
-        ...(({ header, items, taxes, ...rest }) => rest)(obj)
+        ...(({ header, items, taxes, serials, ...rest }) => rest)(obj)
       }
 
       const saTrxRes = await postRequest({
@@ -283,6 +311,8 @@ export default function SaleTransactionForm({
       invalidate()
     }
   })
+
+  const itemsUpdate = useRef(formik?.values?.items)
 
   function openMCRForm(data) {
     stack({
@@ -329,7 +359,7 @@ export default function SaleTransactionForm({
     let rowTaxDetails = null
 
     if (!formik.values.header.taxId) {
-      if (itemInfo.taxId) {
+      if (itemInfo?.taxId) {
         const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
 
         const details = taxDetailsResponse.map(item => ({
@@ -371,13 +401,21 @@ export default function SaleTransactionForm({
         itemId: ItemConvertPrice?.itemId
       })
     }
-
+    let categoryName
+    if (itemInfo.categoryId) {
+      const category = await getRequest({
+        extension: InventoryRepository.Category.get,
+        parameters: `_recordId=${itemInfo.categoryId}`
+      })
+      categoryName = category?.record?.name
+    }
     update({
-      isMetal: isMetal,
-      metalId: metalId,
-      metalPurity: metalPurity,
+      isMetal,
+      metalId,
+      metalPurity,
+      metalRef: itemPhysProp?.metalRef || '',
       volume: parseFloat(itemPhysProp?.volume) || 0,
-      weight: weight,
+      weight,
       basePrice:
         isMetal === false
           ? parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5)
@@ -385,12 +423,14 @@ export default function SaleTransactionForm({
           ? basePriceValue
           : 0,
       baseLaborPrice: 0,
-      TotPricePerG: TotPricePerG,
-      unitPrice: unitPrice,
+      TotPricePerG,
+      unitPrice,
       upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
       priceType: ItemConvertPrice?.priceType || 1,
       qty: 0,
       msId: itemInfo?.msId,
+      categoryId: itemInfo.categoryId,
+      categoryName,
       muRef: filteredMeasurements?.[0]?.reference,
       muId: filteredMeasurements?.[0]?.recordId,
       mdAmount: formik.values.header.maxDiscount ? parseFloat(formik.values.header.maxDiscount).toFixed(2) : 0,
@@ -414,7 +454,7 @@ export default function SaleTransactionForm({
     if (currencyId && date && rateType) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${currencyId}&_date=${date}&_rateDivision=${rateType}`
+        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${rateType}`
       })
 
       const updatedRateRow = getRate({
@@ -435,6 +475,26 @@ export default function SaleTransactionForm({
     }
   }
 
+  const onCondition = row => {
+    if (row.trackBy === 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
+  const iconKey = ({ value, data }) => {
+    const mdType = value?.mdType || data?.mdType
+
+    return mdType === MDTYPE_PCT ? '%' : '123'
+  }
+
   const columns = [
     {
       component: 'textfield',
@@ -445,9 +505,15 @@ export default function SaleTransactionForm({
         if (!newRow?.barcode) return
 
         const ItemConvertPrice = await getItemConvertPrice2(newRow)
-        const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
-        const itemInfo = await getItem(ItemConvertPrice?.itemId)
-        await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
+        if (ItemConvertPrice) {
+          const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
+          const itemInfo = await getItem(ItemConvertPrice?.itemId)
+          await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
+        } else {
+          update({
+            barcode: null
+          })
+        }
       }
     },
     {
@@ -464,6 +530,7 @@ export default function SaleTransactionForm({
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
+          { from: 'trackBy', to: 'trackBy' },
           { from: 'msId', to: 'msId' }
         ],
         columnsInDropDown: [
@@ -479,6 +546,9 @@ export default function SaleTransactionForm({
         getFilteredMU(newRow?.itemId)
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
         await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
+      },
+      propsReducer({ row, props }) {
+        return { ...props, imgSrc: onCondition(row) }
       }
     },
     {
@@ -487,6 +557,23 @@ export default function SaleTransactionForm({
       name: 'itemName',
       flex: 3,
       props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.category,
+      name: 'categoryName',
+      flex: 3,
+      props: {
+        endpointId: InventoryRepository.Category.qry,
+        parameters: `_pagesize=100&_startAt=0&_name=`,
+        displayField: 'name',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'recordId', to: 'categoryId' },
+          { from: 'name', to: 'categoryName' }
+        ],
         readOnly: true
       }
     },
@@ -546,7 +633,8 @@ export default function SaleTransactionForm({
       name: 'qty',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
+        update(data)
       }
     },
     {
@@ -566,12 +654,21 @@ export default function SaleTransactionForm({
       }
     },
     {
+      component: 'textfield',
+      label: labels.metal,
+      name: 'metalRef',
+      props: {
+        readOnly: true
+      }
+    },
+    {
       component: 'numberfield',
       label: labels.baseprice,
       name: 'basePrice',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_BASE_PRICE)
+        update(data)
       }
     },
     {
@@ -580,7 +677,8 @@ export default function SaleTransactionForm({
       name: 'baseLaborPrice',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_BASE_LABOR_PRICE)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_BASE_LABOR_PRICE)
+        update(data)
       }
     },
     {
@@ -589,7 +687,8 @@ export default function SaleTransactionForm({
       name: 'totalWeightPerG',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_TWPG)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_TWPG)
+        update(data)
       }
     },
     {
@@ -604,7 +703,8 @@ export default function SaleTransactionForm({
         if (parseFloat(minPrice) > 0 && parseFloat(unitPrice) < parseFloat(minPrice)) {
           ShowMinPriceValueErrorMessage(minPrice, unitPrice)
         }
-        getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_UNIT_PRICE)
+        update(data)
       }
     },
     {
@@ -618,7 +718,8 @@ export default function SaleTransactionForm({
       name: 'upo',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_UPO)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_UPO)
+        update(data)
       }
     },
     {
@@ -632,7 +733,6 @@ export default function SaleTransactionForm({
     {
       component: 'button',
       name: 'taxDetailsButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/tax-icon.png'
       },
@@ -659,20 +759,20 @@ export default function SaleTransactionForm({
       flex: 2,
       props: {
         ShowDiscountIcons: true,
-        iconsClicked: (id, updateRow) => handleIconClick(id, updateRow),
-        gridData: formik.values.items,
+        iconsClicked: handleIconClick,
         type: 'numeric',
-        concatenateWith: '%'
+        iconKey
       },
       async onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
+        update(data)
+
         checkMdAmountPct(newRow, update)
       }
     },
     {
       component: 'button',
       name: 'saTrx',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png'
       },
@@ -697,49 +797,70 @@ export default function SaleTransactionForm({
       name: 'extendedPrice',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        getItemPriceRow(update, newRow, DIRTYFIELD_EXTENDED_PRICE)
+        const data = getItemPriceRow(newRow, DIRTYFIELD_EXTENDED_PRICE)
+        update(data)
       }
     },
     {
       component: 'textfield',
       label: labels.notes,
       name: 'notes'
+    },
+    {
+      component: 'button',
+      name: 'serials',
+      label: platformLabels.serials,
+      props: {
+        onCondition
+      },
+      onClick: (e, row, update, updateRow) => {
+        if (row?.trackBy === 1) {
+          stack({
+            Component: SerialsForm,
+            props: {
+              labels,
+              row,
+              disabled: isPosted,
+              siteId: formik?.values?.header.siteId,
+              maxAccess,
+              checkForSiteId: true,
+              updateRow
+            },
+            width: 500,
+            height: 700,
+            title: platformLabels.serials
+          })
+        }
+      }
     }
   ]
 
-  async function handleIconClick(id, updateRow) {
-    const index = formik.values.items.findIndex(item => item.id === id)
+  function checkMinMaxAmount(amount, type, modType) {
+    let currentAmount = parseFloat(amount) || 0
 
-    if (index === -1) return
-
-    let currentMdType
-    let currentMdAmount = parseFloat(formik.values.items[index].mdAmount)
-    const maxClientAmountDiscount = formik.values.items[index].unitPrice * (formik.values?.header.maxDiscount / 100)
-
-    if (formik.values.items[index].mdType === 2) {
-      if (currentMdAmount < 0 || currentMdAmount > 100) currentMdAmount = 0
-
-      formik.setFieldValue(`items[${index}].mdAmountPct`, 1)
-      formik.setFieldValue(`items[${index}].mdType`, 1)
-      currentMdType = 1
-      formik.setFieldValue(`items[${index}].mdAmount`, parseFloat(currentMdAmount).toFixed(2))
+    if (type === modType) {
+      if (currentAmount < 0 || currentAmount > 100) currentAmount = 0
     } else {
-      if (currentMdAmount < 0 || currentMdAmount > maxClientAmountDiscount) currentMdAmount = 0
-
-      formik.setFieldValue(`items[${index}].mdAmountPct`, 2)
-      formik.setFieldValue(`items[${index}].mdType`, 2)
-      currentMdType = 2
-      formik.setFieldValue(`items[${index}].mdAmount`, parseFloat(currentMdAmount).toFixed(2))
+      if (currentAmount < 0) currentAmount = 0
     }
+
+    return currentAmount
+  }
+
+  async function handleIconClick({ updateRow, value, data }) {
+    const mdt = value?.mdType || data?.mdType
+
+    let mdType = mdt === MDTYPE_PCT ? MDTYPE_AMOUNT : MDTYPE_PCT
+
+    const currentMdAmount = checkMinMaxAmount(value?.mdAmount, mdType, MDTYPE_PCT)
 
     const newRow = {
-      ...formik.values.items[index],
       mdAmount: currentMdAmount,
-      mdType: currentMdType
+      mdAmountPct: mdType,
+      mdType: mdType
     }
 
-    getItemPriceRow(updateRow, newRow, DIRTYFIELD_MDTYPE, true)
-    checkMdAmountPct(newRow, updateRow)
+    updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
   async function onWorkFlowClick() {
@@ -796,6 +917,34 @@ export default function SaleTransactionForm({
     })
   }
 
+  const handleMetalClick = async () => {
+    const metalItemsList = itemsUpdate?.current
+      ?.filter(item => item.metalId)
+      .map(item => ({
+        qty: item.qty,
+        metalRef: '',
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+
+    return metalItemsList || []
+  }
+
+  async function verifyRecord() {
+    const copy = { ...formik.values.header, isVerified: !formik.values.header.isVerified }
+    delete copy.items
+    await postRequest({
+      extension: SaleRepository.SalesTransaction.verify,
+      record: JSON.stringify(copy)
+    })
+
+    toast.success(!formik.values.header.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+    refetchForm(formik.values.header.recordId)
+    invalidate()
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -832,17 +981,23 @@ export default function SaleTransactionForm({
       condition: true,
       onClick: 'onClickGL',
       valuesPath: formik.values.header,
+      datasetId: getGLResource(functionId),
       disabled: !editMode
+    },
+    {
+      key: 'Metals',
+      condition: true,
+      onClick: 'onClickMetal',
+      handleMetalClick
     },
     {
       key: 'Locked',
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !isPosted
+      disabled: !isPosted || formik.values.header.isVerified
     },
     {
-      key: 'Unlocked',
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
@@ -853,8 +1008,45 @@ export default function SaleTransactionForm({
       condition: true,
       onClick: 'onClientSalesTransaction',
       disabled: !formik.values.header?.clientId
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.header.accountId),
+            moduleId: 1
+          },
+          width: 1000,
+          height: 500,
+          title: labels.accountSummary
+        })
+      },
+      disabled: !formik.values.header.clientId
+    },
+    {
+      key: 'Verify',
+      condition: !formik.values.header.isVerified,
+      onClick: verifyRecord,
+      disabled: formik.values.header.isVerified || !editMode || !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: formik.values.header.isVerified,
+      onClick: verifyRecord,
+      disabled: !formik.values.header.isVerified
     }
   ]
+
+  async function getSerials(recordId, seqNo) {
+    if (recordId)
+      return await getRequest({
+        extension: SaleRepository.LastSerialInvoice.qry,
+        parameters: `_trxId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
+      })
+  }
 
   async function fillForm(saTrxPack, dtInfo) {
     const saTrxHeader = saTrxPack?.header
@@ -868,17 +1060,8 @@ export default function SaleTransactionForm({
 
     const modifiedList = await Promise.all(
       saTrxItems?.map(async (item, index) => {
-        const taxDetailsResponse = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
-
-        const updatedSaTrxTaxes =
-          saTrxTaxes?.map(tax => {
-            const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
-
-            return {
-              ...tax,
-              taxBase: matchingTaxDetail ? matchingTaxDetail.taxBase : tax.taxBase
-            }
-          }) || null
+        const taxDetails = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
+        const serials = await getSerials(recordId, item.seqNo)
 
         return {
           ...item,
@@ -889,11 +1072,20 @@ export default function SaleTransactionForm({
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
           saTrx: true,
-          taxDetails:
-            updatedSaTrxTaxes.filter(tax => saTrxItems?.some(responseTax => responseTax.seqNo != tax.seqNo)) || null
+          serials: serials?.list?.map((serialDetail, index) => {
+            return {
+              ...serialDetail,
+              id: index
+            }
+          }),
+          taxDetails
         }
       })
     )
+
+    itemsUpdate.current = modifiedList
+    const res = await getClientInfo(saTrxHeader.clientId)
+    getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
     formik.setValues({
       ...formik.values,
       recordId: saTrxHeader.recordId || null,
@@ -906,14 +1098,13 @@ export default function SaleTransactionForm({
           saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
         KGmetalPrice: saTrxHeader?.metalPrice * 1000,
         subtotal: saTrxHeader?.subtotal.toFixed(2),
+        accountId: res?.record?.accountId,
         commitItems: dtInfo?.record?.commitItems
       },
       items: modifiedList,
       taxes: [...saTrxTaxes]
     })
 
-    const res = await getClientInfo(saTrxHeader.clientId)
-    getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
     !formik.values.recordId &&
       lockRecord({
         recordId: saTrxHeader.recordId,
@@ -1138,23 +1329,25 @@ export default function SaleTransactionForm({
     })
   }
 
-  function getItemPriceRow(update, newRow, dirtyField, iconClicked) {
+  function getItemPriceRow(newRow, dirtyField, iconClicked) {
     !reCal && setReCal(true)
+
+    const mdAmount = checkMinMaxAmount(newRow?.mdAmount, newRow?.mdType, MDTYPE_PCT)
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
       basePrice: parseFloat(newRow?.basePrice || 0),
-      volume: parseFloat(newRow?.volume),
+      volume: parseFloat(newRow?.volume) || 0,
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
       qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
-      mdAmount: parseFloat(newRow?.mdAmount) || 0,
+      mdAmount: mdAmount,
       mdType: newRow?.mdType,
       mdValue: parseFloat(newRow?.mdValue),
-      baseLaborPrice: newRow?.baseLaborPrice,
-      totalWeightPerG: newRow?.totalWeightPerG,
+      baseLaborPrice: newRow?.baseLaborPrice || 0,
+      totalWeightPerG: newRow?.totalWeightPerG || 0,
       tdPct: formik?.values?.header?.tdPct || 0,
       dirtyField: dirtyField
     })
@@ -1173,21 +1366,23 @@ export default function SaleTransactionForm({
     })
 
     let commonData = {
+      ...newRow,
       id: newRow?.id,
-      qty: parseFloat(itemPriceRow?.qty).toFixed(2),
-      volume: parseFloat(itemPriceRow?.volume).toFixed(2),
-      weight: parseFloat(itemPriceRow?.weight).toFixed(2),
-      basePrice: parseFloat(itemPriceRow?.basePrice).toFixed(5),
-      unitPrice: parseFloat(itemPriceRow?.unitPrice).toFixed(3),
-      extendedPrice: parseFloat(itemPriceRow?.extendedPrice).toFixed(2),
+      qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
+      volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
+      weight: itemPriceRow?.weight ? parseFloat(itemPriceRow.weight).toFixed(2) : 0,
+      basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
+      unitPrice: itemPriceRow?.unitPrice ? parseFloat(itemPriceRow.unitPrice).toFixed(3) : 0,
+      extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
       upo: parseFloat(itemPriceRow?.upo).toFixed(2),
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
-      mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),
-      vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
+      baseLaborPrice: itemPriceRow?.baseLaborPrice ? parseFloat(itemPriceRow.baseLaborPrice).toFixed(2) : 0,
+      mdAmount: itemPriceRow?.mdAmount ? parseFloat(itemPriceRow.mdAmount).toFixed(2) : 0,
+      vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0
     }
-    let data = iconClicked ? { changes: commonData } : commonData
-    update(data)
+
+    return iconClicked ? { changes: commonData } : commonData
   }
 
   async function getFilteredMU(itemId) {
@@ -1281,7 +1476,8 @@ export default function SaleTransactionForm({
     if (actualDiscount > clientMaxDiscount) {
       formik.setFieldValue('header.mdAmount', clientMaxDiscount)
       rowData.mdAmount = clientMaxDiscount
-      getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
+      const data = getItemPriceRow(rowData, DIRTYFIELD_MDAMOUNT)
+      update(data)
       stackError({
         message: labels.clientMaxPctDiscount + ' ' + clientMaxDiscount + '%'
       })
@@ -1294,7 +1490,8 @@ export default function SaleTransactionForm({
       formik.setFieldValue('header.mdAmount', clientMaxDiscountValue)
       rowData.mdType = 2
       rowData.mdAmount = clientMaxDiscountValue
-      getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
+      const data = getItemPriceRow(rowData, DIRTYFIELD_MDAMOUNT)
+      update(data)
       stackError({
         message: labels.clientMaxDiscount + ' ' + clientMaxDiscountValue
       })
@@ -1327,10 +1524,13 @@ export default function SaleTransactionForm({
     }
   }
 
-  async function refetchForm(recordId) {
+  async function refetchForm(recordId, callDt) {
+    let dtInfo = {}
     const saTrxpack = await getSalesTransactionPack(recordId)
-    await fillForm(saTrxpack)
+    if (callDt) dtInfo = await getDTD(saTrxpack.header.dtId)
+    await fillForm(saTrxpack, dtInfo)
   }
+
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
       formik.setFieldValue(`header.${key}`, value)
@@ -1393,6 +1593,20 @@ export default function SaleTransactionForm({
     return res
   }
 
+  const handleSearchChange = event => {
+    const { value } = event.target
+    formik.setFieldValue('header.search', value)
+  }
+
+  const filteredData = formik.values.header.search
+    ? formik.values.items.filter(
+        item =>
+          item.barcode?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
+          item.sku?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
+          item.itemName?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase())
+      )
+    : formik.values.items
+
   async function onChangeDtId(recordId) {
     const dtd = await getDTD(recordId)
     if (dtd?.record != null) {
@@ -1404,9 +1618,9 @@ export default function SaleTransactionForm({
       setmetalPriceVisibility(false)
     }
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
-    formik.setFieldValue('header.plantId', dtd?.record?.plantId ?? userDefaultsDataState?.plantId)
-    formik.setFieldValue('header.spId', dtd?.record?.spId ?? userDefaultsDataState?.spId)
-    formik.setFieldValue('header.siteId', dtd?.record?.siteId ?? userDefaultsDataState?.siteId)
+    formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
+    formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
+    formik.setFieldValue('header.siteId', dtd?.record?.siteId || userDefaultsDataState?.siteId || null)
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
     if (dtd?.record?.commitItems == false) formik.setFieldValue('header.siteId', null)
@@ -1458,29 +1672,13 @@ export default function SaleTransactionForm({
           setCycleButtonState({ text: '123', value: 1 })
           formik.setFieldValue('header.tdType', 1)
         }
-      }
+      } else if (muList?.list) await refetchForm(recordId, true)
     })()
   }, [])
 
   useEffect(() => {
-    ;(async function () {
-      if (!recordId) {
-        const dtInfo = await getDTD(documentType?.dtId)
-        formik.setFieldValue('header.commitItems', dtInfo?.record?.commitItems)
-        if (!dtInfo?.record?.commitItems) formik.setFieldValue('header.siteId', null)
-      }
-    })()
-  }, [documentType?.dtId])
-
-  useEffect(() => {
-    ;(async function () {
-      if (recordId && measurements) {
-        const transactionPack = await getSalesTransactionPack(recordId)
-        const dtInfo = await getDTD(transactionPack.header.dtId)
-        await fillForm(transactionPack, dtInfo)
-      }
-    })()
-  }, [recordId, measurements])
+    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+  }, [formik.values?.header.dtId])
 
   useEffect(() => {
     defaultsDataState && setDefaultFields()
@@ -1515,7 +1713,7 @@ export default function SaleTransactionForm({
     const myObject = {}
 
     const filteredList = userDefaultsData?.list?.filter(obj => {
-      return obj.key === 'plantId' || obj.key === 'siteId'
+      return obj.key === 'plantId' || obj.key === 'siteId' || obj.key === 'spId'
     })
     filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
     setUserDefaultsDataState(myObject)
@@ -1556,194 +1754,198 @@ export default function SaleTransactionForm({
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={9} container direction='column' gap={2}>
-              <Grid container spacing={2}>
-                <Grid item xs={3}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
-                    name='header.dtId'
-                    readOnly={editMode}
-                    label={labels.documentType}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    values={formik.values.header}
-                    maxAccess={maxAccess}
-                    onChange={async (_, newValue) => {
-                      const recordId = newValue ? newValue.recordId : null
-
-                      await formik.setFieldValue('header.dtId', recordId)
-
-                      if (newValue) {
-                        onChangeDtId(recordId)
-                      } else {
-                        formik.setFieldValue('header.dtId', null)
-                        formik.setFieldValue('header.siteId', null)
-                        formik.setFieldValue('header.metalPrice', 0)
-                        formik.setFieldValue('header.KGmetalPrice', 0)
-                        setmetalPriceVisibility(false)
-                      }
-                    }}
-                    error={formik?.touched?.header?.dtId && Boolean(formik?.errors?.header?.dtId)}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ResourceComboBox
-                    endpointId={SaleRepository.SalesPerson.qry}
-                    name='header.spId'
-                    readOnly={isPosted}
-                    label={labels.salesPerson}
-                    columnsInDropDown={[
-                      { key: 'spRef', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    valueField='recordId'
-                    displayField='name'
-                    values={formik.values.header}
-                    maxAccess={maxAccess}
-                    displayFieldWidth={1.5}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.spId', newValue ? newValue.recordId : null)
-                    }}
-                    error={formik?.touched?.header?.spId && Boolean(formik?.errors?.header?.spId)}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <CustomNumberField
-                    name='header.creditLimit'
-                    maxAccess={maxAccess}
-                    label={labels.creditLimit}
-                    value={formik.values.header.creditLimit}
-                    readOnly
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Plant.qry}
-                    name='header.plantId'
-                    label={labels.plant}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    readOnly={isPosted}
-                    values={formik.values.header}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.plantId', newValue ? newValue.recordId : null)
-                    }}
-                    displayFieldWidth={2}
-                    error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
-                  />
-                </Grid>
-              </Grid>
-              <Grid container spacing={2}>
-                <Grid item xs={3}>
-                  <CustomTextField
-                    name='header.reference'
-                    label={labels.reference}
-                    value={formik?.values?.header?.reference}
-                    maxAccess={!editMode && maxAccess}
-                    readOnly={editMode}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('header.reference', '')}
-                    error={formik?.touched?.header?.reference && Boolean(formik?.errors?.header?.reference)}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <CustomDatePicker
-                    name='header.date'
-                    required
-                    label={labels.date}
-                    readOnly={isPosted}
-                    value={formik?.values?.header?.date}
-                    onChange={async (e, newValue) => {
-                      formik.setFieldValue('header.date', newValue)
-                      await getMultiCurrencyFormData(
-                        formik.values.header.currencyId,
-                        formatDateForGetApI(newValue),
-                        RateDivision.FINANCIALS
-                      )
-                    }}
-                    editMode={editMode}
-                    maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('header.date', '')}
-                    error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ResourceComboBox
-                    endpointId={SaleRepository.SalesZone.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
-                    name='header.szId'
-                    label={labels.saleZone}
-                    readOnly={isPosted}
-                    columnsInDropDown={[{ key: 'name', value: 'Name' }]}
-                    valueField='recordId'
-                    displayField='name'
-                    values={formik.values.header}
-                    maxAccess={maxAccess}
-                    displayFieldWidth={1.5}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.szId', newValue ? newValue.recordId : null)
-                    }}
-                    error={formik?.touched?.header?.szId && Boolean(formik?.errors?.header?.szId)}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ResourceComboBox
-                    endpointId={InventoryRepository.Site.qry}
-                    name='header.siteId'
-                    label={labels.site}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik.values.header}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    maxAccess={maxAccess}
-                    displayFieldWidth={2}
-                    readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
-                    required={
-                      !formik?.values?.header.dtId ||
-                      (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
-                    }
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.siteId', newValue ? newValue.recordId : null)
-                      formik.setFieldValue('header.siteRef', newValue ? newValue.reference : null)
-                      formik.setFieldValue('header.siteName', newValue ? newValue.name : null)
-                    }}
-                    error={formik?.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
             <Grid item xs={3}>
-              <CustomTextArea
-                name='header.billAddress'
-                label={labels.billTo}
-                value={formik.values.header.billAddress}
-                rows={3}
-                maxLength='100'
-                readOnly={!formik.values.header.clientId || isPosted}
+              <ResourceComboBox
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
+                name='header.dtId'
+                readOnly={editMode}
+                label={labels.documentType}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values.header}
                 maxAccess={maxAccess}
-                viewDropDown={formik.values.header.clientId}
-                viewAdd={formik.values.header.clientId && !editMode}
-                onChange={e => formik.setFieldValue('header.billAddress', e.target.value)}
-                onClear={() => formik.setFieldValue('header.billAddress', '')}
-                onDropDown={() => openAddressFilterForm()}
-                handleAddAction={() => openAddressForm()}
-                error={formik?.touched?.header?.billAddress && Boolean(formik?.errors?.header?.billAddress)}
+                onChange={async (_, newValue) => {
+                  const recordId = newValue ? newValue.recordId : null
+                  await formik.setFieldValue('header.dtId', recordId)
+                  if (!newValue) {
+                    formik.setFieldValue('header.dtId', null)
+                    formik.setFieldValue('header.siteId', null)
+                    formik.setFieldValue('header.metalPrice', 0)
+                    formik.setFieldValue('header.KGmetalPrice', 0)
+                    setmetalPriceVisibility(false)
+                  }
+                }}
+                error={formik?.touched?.header?.dtId && Boolean(formik?.errors?.header?.dtId)}
               />
             </Grid>
             <Grid item xs={3}>
+              <ResourceComboBox
+                endpointId={SaleRepository.SalesPerson.qry}
+                name='header.spId'
+                readOnly={isPosted}
+                label={labels.salesPerson}
+                columnsInDropDown={[
+                  { key: 'spRef', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values.header}
+                maxAccess={maxAccess}
+                displayFieldWidth={1.5}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.spId', newValue ? newValue.recordId : null)
+                }}
+                error={formik?.touched?.header?.spId && Boolean(formik?.errors?.header?.spId)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Plant.qry}
+                name='header.plantId'
+                label={labels.plant}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                readOnly={isPosted}
+                values={formik.values.header}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.plantId', newValue ? newValue.recordId : null)
+                }}
+                displayFieldWidth={2}
+                error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='header.currencyId'
+                label={labels.currency}
+                filter={item => item.currencyType == 1}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                readOnly={isPosted}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                required
+                values={formik.values.header}
+                maxAccess={maxAccess}
+                onChange={async (event, newValue) => {
+                  await getMultiCurrencyFormData(
+                    newValue?.recordId,
+                    formik.values.header?.date,
+                    RateDivision.FINANCIALS
+                  )
+                  formik.setFieldValue('header.currencyId', newValue?.recordId || null)
+                  formik.setFieldValue('header.currencyName', newValue?.name)
+                }}
+                error={formik.touched?.header?.currencyId && Boolean(formik.errors?.header?.currencyId)}
+              />
+            </Grid>
+            <Grid item xs={1}>
+              <Button
+                variant='contained'
+                size='small'
+                onClick={() => openMCRForm(formik.values.header)}
+                disabled={formik.values.header.currencyId === defaultsDataState?.currencyId}
+              >
+                <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
+              </Button>
+            </Grid>
+            <Grid item xs={2}>
+              <CustomTextField
+                name='header.reference'
+                label={labels.reference}
+                value={formik?.values?.header?.reference}
+                maxAccess={!editMode && maxAccess}
+                readOnly={editMode}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('header.reference', '')}
+                error={formik?.touched?.header?.reference && Boolean(formik?.errors?.header?.reference)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomDatePicker
+                name='header.date'
+                required
+                label={labels.date}
+                readOnly={isPosted}
+                value={formik?.values?.header?.date}
+                onChange={async (e, newValue) => {
+                  formik.setFieldValue('header.date', newValue)
+                  await getMultiCurrencyFormData(formik.values.header.currencyId, newValue, RateDivision.FINANCIALS)
+                }}
+                editMode={editMode}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('header.date', null)}
+                error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Site.qry}
+                name='header.siteId'
+                label={labels.site}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values.header}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
+                required={
+                  !formik?.values?.header.dtId ||
+                  (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
+                }
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.siteId', newValue ? newValue.recordId : null)
+                  formik.setFieldValue('header.siteRef', newValue ? newValue.reference : null)
+                  formik.setFieldValue('header.siteName', newValue ? newValue.name : null)
+                }}
+                error={formik?.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomNumberField
+                name='header.creditLimit'
+                maxAccess={maxAccess}
+                label={labels.creditLimit}
+                value={formik.values.header.creditLimit}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                endpointId={SaleRepository.SalesZone.qry}
+                parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
+                name='header.szId'
+                label={labels.saleZone}
+                readOnly={isPosted}
+                columnsInDropDown={[{ key: 'name', value: 'Name' }]}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values.header}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.szId', newValue ? newValue.recordId : null)
+                }}
+                error={formik?.touched?.header?.szId && Boolean(formik?.errors?.header?.szId)}
+              />
+            </Grid>
+            <Grid item xs={5}>
               <ResourceLookup
                 endpointId={SaleRepository.Client.snapshot}
                 name='header.clientId'
@@ -1754,6 +1956,7 @@ export default function SaleTransactionForm({
                 secondValueShow='clientName'
                 formObject={formik.values.header}
                 form={formik}
+                firstFieldWidth={4}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' },
@@ -1804,47 +2007,6 @@ export default function SaleTransactionForm({
               />
             </Grid>
             <Grid item xs={2}>
-              <Grid container spacing={1} alignItems='center'>
-                <Grid item xs={8}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
-                    name='header.currencyId'
-                    label={labels.currency}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    readOnly={isPosted}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    required
-                    values={formik.values.header}
-                    maxAccess={maxAccess}
-                    onChange={async (event, newValue) => {
-                      await getMultiCurrencyFormData(
-                        newValue?.recordId,
-                        formatDateForGetApI(formik.values.header?.date),
-                        RateDivision.FINANCIALS
-                      )
-                      formik.setFieldValue('header.currencyId', newValue?.recordId || null)
-                      formik.setFieldValue('header.currencyName', newValue?.name)
-                    }}
-                    error={formik.touched?.header?.currencyId && Boolean(formik.errors?.header?.currencyId)}
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <Button
-                    variant='contained'
-                    size='small'
-                    onClick={() => openMCRForm(formik.values.header)}
-                    disabled={formik.values.header.currencyId === defaultsDataState?.currencyId}
-                  >
-                    <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
-                  </Button>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={formik?.values?.header?.clientId && SaleRepository.Contact.qry}
                 parameters={`_clientId=${formik?.values?.header?.clientId}`}
@@ -1866,6 +2028,19 @@ export default function SaleTransactionForm({
               />
             </Grid>
             <Grid item xs={2}>
+              <CustomTextField
+                name='header.search'
+                value={formik.values.header.search}
+                label={platformLabels.Search}
+                onClear={() => {
+                  formik.setFieldValue('header.search', '')
+                }}
+                onChange={handleSearchChange}
+                onSearch={e => formik.setFieldValue('header.search', e)}
+                search={true}
+              />
+            </Grid>
+            <Grid item xs={3}>
               {metalPriceVisibility && (
                 <CustomNumberField
                   name='header.KGmetalPrice'
@@ -1882,10 +2057,12 @@ export default function SaleTransactionForm({
           <DataGrid
             onChange={(value, action) => {
               formik.setFieldValue('items', value)
+              itemsUpdate.current = value
               action === 'delete' && setReCal(true)
             }}
-            value={formik?.values?.items}
+            value={filteredData || formik?.initialValues?.items[0]}
             error={formik.errors.items}
+            initialValues={formik?.initialValues?.items[0]}
             onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
@@ -1898,19 +2075,42 @@ export default function SaleTransactionForm({
         </Grow>
         <Fixed>
           <Grid container spacing={2} sx={{ pt: 2 }}>
-            <Grid item xs={6}>
-              <CustomTextArea
-                name='header.description'
-                label={labels.description}
-                value={formik.values.header.description}
-                rows={3}
-                editMode={editMode}
-                maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('header.description', e.target.value)}
-                onClear={() => formik.setFieldValue('header.description', '')}
-                error={formik?.touched?.header?.description && Boolean(formik?.errors?.header?.description)}
-              />
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='header.billAddress'
+                    label={labels.billTo}
+                    value={formik.values.header.billAddress}
+                    rows={3}
+                    maxLength='100'
+                    readOnly={!formik.values.header.clientId || isPosted}
+                    maxAccess={maxAccess}
+                    viewDropDown={formik.values.header.clientId}
+                    viewAdd={formik.values.header.clientId && !editMode}
+                    onChange={e => formik.setFieldValue('header.billAddress', e.target.value)}
+                    onClear={() => formik.setFieldValue('header.billAddress', '')}
+                    onDropDown={() => openAddressFilterForm()}
+                    handleAddAction={() => openAddressForm()}
+                    error={formik?.touched?.header?.billAddress && Boolean(formik?.errors?.header?.billAddress)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='header.description'
+                    label={labels.description}
+                    value={formik.values.header.description}
+                    rows={3}
+                    editMode={editMode}
+                    maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('header.description', e.target.value)}
+                    onClear={() => formik.setFieldValue('header.description', '')}
+                    error={formik?.touched?.header?.description && Boolean(formik?.errors?.header?.description)}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
+            <Grid item xs={2}></Grid>
             <Grid item xs={3}>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
@@ -1940,7 +2140,7 @@ export default function SaleTransactionForm({
                     readOnly
                   />
                 </Grid>
-                <Grid item>
+                <Grid item xs={12}>
                   <CustomNumberField
                     name='header.balance'
                     maxAccess={maxAccess}
@@ -1973,7 +2173,7 @@ export default function SaleTransactionForm({
                     decimalScale={2}
                     readOnly={isPosted}
                     handleButtonClick={handleButtonClick}
-                    isPercentIcon={cycleButtonState.text === '%' ? true : false}
+                    iconKey={cycleButtonState.text}
                     ShowDiscountIcons={true}
                     onChange={e => {
                       let discount = Number(e.target.value.replace(/,/g, ''))
@@ -1981,9 +2181,7 @@ export default function SaleTransactionForm({
                         if (discount < 0 || discount > 100) discount = 0
                         formik.setFieldValue('header.tdPct', discount)
                       } else {
-                        if (discount < 0 || formik.values.header.subtotal < discount) {
-                          discount = 0
-                        }
+                        if (discount < 0 || formik.values.header.subtotal < discount) discount = 0
                         formik.setFieldValue('header.tdAmount', discount)
                       }
                       formik.setFieldValue('header.currentDiscount', discount)
@@ -2003,7 +2201,6 @@ export default function SaleTransactionForm({
                         formik.setFieldValue('header.tdAmount', tdAmount)
                       }
                       setReCal(true)
-
                       await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, discountAmount)
                     }}
                     onClear={() => {
@@ -2037,6 +2234,7 @@ export default function SaleTransactionForm({
                       setReCal(true)
                     }}
                     onClear={() => formik.setFieldValue('header.miscAmount', 0)}
+                    error={formik?.touched?.header?.miscAmount && Boolean(formik?.errors?.header?.miscAmount)}
                   />
                 </Grid>
                 <Grid item xs={12}>

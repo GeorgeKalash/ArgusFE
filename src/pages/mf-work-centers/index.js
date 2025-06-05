@@ -1,46 +1,61 @@
 import { useState, useContext } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import WorkCentersWindow from './window/WorkCentersWindow'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const WorkCenter = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [selectedRecordId, setSelectedRecordId] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: ManufacturingRepository.WorkCenter.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
+    filterBy,
     labels: _labels,
-    access
+    access,
+    paginationParameters,
+    refetch,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.WorkCenter.page,
-    datasetId: ResourceIds.WorkCenters
+    datasetId: ResourceIds.WorkCenters,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.WorkCenter.page
-  })
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: ManufacturingRepository.WorkCenter.snapshot,
+        parameters: `_filter=${filters.qry}&_status=0`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
 
   const columns = [
     {
@@ -77,6 +92,22 @@ const WorkCenter = () => {
       field: 'lineRef',
       headerName: _labels.productionLine,
       flex: 1
+    },
+    {
+      field: 'lineName',
+      headerName: _labels.productionLine,
+      flex: 1
+    },
+    {
+      field: 'costCenterName',
+      headerName: _labels.costCenter,
+      flex: 1
+    },
+    {
+      field: 'isInactive',
+      headerName: _labels.inactive,
+      flex: 1,
+      type: 'checkbox'
     }
   ]
 
@@ -95,24 +126,26 @@ const WorkCenter = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'MFWCT'} />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
           gridData={data}
           rowId={['recordId']}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          refetch={refetch}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
           maxAccess={access}
         />
       </Grow>

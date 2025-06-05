@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -36,6 +36,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
+  const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftTransfer,
@@ -101,6 +102,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
             name: 'srlNo-first-row-check',
             test(value, context) {
               const { parent } = context
+
               if (parent?.id == 1) return true
               if (parent?.id > 1 && !value) return false
 
@@ -179,7 +181,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
   const isPosted = formik.values.status === 3
 
   const autoDelete = async row => {
-    if (!row?.itemName) return true
+    if (!row?.draftTransferId) return true
 
     const LastSerPack = {
       draftId: formik?.values?.recordId,
@@ -298,7 +300,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
             }
           }
 
-          addRow(lineObj)
+          !reCal && setReCal(true)
 
           const successSave = formik?.values?.recordId
             ? await autoSave(formik?.values, lineObj.changes)
@@ -307,8 +309,11 @@ export default function DraftTransfer({ labels, access, recordId }) {
           if (!successSave) {
             update({
               ...formik?.initialValues?.serials,
-              id: newRow?.id
+              id: newRow?.id,
+              srlNo: ''
             })
+          } else {
+            await addRow(lineObj)
           }
         }
       }
@@ -390,7 +395,9 @@ export default function DraftTransfer({ labels, access, recordId }) {
       Component: ImportSerials,
       props: {
         endPoint: InventoryRepository.BatchDraftTransferSerial.batch,
-        draftId: formik?.values?.recordId,
+        header: {
+          draftId: formik?.values?.recordId
+        },
         onCloseimport: fillGrids,
         maxAccess: maxAccess
       },
@@ -471,6 +478,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
   ]
 
   async function fillGrids() {
+    const diHeader = await getDraftTransfer(formik?.values?.recordId)
     const diItems = await getDraftTransferItems(formik?.values?.recordId)
 
     const modifiedList = await Promise.all(
@@ -482,7 +490,11 @@ export default function DraftTransfer({ labels, access, recordId }) {
       })
     )
 
-    formik.setFieldValue('serials', modifiedList)
+    formik.setValues({
+      ...formik.values,
+      ...diHeader.record,
+      serials: modifiedList.length ? modifiedList : formik?.initialValues?.serials
+    })
   }
 
   async function fillForm(diHeader, diItems) {
@@ -510,7 +522,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
 
     formik.setFieldValue('carrierId', dtd?.record?.carrierId || null)
     formik.setFieldValue('fromSiteId', dtd?.record?.siteId || formik?.values?.fromSiteId || null)
-    formik.setFieldValue('toSiteId', dtd?.record?.toSiteId || null)
+    formik.setFieldValue('toSiteId', dtd?.record?.toSiteId || formik?.values?.toSiteId || null)
   }
 
   useEffect(() => {
@@ -562,7 +574,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
       const totWeight = parseFloat(row?.weight) || 0
 
       return {
-        totalWeight: acc?.totalWeight + totWeight
+        totalWeight: reCal ? acc?.totalWeight + totWeight : formik.values?.totalWeight || 0
       }
     },
     { totalWeight: 0 }
@@ -588,6 +600,24 @@ export default function DraftTransfer({ labels, access, recordId }) {
       onChangeDtId(formik?.values?.dtId)
     }
   }, [formik?.values?.dtId])
+
+  async function onValidationRequired() {
+    if (Object.keys(await formik.validateForm()).length) {
+      const errors = await formik.validateForm()
+
+      const touchedFields = Object.keys(errors).reduce((acc, key) => {
+        if (!formik.touched[key]) {
+          acc[key] = true
+        }
+
+        return acc
+      }, {})
+
+      if (Object.keys(touchedFields).length) {
+        formik.setTouched(touchedFields, true)
+      }
+    }
+  }
 
   return (
     <FormShell
@@ -673,7 +703,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='toSiteId'
-                    readOnly={isPosted || formik?.values?.serials?.some(serial => serial.srlNo)}
+                    readOnly={isPosted}
                     label={labels.toSite}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -775,15 +805,23 @@ export default function DraftTransfer({ labels, access, recordId }) {
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('serials', value)}
+            onChange={(value, action) => {
+              formik.setFieldValue('serials', value)
+              action === 'delete' && setReCal(true)
+            }}
             value={formik.values.serials || []}
             error={formik.errors.serials}
             columns={serialsColumns}
             name='serials'
             maxAccess={maxAccess}
-            disabled={isPosted || !formik.values.fromSiteId || !formik.values.toSiteId}
+            disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isPosted}
+            allowAddNewLine={
+              formik.values?.serials?.length === 0 ||
+              !!formik.values?.serials?.[formik.values?.serials?.length - 1]?.srlNo
+            }
             autoDelete={autoDelete}
+            onValidationRequired={onValidationRequired}
           />
           <Grid container spacing={16}>
             <Grid item xs={8}>

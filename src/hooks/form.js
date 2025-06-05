@@ -96,7 +96,8 @@ export function useForm({ documentType = {}, maxAccess, validate = () => {}, ...
                 !maxAccessErrors[gridName][fieldName] &&
                 formik.values[gridName] &&
                 !formik.values[gridName][fieldName] &&
-                formik.values[gridName][fieldName] != 0
+                formik.values[gridName][fieldName] !== 0 &&
+                formik.values[gridName][fieldName] !== '0'
               ) {
                 maxAccessErrors[gridName][fieldName] = `${fieldName} is required.`
               }
@@ -117,11 +118,17 @@ export function useForm({ documentType = {}, maxAccess, validate = () => {}, ...
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
 
-  const { key, value } = documentType
+  const { key, value, reference } = documentType
 
   useEffect(() => {
     if (key && value && formik.values[key] !== value) formik.setFieldValue(key, value)
   }, [value])
+
+  useEffect(() => {
+    if (reference?.isEmpty) {
+      formik.setFieldValue(reference?.fieldName, '')
+    }
+  }, [reference?.isEmpty])
 
   return { formik }
 }

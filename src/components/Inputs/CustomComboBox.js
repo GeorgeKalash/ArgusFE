@@ -4,6 +4,7 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import React, { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const CustomComboBox = ({
   type = 'text',
@@ -169,6 +170,12 @@ const CustomComboBox = ({
               )}
               <li {...props}>
                 {columnsInDropDown.map((header, i) => {
+                  let displayValue = option[header.key]
+
+                  if (header?.type && header?.type === 'date' && displayValue) {
+                    displayValue = formatDateDefault(displayValue)
+                  }
+
                   return (
                     <Box
                       key={i}
@@ -180,7 +187,7 @@ const CustomComboBox = ({
                         display: 'flex'
                       }}
                     >
-                      {option[header.key]}
+                      {displayValue}
                     </Box>
                   )
                 })}
@@ -212,10 +219,9 @@ const CustomComboBox = ({
           error={error}
           helperText={helperText}
           onBlur={e => {
-            const listbox = document.querySelector('[role="listbox"]')
-            if (selectFirstValue.current !== 'click' && listbox && listbox.offsetHeight > 0) {
-              onBlur(e, valueHighlightedOption?.current, filterOptions.current)
-            }
+            const allowSelect =
+              selectFirstValue.current !== 'click' && document.querySelector('.MuiAutocomplete-listbox')
+            onBlur(e, valueHighlightedOption?.current, filterOptions.current, allowSelect)
           }}
           InputProps={{
             ...params.InputProps,

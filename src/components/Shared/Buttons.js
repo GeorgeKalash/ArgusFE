@@ -116,6 +116,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'AccountSummary',
+    label: platformLabels.AccountSummary,
+    color: '#90278e',
+    image: 'accountBalanceWhite.png',
+    main: false
+  },
+  {
     key: 'WorkFlow',
     label: platformLabels.WorkFlow,
     color: '#231f20',
@@ -265,6 +272,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Lots',
+    label: platformLabels.Lot,
+    color: '#D3D3D3',
+    image: 'lot.png',
+    main: false
+  },
+  {
     key: 'GL',
     label: platformLabels.GL,
     color: '#231f20',
@@ -317,6 +331,13 @@ export const getButtons = platformLabels => [
     key: 'Rebuild',
     color: '#231F20',
     label: platformLabels.RebuildButton,
+    image: 'rebuild.png',
+    main: false
+  },
+  {
+    key: 'Run',
+    color: '#231F20',
+    label: platformLabels.Run,
     image: 'rebuild.png',
     main: false
   },
@@ -547,6 +568,32 @@ export const getButtons = platformLabels => [
     label: platformLabels.threeDDesign,
     color: '#1f78b4',
     image: '3d-printer.png',
+    main: false
+  },
+  {
+    key: 'ORD',
+    label: platformLabels.ord,
+    color: '#231f20',
+    main: false
+  },
+  {
+    key: 'SHP',
+    label: platformLabels.shp,
+    color: '#231f20',
+    main: false
+  },
+  {
+    key: 'Verify',
+    label: platformLabels.Verify,
+    color: '#047DFA',
+    image: 'checkmark-icon.png',
+    main: false
+  },
+  {
+    key: 'Unverify',
+    label: platformLabels.Unverify,
+    color: '#047DFA',
+    image: 'unverify-icon.png',
     main: false
   }
 ]

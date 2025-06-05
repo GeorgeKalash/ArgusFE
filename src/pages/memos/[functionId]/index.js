@@ -177,6 +177,22 @@ const Financial = () => {
     }
   }
 
+  const getGLResourceId = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.CreditNote:
+        return ResourceIds.GLCreditNote
+      case SystemFunction.DebitNote:
+        return ResourceIds.GLDebitNote
+      case SystemFunction.ServiceBill:
+        return ResourceIds.GLServiceBillReceived
+      case SystemFunction.ServiceInvoice:
+        return ResourceIds.GLServiceInvoice
+      default:
+        return null
+    }
+  }
+
   function openForm(recordId) {
     stack({
       Component: MemosForm,
@@ -185,9 +201,10 @@ const Financial = () => {
         recordId: recordId,
         access,
         functionId: functionId,
-        getEndpoint
+        getEndpoint,
+        getGLResourceId
       },
-      width: 900,
+      width: 1000,
       height: 670,
       title: getcorrectLabel(parseInt(functionId))
     })

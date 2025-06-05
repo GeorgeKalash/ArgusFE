@@ -138,6 +138,7 @@ const CashAccounts = () => {
           labels={_labels}
           onSearchClear={clear}
           inputSearch={true}
+          previewReport={ResourceIds.CashAccounts}
         />
       </Fixed>
       <Grow>

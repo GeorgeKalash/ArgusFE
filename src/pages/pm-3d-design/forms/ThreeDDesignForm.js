@@ -54,15 +54,11 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       status: 1,
       dtId: null,
       reference: '',
+      source: null,
       sketchId: null,
-      sketchRef: '',
-      sketchName: '',
       designerId: null,
-      designerRef: '',
-      designerName: '',
       setPcs: 0,
       weight: 0,
-      statusName: '',
       castingType: null,
       notes: '',
       date: new Date(),
@@ -70,21 +66,16 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
       endDate: null,
       fileReference: '',
       itemGroupId: null,
-      itemGroupRef: '',
-      itemGroupName: '',
       productionClassId: null,
-      productionClassRef: '',
-      productionClassName: '',
       productionStandardId: null,
-      productionStandardRef: '',
-      productionStandardName: '',
-      metalId: null
+      metalId: null,
+      collectionId: null
     },
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      designerId: yup.number().required(),
+      source: yup.number().required(),
       sketchId: yup.number().required(),
       castingType: yup.number().required(),
       fileReference: yup.string().required()
@@ -256,9 +247,9 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             <Grid item xs={4}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
@@ -294,9 +285,25 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
+                  <ResourceComboBox
+                    datasetId={DataSets.THREED_DESIGN_SOURCE}
+                    name='source'
+                    label={labels.source}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('source', newValue?.key || null)
+                    }}
+                    error={formik.touched.source && Boolean(formik.errors.source)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={ProductModelingRepository.Sketch.snapshot2}
-                    name='sketchRef'
+                    name='sketchId'
                     required
                     label={labels.sketchRef}
                     secondDisplayField={false}
@@ -319,19 +326,19 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                         productionStandardId: newValue?.productionStandardId || null,
                         productionStandardRef: newValue?.productionStandardRef || '',
                         productionStandardName: newValue?.productionStandardName || '',
+                        collectionId: newValue?.collectionId || null,
                         metalPurity: newValue?.metalPurity || null,
                         metalId: newValue?.metalId || null
                       })
                     }}
                     errorCheck={'sketchId'}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={ProductModelingRepository.Designer.snapshot}
-                    name='designerRef'
-                    required
+                    name='designerId'
                     label={labels.designer}
                     displayFieldWidth={2}
                     valueField='reference'
@@ -346,7 +353,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                         formik.setFieldValue('designerName', newValue?.name || '')
                     }}
                     errorCheck={'designerId'}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -485,15 +492,8 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <Grid container spacing={3}>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sx={{ marginTop: 20.5 }}>
                   <CustomDatePicker
                     name='date'
                     label={labels.date}
@@ -575,7 +575,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
             <Grid item xs={4}>
               <ImageUpload
                 ref={imageUploadRef}
-                resourceId={ResourceIds.Items}
+                resourceId={ResourceIds.ThreeDDesign}
                 seqNo={0}
                 recordId={recordId}
                 width={300}

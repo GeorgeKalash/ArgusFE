@@ -24,13 +24,11 @@ export default function MetalTrxFinancial() {
   const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
       extension: FinancialRepository.MetalTrx.page,
-      parameters: `_startAt=${_startAt}&_params=${
-        params || ''
-      }&_pageSize=${_pageSize}&_sortBy=reference&_functionId=${functionId}`
+      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}&_sortBy=reference&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -43,7 +41,19 @@ export default function MetalTrxFinancial() {
       case SystemFunction.MetalPaymentVoucher:
         return ResourceIds.MetalPaymentVoucher
       default:
-        return
+        return null
+    }
+  }
+
+  const getGLResourceId = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.MetalReceiptVoucher:
+        return ResourceIds.GLMetalReceiptVoucher
+      case SystemFunction.MetalPaymentVoucher:
+        return ResourceIds.GLMetalPaymentVoucher
+      default:
+        return null
     }
   }
 
@@ -52,11 +62,11 @@ export default function MetalTrxFinancial() {
     refetch,
     labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     access,
     invalidate
   } = useResourceQuery({
+    queryFn: fetchGridData,
     endpointId: FinancialRepository.MetalTrx.page,
     datasetId: ResourceIds.MetalReceiptVoucher,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
@@ -121,6 +131,12 @@ export default function MetalTrxFinancial() {
       flex: 1
     },
     {
+      field: 'pcs',
+      headerName: labels.pcs,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'qty',
       headerName: labels.qty,
       flex: 1,
@@ -132,7 +148,12 @@ export default function MetalTrxFinancial() {
       flex: 1,
       type: 'number'
     },
-
+    {
+      field: 'isVerified',
+      headerName: labels.isVerified,
+      type: 'checkbox',
+      flex: 1
+    },
     {
       field: 'statusName',
       headerName: labels.status,
@@ -161,9 +182,10 @@ export default function MetalTrxFinancial() {
         labels,
         recordId,
         access,
-        functionId
+        functionId,
+        getGLResourceId
       },
-      width: 900,
+      width: 1100,
       height: 670,
       title: getcorrectLabel(parseInt(functionId))
     })
