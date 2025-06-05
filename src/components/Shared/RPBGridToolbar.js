@@ -103,7 +103,7 @@ const RPBGridToolbar = ({
             search: search
           })
       },
-      disabled: false
+      disabled: !reportName
     }
   ].filter(item => !item?.hidden)
 
