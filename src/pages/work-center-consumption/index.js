@@ -13,7 +13,7 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import FoWaxesForm from './form/FoWaxesForm'
+import WCConsumpForm from './forms/WCConsumpForm'
 
 const WorkCenterConsump = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -31,7 +31,7 @@ const WorkCenterConsump = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.WorkCenterConsumption.page,
-    datasetId: ResourceIds.FoWaxes,
+    datasetId: ResourceIds.WorkCenterConsumptions,
     filter: {
       filterFn: fetchWithFilter
     }

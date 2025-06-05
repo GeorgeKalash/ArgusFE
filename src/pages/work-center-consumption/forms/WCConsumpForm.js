@@ -1,0 +1,677 @@
+import { Grid } from '@mui/material'
+import { useContext, useEffect, useRef, useState } from 'react'
+import * as yup from 'yup'
+import FormShell from 'src/components/Shared/FormShell'
+import toast from 'react-hot-toast'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { useInvalidate } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import { formatDateFromApi } from 'src/lib/date-helper'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { ControlContext } from 'src/providers/ControlContext'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { useError } from 'src/error'
+
+export default function WCConsumpForm({ labels, access, recordId, window }) {
+  const { platformLabels } = useContext(ControlContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const filteredMeasurements = useRef([])
+  const { stack: stackError } = useError()
+  const [measurements, setMeasurements] = useState([])
+  const [reCal, setReCal] = useState(false)
+
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId: SystemFunction.WorkCenterConsumption,
+    access,
+    enabled: !recordId,
+    objectName: 'header'
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: ManufacturingRepository.WorkCenterConsumption.page
+  })
+
+  function createRowValidation() {
+    return yup.mixed().test(function (value) {
+      const { sku, qty } = this.parent
+      const isAnyFieldFilled = !!(sku || qty)
+
+      if (isAnyFieldFilled) {
+        return !!value
+      }
+
+      return true
+    })
+  }
+
+  const rowValidationSchema = yup.object({
+    sku: createRowValidation(),
+    qty: createRowValidation()
+  })
+
+  const { formik } = useForm({
+    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    initialValues: {
+      recordId: null,
+      header: {
+        dtId: null,
+        reference: '',
+        date: new Date(),
+        plantId: null,
+        siteId: null,
+        workCenterId: null,
+        WcRef: '',
+        WcName: '',
+        weight: 0,
+        totalQty: 0,
+        description: '',
+        status: 1,
+        wip: 1
+      },
+      items: [
+        {
+          id: 1,
+          seqNo: 1,
+          itemId: null,
+          consumptionId: recordId,
+          unitCost: 0,
+          muId: null,
+          itemName: '',
+          totalCost: 0,
+          baseQty: null
+        }
+      ]
+    },
+    maxAccess,
+    validateOnChange: true,
+    enableReinitialize: false,
+    validationSchema: yup.object({
+      header: yup.object({
+        date: yup.string().required(),
+        workCenterId: yup.number().required()
+      }),
+      items: yup.array().of(rowValidationSchema)
+    }),
+    onSubmit: async obj => {
+      const { items: originalItems, header } = obj
+
+      const items = originalItems
+        ?.filter(item => item.sku)
+        ?.map(item => ({
+          ...item,
+          consumptionId: obj.recordId || 0
+        }))
+
+      const response = await postRequest({
+        extension: ManufacturingRepository.WorkCenterConsumption.set2,
+        record: JSON.stringify({
+          header,
+          items
+        })
+      })
+      const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
+      toast.success(actionMessage)
+      refetchForm(response.recordId)
+      invalidate()
+    }
+  })
+
+  const editMode = !!formik.values?.recordId
+  const isPosted = formik?.values?.header?.status === 3
+  const isClosed = formik?.values?.header?.wip === 2
+
+  const totalCostField =
+    formik.values.items.reduce((sum, item) => sum + (Number(item?.totalCost) || 0), 0) ||
+    formik.values?.header.totalCostField ||
+    0
+
+  const totalQty = reCal
+    ? formik.values.items.reduce((sum, item) => sum + (Number(item?.qty) || 0), 0)
+    : formik.values?.header.totalQty || 0
+
+  const getMeasurementUnits = async () => {
+    return await getRequest({
+      extension: InventoryRepository.MeasurementUnit.qry,
+      parameters: `_msId=0`
+    })
+  }
+
+  async function getFilteredMU(itemId, msId) {
+    if (!itemId) return
+
+    const arrayMU = measurements?.filter(item => item.msId === msId) || []
+    filteredMeasurements.current = arrayMU
+  }
+
+  const getHeaderData = async recordId => {
+    if (!recordId) return
+
+    const response = await getRequest({
+      extension: ManufacturingRepository.WorkCenterConsumption.get,
+      parameters: `_recordId=${recordId}`
+    })
+
+    return {
+      ...response?.record,
+      date: formatDateFromApi(response?.record.date)
+    }
+  }
+
+  const getItems = async recordId => {
+    if (!recordId) return
+
+    const response = await getRequest({
+      extension: ManufacturingRepository.ConsumptionItemView.qry,
+      parameters: `_consumptionId=${recordId}`
+    })
+
+    return response?.list?.length > 0
+      ? response.list.map((item, index) => {
+          return {
+            ...item,
+            id: index + 1,
+            seqNo: index + 1
+          }
+        })
+      : formik.values.items
+  }
+
+  const onPost = async () => {
+    await postRequest({
+      extension: ManufacturingRepository.WorkCenterConsumption.post,
+      record: JSON.stringify(formik.values.header)
+    })
+
+    toast.success(platformLabels.Posted)
+    invalidate()
+    window.close()
+  }
+
+  const onUnpost = async () => {
+    await postRequest({
+      extension: ManufacturingRepository.WorkCenterConsumption.unpost,
+      record: JSON.stringify(formik.values.header)
+    })
+
+    refetchForm(formik.values.recordId)
+    invalidate()
+  }
+
+  const onClose = async () => {
+    await postRequest({
+      extension: ManufacturingRepository.WorkCenterConsumption.close,
+      record: JSON.stringify(formik.values.header)
+    })
+
+    refetchForm(formik.values.recordId)
+    invalidate()
+  }
+
+  const onReopen = async () => {
+    await postRequest({
+      extension: ManufacturingRepository.WorkCenterConsumption.reopen,
+      record: JSON.stringify(formik.values.header)
+    })
+
+    refetchForm(formik.values.recordId)
+    invalidate()
+  }
+
+  async function refetchForm(recordId) {
+    const header = await getHeaderData(recordId)
+    const items = await getItems(recordId)
+
+    formik.setValues({
+      ...formik.values,
+      recordId: header.recordId,
+      header: {
+        ...formik.values.header,
+        ...header
+      },
+      items
+    })
+  }
+
+  const getCost = async itemId => {
+    const response = await getRequest({
+      extension: InventoryRepository.CurrentCost.get,
+      parameters: `_itemId=${itemId}`
+    })
+
+    return response?.record?.currentCost
+  }
+
+  const columns = [
+    {
+      component: 'resourcelookup',
+      label: labels.sku,
+      name: 'sku',
+      props: {
+        endpointId: InventoryRepository.Item.snapshot,
+        valueField: 'sku',
+        displayField: 'sku',
+        mandatory: true,
+        readOnly: isClosed,
+        displayFieldWidth: 3,
+        mapping: [
+          { from: 'recordId', to: 'itemId' },
+          { from: 'msId', to: 'msId' },
+          { from: 'sku', to: 'sku' },
+          { from: 'name', to: 'itemName' }
+        ],
+        columnsInDropDown: [
+          { key: 'sku', value: 'SKU' },
+          { key: 'name', value: 'Name' }
+        ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow?.itemId) {
+          filteredMeasurements.current = []
+          update({
+            muRef: null,
+            muId: null,
+            baseQty: 0,
+            muQty: 0,
+            qty: 0,
+            totalCost: 0
+          })
+
+          return
+        }
+
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.items[0],
+            id: newRow.id
+          })
+          stackError({
+            message: labels.inactiveItem
+          })
+
+          return
+        }
+
+        getFilteredMU(newRow?.itemId, newRow?.msId)
+        const currentCost = newRow?.itemId ? await getCost(newRow?.itemId) : 0
+        update({
+          unitCost: currentCost || 0,
+          muRef: filteredMeasurements?.current?.[0]?.reference || null,
+          muId: filteredMeasurements?.current?.[0]?.recordId || null,
+          muQty: filteredMeasurements?.current?.[0]?.qty || 0,
+          baseQty: filteredMeasurements?.current?.[0]?.qty || newRow?.qty
+        })
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.itemName,
+      name: 'itemName',
+      flex: 2,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.MU,
+      name: 'muRef',
+      props: {
+        store: filteredMeasurements?.current,
+        displayField: 'reference',
+        valueField: 'recordId',
+        readOnly: isClosed,
+        mapping: [
+          { from: 'reference', to: 'muRef' },
+          { from: 'name', to: 'muName' },
+          { from: 'qty', to: 'muQty' },
+          { from: 'recordId', to: 'muId' }
+        ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        setReCal(true)
+        if (newRow) {
+          !newRow.muId
+            ? update({
+                baseQty: 0
+              })
+            : update({
+                baseQty: newRow?.qty ? newRow?.qty * newRow?.muQty : newRow?.muQty
+              })
+        }
+      },
+      propsReducer({ row, props }) {
+        let store = []
+        if (row?.itemId) {
+          getFilteredMU(row?.itemId, row?.msId)
+
+          store = filteredMeasurements?.current
+        }
+
+        return { ...props, store }
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'qty',
+      label: labels.qty,
+      defaultValue: 0,
+      async onChange({ row: { update, newRow } }) {
+        setReCal(true)
+        update({
+          totalCost: newRow?.unitCost * newRow?.qty
+        })
+        if (newRow?.muQty)
+          update({
+            baseQty: newRow?.muQty * newRow?.qty
+          })
+        else
+          update({
+            baseQty: newRow?.qty
+          })
+      },
+      props: {
+        readOnly: isClosed
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'unitCost',
+      label: labels.unitCost,
+      defaultValue: 0,
+      props: {
+        decimalScale: 2,
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'totalCost',
+      label: labels.totalCost,
+      defaultValue: 0,
+      props: {
+        decimalScale: 2,
+        readOnly: true
+      }
+    }
+  ]
+
+  const actions = [
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !isClosed
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !isClosed
+    },
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || isPosted
+    },
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      valuesPath: formik.values.header,
+      datasetId: ResourceIds.WorkCenterConsumptions,
+      disabled: !editMode
+    }
+  ]
+
+  useEffect(() => {
+    if (recordId) refetchForm(recordId)
+  }, [recordId])
+
+  useEffect(() => {
+    formik.setFieldValue('header.totalQty', parseFloat(totalQty).toFixed(2))
+    formik.setFieldValue('header.totalCostField', parseFloat(totalCostField).toFixed(2))
+  }, [totalQty, totalCostField])
+
+  useEffect(() => {
+    ;(async function () {
+      const muList = await getMeasurementUnits()
+      setMeasurements(muList?.list)
+    })()
+  }, [])
+
+  return (
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.WorkCenterConsumptions}
+      unctionId={SystemFunction.WorkCenterConsumption}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      previewReport={editMode}
+      actions={actions}
+      disabledSubmit={isClosed}
+    >
+      <VertLayout>
+        <Fixed>
+          <Grid container spacing={3} xs={12}>
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.DocumentType.qry}
+                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.WorkCenterConsumption}`}
+                    name='header.dtId'
+                    label={labels.docType}
+                    readOnly={editMode}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values.header}
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
+                      changeDT(newValue)
+                    }}
+                    error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='header.reference'
+                    label={labels.reference}
+                    value={formik.values.header?.reference}
+                    readOnly={editMode || !formik.values.header?.dtId}
+                    maxAccess={!editMode && maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('header.reference', '')}
+                    error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='header.date'
+                    required
+                    readOnly={isClosed}
+                    label={labels.date}
+                    value={formik?.values?.header?.date}
+                    maxAccess={maxAccess}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('header.date', null)}
+                    error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Plant.qry}
+                    name='header.plantId'
+                    readOnly={isClosed}
+                    label={labels.plant}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values.header}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('header.plantId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.header?.plantId && Boolean(formik.errors.header?.plantId)}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={ManufacturingRepository.WorkCenter.snapshot}
+                    valueField='reference'
+                    displayField='name'
+                    name='header.workCenterId'
+                    secondFieldLabel={labels.name}
+                    label={labels.workCenter}
+                    valueShow='WcRef'
+                    secondValueShow='WcName'
+                    maxAccess={maxAccess}
+                    formObject={formik.values.header}
+                    form={formik}
+                    displayFieldWidth={2}
+                    required
+                    readOnly={isClosed}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' },
+                      { key: 'siteName', value: 'Site Name' }
+                    ]}
+                    onSecondValueChange={(name, value) => {
+                      formik.setFieldValue('header.WcName', value)
+                    }}
+                    onChange={(event, newValue) => {
+                      if (!newValue?.isInactive) {
+                        formik.setFieldValue('header.WcRef', newValue?.reference || '')
+                        formik.setFieldValue('header.WcName', newValue?.name || '')
+                        formik.setFieldValue('header.siteId', newValue?.siteId || null)
+                        formik.setFieldValue('header.siteRef', newValue?.siteRef || null)
+                        formik.setFieldValue('header.siteName', newValue?.siteName || null)
+                        formik.setFieldValue('header.workCenterId', newValue?.recordId || null)
+                      } else {
+                        formik.setFieldValue('header.WcRef', '')
+                        formik.setFieldValue('header.WcName', '')
+                        formik.setFieldValue('header.siteId', null)
+                        formik.setFieldValue('header.siteRef', '')
+                        formik.setFieldValue('header.siteName', '')
+                        stackError({
+                          message: labels.inactiveWorkCenter
+                        })
+                      }
+                    }}
+                    error={formik.touched.header?.workCenterId && Boolean(formik.errors.header?.workCenterId)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='header.siteRef'
+                    label={labels.siteRef}
+                    value={formik.values.header?.siteRef}
+                    readOnly
+                    maxAccess={maxAccess}
+                    error={formik.touched.header?.siteRef && Boolean(formik.errors.header?.siteRef)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='header.reference'
+                    label={labels.siteName}
+                    value={formik.values.header?.siteName}
+                    readOnly
+                    maxAccess={maxAccess}
+                    error={formik.touched.header?.siteName && Boolean(formik.errors.header?.siteName)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='description'
+                    label={labels.description}
+                    value={formik.values.description}
+                    rows={2.5}
+                    editMode={editMode}
+                    readOnly={isClosed}
+                    maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('description', e.target.value)}
+                    onClear={() => formik.setFieldValue('description', '')}
+                    error={formik.touched.description && Boolean(formik.errors.description)}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Fixed>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values.items}
+            error={formik.errors.items}
+            allowDelete={!isClosed}
+            name='items'
+            columns={columns}
+            maxAccess={maxAccess}
+          />
+        </Grow>
+        <Fixed>
+          <Grid container spacing={3} xs={12}>
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='totalQty'
+                    maxAccess={maxAccess}
+                    label={labels.totalQty}
+                    value={totalQty}
+                    decimalScale={2}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='totalCost'
+                    maxAccess={maxAccess}
+                    label={labels.totalCost}
+                    value={totalCostField}
+                    decimalScale={2}
+                    readOnly
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Fixed>
+      </VertLayout>
+    </FormShell>
+  )
+}

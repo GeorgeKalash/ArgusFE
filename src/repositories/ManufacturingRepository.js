@@ -348,6 +348,15 @@ export const ManufacturingRepository = {
   WorkCenterConsumption: {
     page: service + 'pageCON',
     snapshot: service + 'snapshotCON',
-    del: service + 'delCON'
+    del: service + 'delCON',
+    set2: service + 'set2CON',
+    get: service + 'getCON',
+    post: service + 'postCON',
+    unpost: service + 'unpostCON',
+    close: service + 'closeCON',
+    reopen: service + 'reopenCON'
+  },
+  ConsumptionItemView: {
+    qry: service + 'qryCOI'
   }
 }
