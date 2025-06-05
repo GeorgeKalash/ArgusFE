@@ -24,6 +24,11 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { createConditionalSchema } from 'src/lib/validation'
+
+const conditions = {
+  pieces: row => row?.pieces > 0 && row?.pieces <= row?.jobPc
+}
 
 export default function FoWaxesForm({ labels, access, recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -40,6 +45,11 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
   const invalidate = useInvalidate({
     endpointId: FoundryRepository.Wax.page
   })
+
+  const conditions = {
+    jobId: row => row?.jobId,
+    pieces: row => row?.pieces <= row?.jobPcs
+  }
 
   const { formik } = useForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
@@ -68,7 +78,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         {
           id: 1,
           jobId: null,
-          waxId: recordId,
+          waxId: recordId || 0,
           pieces: 0,
           jobPcs: 0,
           classId: null,
@@ -95,36 +105,16 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         netWgt: yup.number().min(0).required(),
         suggestedWgt: yup.number().required()
       }),
-      items: yup
-        .array()
-        .of(
-          yup.object().shape({
-            jobRef: yup.string().required(),
-            pieces: yup
-              .number()
-              .required()
-              .test(function (value) {
-                const { jobPcs } = this.parent
-
-                return !!!jobPcs ? true : value <= jobPcs && value >= 0
-              })
-          })
-        )
-        .required()
+      items: yup.array().of(createConditionalSchema(conditions, true))
     }),
     onSubmit: async obj => {
-      const { items: originalItems, header } = obj
-
-      const items = originalItems?.map(item => ({
-        ...item,
-        waxId: obj.recordId || 0
-      }))
+      const { items, header } = obj
 
       const response = await postRequest({
         extension: FoundryRepository.Wax.set2,
         record: JSON.stringify({
           header,
-          items
+          items: items.filter(item => item.jobId)
         })
       })
       const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
@@ -133,6 +123,8 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       invalidate()
     }
   })
+
+  console.log(formik.values, 'test')
 
   const editMode = !!formik.values?.recordId
   const isPosted = formik?.values?.header?.status === 3
@@ -290,7 +282,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     {
       component: 'resourcelookup',
       label: labels.jobOrder,
-      name: 'jobRef',
+      name: 'jobId',
       flex: 1,
       props: {
         endpointId: ManufacturingRepository.MFJobOrder.snapshot2,
