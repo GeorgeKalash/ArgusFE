@@ -1537,7 +1537,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       data={{
                         recordId: formik.values?.recordId,
                         reference: formik.values?.reference,
-                        clientName: formik.values?.clientName
+                        clientName: formik.values?.clientName,
+                        viewPosButtons: formik.values.wip === 2
                       }}
                       amount={total}
                       disabled={isClosed}

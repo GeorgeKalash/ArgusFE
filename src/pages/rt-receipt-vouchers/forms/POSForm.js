@@ -56,12 +56,14 @@ export default function POSForm({ labels, data, maxAccess, amount }) {
       key: 'Received',
       condition: true,
       onClick: onReceived,
-      viewLoader: isSubmitting
+      viewLoader: isSubmitting,
+      disabled: data?.viewPosButtons
     },
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel
+      onClick: onCancel,
+      disabled: data?.viewPosButtons
     }
   ]
   async function onReceived() {

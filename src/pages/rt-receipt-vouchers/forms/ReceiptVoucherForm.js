@@ -440,7 +440,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
               recordId: formik.values.header.recordId,
               reference: formik.values.header.reference,
               clientName: formik.values.header.clientName,
-              beneficiaryName: formik.values.header.beneficiaryName
+              beneficiaryName: formik.values.header.beneficiaryName,
+              viewPosButtons: formik?.values?.header?.wip === 2
             }}
             name='cash'
           />

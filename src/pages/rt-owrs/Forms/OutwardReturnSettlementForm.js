@@ -75,6 +75,7 @@ export default function OutwardReturnSettlementForm({
       cellPhone: null,
       cashAccountId: parseInt(cashAccountId),
       wip: 1,
+      beneficiaryName: '',
       items: formikSettings.initialValuePayment || []
     },
 
@@ -339,14 +340,14 @@ export default function OutwardReturnSettlementForm({
                       { key: 'amount', value: 'Amount' }
                     ]}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('returnId', newValue ? newValue.recordId : '')
-                      formik.setFieldValue('corId', newValue ? newValue.corId : '')
+                      formik.setFieldValue('returnId', newValue ? newValue.recordId : null)
+                      formik.setFieldValue('corId', newValue ? newValue.corId : null)
                       formik.setFieldValue('corRef', newValue ? newValue.corRef : '')
                       formik.setFieldValue('corName', newValue ? newValue.corName : '')
                       formik.setFieldValue('owrRef', newValue ? newValue.reference : '')
-
                       formik.setFieldValue('amount', newValue ? newValue.amount : '')
-                      formik.setFieldValue('clientId', newValue ? newValue.clientId : '')
+                      formik.setFieldValue('clientId', newValue ? newValue.clientId : null)
+                      formik.setFieldValue('beneficiaryName', newValue ? newValue.benName : '')
                     }}
                   />
                 </Grid>
@@ -404,7 +405,9 @@ export default function OutwardReturnSettlementForm({
             data={{
               recordId: formik.values?.recordId,
               reference: formik.values?.reference,
-              clientName: formik.values?.clientName
+              clientName: formik.values?.clientName,
+              beneficiaryName: formik.values?.beneficiaryName,
+              viewPosButtons: formik?.values?.wip === 2
             }}
             name='items'
           />
