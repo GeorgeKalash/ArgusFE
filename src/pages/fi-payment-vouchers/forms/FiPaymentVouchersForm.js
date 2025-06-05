@@ -531,7 +531,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 form={formik}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Account Ref' },
-                  { key: 'name', value: 'Name', width: '500px' },
+                  { key: 'name', value: 'Name', grid: 4 },
                   { key: 'keywords', value: 'Keywords' }
                 ]}
                 firstFieldWidth={4}

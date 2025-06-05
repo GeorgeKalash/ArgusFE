@@ -635,7 +635,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 secondValueShow='accountName'
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name', width: '500px' },
+                  { key: 'name', value: 'Name', grid: 4 },
                   { key: 'keywords', value: 'Keywords' },
                   { key: 'groupName', value: 'Account Group' }
                 ]}
