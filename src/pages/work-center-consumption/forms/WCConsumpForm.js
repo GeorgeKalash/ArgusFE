@@ -499,6 +499,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
                     maxAccess={maxAccess}
                   />
                 </Grid>
+
                 <Grid item xs={12}>
                   <CustomTextField
                     name='header.reference'
