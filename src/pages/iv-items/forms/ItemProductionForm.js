@@ -33,7 +33,8 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
       standardCost: '',
       standardId: '',
       cgId: '',
-      rmcId: ''
+      rmcId: '',
+      bomId: null
     },
     maxAccess,
     enableReinitialize: true,
@@ -135,7 +136,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={InventoryRepository.SerialProfile.qry}
+                endpointId={InventoryRepository.SerialsProfile.qry}
                 values={formik.values}
                 name='spfId'
                 label={labels.sprofile}
@@ -224,6 +225,25 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 }}
                 error={formik.touched.rmcId && Boolean(formik.errors.rmcId)}
                 maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={formik.values.itemId && ManufacturingRepository.BillOfMaterials.qry2}
+                parameters={`_itemId=${formik?.values?.itemId}`}
+                name='bomId'
+                label={labels.bom}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('bomId', newValue?.recordId || '')
+                }}
               />
             </Grid>
           </Grid>

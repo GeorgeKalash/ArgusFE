@@ -14,6 +14,7 @@ import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
 const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
   const editMode = !!storeRecordId
@@ -27,9 +28,8 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
       siteId: '',
       plantId: '',
       spId: '',
-      cashAccountId: '',
-      cashAccountRef: '',
-      cashAccountName: ''
+      workCenterId: '',
+      cashAccountId: ''
     },
     onSubmit: async obj => {
       const postField = async field => {
@@ -44,7 +44,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
         })
       }
 
-      const fields = ['cashAccountId', 'plantId', 'siteId', 'spId'].map(postField)
+      const fields = ['cashAccountId', 'plantId', 'siteId', 'spId', 'workCenterId'].map(postField)
 
       await Promise.all(fields)
 
@@ -78,7 +78,8 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
           cashAccountId: null,
           cashAccountRef: null,
           cashAccountName: null,
-          spId: null
+          spId: null,
+          workCenterId: null
         }
 
         await Promise.all(
@@ -96,6 +97,9 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                 break
               case 'spId':
                 UserDocObject.spId = x.value ? parseInt(x.value) : null
+                break
+              case 'workCenterId':
+                UserDocObject.workCenterId = x.value ? parseInt(x.value) : null
                 break
               default:
                 break
@@ -164,28 +168,22 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _size: 50,
-                  _startAt: 0,
-                  _type: 0
-                }}
-                filter={formik.values.plantId && { plantId: formik.values.plantId }}
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=0&_size=50&_startAt=0`}
                 name='cashAccountId'
                 label={labels.cashAccount}
-                valueField='accountNo'
-                displayField='name'
-                firstFieldWidth='30%'
-                displayFieldWidth={1.5}
-                valueShow='cashAccountRef'
-                secondValueShow='cashAccountName'
-                form={formik}
+                filter={item => item.plantId === formik.values.plantId}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('cashAccountRef', newValue ? newValue.accountNo : '')
-                  formik.setFieldValue('cashAccountName', newValue ? newValue.name : '')
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
               />
@@ -208,6 +206,25 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                   formik.setFieldValue('spId', newValue ? newValue.recordId : '')
                 }}
                 error={formik.touched.spId && Boolean(formik.errors.spId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.WorkCenter.qry}
+                name='workCenterId'
+                label={labels.workCenter}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('workCenterId', newValue?.recordId || null)
+                }}
+                error={formik.touched.workCenterId && formik.errors.workCenterId}
               />
             </Grid>
           </Grid>

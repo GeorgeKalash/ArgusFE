@@ -28,6 +28,8 @@ const PuTrx = () => {
     switch (functionId) {
       case SystemFunction.PurchaseInvoice:
         return ResourceIds.PurchaseInvoice
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.PurchaseReturn
       default:
         return null
     }
@@ -187,6 +189,18 @@ const PuTrx = () => {
     }
   }
 
+  const getGLResource = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.GLPurchaseInvoice
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.GLPurchaseReturn
+      default:
+        return null
+    }
+  }
+
   async function openForm(recordId) {
     stack({
       Component: PurchaseTransactionForm,
@@ -194,7 +208,9 @@ const PuTrx = () => {
         labels,
         recordId,
         access,
-        functionId
+        functionId,
+        getResourceId,
+        getGLResource
       },
       width: 1330,
       height: 720,

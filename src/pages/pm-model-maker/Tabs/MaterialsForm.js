@@ -10,6 +10,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
 export default function MaterialsForm({ store, labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -29,6 +30,7 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
         .array()
         .of(
           yup.object().shape({
+            itemId: yup.number().required(),
             pcs: yup.string().test(function (value) {
               const isAnyFieldFilled = this.parent.size
               if (this.options.from[1]?.value?.items?.length === 1) {
@@ -78,6 +80,35 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
 
   const columns = [
     {
+      component: 'resourcelookup',
+      label: labels.sku,
+      name: 'itemId',
+      displayFieldWidth: 2,
+      props: {
+        endpointId: InventoryRepository.Item.snapshot,
+        displayField: 'sku',
+        valueField: 'recordId',
+        columnsInDropDown: [
+          { key: 'sku', value: 'Sku' },
+          { key: 'name', value: 'Name' }
+        ],
+        mapping: [
+          { from: 'recordId', to: 'itemId' },
+          { from: 'name', to: 'itemName' },
+          { from: 'sku', to: 'sku' }
+        ],
+        displayFieldWidth: 2
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.itemName,
+      name: 'itemName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
       component: 'numberfield',
       label: labels.pcs,
       name: 'pcs',
@@ -87,6 +118,7 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
       updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
         if (newRow.pcs > 32767) update({ pcs: 0 })
+        else update({ pcs: newRow.pcs })
       }
     },
     {
@@ -116,19 +148,14 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
           parameters: `_modelId=${recordId}`
         })
 
-        const updateItemsList =
-          res?.list?.length != 0
-            ? await Promise.all(
-                res?.list?.map(async (item, index) => {
-                  return {
-                    ...item,
-                    id: index + 1
-                  }
-                })
-              )
-            : [{ id: 1 }]
+        if (res?.list.length > 0) {
+          const updateItemsList = res?.list?.map((item, index) => ({
+            ...item,
+            id: index + 1
+          }))
 
-        formik.setFieldValue('items', updateItemsList)
+          formik.setFieldValue('items', updateItemsList)
+        }
       }
     })()
   }, [])

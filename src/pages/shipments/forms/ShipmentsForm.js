@@ -28,7 +28,7 @@ import GenerateInvoiceForm from './GenerateInvoiceForm'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate }) {
+export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate, plantId, dtId, siteId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -45,12 +45,12 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
     objectName: 'header'
   })
 
-  const defplantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const defplantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value) || null
+  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value) || null
   const marginDefault = parseInt(defaultsData?.list?.find(obj => obj.key === 'POSHPVarPct')?.value) || 0
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId: recordId || null,
       header: {
@@ -111,7 +111,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
     validationSchema: yup.object({
       header: yup.object({
         plantId: yup.number().required(),
-        date: yup.string().required(),
+        date: yup.date().required(),
         siteId: yup.number().required(),
         vendorId: yup.number().required()
       }),
@@ -228,7 +228,10 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       dtId: shipHeader.record.dtId,
       header: {
         ...formik.values.header,
-        ...shipHeader.record
+        plantId: plantId || formik?.values?.header?.plantId,
+        dtId: dtId || formik?.values?.header?.dtId,
+        ...shipHeader.record,
+        siteId: siteId || formik?.values?.header?.siteId
       },
       items: itemsList
     })
@@ -326,6 +329,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       condition: true,
       onClick: 'onClickGL',
       valuesPath: formik.values.header,
+      datasetId: ResourceIds.GLShipments,
       disabled: !editMode
     },
     {
@@ -368,7 +372,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
 
     const filteredData = array
       .filter(item => item.poId === poId)
-      .map(({ poId, poSeqNo, itemId, sku, itemName, qty, trackBy, lotCategoryId, msId }) => ({
+      .map(({ poId, poSeqNo, itemId, sku, itemName, qty, trackBy, lotCategoryId, msId, isInactive }) => ({
         poId,
         poSeqNo,
         itemId,
@@ -377,7 +381,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         qty,
         trackBy,
         lotCategoryId,
-        msId
+        msId,
+        isInactive
       }))
 
     skuStore.current = filteredData
@@ -433,11 +438,13 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       label: labels.sku,
       name: 'sku',
       flex: 1,
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !!row.shipmentId && !!row.poId && !!row.sku }
+      },
       props: {
         store: skuStore?.current,
         displayField: 'sku',
         valueField: 'sku',
-        readOnly: editMode,
         mapping: [
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -447,7 +454,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
           { from: 'qty', to: 'qty' },
           { from: 'qty', to: 'shippedNowQty' },
           { from: 'trackBy', to: 'trackBy' },
-          { from: 'lotCategoryId', to: 'lotCategoryId' }
+          { from: 'lotCategoryId', to: 'lotCategoryId' },
+          { from: 'isInactive', to: 'isInactive' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -463,6 +471,21 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
             muId: null,
             baseQty: 0,
             muQty: 0
+          })
+
+          return
+        }
+
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.items[0],
+            poId: newRow?.poId,
+            poRef: newRow?.poRef,
+            id: newRow.id
+          })
+
+          stackError({
+            message: labels.inactiveItem
           })
 
           return
@@ -515,7 +538,14 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         }
       },
       propsReducer({ row, props }) {
-        return { ...props, store: filteredMeasurements?.current }
+        let store = []
+        if (row?.itemId) {
+          getFilteredMU(row?.itemId, row?.msId)
+
+          store = filteredMeasurements?.current
+        }
+
+        return { ...props, store }
       }
     },
     {
@@ -541,7 +571,6 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       component: 'button',
       hidden: true,
       name: 'lotButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/TableIcons/lot.png'
       },
@@ -674,6 +703,8 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                     values={formik.values.header}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.plantId', newValue?.recordId || null)
+                      formik.setFieldValue('header.plantIdTouched', newValue?.recordId ? true : false)
+                      formik.setFieldValue('header.siteId', null)
                     }}
                     error={formik.touched?.header?.plantId && Boolean(formik.errors?.header?.plantId)}
                     required
@@ -732,7 +763,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
                       { key: 'name', value: 'Name' }
                     ]}
                     filter={
-                      formik?.values?.header?.plantId
+                      formik.values?.header?.plantIdTouched
                         ? item => Number(item.plantId) === Number(formik?.values?.header?.plantId)
                         : undefined
                     }
@@ -779,6 +810,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
             }}
             value={formik?.values?.items}
             error={formik?.errors?.items}
+            initialValues={formik?.initialValues?.items?.[0]}
             columns={columns}
             maxAccess={maxAccess}
             name='shippedItems'

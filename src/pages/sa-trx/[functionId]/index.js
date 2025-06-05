@@ -64,13 +64,13 @@ const SaTrx = () => {
 
   const columns = [
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'plantName',
+      headerName: labels.plant,
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
+      field: 'reference',
+      headerName: labels.reference,
       flex: 1
     },
     {
@@ -80,23 +80,24 @@ const SaTrx = () => {
       type: 'date'
     },
     {
+      field: 'clientRef',
+      headerName: labels.clientRef,
+      flex: 1
+    },
+    {
       field: 'clientName',
-      headerName: labels.client,
+      headerName: labels.clientName,
       flex: 1
     },
     {
-      field: 'spRef',
-      headerName: labels.salesPerson,
-      flex: 1
+      field: 'pcs',
+      headerName: labels.pcs,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'szName',
-      headerName: labels.saleZone,
-      flex: 1
-    },
-    {
-      field: 'plantName',
-      headerName: labels.plant,
+      field: 'qty',
+      headerName: labels.qty,
       flex: 1
     },
     {
@@ -112,14 +113,13 @@ const SaTrx = () => {
       type: 'number'
     },
     {
-      field: 'pcs',
-      headerName: labels.pcs,
-      flex: 1,
-      type: 'number'
+      field: 'spName',
+      headerName: labels.salesPerson,
+      flex: 1
     },
     {
-      field: 'qty',
-      headerName: labels.qty,
+      field: 'szName',
+      headerName: labels.saleZone,
       flex: 1
     },
     {
@@ -136,6 +136,11 @@ const SaTrx = () => {
       field: 'isVerified',
       headerName: labels.isVerified,
       type: 'checkbox'
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
     }
   ]
 
@@ -196,6 +201,18 @@ const SaTrx = () => {
     }
   }
 
+  const getGLResource = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.GLSalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.GLSalesReturn
+      default:
+        return null
+    }
+  }
+
   function openStack(recordId) {
     stack({
       Component: SaleTransactionForm,
@@ -205,13 +222,15 @@ const SaTrx = () => {
         access,
         functionId: functionId,
         lockRecord,
-        getResourceId
+        getResourceId,
+        getGLResource
       },
       width: 1330,
       height: 720,
       title: getCorrectLabel(parseInt(functionId))
     })
   }
+
 
   async function openForm(recordId, reference, status) {
     if (recordId && status !== 3) {

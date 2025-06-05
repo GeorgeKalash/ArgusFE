@@ -116,6 +116,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'AccountSummary',
+    label: platformLabels.AccountSummary,
+    color: '#90278e',
+    image: 'accountBalanceWhite.png',
+    main: false
+  },
+  {
     key: 'WorkFlow',
     label: platformLabels.WorkFlow,
     color: '#231f20',
@@ -262,6 +269,13 @@ export const getButtons = platformLabels => [
     label: platformLabels.addClientRelation,
     color: '#4eb558',
     image: 'clientRelations.png',
+    main: false
+  },
+  {
+    key: 'Lots',
+    label: platformLabels.Lot,
+    color: '#D3D3D3',
+    image: 'lot.png',
     main: false
   },
   {
@@ -560,6 +574,26 @@ export const getButtons = platformLabels => [
     key: 'ORD',
     label: platformLabels.ord,
     color: '#231f20',
+    main: false
+  },
+  {
+    key: 'SHP',
+    label: platformLabels.shp,
+    color: '#231f20',
+    main: false
+  },
+  {
+    key: 'Verify',
+    label: platformLabels.Verify,
+    color: '#047DFA',
+    image: 'checkmark-icon.png',
+    main: false
+  },
+  {
+    key: 'Unverify',
+    label: platformLabels.Unverify,
+    color: '#047DFA',
+    image: 'unverify-icon.png',
     main: false
   }
 ]

@@ -25,7 +25,7 @@ import { Fixed } from './Layouts/Fixed'
 import { VertLayout } from './Layouts/VertLayout'
 import { useForm } from 'src/hooks/form'
 
-const GeneralLedger = ({ functionId, values, valuesPath }) => {
+const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [formik, setformik] = useState(null)
   const [baseGridData, setBaseGridData] = useState({ credit: 0, debit: 0, balance: 0 })
@@ -48,6 +48,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
       filterFn: fetchGridData,
       default: { functionId }
     },
+    DatasetIdAccess: datasetId,
     datasetId: ResourceIds.GeneralLedger
   })
 
@@ -133,7 +134,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
     }
   }, [formValues])
 
-  const isRaw = formValues.status == 1
+  const isProcessed = formValues.status == 3
 
   useEffect(() => {
     if (formik2 && formik2.values && formik2.values.glTransactions && Array.isArray(formik2.values.glTransactions)) {
@@ -291,7 +292,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
       resourceId={ResourceIds.JournalVoucher}
       form={formik2}
       maxAccess={access}
-      disabledSubmit={baseGridData.balance !== 0 || !isRaw}
+      disabledSubmit={baseGridData.balance !== 0 || isProcessed}
       infoVisible={false}
       previewReport={true}
     >
@@ -341,8 +342,8 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
         <Grow>
           <DataGrid
             onChange={value => formik2.setFieldValue('glTransactions', value)}
-            allowDelete={!!isRaw}
-            allowAddNewLine={!!isRaw}
+            allowDelete={!isProcessed}
+            allowAddNewLine={!isProcessed}
             value={formik2?.values.glTransactions}
             error={formik2?.errors.glTransactions}
             name='glTransactions'
@@ -359,7 +360,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
                   parameters: '_type=',
                   valueField: 'recordId',
                   displayField: 'accountRef',
-                  readOnly: !isRaw,
+                  readOnly: isProcessed,
 
                   columnsInDropDown: [
                     { key: 'accountRef', value: 'reference' },
@@ -420,7 +421,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
                   valueField: 'recordId',
                   displayField: 'reference',
                   displayFieldWidth: 3,
-                  readOnly: !isRaw,
+                  readOnly: isProcessed,
                   columnsInDropDown: [
                     { key: 'reference', value: 'reference' },
                     { key: 'name', value: 'name' }
@@ -448,7 +449,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
                 props: {
                   endpointId: GeneralLedgerRepository.CostCenter.snapshot,
                   valueField: 'recordId',
-                  readOnly: !isRaw,
+                  readOnly: isProcessed,
                   displayField: 'reference',
                   displayFieldWidth: 3,
                   columnsInDropDown: [
@@ -477,7 +478,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
                 props: {
                   endpointId: SystemRepository.Currency.qry,
                   displayField: 'reference',
-                  readOnly: !isRaw,
+                  readOnly: isProcessed,
                   valueField: 'recordId',
                   mapping: [
                     { from: 'reference', to: 'currencyRef' },
@@ -520,7 +521,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
                 name: 'signName',
                 props: {
                   datasetId: DataSets.Sign,
-                  readOnly: !isRaw,
+                  readOnly: isProcessed,
                   displayField: 'value',
                   valueField: 'key',
                   mapping: [
@@ -535,7 +536,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
                 name: 'sourceReference',
                 props: {
                   maxLength: 20,
-                  readOnly: !isRaw
+                  readOnly: isProcessed
                 }
               },
               {
@@ -543,14 +544,14 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
                 label: _labels.notes,
                 name: 'notes',
                 props: {
-                  readOnly: !isRaw
+                  readOnly: isProcessed
                 }
               },
               {
                 component: 'numberfield',
                 label: _labels.exRate,
                 props: {
-                  readOnly: !isRaw
+                  readOnly: isProcessed
                 },
                 name: 'exRate',
                 async onChange({ row: { update, oldRow, newRow } }) {
@@ -572,7 +573,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
                 component: 'numberfield',
                 label: _labels.amount,
                 props: {
-                  readOnly: !isRaw
+                  readOnly: isProcessed
                 },
                 name: 'amount',
                 async onChange({ row: { update, oldRow, newRow } }) {
@@ -594,7 +595,7 @@ const GeneralLedger = ({ functionId, values, valuesPath }) => {
                 component: 'numberfield',
                 label: _labels.baseAmount,
                 props: {
-                  readOnly: !isRaw
+                  readOnly: isProcessed
                 },
                 name: 'baseAmount',
                 async onChange({ row: { update, oldRow, newRow } }) {

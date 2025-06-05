@@ -189,6 +189,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLDepreciation,
       disabled: !editMode
     },
 

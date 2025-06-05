@@ -63,6 +63,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       jobId: null,
       productionClassId: null,
       density: null,
+      nbOfLayers: null,
       status: 1,
       wip: 1
     },
@@ -71,9 +72,8 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      fileReference: yup.string().required(),
-      threeDDId: yup.string().required(),
-      machineId: yup.string().required(),
+      threeDDId: yup.number().required(),
+      machineId: yup.number().required(),
       setPcs: yup.number().nullable()
     }),
     onSubmit: async values => {
@@ -187,7 +187,6 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
     invalidate()
     getData(res.recordId)
   }
-
 
   useEffect(() => {
     if (recordId) {
@@ -351,6 +350,20 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                       formik.setFieldValue('productionClassId', newValue?.recordId || null)
                     }}
                     error={formik.touched.productionClassId && Boolean(formik.errors.productionClassId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='nbOfLayers'
+                    label={labels.nbOfLayers}
+                    value={formik.values.nbOfLayers}
+                    maxAccess={maxAccess}
+                    maxLength={4}
+                    decimalScale={0}
+                    readOnly={isPosted || isReleased}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('nbOfLayers', '')}
+                    error={formik.touched.nbOfLayers && Boolean(formik.errors.nbOfLayers)}
                   />
                 </Grid>
                 <Grid item xs={12}>

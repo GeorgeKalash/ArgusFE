@@ -68,7 +68,8 @@ export const PurchaseRepository = {
     set2: service + 'set2IVC',
     post: service + 'postIVC',
     unpost: service + 'unpostIVC',
-    generate: service + 'generateIVC'
+    generate: service + 'generateIVC',
+    preview: service + 'previewIVC'
   },
   Invoice: {
     snapshot: service + 'snapshotINV'
@@ -78,7 +79,7 @@ export const PurchaseRepository = {
     snapshot: service + 'snapshotIVR'
   },
   VendorPrice: {
-    get: service + 'getPRI'
+    get: service + 'getPRI2'
   },
   ItemCostHistory: {
     qry: service + 'qryIPH'
@@ -96,12 +97,34 @@ export const PurchaseRepository = {
     page: service + 'pageSHP',
     snapshot: service + 'snapshotSHP',
     post: service + 'postSHP',
-    unpost: service + 'unpostSHP'
+    unpost: service + 'unpostSHP',
+    gen: service + 'genSHP'
   },
   ShipmentItem: {
     qry: service + 'qrySHI'
   },
   UnpostedOrderPack: {
-    get: service + 'openORD'
+    get: service + 'openORD',
+    snapshot: service + 'snapshotORD'
+  },
+  PurchaseOrder: {
+    page: service + 'pageORD',
+    snapshot: service + 'snapshotORD',
+    del: service + 'delORD',
+    set2: service + 'set2ORD',
+    get2: service + 'get2ORD',
+    close: service + 'closeORD',
+    reopen: service + 'reopenORD',
+    terminate: service + 'terminateORD',
+    transfer: service + 'transfer1ORD'
+  },
+  Request: {
+    snapshot: service + 'snapshotREQ'
+  },
+  Requisition: {
+    qry: service + 'qryREI'
+  },
+  QuotationItem: {
+    preview: service + 'previewQTI'
   }
 }

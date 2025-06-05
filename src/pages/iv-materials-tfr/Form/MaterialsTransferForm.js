@@ -56,8 +56,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     date: new Date(),
     closedDate: null,
     receivedDate: null,
-    fromSiteId: '',
-    toSiteId: '',
+    fromSiteId: null,
+    toSiteId: null,
     notes: '',
     status: 1,
     plantId: parseInt(plantId),
@@ -111,7 +111,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
       return
     } else {
-      if (siteId?.value && !formik.values.fromSiteId) formik.setFieldValue('fromSiteId', parseInt(siteId?.value || ''))
+      if (siteId?.value && !formik.values.fromSiteId)
+        formik.setFieldValue('fromSiteId', parseInt(siteId?.value || null))
     }
   }
 
@@ -253,7 +254,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
   const getUnitCost = async itemId => {
     const res = await getRequest({
-      extension: InventoryRepository.Cost.get,
+      extension: InventoryRepository.CurrentCost.get,
       parameters: '_itemId=' + itemId
     })
 
@@ -274,8 +275,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('toSiteId', res?.record?.toSiteId)
-      formik.setFieldValue('fromSiteId', res?.record?.siteId ? res?.record?.siteId : siteId)
+      formik.setFieldValue('toSiteId', res?.record?.toSiteId || null)
+      formik.setFieldValue('fromSiteId', res?.record?.siteId ? res?.record?.siteId : siteId || null)
       formik.setFieldValue('carrierId', res?.record?.carrierId)
       formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
 
@@ -356,7 +357,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           { from: 'lotCategoryId', to: 'lotCategoryId' },
           { from: 'priceType', to: 'priceType' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'isInactive', to: 'isInactive' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -371,6 +373,17 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         if (!newRow?.itemId) {
           update({
             details: false
+          })
+
+          return
+        }
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.transfers[0],
+            id: newRow.id
+          })
+          stackError({
+            message: labels.inactiveItem
           })
 
           return
@@ -400,7 +413,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     {
       component: 'button',
       name: 'details',
-      defaultValue: !!formik.values?.plId,
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png'
       },
@@ -568,7 +580,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           ...item,
           id: item.seqNo,
           totalCost: calcTotalCost(item),
-          serials: serials.list.map((serialDetail, index) => {
+          serials: serials?.list?.map((serialDetail, index) => {
             return {
               ...serialDetail,
               id: index
@@ -691,6 +703,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLMaterialsTransfer,
       disabled: !editMode
     },
     {
@@ -776,7 +789,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
               ...item,
               id: item.seqNo,
               totalCost: calcTotalCost(item),
-              serials: serials.list.map((serialDetail, index) => {
+              serials: serials?.list?.map((serialDetail, index) => {
                 return {
                   ...serialDetail,
                   id: index
@@ -917,6 +930,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     label={labels.fromSite}
                     values={formik.values}
                     displayField={['reference', 'name']}
+                    valueField='recordId'
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -925,7 +939,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('fromSiteId', newValue?.recordId || '')
+                      formik.setFieldValue('fromSiteId', newValue?.recordId || null)
                     }}
                     error={formik.touched.fromSiteId && Boolean(formik.errors.fromSiteId)}
                   />
@@ -960,6 +974,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     label={labels.toSite}
                     values={formik?.values}
                     displayField={['reference', 'name']}
+                    valueField='recordId'
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -968,8 +983,11 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('toSiteId', newValue?.recordId)
-                      formik.setFieldValue('plId', newValue?.plId)
+                      formik.setFieldValue('toSiteId', newValue?.recordId || null)
+                      formik.setFieldValue('plId', newValue?.plId || null)
+                      if (newValue?.plId) {
+                        formik.setFieldValue('details', true)
+                      }
                     }}
                     error={formik.touched.toSiteId && Boolean(formik.errors.toSiteId)}
                   />

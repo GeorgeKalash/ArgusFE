@@ -37,14 +37,14 @@ export default function ResourceComboBox({
   const key = endpointId || datasetId
   const noCache = Boolean(dynamicParams)
 
-  function fetch({ datasetId, endpointId, parameters }) {
+  function fetch({ datasetId, endpointId, parameters, refresh }) {
     if (endpointId) {
       const fullParameters = dynamicParams ? parameters + '&' + dynamicParams : parameters
 
       return getRequest({
         extension: endpointId,
         parameters: fullParameters,
-        disableLoading: true
+        disableLoading: refresh
       })
     } else if (datasetId) {
       return new Promise(resolve => {
@@ -74,9 +74,9 @@ export default function ResourceComboBox({
           : cacheAvailable && !noCache
           ? await fetchWithCache({
               queryKey: [datasetId || endpointId, parameters],
-              queryFn: () => fetch({ datasetId, endpointId, parameters })
+              queryFn: () => fetch({ datasetId, endpointId, parameters, refresh })
             })
-          : await fetch({ datasetId, endpointId, parameters })
+          : await fetch({ datasetId, endpointId, parameters, refresh })
 
       setApiResponse(!!datasetId ? { list: data } : data)
 
@@ -104,13 +104,14 @@ export default function ResourceComboBox({
     value ||
     ''
 
-  const onBlur = (e, HighlightedOption, options) => {
-    finalItemsListRef.current = options || finalItemsListRef.current
-
-    if (HighlightedOption) {
-      rest.onChange('', HighlightedOption)
-    } else if (finalItemsListRef.current?.[0]) {
-      selectFirstOption()
+  const onBlur = (e, HighlightedOption, options, allowSelect) => {
+    if (allowSelect) {
+      finalItemsListRef.current = options || finalItemsListRef.current
+      if (HighlightedOption) {
+        rest.onChange('', HighlightedOption)
+      } else if (finalItemsListRef.current?.[0]) {
+        selectFirstOption()
+      }
     }
   }
 
@@ -124,7 +125,6 @@ export default function ResourceComboBox({
     if (finalItemsListRef.current.length > 0 && typeof defaultIndex === 'number') {
       rest.onChange('', finalItemsListRef.current[defaultIndex])
     }
-
   }, [defaultIndex, finalItemsListRef.current.length])
 
   return (

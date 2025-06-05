@@ -157,7 +157,8 @@ export const SaleRepository = {
     reopen: service + 'reopenORD',
     cancel: service + 'terminateORD',
     postToInvoice: service + 'transfer2ORD',
-    snapshot: service + 'snapshotORD'
+    snapshot: service + 'snapshotORD',
+    summaryORD: service + 'summaryORD'
   },
   SalesOrderItem: {
     qry: service + 'qryORI'
@@ -191,7 +192,8 @@ export const SaleRepository = {
     get: service + 'getTR',
     get2: service + 'get2TR',
     set2: service + 'set2TRX',
-    del: service + 'delTR'
+    del: service + 'delTR',
+    verify: service + 'verifyTRX'
   },
   SalesTransactionItems: {
     qry: service + 'qryIT'
@@ -267,5 +269,30 @@ export const SaleRepository = {
   },
   VerifyIntegrity: {
     check: service + 'checkTRX'
+  },
+  ClientPriceList: {
+    page: service + 'pagePRC',
+    get: service + 'getPRC',
+    set: service + 'setPRC',
+    del: service + 'delPRC'
+  },
+  PriceListUpdate: {
+    page: service + 'pagePLU',
+    get: service + 'getPLU',
+    set: service + 'setPLU',
+    del: service + 'delPLU',
+    post: service + 'postPLU',
+    unpost: service + 'unpostPLU',
+    generate: service + 'generatePLU'
+  },
+  PriceListItem: {
+    qry: service + 'qryPLI',
+    snapshot: service + 'snapshotPLI'
+  },
+  CategoryPriceGroup: {
+    get: service + 'getPGC',
+    set: service + 'setPGC',
+    del: service + 'delPGC',
+    page: service + 'pagePGC'
   }
 }

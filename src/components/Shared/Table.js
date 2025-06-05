@@ -60,6 +60,7 @@ const Table = ({
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
   const [focus, setFocus] = useState(false)
+  const hasRowId = gridData?.list?.[0]?.id
   const storeName = 'tableSettings'
 
   const columns = props?.columns
@@ -90,7 +91,7 @@ const Table = ({
       if (col.type === 'number' || col?.type?.field === 'number') {
         return {
           ...col,
-          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal),
+          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round),
           cellStyle: { textAlign: 'right' },
           sortable: !disableSorting
         }
@@ -167,7 +168,8 @@ const Table = ({
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
 
   useEffect(() => {
-    const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
+    const areAllValuesTrue =
+      props?.gridData?.list?.length > 0 && props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
     if (typeof setData === 'function') {
       onSelectionChanged()
@@ -499,6 +501,7 @@ const Table = ({
           height: '100%'
         }}
         checked={params.value}
+        disabled={props?.disable && props?.disable(params?.data)}
         onChange={e => {
           const checked = e.target.checked
           if (rowSelection !== 'single') {
@@ -810,6 +813,9 @@ const Table = ({
             enableClipboard={true}
             enableRangeSelection={true}
             columnDefs={finalColumns}
+            {...(hasRowId && {
+              getRowId: params => params?.data?.id
+            })}
             pagination={false}
             paginationPageSize={pageSize}
             rowSelection={'single'}
