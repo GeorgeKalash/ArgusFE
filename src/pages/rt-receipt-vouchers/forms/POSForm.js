@@ -126,16 +126,16 @@ export default function POSForm({ labels, data, maxAccess, amount }) {
     formik.setFieldValue('cashAccountName', res?.record?.name)
   }
 
-  // useEffect(() => {
-  //   ;(async function () {
-  //     await fillCashAccount()
+  useEffect(() => {
+    ;(async function () {
+      await fillCashAccount()
 
-  //     const response = await getRequestFullEndPoint({
-  //       endPoint: `${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/checkDevice?_port=${process.env.NEXT_PUBLIC_POS_PORT}`
-  //     })
-  //     formik.setFieldValue('posSelected', response?.data ? 2 : 1)
-  //   })()
-  // }, [])
+      const response = await getRequestFullEndPoint({
+        endPoint: `${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/checkDevice?_port=${process.env.NEXT_PUBLIC_POS_PORT}`
+      })
+      formik.setFieldValue('posSelected', response?.data ? 2 : 1)
+    })()
+  }, [])
 
   return (
     <FormShell
