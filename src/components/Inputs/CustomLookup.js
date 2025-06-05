@@ -127,6 +127,8 @@ const CustomLookup = ({
           }
           renderOption={(props, option) => {
             if (columnsInDropDown && columnsInDropDown.length > 0) {
+              const equalWidth = displayFieldWidth ? `${(100 / columnsInDropDown.length).toFixed(2)}%` : 'auto'
+
               return (
                 <Box>
                   {props.id.endsWith('-0') && (
@@ -137,9 +139,8 @@ const CustomLookup = ({
                             <Box
                               key={i}
                               sx={{
-                                flex: 1,
                                 fontWeight: 'bold',
-                                width: header.width || 'auto',
+                                width: header.width || equalWidth,
                                 fontSize: '0.7rem',
                                 height: '15px',
                                 display: 'flex'
@@ -156,8 +157,7 @@ const CustomLookup = ({
                       <Box
                         key={i}
                         sx={{
-                          flex: 1,
-                          width: header.width || 'auto',
+                          width: header.width || equalWidth,
                           fontSize: '0.88rem',
                           height: '20px',
                           display: 'flex'

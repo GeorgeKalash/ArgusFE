@@ -223,12 +223,12 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   const editMode = !!formik.values.recordId
   const isRaw = formik.values.status === 1
 
-  async function getFilteredMU(itemId) {
+  async function getFilteredMU(itemId, msId = null) {
     if (!itemId) return
 
     const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-
-    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    const updatedMsId = currentItemId == 0 ? msId || currentItemId : currentItemId
+    const arrayMU = measurements?.filter(item => item.msId == updatedMsId) || []
     filteredMeasurements.current = arrayMU
   }
 
@@ -303,7 +303,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         }
 
         const filteredMU = measurements?.filter(item => item.msId === itemInfo?.msId)
-        getFilteredMU(newRow?.itemId)
+        getFilteredMU(newRow?.itemId, itemInfo?.msId)
 
         const filteredItems = filteredMeasurements?.current?.filter(item => item.recordId === newRow?.muId)
 
@@ -375,7 +375,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update(data)
-        getFilteredMU(newRow?.itemId)
+        getFilteredMU(newRow?.itemId, newRow?.msId)
         const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
         update({
           baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
@@ -1502,7 +1502,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
               action === 'delete' && setReCal(true)
             }}
             onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId)
+              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             initialValues={formik?.initialValues?.items?.[0]}
             value={formik.values.items}
