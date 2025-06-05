@@ -118,6 +118,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLJournalVoucher,
       disabled: !editMode
     },
     {
