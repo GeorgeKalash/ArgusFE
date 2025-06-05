@@ -5,6 +5,8 @@ function conditionalField(fieldValidators, fieldKey, allowNoLines) {
     const row = this.parent
     const path = this.path
 
+    console.log(this.options.context)
+
     const [, arrayKey] = path.match(/^(\w+)\[(\d+)\]/) || []
 
     console.log(allowNoLines)
@@ -21,8 +23,12 @@ function conditionalField(fieldValidators, fieldKey, allowNoLines) {
       }
 
       const isAnyFieldFilled = Object.entries(fieldValidators).some(([, fn]) => {
-        return !!(fn(row) && row[fieldKey] !== null)
+        console.log(fn(row))
+
+        return !!fn(row)
       })
+
+      console.log(isAnyFieldFilled)
 
       if (!isAnyFieldFilled) return true
     }
@@ -31,16 +37,30 @@ function conditionalField(fieldValidators, fieldKey, allowNoLines) {
   }
 }
 
-function createConditionalSchema(fieldValidators, allowNoLines) {
-  return yup.object().shape({
-    ...Object.keys(fieldValidators).reduce((shape, field) => {
-      console.log(this.options.context?.maxAccess)
+function createConditionalSchema(fieldValidators, allowNoLines, maxAccess, arrayName = 'items') {
+  const updatedValidators = { ...fieldValidators }
 
-      shape[field] = yup.mixed().nullable().test(conditionalField(fieldValidators, field, allowNoLines))
+  maxAccess?.record?.controls.forEach(({ controlId, accessLevel }) => {
+    const [parent, id] = controlId?.split('.')
+    if (parent === arrayName)
+      if (accessLevel === 2 && !(id in updatedValidators)) {
+        updatedValidators[id] = row => row?.[id]
+      }
+
+    if ((accessLevel === 1 || accessLevel === 4) && id in updatedValidators) {
+      delete updatedValidators[id]
+    }
+  })
+
+  const schema = yup.object().shape({
+    ...Object.keys(updatedValidators).reduce((shape, field) => {
+      shape[field] = yup.mixed().nullable().test(conditionalField(updatedValidators, field, allowNoLines))
 
       return shape
     }, {})
   })
+
+  return { schema, requiredFields: updatedValidators }
 }
 
 export { createConditionalSchema }

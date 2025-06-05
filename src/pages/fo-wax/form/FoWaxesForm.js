@@ -26,10 +26,6 @@ import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { createConditionalSchema } from 'src/lib/validation'
 
-const conditions = {
-  pieces: row => row?.pieces > 0 && row?.pieces <= row?.jobPc
-}
-
 export default function FoWaxesForm({ labels, access, recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -48,11 +44,14 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
 
   const conditions = {
     jobId: row => row?.jobId,
-    pieces: row => row?.pieces <= row?.jobPcs
+    pieces: row => row?.jobId > 0 && row?.pieces <= row?.jobPcs
   }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    conditionSchema: ['items'],
     initialValues: {
       recordId: null,
       header: {
@@ -105,7 +104,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         netWgt: yup.number().min(0).required(),
         suggestedWgt: yup.number().required()
       }),
-      items: yup.array().of(createConditionalSchema(conditions, true))
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const { items, header } = obj
@@ -114,7 +113,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         extension: FoundryRepository.Wax.set2,
         record: JSON.stringify({
           header,
-          items: items.filter(item => item.jobId)
+          items: items.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         })
       })
       const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
@@ -123,8 +122,6 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       invalidate()
     }
   })
-
-  console.log(formik.values, 'test')
 
   const editMode = !!formik.values?.recordId
   const isPosted = formik?.values?.header?.status === 3

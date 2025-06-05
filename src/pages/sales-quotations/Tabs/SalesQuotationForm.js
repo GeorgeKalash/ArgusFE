@@ -155,10 +155,12 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     sku: row => row?.sku,
     qty: row => row?.qty > 0
   }
+  const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines, maxAccess, 'items')
 
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
+    conditionSchema: ['items'],
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -168,7 +170,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       clientId: yup.string().test('clientId-required', 'Client ID is required if bpId is empty', function (value) {
         return this.parent.bpId ? true : !!value
       }),
-      items: yup.array().of(createConditionalSchema(conditions, allowNoLines))
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const copy = {
@@ -194,7 +196,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       }
 
       const updatedRows = formik.values.items
-        .filter(item => item.sku)
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         .map((itemDetails, index) => {
           const { physicalProperty, ...rest } = itemDetails
 

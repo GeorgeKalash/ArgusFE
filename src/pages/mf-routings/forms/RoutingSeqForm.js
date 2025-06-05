@@ -10,7 +10,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
-import { createConditionalSchema } from 'src/lib/validation'
 
 const RoutingSeqForm = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -27,19 +26,21 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
     workCenterId: row => row.workCenterId,
     operationId: row => row.operationId
   }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'data')
 
   const { formik } = useForm({
-    enableReinitialize: false,
+    maxAccess,
     validateOnChange: true,
+    conditionSchema: ['data'],
     validationSchema: yup.object({
-      data: yup.array().of(createConditionalSchema(conditions, true))
+      data: yup.array().of(schema)
     }),
     initialValues: {
       data: [{ id: 1, seqNo: 0 }]
     },
     onSubmit: async data => {
       const updatedRows = data?.data
-        .filter(item => item.seqNo)
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         .map(itemDetails => {
           return {
             ...itemDetails,

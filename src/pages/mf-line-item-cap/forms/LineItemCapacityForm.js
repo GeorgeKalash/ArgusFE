@@ -29,11 +29,12 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
   })
 
   const conditions = {
-    lineId: row => row?.lineId,
+    lineId: row => row?.lineId > 0,
     fullCapacityWgtPerHr: row => row?.fullCapacityWgtPerHr,
-    preparationHrs: row => row?.preparationHrs && row?.preparationHrs > 0 && row?.preparationHrs < 9,
+    preparationHrs: row => row?.preparationHrs,
     nbOfLabors: row => row?.nbOfLabors
   }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'data')
 
   const { formik } = useForm({
     initialValues: {
@@ -44,10 +45,11 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
       data: [{ id: 1, lineId: null, fullCapacityWgtPerHr: 0, preparationHrs: 0, nbOfLabors: 0 }]
     },
     maxAccess,
+    conditionSchema: ['data'],
     validateOnChange: true,
     validationSchema: yup.object({
       itemId: yup.number().required(),
-      data: yup.array().of(createConditionalSchema(conditions, true))
+      data: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       console.log(obj?.data)
@@ -56,7 +58,7 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
         record: JSON.stringify({
           ...obj,
           data: obj.data
-            .filter(item => item.lineId)
+            .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
             .map(({ id, lineName, lineRef, ...item }) => ({
               ...item,
               lineId: item.lineId || null,

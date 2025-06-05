@@ -131,15 +131,15 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         seqNo: null,
         componentSeqNo: null,
         itemId: null,
-        sku: null,
-        itemName: null,
+        sku: '',
+        itemName: '',
         trackingStatusId: null,
         trackingStatusName: '',
         muId: null,
         spId: null,
         qty: 0,
         baseQty: 0,
-        unitPrice: 0,
+        unitPrice: null,
         baseLaborPrice: 0,
         isMetal: false,
         metalId: null,
@@ -187,10 +187,12 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     itemName: row => row?.itemName,
     qty: row => row?.qty > 0
   }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
+    conditionSchema: ['items'],
     initialValues: initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -200,7 +202,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         currencyId: yup.number().required(),
         vendorId: yup.number().required()
       }),
-      items: yup.array().of(createConditionalSchema(conditions, true))
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const payload = {
@@ -211,7 +213,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
           tdAmount: obj.header.tdAmount || 0
         },
         items: obj.items
-          .filter(item => item.sku)
+          .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
           .map(({ id, isVattable, taxDetails, ...rest }) => ({
             ...rest,
             seqNo: id,
@@ -646,7 +648,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         return acc
       }, {})
 
-      if (Object.keys(touchedFieldHeader).length || Object.keys(touchedFieldItems).length) {
+      if (touchedFieldItems && (Object.keys(touchedFieldHeader).length || Object.keys(touchedFieldItems).length)) {
         formik.setTouched(
           {
             ...formik.touched,
@@ -1577,7 +1579,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
             }}
             value={formik?.values?.items}
             initialValues={formik.initialValues.items[0]}
-            error={formik.touched.items && formik.errors.items}
+            error={formik.errors.items}
             allowDelete={!isClosed}
             name='items'
             columns={columns}

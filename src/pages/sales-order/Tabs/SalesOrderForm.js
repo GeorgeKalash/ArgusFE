@@ -160,9 +160,12 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     qty: row => row?.qty > 0
   }
 
+  const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines, maxAccess, 'items')
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
+    conditionSchema: ['items'],
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -170,7 +173,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       date: yup.string().required(),
       currencyId: yup.string().required(),
       clientId: yup.string().required(),
-      items: yup.array().of(createConditionalSchema(conditions, allowNoLines))
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const copy = { ...obj }
@@ -195,7 +198,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       }
 
       const updatedRows = obj.items
-        .filter(item => item.sku)
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         ?.map((itemDetails, index) => {
           const { physicalProperty, ...rest } = itemDetails
 
