@@ -47,6 +47,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -59,6 +60,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
+
+  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesOrder,
@@ -151,24 +154,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     endpointId: SaleRepository.SalesOrder.page
   })
 
-  const createRowValidation = term =>
-    yup.mixed().test(function (value) {
-      const { sku, itemName } = this.parent
-      const isAnyFieldFilled = !!(sku || itemName)
-      if (term === 'qty') {
-        if (isAnyFieldFilled) return isNaN(value) ? false : value != 0
-
-        return value != 0 || !value
-      }
-
-      return isAnyFieldFilled ? value !== null && value !== undefined : true
-    })
-
-  const rowValidationSchema = yup.object({
-    sku: createRowValidation(),
-    itemName: createRowValidation(),
-    qty: createRowValidation('qty')
-  })
+  const conditions = {
+    sku: row => row?.sku,
+    itemName: row => row?.itemName,
+    qty: row => row?.qty > 0
+  }
 
   const { formik } = useForm({
     maxAccess,
@@ -180,7 +170,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       date: yup.string().required(),
       currencyId: yup.string().required(),
       clientId: yup.string().required(),
-      items: yup.array().of(rowValidationSchema)
+      items: yup.array().of(createConditionalSchema(conditions, allowNoLines))
     }),
     onSubmit: async obj => {
       const copy = { ...obj }
@@ -204,9 +194,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         copy.shipToAddressId = addressRes.recordId
       }
 
-      const updatedRows = formik.values.items
+      const updatedRows = obj.items
         .filter(item => item.sku)
-        .map((itemDetails, index) => {
+        ?.map((itemDetails, index) => {
           const { physicalProperty, ...rest } = itemDetails
 
           return {

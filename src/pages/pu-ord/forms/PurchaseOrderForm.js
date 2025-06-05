@@ -55,6 +55,7 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { useError } from 'src/error'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function PurchaseOrderForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -181,6 +182,12 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     endpointId: PurchaseRepository.PurchaseOrder.page
   })
 
+  const conditions = {
+    sku: row => row?.sku,
+    itemName: row => row?.itemName,
+    qty: row => row?.qty > 0
+  }
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
@@ -193,16 +200,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         currencyId: yup.number().required(),
         vendorId: yup.number().required()
       }),
-      items: yup
-        .array()
-        .of(
-          yup.object({
-            sku: yup.string().required(),
-            itemName: yup.string().required(),
-            qty: yup.number().required().min(1)
-          })
-        )
-        .required()
+      items: yup.array().of(createConditionalSchema(conditions, true))
     }),
     onSubmit: async obj => {
       const payload = {
@@ -212,12 +210,14 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
           tdPct: obj.header.tdPct || 0,
           tdAmount: obj.header.tdAmount || 0
         },
-        items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
-          ...rest,
-          seqNo: id,
-          applyVat: isVattable,
-          deliveryDate: rest.deliveryDate ? formatDateToApi(rest.deliveryDate) : null
-        }))
+        items: obj.items
+          .filter(item => item.sku)
+          .map(({ id, isVattable, taxDetails, ...rest }) => ({
+            ...rest,
+            seqNo: id,
+            applyVat: isVattable,
+            deliveryDate: rest.deliveryDate ? formatDateToApi(rest.deliveryDate) : null
+          }))
       }
 
       const puTrxRes = await postRequest({

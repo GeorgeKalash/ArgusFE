@@ -21,31 +21,31 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
 
   const filteredOperations = useRef([])
 
+  const conditions = {
+    seqNo: row => row.seqNo,
+    name: row => row.name,
+    workCenterId: row => row.workCenterId,
+    operationId: row => row.operationId
+  }
+
   const { formik } = useForm({
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      data: yup.array().of(
-        createConditionalSchema({
-          seqNo: row => row.seqNo,
-          name: row => row.name,
-          workCenterId: row => row.workCenterId,
-          operationId: row => row.operationId
-        })
-      )
+      data: yup.array().of(createConditionalSchema(conditions, true))
     }),
     initialValues: {
       data: [{ id: 1, seqNo: 0 }]
     },
     onSubmit: async data => {
       const updatedRows = data?.data
+        .filter(item => item.seqNo)
         .map(itemDetails => {
           return {
             ...itemDetails,
             routingId: recordId
           }
         })
-        .filter(item => item.workCenterId || item.operationId)
 
       await postRequest({
         extension: ManufacturingRepository.RoutingSequence.set2,

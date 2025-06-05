@@ -47,7 +47,7 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
     validateOnChange: true,
     validationSchema: yup.object({
       itemId: yup.number().required(),
-      data: yup.array().of(createConditionalSchema(conditions))
+      data: yup.array().of(createConditionalSchema(conditions, true))
     }),
     onSubmit: async obj => {
       console.log(obj?.data)
@@ -56,7 +56,7 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
         record: JSON.stringify({
           ...obj,
           data: obj.data
-            .filter(row => Object.values(conditions)?.every(fn => fn(row)))
+            .filter(item => item.lineId)
             .map(({ id, lineName, lineRef, ...item }) => ({
               ...item,
               lineId: item.lineId || null,

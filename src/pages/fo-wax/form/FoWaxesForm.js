@@ -47,7 +47,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
   })
 
   const conditions = {
-    jobId: row => row?.jobId > 0,
+    jobId: row => row?.jobId,
     pieces: row => row?.pieces <= row?.jobPcs
   }
 
@@ -105,7 +105,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         netWgt: yup.number().min(0).required(),
         suggestedWgt: yup.number().required()
       }),
-      items: yup.array().of(createConditionalSchema(conditions))
+      items: yup.array().of(createConditionalSchema(conditions, true))
     }),
     onSubmit: async obj => {
       const { items, header } = obj
@@ -114,7 +114,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         extension: FoundryRepository.Wax.set2,
         record: JSON.stringify({
           header,
-          items: items.filter(row => Object.values(conditions)?.every(fn => fn(row)))
+          items: items.filter(item => item.jobId)
         })
       })
       const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
