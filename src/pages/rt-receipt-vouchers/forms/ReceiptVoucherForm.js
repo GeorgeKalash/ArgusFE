@@ -69,7 +69,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         clientId: null,
         cellPhone: null
       },
-      cash: formikSettings.initialValuePayment || []
+      cash: formikSettings.initialValuePayment || [{ id: 1, pos: true }]
     },
 
     validationSchema: yup.object({
@@ -232,9 +232,10 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
           ...res.record,
           date: formatDateFromApi(res?.record?.date)
         },
-        cash: result.list.map((amount, index) => ({
+        cash: result.list.map((item, index) => ({
           id: index + 1,
-          ...amount
+          pos: item?.type != 3,
+          ...item
         }))
       })
 
@@ -395,7 +396,6 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.owoId', newValue ? newValue.recordId : '')
                       formik.setFieldValue('header.owoRef', newValue ? newValue.reference : '')
-
                       formik.setFieldValue('header.amount', newValue ? newValue.amount : '')
                       formik.setFieldValue('header.clientId', newValue ? newValue.clientId : '')
                     }}
@@ -436,6 +436,13 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
             allowAddNewLine={!isPosted}
             amount={formik.values.header.amount}
             setFormik={setFormik}
+            data={{
+              recordId: formik.values.header.recordId,
+              reference: formik.values.header.reference,
+              clientName: formik.values.header.clientName,
+              beneficiaryName: formik.values.header.beneficiaryName,
+              viewPosButtons: formik?.values?.header?.wip === 2
+            }}
             name='cash'
           />
         </Grow>
