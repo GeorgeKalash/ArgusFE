@@ -205,16 +205,14 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                datasetId={DataSets.Cost_Center}
+                datasetId={DataSets.COST_CENTER}
                 name='costCenterSource'
                 label={labels.costCenterSource}
                 values={formik.values}
                 valueField='key'
                 displayField='value'
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('costCenterSource', newValue ? newValue.key : null)
-                }}
+                onChange={(event, newValue) => formik.setFieldValue('costCenterSource', newValue?.key || null)}
                 error={formik.touched.costCenterSource && Boolean(formik.errors.costCenterSource)}
               />
             </Grid>
