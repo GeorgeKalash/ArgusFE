@@ -126,6 +126,7 @@ const ProductModelingDTD = () => {
       </Fixed>
       <Grow>
         <Table
+          name='pmDTD'
           columns={columns}
           gridData={data}
           rowId={['dtId']}
