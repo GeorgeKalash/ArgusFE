@@ -315,6 +315,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
         return false
       }
       toast.success(platformLabels.Saved)
+      invalidate()
 
       return true
     }

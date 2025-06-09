@@ -372,6 +372,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       const diHeader = await getDraftReturn(diRes.recordId)
       const diItems = await getDraftReturnItems(diRes.recordId)
       await fillForm(diHeader, diItems)
+      invalidate()
 
       return true
     } else {
