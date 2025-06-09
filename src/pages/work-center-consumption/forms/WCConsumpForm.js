@@ -45,10 +45,12 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
     endpointId: ManufacturingRepository.WorkCenterConsumption.page
   })
 
-  function createRowValidation() {
-    return yup.mixed().test(function (value) {
-      const { sku, qty } = this.parent
-      const isAnyFieldFilled = !!(sku || qty)
+  function createRowValidation(field) {
+    let schema = field === 'qty' ? yup.number().nullable().max(999999999.999, ' ') : yup.mixed()
+
+    return schema.test(function (value) {
+      const { sku, qty, itemName } = this.parent
+      const isAnyFieldFilled = !!(sku || qty || itemName)
 
       if (isAnyFieldFilled) {
         return !!value
@@ -59,8 +61,9 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
   }
 
   const rowValidationSchema = yup.object({
-    sku: createRowValidation(),
-    qty: createRowValidation()
+    itemName: createRowValidation('itemName'),
+    sku: createRowValidation('sku'),
+    qty: createRowValidation('qty')
   })
 
   const { formik } = useForm({
@@ -88,6 +91,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
           seqNo: 1,
           itemId: null,
           consumptionId: recordId,
+          qty: 0,
           unitCost: 0,
           muId: null,
           itemName: '',
@@ -98,10 +102,9 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
     },
     maxAccess,
     validateOnChange: true,
-    enableReinitialize: false,
     validationSchema: yup.object({
       header: yup.object({
-        date: yup.string().required(),
+        date: yup.date().required(),
         workCenterId: yup.number().required()
       }),
       items: yup.array().of(rowValidationSchema)
@@ -111,8 +114,9 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
 
       const items = originalItems
         ?.filter(item => item.sku)
-        ?.map(item => ({
+        ?.map((item, index) => ({
           ...item,
+          seqNo: index + 1,
           consumptionId: obj.recordId || 0
         }))
 
@@ -134,10 +138,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
   const isPosted = formik?.values?.header?.status === 3
   const isClosed = formik?.values?.header?.wip === 2
 
-  const totalCostField =
-    formik.values.items.reduce((sum, item) => sum + (Number(item?.totalCost) || 0), 0) ||
-    formik.values?.header.totalCostField ||
-    0
+  const totalCostField = formik.values.items.reduce((sum, item) => sum + (Number(item?.totalCost) || 0), 0)
 
   const totalQty = reCal
     ? formik.values.items.reduce((sum, item) => sum + (Number(item?.qty) || 0), 0)
@@ -152,6 +153,11 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
 
   async function getFilteredMU(itemId, msId) {
     if (!itemId) return
+
+    if (!msId) {
+      const itemInfo = await getItem(itemId)
+      msId = itemInfo?.msId
+    }
 
     const arrayMU = measurements?.filter(item => item.msId === msId) || []
     filteredMeasurements.current = arrayMU
@@ -208,6 +214,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
     })
 
     refetchForm(formik.values.recordId)
+    toast.success(platformLabels.Unposted)
     invalidate()
   }
 
@@ -217,6 +224,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       record: JSON.stringify(formik.values.header)
     })
 
+    toast.success(platformLabels.Closed)
     refetchForm(formik.values.recordId)
     invalidate()
   }
@@ -227,6 +235,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       record: JSON.stringify(formik.values.header)
     })
 
+    toast.success(platformLabels.Reopened)
     refetchForm(formik.values.recordId)
     invalidate()
   }
@@ -253,6 +262,15 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
     })
 
     return response?.record?.currentCost
+  }
+
+  async function getItem(itemId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Item.get,
+      parameters: `_recordId=${itemId}`
+    })
+
+    return res?.record
   }
 
   const columns = [
@@ -304,16 +322,18 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
 
           return
         }
-
-        getFilteredMU(newRow?.itemId, newRow?.msId)
-        const currentCost = newRow?.itemId ? await getCost(newRow?.itemId) : 0
-        update({
-          unitCost: currentCost || 0,
-          muRef: filteredMeasurements?.current?.[0]?.reference || null,
-          muId: filteredMeasurements?.current?.[0]?.recordId || null,
-          muQty: filteredMeasurements?.current?.[0]?.qty || 0,
-          baseQty: filteredMeasurements?.current?.[0]?.qty || newRow?.qty
-        })
+        if (newRow?.itemId) {
+          getFilteredMU(newRow?.itemId, newRow?.msId)
+          const currentCost = newRow?.itemId ? await getCost(newRow?.itemId) : 0
+          update({
+            unitCost: currentCost || 0,
+            muRef: filteredMeasurements?.current?.[0]?.reference || null,
+            muId: filteredMeasurements?.current?.[0]?.recordId || null,
+            muQty: filteredMeasurements?.current?.[0]?.qty || 0,
+            baseQty: filteredMeasurements?.current?.[0]?.qty || newRow?.qty,
+            qty: newRow?.qty || 0
+          })
+        }
       }
     },
     {
@@ -368,7 +388,6 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
-      defaultValue: 0,
       async onChange({ row: { update, newRow } }) {
         setReCal(true)
         update({
@@ -384,6 +403,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
           })
       },
       props: {
+        decimalScale: 2,
         readOnly: isClosed
       }
     },
@@ -391,7 +411,6 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: 'unitCost',
       label: labels.unitCost,
-      defaultValue: 0,
       props: {
         decimalScale: 2,
         readOnly: true
@@ -401,7 +420,6 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: 'totalCost',
       label: labels.totalCost,
-      defaultValue: 0,
       props: {
         decimalScale: 2,
         readOnly: true
@@ -446,10 +464,6 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
   ]
 
   useEffect(() => {
-    if (recordId) refetchForm(recordId)
-  }, [recordId])
-
-  useEffect(() => {
     formik.setFieldValue('header.totalQty', parseFloat(totalQty).toFixed(2))
     formik.setFieldValue('header.totalCostField', parseFloat(totalCostField).toFixed(2))
   }, [totalQty, totalCostField])
@@ -458,6 +472,8 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
     ;(async function () {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
+
+      if (recordId) refetchForm(recordId)
     })()
   }, [])
 
@@ -465,7 +481,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
     <FormShell
       form={formik}
       resourceId={ResourceIds.WorkCenterConsumptions}
-      unctionId={SystemFunction.WorkCenterConsumption}
+      functionId={SystemFunction.WorkCenterConsumption}
       maxAccess={maxAccess}
       editMode={editMode}
       previewReport={editMode}
@@ -574,23 +590,13 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
                       formik.setFieldValue('header.WcName', value)
                     }}
                     onChange={(event, newValue) => {
-                      if (!newValue?.isInactive) {
-                        formik.setFieldValue('header.WcRef', newValue?.reference || '')
-                        formik.setFieldValue('header.WcName', newValue?.name || '')
-                        formik.setFieldValue('header.siteId', newValue?.siteId || null)
-                        formik.setFieldValue('header.siteRef', newValue?.siteRef || null)
-                        formik.setFieldValue('header.siteName', newValue?.siteName || null)
-                        formik.setFieldValue('header.workCenterId', newValue?.recordId || null)
-                      } else {
-                        formik.setFieldValue('header.WcRef', '')
-                        formik.setFieldValue('header.WcName', '')
-                        formik.setFieldValue('header.siteId', null)
-                        formik.setFieldValue('header.siteRef', '')
-                        formik.setFieldValue('header.siteName', '')
-                        stackError({
-                          message: labels.inactiveWorkCenter
-                        })
-                      }
+                      formik.setFieldValue('header.WcRef', newValue?.isInactive ? '' : newValue?.reference)
+                      formik.setFieldValue('header.WcName', newValue?.isInactive ? '' : newValue?.name)
+                      formik.setFieldValue('header.siteId', newValue?.isInactive ? null : newValue?.siteId)
+                      formik.setFieldValue('header.siteRef', newValue?.isInactive ? '' : newValue?.siteRef)
+                      formik.setFieldValue('header.siteName', newValue?.isInactive ? '' : newValue?.siteName)
+                      formik.setFieldValue('header.workCenterId', newValue?.isInactive ? null : newValue?.recordId)
+                      if (newValue?.isInactive) stackError({ message: labels.inactiveWorkCenter })
                     }}
                     error={formik.touched.header?.workCenterId && Boolean(formik.errors.header?.workCenterId)}
                   />
@@ -619,9 +625,8 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
                   <CustomTextArea
                     name='description'
                     label={labels.description}
-                    value={formik.values.description}
+                    value={formik.values?.header?.description}
                     rows={2.5}
-                    editMode={editMode}
                     readOnly={isClosed}
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('description', e.target.value)}
@@ -635,7 +640,15 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('items', value)}
+            onChange={(value, action) => {
+              formik.setFieldValue('items', value)
+              if (action === 'delete') {
+                setReCal(true)
+              }
+            }}
+            onSelectionChange={(row, field) => {
+              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
+            }}
             value={formik.values.items}
             error={formik.errors.items}
             allowDelete={!isClosed}
