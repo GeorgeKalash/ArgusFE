@@ -68,7 +68,7 @@ export default function ProductModelingDTDForm({ labels, maxAccess, recordId, fu
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.ProductModelingDTD} functionId={functionId} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.ProductModelingDTD} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
