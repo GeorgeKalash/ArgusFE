@@ -6,7 +6,6 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -32,7 +31,7 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import Samples from './Samples'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 
-export default function JobOrderForm({ labels, maxAccess: access, setStore, store, setRefetchRouting }) {
+export default function JobOrderForm({ labels, maxAccess: access, setStore, store, setRefetchRouting, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -63,7 +62,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     routingSeqNo: null,
     startingDT: null,
     endingDT: null,
-    description: null,
+    description: '',
     weight: 0,
     qty: 0,
     pcs: 0,
@@ -92,16 +91,12 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
     itemFromDesign: false
   }
 
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.MFJobOrder.qry
-  })
-
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
     enableReinitialize: false,
-    validateOnChange: true,
+    validateOnChange: false,
     validationSchema: yup.object({
       date: yup.string().required(),
       expectedQty: yup.number().required(),
@@ -183,6 +178,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLMFJobOrders,
       disabled: !editMode
     },
     {
@@ -707,10 +703,11 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
                         value={formik.values.description}
                         rows={2.5}
                         maxLength='100'
-                        readOnly={isCancelled || isPosted}
                         maxAccess={maxAccess}
-                        onChange={e => formik.setFieldValue('description', e.target.value)}
-                        onClear={() => formik.setFieldValue('description', null)}
+                        readOnly={isCancelled || isPosted}
+                        onChange={formik.handleChange}
+                        onClear={() => formik.setFieldValue('description', '')}
+                        error={formik.touched.description && Boolean(formik.errors.description)}
                       />
                     </Grid>
                     <Grid item>

@@ -31,14 +31,20 @@ import { LOTransportationForm } from 'src/components/Shared/LOTransportationForm
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function CreditInvoiceForm({ _labels, access, recordId, plantId, userData, cashAccountId }) {
+export default function CreditInvoiceForm({ recordId, plantId, userData, cashAccountId, window }) {
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const [selectedFunctionId, setFunctionId] = useState(SystemFunction.CreditInvoicePurchase)
   const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.CreditInvoice
+  })
 
   const invalidate = useInvalidate({
     endpointId: CTTRXrepository.CreditInvoice.page
@@ -95,6 +101,8 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     access: access,
     enabled: !recordId
   })
+
+  useSetWindow({ title: labels.creditInvoice, window })
 
   const { formik } = useForm({
     initialValues,
@@ -290,7 +298,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     if (!plantId || !currencyId || !rateType || !baseCurrency) {
       if (!plantId) {
         stackError({
-          message: _labels.emptyPlant
+          message: labels.emptyPlant
         })
       }
       if (!currencyId) {
@@ -298,17 +306,17 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
         formik.setFieldValue('corRef', '')
         formik.setFieldValue('corName', '')
         stackError({
-          message: _labels.emptyToCurrency
+          message: labels.emptyToCurrency
         })
       }
       if (!rateType) {
         stackError({
-          message: _labels.emptyRate
+          message: labels.emptyRate
         })
       }
       if (!baseCurrency) {
         stackError({
-          message: _labels.emptyFromCurrency
+          message: labels.emptyFromCurrency
         })
       }
 
@@ -322,7 +330,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
 
     if (!res?.record?.rate) {
       stackError({
-        message: _labels.undefinedCorRate
+        message: labels.undefinedCorRate
       })
 
       return
@@ -339,7 +347,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     for (const key in obj) {
       if (!obj[key]) {
         stackError({
-          message: `${key} ${_labels.empty}`
+          message: `${key} ${labels.empty}`
         })
 
         return
@@ -445,7 +453,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
         recordId: formik.values.recordId
       },
       width: 950,
-      title: _labels.workflow
+      title: labels.workflow
     })
   }
 
@@ -460,7 +468,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       },
       width: 1200,
       height: 670,
-      title: _labels.shipments
+      title: labels.shipments
     })
   }
 
@@ -474,7 +482,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       },
       width: 700,
       height: 430,
-      title: _labels.transportation
+      title: labels.transportation
     })
   }
 
@@ -483,6 +491,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLCreditInvoice,
       disabled: !editMode
     },
     {
@@ -520,7 +529,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
   const columns = [
     {
       component: 'resourcecombobox',
-      label: _labels.currency,
+      label: labels.currency,
       name: 'currencyRef',
       props: {
         endpointId: SystemRepository.Currency.qry,
@@ -559,7 +568,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
           })
 
           stackError({
-            message: `${_labels.undefinedRate} ${newRow?.currencyRef}`
+            message: `${labels.undefinedRate} ${newRow?.currencyRef}`
           })
 
           return
@@ -600,7 +609,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     },
     {
       component: 'textfield',
-      label: _labels.name,
+      label: labels.name,
       name: 'currencyName',
       readOnly: true,
       props: {
@@ -610,7 +619,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     },
     {
       component: 'numberfield',
-      label: _labels.quantity,
+      label: labels.quantity,
       name: 'qty',
       props: {
         readOnly: visible,
@@ -646,7 +655,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     },
     {
       component: 'numberfield',
-      label: _labels.defaultRate,
+      label: labels.defaultRate,
       name: 'defaultRate',
       props: {
         readOnly: true,
@@ -657,7 +666,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     },
     {
       component: 'numberfield',
-      label: _labels.exRate,
+      label: labels.exRate,
       name: 'exRate',
       props: {
         readOnly: visible,
@@ -714,7 +723,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
             })
           } else {
             stackError({
-              message: `${_labels.rateRange} ${minRate}-${maxRate} ${_labels.range}`
+              message: `${labels.rateRange} ${minRate}-${maxRate} ${labels.range}`
             })
             if (nv) {
               update({
@@ -729,7 +738,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     },
     {
       component: 'numberfield',
-      label: `${_labels.total} ${formik.values.currencyRef !== null ? formik.values.currencyRef : ''}`,
+      label: `${labels.total} ${formik.values.currencyRef !== null ? formik.values.currencyRef : ''}`,
       name: 'amount',
       props: {
         readOnly: true,
@@ -778,7 +787,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
               <CustomDatePicker
                 name='date'
                 required
-                label={_labels.date}
+                label={labels.date}
                 readOnly={visible}
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
@@ -791,7 +800,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
-                label={_labels.plant}
+                label={labels.plant}
                 readOnly={true}
                 values={formik.values}
                 valueField='recordId'
@@ -811,7 +820,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
             <Grid item xs={4} sx={{ pl: 1 }}>
               <CustomTextField
                 name='reference'
-                label={_labels.reference}
+                label={labels.reference}
                 value={formik?.values?.reference}
                 editMode={editMode}
                 maxAccess={maxAccess}
@@ -830,9 +839,9 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
                 valueField='reference'
                 displayField='name'
                 name='corId'
-                label={_labels.correspondent}
+                label={labels.correspondent}
                 form={formik}
-                firstFieldWidth='30%'
+                firstFieldWidth={4}
                 required
                 valueShow='corRef'
                 secondValueShow='corName'
@@ -855,12 +864,12 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
                 parameters={{
                   _type: 0
                 }}
-                firstFieldWidth='30%'
+                firstFieldWidth={4}
                 valueField='accountNo'
                 displayField='name'
                 name='cashAccountId'
                 required
-                label={_labels.cashAccount}
+                label={labels.cashAccount}
                 form={formik}
                 readOnly={visible}
                 valueShow='cashAccountRef'
@@ -889,13 +898,13 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
               <FormControlLabel
                 value={SystemFunction.CreditInvoicePurchase}
                 control={<Radio />}
-                label={_labels.purchase}
+                label={labels.purchase}
                 disabled={formik?.values?.rows[0]?.currencyId}
               />
               <FormControlLabel
                 value={SystemFunction.CreditInvoiceSales}
                 control={<Radio />}
-                label={_labels.sale}
+                label={labels.sale}
                 disabled={formik?.values?.rows[0]?.currencyId}
               />
             </RadioGroup>
@@ -923,7 +932,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
             <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
               <CustomTextArea
                 name='notes'
-                label={_labels.notes}
+                label={labels.notes}
                 value={formik.values.notes}
                 rows={3}
                 readOnly={visible}
@@ -937,7 +946,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
               <Grid item xs={12}>
                 <CustomTextField
                   name='totalCUR'
-                  label={`${_labels.total} ${formik.values.currencyRef !== null ? formik.values.currencyRef : ''}`}
+                  label={`${labels.total} ${formik.values.currencyRef !== null ? formik.values.currencyRef : ''}`}
                   value={getFormattedNumber(totalCUR.toFixed(2))}
                   numberField={true}
                   readOnly={true}
@@ -946,7 +955,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
               <Grid item xs={12}>
                 <CustomTextField
                   name='baseAmount'
-                  label={`${_labels.total} ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
+                  label={`${labels.total} ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
                   style={{ textAlign: 'right' }}
                   value={getFormattedNumber(totalLoc.toFixed(2))}
                   numberField={true}

@@ -24,7 +24,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { useForm } from 'src/hooks/form'
 
-const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) => {
+const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [referenceRequired, setReferenceRequired] = useState(true)
   const [editMode, setEditMode] = useState(!!recordId)
@@ -590,4 +590,4 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
   )
 }
 
-export default ClientTemplateForm
+export default ClientCorporateForm

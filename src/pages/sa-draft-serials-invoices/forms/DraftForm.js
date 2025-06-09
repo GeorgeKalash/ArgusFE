@@ -108,7 +108,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
           unitPrice: 0,
           taxId: null,
           taxDetails: null,
-          taxDetailsButton: false,
+          taxDetailsButton: true,
           priceType: 0,
           volume: 0
         }
@@ -480,7 +480,6 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     {
       component: 'button',
       name: 'taxDetailsButton',
-      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/tax-icon.png'
       },
@@ -495,7 +494,6 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
               taxId: row?.taxId,
               obj: row
             },
-            width: 1000,
             title: platformLabels.TaxDetails
           })
         }
@@ -571,7 +569,9 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       Component: ImportSerials,
       props: {
         endPoint: SaleRepository.DraftInvoiceSerial.batch,
-        draftId: formik?.values?.recordId,
+        header: {
+          draftId: formik?.values?.recordId
+        },
         onCloseimport: fillGrids,
         maxAccess: maxAccess
       },
@@ -1091,6 +1091,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
             onChange={(value, action, row) => handleGridChange(value, action, row)}
             value={filteredData || []}
             error={formik.errors.serials}
+            initialValues={formik?.initialValues?.serials?.[0]}
             columns={serialsColumns}
             name='serials'
             maxAccess={maxAccess}

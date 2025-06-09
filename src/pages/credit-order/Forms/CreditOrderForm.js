@@ -34,8 +34,9 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { LOTransportationForm } from 'src/components/Shared/LOTransportationForm'
 import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function CreditOrderForm({ labels, access, recordId, plantId, userData, window }) {
+export default function CreditOrderForm({ recordId, plantId, userData, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -86,14 +87,16 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     ]
   })
 
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.CreditOrder
+  })
+
+  useSetWindow({ title: labels.creditOrder, window })
+
   const { maxAccess } = useDocumentType({
     functionId: selectedFunctionId,
     access: access,
     enabled: !recordId
-  })
-
-  const { labels: _labels, access: accessINV } = useResourceParams({
-    datasetId: ResourceIds.CreditInvoice
   })
 
   const invalidate = useInvalidate({
@@ -264,15 +267,15 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     stack({
       Component: CreditInvoiceForm,
       props: {
-        _labels,
-        access: accessINV,
+        labels,
+        access: access,
         recordId: res?.recordId,
         plantId,
         userData
       },
       width: 900,
       height: 600,
-      title: _labels.creditInvoice
+      title: labels.creditInvoice
     })
   }
 
@@ -705,7 +708,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       },
       width: 1200,
       height: 670,
-      title: _labels.shipments
+      title: labels.shipments
     })
   }
 
@@ -719,7 +722,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       },
       width: 700,
       height: 430,
-      title: _labels.transportation
+      title: labels.transportation
     })
   }
 
@@ -877,7 +880,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 label={labels.correspondent}
                 form={formik}
                 required
-                firstFieldWidth='30%'
+                firstFieldWidth={4}
                 displayFieldWidth={1.5}
                 valueShow='corRef'
                 secondValueShow='corName'

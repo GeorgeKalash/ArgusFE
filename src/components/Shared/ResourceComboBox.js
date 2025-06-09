@@ -37,14 +37,14 @@ export default function ResourceComboBox({
   const key = endpointId || datasetId
   const noCache = Boolean(dynamicParams)
 
-  function fetch({ datasetId, endpointId, parameters }) {
+  function fetch({ datasetId, endpointId, parameters, refresh }) {
     if (endpointId) {
       const fullParameters = dynamicParams ? parameters + '&' + dynamicParams : parameters
 
       return getRequest({
         extension: endpointId,
         parameters: fullParameters,
-        disableLoading: true
+        disableLoading: refresh
       })
     } else if (datasetId) {
       return new Promise(resolve => {
@@ -74,9 +74,9 @@ export default function ResourceComboBox({
           : cacheAvailable && !noCache
           ? await fetchWithCache({
               queryKey: [datasetId || endpointId, parameters],
-              queryFn: () => fetch({ datasetId, endpointId, parameters })
+              queryFn: () => fetch({ datasetId, endpointId, parameters, refresh })
             })
-          : await fetch({ datasetId, endpointId, parameters })
+          : await fetch({ datasetId, endpointId, parameters, refresh })
 
       setApiResponse(!!datasetId ? { list: data } : data)
 

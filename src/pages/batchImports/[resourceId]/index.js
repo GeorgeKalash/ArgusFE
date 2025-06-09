@@ -158,10 +158,10 @@ const BatchImports = () => {
   }, [])
 
   const modifiedFields =
-    importsConfiguration?.record?.fields?.map(({ name, dataType, ...rest }) => ({
+    importsConfiguration?.record?.fields?.map(({ name, dataType, format, ...rest }) => ({
       field: name,
       headerName: name,
-      type: dataType === 2 || dataType === 3 ? 'number' : undefined,
+      type: (dataType === 2 && format === '1') || dataType === 3 ? 'number' : undefined,
       ...rest
     })) || []
 

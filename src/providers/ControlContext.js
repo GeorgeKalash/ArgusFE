@@ -8,6 +8,7 @@ import axios from 'axios'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
 import { debounce } from 'lodash'
+import { commonResourceIds } from 'src/resources/commonResourceIds'
 
 const ControlContext = createContext()
 
@@ -21,6 +22,23 @@ const ControlProvider = ({ children }) => {
   const [systemChecks, setSystemChecks] = useState([])
   const [loading, setLoading] = useState(false)
   const errorModel = useError()
+
+  const [labels, selLabels] = useState({})
+  const [access, setAccess] = useState({})
+
+  const addLabels = (resourceId, labels) => {
+    selLabels(prevData => ({
+      ...prevData,
+      [resourceId]: labels
+    }))
+  }
+
+  const addAccess = (resourceId, access) => {
+    setAccess(prevData => ({
+      ...prevData,
+      [resourceId]: access
+    }))
+  }
 
   async function showError(props) {
     if (errorModel) await errorModel.stack(props)
@@ -142,23 +160,40 @@ const ControlProvider = ({ children }) => {
   }
 
   const getLabels = (resourceId, callback) => {
-    var parameters = '_dataset=' + resourceId
-    getRequest({
-      extension: KVSRepository.getLabels,
-      parameters: parameters
-    }).then(res => {
-      callback(res.list)
-    })
+    const cache = commonResourceIds.includes(resourceId)
+    if (cache && labels?.[resourceId]) {
+      callback(labels?.[resourceId])
+    } else {
+      var parameters = '_dataset=' + resourceId
+      getRequest({
+        extension: KVSRepository.getLabels,
+        parameters: parameters
+      }).then(res => {
+        if (cache && !labels?.[resourceId]) {
+          addLabels(resourceId, res.list)
+        }
+        callback(res.list)
+      })
+    }
   }
 
   const getAccess = (resourceId, callback) => {
-    var parameters = '_resourceId=' + resourceId
-    getRequest({
-      extension: AccessControlRepository.maxAccess,
-      parameters: parameters
-    }).then(res => {
-      callback(res)
-    })
+    const cache = commonResourceIds.includes(resourceId)
+
+    if (cache && access?.[resourceId]) {
+      callback(access?.[resourceId])
+    } else {
+      var parameters = '_resourceId=' + resourceId
+      getRequest({
+        extension: AccessControlRepository.maxAccess,
+        parameters: parameters
+      }).then(res => {
+        if (cache && !access?.[resourceId]) {
+          addAccess(resourceId, res)
+        }
+        callback(res)
+      })
+    }
   }
 
   const values = {

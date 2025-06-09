@@ -129,7 +129,6 @@ export default function SizesTab({ labels, maxAccess, store }) {
       component: 'numberfield',
       label: labels.expectedPcs,
       name: 'expectedPcs',
-      defaultValue: 0,
       props: {
         maxLength: 6
       }
@@ -138,7 +137,6 @@ export default function SizesTab({ labels, maxAccess, store }) {
       component: 'numberfield',
       label: labels.expectedQty,
       name: 'expectedQty',
-      defaultValue: 0,
       props: {
         maxLength: 6
       }
@@ -147,7 +145,6 @@ export default function SizesTab({ labels, maxAccess, store }) {
       component: 'numberfield',
       label: labels.pcs,
       name: 'pcs',
-      defaultValue: 0,
       props: {
         maxLength: 6
       }
@@ -156,7 +153,6 @@ export default function SizesTab({ labels, maxAccess, store }) {
       component: 'numberfield',
       label: labels.qty,
       name: 'qty',
-      defaultValue: 0,
       props: {
         maxLength: 6
       }
@@ -179,7 +175,7 @@ export default function SizesTab({ labels, maxAccess, store }) {
               }
             })
           )
-        : [{ id: 1 }]
+        : formik.initialValues.jobItemSizes
 
     formik.setValues({
       jobId: recordId,
@@ -210,6 +206,7 @@ export default function SizesTab({ labels, maxAccess, store }) {
             onChange={value => formik.setFieldValue('jobItemSizes', value)}
             value={formik.values.jobItemSizes}
             error={formik.errors.jobItemSizes}
+            initialValues={formik?.initialValues?.jobItemSizes?.[0]}
             columns={columns}
             name='jobItemSizes'
             maxAccess={maxAccess}

@@ -357,7 +357,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           { from: 'lotCategoryId', to: 'lotCategoryId' },
           { from: 'priceType', to: 'priceType' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'isInactive', to: 'isInactive' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -372,6 +373,17 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         if (!newRow?.itemId) {
           update({
             details: false
+          })
+
+          return
+        }
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.transfers[0],
+            id: newRow.id
+          })
+          stackError({
+            message: labels.inactiveItem
           })
 
           return
@@ -401,7 +413,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     {
       component: 'button',
       name: 'details',
-      defaultValue: !!formik.values?.plId,
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png'
       },
@@ -692,6 +703,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLMaterialsTransfer,
       disabled: !editMode
     },
     {
@@ -973,6 +985,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     onChange={(event, newValue) => {
                       formik.setFieldValue('toSiteId', newValue?.recordId || null)
                       formik.setFieldValue('plId', newValue?.plId || null)
+                      if (newValue?.plId) {
+                        formik.setFieldValue('details', true)
+                      }
                     }}
                     error={formik.touched.toSiteId && Boolean(formik.errors.toSiteId)}
                   />

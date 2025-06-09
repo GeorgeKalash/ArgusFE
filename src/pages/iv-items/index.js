@@ -103,7 +103,11 @@ const IvItems = () => {
     {
       field: 'volume',
       headerName: _labels.volume,
-      flex: 1
+      flex: 1,
+      type: {
+        field: 'number',
+        decimal: 4
+      }
     },
     {
       field: 'weight',
