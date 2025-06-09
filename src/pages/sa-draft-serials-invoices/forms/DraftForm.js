@@ -278,7 +278,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
   }
 
   const autoDelete = async row => {
-    if (!row?.draftId) return true
+    if (!row?.draftId || !row?.itemId) return true
 
     const LastSerPack = {
       draftId: formik?.values?.recordId,

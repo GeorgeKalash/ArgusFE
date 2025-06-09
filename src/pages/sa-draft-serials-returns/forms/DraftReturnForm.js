@@ -283,7 +283,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
   }
 
   const autoDelete = async row => {
-    if (!row?.returnId) return true
+    if (!row?.returnId || !row?.itemId) return true
 
     const LastSerPack = {
       returnId: formik?.values?.recordId,
@@ -868,6 +868,9 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
   }, [])
 
   async function importSerials() {
+    const isValid = await onValidationRequired()
+    if (!isValid) return
+
     let updatedSerials = [...formik.values.serials]
 
     const res = await getRequest({
@@ -946,7 +949,11 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       if (Object.keys(touchedFields).length) {
         formik.setTouched(touchedFields, true)
       }
+
+      return false
     }
+
+    return true
   }
 
   return (
@@ -1222,12 +1229,9 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                     name='invoiceId'
                     label={labels.salesInv}
                     valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    displayFieldWidth={2}
+                    displayField={'reference'}
+                    columnsInDropDown={[{ key: 'reference', value: 'Reference' }]}
+                    displayFieldWidth={1}
                     readOnly={isClosed}
                     values={formik.values}
                     maxAccess={maxAccess}
@@ -1241,7 +1245,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
 
                 <Grid item xs={1}>
                   <CustomButton
-                    onClick={() => importSerials()}
+                    onClick={importSerials}
                     label={platformLabels.import}
                     image={'import.png'}
                     color='#000'
