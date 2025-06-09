@@ -25,7 +25,8 @@ export const FinancialRepository = {
     set: service + 'setACC',
     del: service + 'delACC',
     page: service + 'pageACC',
-    snapshot: service + 'snapshotACC'
+    snapshot: service + 'snapshotACC',
+    snapshot2: service + 'snapshotACC2'
   },
   Group: {
     qry: service + 'qryGRP',
@@ -146,6 +147,8 @@ export const FinancialRepository = {
   PaymentVouchers: {
     qry: service + 'qryPV',
     page: service + 'pagePV',
+    page2: service + 'pagePV2',
+    page3: service + 'pagePV3',
     get: service + 'getPV',
     set2: service + 'set2PV',
     set: service + 'setPV',
@@ -222,5 +225,19 @@ export const FinancialRepository = {
     unpost: service + 'unpostTFR',
     page: service + 'pageTFR',
     snapshot: service + 'snapshotTFR'
+  },
+  BalanceTransferSales: {
+    set: service + 'setTFS'
+  },
+  BalanceTransferPurchases: {
+    set: service + 'setTFP'
+  },
+  PaymentReasons: {
+    qry: service + 'qryPR',
+    get: service + 'getPR',
+    del: service + 'delPR',
+    set: service + 'setPR',
+    page: service + 'pagePR',
+    snapshot: service + 'snapshotPR'
   }
 }

@@ -25,6 +25,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import AccountSummary from 'src/components/Shared/AccountSummary'
+import { useWindow } from 'src/windows'
 
 export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, getGLResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -32,6 +34,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const [metal, setMetal] = useState({})
   const [allMetals, setAllMetals] = useState([])
   const filteredItems = useRef()
+  const { stack } = useWindow()
 
   const getEndpoint = {
     [SystemFunction.MetalReceiptVoucher]: FinancialRepository.MetalReceiptVoucher.set2,
@@ -55,6 +58,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       accountId: null,
+      paymentReasonId: null,
       batchId: null,
       collectorId: null,
       contactId: null,
@@ -158,6 +162,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
   const editMode = !!formik.values?.recordId
   const isPosted = formik.values.status === 3
+  const isVerified = formik.values.isVerified
   const calculateTotal = key => formik.values.items.reduce((sum, item) => sum + (parseFloat(item[key]) || 0), 0)
   const totalQty = calculateTotal('qty')
   const totalPcs = calculateTotal('pcs')
@@ -444,7 +449,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     })
 
     if (res) {
-      toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+      toast.success(!isVerified ? platformLabels.Verified : platformLabels.Unverfied)
       invalidate()
       window.close()
     }
@@ -456,7 +461,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || formik.values.isVerified
+      disabled: !editMode || isVerified
     },
     {
       key: 'Unlocked',
@@ -479,15 +484,32 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     },
     {
       key: 'Verify',
-      condition: !formik.values.isVerified,
+      condition: !isVerified,
       onClick: onVerify,
       disabled: !isPosted
     },
     {
       key: 'Unverify',
-      condition: formik.values.isVerified,
+      condition: isVerified,
       onClick: onVerify,
       disabled: !isPosted
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.accountId),
+            moduleId: 1
+          },
+          width: 1000,
+          height: 500,
+          title: platformLabels.AccountSummary
+        })
+      },
+      disabled: !formik.values.accountId
     }
   ]
 
@@ -760,7 +782,36 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <CustomNumberField label={labels.totalPcs} value={totalPcs} decimalScale={2} readOnly />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomNumberField label={labels.totalPcs} value={totalPcs} decimalScale={2} readOnly />
+                </Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={FinancialRepository.PaymentReasons.qry}
+                    name='paymentReasonId'
+                    label={labels.paymentReason}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={isPosted}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('paymentReasonId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.paymentReasonId && Boolean(formik.errors.paymentReasonId)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={4}>
               <Grid container spacing={2}>
