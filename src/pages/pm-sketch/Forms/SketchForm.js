@@ -93,22 +93,22 @@ export default function SketchForm({ recordId, invalidate }) {
     }
   })
 
-  async function getDTD(dtId) {
-    if (dtId) {
-      const res = await getRequest({
-        extension: ProductModelingRepository.DocumentTypeDefault.get,
-        parameters: `_dtId=${dtId}`
-      })
+  // async function getDTD(dtId) {
+  //   if (dtId) {
+  //     const res = await getRequest({
+  //       extension: ProductModelingRepository.DocumentTypeDefault.get,
+  //       parameters: `_dtId=${dtId}`
+  //     })
 
-      formik.setFieldValue('productionLineId', res?.record?.productionLineId)
+  //     formik.setFieldValue('productionLineId', res?.record?.productionLineId)
 
-      return res
-    }
-  }
+  //     return res
+  //   }
+  // }
 
-  useEffect(() => {
-    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
-  }, [formik.values.dtId])
+  // useEffect(() => {
+  //   if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
+  // }, [formik.values.dtId])
 
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
