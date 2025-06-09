@@ -1230,7 +1230,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                     label={labels.salesInv}
                     valueField='recordId'
                     displayField={'reference'}
-                    columnsInDropDown={[{ key: 'reference', value: 'Reference' }]}
                     displayFieldWidth={1}
                     readOnly={isClosed}
                     values={formik.values}
