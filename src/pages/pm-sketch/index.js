@@ -115,13 +115,13 @@ const Sketch = () => {
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
+      field: 'wipName',
+      headerName: labels.wip,
       flex: 1
     },
     {
-      field: 'wipName',
-      headerName: labels.wip,
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     }
   ]
