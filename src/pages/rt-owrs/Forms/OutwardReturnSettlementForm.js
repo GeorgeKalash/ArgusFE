@@ -76,7 +76,7 @@ export default function OutwardReturnSettlementForm({
       cashAccountId: parseInt(cashAccountId),
       wip: 1,
       beneficiaryName: '',
-      items: formikSettings.initialValuePayment || [{ id: 1, pos: true }]
+      items: formikSettings.initialValuePayment || []
     },
 
     validationSchema: yup.object({

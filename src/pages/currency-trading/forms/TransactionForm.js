@@ -89,7 +89,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         maxRate: ''
       }
     ],
-    amount: formikSettings.initialValuePayment || [{ id: 1, pos: true }],
+    amount: formikSettings.initialValuePayment || [],
     date: '',
     clientId: null,
     clientName: null,

@@ -15,25 +15,25 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   })
   const { stack } = useWindow()
 
-  useEffect(() => {
-    const initialValuePayment = [
-      {
-        id: 1,
-        seqNo: 0,
-        cashAccountId: null,
-        cashAccount: '',
-        posStatus: 1,
-        posStatusName: '',
-        type: '',
-        amount: '',
-        paidAmount: '',
-        returnedAmount: 0,
-        bankFees: '',
-        receiptRef: '',
-        pos: true
-      }
-    ]
+  const initialValuePayment = [
+    {
+      id: 1,
+      seqNo: 0,
+      cashAccountId: null,
+      cashAccount: '',
+      posStatus: 1,
+      posStatusName: '',
+      type: '',
+      amount: '',
+      paidAmount: '',
+      returnedAmount: 0,
+      bankFees: '',
+      receiptRef: '',
+      pos: true
+    }
+  ]
 
+  useEffect(() => {
     const paymentValidation = yup
       .array()
       .of(
@@ -248,6 +248,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
         }
       }}
       value={value}
+      initialValues={initialValuePayment[0]}
     />
   )
 }

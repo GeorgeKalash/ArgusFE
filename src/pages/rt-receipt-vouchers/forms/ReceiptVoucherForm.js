@@ -69,7 +69,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         clientId: null,
         cellPhone: null
       },
-      cash: formikSettings.initialValuePayment || [{ id: 1, pos: true }]
+      cash: formikSettings.initialValuePayment || []
     },
 
     validationSchema: yup.object({
