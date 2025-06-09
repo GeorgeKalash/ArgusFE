@@ -475,7 +475,13 @@ export const ResourceIds = {
   BalanceTransferSales: 31319,
   PaymentReasons: 31116,
   IVSerials: 41224,
-
+  SketchDTD: 48601,
+  ModelDTD: 48602,
+  RubberDTD: 48603,
+  CastingDTD: 48604,
+  ThreeDDrawingDTD: 48605,
+  ProductModelingDTD: 48102,
+  
   // GL
   GLSalesInvoice: 51604,
   GLSalesReturn: 51605,
