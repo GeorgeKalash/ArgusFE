@@ -115,6 +115,23 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
     })
   }
 
+  // async function getDTD(dtId) {
+  //   if (dtId) {
+  //     const res = await getRequest({
+  //       extension: ProductModelingRepository.DocumentTypeDefault.get,
+  //       parameters: `_dtId=${dtId}`
+  //     })
+
+  //     formik.setFieldValue('productionLineId', res?.record?.productionLineId)
+
+  //     return res
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
+  // }, [formik.values.dtId])
+
   const onPost = async () => {
     const header = {
       ...formik.values,
@@ -273,15 +290,25 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     name='threeDDId'
                     label={labels.threeDD}
                     form={formik}
+                    columnsInDropDown={[
+                      { key: 'designerRef', value: 'Designer' },
+                      { key: 'date', value: 'Date', type: 'date' },
+                      { key: 'reference', value: 'Reference' }
+                    ]}
                     valueShow='threeDDRef'
                     maxAccess={maxAccess}
                     readOnly={isPosted || isReleased}
                     required
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('threeDDId', newValue?.recordId || null)
                       formik.setFieldValue('threeDDRef', newValue?.reference || '')
                       formik.setFieldValue('fileReference', newValue?.fileReference || '')
+                      formik.setFieldValue('designerName', newValue?.designerName || '')
                       formik.setFieldValue('productionClassId', newValue?.productionClassId || null)
+                      formik.setFieldValue('productionStandardRef', newValue?.productionStandardRef || null)
+                      formik.setFieldValue('metalRef', newValue?.metalRef || null)
+                      formik.setFieldValue('collectionName', newValue?.collectionName || null)
+                      formik.setFieldValue('itemGroupName', newValue?.itemGroupName || null)
+                      formik.setFieldValue('threeDDId', newValue?.recordId || null)
                     }}
                     errorCheck={'threeDDId'}
                   />
@@ -433,6 +460,56 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     readOnly={isPosted || isReleased}
                     onClear={() => formik.setFieldValue('fileReference', '')}
                     error={formik.touched.fileReference && Boolean(formik.errors.fileReference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='designerName'
+                    label={labels.designer}
+                    value={formik.values.designerName}
+                    maxAccess={maxAccess}
+                    readOnly
+                    error={formik.touched.designerName && Boolean(formik.errors.designerName)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='productionStandardRef'
+                    label={labels.productionStandard}
+                    value={formik.values.productionStandardRef}
+                    maxAccess={maxAccess}
+                    readOnly
+                    error={formik.touched.productionStandardRef && Boolean(formik.errors.productionStandardRef)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='metalRef'
+                    label={labels.metalRef}
+                    value={formik.values.metalRef}
+                    maxAccess={maxAccess}
+                    readOnly
+                    error={formik.touched.metalRef && Boolean(formik.errors.metalRef)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='collectionName'
+                    label={labels.collectionName}
+                    value={formik.values.collectionName}
+                    maxAccess={maxAccess}
+                    readOnly
+                    error={formik.touched.collectionName && Boolean(formik.errors.collectionName)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='itemGroupName'
+                    label={labels.itemGroupName}
+                    value={formik.values.itemGroupName}
+                    maxAccess={maxAccess}
+                    readOnly
+                    error={formik.touched.itemGroupName && Boolean(formik.errors.itemGroupName)}
                   />
                 </Grid>
                 <Grid item xs={12}>

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from 'src/lib/maxAccess'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const CustomLookup = ({
   type = 'text',
@@ -153,19 +154,27 @@ const CustomLookup = ({
                     </li>
                   )}
                   <li {...props}>
-                    {columnsInDropDown.map((header, i) => (
-                      <Box
-                        key={i}
-                        sx={{
-                          width: header.width || equalWidth,
-                          fontSize: '0.88rem',
-                          height: '20px',
-                          display: 'flex'
-                        }}
-                      >
-                        {option[header.key]}
-                      </Box>
-                    ))}
+                    {columnsInDropDown.map((header, i) => {
+                      let displayValue = option[header.key]
+
+                      if (header?.type && header?.type === 'date' && displayValue) {
+                        displayValue = formatDateDefault(displayValue)
+                      }
+
+                      return (
+                        <Box
+                          key={i}
+                          sx={{
+                            width: header.width || equalWidth,
+                            fontSize: '0.88rem',
+                            height: '20px',
+                            display: 'flex'
+                          }}
+                        >
+                          {displayValue}
+                        </Box>
+                      )
+                    })}
                   </li>
                 </Box>
               )
