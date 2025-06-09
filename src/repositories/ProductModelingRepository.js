@@ -51,6 +51,7 @@ export const ProductModelingRepository = {
     del: service + 'del3DP',
     start: service + 'start3DP',
     snapshot: service + 'snapshot3DP',
+    snapshot2: service + 'snapshot3DP2',
     post: service + 'post3DP',
     qry: service + 'qry3DP'
   },
@@ -78,5 +79,8 @@ export const ProductModelingRepository = {
     del: service + 'delCAS',
     snapshot: service + 'snapshotCAS',
     post: service + 'postCAS'
+  },
+  DocumentTypeDefault: {
+    get: service + 'getDTD'
   }
 }

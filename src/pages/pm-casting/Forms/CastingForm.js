@@ -25,6 +25,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
 import { useWindow } from 'src/windows'
 import { KVSRepository } from 'src/repositories/KVSRepository'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function CastingForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -51,6 +52,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       date: new Date(),
       threeDPId: null,
       productionLineId: null,
+      castingType: null,
       laborId: null,
       mould: '',
       setPcs: null,
@@ -64,8 +66,8 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
     validationSchema: yup.object({
       date: yup.date().required(),
       threeDPId: yup.string().required(),
-      productionLineId: yup.string().required(),
       laborId: yup.string().required(),
+      castingType: yup.string().required(),
       setPcs: yup.number().nullable().min(0).max(1000)
     }),
     onSubmit: async values => {
@@ -182,6 +184,19 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || null)
                   changeDT(newValue)
+
+                  formik.setFieldValue('productionLineId', null)
+
+                  if (newValue?.recordId) {
+                    const { record } = await getRequest({
+                      extension: ProductModelingRepository.DocumentTypeDefault.get,
+                      parameters: `_dtId=${newValue?.recordId}`
+                    })
+
+                    formik.setFieldValue('productionLineId', record?.productionLineId)
+                  } else {
+                    formik.setFieldValue('productionLineId', null)
+                  }
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 maxAccess={maxAccess}
@@ -201,77 +216,11 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
             </Grid>
 
             <Grid item xs={12}>
-              <CustomDatePicker
-                name='date'
-                label={labels.date}
-                value={formik?.values?.date}
-                required
-                onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('date', null)}
-                readOnly={isPosted}
-                error={formik.touched.date && Boolean(formik.errors.date)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={ProductModelingRepository.Printing.snapshot}
-                valueField='reference'
-                name='threeDPId'
-                label={labels.threeDP}
-                form={formik}
-                secondDisplayField={false}
-                valueShow='threeDPRef'
-                formObject={formik.values}
-                readOnly={isPosted}
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('threeDPId', newValue?.recordId || null)
-                  formik.setFieldValue('threeDPRef', newValue?.reference || '')
-                }}
-                errorCheck={'threeDPId'}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={ManufacturingRepository.Labor.qry}
-                parameters={{
-                  _startAt: 0,
-                  _pageSize: 1000,
-                  _params: ''
-                }}
-                valueField='reference'
-                displayField='name'
-                name='laborId'
-                label={labels.labor}
-                form={formik}
-                readOnly={isPosted}
-                required
-                valueShow='laborRef'
-                secondValueShow='laborName'
-                maxAccess={maxAccess}
-                displayFieldWidth={2}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Ref.' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('laborId', newValue?.recordId || null)
-                  formik.setFieldValue('laborName', newValue?.name || '')
-                  formik.setFieldValue('laborRef', newValue?.reference || '')
-                }}
-                errorCheck={'laborId'}
-              />
-            </Grid>
-            <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={ManufacturingRepository.ProductionLine.qry}
-                parameters='_startAt=0&_pageSize=1000'
+                parameters={`_startAt=0&_pageSize=1000&_dtId=${formik.values.dtId}`}
                 values={formik.values}
                 name='productionLineId'
-                required
                 label={labels.productionLine}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -288,6 +237,86 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                 error={formik.touched.productionLineId && formik.errors.productionLineId}
               />
             </Grid>
+
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={ProductModelingRepository.Printing.snapshot2}
+                parameters={{ _productionLineId: formik.values.productionLineId || 0 }}
+                valueField='reference'
+                name='threeDPId'
+                label={labels.threeDP}
+                form={formik}
+                secondDisplayField={false}
+                valueShow='threeDPRef'
+                formObject={formik.values}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'date', value: 'date', type: 'date' },
+                  { key: 'designerRef', value: 'designer Ref' },
+                  { key: 'designerName', value: 'designer Name' }
+                ]}
+                readOnly={isPosted}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('threeDPId', newValue?.recordId || null)
+                  formik.setFieldValue('threeDPRef', newValue?.reference || '')
+                }}
+                errorCheck={'threeDPId'}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='date'
+                label={labels.date}
+                value={formik?.values?.date}
+                required
+                onChange={formik.setFieldValue}
+                onClear={() => formik.setFieldValue('date', null)}
+                readOnly={isPosted}
+                error={formik.touched.date && Boolean(formik.errors.date)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.Labor.qry}
+                parameters={`_startAt=0&_pageSize=200&_params=`}
+                name='laborId'
+                required
+                readOnly={isPosted}
+                label={labels.labor}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('laborId', newValue?.recordId || null)
+                }}
+                error={formik.touched.laborId && Boolean(formik.errors.laborId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.CASTING_TYPE}
+                name='castingType'
+                required
+                label={labels.castingType}
+                valueField='key'
+                readOnly={isPosted}
+                displayField='value'
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('castingType', newValue?.key)
+                }}
+                error={formik.touched.castingType && Boolean(formik.errors.castingType)}
+              />
+            </Grid>
+
             <Grid item xs={12}>
               <CustomTextField
                 name='mould'
