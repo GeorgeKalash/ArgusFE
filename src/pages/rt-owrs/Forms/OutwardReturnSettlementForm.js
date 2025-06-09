@@ -76,7 +76,7 @@ export default function OutwardReturnSettlementForm({
       cashAccountId: parseInt(cashAccountId),
       wip: 1,
       beneficiaryName: '',
-      items: formikSettings.initialValuePayment || []
+      items: formikSettings.initialValuePayment || [{ id: 1, pos: true }]
     },
 
     validationSchema: yup.object({
@@ -214,10 +214,14 @@ export default function OutwardReturnSettlementForm({
       formik.setValues({
         ...res.record.header,
         date: formatDateFromApi(res?.record?.header.date),
-        items: res.record.items.map((amount, index) => ({
-          id: index + 1,
-          ...amount
-        }))
+        items:
+          res?.record?.length != 0
+            ? res.record.items.map((item, index) => ({
+                id: index + 1,
+                pos: item?.type != 3,
+                ...item
+              }))
+            : formik.initialValues.items
       })
 
       return res.record

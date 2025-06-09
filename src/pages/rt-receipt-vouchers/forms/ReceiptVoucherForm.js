@@ -232,11 +232,14 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
           ...res.record,
           date: formatDateFromApi(res?.record?.date)
         },
-        cash: result.list.map((item, index) => ({
-          id: index + 1,
-          pos: item?.type != 3,
-          ...item
-        }))
+        cash:
+          result?.list?.length != 0
+            ? result.list.map((item, index) => ({
+                id: index + 1,
+                pos: item?.type != 3,
+                ...item
+              }))
+            : formik.initialValues.cash
       })
 
       return res.record
