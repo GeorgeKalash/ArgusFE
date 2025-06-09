@@ -119,10 +119,31 @@ const ProductModelingDTD = () => {
     toast.success(platformLabels.Deleted)
   }
 
+  const getReportName = functionId => {
+    switch (functionId) {
+      case SystemFunction.Sketch:
+        return 'PMDTDa'
+      case SystemFunction.ThreeDDesign:
+        return 'PMDTDb'
+      case SystemFunction.Rubber:
+        return 'PMDTDc'
+      case SystemFunction.ModelMaker:
+        return 'PMDTDd'
+      case SystemFunction.ModellingCasting:
+        return 'PMDTDe'
+    }
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} hasSearch={false} maxAccess={access} reportName={'PMDTD'} filterBy={filterBy} />
+        <RPBGridToolbar
+          onAdd={add}
+          hasSearch={false}
+          maxAccess={access}
+          reportName={getReportName(parseInt(functionId))}
+          filterBy={filterBy}
+        />
       </Fixed>
       <Grow>
         <Table
