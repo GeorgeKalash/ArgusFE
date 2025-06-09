@@ -28,7 +28,7 @@ export default function DesignerForm({ labels, maxAccess, recordId }) {
       recordId: null,
       reference: '',
       name: '',
-      type: ''
+      type: '',
     },
     maxAccess,
     enableReinitialize: true,
@@ -36,7 +36,7 @@ export default function DesignerForm({ labels, maxAccess, recordId }) {
     validationSchema: yup.object({
       name: yup.string().required(),
       reference: yup.string().required(),
-      type: yup.string().required()
+      type: yup.string().required(),
     }),
     onSubmit: async obj => {
       const response = await postRequest({
