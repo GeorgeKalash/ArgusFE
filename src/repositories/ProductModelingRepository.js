@@ -57,7 +57,8 @@ export const ProductModelingRepository = {
   ThreeDDrawing: {
     snapshot: service + 'snapshot3DD',
     snapshot2: service + 'snapshot23DD',
-    get: service + 'get3DD'
+    get: service + 'get3DD',
+    snapshot3DD2: service + 'snapshot3DD2'
   },
   Rubber: {
     page: service + 'pageRBR',

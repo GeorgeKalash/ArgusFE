@@ -62,6 +62,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       notes: '',
       jobId: null,
       productionClassId: null,
+      productionLineId: null,
       density: null,
       nbOfLayers: null,
       status: 1,
@@ -115,22 +116,22 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
     })
   }
 
-  // async function getDTD(dtId) {
-  //   if (dtId) {
-  //     const res = await getRequest({
-  //       extension: ProductModelingRepository.DocumentTypeDefault.get,
-  //       parameters: `_dtId=${dtId}`
-  //     })
+  async function getDTD(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: ProductModelingRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${dtId}`
+      })
 
-  //     formik.setFieldValue('productionLineId', res?.record?.productionLineId)
+      formik.setFieldValue('productionLineId', res?.record?.productionLineId)
 
-  //     return res
-  //   }
-  // }
+      return res
+    }
+  }
 
-  // useEffect(() => {
-  //   if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
-  // }, [formik.values.dtId])
+  useEffect(() => {
+    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
+  }, [formik.values.dtId])
 
   const onPost = async () => {
     const header = {
@@ -283,7 +284,10 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
-                    endpointId={ProductModelingRepository.ThreeDDrawing.snapshot2}
+                    endpointId={ProductModelingRepository.ThreeDDrawing.snapshot3DD2}
+                    parameters={{
+                      _productionLineId: formik.values.productionLineId || 0
+                    }}
                     valueField='reference'
                     displayField='reference'
                     secondDisplayField={false}
@@ -357,6 +361,21 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     readOnly={isPosted || isReleased}
                     error={formik.touched.machineId && Boolean(formik.errors.machineId)}
                     maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.ProductionLine.qry}
+                    parameters='_startAt=0&_pageSize=1000'
+                    values={formik.values}
+                    name='productionLineId'
+                    label={labels.productionLine}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    displayFieldWidth={1}
+                    maxAccess={maxAccess}
+                    readOnly
+                    error={formik.touched.productionLineId && formik.errors.productionLineId}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -485,7 +504,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                 <Grid item xs={12}>
                   <CustomTextField
                     name='metalRef'
-                    label={labels.metalRef}
+                    label={labels.purity}
                     value={formik.values.metalRef}
                     maxAccess={maxAccess}
                     readOnly
@@ -495,7 +514,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                 <Grid item xs={12}>
                   <CustomTextField
                     name='collectionName'
-                    label={labels.collectionName}
+                    label={labels.collection}
                     value={formik.values.collectionName}
                     maxAccess={maxAccess}
                     readOnly
@@ -505,7 +524,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                 <Grid item xs={12}>
                   <CustomTextField
                     name='itemGroupName'
-                    label={labels.itemGroupName}
+                    label={labels.itemGroup}
                     value={formik.values.itemGroupName}
                     maxAccess={maxAccess}
                     readOnly
