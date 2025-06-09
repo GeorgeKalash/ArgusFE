@@ -31,7 +31,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
       masterSource: '',
       postTypeId: '',
       description: '',
-      isCostElement: false
+      costCenterSource: null
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -166,7 +166,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('masterSource', newValue ? newValue.key : '')
+                  formik && formik.setFieldValue('masterSource', newValue ? parseInt(newValue.key) : '')
                 }}
                 error={formik.touched.masterSource && Boolean(formik.errors.masterSource)}
               />
@@ -204,6 +204,21 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
               />
             </Grid>
             <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.Cost_Center}
+                name='costCenterSource'
+                label={labels.costCenterSource}
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('costCenterSource', newValue ? newValue.key : null)
+                }}
+                error={formik.touched.costCenterSource && Boolean(formik.errors.costCenterSource)}
+              />
+            </Grid>
+            <Grid item xs={12}>
               <CustomTextArea
                 name='description'
                 label={labels.description}
@@ -214,15 +229,6 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('description', '')}
                 error={formik.touched.description && Boolean(formik.errors.description)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomCheckBox
-                name='isCostElement'
-                value={formik.values?.isCostElement}
-                onChange={event => formik.setFieldValue('isCostElement', event.target.checked)}
-                label={labels.isCostElement}
-                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
