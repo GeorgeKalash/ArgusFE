@@ -78,5 +78,11 @@ export const ProductModelingRepository = {
     del: service + 'delCAS',
     snapshot: service + 'snapshotCAS',
     post: service + 'postCAS'
+  },
+  DocumentTypeDefault: {
+    page: service + 'pageDTD',
+    get: service + 'getDTD',
+    set: service + 'setDTD',
+    del: service + 'delDTD'
   }
 }
