@@ -72,7 +72,7 @@ const Designer = () => {
         maxAccess: access
       },
       width: 600,
-      height: 250,
+      height: 300,
       title: labels.designer
     })
   }
