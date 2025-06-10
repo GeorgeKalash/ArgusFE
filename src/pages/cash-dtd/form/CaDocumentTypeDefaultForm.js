@@ -33,11 +33,7 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
       recordId: recordId || null,
       cashAccountId: '',
       fromCashAccountId: '',
-      toCashAccountId: '',
-      fromCashAccountRef: '',
-      fromCashAccountName: '',
-      toCashAccountName: '',
-      toCashAccountRef: ''
+      toCashAccountId: ''
     },
     maxAccess,
     enableReinitialize: false,
@@ -133,49 +129,43 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
-                valueField='reference'
-                displayField='name'
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=0`}
                 name='fromCashAccountId'
-                displayFieldWidth={2}
                 label={labels.fromCa}
-                form={formik}
-                valueShow='fromCashAccountRef'
-                secondValueShow='fromCashAccountName'
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('fromCashAccountId', newValue ? newValue.recordId : null)
-                  formik.setFieldValue('fromCashAccountRef', newValue ? newValue.reference : null)
-                  formik.setFieldValue('fromCashAccountName', newValue ? newValue.name : null)
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('fromCashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.fromCashAccountId && Boolean(formik.errors.fromCashAccountId)}
-                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
-                valueField='reference'
-                displayField='name'
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=0`}
                 name='toCashAccountId'
-                displayFieldWidth={2}
                 label={labels.toCa}
-                form={formik}
-                valueShow='toCashAccountRef'
-                secondValueShow='toCashAccountName'
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('toCashAccountId', newValue ? newValue.recordId : null)
-                  formik.setFieldValue('toCashAccountRef', newValue ? newValue.reference : null)
-                  formik.setFieldValue('toCashAccountName', newValue ? newValue.name : null)
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('toCashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
-                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

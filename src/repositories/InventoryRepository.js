@@ -254,7 +254,9 @@ export const InventoryRepository = {
   Serial: {
     qry: service + 'qrySRL',
     get2: service + 'get2SRL',
-    get: service + 'getSRL'
+    set: service + 'setSRL',
+    get: service + 'getSRL',
+    del: service + 'delSRL',
   },
   MaterialTransferSerial: {
     qry: service + 'qryTFS'

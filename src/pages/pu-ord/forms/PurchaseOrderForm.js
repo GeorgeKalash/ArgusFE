@@ -292,7 +292,8 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
-          { from: 'msId', to: 'msId' }
+          { from: 'msId', to: 'msId' },
+          { from: 'isInactive', to: 'isInactive' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -310,7 +311,17 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
 
           return
         }
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.items[0],
+            id: newRow.id
+          })
+          stackError({
+            message: labels.inactiveItem
+          })
 
+          return
+        }
         const data = await getDataRow(newRow.itemId)
         update(data)
       }

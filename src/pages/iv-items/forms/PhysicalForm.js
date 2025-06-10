@@ -212,6 +212,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               label={labels.volume}
               value={formik.values.volume}
               maxAccess={maxAccess}
+              decimalScale={4}
               onBlur={e => handleFieldChange('volume', DirtyField.VOLUME, e)}
               onClear={() => handleFieldClear('volume')}
             />
