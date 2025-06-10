@@ -32,6 +32,7 @@ export const ProductModelingRepository = {
   },
   ModelMaker: {
     snapshot: service + 'snapshotMDL',
+    snapshot2: service + 'snapshot2MDL',
     page: service + 'pageMDL',
     get: service + 'getMDL',
     set: service + 'setMDL',
