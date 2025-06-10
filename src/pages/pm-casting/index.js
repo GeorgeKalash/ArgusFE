@@ -75,18 +75,18 @@ const Casting = () => {
       flex: 1
     },
     {
-      field: 'laborRef',
-      headerName: labels.laborRef,
+      field: 'setPcs',
+      headerName: labels.pieces,
+      flex: 1
+    },
+    {
+      field: 'weight',
+      headerName: labels.weight,
       flex: 1
     },
     {
       field: 'laborName',
       headerName: labels.labor,
-      flex: 1
-    },
-    {
-      field: 'productionLineRef',
-      headerName: labels.productionLineRef,
       flex: 1
     },
     {
@@ -152,6 +152,7 @@ const Casting = () => {
           isLoading={false}
           pageSize={50}
           paginationType='api'
+          deleteConfirmationType={'strict'}
           paginationParameters={paginationParameters}
           refetch={refetch}
           maxAccess={access}

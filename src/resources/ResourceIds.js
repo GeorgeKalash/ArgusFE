@@ -173,7 +173,7 @@ export const ResourceIds = {
   CashCountTransaction: 37301,
   ExchangeRates: 32103,
   CbBankAccounts: 33105,
-  Terrapay : 36307,
+  Terrapay: 36307,
   CashNote: 37101,
   OutwardsModification: 36308,
   POSUsers: 54104,
@@ -470,12 +470,18 @@ export const ResourceIds = {
   SyncMFTrx: 42316,
   AccountSummary: 31600,
   PhysicalCountSerialDetail: 44203,
-  PhysicalCountSerialDetail: 44203,
   BalanceTransferPurchase: 31318,
   BalanceTransferSales: 31319,
   PaymentReasons: 31116,
   IVSerials: 41224,
-
+  SketchDTD: 48601,
+  ModelDTD: 48602,
+  RubberDTD: 48603,
+  CastingDTD: 48604,
+  ThreeDDrawingDTD: 48605,
+  ProductModelingDTD: 48102,
+  ThreePrintingDTD: 48606,
+  
   // GL
   GLSalesInvoice: 51604,
   GLSalesReturn: 51605,
@@ -515,5 +521,6 @@ export const ResourceIds = {
   GLBalanceTransferPurchase: 31602,
   GLBalanceTransferSales: 31603,
   GLBalanceTransferBetweenAccounts: 31601,
-  GLReturnOnInvoice: 51606
+  GLReturnOnInvoice: 51606,
+  IomProperties:42606,
 }
