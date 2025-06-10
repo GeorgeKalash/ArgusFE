@@ -1959,7 +1959,7 @@ export default function SaleTransactionForm({
                 firstFieldWidth={4}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
+                  { key: 'name', value: 'Name', grid: 8 },
                   { key: 'szName', value: 'Sales Zone' },
                   { key: 'keywords', value: 'Keywords' },
                   { key: 'cgName', value: 'Client Group' }
@@ -1978,7 +1978,7 @@ export default function SaleTransactionForm({
                 required
                 autoSelectFistValue={!formik.values.clientId}
                 readOnly={formik.values.items.length > 0 && formik.values.items[0].sku}
-                displayFieldWidth={3}
+                displayFieldWidth={5}
                 editMode={editMode}
                 error={formik.touched?.header?.clientId && Boolean(formik.errors?.header?.clientId)}
               />
