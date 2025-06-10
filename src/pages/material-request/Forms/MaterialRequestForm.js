@@ -242,7 +242,8 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
           { from: 'onHandGlobal', to: 'onHandGlobal' },
           { from: 'deliveredQty', to: 'deliveredQty' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'isInactive', to: 'isInactive' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -258,7 +259,17 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
 
           return
         }
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.items[0],
+            id: newRow.id
+          })
+          stackError({
+            message: labels.inactiveItem
+          })
 
+          return
+        }
         if (newRow?.itemId) {
           const itemInfo = await getItem(newRow.itemId)
           getFilteredMU(newRow?.itemId)

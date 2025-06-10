@@ -147,8 +147,8 @@ const Sketch = () => {
         recordId,
         invalidate
       },
-      width: 700,
-      height: 700,
+      width: 900,
+      height: 720,
       title: labels.Sketch
     })
   }

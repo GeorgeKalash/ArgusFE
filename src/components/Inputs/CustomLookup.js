@@ -26,7 +26,7 @@ const CustomLookup = ({
   onChange,
   onKeyDown,
   error,
-  firstFieldWidth = secondDisplayField ? '50%' : '100%',
+  firstFieldWidth = secondDisplayField ? 6 : 12,
   displayFieldWidth = 1,
   helperText,
   variant = 'outlined',
@@ -82,7 +82,7 @@ const CustomLookup = ({
     <></>
   ) : (
     <Grid container spacing={0} sx={{ width: '100%' }}>
-      <Grid item xs={secondDisplayField ? 6 : 12}>
+      <Grid item xs={firstFieldWidth}>
         <Autocomplete
           ref={autocompleteRef}
           onFocus={() => setIsFocused(true)}
@@ -126,46 +126,56 @@ const CustomLookup = ({
             props.renderOption && <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>
           }
           renderOption={(props, option) => {
-            if (columnsInDropDown && columnsInDropDown.length > 0) {
+            if (columnsInDropDown?.length > 0) {
+              const columnsWithGrid = columnsInDropDown.map(col => ({
+                ...col,
+                grid: col.grid ?? 2
+              }))
+
+              const totalGrid = columnsWithGrid.reduce((sum, col) => sum + col.grid, 0)
+
               return (
                 <Box>
                   {props.id.endsWith('-0') && (
                     <li className={props.className}>
-                      {columnsInDropDown.map(
-                        (header, i) =>
-                          columnsInDropDown.length > 1 && (
-                            <Box
-                              key={i}
-                              sx={{
-                                flex: 1,
-                                fontWeight: 'bold',
-                                width: header.width || 'auto',
-                                fontSize: '0.7rem',
-                                height: '15px',
-                                display: 'flex'
-                              }}
-                            >
-                              {header.value.toUpperCase()}
-                            </Box>
-                          )
-                      )}
+                      {columnsWithGrid.map((header, i) => {
+                        const widthPercent = `${(header.grid / totalGrid) * 100}%`
+
+                        return (
+                          <Box
+                            key={i}
+                            sx={{
+                              fontWeight: 'bold',
+                              width: widthPercent,
+                              fontSize: '0.7rem',
+                              height: '15px',
+                              display: 'flex'
+                            }}
+                          >
+                            {header.value.toUpperCase()}
+                          </Box>
+                        )
+                      })}
                     </li>
                   )}
                   <li {...props}>
-                    {columnsInDropDown.map((header, i) => (
-                      <Box
-                        key={i}
-                        sx={{
-                          flex: 1,
-                          width: header.width || 'auto',
-                          fontSize: '0.88rem',
-                          height: '20px',
-                          display: 'flex'
-                        }}
-                      >
-                        {option[header.key]}
-                      </Box>
-                    ))}
+                    {columnsWithGrid.map((header, i) => {
+                      const widthPercent = `${(header.grid / totalGrid) * 100}%`
+
+                      return (
+                        <Box
+                          key={i}
+                          sx={{
+                            width: widthPercent,
+                            fontSize: '0.88rem',
+                            height: '20px',
+                            display: 'flex'
+                          }}
+                        >
+                          {option[header.key]}
+                        </Box>
+                      )
+                    })}
                   </li>
                 </Box>
               )
@@ -324,7 +334,7 @@ const CustomLookup = ({
         />
       </Grid>
       {secondDisplayField && (
-        <Grid item xs={6}>
+        <Grid item xs={12 - firstFieldWidth}>
           <TextField
             size={size}
             variant={variant}

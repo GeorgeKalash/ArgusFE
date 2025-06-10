@@ -50,7 +50,7 @@ import { RateDivision } from 'src/resources/RateDivision'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 
-export default function RetailTransactionsForm({ labels, posUser, access, recordId, functionId, window }) {
+export default function RetailTransactionsForm({ labels, posUser, access, recordId, functionId, getGLResource, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -442,6 +442,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
       condition: true,
       onClick: 'onClickGL',
       valuesPath: formik.values.header,
+      datasetId: getGLResource(functionId),
       disabled: !editMode
     },
     {

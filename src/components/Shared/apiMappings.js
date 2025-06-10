@@ -54,16 +54,15 @@ export const apiMappings = {
     displayField: 'fiscalYear'
   },
   [ResourceIds.CashAccount]: {
-    type: LOOKUP,
-    endpoint: CashBankRepository.CashAccount.snapshot,
-    parameters: {
-      _type: 0
-    },
-    firstField: 'reference',
-    valueOnSelection: 'recordId',
-    secondField: 'name',
-    displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    type: COMBOBOX,
+    endpoint: CashBankRepository.CashAccount.qry,
+    parameters: '_type=0',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   },
   [ResourceIds.Category]: {
     //Item Category
@@ -111,6 +110,20 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  [ResourceIds.Assemblies]: {
+    type: LOOKUP,
+    endpoint: ManufacturingRepository.Assembly.snapshot,
+    firstField: 'reference',
+    secondDisplayField: false,
+    valueOnSelection: 'recordId'
+  },
+  [ResourceIds.ProductionOrder]: {
+    type: LOOKUP,
+    endpoint: ManufacturingRepository.ProductionOrder.snapshot,
+    firstField: 'reference',
+    secondDisplayField: false,
+    valueOnSelection: 'recordId'
+  },
   [ResourceIds.Accounts]: {
     type: LOOKUP,
     endpoint: FinancialRepository.Account.snapshot,
@@ -118,7 +131,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 2,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.DocumentTypes]: {
     type: COMBOBOX,
@@ -225,7 +238,7 @@ export const apiMappings = {
     valueOnSelection: 'recordId',
     secondField: 'name',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.FlAccountGroups]: {
     type: COMBOBOX,
@@ -295,7 +308,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.FIAgingProfile]: {
     type: COMBOBOX,
@@ -322,7 +335,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.WorkCenters]: {
     type: COMBOBOX,
@@ -341,7 +354,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.Machines]: {
     type: COMBOBOX,
@@ -370,7 +383,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%',
+    firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' },
@@ -387,7 +400,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondValueShow: false,
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.Expense_Types]: {
     type: LOOKUP,
@@ -396,7 +409,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.PriceLevels]: {
     type: COMBOBOX,
@@ -461,7 +474,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%',
+    firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' },
@@ -475,7 +488,7 @@ export const apiMappings = {
     valueOnSelection: 'recordId',
     secondValueShow: false,
     displayFieldWidth: 1,
-    firstFieldWidth: '40%'
+    firstFieldWidth: 5
   },
   [ResourceIds.SalesPerson]: {
     type: COMBOBOX,
@@ -592,7 +605,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'itemName',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%',
+    firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'itemName', value: 'Name' },
@@ -629,7 +642,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%',
+    firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
@@ -689,7 +702,7 @@ export const apiMappings = {
     secondField: 'name',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%',
+    firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
@@ -787,7 +800,7 @@ export const apiMappings = {
     secondField: 'fullName',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
-    firstFieldWidth: '40%',
+    firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'fullName', value: 'Name' }
@@ -1038,6 +1051,27 @@ export const apiMappings = {
     type: COMBOBOX,
     endpoint: BusinessPartnerRepository.MasterData.qry,
     parameters: `_params=&_startAt=0&_pageSize=1000&_sortBy=recordId`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.LoCollectors]: {
+    type: COMBOBOX,
+    endpoint: LogisticsRepository.LoCollector.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.PaymentReasons]: {
+    type: COMBOBOX,
+    endpoint: FinancialRepository.PaymentReasons.qry,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
