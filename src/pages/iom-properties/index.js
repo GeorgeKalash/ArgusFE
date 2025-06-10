@@ -92,34 +92,36 @@ const IomProperties = () => {
       <VertLayout>
         <Grow>
           <Grid container>
-            <Grid item container xs={6} spacing={2}>
-              <Grid item xs={12}>
-                <CustomComboBox
-                  store={propertyStore}
-                  name='mfimd1'
-                  label={labels.property1}
-                  valueField='recordId'
-                  displayField='name'
-                  value={formik.values.mfimd1}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('mfimd1', newValue?.recordId || null)
-                  }}
-                  error={formik.touched.mfimd1 && Boolean(formik.errors.mfimd1)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomComboBox
-                  store={propertyStore}
-                  name='mfimd2'
-                  label={labels.property2}
-                  valueField='recordId'
-                  displayField='name'
-                  value={formik.values.mfimd2}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('mfimd2', newValue?.recordId || null)
-                  }}
-                  error={formik.touched.mfimd2 && Boolean(formik.errors.mfimd2)}
-                />
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomComboBox
+                    store={propertyStore}
+                    name='mfimd1'
+                    label={labels.property1}
+                    valueField='recordId'
+                    displayField='name'
+                    value={formik.values.mfimd1}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('mfimd1', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.mfimd1 && Boolean(formik.errors.mfimd1)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomComboBox
+                    store={propertyStore}
+                    name='mfimd2'
+                    label={labels.property2}
+                    valueField='recordId'
+                    displayField='name'
+                    value={formik.values.mfimd2}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('mfimd2', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.mfimd2 && Boolean(formik.errors.mfimd2)}
+                  />
+                </Grid>
               </Grid>
             </Grid>
           </Grid>

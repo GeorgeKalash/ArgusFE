@@ -157,8 +157,7 @@ export const SystemRepository = {
   Defaults: {
     qry: service + 'qryDE',
     get: service + 'getDE',
-    set: service + 'set2DE',
-    get: service + 'getDE'
+    set: service + 'set2DE'
   },
   ModuleClassRES: {
     qry: service + 'qryRES',
