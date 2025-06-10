@@ -437,7 +437,6 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
               label={labels.amount}
               value={formik.values.amount}
               maxAccess={maxAccess}
-              thousandSeparator={false}
               onChange={async e => {
                 formik.setFieldValue('amount', e.target.value)
 
