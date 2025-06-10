@@ -369,7 +369,7 @@ export default function SaleTransactionForm({
       if (itemInfo?.taxId) {
         const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
 
-        const details = taxDetailsResponse.map(item => ({
+        const details = taxDetailsResponse?.map(item => ({
           invoiceId: formik.values.recordId,
           taxSeqNo: item.seqNo,
           taxId: itemInfo.taxId,
@@ -383,7 +383,7 @@ export default function SaleTransactionForm({
     } else {
       const taxDetailsResponse = await getTaxDetails(formik.values.header.taxId)
 
-      const details = taxDetailsResponse.map(item => ({
+      const details = taxDetailsResponse?.map(item => ({
         invoiceId: formik.values.recordId,
         taxSeqNo: item.seqNo,
         taxId: formik.values.header.taxId,
@@ -1269,12 +1269,16 @@ export default function SaleTransactionForm({
   }
 
   async function getTaxDetails(taxId) {
-    const res = await getRequest({
-      extension: FinancialRepository.TaxDetailPack.qry,
-      parameters: `_taxId=${taxId}`
-    })
+    if (taxId) {
+      const res = await getRequest({
+        extension: FinancialRepository.TaxDetailPack.qry,
+        parameters: `_taxId=${taxId}`
+      })
 
-    return res?.list
+      return res?.list
+    }
+
+    return
   }
 
   async function getItemConvertPrice(itemId) {
