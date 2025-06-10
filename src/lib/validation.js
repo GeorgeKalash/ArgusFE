@@ -5,11 +5,8 @@ function conditionalField(fieldValidators, fieldKey, allowNoLines) {
     const row = this.parent
     const path = this.path
 
-    console.log(this.options.context)
-
     const [, arrayKey] = path.match(/^(\w+)\[(\d+)\]/) || []
 
-    console.log(allowNoLines)
     const allRows = this.options.context?.[arrayKey] || []
     if (allowNoLines || (!allowNoLines && allRows.length > 1)) {
       if (
@@ -23,12 +20,8 @@ function conditionalField(fieldValidators, fieldKey, allowNoLines) {
       }
 
       const isAnyFieldFilled = Object.entries(fieldValidators).some(([, fn]) => {
-        console.log(fn(row))
-
         return !!fn(row)
       })
-
-      console.log(isAnyFieldFilled)
 
       if (!isAnyFieldFilled) return true
     }

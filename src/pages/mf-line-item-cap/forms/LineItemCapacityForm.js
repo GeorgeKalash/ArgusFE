@@ -52,7 +52,6 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
       data: yup.array().of(schema)
     }),
     onSubmit: async obj => {
-      console.log(obj?.data)
       await postRequest({
         extension: ManufacturingRepository.LineItemCapacity.set2,
         record: JSON.stringify({
@@ -72,8 +71,6 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
       invalidate()
     }
   })
-
-  console.log(formik)
 
   const editMode = !!itemId
 

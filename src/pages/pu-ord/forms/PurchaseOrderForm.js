@@ -756,7 +756,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         date: formatDateFromApi(puTrxHeader?.date),
         deliveryDate: puTrxHeader?.deliveryDate && formatDateFromApi(puTrxHeader?.deliveryDate)
       },
-      items: modifiedList
+      items: modifiedList.length > 0 ? modifiedList : formik?.initialValues?.items
     })
   }
 

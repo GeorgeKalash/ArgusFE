@@ -110,6 +110,8 @@ export default function SaleTransactionForm({
     qty: row => row?.qty > 0
   }
 
+  const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines)
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
@@ -232,7 +234,7 @@ export default function SaleTransactionForm({
             return true
           })
       }),
-      items: yup.array().of(createConditionalSchema(conditions, allowNoLines))
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       if (obj.header.serializedAddress) {
@@ -252,7 +254,7 @@ export default function SaleTransactionForm({
       let serialsValues = []
 
       const updatedRows = obj.items
-        .filter(item => item.sku)
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         .map(({ id, isVattable, taxDetails, ...rest }) => {
           const { serials, ...restDetails } = rest
 

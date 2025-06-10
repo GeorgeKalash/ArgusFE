@@ -10,6 +10,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
+import { createConditionalSchema } from 'src/lib/validation'
 
 const RoutingSeqForm = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -56,8 +57,6 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
       toast.success(platformLabels.Edited)
     }
   })
-
-  console.log(formik)
 
   async function getFilteredOperations(workCenterId) {
     console.log(operations)
