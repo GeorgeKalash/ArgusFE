@@ -1,3 +1,4 @@
+import { useContext, useEffect } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from './ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -5,15 +6,86 @@ import { ResourceLookup } from './ResourceLookup'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-const AddressTab = ({ addressValidation, readOnly = false, required = true, defaultReadOnly = {} }) => {
-  const { labels: labels, access: maxAccess } = useResourceParams({
+const AddressTab = ({
+  address = {},
+  optional = false,
+  addressValidation,
+  readOnly = false,
+  defaultReadOnly = {},
+  setFormik,
+  access
+}) => {
+  const { getRequest } = useContext(RequestsContext)
+
+  const { labels, maxAccess } = useResourceParams({
     datasetId: ResourceIds.Address
   })
 
-  const { getRequest } = useContext(RequestsContext)
+  useEffect(() => {
+    const initialValues = {
+      recordId: address?.recordId || null,
+      name: address?.name || '',
+      countryId: address?.countryId || '',
+      countryName: address?.countryName || '',
+      stateId: address?.stateId || '',
+      stateName: address?.stateName || '',
+      cityId: address?.cityId || '',
+      city: address?.city || '',
+      street1: address?.street1 || '',
+      street2: address?.street2 || '',
+      email1: address?.email1 || '',
+      email2: address?.email2 || '',
+      phone: address?.phone || '',
+      phone2: address?.phone2 || '',
+      phone3: address?.phone3 || '',
+      addressId: address?.addressId || '',
+      postalCode: address?.postalCode || '',
+      cityDistrictId: address?.cityDistrictId || '',
+      cityDistrict: address?.cityDistrict || '',
+      bldgNo: address?.bldgNo || '',
+      unitNo: address?.unitNo || '',
+      subNo: address?.subNo || '',
+      poBox: address?.poBox || ''
+    }
+
+    const validate = values => {
+      const errors = {}
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+      if (
+        ((values.name || values.cityId || values.phone || values.countryId || values.street1) && optional) ||
+        !optional
+      ) {
+        if (!values.name) errors.name = ' '
+        if (!values.street1) errors.street1 = ' '
+        if (!values.countryId) errors.countryId = ' '
+        if (!values.cityId) errors.cityId = ' '
+      }
+
+      if (values.email1 && !emailRegex.test(values.email1)) {
+        errors.email1 = 'Invalid email format'
+      }
+
+      if (values.email2 && !emailRegex.test(values.email2)) {
+        errors.email2 = 'Invalid email format'
+      }
+
+      return errors
+    }
+
+    setFormik({
+      initialValues: { ...initialValues },
+      validate,
+      maxAccess: access
+        ? {
+            ...access,
+            record: { ...access?.record, controls: [...access?.record?.controls, ...(maxAccess.controls || [])] }
+          }
+        : maxAccess
+    })
+  }, [])
 
   useEffect(() => {
     async function getCountry() {
@@ -39,11 +111,11 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
           label={labels.name}
           value={addressValidation.values.name}
           readOnly={readOnly}
-          required={required}
           maxLength='20'
+          required
           onChange={addressValidation.handleChange}
           onClear={() => addressValidation.setFieldValue('name', '')}
-          error={addressValidation.touched.name && Boolean(addressValidation.errors.name)}
+          error={addressValidation.touched?.name && Boolean(addressValidation.errors?.name)}
           maxAccess={maxAccess}
         />
       </FormGrid>
@@ -55,8 +127,8 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
           valueField='recordId'
           displayField={['reference', 'name']}
           readOnly={readOnly || defaultReadOnly?.countryId}
-          required={required}
           displayFieldWidth={1.5}
+          required
           columnsInDropDown={[
             { key: 'reference', value: 'Reference' },
             { key: 'name', value: 'Name' },
@@ -89,7 +161,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
           label={labels.state}
           valueField='recordId'
           displayField='name'
-          readOnly={(readOnly || !addressValidation.values.countryId) && true}
+          readOnly={(readOnly || !addressValidation.values?.countryId) && true}
           values={addressValidation.values}
           onChange={(event, newValue) => {
             addressValidation.setFieldValue('stateId', newValue?.recordId)
@@ -113,7 +185,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
           valueField='name'
           displayField='name'
           name='city'
-          required={required}
+          required
           label={labels.city}
           readOnly={(readOnly || !addressValidation.values.countryId) && true}
           form={addressValidation}
@@ -122,7 +194,6 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
             addressValidation.setValues({
               ...addressValidation.values,
               cityId: newValue?.recordId || '',
-
               city: newValue?.name || '',
               cityDistrictId: '',
               cityDistrict: ''
@@ -140,7 +211,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
           }}
           valueField='name'
           displayField='name'
-          name='cityDistrict'
+          name='cityDistrictId'
           label={labels.cityDistrict}
           readOnly={(readOnly || !addressValidation.values.cityId) && true}
           form={addressValidation}
@@ -165,8 +236,8 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
               name='street1'
               label={labels.street1}
               value={addressValidation.values.street1}
+              required
               readOnly={readOnly}
-              required={required}
               maxLength='100'
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('street1', '')}

@@ -6,13 +6,22 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import ClientsAddressForm from './ClientsAddressForm'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import useResourceParams from 'src/hooks/useResourceParams'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-const AddressTab = ({ store, maxAccess, labels, editMode, setStore, ...props }) => {
+const AddressTab = ({ store, window, editMode, setStore, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([])
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+
+  const { labels: labels, access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.Address
+  })
+
+  useSetWindow({ title: labels.salesOrder, window })
 
   const getAddressGridData = recordId => {
     setAddressGridData([])
