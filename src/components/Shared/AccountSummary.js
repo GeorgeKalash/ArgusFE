@@ -110,7 +110,7 @@ export default function AccountSummary({ accountId, moduleId }) {
         const [_, days, ...columns] = item
         const rowObject = { days }
         columns.forEach((value, index) => {
-          rowObject[`column${index + 1}`] = value
+          rowObject[`column${index + 1}`] = value.toFixed(2)
         })
 
         return rowObject
@@ -118,7 +118,7 @@ export default function AccountSummary({ accountId, moduleId }) {
 
     let totalRow = {}
     for (let i = 0; i < currencyItems.length; i++) {
-      totalRow[`column${i + 1}`] = modifiedListObj[i + 2] ?? 0
+      totalRow[`column${i + 1}`] = modifiedListObj[i + 2].toFixed(2) ?? 0
     }
     newList.push(totalRow)
 
