@@ -123,7 +123,7 @@ const Sketch = () => {
         invalidate
       },
       width: 900,
-      height: 700,
+      height: 720,
       title: labels.Sketch
     })
   }

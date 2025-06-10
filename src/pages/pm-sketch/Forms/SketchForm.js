@@ -100,9 +100,11 @@ export default function SketchForm({ recordId, invalidate }) {
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('productionLineId', res?.record?.productionLineId)
+      formik.setFieldValue('productionLineId', res?.record?.productionLineId || null)
 
       return res
+    } else {
+      formik.setFieldValue('productionLineId', null)
     }
   }
 
@@ -232,6 +234,9 @@ export default function SketchForm({ recordId, invalidate }) {
                     onChange={async (event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
+                      if (!newValue?.recordId) {
+                        formik.setFieldValue('productionLineId', null)
+                      }
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                     maxAccess={maxAccess}
@@ -278,7 +283,7 @@ export default function SketchForm({ recordId, invalidate }) {
                       { key: 'name', value: 'Name' },
                       { key: 'typeName', value: 'Type' }
                     ]}
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     maxAccess={maxAccess}
                     values={formik.values}
                     onChange={(event, newValue) => {
@@ -401,8 +406,10 @@ export default function SketchForm({ recordId, invalidate }) {
                     label={labels.productionLine}
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    displayFieldWidth={1}
                     maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('productionLineId', newValue?.recordId || null)
+                    }}
                     readOnly
                     error={formik.touched.productionLineId && formik.errors.productionLineId}
                   />
