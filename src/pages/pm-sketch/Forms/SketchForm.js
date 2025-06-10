@@ -280,9 +280,10 @@ export default function SketchForm({ recordId, invalidate }) {
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' },
+                      { key: 'name', value: 'Name', grid: 4 },
                       { key: 'typeName', value: 'Type' }
                     ]}
+                    displayFieldWidth={2}
                     readOnly={isClosed}
                     maxAccess={maxAccess}
                     values={formik.values}
