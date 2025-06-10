@@ -63,6 +63,12 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       jobId: null,
       productionClassId: null,
       productionLineId: null,
+      collectionId: null,
+      productionStandardRef: '',
+      designerName: '',
+      metalRef: '',
+      collectionName: '',
+      itemGroupName: '',
       density: null,
       nbOfLayers: null,
       status: 1,
@@ -75,7 +81,8 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       date: yup.date().required(),
       threeDDId: yup.number().required(),
       machineId: yup.number().required(),
-      setPcs: yup.number().nullable()
+      setPcs: yup.number().nullable(),
+      collectionName: yup.number().required(),
     }),
     onSubmit: async values => {
       const data = { ...values, date: formatDateToApi(values?.date) }
@@ -307,11 +314,16 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                       formik.setFieldValue('threeDDRef', newValue?.reference || '')
                       formik.setFieldValue('fileReference', newValue?.fileReference || '')
                       formik.setFieldValue('designerName', newValue?.designerName || '')
+                      formik.setFieldValue('designerId', newValue?.designerId || '')
                       formik.setFieldValue('productionClassId', newValue?.productionClassId || null)
+                      formik.setFieldValue('productionStandardId', newValue?.productionStandardId || null)
                       formik.setFieldValue('productionStandardRef', newValue?.productionStandardRef || null)
                       formik.setFieldValue('metalRef', newValue?.metalRef || null)
+                      formik.setFieldValue('metalId', newValue?.metalId || null)
                       formik.setFieldValue('collectionName', newValue?.collectionName || null)
+                      formik.setFieldValue('collectionId', newValue?.collectionId || null)
                       formik.setFieldValue('itemGroupName', newValue?.itemGroupName || null)
+                       formik.setFieldValue('itemGroupId', newValue?.itemGroupId || null)
                       formik.setFieldValue('threeDDId', newValue?.recordId || null)
                     }}
                     errorCheck={'threeDDId'}
@@ -517,6 +529,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     label={labels.collection}
                     value={formik.values.collectionName}
                     maxAccess={maxAccess}
+                    required
                     readOnly
                     error={formik.touched.collectionName && Boolean(formik.errors.collectionName)}
                   />
