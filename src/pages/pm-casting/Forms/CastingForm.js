@@ -65,9 +65,10 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      threeDPId: yup.string().required(),
-      laborId: yup.string().required(),
-      castingType: yup.string().required(),
+      threeDPId: yup.number().required(),
+      laborId: yup.number().required(),
+      castingType: yup.number().required(),
+      productionLineId: yup.number().required(),
       setPcs: yup.number().nullable().min(0).max(1000)
     }),
     onSubmit: async values => {
@@ -229,7 +230,8 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                readOnly={isPosted}
+                required
+                readOnly
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('productionLineId', newValue?.recordId || null)

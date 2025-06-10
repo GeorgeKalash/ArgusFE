@@ -123,7 +123,7 @@ const Casting = () => {
         maxAccess: access
       },
       width: 700,
-      height: 580,
+      height: 630,
       title: labels.Casting
     })
   }
