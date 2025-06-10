@@ -16,5 +16,6 @@ export const commonResourceIds = [
   ResourceIds.ThreeDDesign,
   ResourceIds.Sketch,
   ResourceIds.RemittanceReceiptVoucher,
-  ResourceIds.POSPayment
+  ResourceIds.POSPayment,
+  ResourceIds.Address
 ]

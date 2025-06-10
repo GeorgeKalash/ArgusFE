@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useState, useEffect, useContext, useRef } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import AddressTab from 'src/components/Shared/AddressTab'
 import FieldSet from 'src/components/Shared/FieldSet'
@@ -7,6 +7,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { TextFieldReference } from 'src/components/Shared/TextFieldReference'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import FormShell from 'src/components/Shared/FormShell'
+import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
@@ -29,23 +30,10 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
   const [referenceRequired, setReferenceRequired] = useState(true)
   const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
-  const formikRef = useRef(null)
-
-  const handleMaxAccess = (access, validation) => {
-    if (!access?.record || !maxAccess) return
-
-    formikRef.current = {
-      maxAccess: {
-        ...maxAccess,
-        record: { ...maxAccess.record, controls: [...maxAccess.record.controls, ...(access.record.controls || [])] }
-      },
-      validation: { ...validation }
-    }
-  }
+  const [formikSettings, setFormik] = useState({})
 
   const [initialValues, setInitialData] = useState({
     //ClientCorporate
-
     clientId: null,
     lgsId: null,
     industry: null,
@@ -56,27 +44,7 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
     inward: false,
 
     //address
-
-    cityName: null,
-    countryId: null,
-    cityId: null,
-    city: null,
-    stateId: null,
-    cityDistrictId: null,
-    cityDistrict: null,
-    email1: null,
-    email2: null,
-    name1: null,
-    phone: null,
-    phone2: null,
-    phone3: null,
-    postalCode: null,
-    street1: null,
-    street2: null,
-    subNo: null,
-    unitNo: null,
-    bldgNo: '',
-    poBox: null,
+    ...formikSettings.initialValues,
 
     //clientMaster
     category: null,
@@ -99,24 +67,9 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
 
   const { formik } = useForm({
     initialValues,
-    maxAccess: formikRef.current?.maxAccess,
-    enableReinitialize: false,
+    maxAccess: formikSettings.maxAccess,
+    enableReinitialize: true,
     validateOnChange: true,
-    validate: values => {
-      const errors = {}
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-      if (values.email1 && !emailRegex.test(values.email1)) {
-        errors.email1 = 'Invalid email format'
-      }
-
-      if (values.email2 && !emailRegex.test(values.email2)) {
-        errors.email2 = 'Invalid email format'
-      }
-
-      return errors
-    },
     validationSchema: yup.object({
       reference: referenceRequired && yup.string().required(),
       expiryDate: yup.date().required(),
@@ -127,10 +80,12 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
       lgsId: yup.string().required(),
       industry: yup.string().required(),
       activityId: yup.string().required(),
-      ...formikRef.current?.validation
+      street1: yup.string().required(),
+      phone: yup.string().required()
     }),
-    onSubmit: async values => {
-      await postRtDefault(values)
+    validate: formikSettings.validate,
+    onSubmit: values => {
+      postRtDefault(values)
     }
   })
 
@@ -293,7 +248,7 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
       actions={actions}
       form={formik}
       resourceId={ResourceIds.ClientCorporate}
-      maxAccess={formikRef.current.maxAccess}
+      maxAccess={maxAccess}
       recordId={recordId}
       disabledSubmit={editMode}
       editMode={editMode}
@@ -317,6 +272,7 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
                     editMode={editMode}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    helperText={formik.touched.reference && formik.errors.reference}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -420,7 +376,7 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
                               if (newValue) {
                                 formik.setFieldValue('status', newValue?.key)
                               } else {
-                                formik.setFieldValue('status', null)
+                                formik.setFieldValue('status', newValue?.key)
                               }
                             }}
                             error={formik.touched.status && Boolean(formik.errors.status)}
@@ -565,10 +521,10 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
               <FieldSet title={_labels.address}>
                 <AddressTab
                   labels={_labels}
-                  access={formikRef.current?.maxAccess}
+                  access={maxAccess}
                   addressValidation={formik}
+                  setFormik={setFormik}
                   readOnly={editMode && true}
-                  onMaxAccessChange={handleMaxAccess}
                 />
               </FieldSet>
               <Grid item xs={12}>
