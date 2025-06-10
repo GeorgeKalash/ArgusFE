@@ -339,7 +339,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
-                    endpointId={ProductModelingRepository.Sketch.snapshot2}
+                    endpointId={ProductModelingRepository.Sketch.snapshot3}
                     parameters={{ _productionLineId: formik.values.productionLineId || 0 }}
                     name='sketchId'
                     required
