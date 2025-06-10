@@ -248,6 +248,9 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     onChange={async (event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
+                      if (!newValue?.recordId) {
+                        formik.setFieldValue('productionLineId', null)
+                      }
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                     maxAccess={maxAccess}
