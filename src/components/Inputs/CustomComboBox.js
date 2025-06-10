@@ -147,7 +147,7 @@ const CustomComboBox = ({
         if (columnsInDropDown && columnsInDropDown.length > 0) {
           const columnsWithGrid = columnsInDropDown.map(col => ({
             ...col,
-            grid: col.grid ?? 2
+            grid: col.width ?? 2
           }))
 
           const totalGrid = columnsWithGrid.reduce((sum, col) => sum + col.grid, 0)

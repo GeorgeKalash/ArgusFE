@@ -103,8 +103,6 @@ export default function SketchForm({ recordId, invalidate }) {
       formik.setFieldValue('productionLineId', res?.record?.productionLineId || null)
 
       return res
-    } else {
-      formik.setFieldValue('productionLineId', null)
     }
   }
 
@@ -280,7 +278,7 @@ export default function SketchForm({ recordId, invalidate }) {
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name', grid: 4 },
+                      { key: 'name', value: 'Name', width: 4 },
                       { key: 'typeName', value: 'Type' }
                     ]}
                     displayFieldWidth={2}
