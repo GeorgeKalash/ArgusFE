@@ -1,3 +1,4 @@
+import MatPlaning from 'src/pages/ir-mat-planning'
 import { Module } from './Module'
 
 export const SystemFunction = {
@@ -121,7 +122,8 @@ export const SystemFunction = {
   JobOrderWizard: Module.Manufacturing * 100 + 14,
   BalanceTransferMultiAccount: Module.Financials * 100 + 13,
   BalanceTransferPurchase: Module.Financials * 100 + 10,
-  BalanceTransferSales: Module.Financials * 100 + 11
+  BalanceTransferSales: Module.Financials * 100 + 11,
+  MatPlaning: Module.Replenishment * 100 + 2
 }
 
 export const getSystemFunctionModule = functionId => {

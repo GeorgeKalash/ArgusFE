@@ -29,9 +29,15 @@ export const IVReplenishementRepository = {
     close: service + 'closeREQ',
     reopen: service + 'reopenREQ',
     cancel: service + 'cancelREQ',
-    print: service + 'printREQ',
+    print: service + 'printREQ'
   },
   OrderItem: {
-    qry: service + 'qryREI',
+    qry: service + 'qryREI'
+  },
+  MatPlanning: {
+    page: service + 'pageMPL',
+    del: service + 'delMPL',
+    get: service + 'getMPL',
+    set2: service + 'set2MPL'
   }
 }
