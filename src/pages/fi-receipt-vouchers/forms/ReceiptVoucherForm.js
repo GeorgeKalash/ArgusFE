@@ -452,7 +452,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 form={formik}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Account Ref' },
-                  { key: 'name', value: 'Name', width: '500px' },
+                  { key: 'name', value: 'Name', grid: 4 },
                   { key: 'keywords', value: 'Keywords' }
                 ]}
                 displayFieldWidth={4}
