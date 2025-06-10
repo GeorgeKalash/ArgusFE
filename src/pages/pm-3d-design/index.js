@@ -80,13 +80,13 @@ const ThreeDDesign = () => {
       flex: 1
     },
     {
-      field: 'designerName',
-      headerName: labels.Drawer,
+      field: 'sketchRef',
+      headerName: labels.sketchRef,
       flex: 1
     },
     {
-      field: 'sketchRef',
-      headerName: labels.sketchRef,
+      field: 'designerName',
+      headerName: labels.Drawer,
       flex: 1
     },
     {

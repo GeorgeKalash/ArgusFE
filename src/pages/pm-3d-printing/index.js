@@ -113,22 +113,21 @@ const ThreeDPrinting = () => {
       flex: 1,
       type: 'number'
     },
-
-    // {
-    //   field: 'productionLineName',
-    //   headerName: labels.productionLineName,
-    //   flex: 1
-    // },
-    // {
-    //   field: 'itemGroupName',
-    //   headerName: labels.itemGroup,
-    //   flex: 1
-    // },
-    // {
-    //   field: 'collectionName',
-    //   headerName: labels.collection,
-    //   flex: 1
-    // },
+    {
+      field: 'productionLineName',
+      headerName: labels.productionLineName,
+      flex: 1
+    },
+    {
+      field: 'itemGroupName',
+      headerName: labels.itemGroup,
+      flex: 1
+    },
+    {
+      field: 'collectionName',
+      headerName: labels.collection,
+      flex: 1
+    },
     {
       field: 'statusName',
       headerName: labels.status,
