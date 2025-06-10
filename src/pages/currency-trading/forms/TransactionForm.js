@@ -536,10 +536,13 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       )
       formik.setFieldValue(
         'amount',
-        record.cash.map(({ seqNo, ...rest }) => ({
-          id: seqNo,
-          ...rest
-        }))
+        record?.cash?.length != 0
+          ? record.cash?.map((item, index) => ({
+              id: index + 1,
+              pos: item?.type != 3,
+              ...item
+            }))
+          : formik.initialValues.amount
       )
 
       formik.setFieldValue('clientType', record.clientMaster.category)
@@ -1496,7 +1499,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
                             return
                           }
-                      },
+                      }
                     },
                     {
                       component: 'numberfield',
@@ -1517,7 +1520,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           update({
                             fcAmount: fcAmount.toFixed(2)
                           })
-                      },
+                      }
                     }
                   ]}
                 />
@@ -1532,8 +1535,14 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       onChange={value => formik.setFieldValue('amount', value)}
                       value={formik.values.amount}
                       error={formik.errors.amount}
-                      name={'amount'}
+                      name='amount'
                       setFormik={setFormik}
+                      data={{
+                        recordId: formik.values?.recordId,
+                        reference: formik.values?.reference,
+                        clientName: formik.values?.clientName,
+                        viewPosButtons: formik.values.wip === 2
+                      }}
                       amount={total}
                       disabled={isClosed}
                     />
