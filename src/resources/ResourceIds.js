@@ -480,6 +480,7 @@ export const ResourceIds = {
   CastingDTD: 48604,
   ThreeDDrawingDTD: 48605,
   ProductModelingDTD: 48102,
+  ThreePrintingDTD: 48606,
   
   // GL
   GLSalesInvoice: 51604,
