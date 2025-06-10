@@ -39,6 +39,11 @@ const DraftSerialsInvoices = () => {
 
   const columns = [
     {
+      field: 'plantName',
+      headerName: labels.plant,
+      flex: 1
+    },
+    {
       field: 'reference',
       headerName: labels.reference,
       flex: 1
@@ -56,14 +61,8 @@ const DraftSerialsInvoices = () => {
     },
     {
       field: 'clientName',
-      headerName: labels.client,
+      headerName: labels.clientName,
       flex: 1
-    },
-    {
-      field: 'amount',
-      headerName: labels.amount,
-      flex: 1,
-      type: 'number'
     },
     {
       field: 'pcs',
@@ -73,9 +72,20 @@ const DraftSerialsInvoices = () => {
     },
     {
       field: 'weight',
-      headerName: labels.totalWeight,
+      headerName: labels.weight,
       flex: 1,
       type: 'number'
+    },
+    {
+      field: 'amount',
+      headerName: labels.amount,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'spName',
+      headerName: labels.salesPerson,
+      flex: 1
     },
     {
       field: 'description',
@@ -83,13 +93,13 @@ const DraftSerialsInvoices = () => {
       flex: 1
     },
     {
-      field: 'wipName',
-      headerName: labels.wip,
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
+      field: 'wipName',
+      headerName: labels.wip,
       flex: 1
     }
   ]

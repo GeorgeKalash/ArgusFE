@@ -19,7 +19,6 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack: stackError } = useError()
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
