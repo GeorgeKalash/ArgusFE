@@ -45,6 +45,8 @@ const ProductModelingDTD = () => {
         return ResourceIds.RubberDTD
       case SystemFunction.ModelMaker:
         return ResourceIds.ModelDTD
+      case SystemFunction.ThreeDPrint:
+        return ResourceIds.ThreePrintingDTD
     }
   }
 
@@ -131,6 +133,8 @@ const ProductModelingDTD = () => {
         return 'PMDTDd'
       case SystemFunction.ModellingCasting:
         return 'PMDTDe'
+      case SystemFunction.ThreeDPrint:
+        return 'PMDTDf'
     }
   }
 

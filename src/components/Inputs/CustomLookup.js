@@ -127,30 +127,36 @@ const CustomLookup = ({
             props.renderOption && <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>
           }
           renderOption={(props, option) => {
-            if (columnsInDropDown && columnsInDropDown.length > 0) {
-              const equalWidth = displayFieldWidth ? `${(100 / columnsInDropDown.length).toFixed(2)}%` : 'auto'
+            if (columnsInDropDown?.length > 0) {
+              const columnsWithGrid = columnsInDropDown.map(col => ({
+                ...col,
+                grid: col.grid ?? 2
+              }))
+
+              const totalGrid = columnsWithGrid.reduce((sum, col) => sum + col.grid, 0)
 
               return (
                 <Box>
                   {props.id.endsWith('-0') && (
                     <li className={props.className}>
-                      {columnsInDropDown.map(
-                        (header, i) =>
-                          columnsInDropDown.length > 1 && (
-                            <Box
-                              key={i}
-                              sx={{
-                                fontWeight: 'bold',
-                                width: header.width || equalWidth,
-                                fontSize: '0.7rem',
-                                height: '15px',
-                                display: 'flex'
-                              }}
-                            >
-                              {header.value.toUpperCase()}
-                            </Box>
-                          )
-                      )}
+                      {columnsWithGrid.map((header, i) => {
+                        const widthPercent = `${(header.grid / totalGrid) * 100}%`
+
+                        return (
+                          <Box
+                            key={i}
+                            sx={{
+                              fontWeight: 'bold',
+                              width: widthPercent,
+                              fontSize: '0.7rem',
+                              height: '15px',
+                              display: 'flex'
+                            }}
+                          >
+                            {header.value.toUpperCase()}
+                          </Box>
+                        )
+                      })}
                     </li>
                   )}
                   <li {...props}>
@@ -160,12 +166,13 @@ const CustomLookup = ({
                       if (header?.type && header?.type === 'date' && displayValue) {
                         displayValue = formatDateDefault(displayValue)
                       }
+                      const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                       return (
                         <Box
                           key={i}
                           sx={{
-                            width: header.width || equalWidth,
+                            width: widthPercent,
                             fontSize: '0.88rem',
                             height: '20px',
                             display: 'flex'
