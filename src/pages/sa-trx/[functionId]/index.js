@@ -110,7 +110,7 @@ const SaTrx = () => {
       field: 'amount',
       headerName: labels.net,
       flex: 1,
-      type: 'number'
+      type: { field: 'number', decimal: 2 }
     },
     {
       field: 'spName',
@@ -217,10 +217,10 @@ const SaTrx = () => {
     stack({
       Component: SaleTransactionForm,
       props: {
-        labels: labels,
-        recordId: recordId,
+        labels,
+        recordId,
         access,
-        functionId: functionId,
+        functionId,
         lockRecord,
         getResourceId,
         getGLResource
@@ -230,7 +230,6 @@ const SaTrx = () => {
       title: getCorrectLabel(parseInt(functionId))
     })
   }
-
 
   async function openForm(recordId, reference, status) {
     if (recordId && status !== 3) {
