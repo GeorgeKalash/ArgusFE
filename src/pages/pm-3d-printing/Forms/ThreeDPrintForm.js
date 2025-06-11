@@ -130,8 +130,6 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       })
 
       formik.setFieldValue('productionLineId', res?.record?.productionLineId)
-
-      return res
     }
   }
 
@@ -319,12 +317,12 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                       formik.setFieldValue('designerId', newValue?.designerId || '')
                       formik.setFieldValue('productionClassId', newValue?.productionClassId || null)
                       formik.setFieldValue('productionStandardId', newValue?.productionStandardId || null)
-                      formik.setFieldValue('productionStandardRef', newValue?.productionStandardRef || null)
-                      formik.setFieldValue('metalRef', newValue?.metalRef || null)
+                      formik.setFieldValue('productionStandardRef', newValue?.productionStandardRef || '')
+                      formik.setFieldValue('metalRef', newValue?.metalRef || '')
                       formik.setFieldValue('metalId', newValue?.metalId || null)
-                      formik.setFieldValue('collectionName', newValue?.collectionName || null)
+                      formik.setFieldValue('collectionName', newValue?.collectionName || '')
                       formik.setFieldValue('collectionId', newValue?.collectionId || null)
-                      formik.setFieldValue('itemGroupName', newValue?.itemGroupName || null)
+                      formik.setFieldValue('itemGroupName', newValue?.itemGroupName || '')
                       formik.setFieldValue('itemGroupId', newValue?.itemGroupId || null)
                       formik.setFieldValue('threeDDId', newValue?.recordId || null)
                     }}
