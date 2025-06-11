@@ -104,6 +104,7 @@ export function WindowProvider({ children }) {
           onClose,
           closable,
           expandable,
+          refresh,
           draggable,
           height,
           styles
@@ -163,6 +164,7 @@ export function WindowProvider({ children }) {
               width={width}
               height={height}
               expandable={expandable}
+              refresh={refresh}
               draggable={draggable}
               closable={closable}
               styles={styles}
@@ -209,6 +211,7 @@ export function ImmediateWindow({ datasetId, Component, labelKey, titleName, hei
         ...props
       },
       expandable: false,
+      refresh: false,
       closable: false,
       draggable: false,
       width: width || 600,

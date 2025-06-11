@@ -516,6 +516,7 @@ export default function FormShell({
               },
               width: 1150,
               height: 700,
+              refresh: false,
               title: platformLabels.PreviewReport
             })
           }

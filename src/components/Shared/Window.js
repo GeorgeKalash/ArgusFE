@@ -41,6 +41,7 @@ const Window = React.memo(
     draggable = true,
     expandable = true,
     closable = true,
+    refresh = true,
     Title,
     nextToTitle,
     onSave,
@@ -159,7 +160,7 @@ const Window = React.memo(
                     </Typography>
                   </Box>
                   <Box>
-                    {props?.onRefresh && (
+                    {refresh && (
                       <IconButton
                         tabIndex={-1}
                         edge='end'
