@@ -81,8 +81,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
       date: yup.date().required(),
       threeDDId: yup.number().required(),
       machineId: yup.number().required(),
-      setPcs: yup.number().nullable(),
-      collectionName: yup.number().required(),
+      setPcs: yup.number().nullable()
     }),
     onSubmit: async values => {
       const data = { ...values, date: formatDateToApi(values?.date) }
@@ -305,9 +304,9 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     label={labels.threeDD}
                     form={formik}
                     columnsInDropDown={[
-                      { key: 'designerRef', value: 'Designer' },
-                      { key: 'date', value: 'Date', type: 'date' },
-                      { key: 'reference', value: 'Reference' }
+                      { key: 'reference', value: 'Reference', grid: 2 },
+                      { key: 'date', value: 'Date', type: 'date', grid: 2 },
+                      { key: 'designerRef', value: 'Designer', grid: 2 }
                     ]}
                     valueShow='threeDDRef'
                     maxAccess={maxAccess}
@@ -326,7 +325,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                       formik.setFieldValue('collectionName', newValue?.collectionName || null)
                       formik.setFieldValue('collectionId', newValue?.collectionId || null)
                       formik.setFieldValue('itemGroupName', newValue?.itemGroupName || null)
-                       formik.setFieldValue('itemGroupId', newValue?.itemGroupId || null)
+                      formik.setFieldValue('itemGroupId', newValue?.itemGroupId || null)
                       formik.setFieldValue('threeDDId', newValue?.recordId || null)
                     }}
                     errorCheck={'threeDDId'}
@@ -532,7 +531,6 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     label={labels.collection}
                     value={formik.values.collectionName}
                     maxAccess={maxAccess}
-                    required
                     readOnly
                     error={formik.touched.collectionName && Boolean(formik.errors.collectionName)}
                   />
