@@ -42,7 +42,7 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
     <Box
       ref={popperRef}
       sx={{
-        zIndex: 999999,
+        zIndex: '3 !important',
         visibility: open ? 'visible' : 'hidden',
         '& .MuiMultiSectionDigitalClock-root': {
           width: '200px'
@@ -69,7 +69,6 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
         position: 'absolute',
         top: rect?.bottom / zoom,
         left: rect?.left / zoom,
-        zIndex: 999999,
         transform: !canRenderBelow ? `translateY(calc(-100% - 10px - ${rect?.height}px))` : 'none',
         ...props?.style
       }}
