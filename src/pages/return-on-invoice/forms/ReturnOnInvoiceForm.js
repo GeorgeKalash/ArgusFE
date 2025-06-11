@@ -1041,13 +1041,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       hiddenTdAmount: parseFloat(tdAmount),
       typeChange
     })
-    formik.setFieldValue(
-      'tdAmount',
-      parseInt(subtotal) != 0 ? (_discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0) : 0
-    )
-    formik.setFieldValue('tdType', parseInt(subtotal) != 0 ? _discountObj?.tdType : 0)
-    formik.setFieldValue('currentDiscount', parseInt(subtotal) != 0 ? _discountObj?.currentDiscount || 0 : 0)
-    formik.setFieldValue('tdPct', parseInt(subtotal) != 0 ? _discountObj?.hiddenTdPct : 0)
+    formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
+    formik.setFieldValue('tdType', _discountObj?.tdType)
+    formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
+    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct)
   }
 
   function recalcNewVat(tdPct) {
