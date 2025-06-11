@@ -351,9 +351,10 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'date', value: 'date', type: 'date' },
                       { key: 'designerRef', value: 'designer Ref' },
-                      { key: 'designerName', value: 'designer Name' }
+                      { key: 'designerName', value: 'designer Name', grid: 4 }
                     ]}
                     form={formik}
+                    displayFieldWidth={2}
                     readOnly={isClosed}
                     onChange={(event, newValue) => {
                       formik.setValues({
