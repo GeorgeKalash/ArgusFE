@@ -41,6 +41,13 @@ export const FoundryRepository = {
     qry2: service + 'qry2WAJ'
   },
   Casting: {
-    qry: service + 'qryCAS'
+    qry: service + 'qryCAS',
+    page: service + 'pageCAS',
+    get: service + 'getCAS',
+    set: service + 'setCAS',
+    del: service + 'delCAS',
+    cancel: service + 'cancelCAS',
+    post: service + 'postCAS',
+    snapshot: service + 'snapshotCAS'
   }
 }
