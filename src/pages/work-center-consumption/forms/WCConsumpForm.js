@@ -94,6 +94,9 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
           qty: 0,
           unitCost: 0,
           muId: null,
+          msId: null,
+          muRef: '',
+          muQty: 0,
           itemName: '',
           totalCost: 0,
           baseQty: null
@@ -151,15 +154,15 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
     })
   }
 
-  async function getFilteredMU(itemId, msId) {
+  async function getFilteredMU(itemId, msId = null) {
     if (!itemId) return
 
     if (!msId) {
       const itemInfo = await getItem(itemId)
-      msId = itemInfo?.msId
+      msId = itemInfo?.msId || null
     }
 
-    const arrayMU = measurements?.filter(item => item.msId === msId) || []
+    const arrayMU = measurements?.filter(item => item.msId == msId) || []
     filteredMeasurements.current = arrayMU
   }
 
@@ -374,14 +377,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
         }
       },
       propsReducer({ row, props }) {
-        let store = []
-        if (row?.itemId) {
-          getFilteredMU(row?.itemId, row?.msId)
-
-          store = filteredMeasurements?.current
-        }
-
-        return { ...props, store }
+        return { ...props, store: filteredMeasurements?.current }
       }
     },
     {
@@ -391,7 +387,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       async onChange({ row: { update, newRow } }) {
         setReCal(true)
         update({
-          totalCost: newRow?.unitCost * newRow?.qty
+          totalCost: parseFloat(newRow?.unitCost * newRow?.qty).toFixed(2)
         })
         if (newRow?.muQty)
           update({
@@ -521,7 +517,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
                     name='header.reference'
                     label={labels.reference}
                     value={formik.values.header?.reference}
-                    readOnly={editMode || !formik.values.header?.dtId}
+                    readOnly={editMode}
                     maxAccess={!editMode && maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.reference', '')}
@@ -623,15 +619,15 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
-                    name='description'
+                    name='header.description'
                     label={labels.description}
-                    value={formik.values?.header?.description}
+                    value={formik.values.header.description}
                     rows={2.5}
                     readOnly={isClosed}
                     maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('description', e.target.value)}
-                    onClear={() => formik.setFieldValue('description', '')}
-                    error={formik.touched.description && Boolean(formik.errors.description)}
+                    onChange={e => formik.setFieldValue('header.description', e.target.value)}
+                    onClear={() => formik.setFieldValue('header.description', '')}
+                    error={formik.touched.header?.description && Boolean(formik.errors.header?.description)}
                   />
                 </Grid>
               </Grid>
@@ -646,7 +642,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
                 setReCal(true)
               }
             }}
-            onSelectionChange={(row, field) => {
+            onSelectionChange={(row, update, field) => {
               if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             value={formik.values.items}
