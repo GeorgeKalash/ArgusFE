@@ -54,7 +54,7 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
           paddingRight: '10px'
         },
         '& .MuiDateCalendar-root': {
-          height: 250
+          height: 310
         },
         ...(isDateTimePicker && {
           '& .MuiDateCalendar-root': {
