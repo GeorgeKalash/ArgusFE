@@ -713,7 +713,8 @@ const Table = ({
 
   const height = gridData?.list?.length * 35 + 40 + 40
 
-  const tableName = name ? `${name}.${props?.maxAccess?.record?.resourceId}` : props?.maxAccess?.record?.resourceId
+  const tableName =
+    name && name !== 'table' ? `${name}.${props?.maxAccess?.record?.resourceId}` : props?.maxAccess?.record?.resourceId
 
   const { data: tableSettings, refetch: invalidate } = useQuery({
     queryKey: [tableName],
