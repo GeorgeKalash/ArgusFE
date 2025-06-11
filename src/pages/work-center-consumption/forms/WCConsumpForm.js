@@ -67,12 +67,13 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
-      recordId: null,
+      recordId,
       header: {
-        dtId: null,
+        recordId: null,
         reference: '',
+        dtId: null,
         date: new Date(),
         plantId: null,
         siteId: null,
@@ -479,9 +480,9 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       resourceId={ResourceIds.WorkCenterConsumptions}
       functionId={SystemFunction.WorkCenterConsumption}
       maxAccess={maxAccess}
+      actions={actions}
       editMode={editMode}
       previewReport={editMode}
-      actions={actions}
       disabledSubmit={isClosed}
     >
       <VertLayout>
@@ -495,20 +496,20 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.WorkCenterConsumption}`}
                     name='header.dtId'
                     label={labels.docType}
-                    readOnly={editMode}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    readOnly={editMode}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
                     values={formik.values.header}
-                    onChange={async (event, newValue) => {
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
-                    error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
-                    maxAccess={maxAccess}
+                    error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
                 </Grid>
 
@@ -516,9 +517,9 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
                   <CustomTextField
                     name='header.reference'
                     label={labels.reference}
-                    value={formik.values.header?.reference}
-                    readOnly={editMode}
+                    value={formik?.values?.header?.reference}
                     maxAccess={!editMode && maxAccess}
+                    readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.reference', '')}
                     error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}

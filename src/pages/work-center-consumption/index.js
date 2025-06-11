@@ -113,7 +113,7 @@ const WorkCenterConsump = () => {
   })
 
   const add = async () => {
-    proxyAction()
+    await proxyAction()
   }
 
   const edit = obj => {
