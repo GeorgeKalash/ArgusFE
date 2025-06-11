@@ -232,10 +232,14 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
           ...res.record,
           date: formatDateFromApi(res?.record?.date)
         },
-        cash: result.list.map((amount, index) => ({
-          id: index + 1,
-          ...amount
-        }))
+        cash:
+          result?.list?.length != 0
+            ? result.list.map((item, index) => ({
+                id: index + 1,
+                pos: item?.type != 3,
+                ...item
+              }))
+            : formik.initialValues.cash
       })
 
       return res.record
@@ -395,7 +399,6 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.owoId', newValue ? newValue.recordId : '')
                       formik.setFieldValue('header.owoRef', newValue ? newValue.reference : '')
-
                       formik.setFieldValue('header.amount', newValue ? newValue.amount : '')
                       formik.setFieldValue('header.clientId', newValue ? newValue.clientId : '')
                     }}
@@ -436,6 +439,13 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
             allowAddNewLine={!isPosted}
             amount={formik.values.header.amount}
             setFormik={setFormik}
+            data={{
+              recordId: formik.values.header.recordId,
+              reference: formik.values.header.reference,
+              clientName: formik.values.header.clientName,
+              beneficiaryName: formik.values.header.beneficiaryName,
+              viewPosButtons: formik?.values?.header?.wip === 2
+            }}
             name='cash'
           />
         </Grow>
