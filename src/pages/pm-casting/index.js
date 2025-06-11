@@ -118,8 +118,8 @@ const Casting = () => {
     stack({
       Component: CastingForm,
       props: {
-        labels,
         recordId,
+        labels,
         maxAccess: access
       },
       width: 700,

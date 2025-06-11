@@ -313,7 +313,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('castingType', newValue?.key)
+                  formik.setFieldValue('castingType', newValue?.key || null)
                 }}
                 error={formik.touched.castingType && Boolean(formik.errors.castingType)}
               />
