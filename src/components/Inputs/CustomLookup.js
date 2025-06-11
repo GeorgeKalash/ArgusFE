@@ -168,6 +168,12 @@ const CustomLookup = ({
                       }
                       const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
+                      let displayValue = option[header.key]
+
+                      if (header?.type && header?.type === 'date' && displayValue) {
+                        displayValue = formatDateDefault(displayValue)
+                      }
+
                       return (
                         <Box
                           key={i}
