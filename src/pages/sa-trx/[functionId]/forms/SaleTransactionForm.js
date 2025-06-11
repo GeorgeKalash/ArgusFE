@@ -106,6 +106,7 @@ export default function SaleTransactionForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
       recordId: recordId || null,
+      search: '',
       header: {
         dgId: functionId,
         recordId: null,
@@ -1594,20 +1595,20 @@ export default function SaleTransactionForm({
     return res
   }
 
-  const handleSearchChange = event => {
-    const { value } = event.target
-    formik.setFieldValue('header.search', value)
-  }
-
-  const filteredData = formik.values.header.search
+  const filteredData = formik.values.search
     ? formik.values.items.filter(
         item =>
-          item.barcode?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.sku?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.itemName?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase())
+          item.barcode?.toString()?.includes(formik.values.search) ||
+          item.sku?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
+          item.itemName?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
+          item.qty?.toString()?.includes(formik.values.search)
       )
     : formik.values.items
 
+  const handleSearchChange = event => {
+    const { value } = event.target
+    formik.setFieldValue('search', value)
+  }
   async function onChangeDtId(recordId) {
     const dtd = await getDTD(recordId)
     if (dtd?.record != null) {
@@ -2030,14 +2031,14 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <CustomTextField
-                name='header.search'
-                value={formik.values.header.search}
+                name='search'
+                value={formik.values.search}
                 label={platformLabels.Search}
                 onClear={() => {
-                  formik.setFieldValue('header.search', '')
+                  formik.setFieldValue('search', '')
                 }}
                 onChange={handleSearchChange}
-                onSearch={e => formik.setFieldValue('header.search', e)}
+                onSearch={e => formik.setFieldValue('search', e)}
                 search={true}
               />
             </Grid>
