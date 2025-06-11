@@ -38,6 +38,13 @@ export const IVReplenishementRepository = {
     page: service + 'pageMPL',
     del: service + 'delMPL',
     get: service + 'getMPL',
-    set2: service + 'set2MPL'
+    set: service + 'setMPL',
+    set2: service + 'set2MPL',
+    reopen: service + 'reopenMPL',
+    close: service + 'closeMPL',
+    generate: service + 'generatePR'
+  },
+  MatPlanningItem: {
+    qry: service + 'qryMPI'
   }
 }

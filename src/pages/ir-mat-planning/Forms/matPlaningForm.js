@@ -15,15 +15,14 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
-import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useWindow } from 'src/windows'
-import ConfirmationDialog from 'src/components/ConfirmationDialog'
-import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
+import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import WorkFlow from 'src/components/Shared/WorkFlow'
 
 export default function MatPlaningForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,150 +32,168 @@ export default function MatPlaningForm({ labels, access, recordId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.MatPlaning,
     access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   const invalidate = useInvalidate({
-    endpointId: ProductModelingRepository.Rubber.page
+    endpointId: IVReplenishementRepository.MatPlanning.page
   })
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
-      recordId,
-      dtId: null,
-      reference: '',
-      date: new Date(),
-      modelId: null,
-      threeDPId: null,
-      laborId: null,
-      startDate: null,
-      endDate: null,
-      pcs: null,
-      jobId: null,
-      status: 1,
-      notes: ''
+      header: {
+        recordId,
+        dtId: null,
+        reference: '',
+        date: new Date(),
+        notes: '',
+        status: 1,
+        releaseStatus: null,
+        wip: 1
+      },
+      items: []
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      pcs: yup.number().moreThan(0, 'min'),
-      laborId: yup.number().required(),
-      modelId: yup.number().required()
+      header: yup.object({
+        date: yup.date().required()
+      }),
+      items: yup.array().of(
+        yup.object({
+          qty: yup.string().required()
+        })
+      )
     }),
     onSubmit: async obj => {
-      postRequest({
-        extension: ProductModelingRepository.Rubber.set,
+      const res = await postRequest({
+        extension: IVReplenishementRepository.MatPlanning.set2,
         record: JSON.stringify({
-          ...obj,
-          startDate: obj.startDate ? formatDateToApi(obj.startDate) : null,
-          endDate: obj.endDate ? formatDateToApi(obj.endDate) : null
+          header: { ...obj.header, date: formatDateToApi(obj.header.date) },
+          items: obj.items
         })
-      }).then(async res => {
-        const actionMessage = obj.recordId ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
-        await refetchForm(res.recordId)
-        invalidate()
       })
+      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+
+      await refetchForm(res.recordId)
+      invalidate()
     }
   })
 
-  const editMode = !!formik.values.recordId
-  const isReleased = formik.values.status == 4
-  const isPosted = formik.values.status == 3
+  const editMode = !!formik.values.header.recordId
+  const isReleased = formik.values.header.status == 4
+  const isClosed = formik.values.header.wip === 2
 
-  async function refetchForm(damageId) {
-    await getRequest({
-      extension: ProductModelingRepository.Rubber.get,
-      parameters: `_recordId=${damageId}`
-    }).then(res => {
-      formik.setValues({
-        ...res?.record,
-        startDate: formatDateFromApi(res?.record?.startDate),
-        endDate: formatDateFromApi(res?.record?.endDate)
-      })
-    })
-  }
-
-  const onPost = async () => {
-    await postRequest({
-      extension: ProductModelingRepository.Rubber.post,
-      record: JSON.stringify({
-        ...formik.values,
-        startDate: formatDateToApi(formik.values.startDate)
-      })
+  async function refetchForm(requestId) {
+    const { record } = await getRequest({
+      extension: IVReplenishementRepository.MatPlanning.get,
+      parameters: `_requestId=${requestId}`
     })
 
-    toast.success(platformLabels.Posted)
-    invalidate()
-
-    await refetchForm(formik.values.recordId)
-  }
-
-  async function onStart() {
-    const res = await postRequest({
-      extension: ProductModelingRepository.Rubber.start,
-      record: JSON.stringify(formik.values)
+    const { list } = await getRequest({
+      extension: IVReplenishementRepository.MatPlanningItem.qry,
+      parameters: `_mrpId=${requestId}`
     })
-    toast.success(platformLabels.Started)
-    invalidate()
-    await refetchForm(res.recordId)
-  }
 
-  function confirmation(dialogText, titleText, event) {
-    stack({
-      Component: ConfirmationDialog,
-      props: {
-        DialogText: dialogText,
-        okButtonAction: async () => {
-          await event()
-        },
-        fullScreen: false,
-        close: true
+    formik.setValues({
+      header: {
+        ...record,
+        date: formatDateFromApi(record?.date)
       },
-      width: 400,
-      height: 150,
-      title: titleText
+      items: list?.map((item, index) => {
+        return {
+          ...item,
+          id: index + 1,
+          seqNo: index + 1,
+          date: formatDateFromApi(item.date)
+        }
+      })
     })
+  }
+
+  async function onWorkFlow() {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.MatPlaning,
+        recordId: formik.values.header.recordId
+      },
+      width: 950,
+      height: 600,
+      title: labels.workflow
+    })
+  }
+
+  async function onReopen() {
+    await postRequest({
+      extension: IVReplenishementRepository.MatPlanning.reopen,
+      record: JSON.stringify({ ...formik.values.header, date: formatDateToApi(formik.values.header.date) })
+    })
+
+    toast.success(platformLabels.Reopened)
+    invalidate()
+    refetchForm(formik.values.header.recordId)
+  }
+
+  async function onClose() {
+    await postRequest({
+      extension: IVReplenishementRepository.MatPlanning.close,
+      record: JSON.stringify({ ...formik.values.header, date: formatDateToApi(formik.values.header.date) })
+    })
+    toast.success(platformLabels.Closed)
+    invalidate()
+    refetchForm(formik.values.header.recordId)
+  }
+
+  const onGenerate = async () => {
+    await postRequest({
+      extension: IVReplenishementRepository.MatPlanning.generate,
+      record: JSON.stringify({ ...formik.values.header, date: formatDateToApi(formik.values.header.date) })
+    })
+
+    toast.success(platformLabels.Generated)
+    invalidate()
+    refetchForm(formik.values.header.recordId)
   }
 
   const actions = [
     {
-      key: 'Locked',
-      condition: isPosted,
-      disabled: !editMode || isPosted
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed
     },
     {
-      key: 'Unlocked',
-      condition: !isPosted,
-      onClick: onPost,
-      disabled: !editMode || isPosted || !isReleased
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
     },
     {
-      key: 'Start',
-      condition: !isReleased,
-      onClick: () => {
-        confirmation(platformLabels.StartRecord, platformLabels.Confirmation, onStart)
-      },
-      disabled: !editMode || isReleased || isPosted
-    },
-    {
-      key: 'threeDPrinting',
+      key: 'RecordRemarks',
       condition: true,
-      onClick: () => {
-        stack({
-          Component: ThreeDPrintForm,
-          props: {
-            recordId: formik.values?.threeDPId,
-            labels
-          },
-          width: 750,
-          height: 650,
-          title: platformLabels.threeDPrinting
-        })
-      },
-      disabled: !formik.values.threeDPId
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlow,
+      disabled: !editMode
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
+    {
+      key: 'generate',
+      condition: true,
+      onClick: onGenerate,
+      disabled: !editMode || (editMode && !isReleased)
     }
   ]
 
@@ -186,26 +203,202 @@ export default function MatPlaningForm({ labels, access, recordId }) {
     }
   }, [])
 
+  const columns = [
+    {
+      component: 'textfield',
+      label: labels.sku,
+      name: 'sku',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.name,
+      name: 'itemName',
+      width: 150,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.onHand,
+      name: 'onhand',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.openPr,
+      name: 'openPR',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.openPo,
+      name: 'openPO',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.leadTime,
+      name: 'leadTime',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.safetyStock,
+      name: 'safetyStock',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.reorderPoint,
+      name: 'reorderPoint',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.min,
+      name: 'minStock',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.maxS,
+      name: 'maxStock',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.amcShortTerm,
+      name: 'amcShortTerm',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.amcLongTerm,
+      name: 'amcLongTerm',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.siteCoverageStock,
+      name: 'siteCoverageStock',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.totalCoverageStock,
+      name: 'totalStockCoverage',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.mu,
+      name: 'msRef',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.unitCost,
+      name: 'unitCost',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.totalCost,
+      name: 'totalCost',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.sugQty,
+      name: 'suggestedPRQty',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    }
+
+    // {
+    //   component: 'numberfield',
+    //   label: labels.reqQty,
+    //   name: 'qty',
+    //   width: 100,
+    //   props: {
+    //     decimalScale: 2
+    //   }
+    // }
+  ]
+
   return (
     <FormShell
-      resourceId={ResourceIds.Rubber}
-      functionId={SystemFunction.Rubber}
+      resourceId={ResourceIds.MaterialReqPlannings}
+      functionId={SystemFunction.MatPlaning}
       form={formik}
       maxAccess={maxAccess}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={isReleased || isPosted}
+      previewReport={editMode}
+      disabledSubmit={isReleased || isClosed}
     >
       <VertLayout>
-        <Grow>
+        <Fixed>
           <Grid container spacing={2}>
             <Grid item xs={4}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Rubber}`}
-                    name='dtId'
+                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MatPlaning}`}
+                    name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -214,55 +407,69 @@ export default function MatPlaningForm({ labels, access, recordId }) {
                     readOnly={editMode}
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    values={formik.values}
+                    values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId)
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
-                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                    error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
-                    name='date'
+                    name='header.date'
                     label={labels.date}
-                    value={formik.values?.date}
+                    value={formik.values?.header.date}
                     required
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('date', '')}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
+                    onClear={() => formik.setFieldValue('header.date', '')}
+                    error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='reference'
+                    name='header.reference'
                     label={labels.reference}
-                    value={formik?.values?.reference}
+                    value={formik?.values?.header.reference}
                     maxAccess={!editMode && maxAccess}
                     readOnly={editMode}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    onClear={() => formik.setFieldValue('header.reference', '')}
+                    error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
                   />
                 </Grid>
               </Grid>
             </Grid>
             <Grid item xs={4}>
               <CustomTextArea
-                name='notes'
+                name='header.notes'
                 label={labels.notes}
-                value={formik.values.notes}
+                value={formik.values.header.notes}
                 rows={3}
-                readOnly={isReleased || isPosted}
+                readOnly={isReleased || isClosed}
                 maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('notes', e.target.value)}
-                onClear={() => formik.setFieldValue('notes', '')}
-                error={formik.touched.notes && Boolean(formik.errors.notes)}
+                onChange={e => formik.setFieldValue('header.notes', e.target.value)}
+                onClear={() => formik.setFieldValue('header.notes', '')}
+                error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
               />
             </Grid>
           </Grid>
+        </Fixed>
+        <Grow>
+          <DataGrid
+            onChange={value => {
+              formik.setFieldValue('items', value)
+            }}
+            value={formik?.values?.items}
+            error={formik?.errors?.items}
+            columns={columns}
+            maxAccess={maxAccess}
+            name='items'
+            allowDelete={!isClosed}
+            allowAddNewLine={false}
+          />
         </Grow>
       </VertLayout>
     </FormShell>

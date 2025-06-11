@@ -30,7 +30,7 @@ const MatPlaning = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: IVReplenishementRepository.MatPlanning.page,
-    datasetId: ResourceIds.Rubber
+    datasetId: ResourceIds.MaterialReqPlannings
   })
 
   async function fetchGridData(options = {}) {
@@ -47,7 +47,7 @@ const MatPlaning = () => {
   const columns = [
     {
       field: 'dtRef',
-      headerName: labels.docType,
+      headerName: labels.documentType,
       flex: 1
     },
     {
@@ -73,7 +73,7 @@ const MatPlaning = () => {
     },
     {
       field: 'wipName',
-      headerName: labels.wipName,
+      headerName: labels.wip,
       flex: 1
     },
     {
@@ -112,7 +112,7 @@ const MatPlaning = () => {
       },
       width: 1300,
       height: 600,
-      title: labels?.matPlaning
+      title: labels?.materialRequestPlaning
     })
   }
 
