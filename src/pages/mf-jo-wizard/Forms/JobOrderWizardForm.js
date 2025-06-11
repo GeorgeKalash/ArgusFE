@@ -189,7 +189,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
       },
       props: {
         maxLength: 9,
-        decimalScale: 2,
+        decimalScale: 2
       }
     },
     {

@@ -145,18 +145,26 @@ const CustomComboBox = ({
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
       renderOption={(props, option) => {
         if (columnsInDropDown && columnsInDropDown.length > 0) {
+          const columnsWithGrid = columnsInDropDown.map(col => ({
+            ...col,
+            grid: col.width ?? 2
+          }))
+
+          const totalGrid = columnsWithGrid.reduce((sum, col) => sum + col.grid, 0)
+
           return (
             <Box>
               {props.id.endsWith('-0') && (
                 <li className={props.className} style={{ borderBottom: '1px solid #ccc' }}>
-                  {columnsInDropDown.map((header, i) => {
+                  {columnsWithGrid.map((header, i) => {
+                    const widthPercent = `${(header.grid / totalGrid) * 100}%`
+
                     return (
                       <Box
                         key={i}
                         sx={{
-                          flex: 1,
                           fontWeight: 'bold',
-                          width: header.width || 'auto',
+                          width: widthPercent,
                           fontSize: '0.7rem',
                           height: '15px',
                           display: 'flex'
@@ -169,9 +177,9 @@ const CustomComboBox = ({
                 </li>
               )}
               <li {...props}>
-                {columnsInDropDown.map((header, i) => {
+                {columnsWithGrid.map((header, i) => {
                   let displayValue = option[header.key]
-
+                  const widthPercent = `${(header.grid / totalGrid) * 100}%`
                   if (header?.type && header?.type === 'date' && displayValue) {
                     displayValue = formatDateDefault(displayValue)
                   }
@@ -180,8 +188,7 @@ const CustomComboBox = ({
                     <Box
                       key={i}
                       sx={{
-                        flex: 1,
-                        width: header.width || 'auto',
+                        width: widthPercent,
                         fontSize: '0.88rem',
                         height: '20px',
                         display: 'flex'
