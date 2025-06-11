@@ -86,7 +86,7 @@ const ThreeDDesign = () => {
     },
     {
       field: 'designerName',
-      headerName: labels.Drawer,
+      headerName: labels.designerName,
       flex: 1
     },
     {
@@ -116,7 +116,7 @@ const ThreeDDesign = () => {
     },
     {
       field: 'rsName',
-      headerName: labels.approvedStatus,
+      headerName: labels.releaseStatus,
       flex: 1
     },
     {

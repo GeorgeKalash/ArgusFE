@@ -97,11 +97,6 @@ const ThreeDPrinting = () => {
       flex: 1
     },
     {
-      field: 'machineRef',
-      headerName: labels.machineRef,
-      flex: 1
-    },
-    {
       field: 'setPcs',
       headerName: labels.threeDPrintPcs,
       flex: 1,

@@ -1083,7 +1083,7 @@ export const apiMappings = {
   [ResourceIds.ReleaseIndicators]: {
     type: COMBOBOX,
     endpoint: DocumentReleaseRepository.ReleaseIndicator.qry,
-    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    parameters: `_startAt=0&_pageSize=1000`,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [

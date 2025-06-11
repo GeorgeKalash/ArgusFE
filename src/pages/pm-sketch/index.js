@@ -97,6 +97,7 @@ const Sketch = () => {
     {
       field: 'metalPurity',
       headerName: labels.purity,
+      type: 'number',
       flex: 1
     },
     {
@@ -111,7 +112,7 @@ const Sketch = () => {
     },
     {
       field: 'rsName',
-      headerName: labels.approvalStatus,
+      headerName: labels.releaseStatus,
       flex: 1
     },
     {

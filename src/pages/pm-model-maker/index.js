@@ -83,13 +83,18 @@ const ModelMaker = () => {
       type: 'number'
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
+      field: 'productionLineName',
+      headerName: labels.productionLine,
       flex: 1
     },
     {
       field: 'rsName',
       headerName: labels.rsName,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     },
     {
