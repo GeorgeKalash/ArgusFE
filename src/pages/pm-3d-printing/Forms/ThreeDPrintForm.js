@@ -304,9 +304,9 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
                     label={labels.threeDD}
                     form={formik}
                     columnsInDropDown={[
-                      { key: 'reference', value: 'Reference', grid: 2 },
-                      { key: 'date', value: 'Date', type: 'date', grid: 2 },
-                      { key: 'designerRef', value: 'Designer', grid: 2 }
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'date', value: 'Date', type: 'date' },
+                      { key: 'designerRef', value: 'Designer' }
                     ]}
                     valueShow='threeDDRef'
                     maxAccess={maxAccess}

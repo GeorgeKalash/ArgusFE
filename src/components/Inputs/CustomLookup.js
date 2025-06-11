@@ -160,7 +160,7 @@ const CustomLookup = ({
                     </li>
                   )}
                   <li {...props}>
-                    {columnsInDropDown.map((header, i) => {
+                    {columnsWithGrid.map((header, i) => {
                       let displayValue = option[header.key]
 
                       if (header?.type && header?.type === 'date' && displayValue) {
