@@ -276,7 +276,28 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                           parameters: `_dtId=${newValue?.recordId}`
                         })
 
-                        formik.setFieldValue('productionLineId', record?.productionLineId || null)
+                        if (record?.productionLineId) {
+                          formik.setValues({
+                            ...formik.values,
+                            dtId: newValue?.recordId,
+                            productionLineId: record?.productionLineId,
+                            sketchId: null,
+                            sketchRef: '',
+                            sketchName: '',
+                            itemGroupId: null,
+                            itemGroupRef: '',
+                            itemGroupName: '',
+                            productionClassId: null,
+                            productionClassRef: '',
+                            productionClassName: '',
+                            productionStandardId: null,
+                            productionStandardRef: '',
+                            productionStandardName: '',
+                            collectionId: null,
+                            metalPurity: null,
+                            metalId: null
+                          })
+                        }
                       }
                     }}
                     readOnly={editMode}
@@ -310,7 +331,6 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    required
                     readOnly
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
