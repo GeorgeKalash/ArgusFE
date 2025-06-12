@@ -102,6 +102,7 @@ const PriceTab = ({ labels, maxAccess, store }) => {
           <GridToolbar onAdd={add} maxAccess={maxAccess} />
         </Fixed>
         <Table
+          name='price'
           columns={columns}
           gridData={data}
           rowId={['clientId', 'categoryId', 'currencyId', 'priceType']}

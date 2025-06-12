@@ -95,6 +95,7 @@ const RetailForm = ({ store, maxAccess }) => {
     <VertLayout>
       <Grow>
         <Table
+          name='retail'
           columns={rowColumns}
           gridData={{ list: data }}
           setData={setData}

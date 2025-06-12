@@ -390,7 +390,6 @@ const Table = ({
                   bottom: 0
                 }}
               >
-                {' '}
                 <IconButton
                   onClick={goToFirstPage}
                   disabled={page === 1}
@@ -424,7 +423,7 @@ const Table = ({
                   <RefreshIcon />
                 </IconButton>
                 {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
-                {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
+                {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}
                 {platformLabels.Of} {totalRecords}
               </Box>
               <Box>

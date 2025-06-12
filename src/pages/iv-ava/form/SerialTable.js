@@ -50,7 +50,6 @@ const SerialTable = ({ labels, obj, access }) => {
       flex: 1
     }
   ]
-  console.log(access)
 
   return (
     <VertLayout>

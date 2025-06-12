@@ -107,6 +107,7 @@ const LotForm = ({ labels, obj }) => {
           isLoading={false}
           pageSize={50}
           pagination={false}
+          maxAccess={maxAccess}
         />
       </Grow>
     </VertLayout>
