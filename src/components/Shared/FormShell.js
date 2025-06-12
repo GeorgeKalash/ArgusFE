@@ -201,7 +201,7 @@ export default function FormShell({
                 datasetId: action.datasetId
               },
               width: 1000,
-              height: 620,
+              height: 650,
               title: platformLabels.GeneralLedger
             })
           }
