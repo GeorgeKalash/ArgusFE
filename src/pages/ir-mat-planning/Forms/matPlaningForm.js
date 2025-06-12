@@ -44,6 +44,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
+      recordId,
       header: {
         recordId,
         dtId: null,
@@ -82,7 +83,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
     }
   })
 
-  const editMode = !!formik.values.header.recordId
+  const editMode = !!formik.values.recordId
   const isReleased = formik.values.header.status == 4
   const isClosed = formik.values.header.wip === 2
 
@@ -98,6 +99,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
     })
 
     formik.setValues({
+      recordId: record.recordId,
       header: {
         ...record,
         date: formatDateFromApi(record?.date)
@@ -118,7 +120,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
       Component: WorkFlow,
       props: {
         functionId: SystemFunction.MatPlaning,
-        recordId: formik.values.header.recordId
+        recordId: formik.values.recordId
       },
       width: 950,
       height: 600,
@@ -134,7 +136,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
 
     toast.success(platformLabels.Reopened)
     invalidate()
-    refetchForm(formik.values.header.recordId)
+    refetchForm(formik.values.recordId)
   }
 
   async function onClose() {
@@ -144,7 +146,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
     })
     toast.success(platformLabels.Closed)
     invalidate()
-    refetchForm(formik.values.header.recordId)
+    refetchForm(formik.values.recordId)
   }
 
   const onGenerate = async () => {
@@ -155,7 +157,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
 
     toast.success(platformLabels.Generated)
     invalidate()
-    refetchForm(formik.values.header.recordId)
+    refetchForm(formik.values.recordId)
   }
 
   const actions = [
@@ -386,7 +388,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
       actions={actions}
       editMode={editMode}
       previewReport={editMode}
-      disabledSubmit={isReleased || isClosed}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Fixed>
@@ -420,6 +422,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
                     name='header.date'
                     label={labels.date}
                     value={formik.values?.header.date}
+                    readOnly={isClosed}
                     required
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('header.date', null)}
@@ -447,7 +450,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
                 label={labels.notes}
                 value={formik.values.header.notes}
                 rows={3}
-                readOnly={isReleased || isClosed}
+                readOnly={isClosed}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.notes', e.target.value)}
                 onClear={() => formik.setFieldValue('header.notes', '')}
@@ -468,6 +471,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
             name='items'
             allowDelete={!isClosed}
             allowAddNewLine={false}
+            disabled={isClosed}
           />
         </Grow>
       </VertLayout>
