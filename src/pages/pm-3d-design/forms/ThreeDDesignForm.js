@@ -264,8 +264,20 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId || ''), changeDT(newValue)
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('dtId', newValue?.recordId || '')
+                      changeDT(newValue)
+
+                      formik.setFieldValue('productionLineId', null)
+
+                      if (newValue?.recordId) {
+                        const { record } = await getRequest({
+                          extension: ProductModelingRepository.DocumentTypeDefault.get,
+                          parameters: `_dtId=${newValue?.recordId}`
+                        })
+
+                        formik.setFieldValue('productionLineId', record?.productionLineId || null)
+                      }
                     }}
                     readOnly={editMode}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -286,6 +298,29 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
+                    endpointId={ManufacturingRepository.ProductionLine.qry}
+                    parameters={`_startAt=0&_pageSize=1000&_dtId=${formik.values.dtId}`}
+                    values={formik.values}
+                    name='productionLineId'
+                    label={labels.productionLine}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    displayFieldWidth={1}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    required
+                    readOnly
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('productionLineId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.productionLineId && formik.errors.productionLineId}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
                     datasetId={DataSets.THREED_DESIGN_SOURCE}
                     name='source'
                     label={labels.source}
@@ -302,14 +337,22 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
-                    endpointId={ProductModelingRepository.Sketch.snapshot2}
+                    endpointId={ProductModelingRepository.Sketch.snapshot3}
+                    parameters={{ _productionLineId: formik.values.productionLineId || 0 }}
                     name='sketchId'
                     required
                     label={labels.sketchRef}
                     secondDisplayField={false}
                     valueField='reference'
                     valueShow='sketchRef'
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'date', value: 'date', type: 'date' },
+                      { key: 'designerRef', value: 'designer Ref' },
+                      { key: 'designerName', value: 'designer Name', grid: 4 }
+                    ]}
                     form={formik}
+                    displayFieldWidth={2}
                     readOnly={isClosed}
                     onChange={(event, newValue) => {
                       formik.setValues({
@@ -336,24 +379,24 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={ProductModelingRepository.Designer.snapshot}
+                  <ResourceComboBox
+                    endpointId={ProductModelingRepository.Designer.qry}
                     name='designerId'
                     label={labels.designer}
-                    displayFieldWidth={2}
-                    valueField='reference'
-                    displayField='name'
-                    valueShow='designerRef'
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' },
+                      { key: 'typeName', value: 'Type' }
+                    ]}
                     readOnly={isClosed}
-                    secondValueShow='designerName'
-                    form={formik}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('designerId', newValue?.recordId || null),
-                        formik.setFieldValue('designerRef', newValue?.reference || ''),
-                        formik.setFieldValue('designerName', newValue?.name || '')
-                    }}
-                    errorCheck={'designerId'}
                     maxAccess={maxAccess}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('designerId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.designerId && Boolean(formik.errors.designerId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
