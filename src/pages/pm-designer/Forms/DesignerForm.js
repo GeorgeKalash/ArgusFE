@@ -12,6 +12,8 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function DesignerForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -25,14 +27,16 @@ export default function DesignerForm({ labels, maxAccess, recordId }) {
     initialValues: {
       recordId: null,
       reference: '',
-      name: ''
+      name: '',
+      type: '',
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      reference: yup.string().required()
+      reference: yup.string().required(),
+      type: yup.string().required(),
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -93,6 +97,22 @@ export default function DesignerForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.DESIGNER_TYPE}
+                name='type'
+                label={labels.type}
+                values={formik.values}
+                required
+                valueField='key'
+                displayField='value'
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('type', newValue?.key || null)
+                }}
+                error={formik.touched.type && Boolean(formik.errors.type)}
               />
             </Grid>
           </Grid>
