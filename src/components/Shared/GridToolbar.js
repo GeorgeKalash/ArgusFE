@@ -1,6 +1,6 @@
-import { Button, Grid, Tooltip, DialogActions } from '@mui/material'
+import { Grid, DialogActions } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ControlContext } from 'src/providers/ControlContext'
 import { getButtons } from './Buttons'
@@ -29,17 +29,26 @@ const GridToolbar = ({
   const { getRequest } = useContext(RequestsContext)
   const [searchValue, setSearchValue] = useState('')
   const { platformLabels } = useContext(ControlContext)
-  const [tooltip, setTooltip] = useState('')
   const [reportStore, setReportStore] = useState([])
+  const [zoomSpacing, setZoomSpacing] = useState(2)
+
+  useEffect(() => {
+    const updateZoomSpacing = () => {
+      const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom')) || 1
+      setZoomSpacing(zoom === 1 ? 2 : 4)
+    }
+
+    updateZoomSpacing()
+    window.addEventListener('resize', updateZoomSpacing)
+
+    return () => window.removeEventListener('resize', updateZoomSpacing)
+  }, [])
 
   const clear = () => {
     setSearchValue('')
     onSearch('')
     if (onSearchClear) onSearchClear()
   }
-
-  const handleButtonMouseEnter = text => setTooltip(text)
-  const handleButtonMouseLeave = () => setTooltip(null)
 
   const getReportLayout = async setReport => {
     setReportStore([])
@@ -74,34 +83,9 @@ const GridToolbar = ({
 
   return (
     <DialogActions sx={{ px: '0px !important', py: '4px !important', flexDirection: 'column' }}>
-      <style>
-        {`
-          .button-container {
-            position: relative;
-            display: inline-block;
-          }
-          .toast {
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333333ad;
-            color: white;
-            padding: 3px 7px;
-            border-radius: 7px;
-            opacity: 0;
-            transition: opacity 0.3s, top 0.3s;
-            z-index: 1;
-          }
-          .button-container:hover .toast {
-            opacity: 1;
-            top: -40px;
-          }
-        `}
-      </style>
       <Grid container spacing={2} sx={{ display: 'flex', px: 2, width: '100%', justifyContent: 'space-between' }}>
         <Grid item xs={previewReport ? 6 : 9}>
-          <Grid container spacing={4}>
+          <Grid container spacing={zoomSpacing}>
             {leftSection}
             {onAdd && addBtnVisible && (
               <Grid item sx={{ display: 'flex', justifyContent: 'flex-start' }}>
@@ -143,6 +127,7 @@ const GridToolbar = ({
                   return (
                     isVisible && (
                       <CustomButton
+                        key={button.key || index}
                         onClick={handleClick}
                         image={button.image}
                         tooltip={button.label}
