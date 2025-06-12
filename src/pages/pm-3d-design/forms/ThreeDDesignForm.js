@@ -276,7 +276,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                           parameters: `_dtId=${newValue?.recordId}`
                         })
 
-                        formik.setFieldValue('productionLineId', record?.productionLineId)
+                        formik.setFieldValue('productionLineId', record?.productionLineId || null)
                       }
                     }}
                     readOnly={editMode}
