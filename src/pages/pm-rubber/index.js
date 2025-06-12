@@ -61,6 +61,11 @@ const Rubber = () => {
 
   const columns = [
     {
+      field: 'dtRef',
+      headerName: labels.documentType,
+      flex: 1
+    },
+    {
       field: 'reference',
       headerName: labels.reference,
       flex: 1
@@ -72,20 +77,37 @@ const Rubber = () => {
       type: 'date'
     },
     {
+      field: 'startDate',
+      headerName: labels.startDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'endDate',
+      headerName: labels.endDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
       field: 'modelRef',
-      headerName: labels.modelRef,
+      headerName: labels.model,
       flex: 1
     },
     {
-      field: 'laborRef',
-      headerName: labels.laborRef,
+      field: 'laborName',
+      headerName: labels.labor,
       flex: 1
     },
     {
       field: 'pcs',
-      headerName: labels.silverPieces,
+      headerName: labels.rubberpcs,
       flex: 1,
       type: 'number'
+    },
+    {
+      field: 'productionLineName',
+      headerName: labels.productionLine,
+      flex: 1
     },
     {
       field: 'statusName',
@@ -142,6 +164,7 @@ const Rubber = () => {
           gridData={data}
           rowId={['recordId']}
           paginationParameters={paginationParameters}
+          deleteConfirmationType={'strict'}
           paginationType='api'
           refetch={refetch}
           onEdit={edit}
