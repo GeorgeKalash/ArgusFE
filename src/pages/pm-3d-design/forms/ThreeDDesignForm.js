@@ -278,6 +278,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
 
                         if (record?.productionLineId) {
                           formik.setValues({
+                            ...formik.values,
                             dtId: newValue?.recordId,
                             productionLineId: record?.productionLineId,
                             sketchId: null,
