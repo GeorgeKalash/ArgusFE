@@ -1,4 +1,4 @@
-import { FormControlLabel, Grid, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -6,21 +6,19 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
-export default function PVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
+export default function PVDocTypeDefaultsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -30,16 +28,15 @@ export default function PVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
 
   const { formik } = useForm({
     initialValues: {
-      dtId: dtId,
+      dtId: recordId,
       accountId: '',
       plantId: '',
-      recordId: dtId,
+      recordId,
       paymentMethod: '',
       cashAccountId: null,
       disableExpenseGrid: false
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       dtId: yup.string().required(' ')
@@ -50,7 +47,7 @@ export default function PVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
         record: JSON.stringify(obj)
       })
 
-      if (!dtId) {
+      if (!recordId) {
         formik.setFieldValue('recordId', obj.dtId)
       }
 
@@ -64,13 +61,13 @@ export default function PVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
   useEffect(() => {
     ;(async function () {
       try {
-        if (dtId) {
+        if (recordId) {
           const res = await getRequest({
             extension: FinancialRepository.FIDocTypeDefaults.get,
-            parameters: `_dtId=${dtId}`
+            parameters: `_dtId=${recordId}`
           })
 
-          formik.setValues({ ...res.record, recordId: dtId })
+          formik.setValues({ ...res.record, recordId: res.record.dtId })
         }
       } catch (exception) {}
     })()

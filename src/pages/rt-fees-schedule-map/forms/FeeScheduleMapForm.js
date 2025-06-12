@@ -37,7 +37,6 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
       scheduleId: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       corId: yup.string().required(),

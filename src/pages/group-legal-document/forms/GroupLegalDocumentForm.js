@@ -29,7 +29,6 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
       mandatory: false
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       groupId: yup.string().required(),

@@ -31,7 +31,6 @@ export default function AdjDocTypeDefaultsForm({ labels, maxAccess, recordId, fu
       cashAccountId: null,
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       dtId: yup.string().required()

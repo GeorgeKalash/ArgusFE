@@ -51,7 +51,6 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
       barcode: null,
       isInactive: false
     },
-    enableReinitialize: true,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
