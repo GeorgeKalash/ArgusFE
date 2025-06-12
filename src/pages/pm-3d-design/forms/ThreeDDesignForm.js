@@ -277,8 +277,6 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                         })
 
                         formik.setFieldValue('productionLineId', record?.productionLineId)
-                      } else {
-                        formik.setFieldValue('productionLineId', null)
                       }
                     }}
                     readOnly={editMode}
@@ -392,7 +390,7 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                       { key: 'name', value: 'Name' },
                       { key: 'typeName', value: 'Type' }
                     ]}
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     maxAccess={maxAccess}
                     values={formik.values}
                     onChange={(event, newValue) => {
