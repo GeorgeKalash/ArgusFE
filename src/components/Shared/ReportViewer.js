@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react'
-import { Autocomplete, Box, TextField } from '@mui/material'
+import { Autocomplete, Box, TextField, Menu, MenuItem } from '@mui/material'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
@@ -15,6 +15,9 @@ const ReportViewer = ({ resourceId }) => {
   const [selectedReport, setSelectedReport] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
   const [pdf, setPDF] = useState(null)
+  const [exportFormats, setExportFormats] = useState([])
+  const [formatIndex, setFormatIndex] = useState(0)
+  const [contextMenu, setContextMenu] = useState(null)
 
   const getReportLayout = () => {
     var parameters = `_resourceId=${resourceId}`
@@ -95,6 +98,24 @@ const ReportViewer = ({ resourceId }) => {
     generateReport({ _startAt: 0, _pageSize: 30, params: rpbParams, paramsDict: paramsDict })
   }
 
+  const handleContextMenu = event => {
+    event.preventDefault()
+    if (pdf) {
+      setContextMenu(contextMenu === null ? { mouseX: event.clientX - 2, mouseY: event.clientY - 4 } : null)
+    }
+  }
+
+  const handleCloseContextMenu = () => {
+    setContextMenu(null)
+  }
+
+  const handleOpenInNewTab = () => {
+    if (pdf) {
+      window.open(pdf, '_blank')
+    }
+    handleCloseContextMenu()
+  }
+
   return (
     <VertLayout>
       <Fixed>
@@ -133,9 +154,39 @@ const ReportViewer = ({ resourceId }) => {
         />
       </Fixed>
       {pdf && (
-        <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
-          <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
-        </Box>
+        <>
+          <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2, position: 'relative' }}>
+            <iframe
+              title={selectedReport?.layoutName}
+              src={pdf}
+              width='100%'
+              height='100%'
+              allowFullScreen
+              style={{ pointerEvents: 'auto' }}
+            />
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: 10,
+                cursor: 'context-menu'
+              }}
+              onContextMenu={handleContextMenu}
+            />
+          </Box>
+
+          <Menu
+            open={contextMenu !== null}
+            onClose={handleCloseContextMenu}
+            anchorReference='anchorPosition'
+            anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
+          >
+            <MenuItem onClick={handleOpenInNewTab}>Open in New Tab</MenuItem>
+          </Menu>
+        </>
       )}
     </VertLayout>
   )
