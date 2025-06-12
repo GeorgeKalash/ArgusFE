@@ -42,7 +42,7 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
     <Box
       ref={popperRef}
       sx={{
-        zIndex: '2 !important',
+        zIndex: '3 !important',
         visibility: open ? 'visible' : 'hidden',
         '& .MuiMultiSectionDigitalClock-root': {
           width: '200px'
@@ -52,6 +52,9 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
         },
         '& .MuiMenuItem-root': {
           paddingRight: '10px'
+        },
+        '& .MuiDateCalendar-root': {
+          height: 310
         },
         ...(isDateTimePicker && {
           '& .MuiDateCalendar-root': {
