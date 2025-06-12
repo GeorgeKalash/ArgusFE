@@ -43,7 +43,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
   })
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.PaymentVouchers.page
+    endpointId: FinancialRepository.PaymentVouchers.page3
   })
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
@@ -531,11 +531,11 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
                 form={formik}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Account Ref' },
-                  { key: 'name', value: 'Name' },
+                  { key: 'name', value: 'Name', grid: 4 },
                   { key: 'keywords', value: 'Keywords' }
                 ]}
                 firstFieldWidth={4}
-                displayFieldWidth={2}
+                displayFieldWidth={4}
                 filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')

@@ -1,7 +1,18 @@
-import { Button } from '@mui/material'
+import { Button, CircularProgress } from '@mui/material'
 import { useState } from 'react'
 
-const CustomButton = ({ onClick, label, image, color, border, disabled, tooltipText, style, ...props }) => {
+const CustomButton = ({
+  onClick,
+  label,
+  image,
+  color,
+  border,
+  disabled,
+  tooltipText,
+  viewLoader = false,
+  style,
+  ...props
+}) => {
   const [tooltip, setTooltip] = useState('')
 
   const handleButtonMouseEnter = () => {
@@ -36,12 +47,11 @@ const CustomButton = ({ onClick, label, image, color, border, disabled, tooltipT
             overflow: hidden;
             text-overflow: ellipsis;
             display: none;
-            }
+          }
           .button-container:hover .toast {
             opacity: 1;
             top: -40px;
             display: inline;
-          }
           }
         `}
       </style>
@@ -70,10 +80,12 @@ const CustomButton = ({ onClick, label, image, color, border, disabled, tooltipT
             lineHeight: 1.5,
             ...style
           }}
-          disabled={disabled}
+          disabled={disabled || viewLoader}
           {...props}
         >
-          {image ? (
+          {viewLoader ? (
+            <CircularProgress size={20} color='inherit' sx={{ color: 'black' }} />
+          ) : image ? (
             <img
               style={{
                 width: '100%',

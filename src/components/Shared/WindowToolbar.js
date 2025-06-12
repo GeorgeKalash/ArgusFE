@@ -1,11 +1,11 @@
 import { Box } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getButtons } from './Buttons'
-import CustomComboBox from '../Inputs/CustomComboBox'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomButton from '../Inputs/CustomButton'
+import ReportGenerator from './ReportGenerator'
 
 const WindowToolbar = ({
   onSave,
@@ -17,7 +17,6 @@ const WindowToolbar = ({
   isInfo,
   isCleared,
   onORD,
-  onGenerateReport,
   disabledSubmit,
   disabledSavedClear,
   disabledApply,
@@ -27,9 +26,10 @@ const WindowToolbar = ({
   isClosed = false,
   isPosted = false,
   resourceId,
-  setSelectedReport,
-  selectedReport,
   previewReport,
+  recordId,
+  form,
+  previewBtnClicked,
   actions = []
 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -80,21 +80,7 @@ const WindowToolbar = ({
     const combinedStore = firstStore ? [...firstStore2, ...secondStore] : [...secondStore]
 
     setReportStore(combinedStore)
-
-    if (combinedStore.length > 0) {
-      setSelectedReport(combinedStore[0])
-    }
   }
-  useEffect(() => {
-    const fetchReportLayout = async () => {
-      if (previewReport) {
-        await getReportLayout()
-        if (reportStore.length > 0) setSelectedReport(reportStore[0])
-      }
-    }
-
-    fetchReportLayout()
-  }, [previewReport])
 
   const functionMapping = {
     actions,
@@ -123,28 +109,16 @@ const WindowToolbar = ({
     <Box sx={{ padding: '8px !important' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
         {previewReport ? (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <CustomComboBox
-              label={'Select a report template'}
-              valueField='layoutName'
-              displayField='layoutName'
-              store={reportStore}
-              value={selectedReport}
-              onChange={(e, newValue) => {
-                setSelectedReport(newValue)
-              }}
-              sx={{ width: 250 }}
-              disableClearable
-            />
-            <CustomButton
-              style={{ ml: 1 }}
-              onClick={onGenerateReport}
-              label={platformLabels.Preview}
-              image={'preview.png'}
-              disabled={!selectedReport}
-              tooltipText={platformLabels.Preview}
-            />
-          </Box>
+          <ReportGenerator
+            previewReport={previewReport}
+            form={form}
+            resourceId={resourceId}
+            condition={previewReport}
+            reportStore={reportStore}
+            getReportLayout={getReportLayout}
+            recordId={recordId}
+            previewBtnClicked={previewBtnClicked}
+          />
         ) : (
           <Box></Box>
         )}
@@ -167,6 +141,7 @@ const WindowToolbar = ({
                     disabled={isDisabled}
                     image={button.image}
                     tooltipText={button.label}
+                    viewLoader={correspondingAction?.viewLoader}
                   />
                 )
               )

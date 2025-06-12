@@ -110,6 +110,20 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  [ResourceIds.Assemblies]: {
+    type: LOOKUP,
+    endpoint: ManufacturingRepository.Assembly.snapshot,
+    firstField: 'reference',
+    secondDisplayField: false,
+    valueOnSelection: 'recordId'
+  },
+  [ResourceIds.ProductionOrder]: {
+    type: LOOKUP,
+    endpoint: ManufacturingRepository.ProductionOrder.snapshot,
+    firstField: 'reference',
+    secondDisplayField: false,
+    valueOnSelection: 'recordId'
+  },
   [ResourceIds.Accounts]: {
     type: LOOKUP,
     endpoint: FinancialRepository.Account.snapshot,
@@ -1055,7 +1069,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-    [ResourceIds.PaymentReasons]: {
+  [ResourceIds.PaymentReasons]: {
     type: COMBOBOX,
     endpoint: FinancialRepository.PaymentReasons.qry,
     valueField: 'recordId',
@@ -1064,5 +1078,5 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  },
+  }
 }
