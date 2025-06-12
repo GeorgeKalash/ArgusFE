@@ -59,6 +59,11 @@ const Sketch = () => {
 
   const columns = [
     {
+      field: 'dtName',
+      headerName: labels.documentType,
+      flex: 1
+    },
+    {
       field: 'reference',
       headerName: labels.reference,
       flex: 1
@@ -68,6 +73,11 @@ const Sketch = () => {
       headerName: labels.date,
       flex: 1,
       type: 'date'
+    },
+    {
+      field: 'sourceName',
+      headerName: labels.sketchSource,
+      flex: 1
     },
     {
       field: 'designerName',
@@ -80,8 +90,24 @@ const Sketch = () => {
       flex: 1
     },
     {
-      field: 'sourceName',
-      headerName: labels.sketchSource,
+      field: 'collectionName',
+      headerName: labels.collection,
+      flex: 1
+    },
+    {
+      field: 'metalPurity',
+      headerName: labels.purity,
+      type: 'number',
+      flex: 1
+    },
+    {
+      field: 'productionClassName',
+      headerName: labels.productionClass,
+      flex: 1
+    },
+    {
+      field: 'productionStandardRef',
+      headerName: labels.standardClass,
       flex: 1
     },
     {
@@ -90,13 +116,13 @@ const Sketch = () => {
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
+      field: 'wipName',
+      headerName: labels.wip,
       flex: 1
     },
     {
-      field: 'wipName',
-      headerName: labels.wip,
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     }
   ]
@@ -150,6 +176,7 @@ const Sketch = () => {
           onEdit={edit}
           onDelete={del}
           isLoading={false}
+          deleteConfirmationType={'strict'}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
