@@ -123,7 +123,7 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
       component: 'numberfield',
       label: labels.fullCapacity,
       name: 'fullCapacityWgtPerHr',
-      props: { decimalScale: 2, maxLength: 14 }
+      props: { decimalScale: 2, maxLength: 9 }
     },
     {
       component: 'numberfield',
@@ -155,6 +155,7 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
               <Grid item xs={8}>
                 <ResourceLookup
                   endpointId={InventoryRepository.Item.snapshot}
+                  parameters={{ _size: 30, _startAt: 0, _categoryId: 0, _msId: 0 }}
                   name='itemId'
                   label={labels.sku}
                   valueField='sku'
@@ -201,8 +202,7 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
             error={formik.errors.data}
             name='data'
             maxAccess={maxAccess}
-
-            // initialValues={formik.initialValues.data[0]}
+            initialValues={formik.initialValues.data[0]}
           />
         </Grow>
       </VertLayout>
