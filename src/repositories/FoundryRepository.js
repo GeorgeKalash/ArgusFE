@@ -18,6 +18,7 @@ export const FoundryRepository = {
     post: service + 'postWAX',
     unpost: service + 'unpostWAX',
     close: service + 'closeWAX',
+    open: service + 'openWAX',
     reopen: service + 'reopenWAX'
   },
   WaxJob: {

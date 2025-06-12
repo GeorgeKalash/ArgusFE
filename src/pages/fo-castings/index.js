@@ -108,8 +108,7 @@ const FoCastings = () => {
       props: {
         labels,
         access,
-        recordId,
-        invalidate
+        recordId
       },
       width: 1150,
       height: 700,

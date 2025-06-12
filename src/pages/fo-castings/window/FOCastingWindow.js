@@ -12,7 +12,7 @@ const FOCastingWindow = ({ recordId, access, labels }) => {
   const tabs = [
     { label: labels.castings },
     { label: labels.disassembly, disabled: !store.recordId },
-    { label: labels.job, disabled: !store.recordId }
+    { label: labels.jobs, disabled: !store.recordId }
   ]
 
   return (
