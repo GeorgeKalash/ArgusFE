@@ -130,6 +130,7 @@ export default function SyncPurchaseTrx({ _labels, access }) {
                 label={platformLabels.batch}
                 valueField='reference'
                 required
+                displayFieldWidth={2}
                 displayField='name'
                 valueShow='batchRef'
                 secondValueShow='batchName'
