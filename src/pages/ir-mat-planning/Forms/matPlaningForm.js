@@ -287,7 +287,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
     },
     {
       component: 'numberfield',
-      label: labels.maxS,
+      label: labels.max,
       name: 'maxStock',
       width: 100,
       props: {
@@ -365,17 +365,16 @@ export default function MatPlaningForm({ labels, access, recordId }) {
       props: {
         readOnly: true
       }
+    },
+    {
+      component: 'numberfield',
+      label: labels.reqQty,
+      name: 'qty',
+      width: 100,
+      props: {
+        decimalScale: 2
+      }
     }
-
-    // {
-    //   component: 'numberfield',
-    //   label: labels.reqQty,
-    //   name: 'qty',
-    //   width: 100,
-    //   props: {
-    //     decimalScale: 2
-    //   }
-    // }
   ]
 
   return (
@@ -423,7 +422,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
                     value={formik.values?.header.date}
                     required
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('header.date', '')}
+                    onClear={() => formik.setFieldValue('header.date', null)}
                     error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
                     maxAccess={maxAccess}
                   />

@@ -546,21 +546,16 @@ export function DataGrid({
     )
   }
 
-  const gridWidth = gridContainerRef?.current?.offsetWidth
-  console.log('Grid width in pixels:', gridWidth)
+  const gridWidth = gridContainerRef?.current?.offsetWidth - 2
 
   const totalWidth =
-    columns.filter(col => col?.width !== undefined)?.reduce((sum, col) => sum + col.width, 0) + (allowDelete ? 50 : 0)
+    allColumns.filter(col => col?.width !== undefined)?.reduce((sum, col) => sum + col.width, 0) +
+    (allowDelete ? 50 : 0)
 
-  console.log('Total width:', totalWidth) // Example output: 350
-
-  const widthPlus = totalWidth > 50 && gridWidth > totalWidth ? (gridWidth - totalWidth) / allColumns?.length : 0
-
-  console.log('gridWidth', gridWidth)
-  console.log('totalWidth', totalWidth)
-
-  console.log('length', allColumns?.length)
-  console.log('widthPlus', widthPlus)
+  const widthPlus =
+    totalWidth > 0 && allColumns?.length > 0 && gridWidth > totalWidth
+      ? (gridWidth - totalWidth) / allColumns?.length
+      : 0
 
   const columnDefs = [
     ...allColumns.map(column => ({
@@ -568,6 +563,7 @@ export function DataGrid({
       ...{ width: column.width + widthPlus },
       field: column.name,
       headerName: column.label || column.name,
+      headerTooltip: column.label,
       editable: !disabled,
       flex: column.flex || (!column.width && 1),
       sortable: false,
@@ -817,6 +813,7 @@ export function DataGrid({
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}
               onCellEditingStopped={onCellEditingStopped}
+              enableBrowserTooltips={true}
             />
           )}
         </Box>
