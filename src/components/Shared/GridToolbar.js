@@ -35,7 +35,7 @@ const GridToolbar = ({
   useEffect(() => {
     const updateZoomSpacing = () => {
       const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom')) || 1
-      setZoomSpacing(zoom === 1 ? 2 : 4)
+      setZoomSpacing(zoom === 1 ? 2 : 5)
     }
 
     updateZoomSpacing()
