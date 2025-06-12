@@ -277,6 +277,27 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                         })
 
                         formik.setFieldValue('productionLineId', record?.productionLineId || null)
+                        if (record?.productionLineId) {
+                          formik.setValues({
+                            dtId: newValue?.recordId,
+                            productionLineId: record?.productionLineId,
+                            sketchId: null,
+                            sketchRef: '',
+                            sketchName: '',
+                            itemGroupId: null,
+                            itemGroupRef: '',
+                            itemGroupName: '',
+                            productionClassId: null,
+                            productionClassRef: '',
+                            productionClassName: '',
+                            productionStandardId: null,
+                            productionStandardRef: '',
+                            productionStandardName: '',
+                            collectionId: null,
+                            metalPurity: null,
+                            metalId: null
+                          })
+                        }
                       }
                     }}
                     readOnly={editMode}
