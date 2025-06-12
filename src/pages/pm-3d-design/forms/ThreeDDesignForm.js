@@ -310,7 +310,6 @@ export default function ThreeDDesignForm({ labels, access, recordId }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    required
                     readOnly
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
