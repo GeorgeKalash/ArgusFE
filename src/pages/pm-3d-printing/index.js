@@ -151,8 +151,8 @@ const ThreeDPrinting = () => {
         recordId,
         maxAccess: access
       },
-      width: 700,
-      height: 650,
+      width: 1000,
+      height: 750,
       title: labels.ThreeDPrint
     })
   }

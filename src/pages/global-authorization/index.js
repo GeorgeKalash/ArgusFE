@@ -100,7 +100,7 @@ const GlobalAuthorization = () => {
         invalidate,
         resourceId: ResourceIds.GlobalAuthorization
       },
-      width: 500,
+      width: 800,
       height: 600,
       title: labels.fieldGlobal
     })

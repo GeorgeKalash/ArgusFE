@@ -1,21 +1,21 @@
-import { Grow } from '@mui/material'
-import React, { useContext } from 'react'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import toast from 'react-hot-toast'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import { ControlContext } from 'src/providers/ControlContext'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { useWindow } from 'src/windows'
+import { useContext } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
+import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
-import PurchaseOrderForm from './forms/PurchaseOrderForm'
+import toast from 'react-hot-toast'
+import { useWindow } from 'src/windows'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import ReturnOnInvoiceForm from './forms/ReturnOnInvoiceForm'
 
-const PuTrx = () => {
+const ReturnOnInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -30,19 +30,11 @@ const PuTrx = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PurchaseRepository.PurchaseOrder.page,
-    datasetId: ResourceIds.PurchaseTransactions,
+    endpointId: SaleRepository.ReturnOnInvoice.page,
+    datasetId: ResourceIds.ReturnOnInvoice,
     filter: {
       filterFn: fetchWithFilter
     }
-  })
-
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.PurchaseOrder,
-    action: async () => {
-      openForm()
-    },
-    hasDT: true
   })
 
   const columns = [
@@ -52,64 +44,63 @@ const PuTrx = () => {
       flex: 1
     },
     {
+      field: 'dtName',
+      headerName: labels.docType,
+      flex: 1
+    },
+    {
       field: 'date',
       headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
-      field: 'vendorName',
-      headerName: labels.vendor,
+      field: 'invoiceRef',
+      headerName: labels.invoice,
       flex: 1
     },
     {
-      field: 'currencyName',
+      field: 'clientRef',
+      headerName: labels.client,
+      flex: 1
+    },
+    {
+      field: 'clientName',
+      headerName: labels.clientName,
+      flex: 1
+    },
+    {
+      field: 'currencyRef',
       headerName: labels.currency,
       flex: 1
     },
     {
-      field: 'volume',
-      headerName: labels.volume,
+      field: 'amount',
+      headerName: labels.amount,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'pcs',
+      headerName: labels.pcs,
       flex: 1,
       type: 'number'
     },
     {
       field: 'qty',
-      headerName: labels.qty,
+      headerName: labels.totalQty,
       flex: 1,
       type: 'number'
-    },
-    {
-      field: 'amount',
-      headerName: labels.net,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'description',
-      headerName: labels.description,
-      flex: 2
     },
     {
       field: 'statusName',
       headerName: labels.status,
       flex: 1
     },
-
     {
-      field: 'dsName',
-      headerName: labels.deliveryStatus,
-      flex: 1
-    },
-    {
-      field: 'rsName',
-      headerName: labels.releaseStatus,
-      flex: 1
-    },
-    {
-      field: 'wipName',
-      headerName: labels.wip,
-      flex: 1
+      field: 'isVerified',
+      headerName: labels.isVerified,
+      type: 'checkbox'
     }
   ]
 
@@ -117,8 +108,8 @@ const PuTrx = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: PurchaseRepository.PurchaseOrder.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortby=recordId&&_params=${params}`
+      extension: SaleRepository.ReturnOnInvoice.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -127,37 +118,43 @@ const PuTrx = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
       return await getRequest({
-        extension: PurchaseRepository.PurchaseOrder.snapshot,
+        extension: SaleRepository.ReturnOnInvoice.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
-  const edit = obj => {
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.ReturnOnInvoice,
+    action: openForm,
+    hasDT: true
+  })
+
+  const add = async () => {
+    proxyAction()
+  }
+
+  const editRET = obj => {
     openForm(obj?.recordId)
   }
 
   async function openForm(recordId) {
     stack({
-      Component: PurchaseOrderForm,
+      Component: ReturnOnInvoiceForm,
       props: {
         labels,
-        recordId,
-        access
+        access,
+        recordId
       },
-      width: 1330,
-      height: 720,
-      title: labels.purchaseOrder
+      width: 1300,
+      height: 730,
+      title: labels.returnOnInvoice
     })
   }
 
-  const add = async () => {
-    await proxyAction()
-  }
-
-  const del = async obj => {
+  const delRET = async obj => {
     await postRequest({
-      extension: PurchaseRepository.PurchaseOrder.del,
+      extension: SaleRepository.ReturnOnInvoice.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -167,7 +164,7 @@ const PuTrx = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'PUORD'} filterBy={filterBy} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'SARET'} />
       </Fixed>
       <Grow>
         <Table
@@ -175,19 +172,19 @@ const PuTrx = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={edit}
-          onDelete={del}
+          onEdit={editRET}
+          refetch={refetch}
+          onDelete={delRET}
           deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
-          paginationParameters={paginationParameters}
-          refetch={refetch}
-          paginationType='api'
           maxAccess={access}
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default PuTrx
+export default ReturnOnInvoice
