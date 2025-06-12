@@ -15,8 +15,6 @@ const ReportViewer = ({ resourceId }) => {
   const [selectedReport, setSelectedReport] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
   const [pdf, setPDF] = useState(null)
-  const [exportFormats, setExportFormats] = useState([])
-  const [formatIndex, setFormatIndex] = useState(0)
   const [contextMenu, setContextMenu] = useState(null)
 
   const getReportLayout = () => {
