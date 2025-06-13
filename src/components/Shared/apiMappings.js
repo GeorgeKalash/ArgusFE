@@ -1100,5 +1100,12 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
+  },
+  [ResourceIds.FoWaxes]: {
+    type: LOOKUP,
+    endpoint: FoundryRepository.Wax.snapshot,
+    firstField: 'reference',
+    secondDisplayField: false,
+    valueOnSelection: 'recordId'
   }
 }

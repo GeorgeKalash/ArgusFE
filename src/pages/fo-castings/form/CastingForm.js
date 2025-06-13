@@ -18,12 +18,16 @@ import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import toast from 'react-hot-toast'
 
-export default function CastingForm({ recordId, access, labels }) {
+export default function CastingForm({ store, setStore, access, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
+  const recordId = store?.recordId
+  const [recal, setRecal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Casting,
@@ -46,6 +50,7 @@ export default function CastingForm({ recordId, access, labels }) {
       status: 1,
       date: new Date(),
       waxId: null,
+      waxRef: '',
       grossWgt: null,
       mouldWgt: null,
       rmWgt: null,
@@ -65,7 +70,7 @@ export default function CastingForm({ recordId, access, labels }) {
       metalColorId: null,
       stdLossRate: null,
       factor: null,
-      scrapWgt: null
+      scrapWgt: 0
     },
     enableReinitialize: false,
     validateOnChange: true,
@@ -78,7 +83,6 @@ export default function CastingForm({ recordId, access, labels }) {
       factor: yup.number().required(),
       stdLossRate: yup.number().required(),
       laborId: yup.number().required(),
-      groddWgt: yup.number().required(),
       grossWgt: yup.number().max(9999999.999).required(),
       rmWgt: yup.number().max(9999999.999).required(),
       mouldWgt: yup.number().max(9999999.999).required(),
@@ -91,13 +95,64 @@ export default function CastingForm({ recordId, access, labels }) {
       lossVariationPct: yup.number().max(100).required(),
       lossPct: yup.number().max(100).required()
     }),
-    onSubmit: async obj => {}
+    onSubmit: async obj => {
+      const res = await postRequest({
+        extension: FoundryRepository.Casting.set,
+        record: JSON.stringify({
+          ...obj,
+          date: obj?.date ? formatDateToApi(obj?.date) : null
+        })
+      })
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: res?.recordId
+      }))
+      invalidate()
+      toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
+      refetchForm(res?.recordId)
+    }
   })
 
   const editMode = !!formik.values.recordId
   const isCancelled = formik.values.status === -1
   const isPosted = formik.values.status === 3
-  const actions = []
+  console.log('check formik', formik)
+
+  const suggestedWgt = recal
+    ? ((Number(formik?.values?.netWgt) || 0) * (Number(formik?.values?.factor) || 0)).toFixed(3)
+    : formik?.values?.suggestedWgt
+
+  const netInputWgt = recal
+    ? ((Number(formik?.values?.inputWgt) || 0) + (Number(formik?.values?.rmWgt) || 0)).toFixed(3)
+    : formik?.values?.netInputWgt
+
+  const loss = recal ? ((netInputWgt || 0) - (Number(formik?.values?.outputWgt) || 0)).toFixed(3) : formik?.values?.loss
+
+  const lossPct = recal ? ((100 * loss) / (netInputWgt || 0)).toFixed(3) : formik?.values?.lossPct
+
+  const lossVariationPct = recal
+    ? (lossPct - (Number(formik?.values?.stdLossRate) || 0)).toFixed(3)
+    : formik?.values?.lossVariationPct
+
+  const actions = [
+    {
+      key: 'Locked',
+      condition: isPosted,
+      disabled: true
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode || isCancelled
+    },
+    {
+      key: 'Cancel',
+      condition: true,
+      onClick: onCancel,
+      disabled: !editMode || isCancelled || isPosted
+    }
+  ]
 
   async function getfactorStdLoss(metalId, metalColorId) {
     if (!metalId && !metalColorId) return
@@ -109,6 +164,7 @@ export default function CastingForm({ recordId, access, labels }) {
 
     return res?.record
   }
+
   async function getWaxInfo(waxId) {
     if (!waxId) return
 
@@ -119,6 +175,84 @@ export default function CastingForm({ recordId, access, labels }) {
 
     return res?.record
   }
+
+  async function onPost() {
+    await postRequest({
+      extension: FoundryRepository.Casting.post,
+      record: JSON.stringify({
+        ...formik.values,
+        date: formatDateToApi(formik.values.date)
+      })
+    })
+    toast.success(platformLabels.Posted)
+    invalidate()
+    refetchForm(formik.values.recordId)
+    setStore(prevStore => ({
+      ...prevStore,
+      isPosted: true
+    }))
+  }
+
+  async function onCancel() {
+    await postRequest({
+      extension: FoundryRepository.Casting.cancel,
+      record: JSON.stringify({
+        ...formik.values,
+        date: formatDateToApi(formik.values.date)
+      })
+    })
+    toast.success(platformLabels.Cancelled)
+    invalidate()
+    refetchForm(formik.values.recordId)
+    setStore(prevStore => ({
+      ...prevStore,
+      isCancelled: true
+    }))
+  }
+
+  async function refetchForm(recordId) {
+    if (!recordId) return
+
+    const res = await getRequest({
+      extension: FoundryRepository.Casting.get,
+      parameters: `_recordId=${recordId}`
+    })
+    const waxInfo = await getWaxInfo(res?.record?.recordId)
+    const factorStdLoss = await getfactorStdLoss(waxInfo?.metalId, waxInfo?.metalColorId)
+    formik.setValues({
+      ...res?.record,
+      date: formatDateFromApi(res?.record?.date),
+      grossWgt: res?.record?.grossWgt.toFixed(3),
+      rmWgt: res?.record?.rmWgt.toFixed(3),
+      mouldWgt: res?.record?.mouldWgt.toFixed(3),
+      netWgt: res?.record?.netWgt.toFixed(3),
+      suggestedWgt: res?.record?.suggestedWgt.toFixed(3),
+      inputWgt: res?.record?.inputWgt.toFixed(3),
+      netInputWgt: res?.record?.netInputWgt.toFixed(3),
+      outputWgt: res?.record?.outputWgt.toFixed(3),
+      loss: res?.record?.loss.toFixed(3),
+      lossPct: res?.record?.lossPct.toFixed(3),
+      lossVariationPct: res?.record?.lossVariationPct.toFixed(3),
+      scrapWgt: res?.record?.scrapWgt.toFixed(3),
+      factor: factorStdLoss?.rate || 0,
+      stdLossRate: factorStdLoss?.stdLossRate || 0,
+      mouldId: waxInfo?.mouldId || null,
+      metalId: waxInfo?.metalId || null,
+      metalColorId: waxInfo?.metalColorId || null
+    })
+  }
+
+  useEffect(() => {
+    formik.setFieldValue('suggestedWgt', suggestedWgt || 0)
+    formik.setFieldValue('loss', loss || 0)
+    formik.setFieldValue('lossPct', lossPct || 0)
+    formik.setFieldValue('lossVariationPct', lossVariationPct || 0)
+    formik.setFieldValue('netInputWgt', netInputWgt || 0)
+  }, [suggestedWgt, loss, lossPct, lossVariationPct])
+
+  useEffect(() => {
+    refetchForm(recordId)
+  }, [])
 
   return (
     <FormShell
@@ -189,12 +323,12 @@ export default function CastingForm({ recordId, access, labels }) {
                     <ResourceLookup
                       endpointId={FoundryRepository.Wax.open}
                       name='waxId'
-                      readOnly={isCancelled || isPosted}
+                      readOnly={editMode}
                       label={labels.wax}
                       secondDisplayField={false}
-                      valueField='reference'
-                      displayField='reference'
-                      valueShow='reference'
+                      valueField='waxRef'
+                      displayField='waxRef'
+                      valueShow='waxRef'
                       columnsInDropDown={[
                         { key: 'reference', value: 'Reference' },
                         { key: 'mouldRef', value: 'Mould' },
@@ -215,6 +349,7 @@ export default function CastingForm({ recordId, access, labels }) {
                         formik.setFieldValue('metalId', newValue?.metalId || null)
                         formik.setFieldValue('metalColorId', newValue?.metalColorId || null)
                         formik.setFieldValue('lineId', newValue?.lineId || null)
+                        formik.setFieldValue('waxRef', newValue?.reference || null)
                         formik.setFieldValue('waxId', newValue?.recordId || null)
                       }}
                       errorCheck={'waxId'}
@@ -269,9 +404,7 @@ export default function CastingForm({ recordId, access, labels }) {
                       values={formik.values}
                       maxAccess={maxAccess}
                       onChange={async (event, newValue) => {
-                        // formik.setFieldValue('metalColorId', newValue?.recordId || null)
-                        // const metalSetting = await getMetalSetting(formik.values?.metalId, newValue?.recordId)
-                        // formik.setFieldValue('factor', metalSetting?.rate || 0)
+                        formik.setFieldValue('metalColorId', newValue?.recordId || null)
                       }}
                       error={formik.touched?.metalColorId && Boolean(formik.errors?.metalColorId)}
                     />
@@ -284,7 +417,6 @@ export default function CastingForm({ recordId, access, labels }) {
                       required
                       readOnly
                       onChange={e => {
-                        formik.setFieldValue('suggestedWgt', (formik.values.netWgt || 0) * (e.target.value || 0) || 0)
                         formik.setFieldValue('factor', e.target.value)
                       }}
                       onClear={() => formik.setFieldValue('factor', 0)}
@@ -299,10 +431,6 @@ export default function CastingForm({ recordId, access, labels }) {
                       required
                       readOnly={isCancelled || isPosted}
                       onChange={e => {
-                        formik.setFieldValue(
-                          'lossVariationPct',
-                          (formik.values.lossPct || 0) - (e.target.value || 0) || 0
-                        )
                         formik.setFieldValue('stdLossRate', e.target.value)
                       }}
                       onClear={() => formik.setFieldValue('stdLossRate', 0)}
@@ -408,7 +536,7 @@ export default function CastingForm({ recordId, access, labels }) {
                     <CustomNumberField
                       name='suggestedWgt'
                       label={labels.suggestedWgt}
-                      value={formik.values.suggestedWgt}
+                      value={suggestedWgt}
                       required
                       readOnly
                       onChange={e => formik.setFieldValue('suggestedWgt', e.target.value)}
@@ -424,9 +552,8 @@ export default function CastingForm({ recordId, access, labels }) {
                       required
                       readOnly={isPosted || isCancelled}
                       onChange={e => {
+                        setRecal(true)
                         formik.setFieldValue('inputWgt', e.target.value)
-                        let netInput = (e.target.value || 0) + (formik.values.rmWgt || 0)
-                        formik.setFieldValue('netInputWgt', netInput || 0)
                       }}
                       onClear={() => formik.setFieldValue('inputWgt', 0)}
                       error={formik.touched.inputWgt && Boolean(formik.errors.inputWgt)}
@@ -440,10 +567,6 @@ export default function CastingForm({ recordId, access, labels }) {
                       required
                       readOnly
                       onChange={e => {
-                        formik.setFieldValue(
-                          'loss',
-                          (formik.values.netInputWgt || 0) - (formik.values.outputWgt || 0) || 0
-                        )
                         formik.setFieldValue('netInputWgt', e.target.value)
                       }}
                       onClear={() => formik.setFieldValue('netInputWgt', 0)}
@@ -458,10 +581,7 @@ export default function CastingForm({ recordId, access, labels }) {
                       required
                       readOnly={isPosted || isCancelled}
                       onChange={e => {
-                        var loss = (formik.values.netInputWgt || 0) - (e.target.value || 0)
-                        formik.setFieldValue('loss', loss || 0)
-
-                        //formik.setFieldValue('outputWgtBB', loss||0)
+                        setRecal(true)
                         formik.setFieldValue('outputWgt', e.target.value)
                       }}
                       onClear={() => formik.setFieldValue('outputWgt', 0)}
@@ -472,14 +592,10 @@ export default function CastingForm({ recordId, access, labels }) {
                     <CustomNumberField
                       name='loss'
                       label={labels.loss}
-                      value={formik.values.loss}
+                      value={loss}
                       required
                       readOnly
                       onChange={e => {
-                        formik.setFieldValue(
-                          'lossPct',
-                          (100 * (formik.values.loss || 0)) / (formik.values.netInputWgt || 0) || 0
-                        )
                         formik.setFieldValue('loss', e.target.value)
                       }}
                       onClear={() => formik.setFieldValue('loss', 0)}
@@ -490,14 +606,10 @@ export default function CastingForm({ recordId, access, labels }) {
                     <CustomNumberField
                       name='lossPct'
                       label={labels.lossPct}
-                      value={formik.values.lossPct}
+                      value={lossPct}
                       required
                       readOnly
                       onChange={e => {
-                        formik.setFieldValue(
-                          'lossVariationPct',
-                          (formik.values.lossPct || 0) - (formik.values.stdLossRate || 0) || 0
-                        )
                         formik.setFieldValue('lossPct', e.target.value)
                       }}
                       onClear={() => formik.setFieldValue('lossPct', 0)}
@@ -508,7 +620,7 @@ export default function CastingForm({ recordId, access, labels }) {
                     <CustomNumberField
                       name='lossVariationPct'
                       label={labels.lossVariation}
-                      value={formik.values.lossVariationPct}
+                      value={lossVariationPct}
                       required
                       readOnly
                       onChange={e => formik.setFieldValue('lossVariationPct', e.target.value)}
