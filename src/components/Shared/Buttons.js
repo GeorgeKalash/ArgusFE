@@ -102,6 +102,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Received',
+    label: platformLabels.Received,
+    color: '#D3D3D3',
+    image: 'received.png',
+    main: false
+  },
+  {
     key: 'Cancel',
     label: platformLabels.Cancel,
     color: '#0A4164',
@@ -397,6 +404,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'ImportAll',
+    label: platformLabels.importAll,
+    color: '#000',
+    image: 'importAll.png',
+    main: false
+  },
+  {
     key: 'Lock',
     label: platformLabels.Lock,
     color: '#231f20',
@@ -436,6 +450,20 @@ export const getButtons = platformLabels => [
     label: platformLabels.Metals,
     color: '#ADD8E6',
     image: 'metals-icon.png',
+    main: false
+  },
+  {
+    key: 'Verify',
+    label: platformLabels.Verify,
+    color: '#047DFA',
+    image: 'checkmark-icon.png',
+    main: false
+  },
+  {
+    key: 'Unverify',
+    label: platformLabels.Unverify,
+    color: '#047DFA',
+    image: 'unverify-icon.png',
     main: false
   },
   {
@@ -580,20 +608,6 @@ export const getButtons = platformLabels => [
     key: 'SHP',
     label: platformLabels.shp,
     color: '#231f20',
-    main: false
-  },
-  {
-    key: 'Verify',
-    label: platformLabels.Verify,
-    color: '#047DFA',
-    image: 'checkmark-icon.png',
-    main: false
-  },
-  {
-    key: 'Unverify',
-    label: platformLabels.Unverify,
-    color: '#047DFA',
-    image: 'unverify-icon.png',
     main: false
   }
 ]
