@@ -31,13 +31,21 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { getStorageData } from 'src/storage/storage'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function InwardSettlementForm({ labels, recordId, access, plantId, cashAccountId, dtId }) {
+export default function InwardSettlementForm({ recordId, plantId, cashAccountId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const userId = getStorageData('userData').userId
   const [mismatchedFields, setMismatchedFields] = useState([])
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.InwardSettlement
+  })
+
+  useSetWindow({ title: labels.InwardSettlement, window })
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.InwardSettlement.snapshot

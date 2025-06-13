@@ -107,15 +107,11 @@ const CreditInvoice = () => {
     stack({
       Component: CreditInvoiceForm,
       props: {
-        _labels,
-        access,
         plantId,
         userData,
         cashAccountId,
         recordId
-      },
-      width: 1000,
-      title: _labels.creditInvoice
+      }
     })
   }
 

@@ -8,7 +8,7 @@ import { useForm } from 'src/hooks/form'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 import * as yup from 'yup'
 
-export default function SelectAgent({
+const SelectAgent = ({
   labels,
   maxAccess,
   setData,
@@ -23,7 +23,7 @@ export default function SelectAgent({
     agentDeliveryMode
   },
   window
-}) {
+}) => {
   const { formik } = useForm({
     initialValues: {
       agentCode,
@@ -87,3 +87,8 @@ export default function SelectAgent({
     </FormShell>
   )
 }
+
+SelectAgent.width = 500
+SelectAgent.height = 200
+
+export default SelectAgent

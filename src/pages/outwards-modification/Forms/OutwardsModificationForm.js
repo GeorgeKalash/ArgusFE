@@ -26,14 +26,22 @@ import { useInvalidate } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function OutwardsModificationForm({ access, labels, recordId }) {
+export default function OutwardsModificationForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const [resetForm, setResetForm] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [validSubmit, setValidSubmit] = useState(false)
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.OutwardsModification
+  })
+
+  useSetWindow({ title: labels.outwardsModification, window })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsModification,

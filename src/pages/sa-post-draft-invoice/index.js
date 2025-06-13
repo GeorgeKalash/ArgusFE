@@ -151,8 +151,6 @@ const PostDraftInvoice = () => {
         recordId,
         invalidate
       },
-      width: 1300,
-      height: 750,
       title: labels.draftSerInv
     })
   }
