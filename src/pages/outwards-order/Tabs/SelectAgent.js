@@ -6,7 +6,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
-import { exportWithName } from 'src/resources/exportWithName'
 import * as yup from 'yup'
 
 const SelectAgent = ({
@@ -89,4 +88,7 @@ const SelectAgent = ({
   )
 }
 
-export default exportWithName(SelectAgent, { width: 500, height: 200 })
+SelectAgent.width = 500
+SelectAgent.height = 200
+
+export default SelectAgent

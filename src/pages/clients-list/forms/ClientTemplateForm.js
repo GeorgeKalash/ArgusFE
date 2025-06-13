@@ -42,7 +42,6 @@ import CustomPhoneNumber from 'src/components/Inputs/CustomPhoneNumber'
 import { isValidPhoneNumber } from 'libphonenumber-js'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
-import { exportWithName } from 'src/resources/exportWithName'
 
 const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) => {
   const { stack } = useWindow()
@@ -1844,4 +1843,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   )
 }
 
-export default exportWithName(ClientTemplateForm, { width: 1100, height: 700 })
+ClientTemplateForm.width = 1200
+ClientTemplateForm.height = 650
+
+export default ClientTemplateForm

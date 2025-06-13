@@ -40,7 +40,6 @@ import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
 import CustomRadioButtonGroup from 'src/components/Inputs/CustomRadioButtonGroup'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
-import { exportWithName } from 'src/resources/exportWithName'
 
 const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -1582,4 +1581,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   )
 }
 
-export default exportWithName(TransactionForm, { width: 1200, height: 600 })
+TransactionForm.width = 1200
+TransactionForm.height = 600
+
+export default TransactionForm
