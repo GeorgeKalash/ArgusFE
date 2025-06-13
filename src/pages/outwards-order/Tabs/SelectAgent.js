@@ -6,9 +6,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
+import { exportWithName } from 'src/resources/exportWithName'
 import * as yup from 'yup'
 
-export default function SelectAgent({
+const SelectAgent = ({
   labels,
   maxAccess,
   setData,
@@ -23,7 +24,7 @@ export default function SelectAgent({
     agentDeliveryMode
   },
   window
-}) {
+}) => {
   const { formik } = useForm({
     initialValues: {
       agentCode,
@@ -87,3 +88,5 @@ export default function SelectAgent({
     </FormShell>
   )
 }
+
+export default exportWithName(SelectAgent, { width: 500, height: 200 })

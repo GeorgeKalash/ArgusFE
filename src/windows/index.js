@@ -88,12 +88,19 @@ export function WindowProvider({ children }) {
   }
 
   function addToStack(options) {
+    console.log(options)
+
+    // console.log('options.Component.name', options.Component.name)
+    // console.log(width, formDimensions.get(options.Component.name))
     setStack(stack => [
       ...stack,
       {
+        width: options.Component.width,
+        height: options.Component.height,
         ...options,
-        id: uuidv4(),
-        ...formDimensions.get(options.Component.name)
+        id: uuidv4()
+
+        // ...formDimensions.get(options.Component.name)
       }
     ])
   }

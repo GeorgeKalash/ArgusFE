@@ -40,8 +40,9 @@ import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
 import CustomRadioButtonGroup from 'src/components/Inputs/CustomRadioButtonGroup'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
+import { exportWithName } from 'src/resources/exportWithName'
 
-export default function TransactionForm({ recordId, plantId, window: windowStack }) {
+const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
@@ -1580,3 +1581,5 @@ export default function TransactionForm({ recordId, plantId, window: windowStack
     </FormShell>
   )
 }
+
+export default exportWithName(TransactionForm, { width: 1200, height: 600 })
