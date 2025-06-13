@@ -87,8 +87,6 @@ export default function RubberForm({ labels, access, recordId }) {
     }
   })
 
-  console.log(formik)
-
   const editMode = !!formik.values.recordId
   const isReleased = formik.values.status == 4
   const isPosted = formik.values.status == 3
@@ -225,6 +223,9 @@ export default function RubberForm({ labels, access, recordId }) {
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
+
+                  formik.setFieldValue('productionLineId', null)
+
                   if (newValue?.recordId) {
                     const { record } = await getRequest({
                       extension: ProductModelingRepository.DocumentTypeDefault.get,
@@ -241,8 +242,6 @@ export default function RubberForm({ labels, access, recordId }) {
                       formik.setFieldValue('jobId', '')
                     }
                     formik.setFieldValue('productionLineId', record?.productionLineId || null)
-                  } else {
-                    formik.setFieldValue('productionLineId', null)
                   }
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
