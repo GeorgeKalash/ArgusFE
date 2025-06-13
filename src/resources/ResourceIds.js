@@ -525,5 +525,6 @@ export const ResourceIds = {
   GLBalanceTransferSales: 31603,
   GLBalanceTransferBetweenAccounts: 31601,
   GLReturnOnInvoice: 51606,
-  IomProperties: 42606
+  IomProperties: 42606,
+  SyncPurchaseTrx: 50602
 }
