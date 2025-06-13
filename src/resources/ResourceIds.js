@@ -470,6 +470,7 @@ export const ResourceIds = {
   SyncMFTrx: 42316,
   AccountSummary: 31600,
   PhysicalCountSerialDetail: 44203,
+  PhysicalCountSerialDetail: 44203,
   BalanceTransferPurchase: 31318,
   BalanceTransferSales: 31319,
   PaymentReasons: 31116,
@@ -483,6 +484,8 @@ export const ResourceIds = {
   ThreePrintingDTD: 48606,
   IomProperties: 42606,
   MaterialReqPlannings: 46303,
+  ReturnOnInvoice: 51319,
+  ChangeClient: 51336,
 
   // GL
   GLSalesInvoice: 51604,
