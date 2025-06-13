@@ -95,7 +95,7 @@ export default function CreditOrderForm({ recordId, plantId, userData, window })
 
   const { maxAccess } = useDocumentType({
     functionId: selectedFunctionId,
-    access: access,
+    access,
     enabled: !recordId
   })
 

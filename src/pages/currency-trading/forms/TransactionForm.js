@@ -41,7 +41,7 @@ import CustomRadioButtonGroup from 'src/components/Inputs/CustomRadioButtonGroup
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function TransactionForm({ recordId, plantId }) {
+export default function TransactionForm({ recordId, plantId, window: windowStack }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
@@ -79,7 +79,7 @@ export default function TransactionForm({ recordId, plantId }) {
     datasetId: ResourceIds.CashInvoice
   })
 
-  useSetWindow({ title: labels.CurrencyTrading, window })
+  useSetWindow({ title: labels?.cashInvoice, window: windowStack })
 
   const initialValues = {
     recordId: null,
@@ -447,8 +447,6 @@ export default function TransactionForm({ recordId, plantId }) {
       (!row.lcAmount || row.lcAmount == 0)
   )
 
-  const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
-
   const onClose = async recId => {
     const res = await getRequest({
       extension: CTTRXrepository.CurrencyTrading.get2,
@@ -584,7 +582,7 @@ export default function TransactionForm({ recordId, plantId }) {
       return record?.clientIndividual?.clientId
     }
   }
-  const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
+  const { userId } = JSON.parse(window?.sessionStorage?.getItem('userData'))
 
   async function fetchRate({ currencyId }) {
     if (currencyId) {
@@ -803,7 +801,7 @@ export default function TransactionForm({ recordId, plantId }) {
       form={formik}
       initialValues={initialValues}
       setIDInfoAutoFilled={resetAutoFilled}
-      resourceId={ResourceIds.CurrencyTrading}
+      resourceId={ResourceIds.CashInvoice}
       editMode={editMode}
       isClosed={isClosed}
       disabledSubmit={balance > 0 && true}

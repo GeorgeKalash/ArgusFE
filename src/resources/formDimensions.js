@@ -4,6 +4,7 @@ export const formDimensions = new Map([
   ['CashCountForm', { width: 1100, height: 700 }],
   ['CashTransferTab', { width: 1100, height: 650 }],
   ['CreditInvoiceForm', { width: 1000, height: 650 }],
+  ['CreditOrderForm', { width: 1000, height: 650 }],
   ['TransactionForm', { width: 1200, height: 600 }],
   ['InwardSettlementForm', { width: 1200, height: 650 }],
   ['InwardTransferForm', { width: 1200, height: 650 }],
