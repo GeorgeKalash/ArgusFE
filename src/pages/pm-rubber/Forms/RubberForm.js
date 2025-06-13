@@ -392,7 +392,7 @@ export default function RubberForm({ labels, access, recordId }) {
                 name='pcs'
                 decimalScale={0}
                 required
-                label={labels.silverPieces}
+                label={labels.rubberpcs}
                 value={formik?.values?.pcs}
                 maxAccess={maxAccess}
                 readOnly={isReleased || isPosted}
