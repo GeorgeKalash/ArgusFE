@@ -485,6 +485,7 @@ export const ResourceIds = {
   ThreePrintingDTD: 48606,
   ReturnOnInvoice: 51319,
   ChangeClient: 51336,
+  WCConsumptionImport: 42702,
 
   // GL
   GLSalesInvoice: 51604,

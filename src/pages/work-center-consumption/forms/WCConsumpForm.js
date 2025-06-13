@@ -25,8 +25,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useError } from 'src/error'
+import { useWindow } from 'src/windows'
+import ImportForm from 'src/components/Shared/ImportForm'
 
 export default function WCConsumpForm({ labels, access, recordId, window }) {
+  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const filteredMeasurements = useRef([])
@@ -67,7 +70,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
   })
 
   const { formik } = useForm({
-    documentType: { key: 'header.dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId,
       header: {
@@ -96,8 +99,6 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
           unitCost: 0,
           muId: null,
           msId: null,
-          muRef: '',
-          muQty: 0,
           itemName: '',
           totalCost: 0,
           baseQty: null
@@ -155,15 +156,12 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
     })
   }
 
-  async function getFilteredMU(itemId, msId = null) {
+  async function getFilteredMU(itemId) {
     if (!itemId) return
 
-    if (!msId) {
-      const itemInfo = await getItem(itemId)
-      msId = itemInfo?.msId || null
-    }
+    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
 
-    const arrayMU = measurements?.filter(item => item.msId == msId) || []
+    const arrayMU = measurements?.filter(item => item.msId == currentItemId) || []
     filteredMeasurements.current = arrayMU
   }
 
@@ -327,7 +325,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
           return
         }
         if (newRow?.itemId) {
-          getFilteredMU(newRow?.itemId, newRow?.msId)
+          getFilteredMU(newRow?.itemId)
           const currentCost = newRow?.itemId ? await getCost(newRow?.itemId) : 0
           update({
             unitCost: currentCost || 0,
@@ -345,9 +343,10 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       label: labels.itemName,
       name: 'itemName',
       flex: 2,
-      props: {
-        readOnly: true
-      }
+
+      // props: {
+      //   readOnly: true
+      // }
     },
     {
       component: 'resourcecombobox',
@@ -388,16 +387,9 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       async onChange({ row: { update, newRow } }) {
         setReCal(true)
         update({
-          totalCost: parseFloat(newRow?.unitCost * newRow?.qty).toFixed(2)
+          totalCost: parseFloat(newRow?.unitCost * newRow?.qty).toFixed(2),
+          baseQty: newRow?.muQty ? newRow?.muQty * newRow?.qty : newRow?.qty
         })
-        if (newRow?.muQty)
-          update({
-            baseQty: newRow?.muQty * newRow?.qty
-          })
-        else
-          update({
-            baseQty: newRow?.qty
-          })
       },
       props: {
         decimalScale: 2,
@@ -423,6 +415,37 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       }
     }
   ]
+
+  async function onImportClick() {
+    stack({
+      Component: ImportForm,
+      props: {
+        resourceId: ResourceIds.WCConsumptionImport,
+        access: maxAccess,
+        platformLabels,
+        onSuccess: async res => {
+          if (formik?.values?.recordId) {
+            const header = await getHeaderData(formik?.values.recordId)
+            const items = await getItems(formik?.values.recordId)
+
+            formik.setValues({
+              ...formik.values,
+              recordId: header.recordId,
+              header: {
+                ...formik.values.header,
+                ...header
+              },
+              items
+            })
+            invalidate()
+          }
+        }
+      },
+      width: 1000,
+      height: 600,
+      title: platformLabels.import
+    })
+  }
 
   const actions = [
     {
@@ -457,6 +480,12 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       valuesPath: formik.values.header,
       datasetId: ResourceIds.WorkCenterConsumptions,
       disabled: !editMode
+    },
+    {
+      key: 'Import',
+      condition: true,
+      onClick: onImportClick,
+      disabled: !editMode || formik.values.items.some(item => item.itemId)
     }
   ]
 
@@ -604,8 +633,6 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
                     label={labels.siteRef}
                     value={formik.values.header?.siteRef}
                     readOnly
-                    maxAccess={maxAccess}
-                    error={formik.touched.header?.siteRef && Boolean(formik.errors.header?.siteRef)}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -644,7 +671,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
               }
             }}
             onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
+              if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
             value={formik.values.items}
             error={formik.errors.items}
