@@ -39,6 +39,11 @@ const DraftSerialsReturns = () => {
 
   const columns = [
     {
+      field: 'plantName',
+      headerName: labels.plant,
+      flex: 1
+    },
+    {
       field: 'reference',
       headerName: labels.reference,
       flex: 1
@@ -56,14 +61,8 @@ const DraftSerialsReturns = () => {
     },
     {
       field: 'clientName',
-      headerName: labels.client,
+      headerName: labels.clientName,
       flex: 1
-    },
-    {
-      field: 'amount',
-      headerName: labels.amount,
-      flex: 1,
-      type: 'number'
     },
     {
       field: 'pcs',
@@ -73,14 +72,25 @@ const DraftSerialsReturns = () => {
     },
     {
       field: 'weight',
-      headerName: labels.totalWeight,
+      headerName: labels.weight,
       flex: 1,
       type: 'number'
     },
     {
+      field: 'amount',
+      headerName: labels.amount,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'spName',
+      headerName: labels.salesPerson,
+      flex: 1
+    },
+    {
       field: 'description',
       headerName: labels.description,
-      flex: 2
+      flex: 1.25
     },
     {
       field: 'statusName',

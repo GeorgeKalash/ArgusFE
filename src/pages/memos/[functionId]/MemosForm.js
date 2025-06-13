@@ -635,11 +635,12 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 secondValueShow='accountName'
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
+                  { key: 'name', value: 'Name', grid: 4 },
                   { key: 'keywords', value: 'Keywords' },
                   { key: 'groupName', value: 'Account Group' }
                 ]}
                 maxAccess={maxAccess}
+                displayFieldWidth={2}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue ? newValue.recordId : '')
                   formik.setFieldValue('accountRef', newValue ? newValue.reference : '')

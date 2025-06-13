@@ -544,7 +544,8 @@ export default function SaleTransactionForm({
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
         getFilteredMU(newRow?.itemId)
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
+        const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, filteredMeasurements?.[0]?.recordId)
         await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
       },
       propsReducer({ row, props }) {
@@ -1270,12 +1271,12 @@ export default function SaleTransactionForm({
     return res?.list
   }
 
-  async function getItemConvertPrice(itemId) {
+  async function getItemConvertPrice(itemId, muId) {
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
       parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${
         formik.values.header.currencyId
-      }&_plId=${formik.values.header.plId}&_muId=${0}`
+      }&_plId=${formik.values.header.plId}&_muId=${muId || 0}`
     })
 
     return res?.record
@@ -1959,7 +1960,7 @@ export default function SaleTransactionForm({
                 firstFieldWidth={4}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
+                  { key: 'name', value: 'Name', grid: 8 },
                   { key: 'szName', value: 'Sales Zone' },
                   { key: 'keywords', value: 'Keywords' },
                   { key: 'cgName', value: 'Client Group' }
@@ -1978,7 +1979,7 @@ export default function SaleTransactionForm({
                 required
                 autoSelectFistValue={!formik.values.clientId}
                 readOnly={formik.values.items.length > 0 && formik.values.items[0].sku}
-                displayFieldWidth={3}
+                displayFieldWidth={5}
                 editMode={editMode}
                 error={formik.touched?.header?.clientId && Boolean(formik.errors?.header?.clientId)}
               />
