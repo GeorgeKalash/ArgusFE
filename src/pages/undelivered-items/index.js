@@ -17,7 +17,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { RGSaleRepository } from 'src/repositories/RGSaleRepository'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
@@ -25,6 +25,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useWindow } from 'src/windows'
 import DeliveriesOrdersForm from '../delivery-orders/Forms/DeliveryOrdersForm'
 import { useError } from 'src/error'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
 const UndeliveredItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -54,6 +55,7 @@ const UndeliveredItems = () => {
       clientId: 0,
       clientRef: '',
       clientName: '',
+      date: new Date(),
       soId: 0,
       items: [],
       marginDefault: defaultVat?.value,
@@ -61,7 +63,7 @@ const UndeliveredItems = () => {
     },
     validateOnChange: true,
     onSubmit: async obj => {
-      const { clientId, siteId, notes, items, dtId, plantId } = obj
+      const { clientId, siteId, notes, items, dtId, plantId, date } = obj
 
       const itemValues = items
         .filter(item => item.isChecked)
@@ -77,7 +79,7 @@ const UndeliveredItems = () => {
 
       postRequest({
         extension: DeliveryRepository.DeliveriesOrders.gen,
-        record: JSON.stringify({ clientId, siteId, notes, items: itemValues })
+        record: JSON.stringify({ clientId, siteId, notes, date: formatDateToApi(date), items: itemValues })
       }).then(res => {
         if (res.recordId) {
           stack({
@@ -423,7 +425,19 @@ const UndeliveredItems = () => {
 
           <Grid item xs={3}>
             <Grid container spacing={2}>
-              <Grid item xs={12}></Grid>
+              <Grid item xs={12}>
+                <CustomDatePicker
+                  name='date'
+                  required
+                  label={labels.date}
+                  value={formik?.values?.date}
+                  onChange={formik.setFieldValue}
+                  readOnly
+                  maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('date', '')}
+                  error={formik.touched.date && Boolean(formik.errors.date)}
+                />
+              </Grid>
               <Grid item xs={12}></Grid>
               <Grid item xs={12}></Grid>
               <Grid item xs={12}></Grid>
