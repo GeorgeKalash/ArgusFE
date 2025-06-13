@@ -107,15 +107,15 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
         endpointId: ManufacturingRepository.ProductionLine.qry,
         displayField: 'reference',
         valueField: 'recordId',
-        displayFieldWidth: 1.5,
+        displayFieldWidth: 2,
         mapping: [
           { from: 'recordId', to: 'lineId' },
           { from: 'name', to: 'lineName' },
           { from: 'reference', to: 'lineRef' }
         ],
         columnsInDropDown: [
-          { key: 'name', value: 'Name' },
-          { key: 'reference', value: 'Reference' }
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
         ]
       }
     },

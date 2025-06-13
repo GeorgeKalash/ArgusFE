@@ -721,7 +721,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       amount: parseFloat(soHeader?.record?.amount).toFixed(2),
       shipAddress: shipAdd,
       billAddress: billAdd,
-      items: modifiedList
+      items: modifiedList?.length > 0 ? modifiedList : formik.initialValues.items
     })
   }
 
