@@ -433,7 +433,7 @@ const UndeliveredItems = () => {
                   value={formik?.values?.date}
                   onChange={formik.setFieldValue}
                   readOnly
-                  maxAccess={maxAccess}
+                  maxAccess={access}
                   onClear={() => formik.setFieldValue('date', '')}
                   error={formik.touched.date && Boolean(formik.errors.date)}
                 />
