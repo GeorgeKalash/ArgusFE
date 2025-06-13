@@ -343,10 +343,9 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       label: labels.itemName,
       name: 'itemName',
       flex: 2,
-
-      // props: {
-      //   readOnly: true
-      // }
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'resourcecombobox',
