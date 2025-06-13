@@ -85,7 +85,7 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
       name: 'itemId',
       displayFieldWidth: 2,
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
+        endpointId: InventoryRepository.UnfinishedGoods.snapshot,
         displayField: 'sku',
         valueField: 'recordId',
         columnsInDropDown: [
@@ -95,7 +95,9 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'name', to: 'itemName' },
-          { from: 'sku', to: 'sku' }
+          { from: 'sku', to: 'sku' },
+          { from: 'categoryName', to: 'category' },
+          { from: 'categoryId', to: 'categoryId' }
         ],
         displayFieldWidth: 2
       }
@@ -104,6 +106,14 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.category,
+      name: 'category',
       props: {
         readOnly: true
       }

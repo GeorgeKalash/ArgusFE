@@ -256,7 +256,7 @@ export const InventoryRepository = {
     get2: service + 'get2SRL',
     set: service + 'setSRL',
     get: service + 'getSRL',
-    del: service + 'delSRL',
+    del: service + 'delSRL'
   },
   MaterialTransferSerial: {
     qry: service + 'qryTFS'
@@ -328,9 +328,12 @@ export const InventoryRepository = {
     get: service + 'getSPF',
     del: service + 'delSPF',
     page: service + 'pageSPF',
-    set2: service + 'set2SPF',
+    set2: service + 'set2SPF'
   },
   SerialsProfileSequences: {
-    qry: service + 'qrySPS',
+    qry: service + 'qrySPS'
+  },
+  UnfinishedGoods: {
+    snapshot: service + 'snapshotUF'
   }
 }
