@@ -133,8 +133,8 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
         invalidate,
         resourceId: ResourceIds.SecurityGroup
       },
-      width: 500,
-      height: 480,
+      width: 800,
+      height: 600,
       title: labels.controlAccessLevel
     })
   }

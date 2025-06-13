@@ -118,12 +118,12 @@ const Casting = () => {
     stack({
       Component: CastingForm,
       props: {
-        labels,
         recordId,
+        labels,
         maxAccess: access
       },
       width: 700,
-      height: 580,
+      height: 630,
       title: labels.Casting
     })
   }

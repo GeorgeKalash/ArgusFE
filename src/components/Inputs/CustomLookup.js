@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from 'src/lib/maxAccess'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const CustomLookup = ({
   type = 'text',
@@ -160,6 +161,11 @@ const CustomLookup = ({
                   )}
                   <li {...props}>
                     {columnsWithGrid.map((header, i) => {
+                      let displayValue = option[header.key]
+
+                      if (header?.type && header?.type === 'date' && displayValue) {
+                        displayValue = formatDateDefault(displayValue)
+                      }
                       const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                       return (
@@ -172,7 +178,7 @@ const CustomLookup = ({
                             display: 'flex'
                           }}
                         >
-                          {option[header.key]}
+                          {displayValue}
                         </Box>
                       )
                     })}

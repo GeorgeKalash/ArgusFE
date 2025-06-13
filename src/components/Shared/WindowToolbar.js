@@ -141,6 +141,7 @@ const WindowToolbar = ({
                     disabled={isDisabled}
                     image={button.image}
                     tooltipText={button.label}
+                    viewLoader={correspondingAction?.viewLoader}
                   />
                 )
               )
