@@ -30,7 +30,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
   const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.MatPlaning,
+    functionId: SystemFunction.MRP,
     access,
     enabled: !recordId,
     objectName: 'header'
@@ -64,7 +64,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
       }),
       items: yup.array().of(
         yup.object({
-          qty: yup.string().required()
+          qty: yup.number().required()
         })
       )
     }),
@@ -78,7 +78,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
       })
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
 
-      await refetchForm(res.recordId)
+      refetchForm(res.recordId)
       invalidate()
     }
   })
@@ -119,7 +119,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
     stack({
       Component: WorkFlow,
       props: {
-        functionId: SystemFunction.MatPlaning,
+        functionId: SystemFunction.MRP,
         recordId: formik.values.recordId
       },
       width: 950,
@@ -151,7 +151,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
 
   const onGenerate = async () => {
     await postRequest({
-      extension: IVReplenishementRepository.MatPlanning.generate,
+      extension: IVReplenishementRepository.PurchaseRequest.generate,
       record: JSON.stringify({ ...formik.values.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -195,7 +195,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
       key: 'generate',
       condition: true,
       onClick: onGenerate,
-      disabled: !editMode || (editMode && !isReleased)
+      disabled: !editMode || !isReleased
     }
   ]
 
@@ -382,7 +382,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
   return (
     <FormShell
       resourceId={ResourceIds.MaterialReqPlannings}
-      functionId={SystemFunction.MatPlaning}
+      functionId={SystemFunction.MRP}
       form={formik}
       maxAccess={maxAccess}
       actions={actions}
@@ -398,7 +398,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MatPlaning}`}
+                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MRP}`}
                     name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[

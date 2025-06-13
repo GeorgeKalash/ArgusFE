@@ -34,11 +34,11 @@ const MatPlaning = () => {
   })
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params } = options
+    const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
       extension: IVReplenishementRepository.MatPlanning.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -94,7 +94,7 @@ const MatPlaning = () => {
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.MatPlaning,
+    functionId: SystemFunction.MRP,
     action: openForm
   })
 
@@ -132,6 +132,7 @@ const MatPlaning = () => {
           gridData={data}
           rowId={['recordId']}
           paginationParameters={paginationParameters}
+          deleteConfirmationType={'strict'}
           paginationType='api'
           refetch={refetch}
           onEdit={edit}

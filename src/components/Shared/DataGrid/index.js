@@ -552,7 +552,7 @@ export function DataGrid({
     allColumns.filter(col => col?.width !== undefined)?.reduce((sum, col) => sum + col.width, 0) +
     (allowDelete ? 50 : 0)
 
-  const widthPlus =
+  const additionalWidth =
     totalWidth > 0 && allColumns?.length > 0 && gridWidth > totalWidth
       ? (gridWidth - totalWidth) / allColumns?.length
       : 0
@@ -560,7 +560,7 @@ export function DataGrid({
   const columnDefs = [
     ...allColumns.map(column => ({
       ...column,
-      ...{ width: column.width + widthPlus },
+      ...{ width: column.width + additionalWidth },
       field: column.name,
       headerName: column.label || column.name,
       headerTooltip: column.label,
