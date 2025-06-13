@@ -28,6 +28,7 @@ export const ProductModelingRepository = {
     reopen: service + 'reopenSKH',
     snapshot: service + 'snapshotSKH',
     snapshot2: service + 'snapshot2SKH',
+    snapshot3: service + 'snapshot3SKH',
     post: service + 'postSKH'
   },
   ModelMaker: {
