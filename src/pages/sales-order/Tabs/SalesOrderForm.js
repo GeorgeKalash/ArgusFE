@@ -710,7 +710,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
               }
             })
           )
-        : [{ id: 1 }]
+        : formik.initialValues.items
 
     formik.setValues({
       ...soHeader.record,
@@ -721,7 +721,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       amount: parseFloat(soHeader?.record?.amount).toFixed(2),
       shipAddress: shipAdd,
       billAddress: billAdd,
-      items: modifiedList?.length > 0 ? modifiedList : formik.initialValues.items
+      items: modifiedList
     })
   }
 

@@ -320,7 +320,7 @@ export const apiMappings = {
     firstField: 'sku',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: 5
   },
   [ResourceIds.WorkCenters]: {
@@ -1055,7 +1055,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-    [ResourceIds.PaymentReasons]: {
+  [ResourceIds.PaymentReasons]: {
     type: COMBOBOX,
     endpoint: FinancialRepository.PaymentReasons.qry,
     valueField: 'recordId',
@@ -1064,5 +1064,5 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  },
+  }
 }
