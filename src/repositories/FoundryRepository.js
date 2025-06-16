@@ -50,5 +50,15 @@ export const FoundryRepository = {
     cancel: service + 'cancelCAS',
     post: service + 'postCAS',
     snapshot: service + 'snapshotCAS'
+  },
+  CastingDisassembly: {
+    qry: service + 'qryCDA',
+    set2: service + 'set2CDA'
+  },
+  MetalScrap: {
+    qry: service + 'qryMSC'
+  },
+  CastingJob: {
+    set2: service + 'set2CAJ'
   }
 }

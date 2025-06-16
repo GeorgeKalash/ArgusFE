@@ -23,7 +23,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import toast from 'react-hot-toast'
 
-export default function CastingForm({ store, setStore, access, labels }) {
+export default function CastingForm({ store, setStore, access, labels, setRecalculateJobs }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const recordId = store?.recordId
@@ -103,10 +103,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
           date: obj?.date ? formatDateToApi(obj?.date) : null
         })
       })
-      setStore(prevStore => ({
-        ...prevStore,
-        recordId: res?.recordId
-      }))
+
       invalidate()
       toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
       refetchForm(res?.recordId)
@@ -116,7 +113,6 @@ export default function CastingForm({ store, setStore, access, labels }) {
   const editMode = !!formik.values.recordId
   const isCancelled = formik.values.status === -1
   const isPosted = formik.values.status === 3
-  console.log('check formik', formik)
 
   const suggestedWgt = recal
     ? ((Number(formik?.values?.netWgt) || 0) * (Number(formik?.values?.factor) || 0)).toFixed(3)
@@ -187,10 +183,6 @@ export default function CastingForm({ store, setStore, access, labels }) {
     toast.success(platformLabels.Posted)
     invalidate()
     refetchForm(formik.values.recordId)
-    setStore(prevStore => ({
-      ...prevStore,
-      isPosted: true
-    }))
   }
 
   async function onCancel() {
@@ -204,10 +196,6 @@ export default function CastingForm({ store, setStore, access, labels }) {
     toast.success(platformLabels.Cancelled)
     invalidate()
     refetchForm(formik.values.recordId)
-    setStore(prevStore => ({
-      ...prevStore,
-      isCancelled: true
-    }))
   }
 
   async function refetchForm(recordId) {
@@ -240,6 +228,13 @@ export default function CastingForm({ store, setStore, access, labels }) {
       metalId: waxInfo?.metalId || null,
       metalColorId: waxInfo?.metalColorId || null
     })
+    setStore(prevStore => ({
+      ...prevStore,
+      recordId,
+      isPosted: res?.record?.status == 3,
+      isCancelled: res?.record?.status == -1,
+      metalInfo: { metalId: waxInfo?.metalId || null, metalColorId: waxInfo?.metalColorId || null }
+    }))
   }
 
   useEffect(() => {
@@ -248,7 +243,8 @@ export default function CastingForm({ store, setStore, access, labels }) {
     formik.setFieldValue('lossPct', lossPct || 0)
     formik.setFieldValue('lossVariationPct', lossVariationPct || 0)
     formik.setFieldValue('netInputWgt', netInputWgt || 0)
-  }, [suggestedWgt, loss, lossPct, lossVariationPct])
+    formik.setFieldValue('scrapWgt', store?.scrapWgt || 0)
+  }, [suggestedWgt, loss, lossPct, lossVariationPct, store?.scrapWgt])
 
   useEffect(() => {
     refetchForm(recordId)
@@ -553,6 +549,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       readOnly={isPosted || isCancelled}
                       onChange={e => {
                         setRecal(true)
+                        setRecalculateJobs(true)
                         formik.setFieldValue('inputWgt', e.target.value)
                       }}
                       onClear={() => formik.setFieldValue('inputWgt', 0)}
