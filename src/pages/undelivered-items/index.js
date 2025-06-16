@@ -79,7 +79,7 @@ const UndeliveredItems = () => {
 
       postRequest({
         extension: DeliveryRepository.DeliveriesOrders.gen,
-        record: JSON.stringify({ clientId, siteId, notes, date: formatDateToApi(date), items: itemValues })
+        record: JSON.stringify({ clientId, siteId, notes, date: date ? formatDateToApi(date) : null, items: itemValues })
       }).then(res => {
         if (res.recordId) {
           stack({
@@ -428,7 +428,6 @@ const UndeliveredItems = () => {
               <Grid item xs={12}>
                 <CustomDatePicker
                   name='date'
-                  required
                   label={labels.date}
                   value={formik?.values?.date}
                   onChange={formik.setFieldValue}
