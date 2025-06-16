@@ -115,45 +115,50 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         .required()
     }),
     onSubmit: async obj => {
-      const copy = { ...obj }
-      delete copy.expenses
-      copy.date = formatDateToApi(copy.date)
-      copy.amount = totalAmount
-      copy.baseAmount = totalAmount
-      const costCentersValues = []
+      const payload = getPayload(obj)
 
-      const updatedRows = formik.values.expenses.map((expensesDetails, index) => {
-        const { costCenters, ...restDetails } = expensesDetails
-        if (costCenters) {
-          costCentersValues.push(...costCenters)
-        }
-
-        return {
-          ...restDetails,
-          seqNo: index + 1,
-          pvId: formik.values.recordId || 0
-        }
+      const response = await postRequest({
+        extension: FinancialRepository.PaymentVouchers.set2,
+        record: JSON.stringify(payload)
       })
 
-      const data = {
-        header: copy,
-        items: updatedRows,
-        costCenters: costCentersValues
-      }
-      try {
-        const response = await postRequest({
-          extension: FinancialRepository.PaymentVouchers.set2,
-          record: JSON.stringify(data)
-        })
-
-        !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
-        const res2 = await getPaymentVouchers(response.recordId)
-        res2.record.date = formatDateFromApi(res2.record.date)
-        await getExpenses(res2.record)
-        invalidate()
-      } catch (error) {}
+      !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
+      const res2 = await getPaymentVouchers(response.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
+      await getExpenses(res2.record)
+      invalidate()
     }
   })
+
+  const getPayload = obj => {
+    const copy = { ...obj }
+    delete copy.expenses
+    copy.date = formatDateToApi(copy.date)
+    copy.amount = totalAmount
+    copy.baseAmount = totalAmount
+    const costCentersValues = []
+
+    const updatedRows = formik.values.expenses.map((expensesDetails, index) => {
+      const { costCenters, ...restDetails } = expensesDetails
+      if (costCenters) {
+        costCentersValues.push(...costCenters)
+      }
+
+      return {
+        ...restDetails,
+        seqNo: index + 1,
+        pvId: formik.values.recordId || 0
+      }
+    })
+
+    const payload = {
+      header: copy,
+      items: updatedRows,
+      costCenters: costCentersValues
+    }
+
+    return payload
+  }
 
   const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
     endpointId: MultiCurrencyRepository.Currency.get,
@@ -305,6 +310,15 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     }
   }
 
+  const onReset = async () => {
+    getDefaultVAT()
+    const payload = getPayload(formik.values)
+    await postRequest({
+      extension: FinancialRepository.ResetGL_PV.reset,
+      record: JSON.stringify(payload)
+    })
+  }
+
   const actions = [
     {
       key: 'Locked',
@@ -342,6 +356,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       condition: true,
       onClick: 'onClickGL',
       datasetId: ResourceIds.GLPaymentVoucherExpenses,
+      onReset,
       disabled: !editMode
     },
     {

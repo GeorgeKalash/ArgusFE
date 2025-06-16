@@ -25,7 +25,7 @@ import { Fixed } from './Layouts/Fixed'
 import { VertLayout } from './Layouts/VertLayout'
 import { useForm } from 'src/hooks/form'
 
-const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
+const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [formik, setformik] = useState(null)
   const [baseGridData, setBaseGridData] = useState({ credit: 0, debit: 0, balance: 0 })
@@ -287,6 +287,20 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
     return response
   }
 
+  console.log(onReset)
+
+  const actions = [
+    {
+      key: 'Reset',
+      condition: onReset,
+      onClick: () => {
+        onReset() 
+        window.close()
+      },
+      disabled: false
+    },
+  ]
+
   return (
     <FormShell
       resourceId={ResourceIds.JournalVoucher}
@@ -295,6 +309,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
       disabledSubmit={baseGridData.balance !== 0 || isProcessed}
       infoVisible={false}
       previewReport={true}
+      actions={actions}
     >
       <VertLayout>
         {formik && (
