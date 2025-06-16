@@ -27,6 +27,7 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
+import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
 export const COMBOBOX = 1
 
@@ -334,7 +335,7 @@ export const apiMappings = {
     firstField: 'sku',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: 5
   },
   [ResourceIds.WorkCenters]: {
@@ -1078,5 +1079,37 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  }
+  },
+  [ResourceIds.ReleaseIndicators]: {
+    type: COMBOBOX,
+    endpoint: DocumentReleaseRepository.ReleaseIndicator.qry,
+    parameters: `_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.ItemSizes]: {
+    type: COMBOBOX,
+    endpoint: InventoryRepository.ItemSizes.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Currency]: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.Currency.qry2,
+    parameters: '',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
 }

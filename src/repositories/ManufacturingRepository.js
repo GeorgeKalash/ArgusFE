@@ -358,5 +358,11 @@ export const ManufacturingRepository = {
   },
   ConsumptionItemView: {
     qry: service + 'qryCOI'
+  },
+  LineItemCapacity: {
+    set2: service + 'set2LIT',
+    del: service + 'delLIT',
+    qry: service + 'qryLIT',
+    page: service + 'pageLIT'
   }
 }
