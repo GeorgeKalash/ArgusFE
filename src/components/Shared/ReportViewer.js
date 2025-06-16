@@ -8,6 +8,7 @@ import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import RPBGridToolbar from './RPBGridToolbar'
 import PopperComponent from './Popper/PopperComponent'
+import CustomButton from '../Inputs/CustomButton'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -103,7 +104,7 @@ const ReportViewer = ({ resourceId }) => {
           hasSearch={false}
           reportName={selectedReport?.parameters}
           leftSection={
-            <Box sx={{ display: 'flex', padding: 2, justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', padding: 2, alignItems: 'center' }}>
               <Autocomplete
                 size='small'
                 options={reportStore}
@@ -128,14 +129,28 @@ const ReportViewer = ({ resourceId }) => {
                 sx={{ width: 200, pl: 2, height: 35 }}
                 disableClearable
               />
+              {pdf && (
+                <CustomButton
+                  style={{ ml: 4 }}
+                  onClick={() => {
+                    if (pdf) {
+                      window.open(pdf, '_blank')
+                    }
+                  }}
+                  image={'popup.png'}
+                  color='#231F20'
+                />
+              )}
             </Box>
           }
         />
       </Fixed>
       {pdf && (
-        <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
-          <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
-        </Box>
+        <>
+          <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
+            <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
+          </Box>
+        </>
       )}
     </VertLayout>
   )
