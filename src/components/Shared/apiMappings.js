@@ -335,7 +335,7 @@ export const apiMappings = {
     firstField: 'sku',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: 5
   },
   [ResourceIds.WorkCenters]: {
@@ -1094,6 +1094,17 @@ export const apiMappings = {
   [ResourceIds.ItemSizes]: {
     type: COMBOBOX,
     endpoint: InventoryRepository.ItemSizes.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Currency]: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.Currency.qry2,
+    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
