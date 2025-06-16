@@ -223,7 +223,8 @@ const SaTrx = () => {
         functionId,
         lockRecord,
         getResourceId,
-        getGLResource
+        getGLResource,
+        getResourceMCR
       },
       width: 1330,
       height: 720,
@@ -268,6 +269,22 @@ const SaTrx = () => {
     })
     invalidate()
     toast.success(platformLabels.Deleted)
+  }
+
+  const getResourceMCR = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.MCRSalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.MCRSalesReturn
+      case SystemFunction.ConsignmentIn:
+        return ResourceIds.MCRClientGOCIn
+      case SystemFunction.ConsignmentOut:
+        return ResourceIds.MCRClientGOCOut
+      default:
+        return null
+    }
   }
 
   return (

@@ -49,6 +49,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
   const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
     endpointId: MultiCurrencyRepository.Currency.get,
+    DatasetIdAccess: ResourceIds.MCRFIReceiptVoucher,
     datasetId: ResourceIds.MultiCurrencyRate
   })
 

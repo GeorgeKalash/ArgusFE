@@ -70,7 +70,8 @@ export default function SaleTransactionForm({
   window,
   lockRecord,
   getResourceId,
-  getGLResource
+  getGLResource,
+  getResourceMCR
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -98,6 +99,7 @@ export default function SaleTransactionForm({
 
   const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
     endpointId: MultiCurrencyRepository.Currency.get,
+    DatasetIdAccess: getResourceMCR(functionId),
     datasetId: ResourceIds.MultiCurrencyRate
   })
 

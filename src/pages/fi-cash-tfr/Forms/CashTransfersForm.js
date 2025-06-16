@@ -123,6 +123,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
 
   const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
     endpointId: MultiCurrencyRepository.Currency.get,
+    DatasetIdAccess: ResourceIds.MCRCashTransfers,
     datasetId: ResourceIds.MultiCurrencyRate
   })
 

@@ -202,7 +202,8 @@ const Financial = () => {
         access,
         functionId: functionId,
         getEndpoint,
-        getGLResourceId
+        getGLResourceId,
+        getResourceMCR
       },
       width: 1000,
       height: 670,
@@ -226,6 +227,23 @@ const Financial = () => {
     })
     invalidate()
     toast.success(platformLabels.Deleted)
+  }
+
+
+    const getResourceMCR = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.CreditNote:
+        return ResourceIds.MCRCreditNote
+      case SystemFunction.DebitNote:
+        return ResourceIds.MCRDebitNote
+      case SystemFunction.ServiceBill:
+        return ResourceIds.MCRServiceBillReceived
+      case SystemFunction.ServiceInvoice:
+        return ResourceIds.MCRServiceInvoice
+      default:
+        return null
+    }
   }
 
   return (

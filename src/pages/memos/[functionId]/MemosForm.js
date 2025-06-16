@@ -29,7 +29,7 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import AccountSummary from 'src/components/Shared/AccountSummary'
 
-export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
+export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId, getResourceMCR }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
@@ -122,6 +122,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
   const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
     endpointId: MultiCurrencyRepository.Currency.get,
+    DatasetIdAccess: getResourceMCR(functionId),
     datasetId: ResourceIds.MultiCurrencyRate
   })
 

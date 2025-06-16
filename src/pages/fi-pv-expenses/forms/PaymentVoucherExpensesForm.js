@@ -157,6 +157,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
 
   const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
     endpointId: MultiCurrencyRepository.Currency.get,
+    DatasetIdAccess: ResourceIds.MCRPaymentVoucherExpenses,
     datasetId: ResourceIds.MultiCurrencyRate
   })
 

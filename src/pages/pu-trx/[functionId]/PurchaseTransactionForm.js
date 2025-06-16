@@ -1,12 +1,12 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from 'src/lib/date-helper'
-import { Grid, Stack } from '@mui/material'
+import { Button, Grid, Stack } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -57,6 +57,9 @@ import ItemPromotion from 'src/components/Shared/ItemPromotion'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import { useError } from 'src/error'
+import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
+import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 export default function PurchaseTransactionForm({
   labels,
@@ -65,7 +68,8 @@ export default function PurchaseTransactionForm({
   functionId,
   window,
   getResourceId,
-  getGLResource
+  getGLResource,
+  getResourceMCR
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -1398,6 +1402,57 @@ export default function PurchaseTransactionForm({
     })
   }
 
+  async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
+    if (currencyId && date && rateType) {
+      const res = await getRequest({
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${rateType}`
+      })
+
+      const updatedRateRow = getRate({
+        amount: amount === 0 ? 0 : amount ?? formik.values.header.amount,
+        exRate: res.record?.exRate,
+        baseAmount: 0,
+        rateCalcMethod: res.record?.rateCalcMethod,
+        dirtyField: DIRTYFIELD_RATE
+      })
+
+      formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('header.exRate', res.record?.exRate)
+      formik.setFieldValue('header.rateCalcMethod', res.record?.rateCalcMethod)
+      formik.setFieldValue('header.rateCalcMethodName', res.record?.rateCalcMethodName)
+      formik.setFieldValue('header.rateTypeName', res.record?.rateTypeName)
+      formik.setFieldValue('header.exchangeId', res.record?.exchangeId)
+      formik.setFieldValue('header.exchangeName', res.record?.exchangeName)
+    }
+  }
+
+    const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
+      endpointId: MultiCurrencyRepository.Currency.get,
+      DatasetIdAccess: getResourceMCR(functionId),
+      datasetId: ResourceIds.MultiCurrencyRate
+    })
+
+  function openMCRForm(data) {
+      stack({
+        Component: MultiCurrencyRateForm,
+        props: {
+          labels: _labels,
+          maxAccess: MRCMaxAccess,
+          data: data,
+          onOk: childFormikValues => {
+            formik.setFieldValue('header', {
+              ...formik.values.header,
+              ...childFormikValues
+            })
+          }
+        },
+        width: 500,
+        height: 500,
+        title: _labels.MultiCurrencyRate
+      })
+    }
+
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
@@ -1449,7 +1504,10 @@ export default function PurchaseTransactionForm({
                 label={labels.date}
                 readOnly={isPosted}
                 value={formik?.values?.header?.date}
-                onChange={(e, newValue) => formik.setFieldValue('header.date', newValue)}
+                onChange={async (e, newValue) => {
+                  formik.setFieldValue('header.date', newValue)
+                  await getMultiCurrencyFormData(formik.values.header.currencyId, newValue, RateDivision.FINANCIALS)
+                }}
                 editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('header.date', '')}
@@ -1565,6 +1623,7 @@ export default function PurchaseTransactionForm({
                 endpointId={SystemRepository.Currency.qry}
                 name='header.currencyId'
                 label={labels.currency}
+                filter={item => item.currencyType == 1}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 readOnly={isPosted}
@@ -1575,13 +1634,28 @@ export default function PurchaseTransactionForm({
                 required
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={async (event, newValue) => {
+                  await getMultiCurrencyFormData(
+                    newValue?.recordId,
+                    formik.values.header?.date,
+                    RateDivision.FINANCIALS
+                  )
                   formik.setFieldValue('header.currencyId', newValue?.recordId || null)
+                  formik.setFieldValue('header.currencyName', newValue?.name)
                 }}
                 error={formik.touched?.header?.currencyId && Boolean(formik.errors?.header?.currencyId)}
               />
             </Grid>
-            <Grid item xs={2.4}></Grid>
+            <Grid item xs={1}>
+              <Button
+                variant='contained'
+                size='small'
+                onClick={() => openMCRForm(formik.values.header)}
+                disabled={formik.values.header.currencyId === defaultsDataState?.currencyId}
+              >
+                <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
+              </Button>
+            </Grid>
 
             <Grid item xs={4.8}>
               <ResourceLookup

@@ -113,6 +113,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
 
   const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
     endpointId: MultiCurrencyRepository.Currency.get,
+    DatasetIdAccess: ResourceIds.MCRIncreaseDecreaseAdj,
     datasetId: ResourceIds.MultiCurrencyRate
   })
 
