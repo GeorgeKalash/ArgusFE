@@ -1100,5 +1100,16 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  }
+  },
+  [ResourceIds.Currency]: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.Currency.qry2,
+    parameters: '',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
 }
