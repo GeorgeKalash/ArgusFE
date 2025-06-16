@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react'
-import { Autocomplete, Box, TextField, Menu, MenuItem } from '@mui/material'
+import { Autocomplete, Box, TextField } from '@mui/material'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
@@ -8,6 +8,7 @@ import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import RPBGridToolbar from './RPBGridToolbar'
 import PopperComponent from './Popper/PopperComponent'
+import CustomButton from '../Inputs/CustomButton'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -15,7 +16,6 @@ const ReportViewer = ({ resourceId }) => {
   const [selectedReport, setSelectedReport] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
   const [pdf, setPDF] = useState(null)
-  const [contextMenu, setContextMenu] = useState(null)
 
   const getReportLayout = () => {
     var parameters = `_resourceId=${resourceId}`
@@ -96,24 +96,6 @@ const ReportViewer = ({ resourceId }) => {
     generateReport({ _startAt: 0, _pageSize: 30, params: rpbParams, paramsDict: paramsDict })
   }
 
-  const handleContextMenu = event => {
-    event.preventDefault()
-    if (pdf) {
-      setContextMenu(contextMenu === null ? { mouseX: event.clientX - 2, mouseY: event.clientY - 4 } : null)
-    }
-  }
-
-  const handleCloseContextMenu = () => {
-    setContextMenu(null)
-  }
-
-  const handleOpenInNewTab = () => {
-    if (pdf) {
-      window.open(pdf, '_blank')
-    }
-    handleCloseContextMenu()
-  }
-
   return (
     <VertLayout>
       <Fixed>
@@ -122,7 +104,7 @@ const ReportViewer = ({ resourceId }) => {
           hasSearch={false}
           reportName={selectedReport?.parameters}
           leftSection={
-            <Box sx={{ display: 'flex', padding: 2, justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', padding: 2, alignItems: 'center' }}>
               <Autocomplete
                 size='small'
                 options={reportStore}
@@ -147,43 +129,27 @@ const ReportViewer = ({ resourceId }) => {
                 sx={{ width: 200, pl: 2, height: 35 }}
                 disableClearable
               />
+              {pdf && (
+                <CustomButton
+                  style={{ ml: 4 }}
+                  onClick={() => {
+                    if (pdf) {
+                      window.open(pdf, '_blank')
+                    }
+                  }}
+                  image={'popup.png'}
+                  color='#231F20'
+                />
+              )}
             </Box>
           }
         />
       </Fixed>
       {pdf && (
         <>
-          <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2, position: 'relative' }}>
-            <iframe
-              title={selectedReport?.layoutName}
-              src={pdf}
-              width='100%'
-              height='100%'
-              allowFullScreen
-              style={{ pointerEvents: 'auto' }}
-            />
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                zIndex: 10,
-                cursor: 'context-menu'
-              }}
-              onContextMenu={handleContextMenu}
-            />
+          <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
+            <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
           </Box>
-
-          <Menu
-            open={contextMenu !== null}
-            onClose={handleCloseContextMenu}
-            anchorReference='anchorPosition'
-            anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
-          >
-            <MenuItem onClick={handleOpenInNewTab}>Open in New Tab</MenuItem>
-          </Menu>
         </>
       )}
     </VertLayout>
