@@ -484,7 +484,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       key: 'Import',
       condition: true,
       onClick: onImportClick,
-      disabled: !editMode || formik.values.items.some(item => item.itemId)
+      disabled: !editMode || formik.values.items.some(item => item.itemId) || isClosed
     }
   ]
 
