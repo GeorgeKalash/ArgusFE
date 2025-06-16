@@ -177,8 +177,6 @@ const POTracking = () => {
     )
   }
 
-  console.log(formik)
-
   return (
     <FormShell
       resourceId={ResourceIds.POTracking}
@@ -200,6 +198,7 @@ const POTracking = () => {
                     <ResourceLookup
                       endpointId={PurchaseRepository.PurchaseOrder.snapshot}
                       name='poId'
+                      filter={{ status: 4 }}
                       label={labels.purchaseOrder}
                       valueField='reference'
                       displayField='name'
