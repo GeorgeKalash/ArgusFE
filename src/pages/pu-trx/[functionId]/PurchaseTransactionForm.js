@@ -60,6 +60,7 @@ import { useError } from 'src/error'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function PurchaseTransactionForm({
   labels,
@@ -95,6 +96,14 @@ export default function PurchaseTransactionForm({
     enabled: !recordId,
     objectName: 'header'
   })
+
+  const conditions = {
+    sku: row => row?.sku,
+    itemName: row => row?.itemName,
+    qty: row => row?.qty > 0
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const initialValues = {
     recordId: recordId,
@@ -147,8 +156,8 @@ export default function PurchaseTransactionForm({
         id: 1,
         orderId: recordId || 0,
         itemId: null,
-        sku: null,
-        itemName: null,
+        sku: '',
+        itemName: '',
         seqNo: 1,
         siteId: '',
         muId: null,
@@ -208,8 +217,8 @@ export default function PurchaseTransactionForm({
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
+    conditionSchema: ['items'],
     initialValues: initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -235,44 +244,37 @@ export default function PurchaseTransactionForm({
             return true
           })
       }),
-      items: yup
-        .array()
-        .of(
-          yup.object({
-            sku: yup.string().required(),
-            itemName: yup.string().required(),
-            qty: yup.number().required().min(1)
-          })
-        )
-        .required()
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const serialsValues = []
 
-      const updatedRows = obj.items.map(({ id, isVattable, taxDetails, ...rest }) => {
-        const { serials, ...restDetails } = rest
-        if (serials) {
-          const updatedSerials = serials.map((serialDetail, idx) => {
-            return {
-              ...serialDetail,
-              id: idx + 1,
-              seqNo: id,
-              srlSeqNo: 0,
-              componentSeqNo: 0,
-              invoiceId: formik.values.recordId || 0,
-              itemId: rest?.itemId
-            }
-          })
-          serialsValues.push(...updatedSerials)
-        }
+      const updatedRows = obj.items
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        .map(({ id, isVattable, taxDetails, ...rest }) => {
+          const { serials, ...restDetails } = rest
+          if (serials) {
+            const updatedSerials = serials.map((serialDetail, idx) => {
+              return {
+                ...serialDetail,
+                id: idx + 1,
+                seqNo: id,
+                srlSeqNo: 0,
+                componentSeqNo: 0,
+                invoiceId: formik.values.recordId || 0,
+                itemId: rest?.itemId
+              }
+            })
+            serialsValues.push(...updatedSerials)
+          }
 
-        return {
-          ...restDetails,
-          seqNo: id,
-          invoiceId: formik.values.recordId || 0,
-          applyVat: isVattable
-        }
-      })
+          return {
+            ...restDetails,
+            seqNo: id,
+            invoiceId: formik.values.recordId || 0,
+            applyVat: isVattable
+          }
+        })
 
       const payload = {
         header: {

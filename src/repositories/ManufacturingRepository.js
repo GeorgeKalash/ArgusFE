@@ -344,5 +344,11 @@ export const ManufacturingRepository = {
   JobWorkCenter: {
     close: service + 'closeJWC',
     reopen: service + 'reopenJWC'
+  },
+  LineItemCapacity: {
+    set2: service + 'set2LIT',
+    del: service + 'delLIT',
+    qry: service + 'qryLIT',
+    page: service + 'pageLIT'
   }
 }
