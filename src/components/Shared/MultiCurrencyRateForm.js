@@ -12,9 +12,16 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { formatDateForGetApI } from 'src/lib/date-helper'
 import { RateDivision } from 'src/resources/RateDivision'
+import { useResourceQuery } from 'src/hooks/resource'
 
-export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, window }) {
+export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, window }) {
   const { getRequest } = useContext(RequestsContext)
+
+  const { labels, access: maxAccess } = useResourceQuery({
+    endpointId: MultiCurrencyRepository.Currency.get,
+    DatasetIdAccess,
+    datasetId: ResourceIds.MultiCurrencyRate
+  })
 
   const { formik } = useForm({
     initialValues: {

@@ -1,12 +1,12 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from 'src/lib/date-helper'
-import { Button, Grid, Stack } from '@mui/material'
+import { Grid, Stack } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -33,7 +33,6 @@ import {
   DIRTYFIELD_TWPG,
   DIRTYFIELD_UNIT_PRICE,
   DIRTYFIELD_MDAMOUNT,
-  DIRTYFIELD_MDTYPE,
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_PCT,
   MDTYPE_AMOUNT
@@ -59,8 +58,8 @@ import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import { useError } from 'src/error'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { createConditionalSchema } from 'src/lib/validation'
+import CustomButton from 'src/components/Inputs/CustomButton'
 
 export default function PurchaseTransactionForm({
   labels,
@@ -1404,11 +1403,13 @@ export default function PurchaseTransactionForm({
     })
   }
 
-  async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
-    if (currencyId && date && rateType) {
+  async function getMultiCurrencyFormData(currencyId, date) {
+    if (currencyId && date) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${rateType}`
+        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${
+          RateDivision.FINANCIALS
+        }`
       })
 
       const updatedRateRow = getRate({
@@ -1429,31 +1430,24 @@ export default function PurchaseTransactionForm({
     }
   }
 
-    const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-      endpointId: MultiCurrencyRepository.Currency.get,
-      DatasetIdAccess: getResourceMCR(functionId),
-      datasetId: ResourceIds.MultiCurrencyRate
-    })
-
   function openMCRForm(data) {
-      stack({
-        Component: MultiCurrencyRateForm,
-        props: {
-          labels: _labels,
-          maxAccess: MRCMaxAccess,
-          data: data,
-          onOk: childFormikValues => {
-            formik.setFieldValue('header', {
-              ...formik.values.header,
-              ...childFormikValues
-            })
-          }
-        },
-        width: 500,
-        height: 500,
-        title: _labels.MultiCurrencyRate
-      })
-    }
+    stack({
+      Component: MultiCurrencyRateForm,
+      props: {
+        DatasetIdAccess: getResourceMCR(functionId),
+        data,
+        onOk: childFormikValues => {
+          formik.setFieldValue('header', {
+            ...formik.values.header,
+            ...childFormikValues
+          })
+        }
+      },
+      width: 500,
+      height: 500,
+      title: platformLabels.MultiCurrencyRate
+    })
+  }
 
   return (
     <FormShell
@@ -1508,7 +1502,7 @@ export default function PurchaseTransactionForm({
                 value={formik?.values?.header?.date}
                 onChange={async (e, newValue) => {
                   formik.setFieldValue('header.date', newValue)
-                  await getMultiCurrencyFormData(formik.values.header.currencyId, newValue, RateDivision.FINANCIALS)
+                  await getMultiCurrencyFormData(formik.values.header.currencyId, newValue)
                 }}
                 editMode={editMode}
                 maxAccess={maxAccess}
@@ -1637,11 +1631,7 @@ export default function PurchaseTransactionForm({
                 values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={async (event, newValue) => {
-                  await getMultiCurrencyFormData(
-                    newValue?.recordId,
-                    formik.values.header?.date,
-                    RateDivision.FINANCIALS
-                  )
+                  await getMultiCurrencyFormData(newValue?.recordId, formik.values.header?.date)
                   formik.setFieldValue('header.currencyId', newValue?.recordId || null)
                   formik.setFieldValue('header.currencyName', newValue?.name)
                 }}
@@ -1649,16 +1639,14 @@ export default function PurchaseTransactionForm({
               />
             </Grid>
             <Grid item xs={1}>
-              <Button
-                variant='contained'
-                size='small'
+              <CustomButton
                 onClick={() => openMCRForm(formik.values.header)}
+                label={platformLabels.add}
                 disabled={formik.values.header.currencyId === defaultsDataState?.currencyId}
-              >
-                <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
-              </Button>
+                image={'popup.png'}
+                color='#231f20'
+              />
             </Grid>
-
             <Grid item xs={4.8}>
               <ResourceLookup
                 endpointId={PurchaseRepository.Vendor.snapshot}

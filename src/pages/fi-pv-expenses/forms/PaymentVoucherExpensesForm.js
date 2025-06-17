@@ -5,7 +5,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
@@ -153,12 +153,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         invalidate()
       } catch (error) {}
     }
-  })
-
-  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-    endpointId: MultiCurrencyRepository.Currency.get,
-    DatasetIdAccess: ResourceIds.MCRPaymentVoucherExpenses,
-    datasetId: ResourceIds.MultiCurrencyRate
   })
 
   const totalAmount = formik.values?.expenses?.reduce((amount, row) => {
@@ -598,8 +592,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     stack({
       Component: MultiCurrencyRateForm,
       props: {
-        labels: _labels,
-        maxAccess: MRCMaxAccess,
+        DatasetIdAccess: ResourceIds.MCRPaymentVoucherExpenses,
         data: {
           ...data,
           amount: amountSum
@@ -613,7 +606,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       },
       width: 500,
       height: 500,
-      title: _labels.MultiCurrencyRate
+      title: platformLabels.MultiCurrencyRate
     })
   }
 

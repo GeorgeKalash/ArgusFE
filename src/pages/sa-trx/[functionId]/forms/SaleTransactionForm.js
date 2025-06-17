@@ -6,7 +6,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -96,12 +96,6 @@ export default function SaleTransactionForm({
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.SalesTransaction.qry
-  })
-
-  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-    endpointId: MultiCurrencyRepository.Currency.get,
-    DatasetIdAccess: getResourceMCR(functionId),
-    datasetId: ResourceIds.MultiCurrencyRate
   })
 
   const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
@@ -327,9 +321,8 @@ export default function SaleTransactionForm({
     stack({
       Component: MultiCurrencyRateForm,
       props: {
-        labels: _labels,
-        maxAccess: MRCMaxAccess,
-        data: data,
+        DatasetIdAccess: getResourceMCR(functionId),
+        data,
         onOk: childFormikValues => {
           formik.setFieldValue('header', {
             ...formik.values.header,
@@ -339,7 +332,7 @@ export default function SaleTransactionForm({
       },
       width: 500,
       height: 500,
-      title: _labels.MultiCurrencyRate
+      title: platformLabels.MultiCurrencyRate
     })
   }
 

@@ -4,7 +4,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -29,7 +29,15 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import AccountSummary from 'src/components/Shared/AccountSummary'
 
-export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId, getResourceMCR }) {
+export default function MemosForm({
+  labels,
+  access,
+  recordId,
+  functionId,
+  getEndpoint,
+  getGLResourceId,
+  getResourceMCR
+}) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
@@ -119,12 +127,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     }
   })
   const editMode = !!formik.values.recordId || !!recordId
-
-  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-    endpointId: MultiCurrencyRepository.Currency.get,
-    DatasetIdAccess: getResourceMCR(functionId),
-    datasetId: ResourceIds.MultiCurrencyRate
-  })
 
   async function getDefaultVAT() {
     const defaultVAT = defaultsData?.list?.find(({ key }) => key === 'vatPct')
@@ -368,8 +370,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     stack({
       Component: MultiCurrencyRateForm,
       props: {
-        labels: _labels,
-        maxAccess: MRCMaxAccess,
+        DatasetIdAccess: getResourceMCR(functionId),
         data,
         onOk: childFormikValues => {
           formik.setValues(prevValues => ({
@@ -380,7 +381,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       },
       width: 500,
       height: 500,
-      title: _labels.MultiCurrencyRate
+      title: platformLabels.MultiCurrencyRate
     })
   }
 
