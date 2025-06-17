@@ -172,6 +172,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
   }
 
   const isCancelled = formik.values.status === -1
+  const isClosed = formik.values.wip == 2
   const editMode = !!formik.values.recordId
 
   async function getPaymentOrder(recordId) {
@@ -247,6 +248,36 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
     }
   }
 
+    const onClose = async () => {
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentOrders.close,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res?.recordId) {
+      toast.success(platformLabels.Closed)
+      invalidate()
+      const res2 = await getPaymentOrder(res.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
+      formik.setValues(res2.record)
+    }
+  }
+
+    const onReopen = async () => {
+    const res = await postRequest({
+      extension: FinancialRepository.PaymentOrders.reopen,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (res?.recordId) {
+      toast.success(platformLabels.Reopened)
+      invalidate()
+      const res2 = await getPaymentOrder(res.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
+      formik.setValues(res2.record)
+    }
+  }
+
   const actions = [
     {
       key: 'Cancel',
@@ -265,7 +296,31 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
       condition: true,
       onClick: onWorkFlowClick,
       disabled: !editMode
-    }
+    },
+    {
+      key: 'Attachment',
+      condition: true,
+      onClick: 'onClickAttachment',
+      disabled: !editMode
+    },
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: () => onClose(formik.values.recordId),
+      disabled: isClosed || !editMode
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
   ]
 
   return (

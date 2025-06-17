@@ -247,6 +247,8 @@ export const FinancialRepository = {
     page: service + 'pagePO',
     page2: service + 'page2PO',
     snapshot: service + 'snapshotPO',
-    cancel: service + 'cancelPO'
+    cancel: service + 'cancelPO',
+    close: service + 'closePO',
+    reopen: service + 'reopenPO',
   }
 }
