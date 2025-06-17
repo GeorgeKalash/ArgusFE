@@ -13,12 +13,19 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function OverheadsForm({ store, labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
   const editMode = !!recordId
+
+  const conditions = {
+    overheadId: row => row?.overheadId,
+    amount: row => row?.amount
+  }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'costGroupOverheads')
 
   const { formik } = useForm({
     initialValues: {
@@ -27,24 +34,18 @@ export default function OverheadsForm({ store, labels, maxAccess }) {
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      costGroupOverheads: yup
-        .array()
-        .of(
-          yup.object().shape({
-            overheadId: yup.number().required(),
-            amount: yup.number().required()
-          })
-        )
-        .required()
+      costGroupOverheads: yup.array().of(schema)
     }),
     onSubmit: async values => {
-      const updatedRows = values?.costGroupOverheads?.map((item, index) => {
-        return {
-          ...item,
-          cgId: recordId,
-          seqNo: index + 1
-        }
-      })
+      const updatedRows = values?.costGroupOverheads
+        ?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        .map((item, index) => {
+          return {
+            ...item,
+            cgId: recordId,
+            seqNo: index + 1
+          }
+        })
 
       await postRequest({
         extension: ManufacturingRepository.CostGroupOverhead.set2,
