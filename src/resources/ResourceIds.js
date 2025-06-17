@@ -484,6 +484,8 @@ export const ResourceIds = {
   ThreeDDrawingDTD: 48605,
   ProductModelingDTD: 48102,
   ThreePrintingDTD: 48606,
+  IomProperties: 42606,
+  MaterialReqPlannings: 46303,
   ReturnOnInvoice: 51319,
   ChangeClient: 51336,
   WCConsumptionImport: 42702,
@@ -529,6 +531,5 @@ export const ResourceIds = {
   GLBalanceTransferSales: 31603,
   GLBalanceTransferBetweenAccounts: 31601,
   GLReturnOnInvoice: 51606,
-  IomProperties: 42606,
   SyncPurchaseTrx: 50602
 }
