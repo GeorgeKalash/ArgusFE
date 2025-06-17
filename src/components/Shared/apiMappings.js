@@ -185,7 +185,7 @@ export const apiMappings = {
     valueOnSelection: 'recordId',
     firstField: 'reference',
     secondField: 'name',
-    displayFieldWidth: 2,
+    displayFieldWidth: 2
   },
   [ResourceIds.Groups]: {
     type: COMBOBOX,
@@ -336,8 +336,12 @@ export const apiMappings = {
     firstField: 'sku',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 2,
-    firstFieldWidth: 5
+    displayFieldWidth: 3,
+    firstFieldWidth: 4,
+    columnsInDropDown: [
+      { key: 'sku', value: 'Sku' },
+      { key: 'name', value: 'Name', grid: 5 }
+    ]
   },
   [ResourceIds.WorkCenters]: {
     type: COMBOBOX,
@@ -1112,5 +1116,5 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  },
+  }
 }
