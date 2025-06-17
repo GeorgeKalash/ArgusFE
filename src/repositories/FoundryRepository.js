@@ -59,6 +59,7 @@ export const FoundryRepository = {
     qry: service + 'qryMSC'
   },
   CastingJob: {
+    qry: service + 'qryCAJ',
     set2: service + 'set2CAJ'
   }
 }

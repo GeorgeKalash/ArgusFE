@@ -160,7 +160,10 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore, se
   useEffect(() => {
     setStore(prevStore => ({
       ...prevStore,
-      scrapWgt
+      castingInfo: {
+        ...prevStore.castingInfo,
+        scrapWgt
+      }
     }))
   }, [scrapWgt])
 

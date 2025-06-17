@@ -22,10 +22,13 @@ import { useContext, useEffect, useState } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import toast from 'react-hot-toast'
+import WorkFlow from 'src/components/Shared/WorkFlow'
+import { useWindow } from 'src/windows'
 
 export default function CastingForm({ store, setStore, access, labels, setRecalculateJobs }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { stack } = useWindow()
   const recordId = store?.recordId
   const [recal, setRecal] = useState(false)
 
@@ -147,9 +150,26 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
       condition: true,
       onClick: onCancel,
       disabled: !editMode || isCancelled || isPosted
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
     }
   ]
-
+  async function onWorkFlowClick() {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.Casting,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      height: 600,
+      title: labels.workflow
+    })
+  }
   async function getfactorStdLoss(metalId, metalColorId) {
     if (!metalId && !metalColorId) return
 
@@ -233,7 +253,12 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
       recordId,
       isPosted: res?.record?.status == 3,
       isCancelled: res?.record?.status == -1,
-      metalInfo: { metalId: waxInfo?.metalId || null, metalColorId: waxInfo?.metalColorId || null }
+      metalInfo: { metalId: waxInfo?.metalId || null, metalColorId: waxInfo?.metalColorId || null },
+      castingInfo: {
+        ...prevStore.castingInfo,
+        outputWgt: res?.record?.outputWgt.toFixed(3),
+        inputWgt: res?.record?.inputWgt.toFixed(3)
+      }
     }))
   }
 
@@ -243,8 +268,8 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
     formik.setFieldValue('lossPct', lossPct || 0)
     formik.setFieldValue('lossVariationPct', lossVariationPct || 0)
     formik.setFieldValue('netInputWgt', netInputWgt || 0)
-    formik.setFieldValue('scrapWgt', store?.scrapWgt || 0)
-  }, [suggestedWgt, loss, lossPct, lossVariationPct, store?.scrapWgt])
+    formik.setFieldValue('scrapWgt', store?.castingInfo?.scrapWgt || 0)
+  }, [suggestedWgt, loss, lossPct, lossVariationPct, store?.castingInfo?.scrapWgt])
 
   useEffect(() => {
     refetchForm(recordId)

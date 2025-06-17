@@ -7,7 +7,14 @@ import JobsForm from '../form/JobsForm'
 
 const FOCastingWindow = ({ recordId, access, labels }) => {
   const [activeTab, setActiveTab] = useState(0)
-  const [store, setStore] = useState({ recordId, isPosted: false, isCancelled: false, metalInfo: {}, scrapWgt: 0 })
+
+  const [store, setStore] = useState({
+    recordId,
+    isPosted: false,
+    isCancelled: false,
+    metalInfo: {},
+    castingInfo: { scrapWgt: 0, outputWgt: 0 }
+  })
   const [recalculateJobs, setRecalculateJobs] = useState(false)
 
   const tabs = [

@@ -32,6 +32,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
     validateOnChange: true,
     initialValues: {
       disassemblyWgt: 0,
+      balanceWgt: 0,
       items: [
         {
           id: 1,
@@ -58,6 +59,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       ]
     },
     validationSchema: yup.object({
+      balanceWgt: yup.number().min(0).max(0).required(),
       items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
@@ -91,6 +93,11 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
 
     return lossSum + lossValue
   }, 0)
+
+  const balanceWgt =
+    (parseFloat(formik.values.footerOutputWgt) || 0) -
+    (parseFloat(formik?.values?.disassemblyWgt) || 0) -
+    (parseFloat(assignedWgtBB) || 0)
 
   const columns = [
     {
@@ -150,7 +157,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       }
     },
     {
-      component: 'numberfield',
+      component: 'textfield',
       label: labels.jobPct,
       name: 'jobPct',
       props: {
@@ -191,7 +198,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
     },
     {
       component: 'numberfield',
-      label: labels.damagedPcs,
+      label: labels.damagePcs,
       name: 'damagedPcs',
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.damagedPcs) {
@@ -204,7 +211,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
     },
     {
       component: 'numberfield',
-      label: labels.damagedQty,
+      label: labels.damageQty,
       name: 'damagedQty',
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.damagedQty) {
@@ -224,6 +231,14 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
     },
     {
       component: 'numberfield',
+      label: labels.outputPcs,
+      name: 'outputPcs',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
       label: labels.netWgt,
       name: 'netWgt',
       props: {
@@ -231,45 +246,94 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       }
     }
   ]
+
   function recalculateJobsOnChange() {
-    let sumMetalWeight = 0,
-      netWgt = 0,
-      lossVal = 0,
-      returnWeight = 0,
-      issueWeight = 0,
-      jobPct = 0
+    let sumMetalWeight = 0
+    const items = formik?.values?.items || []
+
+    for (const item of items) sumMetalWeight += item?.metalWgt || 0
+
+    const calculateJobPct = metalWgt => {
+      if (!sumMetalWeight) return 0
+
+      return parseFloat(((metalWgt * 100) / sumMetalWeight).toFixed(2)) || 0
+    }
+
+    const calculateByPct = (pct, value, decimals = 3) => {
+      return parseFloat(((pct * value) / 100).toFixed(decimals)) || 0
+    }
+
+    const modifiedList = items.map(item => {
+      const metalWgt = item?.metalWgt || 0
+      const jobPct = calculateJobPct(metalWgt)
+
+      const issuedWgt = calculateByPct(jobPct, item?.inputWgt || 0)
+      const returnedWgt = calculateByPct(jobPct, item?.disassemblyWgt || 0)
+      const loss = calculateByPct(jobPct, item?.loss || 0, 2)
+
+      const netWgt = parseFloat(
+        ((item?.currentWgt || 0) + issuedWgt - returnedWgt - loss - (item?.damagedQty || 0)).toFixed(2)
+      )
+
+      return {
+        ...item,
+        jobPct: jobPct.toString() + '%',
+        issuedWgt,
+        returnedWgt,
+        loss,
+        netWgt
+      }
+    })
+
+    formik.setFieldValue('items', modifiedList)
     setRecalculateJobs(false)
   }
 
   async function fetchGridData() {
-    // const res = await getRequest({
-    //   extension: ManufacturingRepository.JobOverhead.qry,
-    //   parameters: `_jobId=${recordId}`
-    // })
-    // const updateItemsList =
-    //   res?.list?.length != 0
-    //     ? await Promise.all(
-    //         res?.list?.map(async (item, index) => {
-    //           return {
-    //             ...item,
-    //             id: index + 1
-    //           }
-    //         })
-    //       )
-    //     : formik.initialValues.items
-    // formik.setFieldValue('items', updateItemsList)
+    const res = await getRequest({
+      extension: FoundryRepository.CastingJob.qry,
+      parameters: `_castingId=${recordId}`
+    })
+
+    const updateItemsList =
+      res?.list?.length != 0
+        ? res?.list?.map((item, index) => {
+            return {
+              ...item,
+              id: index + 1,
+              currentWgt: parseFloat(item?.currentWgt || 0).toFixed(3),
+              metalWgt: parseFloat(item?.metalWgt || 0).toFixed(3),
+              jobPct:
+                parseFloat(item?.jobPct || 0)
+                  .toFixed(2)
+                  .toString() + '%',
+              issuedWgt: parseFloat(item?.issuedWgt || 0).toFixed(2),
+              returnedWgt: parseFloat(item?.returnedWgt || 0).toFixed(2),
+              loss: parseFloat(item?.loss || 0).toFixed(2),
+              inputPcs: parseFloat(item?.inputPcs || 0).toFixed(2),
+              damagedPcs: parseFloat(item?.damagedPcs || 0).toFixed(2),
+              outputPcs: parseFloat(item?.outputPcs || 0).toFixed(2),
+              netWgt: parseFloat(item?.netWgt || 0).toFixed(2)
+            }
+          })
+        : formik.initialValues.items
+    formik.setFieldValue('items', updateItemsList)
   }
 
   useEffect(() => {
-    //   if (recordId) fetchGridData()
+    if (recordId) fetchGridData()
   }, [recordId])
 
   useEffect(() => {
     recalculateJobsOnChange()
   }, [recalculateJobs])
+
   useEffect(() => {
-    formik.setFieldValue('disassemblyWgt', store?.scrapWgt)
-  }, [store?.scrapWgt])
+    formik.setFieldValue('disassemblyWgt', store?.castingInfo?.scrapWgt)
+    formik.setFieldValue('footerOutputWgt', store?.castingInfo?.outputWgt)
+    formik.setFieldValue('footerInputWgt', store?.castingInfo?.inputWgt)
+    formik.setFieldValue('balanceWgt', balanceWgt)
+  }, [store?.castingInfo, balanceWgt])
 
   return (
     <FormShell
@@ -293,6 +357,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
             name='items'
             maxAccess={maxAccess}
             allowDelete={!store?.isPosted && !store?.isCancelled}
+            disabled={store?.isCancelled || store?.isPosted}
           />
         </Grow>
         <Fixed>
@@ -300,7 +365,12 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
             <Grid item xs={4}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField name='outputWgt' label={labels.outputWgt} value={assignedWgtBB} readOnly />
+                  <CustomNumberField
+                    name='outputWgt'
+                    label={labels.outputWgt}
+                    value={formik.values.footerOutputWgt}
+                    readOnly
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField name='assignedWgt' label={labels.assignedWgt} value={assignedWgtBB} readOnly />
@@ -314,14 +384,25 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField name='balanceWgt' label={labels.balanceWgt} value={assignedWgtBB} readOnly />
+                  <CustomNumberField
+                    name='balanceWgt'
+                    label={labels.balanceWgt}
+                    value={formik.values.balanceWgt}
+                    readOnly
+                    error={formik.touched.balanceWgt && Boolean(formik.errors.balanceWgt)}
+                  />
                 </Grid>
               </Grid>
             </Grid>
             <Grid item xs={4}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField name='totalInputWgt' label={labels.totalInputWgt} value={assignedWgtBB} readOnly />
+                  <CustomNumberField
+                    name='totalInputWgt'
+                    label={labels.totalInputWgt}
+                    value={formik?.values?.footerInputWgt}
+                    readOnly
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField name='totalLoss' label={labels.totalLoss} value={totalLoss} readOnly />
