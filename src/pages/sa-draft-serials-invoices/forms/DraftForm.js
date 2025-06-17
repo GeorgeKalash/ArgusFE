@@ -35,7 +35,7 @@ import { SystemChecks } from 'src/resources/SystemChecks'
 import { useError } from 'src/error'
 import AccountSummary from 'src/components/Shared/AccountSummary'
 
-export default function DraftForm({ labels, access, recordId, invalidate }) {
+const DraftForm = ({ labels, access, recordId, invalidate }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -1211,3 +1211,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     </FormShell>
   )
 }
+DraftForm.width = 1300
+DraftForm.height = 750
+
+export default DraftForm

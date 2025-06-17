@@ -36,7 +36,7 @@ import { LOTransportationForm } from 'src/components/Shared/LOTransportationForm
 import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function CreditOrderForm({ recordId, plantId, userData, window }) {
+const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -268,7 +268,7 @@ export default function CreditOrderForm({ recordId, plantId, userData, window })
       Component: CreditInvoiceForm,
       props: {
         labels,
-        access: access,
+        access,
         recordId: res?.recordId,
         plantId,
         userData
@@ -1008,3 +1008,8 @@ export default function CreditOrderForm({ recordId, plantId, userData, window })
     </FormShell>
   )
 }
+
+CreditOrderForm.width = 1000
+CreditOrderForm.height = 650
+
+export default CreditOrderForm

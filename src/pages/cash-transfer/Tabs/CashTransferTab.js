@@ -33,7 +33,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function CashTransferTab({ recordId, plantId, cashAccountId, dtId, window }) {
+const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -595,3 +595,8 @@ export default function CashTransferTab({ recordId, plantId, cashAccountId, dtId
     </FormShell>
   )
 }
+
+CashTransferTab.width = 1100
+CashTransferTab.height = 650
+
+export default CashTransferTab

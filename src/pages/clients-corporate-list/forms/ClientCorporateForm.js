@@ -600,4 +600,6 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
   )
 }
 
+ClientCorporateForm.width = 1100
+
 export default ClientCorporateForm

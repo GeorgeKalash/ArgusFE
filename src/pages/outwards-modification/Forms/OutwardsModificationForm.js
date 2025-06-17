@@ -29,7 +29,7 @@ import { DataSets } from 'src/resources/DataSets'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function OutwardsModificationForm({ recordId, window }) {
+const OutwardsModificationForm = ({ recordId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -615,3 +615,8 @@ export default function OutwardsModificationForm({ recordId, window }) {
     </FormShell>
   )
 }
+
+OutwardsModificationForm.width = 1200
+OutwardsModificationForm.height = 650
+
+export default OutwardsModificationForm

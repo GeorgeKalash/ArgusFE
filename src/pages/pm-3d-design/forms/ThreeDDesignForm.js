@@ -31,7 +31,7 @@ import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function ThreeDDesignForm({ recordId, window }) {
+const ThreeDDesignForm = ({ recordId, window }) => {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -656,3 +656,8 @@ export default function ThreeDDesignForm({ recordId, window }) {
     </FormShell>
   )
 }
+
+ThreeDDesignForm.width = 800
+ThreeDDesignForm.height = 650
+
+export default ThreeDDesignForm

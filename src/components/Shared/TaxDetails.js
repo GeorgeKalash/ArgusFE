@@ -115,4 +115,6 @@ const TaxDetails = props => {
   )
 }
 
+TaxDetails.width = 1000
+
 export default TaxDetails

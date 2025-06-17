@@ -1142,7 +1142,7 @@ export default function SaleTransactionForm({
         )}&_rateDivision=${RateDivision.SALES}`
       })
 
-      return res.record.exRate * 1000
+      return res.record?.exRate * 1000
     }
   }
 

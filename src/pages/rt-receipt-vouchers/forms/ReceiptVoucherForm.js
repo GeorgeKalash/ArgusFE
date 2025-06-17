@@ -30,7 +30,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function ReceiptVoucherForm({ recordId, cashAccountId, form = null, window }) {
+const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -459,3 +459,7 @@ export default function ReceiptVoucherForm({ recordId, cashAccountId, form = nul
     </FormShell>
   )
 }
+
+ReceiptVoucherForm.width = 1000
+
+export default ReceiptVoucherForm
