@@ -239,5 +239,14 @@ export const FinancialRepository = {
     set: service + 'setPR',
     page: service + 'pagePR',
     snapshot: service + 'snapshotPR'
+  },
+  PaymentOrders: {
+    get: service + 'getPO',
+    del: service + 'delPO',
+    set2: service + 'set2PO',
+    page: service + 'pagePO',
+    page2: service + 'page2PO',
+    snapshot: service + 'snapshotPO',
+    cancel: service + 'cancelPO'
   }
 }
