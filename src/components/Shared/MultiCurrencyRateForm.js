@@ -129,6 +129,7 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
                 value={formik?.values?.exRate}
                 label={labels.rate}
                 readOnly={formik?.values?.amount == 0}
+                maxAccess={maxAccess}
                 onClear={() => {
                   formik.setFieldValue('baseAmount', '')
                   formik.setFieldValue('exRate', '')
@@ -175,6 +176,7 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
                   formik.setFieldValue('baseAmount', '')
                   formik.setFieldValue('exRate', '')
                 }}
+                maxAccess={maxAccess}
                 onChange={e => {
                   const inputValue = e.target.value
                   if (!inputValue) {
