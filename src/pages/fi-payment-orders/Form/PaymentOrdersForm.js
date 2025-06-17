@@ -248,7 +248,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
     }
   }
 
-    const onClose = async () => {
+  const onClose = async () => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentOrders.close,
       record: JSON.stringify(formik.values)
@@ -263,7 +263,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
     }
   }
 
-    const onReopen = async () => {
+  const onReopen = async () => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentOrders.reopen,
       record: JSON.stringify(formik.values)
@@ -320,7 +320,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
       condition: true,
       onClick: 'onApproval',
       disabled: !isClosed
-    },
+    }
   ]
 
   return (
@@ -356,7 +356,6 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 maxAccess={maxAccess}
               />
             </Grid>
-
             <Grid item xs={6}>
               <Grid container spacing={1} alignItems='center'>
                 <Grid item xs={8}>
@@ -394,7 +393,6 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 </Grid>
               </Grid>
             </Grid>
-
             <Grid item xs={6}>
               <CustomTextField
                 name='reference'
@@ -406,6 +404,42 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                datasetId={DataSets.PAYMENT_METHOD}
+                name='paymentMethod'
+                label={labels.paymentMethod}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                required
+                readOnly={isCancelled}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('paymentMethod', newValue?.key || null)
+                  if (!newValue?.key) {
+                    formik.setFieldValue('cashAccountId', '')
+                  }
+                }}
+                error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomDatePicker
+                name='date'
+                label={labels.date}
+                value={formik.values?.date}
+                required
+                onChange={async (e, newValue) => {
+                  formik.setFieldValue('date', newValue)
+                  await getMultiCurrencyFormData(formik.values.currencyId, newValue)
+                }}
+                onClear={() => formik.setFieldValue('date', null)}
+                readOnly={isCancelled}
+                error={formik.touched.date && Boolean(formik.errors.date)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -431,71 +465,21 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                datasetId={DataSets.FI_PV_GROUP_TYPE}
-                name='accountType'
-                filter={item => item.key == 1 || item.key == 4}
-                label={labels.accountType}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                required
+                endpointId={SystemRepository.Plant.qry}
+                name='plantId'
+                label={labels.plant}
+                valueField='recordId'
                 readOnly={isCancelled}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('accountType', newValue?.key || null)
-                  if (!newValue?.key) {
-                    formik.setFieldValue('accountId', null)
-                    formik.setFieldValue('accountRef', '')
-                    formik.setFieldValue('accountName', '')
-                  }
-                }}
-                error={formik.touched.accountType && Boolean(formik.errors.accountType)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomDatePicker
-                name='date'
-                label={labels.date}
-                value={formik.values?.date}
-                required
-                onChange={async (e, newValue) => {
-                  formik.setFieldValue('date', newValue)
-                  await getMultiCurrencyFormData(formik.values.currencyId, newValue)
-                }}
-                onClear={() => formik.setFieldValue('date', null)}
-                readOnly={isCancelled}
-                error={formik.touched.date && Boolean(formik.errors.date)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <ResourceLookup
-                endpointId={FinancialRepository.Account.snapshot}
-                name='accountId'
-                readOnly={isCancelled || !formik.values.accountType}
-                label={labels.accountReference}
-                valueField='reference'
-                displayField='name'
-                valueShow='accountRef'
-                secondValueShow='accountName'
-                form={formik}
+                displayField={['reference', 'name']}
                 columnsInDropDown={[
-                  { key: 'reference', value: 'Account Ref' },
-                  { key: 'name', value: 'Name', grid: 4 },
-                  { key: 'keywords', value: 'Keywords' }
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
                 ]}
-                firstFieldWidth={4}
-                displayFieldWidth={4}
-                filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
+                values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('accountId', newValue?.recordId || '')
-                  formik.setFieldValue('accountRef', newValue?.reference || '')
-                  formik.setFieldValue('accountName', newValue?.name || '')
-                  formik.setFieldValue('accountGroupName', newValue?.groupName || '')
+                  formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
                 }}
-                error={formik.touched.accountId && Boolean(formik.errors.accountId)}
-                maxAccess={maxAccess}
+                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -527,6 +511,29 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
+                datasetId={DataSets.FI_PV_GROUP_TYPE}
+                name='accountType'
+                filter={item => item.key == 1 || item.key == 4}
+                label={labels.accountType}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                required
+                readOnly={isCancelled}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('accountType', newValue?.key || null)
+                  if (!newValue?.key) {
+                    formik.setFieldValue('accountId', null)
+                    formik.setFieldValue('accountRef', '')
+                    formik.setFieldValue('accountName', '')
+                  }
+                }}
+                error={formik.touched.accountType && Boolean(formik.errors.accountType)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
                 endpointId={FinancialRepository.DescriptionTemplate.qry}
                 name='templateId'
                 label={labels.descriptionTemplate}
@@ -548,45 +555,33 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 maxAccess={maxAccess}
               />
             </Grid>
-
             <Grid item xs={6}>
-              <ResourceComboBox
-                datasetId={DataSets.PAYMENT_METHOD}
-                name='paymentMethod'
-                label={labels.paymentMethod}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                required
-                readOnly={isCancelled}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('paymentMethod', newValue?.key || null)
-                  if (!newValue?.key) {
-                    formik.setFieldValue('checkbookId', null)
-                  }
-                }}
-                error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
-                name='plantId'
-                label={labels.plant}
-                valueField='recordId'
-                readOnly={isCancelled}
-                displayField={['reference', 'name']}
+              <ResourceLookup
+                endpointId={FinancialRepository.Account.snapshot}
+                name='accountId'
+                readOnly={isCancelled || !formik.values.accountType}
+                label={labels.accountReference}
+                valueField='reference'
+                displayField='name'
+                valueShow='accountRef'
+                secondValueShow='accountName'
+                form={formik}
                 columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
+                  { key: 'reference', value: 'Account Ref' },
+                  { key: 'name', value: 'Name', grid: 4 },
+                  { key: 'keywords', value: 'Keywords' }
                 ]}
-                values={formik.values}
+                firstFieldWidth={4}
+                displayFieldWidth={4}
+                filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
+                  formik.setFieldValue('accountId', newValue?.recordId || '')
+                  formik.setFieldValue('accountRef', newValue?.reference || '')
+                  formik.setFieldValue('accountName', newValue?.name || '')
+                  formik.setFieldValue('accountGroupName', newValue?.groupName || '')
                 }}
-                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                error={formik.touched.accountId && Boolean(formik.errors.accountId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -602,6 +597,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 onClear={() => formik.setFieldValue('notes', '')}
               />
             </Grid>
+            
           </Grid>
         </Grow>
       </VertLayout>
