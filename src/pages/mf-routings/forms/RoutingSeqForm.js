@@ -10,6 +10,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
+import { createConditionalSchema } from 'src/lib/validation'
 
 const RoutingSeqForm = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -20,44 +21,33 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
 
   const filteredOperations = useRef([])
 
-  function createRowValidation() {
-    return yup.mixed().test(function (value) {
-      const { seqNo, name, workCenterId, operationId } = this.parent
-      const isAnyFieldFilled = !!(seqNo || name || workCenterId || operationId)
-
-      if (isAnyFieldFilled) {
-        return !!value
-      }
-
-      return true
-    })
+  const conditions = {
+    seqNo: row => row.seqNo,
+    name: row => row.name,
+    workCenterId: row => row.workCenterId,
+    operationId: row => row.operationId
   }
-
-  const rowValidationSchema = yup.object({
-    seqNo: createRowValidation(),
-    name: createRowValidation(),
-    workCenterId: createRowValidation(),
-    operationId: createRowValidation()
-  })
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'data')
 
   const { formik } = useForm({
-    enableReinitialize: false,
+    maxAccess,
     validateOnChange: true,
+    conditionSchema: ['data'],
     validationSchema: yup.object({
-      data: yup.array().of(rowValidationSchema)
+      data: yup.array().of(schema)
     }),
     initialValues: {
       data: [{ id: 1, seqNo: 0 }]
     },
     onSubmit: async data => {
       const updatedRows = data?.data
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         .map(itemDetails => {
           return {
             ...itemDetails,
             routingId: recordId
           }
         })
-        .filter(item => item.workCenterId || item.operationId)
 
       await postRequest({
         extension: ManufacturingRepository.RoutingSequence.set2,

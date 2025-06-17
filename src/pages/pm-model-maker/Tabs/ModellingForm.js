@@ -23,6 +23,7 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
 export default function ModellingForm({ labels, access, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -63,6 +64,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
     validationSchema: yup.object({
       laborId: yup.string().required(),
       threeDPId: yup.string().required(),
+      date: yup.date().required(),
       startDate: yup.date().required(),
       endDate: yup.date().required()
     }),
@@ -180,20 +182,19 @@ export default function ModellingForm({ labels, access, setStore, store }) {
     {
       key: 'threeDPrinting',
       condition: true,
-
-      // onClick: async () => {
-      //   const threeDFormLabels = await getLabels(ResourceIds.Printing)
-      //   stack({
-      //     Component: ThreeDPrintForm,
-      //     props: {
-      //       recordId: formik.values?.threeDPId,
-      //       labels: threeDFormLabels
-      //     },
-      //     width: 750,
-      //     height: 650,
-      //     title: threeDFormLabels.ThreeDPrint
-      //   })
-      // },
+      onClick: async () => {
+        const threeDFormLabels = await getLabels(ResourceIds.Printing)
+        stack({
+          Component: ThreeDPrintForm,
+          props: {
+            recordId: formik.values?.threeDPId,
+            labels: threeDFormLabels
+          },
+          width: 750,
+          height: 650,
+          title: threeDFormLabels.ThreeDPrint
+        })
+      },
       disabled: !formik.values.threeDPId
     }
   ]
@@ -229,9 +230,25 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId)
+                onChange={async (event, newValue) => {
                   changeDT(newValue)
+
+                  formik.setFieldValue('productionLineId', null)
+
+                  if (newValue?.recordId) {
+                    const { record } = await getRequest({
+                      extension: ProductModelingRepository.DocumentTypeDefault.get,
+                      parameters: `_dtId=${newValue?.recordId}`
+                    })
+
+                    formik.setFieldValue('productionLineId', record?.productionLineId)
+
+                    if (record?.productionLineId) {
+                      formik.setFieldValue('threeDPRef', '')
+                      formik.setFieldValue('threeDPId', null)
+                    }
+                  }
+                  formik.setFieldValue('dtId', newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
@@ -248,6 +265,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
+
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={ManufacturingRepository.ProductionLine.qry}
@@ -263,6 +281,19 @@ export default function ModellingForm({ labels, access, setStore, store }) {
                 }}
                 readOnly
                 error={formik.touched.productionLineId && formik.errors.productionLineId}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='date'
+                required
+                label={labels.date}
+                value={formik.values.date}
+                onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
+                readOnly={isClosed}
+                onClear={() => formik.setFieldValue('date', null)}
+                error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -314,8 +345,8 @@ export default function ModellingForm({ labels, access, setStore, store }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={ProductModelingRepository.Printing.snapshot}
-                parameters={{ _productionLineId: formik.values.productionLineId }}
+                endpointId={ProductModelingRepository.Printing.snapshot2}
+                parameters={{ _productionLineId: formik.values.productionLineId || 0 }}
                 valueField='reference'
                 displayField='reference'
                 name='threeDPId'

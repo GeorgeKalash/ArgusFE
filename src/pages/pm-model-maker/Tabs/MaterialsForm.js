@@ -14,12 +14,19 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function MaterialsForm({ store, labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId, isClosed } = store
   const editMode = !!recordId
+
+  const conditions = {
+    itemId: row => row?.itemId,
+    pcs: row => row?.pcs
+  }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
     initialValues: {
@@ -29,38 +36,7 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      items: yup
-        .array()
-        .of(
-          yup.object().shape({
-            itemId: yup.number().required(),
-            pcs: yup.string().test(function (value) {
-              const isAnyFieldFilled = this.parent.size
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled && isAnyFieldFilled != 0) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            }),
-            size: yup.string().test(function (value) {
-              const isAnyFieldFilled = this.parent.pcs
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled && isAnyFieldFilled != 0) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            })
-          })
-        )
-        .required()
+      items: yup.array().of(schema)
     }),
     onSubmit: async values => {
       const updatedRows = values?.items
@@ -70,7 +46,7 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
             seqNo: index + 1
           }
         })
-        .filter(item => item.pcs || item.size)
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
 
       await postRequest({
         extension: ProductModelingRepository.ModellingMaterial.set2,
