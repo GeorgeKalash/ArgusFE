@@ -150,7 +150,7 @@ const ModelMaker = () => {
         access,
         recordId
       },
-      width: 800,
+      width: 900,
       height: 630,
       title: labels.modelMaker
     })

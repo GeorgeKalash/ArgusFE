@@ -11,6 +11,9 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { Grid } from '@mui/material'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 export default function MaterialsForm({ store, labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -61,7 +64,7 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
     }),
     onSubmit: async values => {
       const updatedRows = values?.items
-        .map((itemDetails, index) => {
+        .map(({ id, itemCategoryName, rawCategoryName, itemCategoryRef, rawCategoryRef, ...itemDetails }, index) => {
           return {
             ...itemDetails,
             seqNo: index + 1
@@ -96,10 +99,18 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
           { from: 'recordId', to: 'itemId' },
           { from: 'name', to: 'itemName' },
           { from: 'sku', to: 'sku' },
-          { from: 'categoryName', to: 'category' },
-          { from: 'categoryId', to: 'categoryId' }
+          { from: 'categoryName', to: 'itemCategoryName' }
         ],
         displayFieldWidth: 2
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (newRow.itemId) {
+          const { record } = await getRequest({
+            extension: InventoryRepository.ItemProduction.get,
+            parameters: `_recordId=${newRow.itemId}`
+          })
+          update({ rawCategoryName: record?.rmcName })
+        }
       }
     },
     {
@@ -113,7 +124,15 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
     {
       component: 'textfield',
       label: labels.category,
-      name: 'category',
+      name: 'itemCategoryName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.rawCategory,
+      name: 'rawCategoryName',
       props: {
         readOnly: true
       }
@@ -170,6 +189,18 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
     })()
   }, [])
 
+  const totalPcs = formik.values.items.reduce((sum, row) => {
+    const value = parseFloat(row?.pcs?.toString().replace(/,/g, '')) || 0
+
+    return sum + value
+  }, 0)
+
+  const totalWgt = formik.values.items.reduce((sum, row) => {
+    const Value = parseFloat(row?.weight?.toString().replace(/,/g, '')) || 0
+
+    return sum + Value
+  }, 0)
+
   return (
     <FormShell
       form={formik}
@@ -193,6 +224,28 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
             disabled={isClosed}
           />
         </Grow>
+        <Fixed>
+          <Grid container justifyContent='flex-end' spacing={2}>
+            <Grid item xs={3}>
+              <CustomNumberField
+                name='totalPcs'
+                maxAccess={maxAccess}
+                label={labels.totalPcs}
+                value={totalPcs}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField
+                name='totalWgt'
+                maxAccess={maxAccess}
+                label={labels.totalWgt}
+                value={totalWgt}
+                readOnly
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )
