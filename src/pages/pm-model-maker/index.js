@@ -39,6 +39,11 @@ const ModelMaker = () => {
 
   const columns = [
     {
+      field: 'dtName',
+      headerName: labels.documentType,
+      flex: 1
+    },
+    {
       field: 'reference',
       headerName: labels.reference,
       flex: 1
@@ -50,13 +55,25 @@ const ModelMaker = () => {
       type: 'date'
     },
     {
-      field: 'laborRef',
-      headerName: labels.labor,
-      flex: 1
+      field: 'startDate',
+      headerName: labels.startDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'endDate',
+      headerName: labels.endDate,
+      flex: 1,
+      type: 'date'
     },
     {
       field: 'threeDPRef',
       headerName: labels.print,
+      flex: 1
+    },
+    {
+      field: 'laborRef',
+      headerName: labels.labor,
       flex: 1
     },
     {
@@ -66,13 +83,18 @@ const ModelMaker = () => {
       type: 'number'
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
+      field: 'productionLineName',
+      headerName: labels.productionLine,
       flex: 1
     },
     {
       field: 'rsName',
       headerName: labels.rsName,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     },
     {

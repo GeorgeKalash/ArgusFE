@@ -142,7 +142,8 @@ export const ManufacturingRepository = {
     post: service + 'postJOB',
     start: service + 'startJOB',
     stop: service + 'stopJOB',
-    wip: service + 'wipJOB'
+    wip: service + 'wipJOB',
+    sync: service + 'syncJOB'
   },
   ProductionSheet: {
     page: service + 'pagePST',
@@ -347,6 +348,12 @@ export const ManufacturingRepository = {
   JobWorkCenter: {
     close: service + 'closeJWC',
     reopen: service + 'reopenJWC'
+  },
+  LineItemCapacity: {
+    set2: service + 'set2LIT',
+    del: service + 'delLIT',
+    qry: service + 'qryLIT',
+    page: service + 'pageLIT'
   },
   CostGroupOverhead: {
     set2: service + 'set2CGV',

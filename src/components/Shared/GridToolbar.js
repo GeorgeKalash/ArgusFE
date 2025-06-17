@@ -1,14 +1,13 @@
-import { Box, Button, Grid, Tooltip, DialogActions } from '@mui/material'
+import { Grid, DialogActions } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useState, useContext, useEffect } from 'react'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ControlContext } from 'src/providers/ControlContext'
 import { getButtons } from './Buttons'
-import CustomComboBox from '../Inputs/CustomComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { useWindow } from 'src/windows'
-import PreviewReport from './PreviewReport'
+import ReportGenerator from './ReportGenerator'
+import CustomButton from '../Inputs/CustomButton'
 
 const GridToolbar = ({
   onAdd,
@@ -30,35 +29,40 @@ const GridToolbar = ({
   const { getRequest } = useContext(RequestsContext)
   const [searchValue, setSearchValue] = useState('')
   const { platformLabels } = useContext(ControlContext)
-  const [tooltip, setTooltip] = useState('')
-  const { stack } = useWindow()
-  const [selectedReport, setSelectedReport] = useState(null)
   const [reportStore, setReportStore] = useState([])
+  const [zoomSpacing, setZoomSpacing] = useState(2)
 
-  function clear() {
+  useEffect(() => {
+    const updateZoomSpacing = () => {
+      const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom')) || 1
+      setZoomSpacing(zoom === 1 ? 2 : 5)
+    }
+
+    updateZoomSpacing()
+    window.addEventListener('resize', updateZoomSpacing)
+
+    return () => window.removeEventListener('resize', updateZoomSpacing)
+  }, [])
+
+  const clear = () => {
     setSearchValue('')
     onSearch('')
     if (onSearchClear) onSearchClear()
   }
 
-  const handleButtonMouseEnter = text => {
-    setTooltip(text)
-  }
-
-  const handleButtonMouseLeave = () => {
-    setTooltip(null)
-  }
-
-  const getReportLayout = () => {
+  const getReportLayout = async setReport => {
     setReportStore([])
 
-    getRequest({
+    await getRequest({
       extension: SystemRepository.ReportLayout,
       parameters: `_resourceId=${previewReport}`
     }).then(res => {
       if (res?.list) {
         const formattedReports = res.list.map(item => ({
-          api_url: item.api,
+          api_url:
+            item.api.includes('_params=') && props?.reportParams
+              ? item.api.replace('_params=', `_params=${props.reportParams}`)
+              : item.api,
           reportClass: item.instanceName,
           parameters: item.parameters,
           layoutName: item.layoutName,
@@ -66,81 +70,36 @@ const GridToolbar = ({
         }))
         setReportStore(formattedReports)
         if (formattedReports.length > 0) {
-          setSelectedReport(formattedReports[0])
+          setReport(prev => ({
+            ...prev,
+            selectedReport: formattedReports[0]
+          }))
         }
       }
     })
   }
 
-  useEffect(() => {
-    const fetchReportLayout = async () => {
-      if (previewReport) {
-        await getReportLayout()
-        if (reportStore.length > 0) setSelectedReport(reportStore[0])
-      }
-    }
-
-    fetchReportLayout()
-  }, [])
-
   const buttons = getButtons(platformLabels)
 
   return (
     <DialogActions sx={{ px: '0px !important', py: '4px !important', flexDirection: 'column' }}>
-      <style>
-        {`
-          .button-container {
-            position: relative;
-            display: inline-block;
-          }
-          .toast {
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333333ad;
-            color: white;
-            padding: 3px 7px;
-            border-radius: 7px;
-            opacity: 0;
-            transition: opacity 0.3s, top 0.3s;
-            z-index: 1;
-          }
-          .button-container:hover .toast {
-            opacity: 1;
-            top: -40px;
-          }
-        `}
-      </style>
       <Grid container spacing={2} sx={{ display: 'flex', px: 2, width: '100%', justifyContent: 'space-between' }}>
-        <Grid item>
-          <Grid container spacing={2}>
+        <Grid item xs={previewReport ? 6 : 9}>
+          <Grid container spacing={zoomSpacing}>
             {leftSection}
             {onAdd && addBtnVisible && (
               <Grid item sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-                <Tooltip title={platformLabels.add}>
-                  <Button
-                    onClick={onAdd}
-                    variant='contained'
-                    style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
-                    disabled={disableAdd}
-                    sx={{
-                      mr: 1,
-                      '&:hover': {
-                        opacity: 0.8
-                      },
-                      width: '20px',
-                      height: '33px',
-                      objectFit: 'contain'
-                    }}
-                  >
-                    <img src='/images/buttonsIcons/add.png' alt={platformLabels.add} />
-                  </Button>
-                </Tooltip>
+                <CustomButton
+                  onClick={onAdd}
+                  style={{ border: '1px solid #4eb558' }}
+                  color={'transparent'}
+                  disabled={disableAdd}
+                  image={'add.png'}
+                />
               </Grid>
             )}
             {inputSearch && (
-              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', m: '0px !important' }}>
+              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', mt: '1px !important' }}>
                 <CustomTextField
                   name='search'
                   value={searchValue}
@@ -167,37 +126,13 @@ const GridToolbar = ({
 
                   return (
                     isVisible && (
-                      <div
-                        className='button-container'
-                        onMouseEnter={() => (isDisabled ? null : handleButtonMouseEnter(button.label))}
-                        onMouseLeave={handleButtonMouseLeave}
-                        key={index}
-                      >
-                        <Button
-                          onClick={handleClick}
-                          variant='contained'
-                          sx={{
-                            mr: 1,
-                            backgroundColor: button.color,
-                            '&:hover': {
-                              backgroundColor: button.color,
-                              opacity: 0.8
-                            },
-                            border: button.border,
-                            width: 'auto',
-                            height: '33px',
-                            objectFit: 'contain'
-                          }}
-                          disabled={isDisabled}
-                        >
-                          {button.image ? (
-                            <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
-                          ) : (
-                            button.label
-                          )}
-                        </Button>
-                        {button.image ? tooltip && <div className='toast'>{tooltip}</div> : null}
-                      </div>
+                      <CustomButton
+                        key={button.key || index}
+                        onClick={handleClick}
+                        image={button.image}
+                        tooltip={button.label}
+                        disabled={isDisabled}
+                      />
                     )
                   )
                 })}
@@ -205,56 +140,17 @@ const GridToolbar = ({
           </Grid>
         </Grid>
         {previewReport && (
-          <Grid item>
-            <Grid item sx={{ display: 'flex', mr: 2 }}>
-              <CustomComboBox
-                label={platformLabels.SelectReport}
-                valueField='caption'
-                displayField='layoutName'
-                store={reportStore}
-                value={selectedReport}
-                onChange={(e, newValue) => setSelectedReport(newValue)}
-                sx={{ width: 250 }}
-                disableClearable
-              />
-              <Button
-                variant='contained'
-                disabled={!selectedReport}
-                onClick={() =>
-                  stack({
-                    Component: PreviewReport,
-                    props: {
-                      selectedReport: selectedReport,
-                      outerGrid: true,
-                      onSuccess: () => {}
-                    },
-                    width: 1000,
-                    height: 500,
-                    title: platformLabels.PreviewReport
-                  })
-                }
-                sx={{
-                  ml: 2,
-                  backgroundColor: '#231F20',
-                  '&:hover': {
-                    backgroundColor: '#231F20',
-                    opacity: 0.8
-                  },
-                  width: 'auto',
-                  height: '35px',
-                  objectFit: 'contain'
-                }}
-                size='small'
-              >
-                <Tooltip title={platformLabels.Preview}>
-                  <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
-                </Tooltip>
-              </Button>
-            </Grid>
-          </Grid>
+          <ReportGenerator
+            getReportLayout={getReportLayout}
+            previewReport={previewReport}
+            condition={props?.reportParams}
+            reportStore={reportStore}
+          />
         )}
       </Grid>
-      <Grid item>{rightSection}</Grid>
+      <Grid item xs={3}>
+        {rightSection}
+      </Grid>
       {bottomSection}
     </DialogActions>
   )

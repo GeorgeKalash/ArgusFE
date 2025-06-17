@@ -8,29 +8,32 @@ import { useWindow } from 'src/windows'
 import POSForm from 'src/pages/rt-receipt-vouchers/forms/POSForm'
 
 export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
-  const { labels: labels } = useResourceQuery({
+  const editMode = !!rest.data.recordId
+
+  const { labels, access } = useResourceQuery({
     datasetId: ResourceIds?.POSPayment
   })
   const { stack } = useWindow()
 
-  useEffect(() => {
-    const initialValuePayment = [
-      {
-        id: 1,
-        seqNo: 0,
-        cashAccountId: null,
-        cashAccount: '',
-        posStatus: 1,
-        posStatusName: '',
-        type: '',
-        amount: '',
-        paidAmount: '',
-        returnedAmount: 0,
-        bankFees: '',
-        receiptRef: ''
-      }
-    ]
+  const initialValuePayment = [
+    {
+      id: 1,
+      seqNo: 0,
+      cashAccountId: null,
+      cashAccount: '',
+      posStatus: 1,
+      posStatusName: '',
+      type: '',
+      amount: '',
+      paidAmount: '',
+      returnedAmount: 0,
+      bankFees: '',
+      receiptRef: '',
+      pos: true
+    }
+  ]
 
+  useEffect(() => {
     const paymentValidation = yup
       .array()
       .of(
@@ -119,7 +122,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
 
         const currentAmount = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
 
-        update({ amount: currentAmount, POS: newRow.type === '1' })
+        update({ amount: currentAmount, pos: !editMode || newRow.type != 3 })
       }
     },
     {
@@ -203,7 +206,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     },
     {
       component: 'resourcecombobox',
-      label: labels?.posStatusName,
+      label: labels?.posStatus,
       name: 'posStatusName',
       props: {
         readOnly: true,
@@ -218,14 +221,17 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     },
     {
       component: 'button',
-      name: 'POS',
+      name: 'pos',
+      props: {
+        imgSrc: '/images/buttonsIcons/open-external.png'
+      },
       label: labels.pos,
       onClick: (e, row, update, updateRow) => {
         stack({
           Component: POSForm,
-          props: {},
+          props: { labels, data: rest.data, amount: row?.amount, maxAccess: access },
           width: 700,
-          title: labels?.POS
+          title: labels?.pos
         })
       }
     }
@@ -242,6 +248,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
         }
       }}
       value={value}
+      initialValues={initialValuePayment[0]}
     />
   )
 }

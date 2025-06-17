@@ -1,13 +1,12 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from 'src/lib/date-helper'
-import { Grid, FormControlLabel, Checkbox, Stack } from '@mui/material'
+import { Grid, Stack } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -57,8 +56,18 @@ import { CommonContext } from 'src/providers/CommonContext'
 import ItemPromotion from 'src/components/Shared/ItemPromotion'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
+import { useError } from 'src/error'
+import { createConditionalSchema } from 'src/lib/validation'
 
-export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window, getResourceId }) {
+export default function PurchaseTransactionForm({
+  labels,
+  access,
+  recordId,
+  functionId,
+  window,
+  getResourceId,
+  getGLResource
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
@@ -70,6 +79,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const [defaultsDataState, setDefaultsDataState] = useState(null)
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
+  const { stack: stackError } = useError()
 
   const [cycleButtonState, setCycleButtonState] = useState({
     text: '%',
@@ -82,6 +92,14 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     enabled: !recordId,
     objectName: 'header'
   })
+
+  const conditions = {
+    sku: row => row?.sku,
+    itemName: row => row?.itemName,
+    qty: row => row?.qty > 0
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const initialValues = {
     recordId: recordId,
@@ -134,8 +152,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         id: 1,
         orderId: recordId || 0,
         itemId: null,
-        sku: null,
-        itemName: null,
+        sku: '',
+        itemName: '',
         seqNo: 1,
         siteId: '',
         muId: null,
@@ -195,8 +213,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
+    conditionSchema: ['items'],
     initialValues: initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -222,44 +240,37 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             return true
           })
       }),
-      items: yup
-        .array()
-        .of(
-          yup.object({
-            sku: yup.string().required(),
-            itemName: yup.string().required(),
-            qty: yup.number().required().min(1)
-          })
-        )
-        .required()
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const serialsValues = []
 
-      const updatedRows = obj.items.map(({ id, isVattable, taxDetails, ...rest }) => {
-        const { serials, ...restDetails } = rest
-        if (serials) {
-          const updatedSerials = serials.map((serialDetail, idx) => {
-            return {
-              ...serialDetail,
-              id: idx + 1,
-              seqNo: id,
-              srlSeqNo: 0,
-              componentSeqNo: 0,
-              invoiceId: formik.values.recordId || 0,
-              itemId: rest?.itemId
-            }
-          })
-          serialsValues.push(...updatedSerials)
-        }
+      const updatedRows = obj.items
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        .map(({ id, isVattable, taxDetails, ...rest }) => {
+          const { serials, ...restDetails } = rest
+          if (serials) {
+            const updatedSerials = serials.map((serialDetail, idx) => {
+              return {
+                ...serialDetail,
+                id: idx + 1,
+                seqNo: id,
+                srlSeqNo: 0,
+                componentSeqNo: 0,
+                invoiceId: formik.values.recordId || 0,
+                itemId: rest?.itemId
+              }
+            })
+            serialsValues.push(...updatedSerials)
+          }
 
-        return {
-          ...restDetails,
-          seqNo: id,
-          invoiceId: formik.values.recordId || 0,
-          applyVat: isVattable
-        }
-      })
+          return {
+            ...restDetails,
+            seqNo: id,
+            invoiceId: formik.values.recordId || 0,
+            applyVat: isVattable
+          }
+        })
 
       const payload = {
         header: {
@@ -359,7 +370,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
           { from: 'trackBy', to: 'trackBy' },
-          { from: 'msId', to: 'msId' }
+          { from: 'msId', to: 'msId' },
+          { from: 'isInactive', to: 'isInactive' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -372,6 +384,17 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         if (!newRow?.itemId) {
           update({
             enabled: false
+          })
+
+          return
+        }
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.items[0],
+            id: newRow.id
+          })
+          stackError({
+            message: labels.inactiveItem
           })
 
           return
@@ -732,6 +755,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       condition: true,
       onClick: 'onClickGL',
       valuesPath: formik.values.header,
+      datasetId: getGLResource(functionId),
       disabled: !editMode
     },
     {
@@ -1159,7 +1183,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
-
       const vatCalcRow = getVatCalc({
         basePrice: parseFloat(item?.basePrice),
         qty: parseFloat(item?.qty),

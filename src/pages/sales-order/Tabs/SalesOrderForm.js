@@ -47,6 +47,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -59,6 +60,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
+
+  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesOrder,
@@ -151,9 +154,18 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     endpointId: SaleRepository.SalesOrder.page
   })
 
+  const conditions = {
+    sku: row => row?.sku,
+    itemName: row => row?.itemName,
+    qty: row => row?.qty > 0
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines, maxAccess, 'items')
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
+    conditionSchema: ['items'],
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -161,55 +173,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       date: yup.string().required(),
       currencyId: yup.string().required(),
       clientId: yup.string().required(),
-      items: yup
-        .array()
-        .of(
-          yup.object().shape({
-            sku: yup.string().test(function (value) {
-              const row = this.parent
-              const isAnyFieldFilled = row.sku || row.itemName
-
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled || row.qty > 0) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            }),
-            qty: yup.string().test(function (value) {
-              const row = this.parent
-              const isAnyFieldFilled = row.sku || row.itemName
-
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled || row.qty > 0) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            }),
-            itemName: yup.string().test(function (value) {
-              const row = this.parent
-              const isAnyFieldFilled = row.sku || row.itemName
-
-              if (this.options.from[1]?.value?.items?.length === 1) {
-                if (isAnyFieldFilled || row.qty > 0) {
-                  return !!value
-                }
-
-                return true
-              }
-
-              return !!value
-            })
-          })
-        )
-        .required()
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const copy = { ...obj }
@@ -233,9 +197,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         copy.shipToAddressId = addressRes.recordId
       }
 
-      const updatedRows = formik.values.items
-        .filter(item => item.sku)
-        .map((itemDetails, index) => {
+      const updatedRows = obj.items
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        ?.map((itemDetails, index) => {
           const { physicalProperty, ...rest } = itemDetails
 
           return {
@@ -746,7 +710,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
               }
             })
           )
-        : [{ id: 1 }]
+        : formik.initialValues.items
 
     formik.setValues({
       ...soHeader.record,
@@ -924,8 +888,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       qty: itemPriceRow?.qty,
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
-      vatAmount: parseFloat(itemPriceRow?.vatAmount),
-      tdPct: formik?.values?.tdPct,
+      vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
+      tdPct: formik?.values?.tdPct || 0,
       taxDetails: formik.values.isVattable ? newRow.taxDetails : null
     })
 
@@ -1625,7 +1589,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     value={formik.values.currentDiscount}
                     displayCycleButton={true}
                     readOnly={isClosed}
-                    iconKey={cycleButtonState.text}                 
+                    iconKey={cycleButtonState.text}
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
                     handleButtonClick={handleButtonClick}

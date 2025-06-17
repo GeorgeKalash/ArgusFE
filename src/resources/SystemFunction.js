@@ -56,7 +56,7 @@ export const SystemFunction = {
   DraftSerialsIn: Module.Sales * 100 + 8,
   DraftInvoiceReturn: Module.Sales * 100 + 9, //draft serial return
   Clients: Module.Sales * 100 + 40,
-  ReurnOnInvoice: Module.Sales * 100 + 41,
+  ReturnOnInvoice: Module.Sales * 100 + 41,
   DeliveryOrder: Module.Delivery * 100 + 0,
   DeliveryReturn: Module.Delivery * 100 + 1,
   DeliveryTrip: Module.Delivery * 100 + 2,
@@ -120,6 +120,8 @@ export const SystemFunction = {
   DamageReturn: Module.Manufacturing * 100 + 13,
   JobOrderWizard: Module.Manufacturing * 100 + 14,
   BalanceTransferMultiAccount: Module.Financials * 100 + 13,
+  BalanceTransferPurchase: Module.Financials * 100 + 10,
+  BalanceTransferSales: Module.Financials * 100 + 11
 }
 
 export const getSystemFunctionModule = functionId => {

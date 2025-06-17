@@ -521,6 +521,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLAssemblies,
       disabled: !editMode
     },
     {

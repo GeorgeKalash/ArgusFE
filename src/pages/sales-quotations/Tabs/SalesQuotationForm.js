@@ -47,6 +47,7 @@ import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function SalesQuotationForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -59,6 +60,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   const [measurements, setMeasurements] = useState([])
   const [defaults, setDefaults] = useState(null)
   const [reCal, setReCal] = useState(false)
+  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesQuotation,
@@ -149,9 +151,16 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     endpointId: SaleRepository.SalesQuotations.page
   })
 
+  const conditions = {
+    sku: row => row?.sku,
+    qty: row => row?.qty > 0
+  }
+  const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines, maxAccess, 'items')
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
+    conditionSchema: ['items'],
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -161,13 +170,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       clientId: yup.string().test('clientId-required', 'Client ID is required if bpId is empty', function (value) {
         return this.parent.bpId ? true : !!value
       }),
-      items: yup.array().of(
-        yup.object().shape({
-          qty: yup.string().test('check-value', 'qty must be at least 1', function (value) {
-            return !!this.parent.sku ? Number(value) > 0 : true
-          })
-        })
-      )
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const copy = {
@@ -193,7 +196,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       }
 
       const updatedRows = formik.values.items
-        .filter(item => item.sku)
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         .map((itemDetails, index) => {
           const { physicalProperty, ...rest } = itemDetails
 
@@ -223,12 +226,12 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   const editMode = !!formik.values.recordId
   const isRaw = formik.values.status === 1
 
-  async function getFilteredMU(itemId) {
+  async function getFilteredMU(itemId, msId = null) {
     if (!itemId) return
 
     const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-
-    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    const updatedMsId = currentItemId == 0 ? msId || currentItemId : currentItemId
+    const arrayMU = measurements?.filter(item => item.msId == updatedMsId) || []
     filteredMeasurements.current = arrayMU
   }
 
@@ -303,7 +306,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         }
 
         const filteredMU = measurements?.filter(item => item.msId === itemInfo?.msId)
-        getFilteredMU(newRow?.itemId)
+        getFilteredMU(newRow?.itemId, itemInfo?.msId)
 
         const filteredItems = filteredMeasurements?.current?.filter(item => item.recordId === newRow?.muId)
 
@@ -375,7 +378,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update(data)
-        getFilteredMU(newRow?.itemId)
+        getFilteredMU(newRow?.itemId, newRow?.msId)
         const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
         update({
           baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
@@ -1502,9 +1505,9 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
               action === 'delete' && setReCal(true)
             }}
             onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId)
+              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
-            initialValues={formik?.initialValues?.items?.[0]}            
+            initialValues={formik?.initialValues?.items?.[0]}
             value={formik.values.items}
             error={formik.errors.items}
             columns={columns}
