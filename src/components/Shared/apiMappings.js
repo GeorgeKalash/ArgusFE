@@ -184,7 +184,8 @@ export const apiMappings = {
     },
     valueOnSelection: 'recordId',
     firstField: 'reference',
-    secondField: 'name'
+    secondField: 'name',
+    displayFieldWidth: 2,
   },
   [ResourceIds.Groups]: {
     type: COMBOBOX,
@@ -238,7 +239,7 @@ export const apiMappings = {
     firstField: 'accountRef',
     valueOnSelection: 'recordId',
     secondField: 'name',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: 5
   },
   [ResourceIds.FlAccountGroups]: {
@@ -308,7 +309,7 @@ export const apiMappings = {
     firstField: 'accountRef',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: 5
   },
   [ResourceIds.FIAgingProfile]: {
@@ -354,7 +355,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: 5
   },
   [ResourceIds.Machines]: {
@@ -383,7 +384,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
@@ -400,7 +401,7 @@ export const apiMappings = {
     valueOnSelection: 'recordId',
     firstField: 'reference',
     secondValueShow: false,
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: 5
   },
   [ResourceIds.Expense_Types]: {
@@ -409,7 +410,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: 5
   },
   [ResourceIds.PriceLevels]: {
@@ -474,7 +475,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
@@ -605,7 +606,7 @@ export const apiMappings = {
     valueOnSelection: 'recordId',
     firstField: 'reference',
     secondField: 'itemName',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
@@ -642,7 +643,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
@@ -702,7 +703,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     firstFieldWidth: 5,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
@@ -748,7 +749,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
@@ -781,7 +782,7 @@ export const apiMappings = {
     secondDisplayField: false,
     firstField: ['reference', 'name', 'cellPhone'],
     valueOnSelection: 'recordId',
-    displayFieldWidth: 1,
+    displayFieldWidth: 2,
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' },
