@@ -30,7 +30,6 @@ export default function CountryRiskLevelForm({ labels, maxAccess, recordId }) {
       riskLevel: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       countryId: yup.string().required(),
