@@ -465,6 +465,7 @@ export const ResourceIds = {
   CategoryPriceGroup: 51119,
   PostWorkCenterJob: 42330,
   ProductionShifts: 42113,
+  LineItemCapacity: 42111,
   FIBalanceTfr: 31317,
   CorrespondentDispersalRate: 36138,
   SyncMFTrx: 42316,
@@ -475,6 +476,7 @@ export const ResourceIds = {
   BalanceTransferSales: 31319,
   PaymentReasons: 31116,
   IVSerials: 41224,
+  WorkCenterConsumptions: 42315,
   SketchDTD: 48601,
   ModelDTD: 48602,
   RubberDTD: 48603,
@@ -486,6 +488,8 @@ export const ResourceIds = {
   MaterialReqPlannings: 46303,
   ReturnOnInvoice: 51319,
   ChangeClient: 51336,
+  WCConsumptionImport: 42702,
+  Currency: 20136,
 
   // GL
   GLSalesInvoice: 51604,
@@ -526,5 +530,6 @@ export const ResourceIds = {
   GLBalanceTransferPurchase: 31602,
   GLBalanceTransferSales: 31603,
   GLBalanceTransferBetweenAccounts: 31601,
-  GLReturnOnInvoice: 51606
+  GLReturnOnInvoice: 51606,
+  SyncPurchaseTrx: 50602
 }
