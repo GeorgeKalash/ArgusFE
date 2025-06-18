@@ -144,6 +144,7 @@ const POTracking = () => {
     {
       component: 'date',
       name: 'deliveryDate',
+      flex: 2,
       label: labels?.deliveryDate
     },
     {
