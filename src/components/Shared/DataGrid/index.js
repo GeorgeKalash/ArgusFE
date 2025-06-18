@@ -398,7 +398,7 @@ export function DataGrid({
     })
 
     const row = params.data
-    if (onSelectionChange) onSelectionChange(row)
+    if (onSelectionChange) onSelectionChange(row, '', field)
   }
 
   const CustomCellRenderer = params => {
