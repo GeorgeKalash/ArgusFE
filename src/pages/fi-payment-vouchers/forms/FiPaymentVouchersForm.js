@@ -311,6 +311,22 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     }
   }
 
+  const onReset = async () => {
+    const payload = {
+      header: {
+        ...formik.values,
+        date: formatDateToApi(formik.values.date),
+        recordId: formik.values.recordId
+      },
+      items: [],
+      costCenters: []
+    }
+    await postRequest({
+      extension: FinancialRepository.ResetGL_PV.reset,
+      record: JSON.stringify(payload)
+    })
+  }
+
   const actions = [
     {
       key: 'Locked',
@@ -360,6 +376,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       condition: true,
       onClick: 'onClickGL',
       datasetId: ResourceIds.GLPaymentVouchers,
+      onReset,
       disabled: !editMode
     },
     {
