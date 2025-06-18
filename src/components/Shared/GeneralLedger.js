@@ -287,14 +287,12 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
     return response
   }
 
-  console.log(onReset)
-
   const actions = [
     {
       key: 'Reset',
       condition: onReset,
-      onClick: () => {
-        onReset() 
+      onClick: async () => {
+        await onReset() 
         window.close()
       },
       disabled: false
