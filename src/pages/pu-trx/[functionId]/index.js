@@ -210,8 +210,7 @@ const PuTrx = () => {
         access,
         functionId,
         getResourceId,
-        getGLResource,
-        getResourceMCR
+        getGLResource
       },
       width: 1330,
       height: 720,
@@ -230,18 +229,6 @@ const PuTrx = () => {
     })
     invalidate()
     toast.success(platformLabels.Deleted)
-  }
-
-    const getResourceMCR = functionId => {
-       const fn = Number(functionId)
-    switch (fn) {
-      case SystemFunction.PurchaseInvoice:
-        return ResourceIds.MCRPurchaseInvoice
-      case SystemFunction.PurchaseReturn:
-        return ResourceIds.MCRPurchaseReturn
-      default:
-        return null
-    }
   }
 
   return (

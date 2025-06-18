@@ -35,8 +35,7 @@ export default function MemosForm({
   recordId,
   functionId,
   getEndpoint,
-  getGLResourceId,
-  getResourceMCR
+  getGLResourceId
 }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
@@ -361,6 +360,22 @@ export default function MemosForm({
         return ResourceIds.ServiceBillReceived
       case SystemFunction.ServiceInvoice:
         return ResourceIds.ServiceInvoice
+      default:
+        return null
+    }
+  }
+
+  const getResourceMCR = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.CreditNote:
+        return ResourceIds.MCRCreditNote
+      case SystemFunction.DebitNote:
+        return ResourceIds.MCRDebitNote
+      case SystemFunction.ServiceBill:
+        return ResourceIds.MCRServiceBillReceived
+      case SystemFunction.ServiceInvoice:
+        return ResourceIds.MCRServiceInvoice
       default:
         return null
     }

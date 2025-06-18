@@ -62,6 +62,7 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import AccountSummary from 'src/components/Shared/AccountSummary'
 import { createConditionalSchema } from 'src/lib/validation'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 export default function SaleTransactionForm({
   labels,
@@ -71,8 +72,7 @@ export default function SaleTransactionForm({
   window,
   lockRecord,
   getResourceId,
-  getGLResource,
-  getResourceMCR
+  getGLResource
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -316,6 +316,22 @@ export default function SaleTransactionForm({
   })
 
   const itemsUpdate = useRef(formik?.values?.items)
+
+  const getResourceMCR = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.MCRSalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.MCRSalesReturn
+      case SystemFunction.ConsignmentIn:
+        return ResourceIds.MCRClientGOCIn
+      case SystemFunction.ConsignmentOut:
+        return ResourceIds.MCRClientGOCOut
+      default:
+        return null
+    }
+  }
 
   function openMCRForm(data) {
     stack({

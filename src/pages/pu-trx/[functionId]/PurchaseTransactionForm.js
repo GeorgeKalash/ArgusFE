@@ -60,6 +60,7 @@ import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { createConditionalSchema } from 'src/lib/validation'
 import CustomButton from 'src/components/Inputs/CustomButton'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 export default function PurchaseTransactionForm({
   labels,
@@ -68,8 +69,7 @@ export default function PurchaseTransactionForm({
   functionId,
   window,
   getResourceId,
-  getGLResource,
-  getResourceMCR
+  getGLResource
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -1427,6 +1427,18 @@ export default function PurchaseTransactionForm({
       formik.setFieldValue('header.rateTypeName', res.record?.rateTypeName)
       formik.setFieldValue('header.exchangeId', res.record?.exchangeId)
       formik.setFieldValue('header.exchangeName', res.record?.exchangeName)
+    }
+  }
+
+  const getResourceMCR = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.MCRPurchaseInvoice
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.MCRPurchaseReturn
+      default:
+        return null
     }
   }
 
