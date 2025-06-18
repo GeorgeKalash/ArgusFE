@@ -1,5 +1,6 @@
 import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
+import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -61,6 +62,9 @@ const UndeliveredItems = () => {
       marginDefault: defaultVat?.value,
       notes: ''
     },
+    validationSchema: yup.object({
+      plantId: yup.number().required()
+    }),
     validateOnChange: true,
     onSubmit: async obj => {
       const { clientId, siteId, notes, items, dtId, plantId, date } = obj
@@ -79,7 +83,13 @@ const UndeliveredItems = () => {
 
       postRequest({
         extension: DeliveryRepository.DeliveriesOrders.gen,
-        record: JSON.stringify({ clientId, siteId, notes, date: date ? formatDateToApi(date) : null, items: itemValues })
+        record: JSON.stringify({
+          clientId,
+          siteId,
+          notes,
+          date: date ? formatDateToApi(date) : null,
+          items: itemValues
+        })
       }).then(res => {
         if (res.recordId) {
           stack({
@@ -245,7 +255,7 @@ const UndeliveredItems = () => {
       key: 'ORD',
       condition: true,
       onClick: handleSubmit,
-      disabled: !clientId || !siteId
+      disabled: !clientId || !siteId || !plantId
     }
   ]
 
@@ -376,7 +386,8 @@ const UndeliveredItems = () => {
                   onChange={(event, newValue) => {
                     formik.setFieldValue('plantId', newValue?.recordId || 0)
                   }}
-                  error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                  required
+                  error={(formik.touched.plantId && Boolean(formik.errors.plantId)) || (clientId && !plantId)}
                   maxAccess={access}
                 />
               </Grid>
