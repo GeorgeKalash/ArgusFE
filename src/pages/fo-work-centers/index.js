@@ -73,13 +73,15 @@ const WorkCenters = () => {
     openForm()
   }
 
-  function openForm(obj) {
+  function openForm(record) {
     stack({
       Component: WorkCentersForm,
       props: {
         labels: _labels,
-        workCenterId: obj?.workCenterId,
-        recordId: obj?.workCenterId,
+        recordId: record
+          ? record.workCenterId
+          : null,
+        record,
         maxAccess: access
       },
       width: 500,
