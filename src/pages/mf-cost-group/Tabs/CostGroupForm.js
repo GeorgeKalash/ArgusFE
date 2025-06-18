@@ -24,7 +24,7 @@ export default function CostGroupForm({ labels, access: maxAccess, setStore, sto
 
   const { formik } = useForm({
     initialValues: {
-      recordId,
+      recordId: null,
       name: '',
       reference: ''
     },
@@ -63,9 +63,7 @@ export default function CostGroupForm({ labels, access: maxAccess, setStore, sto
   }
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) refetchForm(recordId)
-    })()
+    if (recordId) refetchForm(recordId)
   }, [])
 
   return (
