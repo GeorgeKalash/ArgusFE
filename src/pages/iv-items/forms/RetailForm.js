@@ -51,7 +51,7 @@ const RetailForm = ({ store, maxAccess }) => {
       ;(async function () {
         const response = await getRequest({
           extension: InventoryRepository.ItemRetail.qry,
-          parameters: `&_itemId=${store.recordId}&_count=${recordNum}`
+          parameters: `_itemId=${store.recordId}&_count=${recordNum}`
         })
 
         const updatedData = data?.map(row => {
@@ -97,7 +97,6 @@ const RetailForm = ({ store, maxAccess }) => {
         <Table
           columns={rowColumns}
           gridData={{ list: data }}
-          setData={setData}
           rowId={['key']}
           pageSize={50}
           pagination={false}
