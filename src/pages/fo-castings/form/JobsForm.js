@@ -13,19 +13,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
-import { createConditionalSchema } from 'src/lib/validation'
 
 export default function JobsForm({ labels, maxAccess, store, recalculateJobs, setRecalculateJobs }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = store?.recordId
-
-  const conditions = {
-    itemName: row => row.itemName,
-    sku: row => row.sku,
-    weight: row => row.weight >= 0
-  }
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
     enableReinitialize: false,
@@ -59,19 +51,19 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       ]
     },
     validationSchema: yup.object({
-      balanceWgt: yup.number().min(0).max(0).required(),
-      items: yup.array().of(schema)
+      balanceWgt: yup.number().min(0).max(0).required()
     }),
     onSubmit: async obj => {
-      const modifiedItems = obj?.items
-        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
-        .map((itemDetails, index) => {
-          return {
-            ...itemDetails,
-            id: index + 1,
-            castingId: recordId
-          }
-        })
+      const modifiedItems = obj?.items.map((itemDetails, index) => {
+        return {
+          ...itemDetails,
+          id: index + 1,
+          castingId: recordId,
+          jobPct: parseFloat(itemDetails?.jobPct || 0),
+          inputPcs: parseFloat(itemDetails?.inputPcs || 0),
+          outputPcs: parseFloat(itemDetails?.outputPcs || 0)
+        }
+      })
 
       const payload = { castingId: recordId, items: modifiedItems }
       await postRequest({
@@ -128,14 +120,10 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'numberfield',
       label: labels.outputWgt,
       name: 'outputWgt',
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        if (!newRow?.outputWgt) {
-          update({ metalWgt: 0 })
-
-          return
-        }
         update({
-          metalWgt: newRow?.outputWgt || 0 - newRow?.currentWgt || 0
+          metalWgt: (parseFloat(newRow?.outputWgt || 0) - parseFloat(newRow?.currentWgt || 0)).toFixed(3)
         })
         setRecalculateJobs(true)
       }
@@ -200,30 +188,25 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'numberfield',
       label: labels.damagePcs,
       name: 'damagedPcs',
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        if (!newRow?.damagedPcs) {
-          update({ outputPcs: 0 })
-
-          return
-        }
-        update({ outputPcs: parseFloat((newRow?.inputPcs || 0 - newRow?.damagedPcs || 0).toFixed(2)) })
+        update({ outputPcs: (parseFloat(newRow?.inputPcs || 0) - parseFloat(newRow?.damagedPcs || 0)).toFixed(2) })
       }
     },
     {
       component: 'numberfield',
       label: labels.damageQty,
       name: 'damagedQty',
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        if (!newRow?.damagedQty) {
-          update({ netWgt: 0 })
-
-          return
-        }
         update({
           netWgt: parseFloat(
             (
-              newRow?.currentWgt ||
-              0 + (newRow?.issuedWgt | (0 - newRow?.returnedWgt) || 0 - newRow?.loss || 0 - newRow?.damagedQty || 0)
+              parseFloat(newRow?.currentWgt || 0) +
+              (parseFloat(newRow?.issuedWgt || 0) -
+                parseFloat(newRow?.returnedWgt || 0) -
+                parseFloat(newRow?.loss || 0) -
+                parseFloat(newRow?.damagedQty || 0))
             ).toFixed(2)
           )
         })
@@ -246,12 +229,13 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       }
     }
   ]
+  console.log('formik', formik)
 
   function recalculateJobsOnChange() {
     let sumMetalWeight = 0
     const items = formik?.values?.items || []
 
-    for (const item of items) sumMetalWeight += item?.metalWgt || 0
+    for (const item of items) sumMetalWeight += parseFloat(item?.metalWgt || 0)
 
     const calculateJobPct = metalWgt => {
       if (!sumMetalWeight) return 0
@@ -266,13 +250,12 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
     const modifiedList = items.map(item => {
       const metalWgt = item?.metalWgt || 0
       const jobPct = calculateJobPct(metalWgt)
-
-      const issuedWgt = calculateByPct(jobPct, item?.inputWgt || 0)
-      const returnedWgt = calculateByPct(jobPct, item?.disassemblyWgt || 0)
-      const loss = calculateByPct(jobPct, item?.loss || 0, 2)
+      const issuedWgt = calculateByPct(jobPct, store?.castingInfo?.inputWgt || 0, 2)
+      const returnedWgt = calculateByPct(jobPct, formik?.values?.disassemblyWgt || 0)
+      const loss = calculateByPct(jobPct, store?.castingInfo?.loss || 0, 2)
 
       const netWgt = parseFloat(
-        ((item?.currentWgt || 0) + issuedWgt - returnedWgt - loss - (item?.damagedQty || 0)).toFixed(2)
+        (parseFloat(item?.currentWgt || 0) + issuedWgt - returnedWgt - loss - (item?.damagedQty || 0)).toFixed(2)
       )
 
       return {
@@ -313,7 +296,13 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
               inputPcs: parseFloat(item?.inputPcs || 0).toFixed(2),
               damagedPcs: parseFloat(item?.damagedPcs || 0).toFixed(2),
               outputPcs: parseFloat(item?.outputPcs || 0).toFixed(2),
-              netWgt: parseFloat(item?.netWgt || 0).toFixed(2)
+              netWgt: (
+                parseFloat(item?.currentWgt || 0) +
+                (parseFloat(item?.issuedWgt || 0) -
+                  parseFloat(item?.returnedWgt || 0) -
+                  parseFloat(item?.loss || 0) -
+                  parseFloat(item?.damagedQty || 0))
+              ).toFixed(2)
             }
           })
         : formik.initialValues.items
@@ -356,7 +345,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
             initialValues={formik?.initialValues?.items?.[0]}
             name='items'
             maxAccess={maxAccess}
-            allowDelete={!store?.isPosted && !store?.isCancelled}
+            allowDelete={false}
             disabled={store?.isCancelled || store?.isPosted}
           />
         </Grow>

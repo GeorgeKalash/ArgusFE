@@ -39,22 +39,9 @@ const FoCastings = () => {
 
   const columns = [
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
-    },
-    {
-      field: 'date',
-      headerName: labels.date,
-      flex: 1,
-      type: 'date'
-    },
-
-    {
-      field: 'inputWgt',
-      headerName: labels.inputWgt,
-      flex: 1,
-      type: 'number'
     },
     {
       field: 'loss',
@@ -63,8 +50,77 @@ const FoCastings = () => {
       type: 'number'
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
+      field: 'outputWgt',
+      headerName: labels.outputWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'netInputWgt',
+      headerName: labels.netInputWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'inputWgt',
+      headerName: labels.inputWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'expWgt',
+      headerName: labels.expWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'netWgt',
+      headerName: labels.netWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'mouldWgt',
+      headerName: labels.mouldWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'rmWgt',
+      headerName: labels.rmWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'grossWgt',
+      headerName: labels.grossWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'metalColorRef',
+      headerName: labels.metalColor,
+      flex: 1
+    },
+    {
+      field: 'metalRef',
+      headerName: labels.metal,
+      flex: 1
+    },
+    {
+      field: 'mouldRef',
+      headerName: labels.mould,
+      flex: 1
+    },
+    {
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'reference',
+      headerName: labels.reference,
       flex: 1
     }
   ]

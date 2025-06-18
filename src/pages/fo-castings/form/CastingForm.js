@@ -257,7 +257,8 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
       castingInfo: {
         ...prevStore.castingInfo,
         outputWgt: res?.record?.outputWgt.toFixed(3),
-        inputWgt: res?.record?.inputWgt.toFixed(3)
+        inputWgt: res?.record?.inputWgt.toFixed(3),
+        loss: res?.record?.loss.toFixed(3)
       }
     }))
   }
@@ -269,6 +270,13 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
     formik.setFieldValue('lossVariationPct', lossVariationPct || 0)
     formik.setFieldValue('netInputWgt', netInputWgt || 0)
     formik.setFieldValue('scrapWgt', store?.castingInfo?.scrapWgt || 0)
+    setStore(prevStore => ({
+      ...prevStore,
+      castingInfo: {
+        ...prevStore.castingInfo,
+        loss: Number(loss)
+      }
+    }))
   }, [suggestedWgt, loss, lossPct, lossVariationPct, store?.castingInfo?.scrapWgt])
 
   useEffect(() => {
@@ -573,9 +581,16 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
                       required
                       readOnly={isPosted || isCancelled}
                       onChange={e => {
+                        formik.setFieldValue('inputWgt', e.target.value)
+                        setStore(prevStore => ({
+                          ...prevStore,
+                          castingInfo: {
+                            ...prevStore.castingInfo,
+                            inputWgt: Number(e.target.value).toFixed(3)
+                          }
+                        }))
                         setRecal(true)
                         setRecalculateJobs(true)
-                        formik.setFieldValue('inputWgt', e.target.value)
                       }}
                       onClear={() => formik.setFieldValue('inputWgt', 0)}
                       error={formik.touched.inputWgt && Boolean(formik.errors.inputWgt)}
@@ -605,6 +620,13 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
                       onChange={e => {
                         setRecal(true)
                         formik.setFieldValue('outputWgt', e.target.value)
+                        setStore(prevStore => ({
+                          ...prevStore,
+                          castingInfo: {
+                            ...prevStore.castingInfo,
+                            outputWgt: Number(e.target.value).toFixed(3)
+                          }
+                        }))
                       }}
                       onClear={() => formik.setFieldValue('outputWgt', 0)}
                       error={formik.touched.outputWgt && Boolean(formik.errors.outputWgt)}

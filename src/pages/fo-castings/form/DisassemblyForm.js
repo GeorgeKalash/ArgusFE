@@ -192,7 +192,7 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore, se
             initialValues={formik?.initialValues?.items?.[0]}
             name='items'
             maxAccess={maxAccess}
-            allowDelete={!store?.isPosted && !store?.isCancelled}
+            allowDelete={false}
             disabled={store?.isCancelled || store?.isPosted}
           />
         </Grow>
