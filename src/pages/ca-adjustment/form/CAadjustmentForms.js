@@ -409,6 +409,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 <Grid item xs={8}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Currency.qry}
+                    filter={item => item.currencyType === 1}
                     name='currencyId'
                     label={labels.currency}
                     readOnly={isPosted}
