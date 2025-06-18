@@ -301,7 +301,8 @@ export const ManufacturingRepository = {
     set: service + 'setJCA',
     get: service + 'getJCA',
     del: service + 'delJCA',
-    page: service + 'pageJCA'
+    page: service + 'pageJCA',
+    qry: service + 'qryJCA'
   },
   DesignGroup: {
     qry: service + 'qryDEG',
