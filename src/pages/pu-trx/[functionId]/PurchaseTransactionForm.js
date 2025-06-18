@@ -1512,9 +1512,9 @@ export default function PurchaseTransactionForm({
                 label={labels.date}
                 readOnly={isPosted}
                 value={formik?.values?.header?.date}
-                onChange={async (e, newValue) => {
+                onChange={(e, newValue) => {
                   formik.setFieldValue('header.date', newValue)
-                  await getMultiCurrencyFormData(formik.values.header.currencyId, newValue)
+                  getMultiCurrencyFormData(formik.values.header.currencyId, newValue)
                 }}
                 editMode={editMode}
                 maxAccess={maxAccess}
