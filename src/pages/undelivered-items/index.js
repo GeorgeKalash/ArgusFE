@@ -50,8 +50,8 @@ const UndeliveredItems = () => {
       recordId: null,
       dtId: null,
       groupId: 0,
-      plantId: 0,
-      siteId: 0,
+      plantId: null,
+      siteId: null,
       categoryId: 0,
       clientId: 0,
       clientRef: '',
@@ -62,10 +62,12 @@ const UndeliveredItems = () => {
       marginDefault: defaultVat?.value,
       notes: ''
     },
-    validationSchema: yup.object({
-      plantId: yup.number().required()
-    }),
     validateOnChange: true,
+    validationSchema: yup.object({
+      plantId: yup.number().required(),
+      siteId: yup.number().required(),
+      clientId: yup.number().required()
+    }),
     onSubmit: async obj => {
       const { clientId, siteId, notes, items, dtId, plantId, date } = obj
 
@@ -254,8 +256,7 @@ const UndeliveredItems = () => {
     {
       key: 'ORD',
       condition: true,
-      onClick: handleSubmit,
-      disabled: !clientId || !siteId || !plantId
+      onClick: handleSubmit
     }
   ]
 
@@ -367,8 +368,8 @@ const UndeliveredItems = () => {
                     formik.setFieldValue('siteRef', newValue?.reference || '')
                     formik.setFieldValue('siteName', newValue?.name || '')
                   }}
-                  required={formik.values.clientId}
-                  error={(formik.touched.sitId && Boolean(formik.errors.sitId)) || (clientId && !siteId)}
+                  required
+                  error={(formik.touched.siteId && Boolean(formik.errors.siteId))}
                 />
               </Grid>
               <Grid item xs={12}>
