@@ -532,5 +532,23 @@ export const ResourceIds = {
   GLBalanceTransferSales: 31603,
   GLBalanceTransferBetweenAccounts: 31601,
   GLReturnOnInvoice: 51606,
-  SyncPurchaseTrx: 50602
+  IomProperties: 42606,
+  SyncPurchaseTrx: 50602,
+
+  //MCR
+  MCRSalesInvoice: 51607,
+  MCRSalesReturn: 51608,
+  MCRClientGOCOut: 51609,
+  MCRClientGOCIn: 51610,
+  MCRPurchaseInvoice: 50610,
+  MCRPurchaseReturn: 50611,
+  MCRFIReceiptVoucher: 31615,
+  MCRFIPaymentVoucher: 31616,
+  MCRPaymentVoucherExpenses: 31617,
+  MCRCreditNote: 31618,
+  MCRDebitNote: 31619,
+  MCRServiceInvoice: 31620,
+  MCRServiceBillReceived: 31621,
+  MCRCashTransfers: 33605,
+  MCRIncreaseDecreaseAdj: 33606
 }

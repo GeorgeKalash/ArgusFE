@@ -6,7 +6,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -62,6 +62,7 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import AccountSummary from 'src/components/Shared/AccountSummary'
 import { createConditionalSchema } from 'src/lib/validation'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 export default function SaleTransactionForm({
   labels,
@@ -95,11 +96,6 @@ export default function SaleTransactionForm({
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.SalesTransaction.qry
-  })
-
-  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-    endpointId: MultiCurrencyRepository.Currency.get,
-    datasetId: ResourceIds.MultiCurrencyRate
   })
 
   const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
@@ -321,13 +317,28 @@ export default function SaleTransactionForm({
 
   const itemsUpdate = useRef(formik?.values?.items)
 
+  const getResourceMCR = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.MCRSalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.MCRSalesReturn
+      case SystemFunction.ConsignmentIn:
+        return ResourceIds.MCRClientGOCIn
+      case SystemFunction.ConsignmentOut:
+        return ResourceIds.MCRClientGOCOut
+      default:
+        return null
+    }
+  }
+
   function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
       props: {
-        labels: _labels,
-        maxAccess: MRCMaxAccess,
-        data: data,
+        DatasetIdAccess: getResourceMCR(functionId),
+        data,
         onOk: childFormikValues => {
           formik.setFieldValue('header', {
             ...formik.values.header,
@@ -337,7 +348,7 @@ export default function SaleTransactionForm({
       },
       width: 500,
       height: 500,
-      title: _labels.MultiCurrencyRate
+      title: platformLabels.MultiCurrencyRate
     })
   }
 
