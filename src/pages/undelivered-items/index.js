@@ -53,7 +53,7 @@ const UndeliveredItems = () => {
       plantId: null,
       siteId: null,
       categoryId: 0,
-      clientId: 0,
+      clientId: null,
       clientRef: '',
       clientName: '',
       date: new Date(),
@@ -132,7 +132,7 @@ const UndeliveredItems = () => {
   async function getData() {
     const result = await getRequest({
       extension: RGSaleRepository.SaSaleOrder.open,
-      parameters: `_categoryId=${categoryId}&_siteId=${siteId}&_groupId=${groupId}&_clientId=${clientId}&_soId=${soId}&_plantId=${plantId}`
+      parameters: `_categoryId=${categoryId}&_siteId=${siteId}&_groupId=${groupId}&_clientId=${clientId || 0}&_soId=${soId}&_plantId=${plantId}`
     })
 
     const res = result?.list?.map((item, index) => ({
@@ -342,6 +342,7 @@ const UndeliveredItems = () => {
                     { key: 'reference', value: 'Ref.' },
                     { key: 'name', value: 'Name' }
                   ]}
+                  required
                   onChange={async (event, newValue) => {
                     formik.setFieldValue('clientId', newValue?.recordId || 0)
                     formik.setFieldValue('clientName', newValue?.name || '')
