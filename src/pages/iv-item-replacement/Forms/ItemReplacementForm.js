@@ -13,6 +13,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function ItemReplacementForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
@@ -22,6 +23,11 @@ export default function ItemReplacementForm({ labels, maxAccess, recordId }) {
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Replacement.page
   })
+
+  const conditions = {
+    replacementId: row => row?.replacementId > 0
+  }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
     initialValues: {
@@ -35,19 +41,12 @@ export default function ItemReplacementForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       itemId: yup.string().required(),
-      items: yup
-        .array()
-        .of(
-          yup.object({
-            replacementSKU: yup.string().required()
-          })
-        )
-        .required()
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const resultObject = {
         itemId: obj.itemId,
-        items: obj.items
+        items: obj.items.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
       }
 
       const res = await postRequest({
