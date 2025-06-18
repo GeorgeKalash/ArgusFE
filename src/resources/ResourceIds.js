@@ -465,6 +465,7 @@ export const ResourceIds = {
   CategoryPriceGroup: 51119,
   PostWorkCenterJob: 42330,
   ProductionShifts: 42113,
+  CostGroup: 42120,
   LineItemCapacity: 42111,
   FIBalanceTfr: 31317,
   CorrespondentDispersalRate: 36138,
