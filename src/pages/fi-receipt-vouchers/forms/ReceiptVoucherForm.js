@@ -272,12 +272,20 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     }
   }
 
+  const onReset = async () => {
+    await postRequest({
+      extension: FinancialRepository.ResetGL_RV.reset,
+      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
+    })
+  }
+
   const actions = [
     {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
       datasetId: ResourceIds.GLReceiptVoucher,
+      onReset,
       disabled: !editMode
     },
 

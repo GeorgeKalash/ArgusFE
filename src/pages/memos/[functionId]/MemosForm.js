@@ -286,6 +286,13 @@ export default function MemosForm({
     }
   }
 
+  const onReset = async () => {
+    await postRequest({
+      extension: FinancialRepository.ResetGLMemo.reset,
+      record: JSON.stringify(formik.values)
+    })
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -298,6 +305,7 @@ export default function MemosForm({
       condition: true,
       onClick: 'onClickGL',
       datasetId: getGLResourceId(parseInt(formik.values.functionId)),
+      onReset: onReset,
       disabled: !editMode
     },
     {

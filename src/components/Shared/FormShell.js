@@ -219,7 +219,8 @@ export default function FormShell({
                 recordId: form.values?.recordId,
                 functionId: functionId,
                 valuesPath: action.valuesPath,
-                datasetId: action.datasetId
+                datasetId: action.datasetId,
+                onReset: action?.onReset
               },
               width: 1000,
               height: 620,
