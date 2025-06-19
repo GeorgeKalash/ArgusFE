@@ -50,7 +50,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
   const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   const { formik } = useForm({
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId: null,
       reference: '',
@@ -74,7 +74,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      accountType: yup.string().required(),
+      accountType: yup.number().required(),
       currencyId: yup.number().required(),
       date: yup.string().required(),
       paymentMethod: yup.string().required(),
@@ -99,9 +99,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
       })
 
       !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
-      const res2 = await getPaymentOrder(response.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      formik.setValues(res2.record)
+      getPaymentOrder(response.recordId)
 
       invalidate()
     }
@@ -176,9 +174,14 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
   const editMode = !!formik.values.recordId
 
   async function getPaymentOrder(recordId) {
-    return await getRequest({
+    const res = await getRequest({
       extension: FinancialRepository.PaymentOrders.get,
       parameters: `_recordId=${recordId}`
+    })
+
+    formik.setValues({
+      ...res.record,
+      date: formatDateFromApi(res.record.date)
     })
   }
 
@@ -202,15 +205,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res = await getRequest({
-          extension: FinancialRepository.PaymentOrders.get,
-          parameters: `_recordId=${recordId}`
-        })
-
-        formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res.record.date)
-        })
+        getPaymentOrder(recordId)
       } else {
         getCashAccountAndPayment(cashAccountId)
       }
@@ -242,9 +237,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
     if (res?.recordId) {
       toast.success(platformLabels.Cancelled)
       invalidate()
-      const res2 = await getPaymentOrder(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      formik.setValues(res2.record)
+      getPaymentOrder(res.recordId)
     }
   }
 
@@ -257,9 +250,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
     if (res?.recordId) {
       toast.success(platformLabels.Closed)
       invalidate()
-      const res2 = await getPaymentOrder(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      formik.setValues(res2.record)
+      getPaymentOrder(res.recordId)
     }
   }
 
@@ -272,9 +263,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
     if (res?.recordId) {
       toast.success(platformLabels.Reopened)
       invalidate()
-      const res2 = await getPaymentOrder(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      formik.setValues(res2.record)
+      getPaymentOrder(res.recordId)
     }
   }
 
@@ -306,14 +295,14 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
     {
       key: 'Close',
       condition: !isClosed,
-      onClick: () => onClose(formik.values.recordId),
-      disabled: isClosed || !editMode
+      onClick: onClose,
+      disabled: isClosed || !editMode || isCancelled
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed
+      disabled: !isClosed || isCancelled
     },
     {
       key: 'Approval',
@@ -418,10 +407,10 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 readOnly={isCancelled}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('paymentMethod', newValue?.key || null)
                   if (!newValue?.key) {
                     formik.setFieldValue('cashAccountId', '')
                   }
+                  formik.setFieldValue('paymentMethod', newValue?.key || null)
                 }}
                 error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
               />
@@ -457,7 +446,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 ]}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
@@ -503,7 +492,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                   formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
                   formik.setFieldValue('amount', e.target.value)
                 }}
-                onClear={async () => {
+                onClear={() => {
                   formik.setFieldValue('amount', 0)
                 }}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
@@ -522,12 +511,12 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 readOnly={isCancelled}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('accountType', newValue?.key || null)
                   if (!newValue?.key) {
                     formik.setFieldValue('accountId', null)
                     formik.setFieldValue('accountRef', '')
                     formik.setFieldValue('accountName', '')
                   }
+                  formik.setFieldValue('accountType', newValue?.key || null)
                 }}
                 error={formik.touched.accountType && Boolean(formik.errors.accountType)}
               />
@@ -575,10 +564,10 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 displayFieldWidth={4}
                 filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('accountId', newValue?.recordId || '')
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                   formik.setFieldValue('accountGroupName', newValue?.groupName || '')
+                  formik.setFieldValue('accountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
@@ -597,7 +586,6 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 onClear={() => formik.setFieldValue('notes', '')}
               />
             </Grid>
-            
           </Grid>
         </Grow>
       </VertLayout>
