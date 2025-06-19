@@ -1144,6 +1144,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
         <Grid container spacing={3}>
           <Grid item xs={6.5} sx={{ display: 'flex', flex: 1 }}>
             <Table
+              name='item'
               columns={[
                 { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 0.75 },
                 { field: 'sku', headerName: labels.sku, flex: 1 },
@@ -1159,6 +1160,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
           </Grid>
           <Grid item xs={3} sx={{ display: 'flex', flex: 1 }}>
             <Table
+              name='metal'
               gridData={{ count: 1, list: formik?.values?.metalGridData }}
               maxAccess={access}
               columns={[
