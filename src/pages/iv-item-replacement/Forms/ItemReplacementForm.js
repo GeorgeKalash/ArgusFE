@@ -76,6 +76,7 @@ export default function ItemReplacementForm({ labels, maxAccess, recordId }) {
       formik.setValues({
         sku: res?.record?.sku,
         itemId: recordId,
+        recordId,
         itemName: res?.record?.name,
         items:
           res2?.list?.length > 0
@@ -134,6 +135,8 @@ export default function ItemReplacementForm({ labels, maxAccess, recordId }) {
       }
     }
   ]
+  console.log(editMode)
+  console.log(formik.values.recordId)
 
   const actions = [
     {
@@ -145,13 +148,7 @@ export default function ItemReplacementForm({ labels, maxAccess, recordId }) {
   ]
 
   return (
-    <FormShell
-      resourceId={ResourceIds.ItemReplacement}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      actions={actions}
-    >
+    <FormShell resourceId={ResourceIds.ItemReplacement} form={formik} maxAccess={maxAccess} actions={actions}>
       <VertLayout>
         <Grow>
           <Grid container>
