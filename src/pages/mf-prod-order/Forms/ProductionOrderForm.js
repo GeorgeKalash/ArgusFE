@@ -276,7 +276,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     {
       component: 'numberfield',
       name: 'qty',
-      label: labels.qty,
+      label: labels.ExQty,
       props: {
         maxLength: 12,
         decimalScale: 2
