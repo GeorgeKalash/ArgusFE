@@ -492,6 +492,7 @@ export const ResourceIds = {
   WCConsumptionImport: 42702,
   Currency: 20136,
   POTracking: 50309,
+  PaymentOrder: 31333,
 
   // GL
   GLSalesInvoice: 51604,

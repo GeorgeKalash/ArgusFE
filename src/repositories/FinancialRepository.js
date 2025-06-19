@@ -251,5 +251,15 @@ export const FinancialRepository = {
   },
   ResetGL_RV: {
     reset: service + 'resetGL_RV'
+  },
+  PaymentOrders: {
+    get: service + 'getPO',
+    del: service + 'delPO',
+    set2: service + 'set2PO',
+    page2: service + 'page2PO',
+    snapshot: service + 'snapshotPO',
+    cancel: service + 'cancelPO',
+    close: service + 'closePO',
+    reopen: service + 'reopenPO',
   }
 }
