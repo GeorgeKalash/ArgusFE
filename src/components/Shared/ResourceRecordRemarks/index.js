@@ -81,7 +81,8 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
       },
       width: 450,
       height: 170,
-      title: platformLabels.Delete
+      title: platformLabels.Delete,
+      refresh: false
     })
   }
 
