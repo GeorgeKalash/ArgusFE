@@ -249,5 +249,17 @@ export const FinancialRepository = {
     cancel: service + 'cancelPO',
     close: service + 'closePO',
     reopen: service + 'reopenPO',
+  },
+  ResetGLMemo: {
+    reset: service + 'resetGL_Memo'
+  },
+  ResetGL_MTX: {
+    reset: service + 'resetGL_MTX'
+  },
+  ResetGL_PV: {
+    reset: service + 'resetGL_PV'
+  },
+  ResetGL_RV: {
+    reset: service + 'resetGL_RV'
   }
 }
