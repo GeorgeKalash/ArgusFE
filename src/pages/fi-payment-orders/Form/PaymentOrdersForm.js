@@ -321,7 +321,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
       previewReport={editMode}
       actions={actions}
       functionId={SystemFunction.PaymentOrder}
-      disabledSubmit={isCancelled}
+      disabledSubmit={isClosed || isCancelled}
     >
       <VertLayout>
         <Grow>
@@ -360,7 +360,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                       { key: 'name', value: 'Name' }
                     ]}
                     required
-                    readOnly={isCancelled}
+                    readOnly={isClosed || isCancelled}
                     values={formik.values}
                     onChange={async (event, newValue) => {
                       await getMultiCurrencyFormData(newValue?.recordId, formik.values.date)
@@ -404,7 +404,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 displayField='value'
                 values={formik.values}
                 required
-                readOnly={isCancelled}
+                readOnly={isClosed || isCancelled}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
                   if (!newValue?.key) {
@@ -426,7 +426,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                   await getMultiCurrencyFormData(formik.values.currencyId, newValue)
                 }}
                 onClear={() => formik.setFieldValue('date', null)}
-                readOnly={isCancelled}
+                readOnly={isClosed || isCancelled}
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 maxAccess={maxAccess}
               />
@@ -436,7 +436,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 endpointId={CashBankRepository.CashAccount.qry}
                 parameters={`_type=0`}
                 name='cashAccountId'
-                readOnly={isCancelled}
+                readOnly={isClosed || isCancelled}
                 label={labels.cashAccount}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -458,7 +458,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 name='plantId'
                 label={labels.plant}
                 valueField='recordId'
-                readOnly={isCancelled}
+                readOnly={isClosed || isCancelled}
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -478,7 +478,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 label={labels.amount}
                 maxLength={'10'}
                 decimalScale={2}
-                readOnly={isCancelled}
+                readOnly={isClosed || isCancelled}
                 value={formik.values.amount}
                 maxAccess={maxAccess}
                 onChange={async e => {
@@ -508,7 +508,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 displayField='value'
                 values={formik.values}
                 required
-                readOnly={isCancelled}
+                readOnly={isClosed || isCancelled}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   if (!newValue?.key) {
@@ -539,7 +539,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                     newValue?.name && formik.setFieldValue('templateId', newValue?.recordId || null)
                   }
                 }}
-                readOnly={isCancelled}
+                readOnly={isClosed || isCancelled}
                 error={formik.touched.templateId && Boolean(formik.errors.templateId)}
                 maxAccess={maxAccess}
               />
@@ -548,7 +548,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
-                readOnly={isCancelled || !formik.values.accountType}
+                readOnly={isClosed || isCancelled || !formik.values.accountType}
                 label={labels.accountReference}
                 valueField='reference'
                 displayField='name'
@@ -580,7 +580,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 label={labels.notes}
                 value={formik.values.notes}
                 rows={3}
-                readOnly={isCancelled}
+                readOnly={isClosed || isCancelled}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('notes', '')}
