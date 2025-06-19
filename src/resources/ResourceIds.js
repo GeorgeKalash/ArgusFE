@@ -491,6 +491,7 @@ export const ResourceIds = {
   ChangeClient: 51336,
   WCConsumptionImport: 42702,
   Currency: 20136,
+  POTracking: 50309,
 
   // GL
   GLSalesInvoice: 51604,
