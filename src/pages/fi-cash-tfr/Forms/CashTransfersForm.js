@@ -4,7 +4,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
@@ -121,11 +121,6 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
     }
   })
 
-  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-    endpointId: MultiCurrencyRepository.Currency.get,
-    datasetId: ResourceIds.MultiCurrencyRate
-  })
-
   function getDefaultsData() {
     const myObject = {}
 
@@ -142,8 +137,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
     stack({
       Component: MultiCurrencyRateForm,
       props: {
-        labels: _labels,
-        maxAccess: MRCMaxAccess,
+        DatasetIdAccess: ResourceIds.MCRCashTransfers,
         data,
         onOk: childFormikValues => {
           formik.setValues(prevValues => ({
@@ -154,7 +148,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
       },
       width: 500,
       height: 500,
-      title: _labels.MultiCurrencyRate
+      title: platformLabels.MultiCurrencyRate
     })
   }
 
