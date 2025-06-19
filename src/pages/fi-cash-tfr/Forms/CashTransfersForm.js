@@ -151,10 +151,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
             ...childFormikValues
           }))
         }
-      },
-      width: 500,
-      height: 500,
-      title: _labels.MultiCurrencyRate
+      }
     })
   }
 

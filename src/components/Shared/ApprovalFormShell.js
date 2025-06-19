@@ -31,9 +31,7 @@ export default function ApprovalFormShell(props) {
       props: {
         recordId: form.values.recordId,
         functionId: form.values.functionId
-      },
-      width: 1000,
-      title: 'Approvals'
+      }
     })
   }
 

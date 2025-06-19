@@ -175,10 +175,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
             ...childFormikValues
           }))
         }
-      },
-      width: 500,
-      height: 500,
-      title: _labels.MultiCurrencyRate
+      }
     })
   }
 
@@ -345,10 +342,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
           props: {
             accountId: parseInt(formik.values.accountId),
             moduleId: 1
-          },
-          width: 1000,
-          height: 500,
-          title: platformLabels.AccountSummary
+          }
         })
       },
       disabled: !formik.values.accountId

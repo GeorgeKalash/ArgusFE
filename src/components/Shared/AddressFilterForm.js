@@ -13,6 +13,8 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function AddressFilterForm({
   labels,
@@ -26,6 +28,9 @@ export default function AddressFilterForm({
 }) {
   const [data, setData] = useState([])
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.AddressFilter, window })
 
   const { formik } = useForm({
     initialValues: { search: '', cityId: null, countryId: null },
@@ -246,3 +251,6 @@ export default function AddressFilterForm({
     </FormShell>
   )
 }
+
+AddressFilterForm.width = 950
+AddressFilterForm.height = 600

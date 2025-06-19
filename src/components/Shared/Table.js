@@ -455,10 +455,7 @@ const Table = ({
         open: [true, {}],
         fullScreen: false,
         onConfirm: () => props?.onDelete(obj)
-      },
-      width: 450,
-      height: 170,
-      title: platformLabels.Delete
+      }
     })
   }
   function openDeleteConfirmation(obj) {
@@ -468,10 +465,7 @@ const Table = ({
         action() {
           props?.onDelete(obj)
         }
-      },
-      width: 500,
-      height: 300,
-      title: platformLabels.DeleteConfirmation
+      }
     })
   }
 

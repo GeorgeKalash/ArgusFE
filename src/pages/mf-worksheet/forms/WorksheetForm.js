@@ -191,9 +191,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       props: {
         functionId,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: labels.workflow
+      }
     })
   }
 

@@ -196,10 +196,7 @@ const OutwardsReturnForm = ({ recordId, plantId, dtId, isOpenOutwards = false, r
         values: formik.values,
         recordId: recId,
         functionId: SystemFunction.OutwardsReturn
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
 

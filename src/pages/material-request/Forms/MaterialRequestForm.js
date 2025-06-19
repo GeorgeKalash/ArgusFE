@@ -430,9 +430,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       props: {
         functionId: SystemFunction.MaterialRequest,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: labels.workflow
+      }
     })
   }
 

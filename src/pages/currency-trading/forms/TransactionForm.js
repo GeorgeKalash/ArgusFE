@@ -665,10 +665,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
         onSuccess: () => {
           onClose(recId)
         }
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
 
@@ -711,10 +708,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
         onClose: () => Post()
       },
       expandable: false,
-      width: 400,
-      height: 400,
-      spacing: false,
-      title: platformLabels.OTPVerification
+      spacing: false
     })
   }
 
@@ -1038,10 +1032,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                                 idTypes: idTypeStore,
                                 clientformik: formik,
                                 labels: labels
-                              },
-                              title: labels.fetch,
-                              width: 400,
-                              height: 400
+                              }
                             })
                           }
                           disabled={

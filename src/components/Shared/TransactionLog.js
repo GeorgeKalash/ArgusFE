@@ -12,12 +12,13 @@ import { useError } from 'src/error'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const TransactionLog = props => {
   const { recordId, resourceId } = props
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const { getLabels, getAccess } = useContext(ControlContext)
+  const { getLabels, getAccess, platformLabels } = useContext(ControlContext)
   const [transactionType, setTransactionType] = useState(0)
   const [gridData, setGridData] = useState({})
   const [labels, setLabels] = useState(null)
@@ -34,6 +35,8 @@ const TransactionLog = props => {
       }
     }
   }, [access, transactionType])
+
+  useSetWindow({ title: platformLabels.TransactionLog, window: props.window })
 
   const _labels = {
     trxType: labels && labels.find(item => item.key === '1').value,
@@ -170,5 +173,8 @@ const TransactionLog = props => {
     </VertLayout>
   )
 }
+
+TransactionLog.width = 900
+TransactionLog.height = 600
 
 export default TransactionLog

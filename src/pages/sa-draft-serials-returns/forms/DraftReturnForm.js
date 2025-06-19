@@ -533,9 +533,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -598,10 +596,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       props: {
         functionId: SystemFunction.DraftInvoiceReturn,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -615,10 +610,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
         },
         onCloseimport: fillGrids,
         maxAccess: maxAccess
-      },
-      width: 550,
-      height: 270,
-      title: platformLabels.importSerials
+      }
     })
   }
 
@@ -656,10 +648,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           props: {
             accountId: parseInt(formik.values.accountId),
             moduleId: 1
-          },
-          width: 1000,
-          height: 500,
-          title: labels.accountSummary
+          }
         })
       },
       disabled: !formik.values.clientId
@@ -1221,7 +1210,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                   <ResourceComboBox
                     key={`${formik.values.clientId}-${formik.values.date?.toISOString()}-${formik.values.currencyId}`}
                     endpointId={
-                      formik?.values?.clientId && formik?.values?.date && SaleRepository.InvoiceReturnBalance.balance
+                      formik?.values?.clientId && formik?.values?.date && SaleRepository.ReturnOnInvoice.balance
                     }
                     parameters={`_clientId=${
                       formik?.values?.clientId

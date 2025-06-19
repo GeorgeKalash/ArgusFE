@@ -95,8 +95,6 @@ const ReportGenerator = ({
         stack({
           Component: PreviewReport,
           props: { pdf: result },
-          width: 1000,
-          height: 500,
           title: platformLabels.PreviewReport
         })
         break

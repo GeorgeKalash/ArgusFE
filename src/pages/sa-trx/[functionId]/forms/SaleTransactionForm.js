@@ -327,10 +327,7 @@ export default function SaleTransactionForm({
             ...childFormikValues
           })
         }
-      },
-      width: 500,
-      height: 500,
-      title: _labels.MultiCurrencyRate
+      }
     })
   }
 
@@ -745,9 +742,7 @@ export default function SaleTransactionForm({
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -786,9 +781,7 @@ export default function SaleTransactionForm({
             functionId: functionId,
             itemId: row?.itemId,
             clientId: formik?.values?.header?.clientId
-          },
-          width: 1200,
-          title: platformLabels.SalesTransactions
+          }
         })
       }
     },
@@ -826,10 +819,7 @@ export default function SaleTransactionForm({
               maxAccess,
               checkForSiteId: true,
               updateRow
-            },
-            width: 500,
-            height: 700,
-            title: platformLabels.serials
+            }
           })
         }
       }
@@ -870,10 +860,7 @@ export default function SaleTransactionForm({
       props: {
         functionId: functionId,
         recordId: formik.values.header.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -907,10 +894,9 @@ export default function SaleTransactionForm({
             Component: NormalDialog,
             props: {
               DialogText: `${platformLabels.RecordLocked} ${name}`,
-              width: 600,
-              height: 200,
               title: platformLabels.Dialog
-            }
+            },
+            title: platformLabels.Dialog
           })
         }
       })
@@ -1019,10 +1005,7 @@ export default function SaleTransactionForm({
           props: {
             accountId: parseInt(formik.values.header.accountId),
             moduleId: 1
-          },
-          width: 1000,
-          height: 500,
-          title: labels.accountSummary
+          }
         })
       },
       disabled: !formik.values.header.clientId
@@ -1548,10 +1531,7 @@ export default function SaleTransactionForm({
         form: formik.values.header,
         checkedAddressId: formik.values?.header?.billAddressId,
         handleAddressValues: setAddressValues
-      },
-      width: 950,
-      height: 600,
-      title: labels.AddressFilter
+      }
     })
   }
 

@@ -504,8 +504,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -568,10 +567,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       props: {
         functionId: SystemFunction.DraftSerialsIn,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -585,10 +581,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
         },
         onCloseimport: fillGrids,
         maxAccess: maxAccess
-      },
-      width: 550,
-      height: 270,
-      title: platformLabels.importSerials
+      }
     })
   }
 
@@ -626,10 +619,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
           props: {
             accountId: parseInt(formik.values.accountId),
             moduleId: 1
-          },
-          width: 1000,
-          height: 500,
-          title: labels.accountSummary
+          }
         })
       },
       disabled: !formik.values.clientId

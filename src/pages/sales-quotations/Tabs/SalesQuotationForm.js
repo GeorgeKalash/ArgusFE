@@ -453,9 +453,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -489,9 +487,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             functionId: SystemFunction.SalesInvoice,
             itemId: row?.itemId,
             clientId: formik?.values?.clientId
-          },
-          width: 1000,
-          title: labels?.salesTrx
+          }
         })
       }
     },
@@ -585,10 +581,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       props: {
         functionId: SystemFunction.SalesQuotation,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -1014,10 +1007,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         checkedAddressId: formik.values?.shipToAddressId,
         form: formik.values,
         handleAddressValues: setAddressValues
-      },
-      width: 950,
-      height: 600,
-      title: labels.AddressFilter
+      }
     })
   }
   function openAddressForm() {

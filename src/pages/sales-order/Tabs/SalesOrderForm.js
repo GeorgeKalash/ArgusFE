@@ -499,9 +499,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -537,8 +535,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             functionId: SystemFunction.SalesInvoice,
             itemId: row?.itemId,
             clientId: formik?.values?.clientId
-          },
-          title: labels?.salesTrx
+          }
         })
       }
     },
@@ -645,10 +642,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       props: {
         functionId: SystemFunction.SalesOrder,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -1067,10 +1061,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         checkedAddressId: clickShip ? formik.values?.shipToAddressId : formik.values?.billToAddressId,
         form: formik.values,
         handleAddressValues: setAddressValues
-      },
-      width: 950,
-      height: 600,
-      title: labels.AddressFilter
+      }
     })
   }
   function openAddressForm() {

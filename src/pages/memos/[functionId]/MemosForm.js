@@ -338,10 +338,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
           props: {
             accountId: parseInt(formik.values.accountId),
             moduleId: 1
-          },
-          width: 1000,
-          height: 500,
-          title: platformLabels.AccountSummary
+          }
         })
       },
       disabled: !formik.values.accountId
@@ -376,10 +373,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
             ...childFormikValues
           }))
         }
-      },
-      width: 500,
-      height: 500,
-      title: _labels.MultiCurrencyRate
+      }
     })
   }
 

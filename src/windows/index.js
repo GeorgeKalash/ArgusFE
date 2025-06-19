@@ -159,10 +159,10 @@ export function WindowProvider({ children }) {
                 {...props}
                 {...(props?.maxAccess
                   ? { maxAccess: { ...props?.maxAccess, editMode: !!props.recordId } }
-                  : { access: { ...props.access, editMode: !!props.recordId } })}
+                  : { access: { ...props?.access, editMode: !!props?.recordId } })}
                 window={{
                   close: () => closeWindowById(id),
-                  setTitle: newTitle => updateWindow(id, { title: newTitle })
+                  setTitle: newTitle => updateWindow(id, { title: title || newTitle })
                 }}
               />
             </Window>

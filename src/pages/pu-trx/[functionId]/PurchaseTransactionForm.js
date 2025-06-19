@@ -194,10 +194,7 @@ export default function PurchaseTransactionForm({
       Component: ItemPromotion,
       props: {
         invoiceId: formik.values.header.recordId
-      },
-      width: 1330,
-      height: 720,
-      title: platformLabels.ItemPromotion
+      }
     })
   }
 
@@ -554,9 +551,7 @@ export default function PurchaseTransactionForm({
             props: {
               itemId: row?.itemId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.CostHistory
+            }
           })
         }
       }
@@ -584,7 +579,6 @@ export default function PurchaseTransactionForm({
               taxId: row?.taxId,
               obj: row
             },
-            width: 1000,
             title: platformLabels.TaxDetails
           })
         }
@@ -659,10 +653,7 @@ export default function PurchaseTransactionForm({
       props: {
         functionId: functionId,
         recordId: formik.values.header.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -1388,10 +1379,7 @@ export default function PurchaseTransactionForm({
               maxAccess,
               checkForSiteId: row.qty >= 0 ? false : true,
               updateRow
-            },
-            width: 500,
-            height: 700,
-            title: platformLabels.serials
+            }
           })
         }
       }
