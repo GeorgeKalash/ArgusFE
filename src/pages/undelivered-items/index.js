@@ -389,7 +389,7 @@ const UndeliveredItems = () => {
                     formik.setFieldValue('plantId', newValue?.recordId || 0)
                   }}
                   required
-                  error={(formik.touched.plantId && Boolean(formik.errors.plantId)) || (clientId && !plantId)}
+                  error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                   maxAccess={access}
                 />
               </Grid>
