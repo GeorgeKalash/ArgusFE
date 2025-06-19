@@ -68,8 +68,8 @@ const FoCastings = () => {
       type: 'number'
     },
     {
-      field: 'expWgt',
-      headerName: labels.expWgt,
+      field: 'suggestedWgt',
+      headerName: labels.suggestedWgt,
       flex: 1,
       type: 'number'
     },

@@ -13,7 +13,7 @@ const FOCastingWindow = ({ recordId, access, labels }) => {
     isPosted: false,
     isCancelled: false,
     metalInfo: {},
-    castingInfo: { scrapWgt: 0, outputWgt: 0, loss: 0 }
+    castingInfo: { scrapWgt: 0, outputWgt: 0, loss: 0, balanceWgt: 0 }
   })
   const [recalculateJobs, setRecalculateJobs] = useState(false)
 
@@ -49,6 +49,7 @@ const FOCastingWindow = ({ recordId, access, labels }) => {
           store={store}
           labels={labels}
           maxAccess={access}
+          setStore={setStore}
           setRecalculateJobs={setRecalculateJobs}
           recalculateJobs={recalculateJobs}
         />

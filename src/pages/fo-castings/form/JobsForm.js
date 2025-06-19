@@ -14,7 +14,7 @@ import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 
-export default function JobsForm({ labels, maxAccess, store, recalculateJobs, setRecalculateJobs }) {
+export default function JobsForm({ labels, maxAccess, store, setStore, recalculateJobs, setRecalculateJobs }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = store?.recordId
@@ -96,6 +96,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'textfield',
       label: labels.jobRef,
       name: 'jobRef',
+      width: 150,
       props: {
         readOnly: true
       }
@@ -104,6 +105,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'textfield',
       label: labels.item,
       name: 'sku',
+      width: 130,
       props: {
         readOnly: true
       }
@@ -112,6 +114,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      width: 150,
       props: {
         readOnly: true
       }
@@ -120,6 +123,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'numberfield',
       label: labels.outputWgt,
       name: 'outputWgt',
+      width: 130,
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         update({
@@ -132,6 +136,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'numberfield',
       label: labels.currentWgt,
       name: 'currentWgt',
+      width: 130,
       props: {
         readOnly: true
       }
@@ -140,6 +145,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'numberfield',
       label: labels.metalWgt,
       name: 'metalWgt',
+      width: 130,
       props: {
         readOnly: true
       }
@@ -148,6 +154,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'textfield',
       label: labels.jobPct,
       name: 'jobPct',
+      width: 130,
       props: {
         readOnly: true
       }
@@ -156,6 +163,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'numberfield',
       label: labels.issuedWgt,
       name: 'issuedWgt',
+      width: 130,
       props: {
         readOnly: true
       }
@@ -164,6 +172,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'numberfield',
       label: labels.returnedWgt,
       name: 'returnedWgt',
+      width: 130,
       props: {
         readOnly: true
       }
@@ -172,6 +181,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'numberfield',
       label: labels.loss,
       name: 'loss',
+      width: 130,
       props: {
         readOnly: true
       }
@@ -180,6 +190,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'numberfield',
       label: labels.inputPcs,
       name: 'inputPcs',
+      width: 130,
       props: {
         readOnly: true
       }
@@ -188,6 +199,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'numberfield',
       label: labels.damagePcs,
       name: 'damagedPcs',
+      width: 130,
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         update({ outputPcs: (parseFloat(newRow?.inputPcs || 0) - parseFloat(newRow?.damagedPcs || 0)).toFixed(2) })
@@ -197,6 +209,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'numberfield',
       label: labels.damageQty,
       name: 'damagedQty',
+      width: 130,
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         update({
@@ -216,6 +229,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'numberfield',
       label: labels.outputPcs,
       name: 'outputPcs',
+      width: 130,
       props: {
         readOnly: true
       }
@@ -224,12 +238,12 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       component: 'numberfield',
       label: labels.netWgt,
       name: 'netWgt',
+      width: 130,
       props: {
         readOnly: true
       }
     }
   ]
-  console.log('formik', formik)
 
   function recalculateJobsOnChange() {
     let sumMetalWeight = 0
@@ -322,6 +336,13 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
     formik.setFieldValue('footerOutputWgt', store?.castingInfo?.outputWgt)
     formik.setFieldValue('footerInputWgt', store?.castingInfo?.inputWgt)
     formik.setFieldValue('balanceWgt', balanceWgt)
+    setStore(prevStore => ({
+      ...prevStore,
+      castingInfo: {
+        ...prevStore.castingInfo,
+        balanceWgt: Number(balanceWgt)
+      }
+    }))
   }, [store?.castingInfo, balanceWgt])
 
   return (

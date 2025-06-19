@@ -143,7 +143,7 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || isCancelled
+      disabled: !editMode || store?.castingInfo?.balanceWgt != 0 || isCancelled
     },
     {
       key: 'Cancel',
