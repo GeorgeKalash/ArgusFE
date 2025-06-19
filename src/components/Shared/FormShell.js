@@ -71,8 +71,7 @@ export default function FormShell({
   isParentWindow = true
 }) {
   const { stack } = useWindow()
-  const [selectedReport, setSelectedReport] = useState(null)
-  const { clear, open } = useGlobalRecord() || {}
+  const { clear, open, setRecord } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
   const { loading } = useContext(RequestsContext)
@@ -103,6 +102,27 @@ export default function FormShell({
       }
     }
   }, [loading, editMode, maxAccess])
+
+  useEffect(() => {
+    if (!form?.values.recordId) {
+      return
+    }
+
+    if (typeof setRecord !== 'function') {
+      return
+    }
+
+    const hasMeaningfulValues = Object.entries(form.values).some(
+      ([key, value]) => key !== 'recordId' && value !== '' && value !== null && value !== undefined
+    )
+
+    if (hasMeaningfulValues) {
+      setRecord(form.values.recordId, form.values)
+    } else {
+      setRecord(form.values.recordId)
+    }
+
+  }, [form?.values.recordId]) 
 
   actions?.filter(Boolean)?.forEach(action => {
     if (typeof action?.onClick !== 'function') {
@@ -199,7 +219,8 @@ export default function FormShell({
                 recordId: form.values?.recordId,
                 functionId: functionId,
                 valuesPath: action.valuesPath,
-                datasetId: action.datasetId
+                datasetId: action.datasetId,
+                onReset: action?.onReset
               },
               width: 1000,
               height: 650,
@@ -302,26 +323,6 @@ export default function FormShell({
               width: 500,
               height: 420,
               title: platformLabels.addClientRelation
-            })
-          }
-          break
-        case 'onGenerateReport':
-          action.onClick = () => {
-            stack({
-              Component: PreviewReport,
-              props: {
-                selectedReport: selectedReport,
-                recordId: form.values?.recordId,
-                functionId: form.values?.functionId,
-                resourceId: resourceId,
-                scId: form.values?.stockCountId,
-                siteId: form.values?.siteId,
-                controllerId: form.values?.controllerId,
-                onSuccess: previewBtnClicked
-              },
-              width: 1150,
-              height: 700,
-              title: platformLabels.PreviewReport
             })
           }
           break
@@ -460,6 +461,8 @@ export default function FormShell({
       </DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
+          form={form}
+          previewBtnClicked={previewBtnClicked}
           print={print}
           onSave={() => {
             form?.handleSubmit()
@@ -480,24 +483,6 @@ export default function FormShell({
               title: platformLabels.TransactionLog
             })
           }
-          onGenerateReport={() =>
-            stack({
-              Component: PreviewReport,
-              props: {
-                selectedReport: selectedReport,
-                recordId: form.values?.recordId,
-                functionId: form.values?.functionId,
-                resourceId: resourceId,
-                scId: form.values?.stockCountId,
-                siteId: form.values?.siteId,
-                controllerId: form.values?.controllerId,
-                onSuccess: previewBtnClicked
-              },
-              width: 1150,
-              height: 700,
-              title: platformLabels.PreviewReport
-            })
-          }
           isSaved={isSaved}
           isSavedClear={isSavedClearVisible}
           isInfo={isInfo}
@@ -514,8 +499,6 @@ export default function FormShell({
           addClientRelation={addClientRelation}
           resourceId={resourceId}
           recordId={form.values?.recordId}
-          selectedReport={selectedReport}
-          setSelectedReport={setSelectedReport}
           previewReport={previewReport}
           visibleClear={visibleClear}
           functionId={functionId}

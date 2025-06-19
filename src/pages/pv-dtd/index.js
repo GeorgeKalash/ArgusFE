@@ -90,7 +90,7 @@ const RVDocTypeDefaults = () => {
       Component: PVDocTypeDefaultsForm,
       props: {
         labels: _labels,
-        dtId: dtId,
+        recordId: dtId,
         maxAccess: access
       },
       width: 500,
