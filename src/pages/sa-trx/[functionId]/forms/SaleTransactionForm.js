@@ -6,7 +6,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -61,6 +61,8 @@ import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import AccountSummary from 'src/components/Shared/AccountSummary'
+import { createConditionalSchema } from 'src/lib/validation'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 export default function SaleTransactionForm({
   labels,
@@ -96,10 +98,15 @@ export default function SaleTransactionForm({
     endpointId: SaleRepository.SalesTransaction.qry
   })
 
-  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-    endpointId: MultiCurrencyRepository.Currency.get,
-    datasetId: ResourceIds.MultiCurrencyRate
-  })
+  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
+
+  const conditions = {
+    sku: row => row?.sku,
+    itemName: row => row?.itemName,
+    qty: row => row?.qty > 0
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines)
 
   const { formik } = useForm({
     maxAccess,
@@ -224,13 +231,7 @@ export default function SaleTransactionForm({
             return true
           })
       }),
-      items: yup.array().of(
-        yup.object({
-          sku: yup.string().required(),
-          itemName: yup.string().required(),
-          qty: yup.number().required().min(1)
-        })
-      )
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       if (obj.header.serializedAddress) {
@@ -249,29 +250,31 @@ export default function SaleTransactionForm({
 
       let serialsValues = []
 
-      const updatedRows = obj.items.map(({ id, isVattable, taxDetails, ...rest }) => {
-        const { serials, ...restDetails } = rest
+      const updatedRows = obj.items
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        .map(({ id, isVattable, taxDetails, ...rest }) => {
+          const { serials, ...restDetails } = rest
 
-        if (serials) {
-          const updatedSerials = serials.map((serialDetail, idx) => ({
-            ...serialDetail,
-            srlSeqNo: 0,
-            id: idx,
-            componentSeqNo: 0,
-            trxId: formik.values.recordId || 0,
-            itemId: rest?.itemId,
-            seqNo: id
-          }))
+          if (serials) {
+            const updatedSerials = serials.map((serialDetail, idx) => ({
+              ...serialDetail,
+              srlSeqNo: 0,
+              id: idx,
+              componentSeqNo: 0,
+              trxId: formik.values.recordId || 0,
+              itemId: rest?.itemId,
+              seqNo: id
+            }))
 
-          serialsValues = [...serialsValues, ...updatedSerials]
-        }
+            serialsValues = [...serialsValues, ...updatedSerials]
+          }
 
-        return {
-          ...restDetails,
-          seqNo: id,
-          applyVat: isVattable
-        }
-      })
+          return {
+            ...restDetails,
+            seqNo: id,
+            applyVat: isVattable
+          }
+        })
 
       const payload = {
         header: {
@@ -315,13 +318,28 @@ export default function SaleTransactionForm({
 
   const itemsUpdate = useRef(formik?.values?.items)
 
+  const getResourceMCR = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.MCRSalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.MCRSalesReturn
+      case SystemFunction.ConsignmentIn:
+        return ResourceIds.MCRClientGOCIn
+      case SystemFunction.ConsignmentOut:
+        return ResourceIds.MCRClientGOCOut
+      default:
+        return null
+    }
+  }
+
   function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
       props: {
-        labels: _labels,
-        maxAccess: MRCMaxAccess,
-        data: data,
+        DatasetIdAccess: getResourceMCR(functionId),
+        data,
         onOk: childFormikValues => {
           formik.setFieldValue('header', {
             ...formik.values.header,
@@ -331,7 +349,7 @@ export default function SaleTransactionForm({
       },
       width: 500,
       height: 500,
-      title: _labels.MultiCurrencyRate
+      title: platformLabels.MultiCurrencyRate
     })
   }
 
@@ -363,7 +381,7 @@ export default function SaleTransactionForm({
       if (itemInfo?.taxId) {
         const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
 
-        const details = taxDetailsResponse.map(item => ({
+        const details = taxDetailsResponse?.map(item => ({
           invoiceId: formik.values.recordId,
           taxSeqNo: item.seqNo,
           taxId: itemInfo.taxId,
@@ -377,7 +395,7 @@ export default function SaleTransactionForm({
     } else {
       const taxDetailsResponse = await getTaxDetails(formik.values.header.taxId)
 
-      const details = taxDetailsResponse.map(item => ({
+      const details = taxDetailsResponse?.map(item => ({
         invoiceId: formik.values.recordId,
         taxSeqNo: item.seqNo,
         taxId: formik.values.header.taxId,
@@ -1264,12 +1282,16 @@ export default function SaleTransactionForm({
   }
 
   async function getTaxDetails(taxId) {
-    const res = await getRequest({
-      extension: FinancialRepository.TaxDetailPack.qry,
-      parameters: `_taxId=${taxId}`
-    })
+    if (taxId) {
+      const res = await getRequest({
+        extension: FinancialRepository.TaxDetailPack.qry,
+        parameters: `_taxId=${taxId}`
+      })
 
-    return res?.list
+      return res?.list
+    }
+
+    return
   }
 
   async function getItemConvertPrice(itemId, muId) {
@@ -1961,7 +1983,7 @@ export default function SaleTransactionForm({
                 firstFieldWidth={4}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
+                  { key: 'name', value: 'Name', grid: 8 },
                   { key: 'szName', value: 'Sales Zone' },
                   { key: 'keywords', value: 'Keywords' },
                   { key: 'cgName', value: 'Client Group' }
@@ -1980,7 +2002,7 @@ export default function SaleTransactionForm({
                 required
                 autoSelectFistValue={!formik.values.clientId}
                 readOnly={formik.values.items.length > 0 && formik.values.items[0].sku}
-                displayFieldWidth={3}
+                displayFieldWidth={5}
                 editMode={editMode}
                 error={formik.touched?.header?.clientId && Boolean(formik.errors?.header?.clientId)}
               />

@@ -239,5 +239,17 @@ export const FinancialRepository = {
     set: service + 'setPR',
     page: service + 'pagePR',
     snapshot: service + 'snapshotPR'
+  },
+  ResetGLMemo: {
+    reset: service + 'resetGL_Memo'
+  },
+  ResetGL_MTX: {
+    reset: service + 'resetGL_MTX'
+  },
+  ResetGL_PV: {
+    reset: service + 'resetGL_PV'
+  },
+  ResetGL_RV: {
+    reset: service + 'resetGL_RV'
   }
 }

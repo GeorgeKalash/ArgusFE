@@ -69,7 +69,8 @@ export const PurchaseRepository = {
     post: service + 'postIVC',
     unpost: service + 'unpostIVC',
     generate: service + 'generateIVC',
-    preview: service + 'previewIVC'
+    preview: service + 'previewIVC',
+    sync: service + 'syncIVC'
   },
   Invoice: {
     snapshot: service + 'snapshotINV'
@@ -126,5 +127,9 @@ export const PurchaseRepository = {
   },
   QuotationItem: {
     preview: service + 'previewQTI'
+  },
+  OrderItem: {
+    qry: service + 'qryORI',
+    set2: service + 'set2ORI',
   }
 }
