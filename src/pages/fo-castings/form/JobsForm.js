@@ -20,7 +20,6 @@ export default function JobsForm({ labels, maxAccess, store, setStore, recalcula
   const recordId = store?.recordId
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       disassemblyWgt: 0,
@@ -265,7 +264,7 @@ export default function JobsForm({ labels, maxAccess, store, setStore, recalcula
       const metalWgt = item?.metalWgt || 0
       const jobPct = calculateJobPct(metalWgt)
       const issuedWgt = calculateByPct(jobPct, store?.castingInfo?.inputWgt || 0, 2)
-      const returnedWgt = calculateByPct(jobPct, formik?.values?.disassemblyWgt || 0)
+      const returnedWgt = calculateByPct(jobPct, store?.castingInfo?.scrapWgt || 0)
       const loss = calculateByPct(jobPct, store?.castingInfo?.loss || 0, 2)
 
       const netWgt = parseFloat(
@@ -336,6 +335,9 @@ export default function JobsForm({ labels, maxAccess, store, setStore, recalcula
     formik.setFieldValue('footerOutputWgt', store?.castingInfo?.outputWgt)
     formik.setFieldValue('footerInputWgt', store?.castingInfo?.inputWgt)
     formik.setFieldValue('balanceWgt', balanceWgt)
+  }, [store?.castingInfo])
+
+  useEffect(() => {
     setStore(prevStore => ({
       ...prevStore,
       castingInfo: {
@@ -343,7 +345,7 @@ export default function JobsForm({ labels, maxAccess, store, setStore, recalcula
         balanceWgt: Number(balanceWgt)
       }
     }))
-  }, [store?.castingInfo, balanceWgt])
+  }, [balanceWgt])
 
   return (
     <FormShell
@@ -367,6 +369,7 @@ export default function JobsForm({ labels, maxAccess, store, setStore, recalcula
             name='items'
             maxAccess={maxAccess}
             allowDelete={false}
+            allowAddNewLine={false}
             disabled={store?.isCancelled || store?.isPosted}
           />
         </Grow>

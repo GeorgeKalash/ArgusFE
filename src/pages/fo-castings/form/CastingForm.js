@@ -75,7 +75,6 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
       factor: null,
       scrapWgt: 0
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
@@ -225,7 +224,7 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
       extension: FoundryRepository.Casting.get,
       parameters: `_recordId=${recordId}`
     })
-    const waxInfo = await getWaxInfo(res?.record?.recordId)
+    const waxInfo = await getWaxInfo(res?.record?.waxId)
     const factorStdLoss = await getfactorStdLoss(waxInfo?.metalId, waxInfo?.metalColorId)
     formik.setValues({
       ...res?.record,
@@ -399,7 +398,6 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
                       maxAccess={maxAccess}
                       onChange={(event, newValue) => {
                         formik.setFieldValue('mouldId', newValue?.recordId || null)
-                        formik.setFieldValue('mouldRef', newValue?.reference || '')
                       }}
                       error={formik.touched?.mouldId && Boolean(formik.errors?.mouldId)}
                     />

@@ -31,7 +31,7 @@ const FOCastingWindow = ({ recordId, access, labels }) => {
           store={store}
           setStore={setStore}
           labels={labels}
-          maxAccess={access}
+          access={access}
           setRecalculateJobs={setRecalculateJobs}
         />
       </CustomTabPanel>

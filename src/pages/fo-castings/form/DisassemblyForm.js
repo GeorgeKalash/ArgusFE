@@ -20,8 +20,6 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore, se
   const metalInfo = store?.metalInfo
 
   const conditions = {
-    itemName: row => row.itemName,
-    sku: row => row.sku,
     weight: row => row.weight >= 0
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
@@ -80,7 +78,7 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore, se
         endpointId: InventoryRepository.Item.snapshot,
         valueField: 'sku',
         displayField: 'sku',
-        mandatory: true,
+        readOnly: true,
         displayFieldWidth: 2,
         mapping: [
           { from: 'recordId', to: 'itemId' },
@@ -91,14 +89,6 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore, se
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Name' }
         ]
-      },
-      async onChange({ row: { update, newRow } }) {
-        update({
-          itemId: newRow?.itemId,
-          sku: newRow?.sku,
-          itemName: newRow?.itemName,
-          unitCost: newRow?.unitCost || 0
-        })
       }
     },
     {
@@ -114,6 +104,7 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore, se
       label: labels.weight,
       name: 'weight',
       async onChange({ row: { update, newRow } }) {
+        update({ weight: newRow?.weight || 0 })
         setRecalculateJobs(true)
       }
     }
@@ -193,6 +184,7 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore, se
             name='items'
             maxAccess={maxAccess}
             allowDelete={false}
+            allowAddNewLine={false}
             disabled={store?.isCancelled || store?.isPosted}
           />
         </Grow>
