@@ -7,7 +7,6 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { TextFieldReference } from 'src/components/Shared/TextFieldReference'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import FormShell from 'src/components/Shared/FormShell'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
@@ -43,9 +42,6 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
     outward: false,
     inward: false,
 
-    //address
-    ...formikSettings.initialValues,
-
     //clientMaster
     category: null,
     reference: null,
@@ -68,9 +64,9 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
   const { formik } = useForm({
     initialValues,
     maxAccess: formikSettings.maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
+      ...formikSettings.validate,
       reference: referenceRequired && yup.string().required(),
       expiryDate: yup.date().required(),
       name1: yup.string().required(),
@@ -79,11 +75,8 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
       capital: yup.string().required(),
       lgsId: yup.string().required(),
       industry: yup.string().required(),
-      activityId: yup.string().required(),
-      street1: yup.string().required(),
-      phone: yup.string().required()
+      activityId: yup.string().required()
     }),
-    validate: formikSettings.validate,
     onSubmit: values => {
       postRtDefault(values)
     }

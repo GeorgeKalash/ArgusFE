@@ -5,7 +5,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import AddressForm from 'src/components/Shared/AddressForm'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 
-const ClientsAddressForm = ({ getAddressGridData, addressId, window, props, store, setStore }) => {
+const ClientsAddressForm = ({ getAddressGridData, addressId, window, props, store, setStore, maxAccess }) => {
   const [address, setAddress] = useState()
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -95,7 +95,9 @@ const ClientsAddressForm = ({ getAddressGridData, addressId, window, props, stor
     }
   ]
 
-  return <AddressForm {...{ ...props, address, setAddress, recordId: addressId, onSubmit, actions }} />
+  return (
+    <AddressForm {...{ ...props, address, setAddress, recordId: addressId, onSubmit, actions, access: maxAccess }} />
+  )
 }
 
 export default ClientsAddressForm

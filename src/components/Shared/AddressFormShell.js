@@ -4,6 +4,7 @@ import AddressTab from './AddressTab'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
+import * as yup from 'yup'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
@@ -30,11 +31,12 @@ export const AddressFormShell = ({
 
   const { formik } = useForm({
     maxAccess: maxAccess,
-    initialValues: { ...formikSettings.initialValues },
-    enableReinitialize: true,
+    initialValues: {},
     validateOnChange: true,
     validateOnBlur: true,
-    validate: formikSettings.validate,
+    validationSchema: yup.object({
+      ...formikSettings.validate
+    }),
     onSubmit: values => {
       setAddress(values)
       if (allowPost) {

@@ -90,9 +90,6 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
     idtName: '',
     cityName: '',
 
-    //address
-    ...formikSettings.initialValues,
-
     //clientIndividual
     birthDate: null,
     firstName: '',
@@ -409,11 +406,10 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   const { formik } = useForm({
     maxAccess: formikSettings.maxAccess,
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
-    validate: formikSettings.validate,
     validationSchema: yup.object({
+      ...formikSettings.validate,
       reference: referenceRequired && yup.string().required(),
       isResident: yup.string().required(),
       birthDate: yup.date().required(),
@@ -454,8 +450,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
         }),
       smsLanguage: yup.string().required(),
       incomeSourceId: yup.string().required(),
-      gender: yup.string().required(),
-      street1: yup.string().required()
+      gender: yup.string().required()
     }),
     onSubmit: async values => {
       shouldValidateOnSubmit ? handleConfirmFetchMobileOwner() : await postRtDefault(values)
