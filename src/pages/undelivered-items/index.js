@@ -344,7 +344,7 @@ const UndeliveredItems = () => {
                   ]}
                   required
                   onChange={async (event, newValue) => {
-                    formik.setFieldValue('clientId', newValue?.recordId || 0)
+                    formik.setFieldValue('clientId', newValue?.recordId || null)
                     formik.setFieldValue('clientName', newValue?.name || '')
                     formik.setFieldValue('clientRef', newValue?.reference || '')
                   }}
@@ -365,7 +365,7 @@ const UndeliveredItems = () => {
                   ]}
                   values={formik.values}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('siteId', newValue?.recordId || 0)
+                    formik.setFieldValue('siteId', newValue?.recordId || null)
                     formik.setFieldValue('siteRef', newValue?.reference || '')
                     formik.setFieldValue('siteName', newValue?.name || '')
                   }}
@@ -386,7 +386,7 @@ const UndeliveredItems = () => {
                   ]}
                   values={formik.values}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('plantId', newValue?.recordId || 0)
+                    formik.setFieldValue('plantId', newValue?.recordId || null)
                   }}
                   required
                   error={formik.touched.plantId && Boolean(formik.errors.plantId)}
