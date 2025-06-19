@@ -50,7 +50,7 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function SalesOrderForm({ recordId, currency, window }) {
+const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -1682,3 +1682,8 @@ export default function SalesOrderForm({ recordId, currency, window }) {
     </FormShell>
   )
 }
+
+SalesOrderForm.width = 1300
+SalesOrderForm.height = 750
+
+export default SalesOrderForm

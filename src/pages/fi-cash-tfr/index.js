@@ -17,7 +17,7 @@ import CashTransfersForm from './Forms/CashTransfersForm'
 
 const FiCashTransfers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {

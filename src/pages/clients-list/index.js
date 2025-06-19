@@ -103,7 +103,7 @@ const ClientsList = () => {
     stack({
       Component: ClientTemplateForm,
       props: {
-        recordId: recordId ? recordId : null,
+        recordId,
         plantId: _plantId
       }
     })

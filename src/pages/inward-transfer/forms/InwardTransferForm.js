@@ -33,7 +33,7 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function InwardTransferForm({ recordId, plantId, userId, dtId, window }) {
+const InwardTransferForm = ({ recordId, plantId, userId, dtId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -1016,3 +1016,8 @@ export default function InwardTransferForm({ recordId, plantId, userId, dtId, wi
     </FormShell>
   )
 }
+
+InwardTransferForm.width = 1200
+InwardTransferForm.height = 650
+
+export default InwardTransferForm

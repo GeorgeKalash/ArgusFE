@@ -30,7 +30,7 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function OutwardsReturnForm({ recordId, plantId, dtId, isOpenOutwards = false, refetch, window }) {
+const OutwardsReturnForm = ({ recordId, plantId, dtId, isOpenOutwards = false, refetch, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -799,3 +799,8 @@ export default function OutwardsReturnForm({ recordId, plantId, dtId, isOpenOutw
     </FormShell>
   )
 }
+
+OutwardsReturnForm.width = 1200
+OutwardsReturnForm.height = 630
+
+export default OutwardsReturnForm

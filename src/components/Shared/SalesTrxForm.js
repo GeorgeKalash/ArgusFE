@@ -7,7 +7,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 
-export default function SalesTrxForm({ functionId, recordId, itemId, clientId }) {
+const SalesTrxForm = ({ functionId, recordId, itemId, clientId }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const {
@@ -105,3 +105,7 @@ export default function SalesTrxForm({ functionId, recordId, itemId, clientId })
     </VertLayout>
   )
 }
+
+SalesTrxForm.width = 1200
+
+export default SalesTrxForm

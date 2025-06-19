@@ -31,7 +31,7 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function CashCountForm({ recordId, window }) {
+const CashCountForm = ({ recordId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [editMode, setEditMode] = useState(!!recordId)
@@ -597,3 +597,8 @@ export default function CashCountForm({ recordId, window }) {
     </FormShell>
   )
 }
+
+CashCountForm.width = 1100
+CashCountForm.height = 700
+
+export default CashCountForm
