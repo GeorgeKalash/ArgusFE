@@ -194,7 +194,12 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
         mapping: [
           { from: 'recordId', to: 'designId' },
           { from: 'reference', to: 'designRef' },
-          { from: 'name', to: 'designName' }
+          { from: 'name', to: 'designName' },
+          { from: 'sku', to: 'sku' },
+          { from: 'itemName', to: 'itemName' },
+          { from: 'routingId', to: 'routingId' },
+          { from: 'routingName', to: 'routingName' },
+          { from: 'routingRef', to: 'routingRef' }
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
@@ -262,6 +267,15 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       props: {
         maxLength: 12,
         decimalScale: 3
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (newRow) {
+          const qty = newRow?.itemWeight * newRow?.pcs ?? 0
+
+          update({
+            qty
+          })
+        }
       }
     },
     {
@@ -271,6 +285,15 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       props: {
         maxLength: 4,
         decimalScale: 0
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (newRow) {
+          const qty = newRow?.itemWeight * newRow?.pcs ?? 0
+
+          update({
+            qty
+          })
+        }
       }
     },
     {
