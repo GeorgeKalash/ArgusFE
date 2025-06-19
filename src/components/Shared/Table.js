@@ -458,7 +458,8 @@ const Table = ({
       },
       width: 450,
       height: 170,
-      title: platformLabels.Delete
+      title: platformLabels.Delete,
+      refresh: false
     })
   }
   function openDeleteConfirmation(obj) {
@@ -471,7 +472,8 @@ const Table = ({
       },
       width: 500,
       height: 300,
-      title: platformLabels.DeleteConfirmation
+      title: platformLabels.DeleteConfirmation,
+      refresh: false
     })
   }
 

@@ -182,6 +182,7 @@ export function DataGrid({
       width: 450,
       height: 170,
       canExpand: false,
+      refresh: false,
       title: 'Delete'
     })
   }

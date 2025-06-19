@@ -1,5 +1,6 @@
 import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
+import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -49,10 +50,10 @@ const UndeliveredItems = () => {
       recordId: null,
       dtId: null,
       groupId: 0,
-      plantId: 0,
-      siteId: 0,
+      plantId: null,
+      siteId: null,
       categoryId: 0,
-      clientId: 0,
+      clientId: null,
       clientRef: '',
       clientName: '',
       date: new Date(),
@@ -62,6 +63,11 @@ const UndeliveredItems = () => {
       notes: ''
     },
     validateOnChange: true,
+    validationSchema: yup.object({
+      plantId: yup.number().required(),
+      siteId: yup.number().required(),
+      clientId: yup.number().required()
+    }),
     onSubmit: async obj => {
       const { clientId, siteId, notes, items, dtId, plantId, date } = obj
 
@@ -79,7 +85,13 @@ const UndeliveredItems = () => {
 
       postRequest({
         extension: DeliveryRepository.DeliveriesOrders.gen,
-        record: JSON.stringify({ clientId, siteId, notes, date: date ? formatDateToApi(date) : null, items: itemValues })
+        record: JSON.stringify({
+          clientId,
+          siteId,
+          notes,
+          date: date ? formatDateToApi(date) : null,
+          items: itemValues
+        })
       }).then(res => {
         if (res.recordId) {
           stack({
@@ -120,7 +132,7 @@ const UndeliveredItems = () => {
   async function getData() {
     const result = await getRequest({
       extension: RGSaleRepository.SaSaleOrder.open,
-      parameters: `_categoryId=${categoryId}&_siteId=${siteId}&_groupId=${groupId}&_clientId=${clientId}&_soId=${soId}&_plantId=${plantId}`
+      parameters: `_categoryId=${categoryId}&_siteId=${siteId}&_groupId=${groupId}&_clientId=${clientId || 0}&_soId=${soId}&_plantId=${plantId}`
     })
 
     const res = result?.list?.map((item, index) => ({
@@ -244,8 +256,7 @@ const UndeliveredItems = () => {
     {
       key: 'ORD',
       condition: true,
-      onClick: handleSubmit,
-      disabled: !clientId || !siteId
+      onClick: handleSubmit
     }
   ]
 
@@ -331,8 +342,9 @@ const UndeliveredItems = () => {
                     { key: 'reference', value: 'Ref.' },
                     { key: 'name', value: 'Name' }
                   ]}
+                  required
                   onChange={async (event, newValue) => {
-                    formik.setFieldValue('clientId', newValue?.recordId || 0)
+                    formik.setFieldValue('clientId', newValue?.recordId || null)
                     formik.setFieldValue('clientName', newValue?.name || '')
                     formik.setFieldValue('clientRef', newValue?.reference || '')
                   }}
@@ -353,12 +365,12 @@ const UndeliveredItems = () => {
                   ]}
                   values={formik.values}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('siteId', newValue?.recordId || 0)
+                    formik.setFieldValue('siteId', newValue?.recordId || null)
                     formik.setFieldValue('siteRef', newValue?.reference || '')
                     formik.setFieldValue('siteName', newValue?.name || '')
                   }}
-                  required={formik.values.clientId}
-                  error={(formik.touched.sitId && Boolean(formik.errors.sitId)) || (clientId && !siteId)}
+                  required
+                  error={(formik.touched.siteId && Boolean(formik.errors.siteId))}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -374,8 +386,9 @@ const UndeliveredItems = () => {
                   ]}
                   values={formik.values}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('plantId', newValue?.recordId || 0)
+                    formik.setFieldValue('plantId', newValue?.recordId || null)
                   }}
+                  required
                   error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                   maxAccess={access}
                 />
