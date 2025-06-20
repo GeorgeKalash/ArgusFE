@@ -540,10 +540,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
               maxAccess: access,
               checkForSiteId: true,
               updateRow
-            },
-            width: 500,
-            height: 700,
-            title: platformLabels.serials
+            }
           })
         }
       }
@@ -635,9 +632,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       props: {
         functionId: SystemFunction.MaterialTransfer,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: labels.workflow
+      }
     })
   }
 

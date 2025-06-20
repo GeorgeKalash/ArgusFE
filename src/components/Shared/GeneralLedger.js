@@ -24,14 +24,20 @@ import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 import { VertLayout } from './Layouts/VertLayout'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [formik, setformik] = useState(null)
   const [baseGridData, setBaseGridData] = useState({ credit: 0, debit: 0, balance: 0 })
   const [exRateValue, setExRateValue] = useState(null)
   const [currencyGridData, setCurrencyGridData] = useState([])
   const formValues = valuesPath ? valuesPath : values
+
+  useSetWindow({ title: platformLabels.GeneralLedger, window })
+
   async function fetchGridData() {
     return await getRequest({
       extension: GeneralLedgerRepository.GeneralLedger.qry,
@@ -292,11 +298,11 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
       key: 'Reset',
       condition: onReset,
       onClick: async () => {
-        await onReset() 
+        await onReset()
         window.close()
       },
       disabled: false
-    },
+    }
   ]
 
   return (
@@ -667,5 +673,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
     </FormShell>
   )
 }
+
+GeneralLedger.width = 1000
+GeneralLedger.height = 620
 
 export default GeneralLedger

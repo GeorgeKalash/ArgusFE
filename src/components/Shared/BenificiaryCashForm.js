@@ -26,6 +26,7 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import CustomCheckBox from '../Inputs/CustomCheckBox'
 import { Fixed } from './Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const BenificiaryCashForm = ({
   viewBtns = true,
@@ -44,7 +45,8 @@ const BenificiaryCashForm = ({
   onSuccess,
   submitMainForm = true,
   recordId,
-  forceDisable
+  forceDisable,
+  window
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
@@ -53,6 +55,8 @@ const BenificiaryCashForm = ({
   const hiddenIsInActive = useRef(false)
   const hiddenIsBlocked = useRef(false)
   const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.Cash, window })
 
   const initialValues = {
     //RTBEN
@@ -822,5 +826,8 @@ const BenificiaryCashForm = ({
     </FormShell>
   )
 }
+
+BenificiaryCashForm.width = 700
+BenificiaryCashForm.height = 500
 
 export default BenificiaryCashForm

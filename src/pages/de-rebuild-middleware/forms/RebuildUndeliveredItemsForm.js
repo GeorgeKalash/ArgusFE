@@ -61,10 +61,7 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
           props: {
             recordId: res.recordId
           },
-          width: 500,
-          height: 450,
-          closable: false,
-          title: platformLabels.Progress
+          closable: false
         })
 
         toast.success(platformLabels.Added)

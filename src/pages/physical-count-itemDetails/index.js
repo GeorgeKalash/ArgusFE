@@ -423,10 +423,7 @@ const PhysicalCountItemDe = () => {
         fullScreen: false,
         onConfirm: clearGrid,
         dialogText: platformLabels.DeleteGridConf
-      },
-      width: 570,
-      height: 170,
-      title: platformLabels.Clear
+      }
     })
   }
 
@@ -443,10 +440,7 @@ const PhysicalCountItemDe = () => {
           setEditMode(false)
         },
         dialogText: platformLabels.ClearFormGrid
-      },
-      width: 570,
-      height: 170,
-      title: platformLabels.Clear
+      }
     })
   }
 

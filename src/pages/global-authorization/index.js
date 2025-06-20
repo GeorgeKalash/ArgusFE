@@ -67,10 +67,7 @@ const GlobalAuthorization = () => {
         moduleId: filters.moduleId,
         invalidate,
         resourceId: ResourceIds.GlobalAuthorization
-      },
-      width: 450,
-      height: 200,
-      title: labels.accessLevel
+      }
     })
   }
 
@@ -83,10 +80,7 @@ const GlobalAuthorization = () => {
         row: { resourceId: row.data.key, resourceName: row.data.value, moduleId: filters.moduleId },
         invalidate,
         resourceId: ResourceIds.GlobalAuthorization
-      },
-      width: 450,
-      height: 300,
-      title: labels.resourceGlobal
+      }
     })
   }
 
@@ -100,8 +94,6 @@ const GlobalAuthorization = () => {
         invalidate,
         resourceId: ResourceIds.GlobalAuthorization
       },
-      width: 800,
-      height: 600,
       title: labels.fieldGlobal
     })
   }

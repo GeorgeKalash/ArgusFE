@@ -9,11 +9,17 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Fixed } from './Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from '../Inputs/CustomNumberField'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const InventoryTransaction = props => {
-  const { recordId, functionId } = props
+  const { recordId, functionId, window } = props
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
   const [extendedCosts, setExtendedCosts] = useState(0)
+
+  useSetWindow({ title: platformLabels.InventoryTransaction, window })
 
   const {
     query: { data },
@@ -70,7 +76,7 @@ const InventoryTransaction = props => {
     let totalExtendedCosts = 0
 
     res.list = res.list.map(item => {
-      const amt = item.amount == null ? 0 : item.amount;
+      const amt = item.amount == null ? 0 : item.amount
       item.extendedCost = item.qty * amt
 
       totalExtendedCosts += item.extendedCost
@@ -98,17 +104,14 @@ const InventoryTransaction = props => {
       <Fixed>
         <Grid container justifyContent='flex-end' sx={{ px: 2, py: 2 }}>
           <Grid item xs={2}>
-            <CustomNumberField
-              name='extendedCosts'
-              label={_labels.extendedCosts}
-              value={extendedCosts}
-              readOnly
-            />
+            <CustomNumberField name='extendedCosts' label={_labels.extendedCosts} value={extendedCosts} readOnly />
           </Grid>
         </Grid>
       </Fixed>
     </VertLayout>
   )
 }
+
+InventoryTransaction.width = 700
 
 export default InventoryTransaction

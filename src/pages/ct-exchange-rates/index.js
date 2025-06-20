@@ -364,10 +364,7 @@ const CTExchangeRates = () => {
         open: [true, {}],
         fullScreen: false,
         onConfirm: () => emptyExchangeMapsRowValues(form, RateTypeId)
-      },
-      width: 450,
-      height: 170,
-      title: platformLabels.Clear
+      }
     })
   }
 

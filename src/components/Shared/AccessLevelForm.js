@@ -9,9 +9,14 @@ import { useForm } from 'src/hooks/form.js'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function AccessLevelForm({ labels, maxAccess, data, invalidate, moduleId, resourceId, window }) {
+const AccessLevelForm = ({ labels, maxAccess, data, invalidate, moduleId, resourceId, window }) => {
   const { postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.AccessLevel, window })
 
   const { formik } = useForm({
     maxAccess,
@@ -82,3 +87,8 @@ export default function AccessLevelForm({ labels, maxAccess, data, invalidate, m
     </FormShell>
   )
 }
+
+AccessLevelForm.width = 450
+AccessLevelForm.height = 200
+
+export default AccessLevelForm

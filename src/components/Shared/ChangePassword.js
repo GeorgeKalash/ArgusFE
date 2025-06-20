@@ -12,6 +12,8 @@ import axios from 'axios'
 import { useError } from 'src/error'
 import { AuthContext } from 'src/providers/AuthContext'
 import NewPassword from './NewPassword'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const ChangePassword = ({
   _labels,
@@ -26,6 +28,9 @@ const ChangePassword = ({
   const { stack: stackError } = useError()
   const auth = useAuth()
   const { encryptePWD, getAccessToken } = useContext(AuthContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.ChangePassword, window })
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -127,5 +132,7 @@ const ChangePassword = ({
     </VertLayout>
   )
 }
+ChangePassword.width = 600
+ChangePassword.height = 400
 
 export default ChangePassword

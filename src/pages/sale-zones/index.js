@@ -123,10 +123,7 @@ const SalesZone = () => {
       Component: Tree,
       props: {
         data: dataTree
-      },
-      width: 500,
-      height: 400,
-      title: _labels.tree
+      }
     })
   }
 

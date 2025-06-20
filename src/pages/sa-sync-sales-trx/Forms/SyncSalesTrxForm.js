@@ -54,10 +54,7 @@ export default function SyncSalesTransactionForm({ _labels, maxAccess }) {
           props: {
             recordId: res.recordId
           },
-          width: 500,
-          height: 450,
-          closable: false,
-          title: platformLabels.Progress
+          closable: false
         })
       }
     }

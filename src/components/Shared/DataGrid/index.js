@@ -179,11 +179,8 @@ export function DataGrid({
         fullScreen: false,
         onConfirm: () => deleteRow(params)
       },
-      width: 450,
-      height: 170,
       canExpand: false,
-      refresh: false,
-      title: 'Delete'
+      refresh: false
     })
   }
 

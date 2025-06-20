@@ -175,13 +175,9 @@ const InwardTransfer = () => {
       props: {
         plantId,
         dtId,
-        access,
         userId,
-        labels: _labels,
         recordId
-      },
-      width: 1200,
-      title: _labels.InwardTransfer
+      }
     })
   }
 

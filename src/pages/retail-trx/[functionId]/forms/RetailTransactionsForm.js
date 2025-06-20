@@ -50,7 +50,15 @@ import { RateDivision } from 'src/resources/RateDivision'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 
-export default function RetailTransactionsForm({ labels, posUser, access, recordId, functionId, getGLResource, window }) {
+export default function RetailTransactionsForm({
+  labels,
+  posUser,
+  access,
+  recordId,
+  functionId,
+  getGLResource,
+  window
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -777,9 +785,7 @@ export default function RetailTransactionsForm({ labels, posUser, access, record
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }

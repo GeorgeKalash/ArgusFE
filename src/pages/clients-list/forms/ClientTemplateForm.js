@@ -40,8 +40,10 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 import MoreDetails from './MoreDetails'
 import CustomPhoneNumber from 'src/components/Inputs/CustomPhoneNumber'
 import { isValidPhoneNumber } from 'libphonenumber-js'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
+const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) => {
   const { stack } = useWindow()
   const { getRequestFullEndPoint, getRequest, postRequest } = useContext(RequestsContext)
   const { systemChecks, defaultsData } = useContext(ControlContext)
@@ -64,6 +66,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const { platformLabels } = useContext(ControlContext)
 
   const trialDays = defaultsData?.list?.find(({ key }) => key === 'ct-client-trial-days')?.value
+
+  const { labels, access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.ClientMaster
+  })
+
+  useSetWindow({ title: labels.pageTitle, window })
 
   const initialValues = {
     //clientIDView
@@ -408,10 +416,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         functionId: formik.values.functionId,
         setEditMode: setEditMode,
         getData: getClient
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
 
@@ -1055,10 +1060,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                                 labels: labels,
                                 idTypes,
                                 refreshProf
-                              },
-                              title: labels.fetch,
-                              width: 400,
-                              height: 400
+                              }
                             })
                           }
                           disabled={
@@ -1834,5 +1836,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     </FormShell>
   )
 }
+
+ClientTemplateForm.width = 1200
+ClientTemplateForm.height = 650
 
 export default ClientTemplateForm

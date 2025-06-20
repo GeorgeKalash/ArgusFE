@@ -498,10 +498,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
               maxAccess,
               checkForSiteId: row.qty < 0,
               updateRow
-            },
-            width: 500,
-            height: 700,
-            title: platformLabels.serials
+            }
           })
         }
       }
@@ -580,9 +577,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                 ...row,
                 basePrice: metalPrice !== 0 ? metalPrice * metalPurity : 0
               }
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -663,10 +658,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       props: {
         functionId: SystemFunction.ReturnOnInvoice,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -1126,10 +1118,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         checkedAddressId: formik.values?.billAddId,
         form: formik.values,
         handleAddressValues: setAddressValues
-      },
-      width: 950,
-      height: 600,
-      title: labels.AddressFilter
+      }
     })
   }
 
@@ -1439,10 +1428,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                         Component: ChangeClient,
                         props: {
                           form: formik
-                        },
-                        width: 500,
-                        height: 570,
-                        title: labels.changeClient
+                        }
                       })
                     }}
                     image='popup.png'

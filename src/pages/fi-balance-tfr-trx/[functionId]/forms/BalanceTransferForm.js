@@ -215,10 +215,7 @@ export default function BalanceTransferForm({
           props: {
             accountId: parseInt(formik.values.fromAccountId),
             moduleId: 1
-          },
-          width: 1000,
-          height: 500,
-          title: platformLabels.AccountSummary
+          }
         })
       },
       disabled: !formik.values.fromAccountId

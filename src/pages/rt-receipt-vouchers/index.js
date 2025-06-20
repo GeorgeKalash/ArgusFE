@@ -61,14 +61,9 @@ export default function RtReceiptVouchers() {
     stack({
       Component: ReceiptVoucherForm,
       props: {
-        labels,
-        access: access,
         recordId: recordId || null,
         cashAccountId: cashAccountId
-      },
-      width: 1200,
-      height: 500,
-      title: labels.receiptVoucher
+      }
     })
   }
 

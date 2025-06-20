@@ -15,4 +15,7 @@ const NormalDialog = ({ DialogText, bottomSection }) => {
   )
 }
 
+NormalDialog.width = 600
+NormalDialog.height = 200
+
 export default NormalDialog

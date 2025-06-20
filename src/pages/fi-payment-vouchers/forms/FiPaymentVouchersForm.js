@@ -181,10 +181,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
             ...childFormikValues
           }))
         }
-      },
-      width: 500,
-      height: 500,
-      title: platformLabels.MultiCurrencyRate
+      }
     })
   }
 
@@ -271,9 +268,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       props: {
         functionId: SystemFunction.PaymentVoucher,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: 'Workflow'
+      }
     })
   }
 
@@ -394,10 +389,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
           props: {
             accountId: parseInt(formik.values.accountId),
             moduleId: 1
-          },
-          width: 1000,
-          height: 500,
-          title: platformLabels.AccountSummary
+          }
         })
       },
       disabled: !formik.values.accountId

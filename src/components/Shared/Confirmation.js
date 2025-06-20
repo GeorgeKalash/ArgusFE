@@ -15,13 +15,16 @@ import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refreshProf = () => {}, window }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
   const [showAsPasswordRepeat, setShowAsPasswordRepeat] = useState(false)
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const { systemChecks } = useContext(ControlContext)
+  const { systemChecks, platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.Fetch, window })
 
   const handleCopy = event => {
     event.preventDefault()
@@ -191,5 +194,8 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
     </FormShell>
   )
 }
+
+Confirmation.width = 400
+Confirmation.height = 400
 
 export default Confirmation

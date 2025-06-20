@@ -69,10 +69,7 @@ const LoginPage = () => {
         onClose: () => auth.EnableLogin(loggedUser)
       },
       expandable: false,
-      width: 400,
-      height: 400,
-      spacing: false,
-      title: platformLabels.OTPVerification
+      spacing: false
     })
   }
 
@@ -95,10 +92,7 @@ const LoginPage = () => {
       expandable: false,
       closable: false,
       draggable: false,
-      width: 600,
-      height: 400,
-      spacing: false,
-      title: platformLabels.ChangePassword
+      spacing: false
     })
   }
 

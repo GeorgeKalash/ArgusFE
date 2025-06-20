@@ -3,11 +3,17 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { Box } from '@mui/material'
 import { AuthContext } from 'src/providers/AuthContext'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const WorkFlow = ({ functionId, recordId }) => {
+const WorkFlow = ({ functionId, recordId, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { languageId } = useContext(AuthContext)
+  const { platformLabels } = useContext(ControlContext)
+
   const id = recordId + '-' + functionId
+
+  useSetWindow({ title: platformLabels.WorkFlow, window })
 
   const getWorkFlowData = async () => {
     var parameters = `_functionId=${functionId}&_recordId=${recordId}`
@@ -124,5 +130,7 @@ const WorkFlow = ({ functionId, recordId }) => {
     </Box>
   )
 }
+
+WorkFlow.width = 950
 
 export default WorkFlow

@@ -9,10 +9,16 @@ import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const ItemCostHistory = props => {
-  const { itemId, obj } = props
+  const { itemId, obj, window } = props
   const { getRequest } = useContext(RequestsContext)
+
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.CostHistory, window })
 
   const {
     query: { data },
@@ -102,5 +108,7 @@ const ItemCostHistory = props => {
     </VertLayout>
   )
 }
+
+ItemCostHistory.width = 1000
 
 export default ItemCostHistory

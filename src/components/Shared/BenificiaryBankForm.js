@@ -27,6 +27,7 @@ import { HIDDEN } from 'src/services/api/maxAccess'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
 import { Fixed } from './Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function BenificiaryBankForm({
   viewBtns = true,
@@ -45,7 +46,8 @@ export default function BenificiaryBankForm({
   onSuccess,
   submitMainForm = true,
   forceDisable,
-  recordId
+  recordId,
+  window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
@@ -54,6 +56,8 @@ export default function BenificiaryBankForm({
   const hiddenIsInActive = useRef(false)
   const hiddenIsBlocked = useRef(false)
   const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.Bank, window })
 
   const initialValues = {
     clientId: client?.clientId || '',
@@ -901,3 +905,6 @@ export default function BenificiaryBankForm({
     </FormShell>
   )
 }
+
+BenificiaryBankForm.width = 700
+BenificiaryBankForm.height = 500

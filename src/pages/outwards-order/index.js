@@ -81,13 +81,8 @@ const OutwardsOrder = () => {
       props: {
         plantId,
         userId: userData?.userId,
-        access,
-        labels: _labels,
         recordId
-      },
-      width: 1100,
-      height: 600,
-      title: _labels.OutwardsOrder
+      }
     })
   }
 

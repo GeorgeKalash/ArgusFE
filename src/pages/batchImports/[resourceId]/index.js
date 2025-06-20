@@ -24,10 +24,7 @@ const BatchImports = () => {
             recordId: res.recordId,
             access
           },
-          width: 500,
-          height: 450,
-          closable: false,
-          title: platformLabels.Progress
+          closable: false
         })
       }}
     />

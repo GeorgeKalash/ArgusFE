@@ -262,3 +262,6 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
     </FormShell>
   )
 }
+
+FieldGlobalForm.width = 800
+FieldGlobalForm.height = 600

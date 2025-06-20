@@ -111,12 +111,8 @@ const InwardSettlement = () => {
           plantId,
           cashAccountId,
           dtId,
-          access,
-          labels: _labels,
           recordId
-        },
-        width: 1200,
-        title: _labels.InwardSettlement
+        }
       })
     } else {
       if (!plantId) {

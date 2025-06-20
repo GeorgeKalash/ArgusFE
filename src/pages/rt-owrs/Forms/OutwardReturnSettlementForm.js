@@ -140,10 +140,7 @@ export default function OutwardReturnSettlementForm({
         onSuccess: () => {
           onClose(recordId)
         }
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
 

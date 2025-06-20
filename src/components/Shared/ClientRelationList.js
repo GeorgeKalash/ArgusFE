@@ -11,10 +11,15 @@ import Table from './Table'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export const ClientRelationList = ({ recordId, name, reference, category }) => {
+export const ClientRelationList = ({ recordId, name, reference, category, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.ClientRelation, window })
 
   async function fetchGridData() {
     const response = await getRequest({
@@ -77,10 +82,7 @@ export const ClientRelationList = ({ recordId, name, reference, category }) => {
         clientId: obj?.clientId,
         seqNo: obj?.seqNo,
         maxAccess: access
-      },
-      width: 500,
-      height: 450,
-      title: _labels.clientRelation
+      }
     })
   }
 
@@ -113,3 +115,6 @@ export const ClientRelationList = ({ recordId, name, reference, category }) => {
     </VertLayout>
   )
 }
+
+ClientRelationList.width = 900
+ClientRelationList.height = 600

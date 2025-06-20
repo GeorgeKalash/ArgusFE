@@ -17,6 +17,7 @@ import { Fixed } from './Layouts/Fixed'
 import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, disabled }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -28,6 +29,8 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, di
   const { labels, maxAccess } = useResourceQuery({
     datasetId: ResourceIds.Serial
   })
+
+  useSetWindow({ title: platformLabels.serials, window })
 
   const { formik } = useForm({
     maxAccess,
@@ -277,3 +280,6 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, di
     </FormShell>
   )
 }
+
+SerialsForm.width = 500
+SerialsForm.height = 700

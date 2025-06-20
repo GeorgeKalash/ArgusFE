@@ -14,6 +14,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomButton from '../Inputs/CustomButton'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const ImportSerials = ({ endPoint, header, onCloseimport, maxAccess, window }) => {
   const { stack } = useWindow()
@@ -22,6 +23,8 @@ const ImportSerials = ({ endPoint, header, onCloseimport, maxAccess, window }) =
   const [file, setFile] = useState(null)
   const [parsedFileContent, setParsedFileContent] = useState([])
   const { postRequest } = useContext(RequestsContext)
+
+  useSetWindow({ title: platformLabels.importSerials, window })
 
   const formik = useFormik({
     initialValues: {
@@ -66,10 +69,7 @@ const ImportSerials = ({ endPoint, header, onCloseimport, maxAccess, window }) =
         fullScreen: false,
         onConfirm: importSerialsData,
         dialogText: platformLabels.importConfirmation
-      },
-      width: 470,
-      height: 170,
-      title: platformLabels.import
+      }
     })
   }
 
@@ -160,5 +160,7 @@ const ImportSerials = ({ endPoint, header, onCloseimport, maxAccess, window }) =
     </VertLayout>
   )
 }
+ImportSerials.width = 550
+ImportSerials.height = 270
 
 export default ImportSerials

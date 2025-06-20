@@ -17,11 +17,14 @@ import { useForm } from 'src/hooks/form'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import Table from './Table'
 import { RGFinancialRepository } from 'src/repositories/RGFinancialRepository'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function AccountSummary({ accountId, moduleId }) {
+export default function AccountSummary({ accountId, moduleId, window }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
+
+  useSetWindow({ title: platformLabels.AccountSummary, window })
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.AccountSummary
@@ -226,3 +229,6 @@ export default function AccountSummary({ accountId, moduleId }) {
     </FormShell>
   )
 }
+
+AccountSummary.width = 1000
+AccountSummary.height = 500

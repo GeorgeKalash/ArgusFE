@@ -10,11 +10,16 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const AccountBalance = () => {
+const AccountBalance = ({ window }) => {
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
   const [gridData, setGridData] = useState({})
+
+  useSetWindow({ title: platformLabels.AccountBalance, window })
 
   const formik = useFormik({
     initialValues: {
@@ -43,11 +48,7 @@ const AccountBalance = () => {
     fetchGridData()
   }, [formik.values.cashAccountId])
 
-  const {
-    query: { data },
-    labels: _labels,
-    access
-  } = useResourceQuery({
+  const { labels: _labels, access } = useResourceQuery({
     datasetId: ResourceIds.AccountBalance
   })
 
@@ -111,5 +112,8 @@ const AccountBalance = () => {
     </VertLayout>
   )
 }
+
+AccountBalance.width = 1000
+AccountBalance.height = 620
 
 export default AccountBalance

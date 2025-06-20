@@ -383,10 +383,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
       props: {
         functionId: SystemFunction.DraftTransfer,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -400,10 +397,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
         },
         onCloseimport: fillGrids,
         maxAccess: maxAccess
-      },
-      width: 550,
-      height: 270,
-      title: platformLabels.importSerials
+      }
     })
   }
 

@@ -3,10 +3,13 @@ import CustomTextField from '../Inputs/CustomTextField'
 import WindowToolbar from './WindowToolbar'
 import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const StrictUnpostConfirmation = ({ window, onSuccess }) => {
   const [confirmationText, setConfirmationText] = useState('')
   const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.UnpostConfirmation, window })
 
   const handleChange = event => {
     const value = event.target.value
@@ -56,5 +59,8 @@ const StrictUnpostConfirmation = ({ window, onSuccess }) => {
     </Grid>
   )
 }
+
+StrictUnpostConfirmation.width = 500
+StrictUnpostConfirmation.height = 300
 
 export default StrictUnpostConfirmation

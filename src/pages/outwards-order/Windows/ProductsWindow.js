@@ -115,8 +115,6 @@ const ProductsWindow = ({
                     labels,
                     maxAccess
                   },
-                  width: 500,
-                  height: 200,
                   title: params.data?.productName
                 })
               }

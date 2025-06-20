@@ -123,10 +123,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
             ...childFormikValues
           }))
         }
-      },
-      width: 500,
-      height: 500,
-      title: platformLabels.MultiCurrencyRate
+      }
     })
   }
 
@@ -265,9 +262,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       props: {
         functionId: formik.values.functionId,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: 'Workflow'
+      }
     })
   }
 
