@@ -29,6 +29,7 @@ import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import { RateDivision } from 'src/resources/RateDivision'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
 
 export default function PaymentOrdersForm({ labels, maxAccess: access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -37,7 +38,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PaymentOrder,
-    access: access,
+    access,
     enabled: !recordId
   })
 
@@ -241,6 +242,23 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
     }
   }
 
+  function confirmation(dialogText, titleText, event) {
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: dialogText,
+        okButtonAction: async () => {
+          await event()
+        },
+        fullScreen: false,
+        close: true
+      },
+      width: 400,
+      height: 150,
+      title: titleText
+    })
+  }
+
   const onClose = async () => {
     const res = await postRequest({
       extension: FinancialRepository.PaymentOrders.close,
@@ -271,7 +289,9 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
     {
       key: 'Cancel',
       condition: true,
-      onClick: onCancel,
+      onClick: () => {
+        confirmation(platformLabels.CancelConf, platformLabels.Confirmation, onCancel)
+      },
       disabled: !editMode || isCancelled
     },
     {
@@ -337,9 +357,9 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
+                  await changeDT(newValue)
                   formik.setFieldValue('dtId', newValue?.recordId || null)
-                  changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 maxAccess={maxAccess}
@@ -362,10 +382,10 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                     required
                     readOnly={isClosed || isCancelled}
                     values={formik.values}
-                    onChange={async (event, newValue) => {
-                      await getMultiCurrencyFormData(newValue?.recordId, formik.values.date)
-                      formik.setFieldValue('currencyId', newValue ? newValue?.recordId : null)
-                      formik.setFieldValue('currencyName', newValue?.name)
+                    onChange={(event, newValue) => {
+                      getMultiCurrencyFormData(newValue?.recordId, formik.values.date)
+                      formik.setFieldValue('currencyId', newValue?.recordId || null)
+                      formik.setFieldValue('currencyName', newValue?.name || '')
                     }}
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
@@ -493,7 +513,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
                   formik.setFieldValue('amount', e.target.value)
                 }}
                 onClear={() => {
-                  formik.setFieldValue('amount', 0)
+                  formik.setFieldValue('amount', '')
                 }}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
               />
