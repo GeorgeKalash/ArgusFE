@@ -14,7 +14,7 @@ import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 
-export default function JobsForm({ labels, maxAccess, store, setStore, recalculateJobs, setRecalculateJobs }) {
+export default function JobsForm({ labels, maxAccess, store, recalculateJobs, setRecalculateJobs }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = store?.recordId
@@ -334,18 +334,7 @@ export default function JobsForm({ labels, maxAccess, store, setStore, recalcula
     formik.setFieldValue('disassemblyWgt', store?.castingInfo?.scrapWgt)
     formik.setFieldValue('footerOutputWgt', store?.castingInfo?.outputWgt)
     formik.setFieldValue('footerInputWgt', store?.castingInfo?.inputWgt)
-    formik.setFieldValue('balanceWgt', balanceWgt)
   }, [store?.castingInfo])
-
-  useEffect(() => {
-    setStore(prevStore => ({
-      ...prevStore,
-      castingInfo: {
-        ...prevStore.castingInfo,
-        balanceWgt: Number(balanceWgt)
-      }
-    }))
-  }, [balanceWgt])
 
   return (
     <FormShell

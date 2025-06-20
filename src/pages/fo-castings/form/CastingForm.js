@@ -54,25 +54,25 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
       date: new Date(),
       waxId: null,
       waxRef: '',
-      grossWgt: null,
-      mouldWgt: null,
-      rmWgt: null,
-      netWgt: null,
-      suggestedWgt: null,
-      inputWgt: null,
-      netInputWgt: null,
-      outputWgt: null,
-      loss: null,
-      lossPct: null,
-      allowedLossPct: null,
-      lossVariationPct: null,
+      grossWgt: 0,
+      mouldWgt: 0,
+      rmWgt: 0,
+      netWgt: 0,
+      suggestedWgt: 0,
+      inputWgt: 0,
+      netInputWgt: 0,
+      outputWgt: 0,
+      loss: 0,
+      lossPct: 0,
+      allowedLossPct: 0,
+      lossVariationPct: 0,
       laborId: null,
       lineId: null,
       mouldId: null,
       metalId: null,
       metalColorId: null,
-      stdLossRate: null,
-      factor: null,
+      stdLossRate: 0,
+      factor: 0,
       scrapWgt: 0
     },
     validateOnChange: true,
@@ -142,7 +142,7 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || store?.castingInfo?.balanceWgt != 0 || isCancelled
+      disabled: !editMode || isCancelled
     },
     {
       key: 'Cancel',
@@ -226,21 +226,10 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
     })
     const waxInfo = await getWaxInfo(res?.record?.waxId)
     const factorStdLoss = await getfactorStdLoss(waxInfo?.metalId, waxInfo?.metalColorId)
+
     formik.setValues({
       ...res?.record,
       date: formatDateFromApi(res?.record?.date),
-      grossWgt: res?.record?.grossWgt.toFixed(3),
-      rmWgt: res?.record?.rmWgt.toFixed(3),
-      mouldWgt: res?.record?.mouldWgt.toFixed(3),
-      netWgt: res?.record?.netWgt.toFixed(3),
-      suggestedWgt: res?.record?.suggestedWgt.toFixed(3),
-      inputWgt: res?.record?.inputWgt.toFixed(3),
-      netInputWgt: res?.record?.netInputWgt.toFixed(3),
-      outputWgt: res?.record?.outputWgt.toFixed(3),
-      loss: res?.record?.loss.toFixed(3),
-      lossPct: res?.record?.lossPct.toFixed(3),
-      lossVariationPct: res?.record?.lossVariationPct.toFixed(3),
-      scrapWgt: res?.record?.scrapWgt.toFixed(3),
       factor: factorStdLoss?.rate || 0,
       stdLossRate: factorStdLoss?.stdLossRate || 0,
       mouldId: waxInfo?.mouldId || null,
@@ -255,9 +244,9 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
       metalInfo: { metalId: waxInfo?.metalId || null, metalColorId: waxInfo?.metalColorId || null },
       castingInfo: {
         ...prevStore.castingInfo,
-        outputWgt: res?.record?.outputWgt.toFixed(3),
-        inputWgt: res?.record?.inputWgt.toFixed(3),
-        loss: res?.record?.loss.toFixed(3)
+        outputWgt: res?.record?.outputWgt,
+        inputWgt: res?.record?.inputWgt,
+        loss: res?.record?.loss
       }
     }))
   }
@@ -475,10 +464,10 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
+                      displayField={['reference', 'name']}
                       readOnly={isPosted || isCancelled}
                       valueField='recordId'
                       required
-                      displayField='name'
                       values={formik.values}
                       onChange={(event, newValue) => {
                         formik.setFieldValue('laborId', newValue?.recordId || null)
@@ -577,6 +566,7 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
                       label={labels.inputWgt}
                       value={formik.values.inputWgt}
                       required
+                      decimalScale={3}
                       readOnly={isPosted || isCancelled}
                       onChange={e => {
                         formik.setFieldValue('inputWgt', e.target.value)
@@ -601,6 +591,7 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
                       value={formik.values.netInputWgt}
                       required
                       readOnly
+                      decimalScale={3}
                       onChange={e => {
                         formik.setFieldValue('netInputWgt', e.target.value)
                       }}
@@ -614,6 +605,7 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
                       label={labels.outputWgt}
                       value={formik.values.outputWgt}
                       required
+                      decimalScale={3}
                       readOnly={isPosted || isCancelled}
                       onChange={e => {
                         setRecal(true)
@@ -636,6 +628,7 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
                       label={labels.loss}
                       value={loss}
                       required
+                      decimalScale={3}
                       readOnly
                       onChange={e => {
                         formik.setFieldValue('loss', e.target.value)
@@ -651,6 +644,7 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
                       value={lossPct}
                       required
                       readOnly
+                      decimalScale={3}
                       onChange={e => {
                         formik.setFieldValue('lossPct', e.target.value)
                       }}
@@ -665,6 +659,7 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
                       value={lossVariationPct}
                       required
                       readOnly
+                      decimalScale={3}
                       onChange={e => formik.setFieldValue('lossVariationPct', e.target.value)}
                       onClear={() => formik.setFieldValue('lossVariationPct', 0)}
                       error={formik.touched.lossVariationPct && Boolean(formik.errors.lossVariationPct)}
@@ -676,6 +671,7 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
                       label={labels.scrapWgt}
                       value={formik.values.scrapWgt}
                       readOnly
+                      decimalScale={3}
                       onChange={e => formik.setFieldValue('scrapWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('scrapWgt', 0)}
                       error={formik.touched.scrapWgt && Boolean(formik.errors.scrapWgt)}
