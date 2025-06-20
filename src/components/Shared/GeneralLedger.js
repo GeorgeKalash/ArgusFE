@@ -631,7 +631,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
         </Grow>
         <Fixed>
           <Grid container sx={{ flex: 1 }}>
-            <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={6} height={190} sx={{ display: 'flex', flex: 1 }}>
               <Table
                 gridData={{ count: 1, list: [baseGridData] }}
                 maxAccess={access}
@@ -645,8 +645,9 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                 pagination={false}
               />
             </Grid>
-            <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={6} height={190} sx={{ display: 'flex', flex: 1 }}>
               <Table
+                name='generalLedger'
                 columns={[
                   { field: 'currency', headerName: 'Currency', flex: 1 },
                   { field: 'debit', headerName: 'Debit', type: 'number', flex: 1 },
