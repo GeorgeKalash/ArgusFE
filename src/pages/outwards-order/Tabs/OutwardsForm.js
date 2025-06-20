@@ -43,7 +43,7 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function OutwardsForm({ recordId, plantId, userId, dtId, window }) {
+const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -1608,3 +1608,8 @@ export default function OutwardsForm({ recordId, plantId, userId, dtId, window }
     </FormShell>
   )
 }
+
+OutwardsForm.width = 1100
+OutwardsForm.height = 600
+
+export default OutwardsForm

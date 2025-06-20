@@ -66,14 +66,14 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       reference: '',
       accountId: null,
       date: new Date(),
-      currencyId: currencyId,
+      currencyId,
       currencyName: '',
       dtId: null,
       sptId: null,
       dgId: '',
       amount: '',
       baseAmount: '',
-      checkNo: '',
+      checkNo: null,
       notes: '',
       oDocId: '',
       printStatus: '',
@@ -98,6 +98,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       paymentMethod: yup.string().required(),
       checkNo: yup
         .string()
+        .nullable()
         .test(
           'check-no-required-if-payment-method-3',
           'Check number is required when payment method is 3.',
@@ -451,10 +452,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 form={formik}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Account Ref' },
-                  { key: 'name', value: 'Name' },
+                  { key: 'name', value: 'Name', grid: 4 },
                   { key: 'keywords', value: 'Keywords' }
                 ]}
-                displayFieldWidth={2}
+                displayFieldWidth={4}
                 filter={{ isInactive: val => val !== true }}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue ? newValue.recordId : null)
@@ -511,7 +512,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   formik.setFieldValue('cashAccountId', null)
                   formik.setFieldValue('cashAccountRef', null)
                   formik.setFieldValue('cashAccountName', null)
-                  formik.setFieldValue('checkNo', '')
+                  formik.setFieldValue('checkNo', null)
                   formik.setFieldValue('paymentMethod', newValue?.key || null)
                 }}
                 error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
@@ -526,10 +527,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
                 maxLength={30}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('checkNo', '')}
+                onClear={() => formik.setFieldValue('checkNo', null)}
                 error={formik.touched.checkNo && Boolean(formik.errors.checkNo)}
-                readOnly={formik.values.paymentMethod !== 3}
-                required={formik.values.paymentMethod === 3}
+                readOnly={formik.values.paymentMethod != 3}
+                required={formik.values.paymentMethod == 3}
               />
             </Grid>
 

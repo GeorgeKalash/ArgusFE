@@ -34,7 +34,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function CreditInvoiceForm({ recordId, plantId, userData, cashAccountId, window }) {
+const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window }) => {
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
@@ -969,3 +969,8 @@ export default function CreditInvoiceForm({ recordId, plantId, userData, cashAcc
     </FormShell>
   )
 }
+
+CreditInvoiceForm.width = 1000
+CreditInvoiceForm.height = 650
+
+export default CreditInvoiceForm

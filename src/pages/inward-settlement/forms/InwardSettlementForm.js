@@ -32,8 +32,9 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import { getStorageData } from 'src/storage/storage'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function InwardSettlementForm({ recordId, plantId, cashAccountId, dtId, window }) {
+const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData } = useContext(ControlContext)
@@ -1329,3 +1330,7 @@ export default function InwardSettlementForm({ recordId, plantId, cashAccountId,
     </FormShell>
   )
 }
+InwardSettlementForm.width = 1200
+InwardSettlementForm.height = 650
+
+export default InwardSettlementForm

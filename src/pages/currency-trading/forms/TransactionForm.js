@@ -41,7 +41,7 @@ import CustomRadioButtonGroup from 'src/components/Inputs/CustomRadioButtonGroup
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function TransactionForm({ recordId, plantId }) {
+const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
@@ -79,7 +79,7 @@ export default function TransactionForm({ recordId, plantId }) {
     datasetId: ResourceIds.CashInvoice
   })
 
-  useSetWindow({ title: labels.CurrencyTrading, window })
+  useSetWindow({ title: labels?.cashInvoice, window: windowStack })
 
   const initialValues = {
     recordId: null,
@@ -447,8 +447,6 @@ export default function TransactionForm({ recordId, plantId }) {
       (!row.lcAmount || row.lcAmount == 0)
   )
 
-  const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
-
   const onClose = async recId => {
     const res = await getRequest({
       extension: CTTRXrepository.CurrencyTrading.get2,
@@ -544,10 +542,13 @@ export default function TransactionForm({ recordId, plantId }) {
       )
       formik.setFieldValue(
         'amount',
-        record.cash.map(({ seqNo, ...rest }) => ({
-          id: seqNo,
-          ...rest
-        }))
+        record?.cash?.length != 0
+          ? record.cash?.map((item, index) => ({
+              id: index + 1,
+              pos: item?.type != 3,
+              ...item
+            }))
+          : formik.initialValues.amount
       )
 
       formik.setFieldValue('clientType', record.clientMaster.category)
@@ -584,7 +585,7 @@ export default function TransactionForm({ recordId, plantId }) {
       return record?.clientIndividual?.clientId
     }
   }
-  const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
+  const { userId } = JSON.parse(window?.sessionStorage?.getItem('userData'))
 
   async function fetchRate({ currencyId }) {
     if (currencyId) {
@@ -803,7 +804,7 @@ export default function TransactionForm({ recordId, plantId }) {
       form={formik}
       initialValues={initialValues}
       setIDInfoAutoFilled={resetAutoFilled}
-      resourceId={ResourceIds.CurrencyTrading}
+      resourceId={ResourceIds.CashInvoice}
       editMode={editMode}
       isClosed={isClosed}
       disabledSubmit={balance > 0 && true}
@@ -1540,8 +1541,14 @@ export default function TransactionForm({ recordId, plantId }) {
                       onChange={value => formik.setFieldValue('amount', value)}
                       value={formik.values.amount}
                       error={formik.errors.amount}
-                      name={'amount'}
+                      name='amount'
                       setFormik={setFormik}
+                      data={{
+                        recordId: formik.values?.recordId,
+                        reference: formik.values?.reference,
+                        clientName: formik.values?.clientName,
+                        viewPosButtons: formik.values.wip === 2
+                      }}
                       amount={total}
                       disabled={isClosed}
                     />
@@ -1573,3 +1580,8 @@ export default function TransactionForm({ recordId, plantId }) {
     </FormShell>
   )
 }
+
+TransactionForm.width = 1200
+TransactionForm.height = 600
+
+export default TransactionForm

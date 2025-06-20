@@ -23,7 +23,9 @@ const TaxDetails = props => {
       case 3:
         return (taxItem.basePrice != null ? (taxItem.basePrice * taxItem.qty * taxDetail.amount) / 100 : 0).toFixed(2)
       case 4:
-        return (taxItem.baseLaborPrice != null ? (taxItem.baseLaborPrice * taxItem.qty * taxDetail.amount) / 100 : 0).toFixed(2)
+        return (
+          taxItem.baseLaborPrice != null ? (taxItem.baseLaborPrice * taxItem.qty * taxDetail.amount) / 100 : 0
+        ).toFixed(2)
       default:
         return null
     }
@@ -112,5 +114,7 @@ const TaxDetails = props => {
     </VertLayout>
   )
 }
+
+TaxDetails.width = 1000
 
 export default TaxDetails

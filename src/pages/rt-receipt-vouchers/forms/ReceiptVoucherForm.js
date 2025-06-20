@@ -30,7 +30,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function ReceiptVoucherForm({ recordId, cashAccountId, form = null, window }) {
+const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -240,10 +240,14 @@ export default function ReceiptVoucherForm({ recordId, cashAccountId, form = nul
           ...res.record,
           date: formatDateFromApi(res?.record?.date)
         },
-        cash: result.list.map((amount, index) => ({
-          id: index + 1,
-          ...amount
-        }))
+        cash:
+          result?.list?.length != 0
+            ? result.list.map((item, index) => ({
+                id: index + 1,
+                pos: item?.type != 3,
+                ...item
+              }))
+            : formik.initialValues.cash
       })
 
       return res.record
@@ -403,7 +407,6 @@ export default function ReceiptVoucherForm({ recordId, cashAccountId, form = nul
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.owoId', newValue ? newValue.recordId : '')
                       formik.setFieldValue('header.owoRef', newValue ? newValue.reference : '')
-
                       formik.setFieldValue('header.amount', newValue ? newValue.amount : '')
                       formik.setFieldValue('header.clientId', newValue ? newValue.clientId : '')
                     }}
@@ -442,6 +445,13 @@ export default function ReceiptVoucherForm({ recordId, cashAccountId, form = nul
             allowAddNewLine={!isPosted}
             amount={formik.values.header.amount}
             setFormik={setFormik}
+            data={{
+              recordId: formik.values.header.recordId,
+              reference: formik.values.header.reference,
+              clientName: formik.values.header.clientName,
+              beneficiaryName: formik.values.header.beneficiaryName,
+              viewPosButtons: formik?.values?.header?.wip === 2
+            }}
             name='cash'
           />
         </Grow>
@@ -449,3 +459,7 @@ export default function ReceiptVoucherForm({ recordId, cashAccountId, form = nul
     </FormShell>
   )
 }
+
+ReceiptVoucherForm.width = 1000
+
+export default ReceiptVoucherForm

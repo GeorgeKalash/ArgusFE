@@ -1805,4 +1805,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   )
 }
 
+ClientTemplateForm.width = 1200
+ClientTemplateForm.height = 650
+
 export default ClientTemplateForm

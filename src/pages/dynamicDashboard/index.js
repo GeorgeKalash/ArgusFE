@@ -332,7 +332,7 @@ const DashboardLayout = () => {
                           label: labels.retailSales,
                           value:
                             data?.dashboard?.summaryFigures?.find(
-                              f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS
+                              f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_RETAIL_SALES
                             )?.amount ?? 0
                         },
                         {
@@ -342,7 +342,7 @@ const DashboardLayout = () => {
                               f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS
                             )?.amount ?? 0) +
                             (data?.dashboard?.summaryFigures?.find(
-                              f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_SALES_ORDERS
+                              f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_RETAIL_SALES
                             )?.amount ?? 0)
                         }
                       ]

@@ -69,7 +69,8 @@ export const PurchaseRepository = {
     post: service + 'postIVC',
     unpost: service + 'unpostIVC',
     generate: service + 'generateIVC',
-    preview: service + 'previewIVC'
+    preview: service + 'previewIVC',
+    sync: service + 'syncIVC'
   },
   Invoice: {
     snapshot: service + 'snapshotINV'
