@@ -223,7 +223,7 @@ export default function FormShell({
                 onReset: action?.onReset
               },
               width: 1000,
-              height: 620,
+              height: 650,
               title: platformLabels.GeneralLedger
             })
           }

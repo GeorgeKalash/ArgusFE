@@ -100,6 +100,7 @@ const PreReqsList = ({ store, labels, maxAccess }) => {
       </Fixed>
       <Grow>
         <Table
+          name='preReq'
           columns={columns}
           gridData={data}
           rowId={['code']}
