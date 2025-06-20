@@ -26,14 +26,13 @@ export default function SyncPurchaseTrx({ _labels, access }) {
     initialValues: {
       startDate: null,
       endDate: null,
-      batchId: null,
+      batchId: 0,
       batchRef: '',
       batchName: ''
     },
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
-      batchId: yup.number().required(),
       startDate: yup
         .date()
         .required()
@@ -126,7 +125,6 @@ export default function SyncPurchaseTrx({ _labels, access }) {
                 name='batchId'
                 label={platformLabels.batch}
                 valueField='reference'
-                required
                 displayFieldWidth={2}
                 displayField='name'
                 valueShow='batchRef'
@@ -135,7 +133,7 @@ export default function SyncPurchaseTrx({ _labels, access }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('batchRef', newValue?.reference || '')
                   formik.setFieldValue('batchName', newValue?.name || '')
-                  formik.setFieldValue('batchId', newValue?.recordId || null)
+                  formik.setFieldValue('batchId', newValue?.recordId || 0)
                 }}
                 error={formik.touched.batchId && Boolean(formik.errors.batchId)}
               />

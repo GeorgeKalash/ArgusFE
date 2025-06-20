@@ -305,9 +305,7 @@ const CashCountForm = ({ recordId, window }) => {
       props: {
         functionId: SystemFunction.CashCountTransaction,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: 'Workflow'
+      }
     })
   }
 

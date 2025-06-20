@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -31,7 +31,6 @@ export default function WorkCentersForm({ labels, recordId, maxAccess }) {
       recordId: recordId || null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({

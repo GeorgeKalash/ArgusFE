@@ -27,7 +27,7 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-const GeneralLedger = ({ functionId, values, valuesPath, datasetId, window }) => {
+const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [formik, setformik] = useState(null)
@@ -293,6 +293,18 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, window }) =>
     return response
   }
 
+  const actions = [
+    {
+      key: 'Reset',
+      condition: onReset,
+      onClick: async () => {
+        await onReset()
+        window.close()
+      },
+      disabled: false
+    }
+  ]
+
   return (
     <FormShell
       resourceId={ResourceIds.JournalVoucher}
@@ -301,6 +313,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, window }) =>
       disabledSubmit={baseGridData.balance !== 0 || isProcessed}
       infoVisible={false}
       previewReport={true}
+      actions={actions}
     >
       <VertLayout>
         {formik && (
@@ -624,7 +637,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, window }) =>
         </Grow>
         <Fixed>
           <Grid container sx={{ flex: 1 }}>
-            <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={6} height={190} sx={{ display: 'flex', flex: 1 }}>
               <Table
                 gridData={{ count: 1, list: [baseGridData] }}
                 maxAccess={access}
@@ -638,8 +651,9 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, window }) =>
                 pagination={false}
               />
             </Grid>
-            <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={6} height={190} sx={{ display: 'flex', flex: 1 }}>
               <Table
+                name='generalLedger'
                 columns={[
                   { field: 'currency', headerName: 'Currency', flex: 1 },
                   { field: 'debit', headerName: 'Debit', type: 'number', flex: 1 },

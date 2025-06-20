@@ -187,6 +187,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
       </Fixed>
       <Grow>
         <Table
+          name='accessLevel'
           columns={[
             {
               field: 'resourceId',

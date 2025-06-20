@@ -1,6 +1,5 @@
 import { useWindow } from 'src/windows'
 import FormShell from './FormShell'
-import { Approval } from '@mui/icons-material'
 import Approvals from './Approvals'
 
 export default function ApprovalFormShell(props) {

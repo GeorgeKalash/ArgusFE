@@ -94,8 +94,7 @@ const ReportGenerator = ({
       case 1:
         stack({
           Component: PreviewReport,
-          props: { pdf: result },
-          title: platformLabels.PreviewReport
+          props: { pdf: result }
         })
         break
       default:

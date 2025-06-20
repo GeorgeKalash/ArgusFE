@@ -99,7 +99,16 @@ const LotForm = ({ labels, obj }) => {
   return (
     <VertLayout>
       <Grow>
-        <Table columns={columns} gridData={data} rowId={['lotId']} isLoading={false} pageSize={50} pagination={false} />
+        <Table
+          name='lot'
+          columns={columns}
+          gridData={data}
+          rowId={['lotId']}
+          isLoading={false}
+          pageSize={50}
+          pagination={false}
+          maxAccess={maxAccess}
+        />
       </Grow>
     </VertLayout>
   )

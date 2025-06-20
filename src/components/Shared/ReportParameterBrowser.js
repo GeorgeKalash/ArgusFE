@@ -141,6 +141,8 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
     newParams = `_dimension=${field?.data}`
   } else if (apiDetails?.endpoint === FinancialRepository.FIDimension.qry) {
     newParams = `_dimension=${field?.data}`
+  } else if (apiDetails?.endpoint === SystemRepository.Currency.qry2) {
+    newParams += `_currencyType=${field?.data}`
   }
 
   return (

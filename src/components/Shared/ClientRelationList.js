@@ -78,10 +78,8 @@ export const ClientRelationList = ({ recordId, name, reference, category, window
     stack({
       Component: ClientRelationForm,
       props: {
-        labels: _labels,
         clientId: obj?.clientId,
-        seqNo: obj?.seqNo,
-        maxAccess: access
+        seqNo: obj?.seqNo
       }
     })
   }

@@ -44,6 +44,8 @@ export function DataGrid({
 
   const skip = allowDelete ? 1 : 0
 
+  const gridContainerRef = useRef(null)
+
   function checkDuplicates(field, data) {
     return value.find(
       item => item.id != data.id && item?.[field] && item?.[field]?.toLowerCase() === data?.[field]?.toLowerCase()
@@ -177,7 +179,8 @@ export function DataGrid({
         fullScreen: false,
         onConfirm: () => deleteRow(params)
       },
-      canExpand: false
+      canExpand: false,
+      refresh: false
     })
   }
 
@@ -541,13 +544,26 @@ export function DataGrid({
     )
   }
 
+  const gridWidth = gridContainerRef?.current?.offsetWidth - 2
+
+  const totalWidth =
+    allColumns.filter(col => col?.width !== undefined)?.reduce((sum, col) => sum + col.width, 0) +
+    (allowDelete ? 50 : 0)
+
+  const additionalWidth =
+    totalWidth > 0 && allColumns?.length > 0 && gridWidth > totalWidth
+      ? (gridWidth - totalWidth) / allColumns?.length
+      : 0
+
   const columnDefs = [
     ...allColumns.map(column => ({
       ...column,
+      ...{ width: column.width + additionalWidth },
       field: column.name,
       headerName: column.label || column.name,
+      headerTooltip: column.label,
       editable: !disabled,
-      flex: column.flex || 1,
+      flex: column.flex || (!column.width && 1),
       sortable: false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
@@ -628,8 +644,6 @@ export function DataGrid({
       }
     }
   }
-
-  const gridContainerRef = useRef(null)
 
   useEffect(() => {
     function handleBlur(event) {
@@ -797,6 +811,7 @@ export function DataGrid({
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}
               onCellEditingStopped={onCellEditingStopped}
+              enableBrowserTooltips={true}
             />
           )}
         </Box>

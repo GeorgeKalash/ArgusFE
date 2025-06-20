@@ -95,8 +95,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
             values: formValidation.values,
             functionId: SystemFunction.ClientRelation,
             onSuccess: verified
-          },
-          title: _labels.OTPVerification
+          }
         })
         toast.success('Record Successfully')
       })

@@ -118,6 +118,7 @@ export function WindowProvider({ children }) {
           onClose,
           closable,
           expandable,
+          refresh,
           draggable,
           height,
           styles
@@ -135,6 +136,28 @@ export function WindowProvider({ children }) {
                 } else {
                   setRerenderFlag(!rerenderFlag)
                 }
+              },
+              setRecord: (recordId, record) => {
+                setStack(prevStack => {
+                  const nextStack = prevStack.map(window =>
+                    window.id === id
+                      ? {
+                          ...window,
+                          props: {
+                            ...window.props,
+                            ...record,
+                            recordId,
+                            ...(record &&
+                            Object.values(record).some(value => value !== '' && value !== null && value !== undefined)
+                              ? { record }
+                              : {})
+                          }
+                        }
+                      : window
+                  )
+                  
+                  return nextStack
+                })
               }
             }}
           >
@@ -148,9 +171,14 @@ export function WindowProvider({ children }) {
                 closeWindow()
                 if (onClose) onClose()
               }}
+              onRefresh={() => {
+                closeWindowById(id)
+                openWindow(id)
+              }}
               width={width}
               height={height}
               expandable={expandable}
+              refresh={refresh}
               draggable={draggable}
               closable={closable}
               styles={styles}
@@ -198,6 +226,7 @@ export function ImmediateWindow({ datasetId, Component, labelKey, titleName, hei
         ...props
       },
       expandable: false,
+      refresh: false,
       closable: false,
       draggable: false,
       width: width || 600,

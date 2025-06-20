@@ -1,5 +1,6 @@
 import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
+import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -17,7 +18,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { RGSaleRepository } from 'src/repositories/RGSaleRepository'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
@@ -25,6 +26,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useWindow } from 'src/windows'
 import DeliveriesOrdersForm from '../delivery-orders/Forms/DeliveryOrdersForm'
 import { useError } from 'src/error'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
 const UndeliveredItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -48,20 +50,26 @@ const UndeliveredItems = () => {
       recordId: null,
       dtId: null,
       groupId: 0,
-      plantId: 0,
-      siteId: 0,
+      plantId: null,
+      siteId: null,
       categoryId: 0,
-      clientId: 0,
+      clientId: null,
       clientRef: '',
       clientName: '',
+      date: new Date(),
       soId: 0,
       items: [],
       marginDefault: defaultVat?.value,
       notes: ''
     },
     validateOnChange: true,
+    validationSchema: yup.object({
+      plantId: yup.number().required(),
+      siteId: yup.number().required(),
+      clientId: yup.number().required()
+    }),
     onSubmit: async obj => {
-      const { clientId, siteId, notes, items, dtId, plantId } = obj
+      const { clientId, siteId, notes, items, dtId, plantId, date } = obj
 
       const itemValues = items
         .filter(item => item.isChecked)
@@ -77,7 +85,13 @@ const UndeliveredItems = () => {
 
       postRequest({
         extension: DeliveryRepository.DeliveriesOrders.gen,
-        record: JSON.stringify({ clientId, siteId, notes, items: itemValues })
+        record: JSON.stringify({
+          clientId,
+          siteId,
+          notes,
+          date: date ? formatDateToApi(date) : null,
+          items: itemValues
+        })
       }).then(res => {
         if (res.recordId) {
           stack({
@@ -118,7 +132,7 @@ const UndeliveredItems = () => {
   async function getData() {
     const result = await getRequest({
       extension: RGSaleRepository.SaSaleOrder.open,
-      parameters: `_categoryId=${categoryId}&_siteId=${siteId}&_groupId=${groupId}&_clientId=${clientId}&_soId=${soId}&_plantId=${plantId}`
+      parameters: `_categoryId=${categoryId}&_siteId=${siteId}&_groupId=${groupId}&_clientId=${clientId || 0}&_soId=${soId}&_plantId=${plantId}`
     })
 
     const res = result?.list?.map((item, index) => ({
@@ -242,8 +256,7 @@ const UndeliveredItems = () => {
     {
       key: 'ORD',
       condition: true,
-      onClick: handleSubmit,
-      disabled: !clientId || !siteId
+      onClick: handleSubmit
     }
   ]
 
@@ -329,8 +342,9 @@ const UndeliveredItems = () => {
                     { key: 'reference', value: 'Ref.' },
                     { key: 'name', value: 'Name' }
                   ]}
+                  required
                   onChange={async (event, newValue) => {
-                    formik.setFieldValue('clientId', newValue?.recordId || 0)
+                    formik.setFieldValue('clientId', newValue?.recordId || null)
                     formik.setFieldValue('clientName', newValue?.name || '')
                     formik.setFieldValue('clientRef', newValue?.reference || '')
                   }}
@@ -351,12 +365,12 @@ const UndeliveredItems = () => {
                   ]}
                   values={formik.values}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('siteId', newValue?.recordId || 0)
+                    formik.setFieldValue('siteId', newValue?.recordId || null)
                     formik.setFieldValue('siteRef', newValue?.reference || '')
                     formik.setFieldValue('siteName', newValue?.name || '')
                   }}
-                  required={formik.values.clientId}
-                  error={(formik.touched.sitId && Boolean(formik.errors.sitId)) || (clientId && !siteId)}
+                  required
+                  error={(formik.touched.siteId && Boolean(formik.errors.siteId))}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -372,8 +386,9 @@ const UndeliveredItems = () => {
                   ]}
                   values={formik.values}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('plantId', newValue?.recordId || 0)
+                    formik.setFieldValue('plantId', newValue?.recordId || null)
                   }}
+                  required
                   error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                   maxAccess={access}
                 />
@@ -423,7 +438,18 @@ const UndeliveredItems = () => {
 
           <Grid item xs={3}>
             <Grid container spacing={2}>
-              <Grid item xs={12}></Grid>
+              <Grid item xs={12}>
+                <CustomDatePicker
+                  name='date'
+                  label={labels.date}
+                  value={formik?.values?.date}
+                  onChange={formik.setFieldValue}
+                  readOnly
+                  maxAccess={access}
+                  onClear={() => formik.setFieldValue('date', '')}
+                  error={formik.touched.date && Boolean(formik.errors.date)}
+                />
+              </Grid>
               <Grid item xs={12}></Grid>
               <Grid item xs={12}></Grid>
               <Grid item xs={12}></Grid>
