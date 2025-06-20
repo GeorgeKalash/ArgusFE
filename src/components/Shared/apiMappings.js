@@ -633,7 +633,11 @@ export const apiMappings = {
     endpoint: FoundryRepository.Mould.qry,
     parameters: `_params=&_startAt=0&_pageSize=1000`,
     valueField: 'recordId',
-    displayField: 'reference'
+    displayField: 'reference',
+    columnsInDropDown: [
+      { key: 'reference', value: 'Mould' },
+      { key: 'lineName', value: 'Production Line' }
+    ]
   },
   [ResourceIds.PointOfSale]: {
     type: COMBOBOX,
