@@ -234,7 +234,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
-      width: 150,
+      width: 200,
       props: {
         readOnly: true
       }
@@ -242,7 +242,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     {
       component: 'date',
       name: 'deliveryDate',
-      width: 100,
+      width: 150,
       label: labels?.deliveryDate
     },
     {
@@ -310,7 +310,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       component: 'resourcelookup',
       label: labels.sizeRef,
       name: 'sizeName',
-      width: 150,
+      width: 100,
       props: {
         endpointId: InventoryRepository.ItemSizes.snapshot,
         displayField: 'reference',
@@ -369,7 +369,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     {
       component: 'textfield',
       label: labels.notes,
-      width: 100,
+      width: 200,
       name: 'notes'
     }
   ]
