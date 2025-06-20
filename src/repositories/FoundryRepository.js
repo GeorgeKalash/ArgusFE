@@ -25,7 +25,10 @@ export const FoundryRepository = {
     qry2: service + 'qry2WAJ'
   },
   Mould: {
-    qry: service + 'qryMOU'
+    qry: service + 'qryMOU',
+    page: service + 'pageMOU',
+    set: service + 'setMOU',
+    get: service + 'getMOU',
   },
   MetalSettings: {
     page: service + 'pageMTS',
