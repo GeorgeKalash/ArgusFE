@@ -64,6 +64,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
 
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
+  const [formikSettings, setFormik] = useState({})
 
   const trialDays = defaultsData?.list?.find(({ key }) => key === 'ct-client-trial-days')?.value
 
@@ -88,27 +89,6 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
     idtId: '',
     idtName: '',
     cityName: '',
-
-    //address
-    countryId: '',
-    cityId: '',
-    city: '',
-    stateId: '',
-    cityDistrictId: '',
-    cityDistrict: '',
-    email1: '',
-    email2: '',
-    name: '',
-    phone: '',
-    phone2: '',
-    phone3: '',
-    postalCode: '',
-    street1: '',
-    street2: '',
-    subNo: '',
-    unitNo: '',
-    bldgNo: '',
-    poBox: '',
 
     //clientIndividual
     birthDate: null,
@@ -421,30 +401,12 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   }
 
   const { formik } = useForm({
-    maxAccess,
+    maxAccess: formikSettings.maxAccess,
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
-    validate: values => {
-      const errors = {}
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (values.isRelativeDiplomat && !values.relativeDiplomatInfo) {
-        errors.relativeDiplomatInfo = 'Relative Diplomat Info is required'
-      }
-
-      if (values.email1 && !emailRegex.test(values.email1)) {
-        errors.email1 = 'Invalid email format'
-      }
-
-      if (values.email2 && !emailRegex.test(values.email2)) {
-        errors.email2 = 'Invalid email format'
-      }
-
-      return errors
-    },
     validationSchema: yup.object({
+      ...formikSettings.validate,
       reference: referenceRequired && yup.string().required(),
       isResident: yup.string().required(),
       birthDate: yup.date().required(),
@@ -485,8 +447,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
         }),
       smsLanguage: yup.string().required(),
       incomeSourceId: yup.string().required(),
-      gender: yup.string().required(),
-      street1: yup.string().required()
+      gender: yup.string().required()
     }),
     onSubmit: async values => {
       shouldValidateOnSubmit ? handleConfirmFetchMobileOwner() : await postRtDefault(values)
@@ -1731,6 +1692,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                       addressValidation={formik}
                       readOnly={editMode && !allowEdit && true}
                       access={maxAccess}
+                      setFormik={setFormik}
                     />
                   </FieldSet>
                 </Grid>

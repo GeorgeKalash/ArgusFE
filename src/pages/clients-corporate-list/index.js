@@ -35,7 +35,7 @@ const ClientsCorporateList = () => {
     }
   })
 
-  async function fetchWithSearch({ options = {}, filters }) {
+  async function fetchWithSearch({ filters }) {
     return (
       filters.qry &&
       (await getRequest({
@@ -92,17 +92,13 @@ const ClientsCorporateList = () => {
     }
   ]
 
-  const addClient = async obj => {
-    try {
-      const plantId = await getPlantId()
-      if (plantId !== '') {
-        setEditMode(false)
-        openForm('')
-      } else {
-        stackError({ message: 'The user does not have a default plant' })
-      }
-    } catch (error) {
-      console.error(error)
+  const addClient = async () => {
+    const plantId = await getPlantId()
+    if (plantId !== '') {
+      setEditMode(false)
+      openForm('')
+    } else {
+      stackError({ message: 'The user does not have a default plant' })
     }
   }
 
@@ -112,23 +108,16 @@ const ClientsCorporateList = () => {
       : null
     const parameters = `_userId=${userData && userData.userId}&_key=plantId`
 
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: parameters
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: parameters
+    })
 
-      if (res.record.value) {
-        return res.record.value
-      }
-
-      return ''
-    } catch (error) {
-      // Handle errors if needed
-      stackError(error)
-
-      return ''
+    if (res.record.value) {
+      return res.record.value
     }
+
+    return ''
   }
 
   const editClient = obj => {

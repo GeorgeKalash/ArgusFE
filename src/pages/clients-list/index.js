@@ -110,16 +110,14 @@ const ClientsList = () => {
   }
 
   const addClient = async () => {
-    try {
-      const plantId = await getPlantId()
-      if (plantId) {
-        openForm('', plantId)
-      } else {
-        stackError({
-          message: 'The user does not have a default plant'
-        })
-      }
-    } catch (error) {}
+    const plantId = await getPlantId()
+    if (plantId) {
+      openForm('', plantId)
+    } else {
+      stackError({
+        message: 'The user does not have a default plant'
+      })
+    }
   }
 
   const getPlantId = async () => {
