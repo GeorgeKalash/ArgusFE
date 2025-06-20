@@ -51,12 +51,17 @@ const AddressTab = ({
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+  const requiredFields = (maxAccess?.record?.controls || [])
+    .filter(control => control.accessLevel === 2)
+    .map(control => control.controlId)
+
   const options =
     ((addressValidation.values.name ||
       addressValidation.values.cityId ||
       addressValidation.values.phone ||
       addressValidation.values.countryId ||
-      addressValidation.values.street1) &&
+      addressValidation.values.street1 ||
+      requiredFields.some(field => !!addressValidation.values[field])) &&
       optional) ||
     !optional
 
@@ -74,7 +79,11 @@ const AddressTab = ({
   }, [])
 
   useEffect(() => {
-    if (maxAccess)
+    if (maxAccess) {
+      const filteredControls = options
+        ? maxAccess?.record?.controls || []
+        : (maxAccess?.record?.controls || []).filter(control => control.accessLevel !== 2)
+
       setFormik({
         validate,
         maxAccess: access
@@ -82,11 +91,18 @@ const AddressTab = ({
               ...access,
               record: {
                 ...access?.record,
-                controls: [...access?.record?.controls, ...(maxAccess?.record?.controls || [])]
+                controls: [...(access?.record?.controls || []), ...filteredControls]
               }
             }
-          : maxAccess
+          : {
+              ...maxAccess,
+              record: {
+                ...maxAccess.record,
+                controls: filteredControls
+              }
+            }
       })
+    }
   }, [maxAccess, options])
 
   useEffect(() => {

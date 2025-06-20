@@ -5,8 +5,6 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import * as yup from 'yup'
-import useResourceParams from 'src/hooks/useResourceParams'
-import { ResourceIds } from 'src/resources/ResourceIds'
 
 export const AddressFormShell = ({
   setAddress,
@@ -25,12 +23,8 @@ export const AddressFormShell = ({
   const [required, setRequired] = useState(!optional)
   const [formikSettings, setFormik] = useState({})
 
-  const { access: maxAccess } = useResourceParams({
-    datasetId: ResourceIds.Address
-  })
-
   const { formik } = useForm({
-    maxAccess: maxAccess,
+    maxAccess: formikSettings.maxAccess,
     initialValues: {},
     validateOnChange: true,
     validateOnBlur: true,
@@ -64,7 +58,7 @@ export const AddressFormShell = ({
   return (
     <FormShell
       form={formik}
-      maxAccess={maxAccess}
+      maxAccess={formikSettings.maxAccess}
       infoVisible={false}
       disabledSubmit={readOnly}
       editMode={editMode}
@@ -80,6 +74,7 @@ export const AddressFormShell = ({
             readOnly={readOnly}
             required={required}
             setFormik={setFormik}
+            optional={optional}
             {...props}
           />
         </Fixed>
