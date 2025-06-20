@@ -92,8 +92,6 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       }
 
       const updatedRows = formik.values.rows.map((prodDetails, index) => {
-        console.log(prodDetails)
-
         return {
           ...prodDetails,
           poId: recordId ?? 0,
@@ -273,11 +271,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
-          const qty = newRow?.itemWeight * newRow?.pcs ?? 0
-
-          update({
-            qty
-          })
+          update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
         }
       }
     },
@@ -291,11 +285,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
-          const qty = newRow?.itemWeight * newRow?.pcs ?? 0
-
-          update({
-            qty
-          })
+          update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
         }
       }
     },
@@ -362,7 +352,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
-        ],
+        ]
       }
     },
     {
@@ -377,21 +367,19 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       parameters: `_recordId=${recordId}`
     })
 
-    if (res?.record?.header) {
-      const modifiedList = res?.record?.items?.map((item, index) => ({
-        ...item,
-        deliveryDate: formatDateFromApi(item.deliveryDate),
-        id: index + 1
-      }))
+    const modifiedList = res?.record?.items?.map((item, index) => ({
+      ...item,
+      deliveryDate: formatDateFromApi(item.deliveryDate),
+      id: index + 1
+    })) || formik.initialValues.items
 
-      formik.setValues({
-        ...res.record.header,
-        date: formatDateFromApi(res?.record?.header?.date),
-        rows: modifiedList
-      })
+    formik.setValues({
+      ...res.record.header,
+      date: formatDateFromApi(res?.record?.header?.date),
+      rows: modifiedList
+    })
 
-      return res?.record
-    }
+    return res?.record
   }
 
   useEffect(() => {
