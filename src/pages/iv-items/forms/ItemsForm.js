@@ -218,7 +218,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           <Grid container spacing={4}>
             <Grid item xs={6}>
               <Grid container spacing={2}>
-                <Grid item xs={6}>
+                <Grid item xs={12}>
                   <ResourceComboBox
                     dataGrid
                     endpointId={InventoryRepository.Items.pack}
@@ -231,7 +231,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     valueField='recordId'
                     displayField='name'
                     readOnly={editMode}
-                    displayFieldWidth={2}
+                    displayFieldWidth={1}
                     columnsInDropDown={[
                       { key: 'caRef', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -264,34 +264,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                       }))
                     }}
                     error={formik.touched.categoryId && formik.errors.categoryId}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <ResourceComboBox
-                    dataGrid
-                    endpointId={InventoryRepository.Items.pack}
-                    reducer={response => {
-                      const formattedPriceTypes = response?.record?.priceTypes?.map(priceTypes => ({
-                        key: parseInt(priceTypes.key),
-                        value: priceTypes.value
-                      }))
-
-                      return formattedPriceTypes
-                    }}
-                    values={formik.values}
-                    defaultIndex={onKitItem && 0}
-                    name='priceType'
-                    label={labels.priceType}
-                    readOnly={formik.values.kitItem}
-                    valueField='key'
-                    displayField='value'
-                    displayFieldWidth={1}
-                    required
-                    maxAccess={maxAccess}
-                    onChange={(e, newValue) => {
-                      formik.setFieldValue('priceType', newValue?.key || null)
-                    }}
-                    error={formik.touched.priceType && formik.errors.priceType}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -356,7 +328,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onClear={() => formik.setFieldValue('flName', '')}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomTextField
                     name='shortName'
                     label={labels.shortName}
@@ -364,6 +336,34 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('shortName', '')}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    dataGrid
+                    endpointId={InventoryRepository.Items.pack}
+                    reducer={response => {
+                      const formattedPriceTypes = response?.record?.priceTypes?.map(priceTypes => ({
+                        key: parseInt(priceTypes.key),
+                        value: priceTypes.value
+                      }))
+
+                      return formattedPriceTypes
+                    }}
+                    values={formik.values}
+                    defaultIndex={onKitItem && 0}
+                    name='priceType'
+                    label={labels.priceType}
+                    readOnly={formik.values.kitItem}
+                    valueField='key'
+                    displayField='value'
+                    displayFieldWidth={1}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(e, newValue) => {
+                      formik.setFieldValue('priceType', newValue?.key || null)
+                    }}
+                    error={formik.touched.priceType && formik.errors.priceType}
                   />
                 </Grid>
                 <Grid item xs={12}>
