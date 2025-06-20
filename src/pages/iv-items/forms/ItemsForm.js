@@ -231,7 +231,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     valueField='recordId'
                     displayField='name'
                     readOnly={editMode}
-                    displayFieldWidth={1}
+                    displayFieldWidth={2}
                     columnsInDropDown={[
                       { key: 'caRef', value: 'Reference' },
                       { key: 'name', value: 'Name' }
