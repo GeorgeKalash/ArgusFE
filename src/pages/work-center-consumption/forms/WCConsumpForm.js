@@ -156,12 +156,10 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
     })
   }
 
-  async function getFilteredMU(itemId) {
+  async function getFilteredMU(itemId, msId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-
-    const arrayMU = measurements?.filter(item => item.msId == currentItemId) || []
+    const arrayMU = measurements?.filter(item => item.msId == msId) || []
     filteredMeasurements.current = arrayMU
   }
 
@@ -325,7 +323,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
           return
         }
         if (newRow?.itemId) {
-          getFilteredMU(newRow?.itemId)
+          getFilteredMU(newRow?.itemId, newRow.msId)
           const currentCost = newRow?.itemId ? await getCost(newRow?.itemId) : 0
           update({
             unitCost: currentCost || 0,
@@ -670,7 +668,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
               }
             }}
             onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId)
+              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             value={formik.values.items}
             error={formik.errors.items}
