@@ -257,9 +257,16 @@ export const FinancialRepository = {
     del: service + 'delPO',
     set2: service + 'set2PO',
     page2: service + 'page2PO',
+    page3: service + 'page3PO',
     snapshot: service + 'snapshotPO',
     cancel: service + 'cancelPO',
     close: service + 'closePO',
-    reopen: service + 'reopenPO',
+    reopen: service + 'reopenPO'
+  },
+  PaymentOrdersExpenses: {
+    qry2: service + 'qry2POX'
+  },
+  PaymentOrdersCostCenters: {
+    qry: service + 'qryPOC'
   }
 }

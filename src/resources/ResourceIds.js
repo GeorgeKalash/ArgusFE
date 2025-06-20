@@ -493,6 +493,7 @@ export const ResourceIds = {
   Currency: 20136,
   POTracking: 50309,
   PaymentOrder: 31333,
+  PaymentOrderExpenses: 31614,
 
   // GL
   GLSalesInvoice: 51604,
