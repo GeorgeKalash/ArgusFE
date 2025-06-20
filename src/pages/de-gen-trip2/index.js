@@ -611,6 +611,7 @@ const GenerateOutboundTransportation2 = () => {
               <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
                 <Grid item xs={3} sx={{ display: 'flex' }}>
                   <Table
+                    name='zones'
                     columns={columnsZones}
                     gridData={filteredData}
                     rowId={['recordId']}
@@ -624,6 +625,7 @@ const GenerateOutboundTransportation2 = () => {
                 </Grid>
                 <Grid item xs={9} sx={{ display: 'flex', flexDirection: 'column' }}>
                   <Table
+                    name='orders'
                     columns={columnsOrders}
                     gridData={formik?.values?.orders}
                     rowId={['recordId']}
@@ -639,6 +641,7 @@ const GenerateOutboundTransportation2 = () => {
                 </Grid>
                 <Grid item xs={3} sx={{ display: 'flex' }}>
                   <Table
+                    name='selectedZones'
                     columns={columnsSelectedZones}
                     gridData={selectedSaleZones}
                     rowId={['recordId']}
@@ -659,6 +662,7 @@ const GenerateOutboundTransportation2 = () => {
                 </Grid>
                 <Grid item xs={9} sx={{ display: 'flex' }}>
                   <Table
+                    name='vehicleAllocations'
                     columns={columnsVehicleAllocations}
                     gridData={formik?.values?.vehicleAllocations}
                     rowId={['recordId']}
@@ -685,6 +689,7 @@ const GenerateOutboundTransportation2 = () => {
                 </Grid>
                 <Grid item xs={9} sx={{ display: 'flex' }}>
                   <Table
+                    name='salesOrders'
                     columns={columnsSalesOrders}
                     gridData={filteredOrders}
                     rowId={['vehicleId']}

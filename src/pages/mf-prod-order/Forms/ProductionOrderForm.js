@@ -25,6 +25,7 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { useWindow } from 'src/windows'
+import { SaleRepository } from 'src/repositories/SaleRepository'
 
 export default function ProductionOrderForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -94,6 +95,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
         return {
           ...prodDetails,
           poId: recordId ?? 0,
+          deliveryDate: prodDetails.deliveryDate ? formatDateToApi(prodDetails.deliveryDate) : null,
           seqNo: index + 1
         }
       })
@@ -181,6 +183,33 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
   const columns = [
     {
       component: 'resourcelookup',
+      label: labels.design,
+      name: 'designId',
+      props: {
+        valueField: 'recordId',
+        displayField: 'reference',
+        readOnly: isPosted,
+        displayFieldWidth: 2,
+        endpointId: ManufacturingRepository.Design.snapshot,
+        mapping: [
+          { from: 'recordId', to: 'designId' },
+          { from: 'reference', to: 'designRef' },
+          { from: 'name', to: 'designName' },
+          { from: 'itemId', to: 'itemId' },
+          { from: 'sku', to: 'sku' },
+          { from: 'itemName', to: 'itemName' },
+          { from: 'routingId', to: 'routingId' },
+          { from: 'routingName', to: 'routingName' },
+          { from: 'routingRef', to: 'routingRef' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ]
+      }
+    },
+    {
+      component: 'resourcelookup',
       label: labels.sku,
       name: 'sku',
       props: {
@@ -208,9 +237,62 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       }
     },
     {
+      component: 'date',
+      name: 'deliveryDate',
+      label: labels?.deliveryDate
+    },
+    {
+      component: 'resourcelookup',
+      label: labels.routing,
+      name: 'routingName',
+      props: {
+        valueField: 'reference',
+        displayField: 'reference',
+        displayFieldWidth: 2,
+        endpointId: ManufacturingRepository.Routing.snapshot,
+        mapping: [
+          { from: 'recordId', to: 'routingId' },
+          { from: 'name', to: 'routingName' },
+          { from: 'reference', to: 'routingRef' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ]
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'itemWeight',
+      label: labels.stdWeight,
+      props: {
+        maxLength: 12,
+        decimalScale: 3
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (newRow) {
+          update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
+        }
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'pcs',
+      label: labels.ExPcs,
+      props: {
+        maxLength: 4,
+        decimalScale: 0
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (newRow) {
+          update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
+        }
+      }
+    },
+    {
       component: 'numberfield',
       name: 'qty',
-      label: labels.qty,
+      label: labels.ExQty,
       props: {
         maxLength: 12,
         decimalScale: 2
@@ -218,24 +300,65 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     },
     {
       component: 'resourcelookup',
-      label: labels.design,
-      name: 'designId',
+      label: labels.sizeRef,
+      name: 'sizeName',
       props: {
-        valueField: 'recordId',
+        endpointId: InventoryRepository.ItemSizes.snapshot,
         displayField: 'reference',
-        readOnly: isPosted,
-        displayFieldWidth: 2,
-        endpointId: ManufacturingRepository.Design.snapshot,
+        valueField: 'reference',
+        minChars: 2,
         mapping: [
-          { from: 'recordId', to: 'designId' },
-          { from: 'reference', to: 'designRef' },
-          { from: 'name', to: 'designName' }
+          { from: 'recordId', to: 'sizeId' },
+          { from: 'reference', to: 'sizeRef' },
+          { from: 'name', to: 'sizeName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 2
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.jobCategory,
+      name: 'jobCategoryId',
+      props: {
+        endpointId: ManufacturingRepository.JobCategory.qry,
+        valueField: 'recordId',
+        displayField: 'name',
+        displayFieldWidth: 1.5,
+        mapping: [
+          { from: 'name', to: 'jobCategoryName' },
+          { from: 'recordId', to: 'jobCategoryId' }
+        ]
+      }
+    },
+    {
+      component: 'resourcelookup',
+      label: labels.client,
+      name: 'clientName',
+      props: {
+        endpointId: SaleRepository.Client.snapshot,
+        displayField: 'reference',
+        valueField: 'reference',
+        displayFieldWidth: 3,
+        minChars: 2,
+        mapping: [
+          { from: 'recordId', to: 'clientId' },
+          { from: 'reference', to: 'clientRef' },
+          { from: 'name', to: 'clientName' }
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ]
       }
+    },
+    {
+      component: 'textfield',
+      label: labels.notes,
+      name: 'notes'
     }
   ]
   async function refetchForm(recordId) {
@@ -244,20 +367,19 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       parameters: `_recordId=${recordId}`
     })
 
-    if (res.record.header) {
-      const modifiedList = res?.record?.items?.map((item, index) => ({
-        ...item,
-        id: index + 1
-      }))
+    const modifiedList = res?.record?.items?.map((item, index) => ({
+      ...item,
+      deliveryDate: formatDateFromApi(item.deliveryDate),
+      id: index + 1
+    })) || formik.initialValues.items
 
-      formik.setValues({
-        ...res.record.header,
-        date: formatDateFromApi(res?.record?.header?.date),
-        rows: modifiedList
-      })
+    formik.setValues({
+      ...res.record.header,
+      date: formatDateFromApi(res?.record?.header?.date),
+      rows: modifiedList
+    })
 
-      return res?.record
-    }
+    return res?.record
   }
 
   useEffect(() => {

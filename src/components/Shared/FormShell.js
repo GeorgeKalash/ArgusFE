@@ -71,7 +71,7 @@ export default function FormShell({
   isParentWindow = true
 }) {
   const { stack } = useWindow()
-  const { clear, open } = useGlobalRecord() || {}
+  const { clear, open, setRecord } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
   const { loading } = useContext(RequestsContext)
@@ -102,6 +102,26 @@ export default function FormShell({
       }
     }
   }, [loading, editMode, maxAccess])
+
+  useEffect(() => {
+    if (!form?.values.recordId) {
+      return
+    }
+
+    if (typeof setRecord !== 'function') {
+      return
+    }
+
+    const hasMeaningfulValues = Object.entries(form.values).some(
+      ([key, value]) => key !== 'recordId' && value !== '' && value !== null && value !== undefined
+    )
+
+    if (hasMeaningfulValues) {
+      setRecord(form.values.recordId, form.values)
+    } else {
+      setRecord(form.values.recordId)
+    }
+  }, [form?.values.recordId])
 
   actions?.filter(Boolean)?.forEach(action => {
     if (typeof action?.onClick !== 'function') {
@@ -187,7 +207,8 @@ export default function FormShell({
                 recordId: form.values?.recordId,
                 functionId: functionId,
                 valuesPath: action.valuesPath,
-                datasetId: action.datasetId
+                datasetId: action.datasetId,
+                onReset: action?.onReset
               }
             })
           }
@@ -212,8 +233,7 @@ export default function FormShell({
                 functionId: functionId,
                 itemId: 0,
                 clientId: form?.values?.header?.clientId || 0
-              },
-              title: platformLabels.SalesTransactions
+              }
             })
           }
           break

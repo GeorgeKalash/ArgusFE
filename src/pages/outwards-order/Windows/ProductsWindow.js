@@ -168,6 +168,7 @@ const ProductsWindow = ({
     <VertLayout>
       <Grow>
         <Table
+          name='products'
           columns={columns}
           gridData={gridData}
           rowId={['productId']}

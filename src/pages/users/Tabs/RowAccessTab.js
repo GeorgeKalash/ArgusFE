@@ -238,6 +238,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
         </Fixed>
         <Grow>
           <Table
+            name='rowAccess'
             columns={rowColumns}
             gridData={filteredData}
             rowId={['recordId']}

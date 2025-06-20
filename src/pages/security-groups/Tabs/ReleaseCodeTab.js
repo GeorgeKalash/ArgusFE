@@ -74,6 +74,7 @@ const ReleaseCodeTab = ({ labels, maxAccess, recordId }) => {
       <Grow>
         <GridToolbar onAdd={add} maxAccess={maxAccess} />
         <Table
+          name='release'
           columns={columns}
           gridData={data}
           rowId={['codeId']}

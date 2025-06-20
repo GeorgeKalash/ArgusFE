@@ -127,5 +127,9 @@ export const PurchaseRepository = {
   },
   QuotationItem: {
     preview: service + 'previewQTI'
+  },
+  OrderItem: {
+    qry: service + 'qryORI',
+    set2: service + 'set2ORI',
   }
 }

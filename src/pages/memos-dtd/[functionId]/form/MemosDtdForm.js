@@ -31,7 +31,6 @@ export default function MemosDtdForm({ labels, maxAccess, recordId, functionId }
       recordId: recordId || ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       dtId: yup.string().required(' ')

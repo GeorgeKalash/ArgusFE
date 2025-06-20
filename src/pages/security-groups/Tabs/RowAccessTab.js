@@ -145,6 +145,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
         </Fixed>
         <Grow>
           <Table
+            name='rowAccess'
             columns={rowColumns}
             gridData={filtered}
             rowId={['recordId']}

@@ -54,6 +54,7 @@ const AccountBalanceForm = ({ labels, maxAccess, store }) => {
     <VertLayout>
       <Grow>
         <Table
+          name='accountBalance'
           columns={columns}
           gridData={data}
           rowId={['currencyId']}

@@ -23,6 +23,7 @@ const PageError = ({ onClose, message, height = '' }) => {
       expandable={false}
       controlled={true}
       isLoading={false}
+      refresh={false}
     >
       <DialogContent>
         <Box

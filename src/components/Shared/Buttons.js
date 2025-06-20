@@ -609,5 +609,12 @@ export const getButtons = platformLabels => [
     label: platformLabels.shp,
     color: '#231f20',
     main: false
+  },
+  {
+    key: 'Reset',
+    label: platformLabels.Reset,
+    image: 'undo-arrow-icon.png',
+    color: '#231f20',
+    main: false
   }
 ]

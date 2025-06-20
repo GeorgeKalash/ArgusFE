@@ -286,8 +286,7 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
                     recordId: Id,
                     functionId: SystemFunction.OutwardsTransfer,
                     resourceId: ResourceIds.OutwardsTransfer
-                  },
-                  title: platformLabels.PreviewReport
+                  }
                 })
               }
               resourceId={ResourceIds.OutwardsTransfer}

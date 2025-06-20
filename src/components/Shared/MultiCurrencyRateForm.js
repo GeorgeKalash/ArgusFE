@@ -12,14 +12,21 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { formatDateForGetApI } from 'src/lib/date-helper'
 import { RateDivision } from 'src/resources/RateDivision'
+import { useResourceQuery } from 'src/hooks/resource'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, window }) {
+export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, window }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   useSetWindow({ title: platformLabels.MultiCurrencyRate, window })
+
+  const { labels, access: maxAccess } = useResourceQuery({
+    endpointId: MultiCurrencyRepository.Currency.get,
+    DatasetIdAccess,
+    datasetId: ResourceIds.MultiCurrencyRate
+  })
 
   const { formik } = useForm({
     initialValues: {
@@ -134,6 +141,7 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
                 value={formik?.values?.exRate}
                 label={labels.rate}
                 readOnly={formik?.values?.amount == 0}
+                maxAccess={maxAccess}
                 onClear={() => {
                   formik.setFieldValue('baseAmount', '')
                   formik.setFieldValue('exRate', '')
@@ -180,6 +188,7 @@ export default function MultiCurrencyRateForm({ labels, maxAccess, data, onOk, w
                   formik.setFieldValue('baseAmount', '')
                   formik.setFieldValue('exRate', '')
                 }}
+                maxAccess={maxAccess}
                 onChange={e => {
                   const inputValue = e.target.value
                   if (!inputValue) {

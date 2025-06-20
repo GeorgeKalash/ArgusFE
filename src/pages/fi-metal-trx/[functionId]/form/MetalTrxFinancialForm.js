@@ -121,33 +121,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         .required()
     }),
     onSubmit: async obj => {
-      const { items: originalItems, ...header } = obj
-
-      const updatedHeader = {
-        ...header,
-        qty: originalItems?.reduce((sum, item) => sum + item.qty, 0) || 0,
-        pcs: originalItems?.reduce((sum, item) => sum + item.pcs, 0) || 0
-      }
-
-      const items = originalItems?.map(item => ({
-        trxId: obj?.recordId || 0,
-        seqNo: item.id,
-        metalId: item.metalId,
-        itemId: item.itemId,
-        qty: item.qty,
-        pcs: item.pcs,
-        creditAmount: item.creditAmount,
-        purity: item.purity / 1000,
-        totalCredit: item.totalCredit,
-        trackBy: item.trackBy || 0,
-        baseSalesMetalValue: item.baseSalesMetalValue,
-        qtyOnHand: item?.qtyOnHand || 0
-      }))
-
-      const payload = {
-        header: updatedHeader,
-        items
-      }
+      const payload = getPayload(obj)
 
       const response = await postRequest({
         extension: getEndpoint[formik.values.functionId],
@@ -159,6 +133,38 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       invalidate()
     }
   })
+
+  const getPayload = (obj) => {
+    const { items: originalItems, ...header } = obj
+
+    const updatedHeader = {
+      ...header,
+      qty: originalItems?.reduce((sum, item) => sum + item.qty, 0) || 0,
+      pcs: originalItems?.reduce((sum, item) => sum + item.pcs, 0) || 0
+    }
+
+    const items = originalItems?.map(item => ({
+      trxId: obj?.recordId || 0,
+      seqNo: item.id,
+      metalId: item.metalId,
+      itemId: item.itemId,
+      qty: item.qty,
+      pcs: item.pcs,
+      creditAmount: item.creditAmount,
+      purity: item.purity / 1000,
+      totalCredit: item.totalCredit,
+      trackBy: item.trackBy || 0,
+      baseSalesMetalValue: item.baseSalesMetalValue,
+      qtyOnHand: item?.qtyOnHand || 0
+    }))
+
+    const payload = {
+      header: updatedHeader,
+      items
+    }
+
+    return payload
+  }
 
   const editMode = !!formik.values?.recordId
   const isPosted = formik.values.status === 3
@@ -455,6 +461,14 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     }
   }
 
+  const onReset = async () => {
+    const payload = getPayload(formik.values)
+    await postRequest({
+      extension: FinancialRepository.ResetGL_MTX.reset,
+      record: JSON.stringify(payload)
+    })
+  }
+
   const actions = [
     {
       key: 'Locked',
@@ -480,6 +494,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       condition: true,
       onClick: 'onClickGL',
       datasetId: getGLResourceId(functionId),
+      onReset,
       disabled: !editMode
     },
     {

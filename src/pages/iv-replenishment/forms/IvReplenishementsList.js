@@ -50,6 +50,7 @@ const IvReplenishementsList = ({ store, labels, maxAccess }) => {
       </Fixed>
       <Grow>
         <Table
+          name='replenishments'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

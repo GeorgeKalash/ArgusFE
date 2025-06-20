@@ -60,7 +60,7 @@ const AddressGridTab = ({
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={addAddress} maxAccess={maxAccess} />
+        <GridToolbar onAdd={addAddress} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
@@ -71,7 +71,7 @@ const AddressGridTab = ({
           onEdit={editAddress}
           onDelete={delAddress}
           isLoading={false}
-          maxAccess={maxAccess}
+          maxAccess={access}
           pagination={false}
         />
       </Grow>

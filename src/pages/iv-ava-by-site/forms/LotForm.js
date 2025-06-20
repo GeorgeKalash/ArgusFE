@@ -105,6 +105,7 @@ const LotForm = ({ labels, maxAccess, lotId, itemId, siteId }) => {
     <VertLayout>
       <Grow>
         <Table
+          name='lot'
           columns={columns}
           gridData={data}
           rowId={['lotId']}

@@ -248,6 +248,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         </Fixed>
         <Grow>
           <Table
+            name='sale'
             columns={columns}
             gridData={data}
             rowId={['plId', 'currencyId']}

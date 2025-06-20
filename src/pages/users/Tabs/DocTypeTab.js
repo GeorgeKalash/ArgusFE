@@ -32,7 +32,7 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
     {
       field: 'functionId',
       headerName: labels.functionId,
-      flex: 1,
+      flex: 1
     },
     {
       field: 'sfName',
@@ -129,6 +129,7 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
         </Fixed>
         <Grow>
           <Table
+            name='docType'
             columns={columns}
             gridData={filteredData}
             rowId={['userId', 'functionId']}

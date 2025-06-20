@@ -15,7 +15,7 @@ import { Fixed } from './Layouts/Fixed'
 import useSetWindow from 'src/hooks/useSetWindow'
 
 const TransactionLog = props => {
-  const { recordId, resourceId } = props
+  const { recordId, resourceId, window } = props
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { getLabels, getAccess, platformLabels } = useContext(ControlContext)
@@ -36,7 +36,7 @@ const TransactionLog = props => {
     }
   }, [access, transactionType])
 
-  useSetWindow({ title: platformLabels.TransactionLog, window: props.window })
+  useSetWindow({ title: platformLabels.TransactionLog, window })
 
   const _labels = {
     trxType: labels && labels.find(item => item.key === '1').value,

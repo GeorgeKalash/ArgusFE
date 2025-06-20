@@ -78,7 +78,8 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
         open: [true, {}],
         fullScreen: false,
         onConfirm: () => onDelete(obj)
-      }
+      },
+      refresh: false
     })
   }
 

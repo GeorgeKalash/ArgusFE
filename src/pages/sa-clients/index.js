@@ -115,6 +115,7 @@ const SAClients = () => {
       type: 'date'
     },
     {
+      field: 'preview',
       flex: 0.5,
       headerName: '',
       cellRenderer: row => {

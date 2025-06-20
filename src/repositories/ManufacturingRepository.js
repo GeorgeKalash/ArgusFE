@@ -24,6 +24,10 @@ export const ManufacturingRepository = {
     del: service + 'delLIN'
   },
   CostGroup: {
+    page: service + 'pageCG',
+    set: service + 'setCG',
+    get: service + 'getCG',
+    del: service + 'delCG',
     qry: service + 'qryCG'
   },
   WorkCenter: {
@@ -297,7 +301,8 @@ export const ManufacturingRepository = {
     set: service + 'setJCA',
     get: service + 'getJCA',
     del: service + 'delJCA',
-    page: service + 'pageJCA'
+    page: service + 'pageJCA',
+    qry: service + 'qryJCA'
   },
   DesignGroup: {
     qry: service + 'qryDEG',
@@ -344,5 +349,29 @@ export const ManufacturingRepository = {
   JobWorkCenter: {
     close: service + 'closeJWC',
     reopen: service + 'reopenJWC'
+  },
+  WorkCenterConsumption: {
+    page: service + 'pageCON',
+    snapshot: service + 'snapshotCON',
+    del: service + 'delCON',
+    set2: service + 'set2CON',
+    get: service + 'getCON',
+    post: service + 'postCON',
+    unpost: service + 'unpostCON',
+    close: service + 'closeCON',
+    reopen: service + 'reopenCON'
+  },
+  ConsumptionItemView: {
+    qry: service + 'qryCOI'
+  },
+  LineItemCapacity: {
+    set2: service + 'set2LIT',
+    del: service + 'delLIT',
+    qry: service + 'qryLIT',
+    page: service + 'pageLIT'
+  },
+  CostGroupOverhead: {
+    set2: service + 'set2CGV',
+    qry: service + 'qryCGV'
   }
 }
