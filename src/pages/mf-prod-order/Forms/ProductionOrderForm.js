@@ -92,6 +92,8 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       }
 
       const updatedRows = formik.values.rows.map((prodDetails, index) => {
+        console.log(prodDetails)
+
         return {
           ...prodDetails,
           poId: recordId ?? 0,
@@ -195,6 +197,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
           { from: 'recordId', to: 'designId' },
           { from: 'reference', to: 'designRef' },
           { from: 'name', to: 'designName' },
+          { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'itemName', to: 'itemName' },
           { from: 'routingId', to: 'routingId' },
@@ -349,6 +352,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
         endpointId: SaleRepository.Client.snapshot,
         displayField: 'reference',
         valueField: 'reference',
+        displayFieldWidth: 3,
         minChars: 2,
         mapping: [
           { from: 'recordId', to: 'clientId' },
@@ -359,7 +363,6 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 2
       }
     },
     {
@@ -374,7 +377,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       parameters: `_recordId=${recordId}`
     })
 
-    if (res.record.header) {
+    if (res?.record?.header) {
       const modifiedList = res?.record?.items?.map((item, index) => ({
         ...item,
         deliveryDate: formatDateFromApi(item.deliveryDate),
