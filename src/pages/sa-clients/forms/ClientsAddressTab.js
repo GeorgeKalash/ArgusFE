@@ -10,7 +10,7 @@ import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-const AddressTab = ({ store, window, editMode, setStore, ...props }) => {
+const ClientsAddressTab = ({ store, window, editMode, setStore, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([])
@@ -108,4 +108,4 @@ const AddressTab = ({ store, window, editMode, setStore, ...props }) => {
   )
 }
 
-export default AddressTab
+export default ClientsAddressTab

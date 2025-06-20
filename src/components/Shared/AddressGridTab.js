@@ -9,9 +9,9 @@ const AddressGridTab = ({
   getAddressGridData,
   addAddress,
   delAddress,
-  maxAccess,
   editAddress,
   labels,
+  maxAccess,
   columns
 }) => {
   const tableColumns = [

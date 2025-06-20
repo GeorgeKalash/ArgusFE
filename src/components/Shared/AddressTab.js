@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useMemo, useRef } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from './ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -10,7 +10,7 @@ import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
 const AddressTab = ({
-  address = {},
+  address,
   optional = false,
   addressValidation,
   readOnly = false,
@@ -24,31 +24,37 @@ const AddressTab = ({
     datasetId: ResourceIds.Address
   })
 
-  const initialValues = {
-    recordId: address?.recordId || null,
-    name: address?.name || '',
-    countryId: address?.countryId || '',
-    countryName: address?.countryName || '',
-    stateId: address?.stateId || '',
-    stateName: address?.stateName || '',
-    cityId: address?.cityId || '',
-    city: address?.city || '',
-    street1: address?.street1 || '',
-    street2: address?.street2 || '',
-    email1: address?.email1 || '',
-    email2: address?.email2 || '',
-    phone: address?.phone || '',
-    phone2: address?.phone2 || '',
-    phone3: address?.phone3 || '',
-    addressId: address?.addressId || '',
-    postalCode: address?.postalCode || '',
-    cityDistrictId: address?.cityDistrictId || null,
-    cityDistrict: address?.cityDistrict || '',
-    bldgNo: address?.bldgNo || '',
-    unitNo: address?.unitNo || '',
-    subNo: address?.subNo || '',
-    poBox: address?.poBox || ''
-  }
+  const lastRecordIdRef = useRef(null)
+
+  const initialValues = useMemo(
+    () => ({
+      recordId: address?.recordId || null,
+      name: address?.name || '',
+      countryId: address?.countryId || '',
+      countryName: address?.countryName || '',
+      stateId: address?.stateId || '',
+      stateName: address?.stateName || '',
+      cityId: address?.cityId || '',
+      city: address?.city || '',
+      street1: address?.street1 || '',
+      street2: address?.street2 || '',
+      email1: address?.email1 || '',
+      email2: address?.email2 || '',
+      phone: address?.phone || '',
+      phone2: address?.phone2 || '',
+      phone3: address?.phone3 || '',
+      addressId: address?.addressId || '',
+      postalCode: address?.postalCode || '',
+      cityDistrictId: address?.cityDistrictId || null,
+      cityDistrict: address?.cityDistrict || '',
+      bldgNo: address?.bldgNo || '',
+      unitNo: address?.unitNo || '',
+      subNo: address?.subNo || '',
+      poBox: address?.poBox || ''
+    }),
+    [address]
+  )
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
   const requiredFields = (maxAccess?.record?.controls || [])
@@ -75,8 +81,11 @@ const AddressTab = ({
   }
 
   useEffect(() => {
-    addressValidation.setValues({ ...addressValidation.values, ...initialValues })
-  }, [])
+    if (address?.recordId !== lastRecordIdRef.current) {
+      lastRecordIdRef.current = address?.recordId
+      addressValidation.setValues(initialValues)
+    }
+  }, [address?.recordId, initialValues])
 
   useEffect(() => {
     if (maxAccess) {

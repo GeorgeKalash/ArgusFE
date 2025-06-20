@@ -75,6 +75,7 @@ export const AddressFormShell = ({
             required={required}
             setFormik={setFormik}
             optional={optional}
+            address={address}
             {...props}
           />
         </Fixed>
