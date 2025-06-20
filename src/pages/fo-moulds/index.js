@@ -29,10 +29,6 @@ const FOMoulds = () => {
     return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithFilter({ filters, pagination }) {
-    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-  }
-
   const {
     query: { data },
     labels,
@@ -71,6 +67,17 @@ const FOMoulds = () => {
     openForm(obj?.recordId)
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: FoundryRepository.Mould.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
+  }
+
   function openForm(recordId) {
     stack({
       Component: MouldForm,
@@ -102,7 +109,6 @@ const FOMoulds = () => {
           maxAccess={access}
           filterBy={filterBy}
           onAdd={add}
-          hasSearch={false}
           reportName={'FOMOU'}
         />
       </Fixed>

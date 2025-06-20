@@ -29,6 +29,7 @@ export const FoundryRepository = {
     page: service + 'pageMOU',
     set: service + 'setMOU',
     get: service + 'getMOU',
+    snapshot: service + 'snapshotMOU'
   },
   MetalSettings: {
     page: service + 'pageMTS',
