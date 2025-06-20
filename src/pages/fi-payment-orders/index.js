@@ -140,7 +140,7 @@ const PaymentOrders = () => {
         recordId,
         maxAccess: access
       },
-      width: 1250,
+      width: 950,
       height: 450,
       title: labels.PaymentOrder
     })

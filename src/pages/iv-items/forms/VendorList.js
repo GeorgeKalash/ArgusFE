@@ -123,6 +123,7 @@ const VendorList = ({ store, labels, maxAccess }) => {
       </Fixed>
       <Grow>
         <Table
+          name='vendor'
           columns={columns}
           gridData={data}
           rowId={['vendorId', 'currencyId']}
