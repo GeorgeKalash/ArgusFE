@@ -69,7 +69,7 @@ const GlobalAuthorization = () => {
         resourceId: ResourceIds.GlobalAuthorization
       },
       width: 450,
-      height: 200,
+      height: 350,
       title: labels.accessLevel
     })
   }
@@ -84,8 +84,8 @@ const GlobalAuthorization = () => {
         invalidate,
         resourceId: ResourceIds.GlobalAuthorization
       },
-      width: 450,
-      height: 300,
+      width: 700,
+      height: 400,
       title: labels.resourceGlobal
     })
   }

@@ -102,7 +102,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
         resourceId: ResourceIds.SecurityGroup
       },
       width: 450,
-      height: 200,
+      height: 350,
       title: labels.accessLevel
     })
   }
@@ -117,8 +117,8 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
         invalidate,
         resourceId: ResourceIds.SecurityGroup
       },
-      width: 450,
-      height: 300,
+      width: 700,
+      height: 400,
       title: labels.accessLevel
     })
   }
@@ -208,12 +208,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
               flex: 1
             },
             {
-              field: 'accessLevelString',
-              headerName: labels.accessLevel,
-              flex: 1
-            },
-            {
-              field: '',
+              field: 'Resource Access',
               headerName: labels.resourceGlobal,
               width: 200,
               cellRenderer: row => (
