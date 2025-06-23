@@ -53,8 +53,8 @@ export default function ItemReplacementForm({ labels, maxAccess, recordId }) {
         extension: InventoryRepository.Replacement.set2,
         record: JSON.stringify(resultObject)
       })
-      formik.setFieldValue('recordId', res?.recordId)
       toast.success(platformLabels.Updated)
+      await refetchForm(recordId)
       invalidate()
     }
   })
@@ -135,8 +135,6 @@ export default function ItemReplacementForm({ labels, maxAccess, recordId }) {
       }
     }
   ]
-  console.log(editMode)
-  console.log(formik.values.recordId)
 
   const actions = [
     {
@@ -148,7 +146,7 @@ export default function ItemReplacementForm({ labels, maxAccess, recordId }) {
   ]
 
   return (
-    <FormShell resourceId={ResourceIds.ItemReplacement} form={formik} maxAccess={maxAccess} actions={actions}>
+    <FormShell resourceId={ResourceIds.ItemReplacement} form={formik} maxAccess={maxAccess} actions={actions} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container>
@@ -193,7 +191,7 @@ export default function ItemReplacementForm({ labels, maxAccess, recordId }) {
             name='items'
             initialValues={formik.initialValues.items[0]}
             maxAccess={maxAccess}
-            disabled={!!!formik.values.itemId}
+            disabled={!formik.values.itemId}
             allowAddNewLine={!!formik.values.itemId}
             allowDelete={!!formik.values.itemId}
           />
