@@ -79,7 +79,7 @@ const MaterialsTab = ({ store, labels, access }) => {
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.IssueOfMaterial,
     action: openForm,
-    hasDT: false
+    hasDT: true
   })
 
   function openForm(obj) {
@@ -92,7 +92,7 @@ const MaterialsTab = ({ store, labels, access }) => {
         access,
         values
       },
-      width: 1000,
+      width: 1200,
       height: 700,
       title: labels.Materials
     })

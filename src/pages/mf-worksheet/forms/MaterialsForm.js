@@ -24,7 +24,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function MaterialsForm({ labels, access, recordId, wsId, values }) {
+export default function MaterialsForm({ labels, access, recordId, wsId, values, jobId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const functionId = SystemFunction.IssueOfMaterial
@@ -45,9 +45,9 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
     initialValues: {
       header: {
         recordId: '',
-        jobId: null,
+        jobId: values.jobId,
         notes: '',
-        siteId: null,
+        siteId: values.siteId,
         status: 1,
         worksheetId: wsId,
         dtId: null,
@@ -57,7 +57,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         reference: '',
         wsJobRef: '',
         joJobRef: '',
-        date: null,
+        date: values.date,
         pgItemName: '',
         laborName: '',
         wipQty: 0,
@@ -95,34 +95,124 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
       )
     }),
     onSubmit: async obj => {
-      await postRequest({
+      const data = {
+        ...obj,
+        jobId: values.jobId,
+        siteId: values.siteId,
+        date: values.date
+      }
+
+      const res = await postRequest({
         extension: ManufacturingRepository.WorksheetMaterials.set2,
-        record: JSON.stringify(obj)
-      }).then(res => {
-        if (!obj.recordId) {
-          formik.setFieldValue('recordId', res.recordId)
-        }
-        toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-        invalidate()
+        record: JSON.stringify(data)
       })
+      if (!obj.recordId) {
+        formik.setFieldValue('recordId', res.recordId)
+      }
+      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+      invalidate()
+
+      const dimensionRecords = []
+      for (const item of obj.items) {
+        const { seqNo, dim1Id, dim1, dim2, dim2Id, dimension1, dimension2 } = item
+
+        if (dim1 && dim1Id) {
+          dimensionRecords.push({
+            imaId: res.recordId,
+            seqNo,
+            dimension: dimension1,
+            id: dim1Id
+          })
+        }
+
+        if (dim2 && dim2Id) {
+          dimensionRecords.push({
+            imaId: res.recordId,
+            seqNo,
+            dimension: dimension2,
+            id: dim2Id
+          })
+        }
+      }
+
+      for (const record of dimensionRecords) {
+        await postRequest({
+          extension: ManufacturingRepository.IssueOfMaterialDimension.set,
+          record: JSON.stringify(record)
+        })
+      }
+
+      getData(res.recordId)
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      const res =
-        recordId &&
-        (await getRequest({
-          extension: ManufacturingRepository.WorksheetMaterials.get,
-          parameters: `_recordId=${recordId}`
-        }))
+      getData(recordId)
+    })()
+  }, [])
 
-      const items =
-        recordId &&
-        (await getRequest({
-          extension: ManufacturingRepository.IssueOfMaterialsItems.qry,
-          parameters: `_imaId=${recordId}`
-        }))
+  const getValueFromDefaultsData = key => {
+    const defaultValue = defaultsData.list.find(item => item.key === key)
+
+    return defaultValue?.value
+  }
+
+  const getLabelFromDefaultsData = key => {
+    const defaultValue = defaultsData.list.find(item => item.key === key)
+    getValueFromDefaultsData(`ivtDimension${defaultValue?.value}`)
+
+    return getValueFromDefaultsData(`ivtDimension${defaultValue?.value}`)
+  }
+
+  const getData = async (recordId) => {
+    if (!recordId) return
+
+      const res = await getRequest({
+        extension: ManufacturingRepository.WorksheetMaterials.get,
+        parameters: `_recordId=${recordId}`
+      })
+
+      const itemsResponse = await getRequest({
+        extension: ManufacturingRepository.IssueOfMaterialsItems.qry,
+        parameters: `_imaId=${recordId}`
+      })
+
+      const itemList = itemsResponse?.list || []
+
+      const items = await Promise.all(
+        itemList.map(async (item, index) => {
+          let dim1Id = null,
+            dim2Id = null,
+            dimension1 = null,
+            dimension2 = null
+
+          const dimRes = await getRequest({
+            extension: ManufacturingRepository.IssueOfMaterialDimension.qry,
+            parameters: `_imaId=${recordId}&_seqNo=${item.seqNo}`
+          })
+
+          const dims = dimRes?.list || []
+
+          const dim1 = dims.find(d => d.dimension === item.dimension)
+          const dim2 = dims.find(d => d.dimension === item.dimension)
+
+          dim1Id = dim1?.id ?? null
+          dimension1 = dim1?.dimension ?? null
+
+          dim2Id = dim2?.id ?? null
+          dimension2 = dim2?.dimension ?? null
+
+          return {
+            id: index + 1,
+            ...item,
+            dim1Id,
+            dim2Id,
+            dimension1,
+            dimension2
+          }
+        })
+      )
 
       if (values) {
         formik.setValues({
@@ -139,20 +229,9 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
             wipPcs: values.wipPcs,
             jobId: values.jobId
           },
-          items:
-            items?.list?.map(({ ...item }, index) => ({
-              id: index + 1,
-              ...item
-            })) || formik.values.items
+          items
         })
       }
-    })()
-  }, [])
-
-  const getValueFromDefaultsData = key => {
-    const defaultValue = defaultsData.list.find(item => item.key === key)
-
-    return defaultValue?.value
   }
 
   async function fillGrid(type, operationId) {
@@ -176,172 +255,159 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
   const totalQty = formik.values.items ? formik.values.items.reduce((acc, item) => acc + parseInt(item.qty), 0) : 0
   const totalPcs = formik.values.items ? formik.values.items.reduce((acc, item) => acc + parseInt(item.pcs), 0) : 0
 
+  const totalExpQty = formik.values.items
+    ? formik.values.items.reduce((acc, item) => acc + parseInt(item.designQty), 0)
+    : 0
+
+  const totalExpPcs = formik.values.items
+    ? formik.values.items.reduce((acc, item) => acc + parseInt(item.designPcs), 0)
+    : 0
+
   return (
     <FormShell resourceId={resourceId} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
-                    name='dtId'
-                    label={labels.documentType}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    values={formik.values.header}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.dtId', newValue?.recordId || ''), changeDT(newValue)
-                    }}
-                    readOnly={editMode}
-                    error={formik.touched.header?.dtId && Boolean(formik.errors.dtId)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='reference'
-                    label={labels.reference}
-                    value={formik.values.header.reference}
-                    rows={2}
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    readOnly={editMode}
-                    onClear={() => formik.setFieldValue('header.reference', '')}
-                    error={formik.touched.header?.reference && Boolean(formik.errors.reference)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={ManufacturingRepository.Operation.qry}
-                    parameters={`_workCenterId=${values.workCenterId}&_startAt=0&_pageSize=100&`}
-                    name='operationId'
-                    label={labels.operation}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    required
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    values={formik.values.header}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.operationId', newValue?.recordId || null)
-                      newValue?.recordId &&
-                        formik.values.header.type &&
-                        fillGrid(formik.values.header.type, newValue?.recordId)
-                    }}
-                    error={formik.touched.header?.operationId && Boolean(formik.errors.header?.operationId)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    datasetId={DataSets.MF_IOM_TYPE}
-                    name='type'
-                    label={labels.type}
-                    valueField='key'
-                    displayField='value'
-                    values={formik.values.header}
-                    required
-                    readOnly={editMode}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.type', newValue?.key || null)
-                      newValue?.key &&
-                        formik.values.header.operationId &&
-                        fillGrid(newValue?.key, formik.values.header.operationId)
-                    }}
-                    error={formik.touched.header?.type && Boolean(formik.errors.header?.type)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextArea
-                    name='notes'
-                    label={labels.notes}
-                    value={formik.values.header.notes}
-                    rows={5}
-                    maxLength='100'
-                    editMode={editMode}
-                    maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('header.notes', e.target.value)}
-                    onClear={() => formik.setFieldValue('header.notes', '')}
-                  />
-                </Grid>
-              </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
+                name='dtId'
+                label={labels.documentType}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values.header}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.dtId', newValue?.recordId || ''), changeDT(newValue)
+                }}
+                readOnly={editMode}
+                error={formik.touched.header?.dtId && Boolean(formik.errors.dtId)}
+              />
             </Grid>
-            <Grid item xs={6}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='wsJobRef'
-                    label={labels.wsJobRef}
-                    value={formik.values.header.wsJobRef}
-                    readOnly
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='joJobRef'
-                    label={labels.joJobRef}
-                    value={formik.values.header.joJobRef}
-                    readOnly
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomDatePicker
-                    name='date'
-                    label={labels.date}
-                    value={formik.values.header.date}
-                    readOnly
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='pgItemName'
-                    label={labels.pgItem}
-                    value={formik.values.header.pgItemName}
-                    readOnly
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='laborName'
-                    label={labels.labor}
-                    value={formik.values.header.laborName}
-                    readOnly
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='wipQty'
-                    label={labels.wsQty}
-                    value={formik.values.header.wipQty}
-                    readOnly
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='wipPcs'
-                    label={labels.wsPcs}
-                    value={formik.values.header.wipPcs}
-                    readOnly
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-              </Grid>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='wsJobRef'
+                label={labels.wsJobRef}
+                value={formik.values.header.wsJobRef}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='laborName'
+                label={labels.labor}
+                value={formik.values.header.laborName}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.header.reference}
+                rows={2}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                readOnly={editMode}
+                onClear={() => formik.setFieldValue('header.reference', '')}
+                error={formik.touched.header?.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='joJobRef'
+                label={labels.joJobRef}
+                value={formik.values.header.joJobRef}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='wipQty'
+                label={labels.wsQty}
+                value={formik.values.header.wipQty}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.Operation.qry}
+                parameters={`_workCenterId=${values.workCenterId}&_startAt=0&_pageSize=100&`}
+                name='operationId'
+                label={labels.operation}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                required
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values.header}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.operationId', newValue?.recordId || null)
+                  newValue?.recordId &&
+                    formik.values.header.type &&
+                    fillGrid(formik.values.header.type, newValue?.recordId)
+                }}
+                error={formik.touched.header?.operationId && Boolean(formik.errors.header?.operationId)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomDatePicker
+                name='date'
+                label={labels.date}
+                value={formik.values.header.date}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='wipPcs'
+                label={labels.wsPcs}
+                value={formik.values.header.wipPcs}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                datasetId={DataSets.MF_IOM_TYPE}
+                name='type'
+                label={labels.type}
+                valueField='key'
+                displayField='value'
+                values={formik.values.header}
+                required
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.type', newValue?.key || null)
+                  newValue?.key &&
+                    formik.values.header.operationId &&
+                    fillGrid(newValue?.key, formik.values.header.operationId)
+                }}
+                error={formik.touched.header?.type && Boolean(formik.errors.header?.type)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='pgItemName'
+                label={labels.pgItem}
+                value={formik.values.header.pgItemName}
+                readOnly
+                maxAccess={maxAccess}
+              />
             </Grid>
           </Grid>
         </Fixed>
@@ -357,7 +423,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                 label: labels.sku,
                 name: 'sku',
                 props: {
-                  endpointId: InventoryRepository.Item.snapshot,
+                  endpointId: InventoryRepository.Materials.snapshot,
                   valueField: 'recordId',
                   displayField: 'sku',
                   mandatory: true,
@@ -378,8 +444,15 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                       extension: InventoryRepository.CurrentCost.get,
                       parameters: `_itemId=${newRow?.itemId}`
                     })
+
+                    const rawCategory = await getRequest({
+                      extension: InventoryRepository.ItemProduction.get,
+                      parameters: `_recordId=${newRow?.itemId}`
+                    })
+
                     update({
-                      unitCost: unitCost?.record?.unitCost || 0
+                      unitCost: unitCost?.record?.unitCost || 0,
+                      rmCategoryName: rawCategory?.record?.rmcName
                     })
                   }
                 }
@@ -388,6 +461,14 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                 component: 'textfield',
                 label: labels.item,
                 name: 'itemName',
+                props: {
+                  readOnly: true
+                }
+              },
+              {
+                component: 'textfield',
+                label: labels.rawCategory,
+                name: 'rmCategoryName',
                 props: {
                   readOnly: true
                 }
@@ -417,48 +498,42 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                   decimalScale: 5
                 }
               },
-              ...(getValueFromDefaultsData('ivtDimension1')
+              ...(getValueFromDefaultsData('mfimd1')
                 ? [
                     {
                       component: 'resourcecombobox',
-                      label: getValueFromDefaultsData('ivtDimension1'),
-                      name: 'ivtDimension1',
+                      label: getLabelFromDefaultsData('mfimd1'),
+                      name: 'mfimd1',
                       props: {
                         endpointId: InventoryRepository.Dimension.qry,
-                        valueField: 'recordId',
-                        displayField: 'reference',
+                        dynamicParams: `_dimension=${getValueFromDefaultsData('mfimd1')}`,
+                        valueField: 'id',
+                        displayField: 'name',
                         mapping: [
-                          { from: 'recordId', to: 'currencyId' },
-                          { from: 'reference', to: 'currencyRef' },
-                          { from: 'name', to: 'currencyName' }
-                        ],
-                        columnsInDropDown: [
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' }
+                          { from: 'id', to: 'dim1Id' },
+                          { from: 'name', to: 'dim1' },
+                          { from: 'dimension', to: 'dimension1' }
                         ],
                         displayFieldWidth: 2
                       }
                     }
                   ]
                 : []),
-              ...(getValueFromDefaultsData('ivtDimension2')
+              ...(getValueFromDefaultsData('mfimd2')
                 ? [
                     {
                       component: 'resourcecombobox',
-                      label: getValueFromDefaultsData('ivtDimension2'),
-                      name: 'ivtDimension2',
+                      label: getLabelFromDefaultsData('mfimd2'),
+                      name: 'mfimd2',
                       props: {
                         endpointId: InventoryRepository.Dimension.qry,
-                        valueField: 'recordId',
-                        displayField: 'reference',
+                        dynamicParams: `_dimension=${getValueFromDefaultsData('mfimd2')}`,
+                        valueField: 'id',
+                        displayField: 'name',
                         mapping: [
-                          { from: 'recordId', to: 'currencyId' },
-                          { from: 'reference', to: 'currencyRef' },
-                          { from: 'name', to: 'currencyName' }
-                        ],
-                        columnsInDropDown: [
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' }
+                          { from: 'id', to: 'dim2Id' },
+                          { from: 'name', to: 'dim2' },
+                          { from: 'dimension', to: 'dimension2' }
                         ],
                         displayFieldWidth: 2
                       }
@@ -486,11 +561,31 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
           />
         </Grow>
         <Fixed>
-          <Grid container justifyContent='flex-end' spacing={2} sx={{ p: 2 }}>
+          <Grid container spacing={2}>
             <Grid item xs={3}>
+              <CustomTextArea
+                name='notes'
+                label={labels.notes}
+                value={formik.values.header.notes}
+                rows={2}
+                maxLength='100'
+                editMode={editMode}
+                maxAccess={maxAccess}
+                onChange={e => formik.setFieldValue('header.notes', e.target.value)}
+                onClear={() => formik.setFieldValue('header.notes', '')}
+              />
+            </Grid>
+            <Grid item xs={1}></Grid>
+            <Grid item xs={2}>
+              <CustomNumberField name='totalExpQty' label={labels.totalExpQty} value={totalExpQty} readOnly />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomNumberField name='totalExpPcs' label={labels.totalExpPcs} value={totalExpPcs} readOnly />
+            </Grid>
+            <Grid item xs={2}>
               <CustomNumberField name='totalQty' label={labels.totalQty} value={totalQty} readOnly />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={2}>
               <CustomNumberField name='totalPcs' label={labels.totalPcs} value={totalPcs} readOnly />
             </Grid>
           </Grid>
