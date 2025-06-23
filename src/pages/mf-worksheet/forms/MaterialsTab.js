@@ -54,6 +54,12 @@ const MaterialsTab = ({ store, labels, access }) => {
       flex: 1
     },
     {
+      field: 'qty',
+      headerName: labels.qty,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'notes',
       headerName: labels.notes,
       flex: 1
@@ -102,8 +108,8 @@ const MaterialsTab = ({ store, labels, access }) => {
     openForm(obj)
   }
 
-  const add = () => {
-    proxyAction()
+  const add = async () => {
+    await proxyAction()
   }
 
   return (
