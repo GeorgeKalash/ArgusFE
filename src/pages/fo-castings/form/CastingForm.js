@@ -25,7 +25,7 @@ import toast from 'react-hot-toast'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { useWindow } from 'src/windows'
 
-export default function CastingForm({ store, setStore, access, labels, setRecalculateJobs }) {
+export default function CastingForm({ store, setStore, access, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -578,7 +578,6 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
                           }
                         }))
                         setRecal(true)
-                        setRecalculateJobs(true)
                       }}
                       onClear={() => formik.setFieldValue('inputWgt', 0)}
                       error={formik.touched.inputWgt && Boolean(formik.errors.inputWgt)}

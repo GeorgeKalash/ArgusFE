@@ -14,7 +14,7 @@ import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 
-export default function JobsForm({ labels, maxAccess, store, recalculateJobs, setRecalculateJobs }) {
+export default function JobsForm({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = store?.recordId
@@ -128,7 +128,6 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
         update({
           metalWgt: (parseFloat(newRow?.outputWgt || 0) - parseFloat(newRow?.currentWgt || 0)).toFixed(3)
         })
-        setRecalculateJobs(true)
       }
     },
     {
@@ -206,7 +205,7 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
     },
     {
       component: 'numberfield',
-      label: labels.damageQty,
+      label: labels.damageWgt,
       name: 'damagedQty',
       width: 130,
       updateOn: 'blur',
@@ -246,7 +245,8 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
 
   function recalculateJobsOnChange() {
     let sumMetalWeight = 0
-    const items = formik?.values?.items || []
+    const items = formik?.values?.items
+    if (!items?.some(job => job.jobRef)) return
 
     for (const item of items) sumMetalWeight += parseFloat(item?.metalWgt || 0)
 
@@ -282,7 +282,6 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
     })
 
     formik.setFieldValue('items', modifiedList)
-    setRecalculateJobs(false)
   }
 
   async function fetchGridData() {
@@ -327,14 +326,12 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
   }, [recordId])
 
   useEffect(() => {
-    recalculateJobsOnChange()
-  }, [recalculateJobs])
-
-  useEffect(() => {
     formik.setFieldValue('disassemblyWgt', store?.castingInfo?.scrapWgt)
     formik.setFieldValue('footerOutputWgt', store?.castingInfo?.outputWgt)
     formik.setFieldValue('footerInputWgt', store?.castingInfo?.inputWgt)
-  }, [store?.castingInfo])
+    formik.setFieldValue('balanceWgt', balanceWgt)
+    recalculateJobsOnChange()
+  }, [store?.castingInfo, balanceWgt, assignedWgtBB])
 
   return (
     <FormShell

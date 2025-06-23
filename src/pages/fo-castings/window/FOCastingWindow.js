@@ -15,7 +15,6 @@ const FOCastingWindow = ({ recordId, access, labels }) => {
     metalInfo: {},
     castingInfo: { scrapWgt: 0, outputWgt: 0, loss: 0 }
   })
-  const [recalculateJobs, setRecalculateJobs] = useState(false)
 
   const tabs = [
     { label: labels.castings },
@@ -27,31 +26,13 @@ const FOCastingWindow = ({ recordId, access, labels }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <CastingForm
-          store={store}
-          setStore={setStore}
-          labels={labels}
-          access={access}
-          setRecalculateJobs={setRecalculateJobs}
-        />
+        <CastingForm store={store} setStore={setStore} labels={labels} access={access} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <DisassemblyForm
-          store={store}
-          setStore={setStore}
-          labels={labels}
-          maxAccess={access}
-          setRecalculateJobs={setRecalculateJobs}
-        />
+        <DisassemblyForm store={store} setStore={setStore} labels={labels} maxAccess={access} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <JobsForm
-          store={store}
-          labels={labels}
-          maxAccess={access}
-          setRecalculateJobs={setRecalculateJobs}
-          recalculateJobs={recalculateJobs}
-        />
+        <JobsForm store={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
     </>
   )
