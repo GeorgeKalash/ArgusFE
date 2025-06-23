@@ -32,8 +32,9 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import ExpensesCostCenters from 'src/components/Shared/ExpensesCostCenters'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import CustomButton from 'src/components/Inputs/CustomButton'
 
-export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, recordId, window }) {
+export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -60,7 +61,6 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
       accountId: '',
       accountType: null,
       currencyId: parseInt(currencyId),
-      currencyName: '',
       paymentMethod: null,
       date: new Date(),
       amount: null,
@@ -97,8 +97,8 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
     validationSchema: yup.object({
       accountType: yup.number().required(),
       currencyId: yup.number().required(),
-      date: yup.string().required(),
-      paymentMethod: yup.string().required(),
+      date: yup.date().required(),
+      paymentMethod: yup.number().required(),
       amount: yup.number().required(),
       expenses: yup
         .array()
@@ -131,8 +131,7 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
           ...obj,
           date: formatDateToApi(obj.date),
           amount: totalAmount,
-          baseAmount: totalAmount,
-          recordId: obj.recordId
+          baseAmount: totalAmount
         },
         items: updatedRows,
         costCenters: costCentersValues
@@ -144,7 +143,7 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
       })
 
       !obj.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
-      await getPaymentOrder(response.recordId)
+      getPaymentOrder(response.recordId)
       invalidate()
     }
   })
@@ -161,9 +160,9 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
         extension: CashBankRepository.CbBankAccounts.get,
         parameters: `_recordId=${cashAccountId}`
       })
-      formik.setFieldValue('cashAccountId', cashAccountResult?.recordId)
-      formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
-      formik.setFieldValue('cashAccountName', cashAccountResult.name)
+      formik.setFieldValue('cashAccountId', cashAccountResult?.recordId || null)
+      formik.setFieldValue('cashAccountRef', cashAccountResult.reference || '')
+      formik.setFieldValue('cashAccountName', cashAccountResult.name || '')
 
       return cashAccountResult.paymentMethod
     } else {
@@ -264,9 +263,9 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+      formik.setFieldValue('plantId', res?.record?.plantId || plantId || null)
       const payment = await getCashAccountAndPayment(res?.record?.cashAccountId || cashAccountId)
-      formik.setFieldValue('paymentMethod', res?.record?.paymentMethod || payment)
+      formik.setFieldValue('paymentMethod', res?.record?.paymentMethod || payment || null)
     }
   }
 
@@ -297,7 +296,7 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
         recordId: formik.values.recordId
       },
       width: 950,
-      title: 'Workflow'
+      title: labels.WorkFlow
     })
   }
 
@@ -307,11 +306,9 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
       record: JSON.stringify(formik.values)
     })
 
-    if (res?.recordId) {
-      toast.success(platformLabels.Cancelled)
-      invalidate()
-      await getPaymentOrder(res.recordId)
-    }
+    toast.success(platformLabels.Cancelled)
+    invalidate()
+    getPaymentOrder(res.recordId)
   }
 
   const onClose = async () => {
@@ -320,11 +317,9 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
       record: JSON.stringify(formik.values)
     })
 
-    if (res?.recordId) {
-      toast.success(platformLabels.Closed)
-      invalidate()
-      await getPaymentOrder(res.recordId)
-    }
+    toast.success(platformLabels.Closed)
+    invalidate()
+    getPaymentOrder(res.recordId)
   }
 
   const subTotalSum = formik.values?.expenses?.reduce((subTotal, row) => {
@@ -339,11 +334,9 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
       record: JSON.stringify(formik.values)
     })
 
-    if (res?.recordId) {
-      toast.success(platformLabels.Reopened)
-      invalidate()
-      await getPaymentOrder(res.recordId)
-    }
+    toast.success(platformLabels.Reopened)
+    invalidate()
+    getPaymentOrder(res.recordId)
   }
 
   const getCostCenters = async (pvId, seqNo) => {
@@ -358,20 +351,18 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
     }))
   }
 
-  function confirmation(dialogText, titleText, event) {
+  function onCancelConf() {
     stack({
       Component: ConfirmationDialog,
       props: {
-        DialogText: dialogText,
-        okButtonAction: async () => {
-          await event()
-        },
+        DialogText: platformLabels.CancelConf,
+        okButtonAction: onCancel,
         fullScreen: false,
         close: true
       },
       width: 400,
       height: 150,
-      title: titleText
+      title: platformLabels.Confirmation
     })
   }
 
@@ -379,9 +370,7 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
     {
       key: 'Cancel',
       condition: true,
-      onClick: () => {
-        confirmation(platformLabels.CancelConf, platformLabels.Confirmation, onCancel)
-      },
+      onClick: onCancelConf,
       disabled: !editMode || isCancelled
     },
     {
@@ -434,9 +423,7 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
       parameters: `_filter=&_key=vatPct`
     })
 
-    const vatPctValue = parseInt(res.record.value)
-
-    formik.setFieldValue('vatPct', vatPctValue ?? 0)
+    formik.setFieldValue('vatPct', parseInt(res.record.value) ?? 0)
 
     return vatPctValue
   }
@@ -479,21 +466,21 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
         disabled: isCancelled
       },
       async onChange({ row: { update, newRow } }) {
-        if (!!newRow.isVAT) {
+        if (newRow.isVAT) {
           const vatPct = await getDefaultVAT()
 
           if (!newRow.amount) {
             return
           }
 
-          let newSubtotal = newRow.amount * (100 / (100 + vatPct))
+          let newSubtotal = (newRow?.amount || 0) * (100 / (100 + (vatPct || 0))) || 0
           update({
-            subTotal: newSubtotal.toFixed(2),
-            vatAmount: (parseFloat(newRow.amount) - parseFloat(newSubtotal)).toFixed(2)
+            subTotal: parseFloat(newSubtotal || 0).toFixed(2),
+            vatAmount: (parseFloat(newRow?.amount || 0) - parseFloat(newSubtotal || 0)).toFixed(2)
           })
         } else {
           update({
-            subTotal: parseFloat(newRow.amount) || 0,
+            subTotal: parseFloat(newRow.amount || 0),
             vatAmount: 0
           })
         }
@@ -508,14 +495,14 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow.isVAT) {
-          let newsubTotal = newRow.amount * (100 / (100 + formik.values.vatPct))
+          let newsubTotal = parseFloat(newRow.amount || 0) * (100 / (100 + formik.values.vatPct || 0))
           update({
-            subTotal: parseFloat(newsubTotal).toFixed(2),
-            vatAmount: parseFloat(newRow.amount - newsubTotal).toFixed(2)
+            subTotal: parseFloat(newsubTotal || 0).toFixed(2),
+            vatAmount: (parseFloat(newRow.amount || 0) - parseFloat(newsubTotal || 0)).toFixed(2)
           })
         } else {
           update({
-            subTotal: parseFloat(newRow.amount),
+            subTotal: parseFloat(newRow.amount || 0),
             vatAmount: 0
           })
         }
@@ -642,20 +629,18 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
                         onChange={(event, newValue) => {
                           getMultiCurrencyFormData(newValue?.recordId, formik.values.date)
                           formik.setFieldValue('currencyId', newValue?.recordId || null)
-                          formik.setFieldValue('currencyName', newValue?.name || '')
                         }}
                         error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                       />
                     </Grid>
                     <Grid item xs={4}>
-                      <Button
-                        variant='contained'
-                        size='small'
+                      <CustomButton
                         onClick={() => openMCRForm(formik.values)}
+                        label={platformLabels.add}
                         disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
-                      >
-                        <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
-                      </Button>
+                        image={'popup.png'}
+                        color='#231f20'
+                      />
                     </Grid>
                   </Grid>
                 </Grid>
@@ -688,9 +673,9 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
                     label={labels.date}
                     value={formik.values.date}
                     required
-                    onChange={async (e, newValue) => {
+                    onChange={(e, newValue) => {
                       formik.setFieldValue('date', newValue)
-                      await getMultiCurrencyFormData(formik.values.currencyId, newValue)
+                      getMultiCurrencyFormData(formik.values.currencyId, newValue)
                     }}
                     onClear={() => formik.setFieldValue('date', null)}
                     readOnly={isClosed || isCancelled}
@@ -761,7 +746,7 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
                     ]}
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
+                      formik.setFieldValue('plantId', newValue?.recordId || null)
                     }}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                   />
