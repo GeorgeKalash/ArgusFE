@@ -79,6 +79,23 @@ export function DataGrid({
     const updateCommit = changes => {
       setData(changes, params)
       commit({ changes: { ...params.node.data, changes } })
+
+      const focusedCell = params.api.getFocusedCell()
+
+      const colId = focusedCell.column.colId
+
+      const isUpdatedColumn = Object.keys(changes || {}).includes(colId)
+
+      if (isUpdatedColumn) {
+        params.api.stopEditing()
+
+        setTimeout(() => {
+          params.api.startEditingCell({
+            rowIndex: params.rowIndex,
+            colKey: colId
+          })
+        }, 0)
+      }
     }
 
     const updateRowCommit = changes => {
@@ -182,6 +199,7 @@ export function DataGrid({
       width: 450,
       height: 170,
       canExpand: false,
+      refresh: false,
       title: 'Delete'
     })
   }
@@ -381,7 +399,7 @@ export function DataGrid({
     })
 
     const row = params.data
-    if (onSelectionChange) onSelectionChange(row)
+    if (onSelectionChange) onSelectionChange(row, '', field)
   }
 
   const CustomCellRenderer = params => {
