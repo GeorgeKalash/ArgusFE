@@ -170,7 +170,6 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore, se
       editMode={true}
       isInfo={false}
       isCleared={false}
-      isSavedClear={false}
       disabledSubmit={store?.isCancelled || store?.isPosted}
     >
       <VertLayout>

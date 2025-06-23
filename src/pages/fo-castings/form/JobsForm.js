@@ -344,7 +344,6 @@ export default function JobsForm({ labels, maxAccess, store, recalculateJobs, se
       editMode={true}
       isInfo={false}
       isCleared={false}
-      isSavedClear={false}
       disabledSubmit={store?.isCancelled || store?.isPosted}
     >
       <VertLayout>

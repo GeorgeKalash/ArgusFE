@@ -77,7 +77,7 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.string().required(),
+      date: yup.date().required(),
       mouldId: yup.number().required(),
       metalId: yup.number().required(),
       waxId: yup.number().required(),
@@ -445,7 +445,7 @@ export default function CastingForm({ store, setStore, access, labels, setRecalc
                       label={labels.standardLoss}
                       value={formik.values.stdLossRate}
                       required
-                      readOnly={isCancelled || isPosted}
+                      readOnly
                       onChange={e => {
                         formik.setFieldValue('stdLossRate', e.target.value)
                       }}

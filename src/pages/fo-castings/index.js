@@ -150,7 +150,7 @@ const FoCastings = () => {
     action: openForm
   })
 
-  const add = async () => {
+  const add = () => {
     proxyAction()
   }
 
