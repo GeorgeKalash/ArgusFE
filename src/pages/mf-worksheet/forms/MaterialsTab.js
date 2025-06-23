@@ -94,7 +94,7 @@ const MaterialsTab = ({ store, labels, access }) => {
       },
       width: 1200,
       height: 700,
-      title: labels.Materials
+      title: labels.issueOfMaterials
     })
   }
 
