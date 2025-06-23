@@ -156,8 +156,7 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
       field: name,
       headerName: name,
       flex: importConfig.record.fields.length < 10 ? 1 : null,
-      width: importConfig.record.fields.length < 10 ? null : 130,
-      type: (dataType === 2 && format === '1') || dataType === 3 ? 'number' : undefined,
+      width: 130,
       dataType,
       ...rest
     })) || []
@@ -264,8 +263,7 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
             {
               field: 'recordId',
               headerName: '',
-              flex: columns.length < 10 ? 1 : null,
-              width: columns.length < 10 ? null : 130
+              width: 130
             },
             ...columns
           ]}

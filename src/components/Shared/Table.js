@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
@@ -63,6 +63,7 @@ const Table = ({
   const [focus, setFocus] = useState(false)
   const hasRowId = gridData?.list?.[0]?.id
   const storeName = 'tableSettings'
+  const gridRef = useRef(null)
 
   const columns = props?.columns
     .filter(
@@ -614,6 +615,19 @@ const Table = ({
     )
   }
 
+  const containerWidth = gridRef?.current?.offsetWidth - 2
+
+  const totalFixedColumnWidth =
+    filteredColumns
+      .filter(col => col?.width !== undefined && col.type !== 'checkbox')
+      ?.reduce((sum, col) => sum + col.width, 0) +
+    (filteredColumns?.some(column => column.field === 'actions') ? 100 : 0)
+
+  const additionalWidth =
+    totalFixedColumnWidth > 0 && filteredColumns?.length > 0 && containerWidth > totalFixedColumnWidth
+      ? (containerWidth - totalFixedColumnWidth) / filteredColumns?.length
+      : 0
+
   const columnDefs = [
     ...(showCheckboxColumn
       ? [
@@ -641,6 +655,8 @@ const Table = ({
       : []),
     ...filteredColumns.map(column => ({
       ...column,
+      width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
+      flex: column.flex,
       sort: column.sort || '',
       cellRenderer: column.cellRenderer ? column.cellRenderer : FieldWrapper
     }))
@@ -789,6 +805,7 @@ const Table = ({
     <VertLayout>
       <Grow>
         <Box
+          ref={gridRef}
           className='ag-theme-alpine'
           style={{
             flex: !props.maxHeight && !props.height && 1,
