@@ -1156,6 +1156,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
               rowId={['sku']}
               maxAccess={access}
               pagination={false}
+              disableColumnControls
             />
           </Grid>
           <Grid item xs={3} sx={{ display: 'flex', flex: 1 }}>
@@ -1170,6 +1171,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
               ]}
               rowId={['metal']}
               pagination={false}
+              disableColumnControls
             />
           </Grid>
           <Grid item xs={0.5}></Grid>

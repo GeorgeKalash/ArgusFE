@@ -45,6 +45,7 @@ const Table = ({
   selectionMode = 'row',
   rowDragManaged = false,
   onRowDragEnd = false,
+  disableColumnControls = false,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -312,9 +313,11 @@ const Table = ({
               {platformLabels.Of} {totalRecords}
             </Box>
             <Box>
-              <IconButton onClick={onReset}>
-                <CachedIcon />
-              </IconButton>
+              {!disableColumnControls && (
+                <IconButton onClick={onReset}>
+                  <CachedIcon />
+                </IconButton>
+              )}
             </Box>
           </Box>
         )
@@ -724,7 +727,7 @@ const Table = ({
   })
 
   const onColumnMoved = params => {
-    if (params.columnApi && tableName && params.source != 'gridOptionsChanged') {
+    if (!disableColumnControls && params.columnApi && tableName && params.source != 'gridOptionsChanged') {
       const columnState = params.columnApi.getColumnState()
       saveToDB(storeName, tableName, columnState)
 
@@ -733,7 +736,7 @@ const Table = ({
   }
 
   const onColumnResized = params => {
-    if (params?.source === 'uiColumnResized' && tableName) {
+    if (!disableColumnControls && tableName && params?.source === 'uiColumnResized') {
       const columnState = params.columnApi.getColumnState()
 
       saveToDB(storeName, tableName, columnState)
@@ -742,7 +745,7 @@ const Table = ({
   }
 
   const onSortChanged = params => {
-    if (params.columnApi && tableName && params.source == 'uiColumnSorted') {
+    if (!disableColumnControls && params.columnApi && tableName && params.source == 'uiColumnSorted') {
       const columnState = params.columnApi.getColumnState()
 
       saveToDB(storeName, tableName, columnState)
@@ -838,13 +841,15 @@ const Table = ({
           <CustomPagination />
         </Fixed>
       ) : (
-        <Fixed>
-          <Box display='flex' justifyContent='flex-end'>
-            <IconButton onClick={onReset}>
-              <CachedIcon />
-            </IconButton>
-          </Box>
-        </Fixed>
+        !disableColumnControls && (
+          <Fixed>
+            <Box display='flex' justifyContent='flex-end'>
+              <IconButton onClick={onReset}>
+                <CachedIcon />
+              </IconButton>
+            </Box>
+          </Fixed>
+        )
       )}
     </VertLayout>
   )
