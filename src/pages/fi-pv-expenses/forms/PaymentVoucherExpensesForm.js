@@ -82,7 +82,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         taxRef: '',
         notes: '',
         isVAT: false,
-        hasCostCenters: true,
+        hasCostCenters: false,
         costCenters: []
       }
     ]
@@ -547,7 +547,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
           ...item,
           id: item.seqNo,
           isVAT: item.vatAmount != 0,
-          hasCostCenters: true,
+          hasCostCenters: false,
           costCenters: costCenters
         }
       })
