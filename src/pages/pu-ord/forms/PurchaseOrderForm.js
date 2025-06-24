@@ -249,12 +249,10 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
 
   const editMode = !!formik.values.header.recordId
 
-  async function getFilteredMU(itemId) {
+  async function getFilteredMU(itemId, msId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-
-    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    const arrayMU = measurements?.filter(item => item.msId === msId) || []
     filteredMeasurements.current = arrayMU
   }
 
@@ -324,6 +322,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
 
           return
         }
+        getFilteredMU(newRow?.itemId, newRow?.msId)
         const data = await getDataRow(newRow.itemId)
         update(data)
       }
@@ -1568,7 +1567,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
               action === 'delete' && setReCal(true)
             }}
             onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId)
+              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             value={formik?.values?.items}
             initialValues={formik.initialValues.items[0]}
