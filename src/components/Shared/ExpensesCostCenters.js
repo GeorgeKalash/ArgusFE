@@ -6,13 +6,12 @@ import { useForm } from 'src/hooks/form.js'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import CustomTextField from '../Inputs/CustomTextField'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import CustomNumberField from '../Inputs/CustomNumberField'
 
 export default function ExpensesCostCenters({ labels, maxAccess, row, window, updateRow, recordId, readOnly }) {
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       costCenters: row.costCenters || [
@@ -53,12 +52,15 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
         mapping: [
           { from: 'recordId', to: 'ccId' },
           { from: 'name', to: 'ccName' },
-          { from: 'reference', to: 'ccRef' }
+          { from: 'reference', to: 'ccRef' },
+          { from: 'ccgName', to: 'ccgName' }
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
+          { key: 'name', value: 'Name', grid: 3 },
+          { key: 'ccgName', value: 'Group Name' },
         ],
+        minChars: 2,
         readOnly
       }
     },
@@ -66,12 +68,13 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
       component: 'textfield',
       label: labels.name,
       name: 'ccName',
+      flex: 2,
       props: {
         readOnly: true
       }
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.amount,
       name: 'amount',
       props: {
@@ -103,7 +106,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
         <Fixed>
           <Grid container spacing={4}>
             <Grid item xs={12}>
-              <CustomTextField
+              <CustomNumberField
                 name='amount'
                 label={labels.amount}
                 value={row.amount}
@@ -115,7 +118,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField
+              <CustomNumberField
                 name='amountAssigned'
                 label={labels.amountAssigned}
                 value={totalAmount}
@@ -124,7 +127,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField
+              <CustomNumberField
                 name='balance'
                 label={labels.balance}
                 value={balance}

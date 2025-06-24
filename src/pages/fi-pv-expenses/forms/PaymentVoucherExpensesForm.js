@@ -513,7 +513,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
             updateRow,
             readOnly: isPosted || isCancelled
           },
-          width: 700,
+          width: 850,
           height: 600,
           title: labels.costCenter
         })
