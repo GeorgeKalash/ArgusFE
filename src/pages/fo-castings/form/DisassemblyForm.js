@@ -5,12 +5,10 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
-import * as yup from 'yup'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import { createConditionalSchema } from 'src/lib/validation'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 
 export default function DisassemblyForm({ labels, maxAccess, store, setStore }) {
@@ -19,14 +17,8 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore }) 
   const recordId = store?.recordId
   const metalInfo = store?.metalInfo
 
-  const conditions = {
-    weight: row => row.weight >= 0
-  }
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
-
   const { formik } = useForm({
     maxAccess,
-    validateOnChange: true,
     initialValues: {
       items: [
         {
@@ -40,19 +32,15 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore }) 
         }
       ]
     },
-    validationSchema: yup.object({
-      items: yup.array().of(schema)
-    }),
     onSubmit: async obj => {
-      const modifiedItems = obj?.items
-        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
-        .map((itemDetails, index) => {
-          return {
-            ...itemDetails,
-            id: index + 1,
-            castingId: recordId
-          }
-        })
+      const modifiedItems = obj?.items.map((itemDetails, index) => {
+        return {
+          ...itemDetails,
+          id: index + 1,
+          castingId: recordId,
+          weight: itemDetails?.weight || 0
+        }
+      })
 
       const payload = { castingId: recordId, items: modifiedItems }
       await postRequest({
@@ -105,7 +93,8 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore }) 
       name: 'weight',
       props: {
         maxLength: 12,
-        decimals: 4
+        decimals: 4,
+        allowNegative: false
       }
     }
   ]

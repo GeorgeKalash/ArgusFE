@@ -116,20 +116,16 @@ export default function CastingForm({ store, setStore, access, labels }) {
   const isCancelled = formik.values.status === -1
   const isPosted = formik.values.status === 3
 
-  const suggestedWgt = recal
-    ? ((Number(formik?.values?.netWgt) || 0) * (Number(formik?.values?.factor) || 0)).toFixed(3)
-    : formik?.values?.suggestedWgt
-
   const netInputWgt = recal
-    ? ((Number(formik?.values?.inputWgt) || 0) + (Number(formik?.values?.rmWgt) || 0)).toFixed(3)
-    : formik?.values?.netInputWgt
+    ? (Number(formik?.values?.inputWgt) || 0) + (Number(formik?.values?.rmWgt) || 0)
+    : Number(formik?.values?.netInputWgt) || 0
 
-  const loss = recal ? ((netInputWgt || 0) - (Number(formik?.values?.outputWgt) || 0)).toFixed(3) : formik?.values?.loss
+  const loss = recal ? netInputWgt - (Number(formik?.values?.outputWgt) || 0) : Number(formik?.values?.loss) || 0
 
-  const lossPct = recal ? ((100 * loss) / (netInputWgt || 0)).toFixed(3) : formik?.values?.lossPct
+  const lossPct = recal ? (100 * loss) / (netInputWgt || 1) : Number(formik?.values?.lossPct) || 0
 
   const lossVariationPct = recal
-    ? (lossPct - (Number(formik?.values?.stdLossRate) || 0)).toFixed(3)
+    ? lossPct - (Number(formik?.values?.stdLossRate) || 0)
     : formik?.values?.lossVariationPct
 
   const actions = [
@@ -252,7 +248,6 @@ export default function CastingForm({ store, setStore, access, labels }) {
   }
 
   useEffect(() => {
-    formik.setFieldValue('suggestedWgt', suggestedWgt || 0)
     formik.setFieldValue('loss', loss || 0)
     formik.setFieldValue('lossPct', lossPct || 0)
     formik.setFieldValue('lossVariationPct', lossVariationPct || 0)
@@ -265,7 +260,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
         loss: Number(loss)
       }
     }))
-  }, [suggestedWgt, loss, lossPct, lossVariationPct, store?.castingInfo?.scrapWgt])
+  }, [loss, lossPct, lossVariationPct, store?.castingInfo?.scrapWgt])
 
   useEffect(() => {
     refetchForm(recordId)
@@ -305,7 +300,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       values={formik.values}
                       maxAccess={maxAccess}
                       onChange={(event, newValue) => {
-                        formik.setFieldValue('dtId', newValue?.recordId)
+                        formik.setFieldValue('dtId', newValue?.recordId || null)
                         changeDT(newValue)
                       }}
                       error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -345,6 +340,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       secondDisplayField={false}
                       valueField='waxRef'
                       displayField='waxRef'
+                      required
                       valueShow='waxRef'
                       columnsInDropDown={[
                         { key: 'reference', value: 'Reference' },
@@ -353,6 +349,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       ]}
                       form={formik}
                       onChange={async (event, newValue) => {
+                        setRecal(true)
                         const factorStdLoss = await getfactorStdLoss(newValue?.metalId, newValue?.metalColorId)
                         const waxInfo = await getWaxInfo(newValue?.recordId)
                         formik.setFieldValue('grossWgt', waxInfo?.grossWgt || 0)
@@ -552,9 +549,10 @@ export default function CastingForm({ store, setStore, access, labels }) {
                     <CustomNumberField
                       name='suggestedWgt'
                       label={labels.suggestedWgt}
-                      value={suggestedWgt}
+                      value={formik.values.suggestedWgt}
                       required
                       readOnly
+                      decimalScale={3}
                       onChange={e => formik.setFieldValue('suggestedWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('suggestedWgt', 0)}
                       error={formik.touched.suggestedWgt && Boolean(formik.errors.suggestedWgt)}

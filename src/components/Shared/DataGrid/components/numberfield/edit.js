@@ -25,6 +25,15 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
     return num.replace(/\.0+$/, '').replace(/(\.\d*?[1-9])0+$/, '$1')
   }
 
+  const parseInputValue = val => {
+    val = val.replace(/,/g, '')
+    if (val.endsWith('.') && !/\.\d+$/.test(val)) {
+      val = val.slice(0, -1)
+    }
+
+    return Number(val)
+  }
+
   return (
     <CustomNumberField
       value={viewDecimals ? (typing.current ? value?.[field] : formatValue(value?.[field])) : value?.[field]}
@@ -36,12 +45,12 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
       hasBorder={false}
       iconMapIndex='1'
       onChange={e => {
-        if (isNaN(Number(e.target.value))) return
         typing.current = true
+        const num = parseInputValue(e.target.value)
         update({
           id,
           field,
-          value: Number(e.target.value)
+          value: num
         })
       }}
       onClear={() => {

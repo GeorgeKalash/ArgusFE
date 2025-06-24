@@ -198,6 +198,9 @@ export default function JobsForm({ labels, maxAccess, store }) {
       label: labels.damagePcs,
       name: 'damagedPcs',
       width: 130,
+      props: {
+        decimalScale: 0
+      },
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         update({ outputPcs: (parseFloat(newRow?.inputPcs || 0) - parseFloat(newRow?.damagedPcs || 0)).toFixed(2) })
@@ -306,7 +309,6 @@ export default function JobsForm({ labels, maxAccess, store }) {
               returnedWgt: parseFloat(item?.returnedWgt || 0).toFixed(2),
               loss: parseFloat(item?.loss || 0).toFixed(2),
               inputPcs: parseFloat(item?.inputPcs || 0).toFixed(2),
-              damagedPcs: parseFloat(item?.damagedPcs || 0).toFixed(2),
               outputPcs: parseFloat(item?.outputPcs || 0).toFixed(2),
               netWgt: (
                 parseFloat(item?.currentWgt || 0) +
