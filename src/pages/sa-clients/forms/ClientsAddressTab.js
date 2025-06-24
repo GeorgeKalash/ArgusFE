@@ -8,9 +8,8 @@ import ClientsAddressForm from './ClientsAddressForm'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import useSetWindow from 'src/hooks/useSetWindow'
 
-const ClientsAddressTab = ({ store, window, editMode, setStore, ...props }) => {
+const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([])
@@ -20,8 +19,6 @@ const ClientsAddressTab = ({ store, window, editMode, setStore, ...props }) => {
   const { labels: labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.Address
   })
-
-  useSetWindow({ title: labels.salesOrder, window })
 
   const getAddressGridData = recordId => {
     setAddressGridData([])
@@ -59,9 +56,6 @@ const ClientsAddressTab = ({ store, window, editMode, setStore, ...props }) => {
     stack({
       Component: ClientsAddressForm,
       props: {
-        _labels: labels,
-        maxAccess,
-        editMode,
         addressId: recordId,
         store,
         setStore,

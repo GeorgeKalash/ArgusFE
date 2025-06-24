@@ -49,7 +49,6 @@ const AddressMasterDataForm = ({ store, labels, editMode, ...props }) => {
     stack({
       Component: BPAddressForm,
       props: {
-        _labels: labels,
         editMode: editMode,
         recordId: recordId,
         bpId: recordId,

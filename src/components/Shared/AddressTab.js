@@ -30,11 +30,11 @@ const AddressTab = ({
     () => ({
       recordId: address?.recordId || null,
       name: address?.name || '',
-      countryId: address?.countryId || '',
+      countryId: address?.countryId || null,
       countryName: address?.countryName || '',
-      stateId: address?.stateId || '',
+      stateId: address?.stateId || null,
       stateName: address?.stateName || '',
-      cityId: address?.cityId || '',
+      cityId: address?.cityId || null,
       city: address?.city || '',
       street1: address?.street1 || '',
       street2: address?.street2 || '',
@@ -43,7 +43,7 @@ const AddressTab = ({
       phone: address?.phone || '',
       phone2: address?.phone2 || '',
       phone3: address?.phone3 || '',
-      addressId: address?.addressId || '',
+      addressId: address?.addressId || null,
       postalCode: address?.postalCode || '',
       cityDistrictId: address?.cityDistrictId || null,
       cityDistrict: address?.cityDistrict || '',
@@ -74,8 +74,9 @@ const AddressTab = ({
   const validate = options && {
     name: yup.string().required(),
     street1: yup.string().required(),
-    countryId: yup.string().required(),
-    cityId: yup.string().required(),
+    phone: yup.string().required(),
+    countryId: yup.number().required(),
+    city: yup.string().required(),
     email1: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true }),
     email2: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true })
   }
@@ -164,15 +165,15 @@ const AddressTab = ({
           values={addressValidation.values}
           onChange={(event, newValue) => {
             addressValidation.setFieldValue('stateId', null)
-            addressValidation.setFieldValue('cityId', '')
+            addressValidation.setFieldValue('cityId', null)
             addressValidation.setFieldValue('city', '')
-            addressValidation.setFieldValue('cityDistrictId', '')
+            addressValidation.setFieldValue('cityDistrictId', null)
             addressValidation.setFieldValue('cityDistrict', '')
             if (newValue) {
               addressValidation.setFieldValue('countryId', newValue?.recordId)
               addressValidation.setFieldValue('countryName', newValue?.name)
             } else {
-              addressValidation.setFieldValue('countryId', '')
+              addressValidation.setFieldValue('countryId', null)
               addressValidation.setFieldValue('countryName', '')
             }
           }}
@@ -188,13 +189,13 @@ const AddressTab = ({
           label={labels.state}
           valueField='recordId'
           displayField='name'
-          readOnly={(readOnly || !addressValidation.values?.countryId) && true}
+          readOnly={readOnly || !addressValidation.values?.countryId}
           values={addressValidation.values}
           onChange={(event, newValue) => {
-            addressValidation.setFieldValue('stateId', newValue?.recordId)
-            addressValidation.setFieldValue('stateName', newValue?.name)
-            addressValidation.setFieldValue('cityId', '')
-            addressValidation.setFieldValue('cityDistrictId', '')
+            addressValidation.setFieldValue('stateId', newValue?.recordId || null)
+            addressValidation.setFieldValue('stateName', newValue?.name || '')
+            addressValidation.setFieldValue('cityId', null)
+            addressValidation.setFieldValue('cityDistrictId', null)
             addressValidation.setFieldValue('city', '')
             addressValidation.setFieldValue('cityDistrict', '')
           }}
@@ -211,10 +212,10 @@ const AddressTab = ({
           }}
           valueField='name'
           displayField='name'
-          name='cityId'
+          name='city'
           required
           label={labels.city}
-          readOnly={(readOnly || !addressValidation.values.countryId) && true}
+          readOnly={readOnly || !addressValidation.values.countryId}
           form={addressValidation}
           secondDisplayField={false}
           onChange={(event, newValue) => {
@@ -226,7 +227,7 @@ const AddressTab = ({
               cityDistrict: ''
             })
           }}
-          errorCheck={'cityId'}
+          errorCheck={'city'}
           maxAccess={maxAccess}
         />
       </FormGrid>
@@ -238,9 +239,9 @@ const AddressTab = ({
           }}
           valueField='name'
           displayField='name'
-          name='cityDistrictId'
+          name='cityDistrict'
           label={labels.cityDistrict}
-          readOnly={(readOnly || !addressValidation.values.cityId) && true}
+          readOnly={readOnly || !addressValidation.values.cityId}
           form={addressValidation}
           secondDisplayField={false}
           onChange={(event, newValue) => {
@@ -248,11 +249,11 @@ const AddressTab = ({
               addressValidation.setFieldValue('cityDistrictId', newValue?.recordId)
               addressValidation.setFieldValue('cityDistrict', newValue?.name)
             } else {
-              addressValidation.setFieldValue('cityDistrictId', '')
+              addressValidation.setFieldValue('cityDistrictId', null)
               addressValidation.setFieldValue('cityDistrict', '')
             }
           }}
-          errorCheck={'cityDistrictId'}
+          errorCheck={'cityDistrict'}
           maxAccess={maxAccess}
         />
       </FormGrid>
@@ -360,6 +361,7 @@ const AddressTab = ({
               value={addressValidation.values.phone}
               readOnly={readOnly}
               maxLength='15'
+              required
               phone={true}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone', '')}

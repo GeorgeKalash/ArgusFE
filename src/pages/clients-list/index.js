@@ -12,11 +12,14 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useError } from 'src/error'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ClientsList = () => {
   const { stack } = useWindow()
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
 
   const {
     query: { data },
@@ -34,7 +37,7 @@ const ClientsList = () => {
       default: { category: 1 }
     }
   })
-  async function fetchWithSearch({ options = {}, filters }) {
+  async function fetchWithSearch({ filters }) {
     return (
       filters.qry &&
       (await getRequest({
@@ -110,28 +113,13 @@ const ClientsList = () => {
   }
 
   const addClient = async () => {
-    const plantId = await getPlantId()
     if (plantId) {
       openForm('', plantId)
     } else {
       stackError({
-        message: 'The user does not have a default plant'
+        message: platformLabels.noDefaultPlant
       })
     }
-  }
-
-  const getPlantId = async () => {
-    const userData = window.sessionStorage.getItem('userData')
-      ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
-
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: parameters
-    })
-
-    return res?.record?.value
   }
 
   const editClient = obj => {

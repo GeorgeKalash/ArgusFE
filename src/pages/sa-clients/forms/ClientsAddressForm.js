@@ -25,11 +25,7 @@ const ClientsAddressForm = ({ getAddressGridData, addressId, window, props, stor
         extension: SaleRepository.Address.set,
         record: JSON.stringify(data)
       })
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-      } else {
-        toast.success(platformLabels.Edited)
-      }
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       window.close()
     }
     getAddressGridData(clientId)
@@ -95,9 +91,7 @@ const ClientsAddressForm = ({ getAddressGridData, addressId, window, props, stor
     }
   ]
 
-  return (
-    <AddressForm {...{ ...props, address, setAddress, recordId: addressId, onSubmit, actions, access: maxAccess }} />
-  )
+  return <AddressForm {...{ ...props, address, setAddress, recordId: addressId, onSubmit, actions }} />
 }
 
 export default ClientsAddressForm
