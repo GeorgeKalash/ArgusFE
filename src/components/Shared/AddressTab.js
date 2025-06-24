@@ -80,13 +80,15 @@ const AddressTab = ({
     email1: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true }),
     email2: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true })
   }
-
   useEffect(() => {
     if (address?.recordId !== lastRecordIdRef.current) {
       lastRecordIdRef.current = address?.recordId
-      addressValidation.setValues(initialValues)
+
+      Object.entries(initialValues).forEach(([key, value]) => {
+        addressValidation.setFieldValue(key, value, false)
+      })
     }
-  }, [address?.recordId, initialValues])
+  }, [address?.recordId])
 
   useEffect(() => {
     if (maxAccess) {
@@ -117,15 +119,14 @@ const AddressTab = ({
 
   useEffect(() => {
     async function getCountry() {
-      var parameters = `_filter=&_key=countryId`
-
       const res = await getRequest({
         extension: SystemRepository.Defaults.get,
-        parameters: parameters
+        parameters: `_filter=&_key=countryId`
       })
       const countryId = res.record.value
-
-      addressValidation.setFieldValue('countryId', parseInt(countryId))
+      if (!addressValidation.values.countryId) {
+        addressValidation.setFieldValue('countryId', parseInt(countryId))
+      }
     }
 
     getCountry()

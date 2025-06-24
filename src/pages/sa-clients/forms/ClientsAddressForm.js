@@ -5,12 +5,12 @@ import { ControlContext } from 'src/providers/ControlContext'
 import AddressForm from 'src/components/Shared/AddressForm'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 
-const ClientsAddressForm = ({ getAddressGridData, addressId, window, props, store, setStore, maxAccess }) => {
+const ClientsAddressForm = ({ getAddressGridData, recordId, window, props, store, setStore }) => {
   const [address, setAddress] = useState()
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [isDefaultShip, setIsDefaultShip] = useState(store?.record?.shipAddressId == addressId)
-  const [isDefaultBill, setIsDefaultBill] = useState(store?.record?.billAddressId == addressId)
+  const [isDefaultShip, setIsDefaultShip] = useState(store?.record?.shipAddressId == recordId)
+  const [isDefaultBill, setIsDefaultBill] = useState(store?.record?.billAddressId == recordId)
   const clientId = store.recordId
 
   const onSubmit = async obj => {
@@ -37,13 +37,13 @@ const ClientsAddressForm = ({ getAddressGridData, addressId, window, props, stor
       extension: SaleRepository.Client.set,
       record: JSON.stringify({
         ...latestRecord,
-        billAddressId: addressId
+        billAddressId: recordId
       })
     })
 
     setStore(prevStore => ({
       ...prevStore,
-      record: { ...latestRecord, billAddressId: addressId }
+      record: { ...latestRecord, billAddressId: recordId }
     }))
     setIsDefaultBill(true)
     toast.success(platformLabels.Updated)
@@ -55,13 +55,13 @@ const ClientsAddressForm = ({ getAddressGridData, addressId, window, props, stor
       extension: SaleRepository.Client.set,
       record: JSON.stringify({
         ...latestRecord,
-        shipAddressId: addressId
+        shipAddressId: recordId
       })
     })
 
     setStore(prevStore => ({
       ...prevStore,
-      record: { ...latestRecord, shipAddressId: addressId }
+      record: { ...latestRecord, shipAddressId: recordId }
     }))
     setIsDefaultShip(true)
     toast.success(platformLabels.Updated)
@@ -81,17 +81,17 @@ const ClientsAddressForm = ({ getAddressGridData, addressId, window, props, stor
       key: 'DefaultBilling',
       condition: true,
       onClick: setDefaultBilling,
-      disabled: !addressId || isDefaultBill
+      disabled: !recordId || isDefaultBill
     },
     {
       key: 'DefaultShipping',
       condition: true,
       onClick: setDefaultShipping,
-      disabled: !addressId || isDefaultShip
+      disabled: !recordId || isDefaultShip
     }
   ]
 
-  return <AddressForm {...{ ...props, address, setAddress, recordId: addressId, onSubmit, actions }} />
+  return <AddressForm {...{ ...props, address, setAddress, recordId, onSubmit, actions }} />
 }
 
 export default ClientsAddressForm

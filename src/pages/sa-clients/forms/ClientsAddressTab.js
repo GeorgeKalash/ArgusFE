@@ -56,7 +56,7 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
     stack({
       Component: ClientsAddressForm,
       props: {
-        addressId: recordId,
+        recordId,
         store,
         setStore,
         getAddressGridData
