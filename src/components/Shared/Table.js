@@ -45,7 +45,6 @@ const Table = ({
   selectionMode = 'row',
   rowDragManaged = false,
   onRowDragEnd = false,
-  disableColumnControls = false,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -64,6 +63,7 @@ const Table = ({
   const hasRowId = gridData?.list?.[0]?.id
   const storeName = 'tableSettings'
   const gridRef = useRef(null)
+  const [hoveredTable, setHoveredTable] = useState(false)
 
   const columns = props?.columns
     .filter(
@@ -314,11 +314,9 @@ const Table = ({
               {platformLabels.Of} {totalRecords}
             </Box>
             <Box>
-              {!disableColumnControls && (
-                <IconButton onClick={onReset}>
-                  <CachedIcon />
-                </IconButton>
-              )}
+              <IconButton onClick={onReset}>
+                <CachedIcon />
+              </IconButton>
             </Box>
           </Box>
         )
@@ -743,7 +741,7 @@ const Table = ({
   })
 
   const onColumnMoved = params => {
-    if (!disableColumnControls && params.columnApi && tableName && params.source != 'gridOptionsChanged') {
+    if (params.columnApi && tableName && params.source != 'gridOptionsChanged') {
       const columnState = params.columnApi.getColumnState()
       saveToDB(storeName, tableName, columnState)
 
@@ -752,7 +750,7 @@ const Table = ({
   }
 
   const onColumnResized = params => {
-    if (!disableColumnControls && tableName && params?.source === 'uiColumnResized') {
+    if (tableName && params?.source === 'uiColumnResized') {
       const columnState = params.columnApi.getColumnState()
 
       saveToDB(storeName, tableName, columnState)
@@ -761,7 +759,7 @@ const Table = ({
   }
 
   const onSortChanged = params => {
-    if (!disableColumnControls && params.columnApi && tableName && params.source == 'uiColumnSorted') {
+    if (params.columnApi && tableName && params.source == 'uiColumnSorted') {
       const columnState = params.columnApi.getColumnState()
 
       saveToDB(storeName, tableName, columnState)
@@ -801,17 +799,36 @@ const Table = ({
     return (a.sortColumn ?? 0) - (b.sortColumn ?? 0)
   })
 
+  const hoverTimeoutRef = useRef(null)
+
+  const handleMouseEnter = () => {
+    if (!pagination)
+      hoverTimeoutRef.current = setTimeout(() => {
+        setHoveredTable(true)
+      }, 600)
+  }
+
+  const handleMouseLeave = () => {
+    if (!pagination) {
+      clearTimeout(hoverTimeoutRef.current)
+      setHoveredTable(false)
+    }
+  }
+
   return (
     <VertLayout>
       <Grow>
         <Box
           ref={gridRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           className='ag-theme-alpine'
           style={{
             flex: !props.maxHeight && !props.height && 1,
             width: '1000px !important',
             height: props?.maxHeight ? height : props?.height || 'auto',
-            maxHeight: props?.maxHeight || 'auto'
+            maxHeight: props?.maxHeight || 'auto',
+            position: 'relative'
           }}
           sx={{
             '.ag-header': {
@@ -830,6 +847,13 @@ const Table = ({
             }
           }}
         >
+          {hoveredTable && !pagination && (
+            <Box position='absolute' top={0} right={0} zIndex={9999} boxShadow={3} borderRadius={1} bgcolor='white'>
+              <IconButton size='small' onClick={onReset}>
+                <CachedIcon fontSize='small' />
+              </IconButton>
+            </Box>
+          )}
           <AgGridReact
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
@@ -853,20 +877,10 @@ const Table = ({
           />
         </Box>
       </Grow>
-      {pagination ? (
+      {pagination && (
         <Fixed>
           <CustomPagination />
         </Fixed>
-      ) : (
-        !disableColumnControls && (
-          <Fixed>
-            <Box display='flex' justifyContent='flex-end'>
-              <IconButton onClick={onReset}>
-                <CachedIcon />
-              </IconButton>
-            </Box>
-          </Fixed>
-        )
       )}
     </VertLayout>
   )
