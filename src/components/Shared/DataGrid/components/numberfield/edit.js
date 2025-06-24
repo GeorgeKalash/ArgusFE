@@ -36,6 +36,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
       hasBorder={false}
       iconMapIndex='1'
       onChange={e => {
+        if (isNaN(Number(e.target.value))) return
         typing.current = true
         update({
           id,

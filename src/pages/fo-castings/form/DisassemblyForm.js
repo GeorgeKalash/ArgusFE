@@ -103,13 +103,9 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore }) 
       component: 'numberfield',
       label: labels.weight,
       name: 'weight',
-      updateOn: 'blur',
       props: {
         maxLength: 12,
         decimals: 4
-      },
-      async onChange({ row: { update, newRow } }) {
-        update({ weight: newRow?.weight || 0 })
       }
     }
   ]
