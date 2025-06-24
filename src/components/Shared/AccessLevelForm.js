@@ -23,6 +23,7 @@ export default function AccessLevelForm({ labels, maxAccess, data, invalidate, m
         edit: false,
         del: false,
         close: false,
+        reopen: false,
         post: false,
         unpost: false
       }
@@ -113,6 +114,15 @@ export default function AccessLevelForm({ labels, maxAccess, data, invalidate, m
               value={formik.values?.accessFlags?.close}
               onChange={event => formik.setFieldValue('accessFlags.close', event.target.checked)}
               label={labels.close}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomCheckBox
+              name='accessFlags.reopen'
+              value={formik.values?.accessFlags?.reopen}
+              onChange={event => formik.setFieldValue('accessFlags.reopen', event.target.checked)}
+              label={labels.reopen}
               maxAccess={maxAccess}
             />
           </Grid>

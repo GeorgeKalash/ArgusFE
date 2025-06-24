@@ -30,6 +30,7 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
         edit: false,
         del: false,
         close: false,
+        reopen: false,
         post: false,
         unpost: false
       }
@@ -126,10 +127,28 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
             </Grid>
             <Grid item xs={6}>
               <CustomCheckBox
+                name='accessFlags.close'
+                value={formik.values?.accessFlags?.close}
+                onChange={event => formik.setFieldValue('accessFlags.close', event.target.checked)}
+                label={labels.close}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomCheckBox
                 name='accessFlags.add'
                 value={formik.values?.accessFlags?.add}
                 onChange={event => formik.setFieldValue('accessFlags.add', event.target.checked)}
                 label={labels.add}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomCheckBox
+                name='accessFlags.reopen'
+                value={formik.values?.accessFlags?.reopen}
+                onChange={event => formik.setFieldValue('accessFlags.reopen', event.target.checked)}
+                label={labels.reopen}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -144,28 +163,19 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
             </Grid>
             <Grid item xs={6}>
               <CustomCheckBox
-                name='del'
-                value={formik.values?.accessFlags?.del}
-                onChange={event => formik.setFieldValue('accessFlags.del', event.target.checked)}
-                label={labels.del}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomCheckBox
-                name='accessFlags.close'
-                value={formik.values?.accessFlags?.close}
-                onChange={event => formik.setFieldValue('accessFlags.close', event.target.checked)}
-                label={labels.close}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomCheckBox
                 name='accessFlags.post'
                 value={formik.values?.accessFlags?.post}
                 onChange={event => formik.setFieldValue('accessFlags.post', event.target.checked)}
                 label={labels.post}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomCheckBox
+                name='del'
+                value={formik.values?.accessFlags?.del}
+                onChange={event => formik.setFieldValue('accessFlags.del', event.target.checked)}
+                label={labels.del}
                 maxAccess={maxAccess}
               />
             </Grid>
