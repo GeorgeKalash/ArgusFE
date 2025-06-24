@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useRef } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -29,6 +29,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const imageUploadRef = useRef(null)
+  const [imageSource, setImageSource] = useState(null)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JTCheckOut,
@@ -104,6 +105,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
       extension: ManufacturingRepository.JobTransfer.get2,
       parameters: `_recordId=${recordId}`
     }).then(async res => {
+      imageUploadRef.current.value = res?.record?.transfer?.jobId
       formik.setValues({
         ...formik.values,
         recordId: res?.record?.transfer?.recordId || null,
@@ -113,13 +115,16 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         },
         categorySummary: res?.record?.categorySummary || []
       })
-
-      imageUploadRef.current.value = res?.record?.transfer?.jobId
     })
   }
 
   useEffect(() => {
     ;(async function () {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=mf_jo_pic_source`
+      })
+      setImageSource(res?.record?.value || 3)
       recordId && (await getData(recordId))
     })()
   }, [])
@@ -440,7 +445,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         label={labels.qty}
                         value={formik?.values?.transfer.qty}
                         maxAccess
-                        decimalScale={3}
+                        decimalScale={2}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -524,16 +529,31 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                 <Grid item xs={12}>
                   <ImageUpload
                     ref={imageUploadRef}
-                    resourceId={ResourceIds.MFJobOrders}
+                    resourceId={
+                      imageSource == 1
+                        ? ResourceIds.Design
+                        : imageSource == 2
+                        ? ResourceIds.Item
+                        : imageSource == 3
+                        ? ResourceIds.MFJobOrders
+                        : null
+                    }
                     seqNo={0}
-                    recordId={formik.values.transfer.jobId}
-                    rerender={formik.values.transfer.jobId}
-                    customWidth={320}
-                    customHeight={180}
+                    rerender={
+                      imageSource == 1
+                        ? formik.values.transfer.designId
+                        : imageSource == 2
+                        ? formik.values.transfer.itemId
+                        : imageSource == 3
+                        ? formik.values.transfer.recordId
+                        : null
+                    }
+                    customWidth={370}
+                    customHeight={240}
                     disabled
                   />
                 </Grid>
-                <Grid item xs={12} height={122}></Grid>
+                <Grid item xs={12} height={62}></Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='transfer.totalQty'

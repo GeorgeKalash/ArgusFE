@@ -62,6 +62,11 @@ const JTCheckout = () => {
 
   const columns = [
     {
+      field: 'dtName',
+      headerName: labels.docType,
+      flex: 1
+    },
+    {
       field: 'reference',
       headerName: labels.reference,
       flex: 1
@@ -83,11 +88,6 @@ const JTCheckout = () => {
       flex: 1
     },
     {
-      field: 'itemName',
-      headerName: labels.item,
-      flex: 1
-    },
-    {
       field: 'fromWCName',
       headerName: labels.fromWorkCenter,
       flex: 1
@@ -98,25 +98,20 @@ const JTCheckout = () => {
       flex: 1
     },
     {
-      field: 'qty',
-      headerName: labels.qty,
-      flex: 1,
-      type: 'number'
-    },
-    {
       field: 'pcs',
       headerName: labels.pieces,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
-      flex: 1
+      field: 'qty',
+      headerName: labels.qty,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'wipName',
-      headerName: labels.wip,
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     }
   ]
