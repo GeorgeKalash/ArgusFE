@@ -1,3 +1,4 @@
+
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
@@ -497,7 +498,11 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     required
                     valueField='recordId'
                     readOnly={isClosed}
-                    displayField={'reference'}
+                    displayField={['reference', 'lineName']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'lineName', value: 'Production Line' }
+                    ]}
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
