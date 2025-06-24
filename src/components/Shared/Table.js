@@ -55,7 +55,7 @@ const Table = ({
   const [startAt, setStartAt] = useState(0)
   const { languageId } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
-  const maxAccess = props?.maxAccess && props?.maxAccess.record.maxAccess
+  const maxAccess = props?.maxAccess && props?.maxAccess.record.accessFlags
   const columnsAccess = props?.maxAccess && props?.maxAccess.record.controls
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
@@ -644,7 +644,11 @@ const Table = ({
   ]
 
   if (props?.onEdit || props?.onDelete) {
-    const deleteBtnVisible = maxAccess ? props?.onDelete && maxAccess > TrxType.EDIT : props?.onDelete ? true : false
+    const deleteBtnVisible = maxAccess
+      ? props?.onDelete && maxAccess[accessMap[TrxType.DEL]]
+      : props?.onDelete
+      ? true
+      : false
 
     if (!columnDefs?.some(column => column.field === 'actions'))
       columnDefs?.push({

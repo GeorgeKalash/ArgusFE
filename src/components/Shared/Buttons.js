@@ -1,3 +1,5 @@
+import { accessMap, TrxType } from 'src/resources/AccessLevels'
+
 export const getButtons = platformLabels => [
   {
     key: 'Clear',
@@ -149,7 +151,8 @@ export const getButtons = platformLabels => [
     color: 'transparent',
     image: 'close.png',
     border: '1px solid #01a437',
-    main: false
+    main: false,
+    access: accessMap[TrxType.CLOSE]
   },
   {
     key: 'Reopen',
@@ -157,7 +160,8 @@ export const getButtons = platformLabels => [
     color: 'transparent',
     image: 'reopen.png',
     border: '1px solid #000000',
-    main: false
+    main: false,
+    access: accessMap[TrxType.REOPEN]
   },
   {
     key: 'Approval',
@@ -512,14 +516,16 @@ export const getButtons = platformLabels => [
     label: platformLabels.Locked,
     color: '#231f20',
     image: 'lock.png',
-    main: false
+    main: false,
+    access: accessMap[TrxType.POST]
   },
   {
     key: 'Unlocked',
     label: platformLabels.Unlocked,
     color: '#231f20',
     image: 'unlock.png',
-    main: false
+    main: false,
+    access: accessMap[TrxType.UNPOST]
   },
   {
     key: 'Ok',
