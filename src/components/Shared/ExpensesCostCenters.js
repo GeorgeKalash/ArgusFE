@@ -41,14 +41,16 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
 
   const columns = [
     {
-      component: 'resourcelookup',
+      component: 'resourcecombobox',
       label: labels.costCenter,
-      name: 'reference',
+      name: 'ccId',
       props: {
-        valueField: 'reference',
+        endpointId: GeneralLedgerRepository.CostCenter.qry,
+        parameters: `_params=&_startAt=0&_pageSize=1000&`,
+        valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 2,
-        endpointId: GeneralLedgerRepository.CostCenter.snapshot,
+        displayFieldWidth: 1.5,
+        readOnly,
         mapping: [
           { from: 'recordId', to: 'ccId' },
           { from: 'name', to: 'ccName' },
@@ -58,10 +60,8 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name', grid: 3 },
-          { key: 'ccgName', value: 'Group Name' },
-        ],
-        minChars: 2,
-        readOnly
+          { key: 'ccgName', value: 'Group Name' }
+        ]
       }
     },
     {
@@ -69,6 +69,14 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
       label: labels.name,
       name: 'ccName',
       flex: 2,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.groupName,
+      name: 'ccgName',
       props: {
         readOnly: true
       }
