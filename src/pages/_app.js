@@ -173,11 +173,17 @@ const App = props => {
                                                 <CommonProvider
                                                   key={typeof window !== 'undefined' ? window.location.pathname : ''}
                                                 >
-                                                  <WindowProvider
+                                                  <ControlProvider
                                                     key={typeof window !== 'undefined' ? window.location.pathname : ''}
                                                   >
-                                                    <Component {...pageProps} />
-                                                  </WindowProvider>
+                                                    <WindowProvider
+                                                      key={
+                                                        typeof window !== 'undefined' ? window.location.pathname : ''
+                                                      }
+                                                    >
+                                                      <Component {...pageProps} />
+                                                    </WindowProvider>
+                                                  </ControlProvider>
                                                 </CommonProvider>
                                               </RequestsProvider>
                                             </ErrorProvider>
