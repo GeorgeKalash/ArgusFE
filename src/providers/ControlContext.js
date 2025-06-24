@@ -169,10 +169,12 @@ const ControlProvider = ({ children }) => {
         extension: KVSRepository.getLabels,
         parameters: parameters
       }).then(res => {
-        if (cache && !labels?.[resourceId]) {
-          addLabels(resourceId, res.list)
+        if (res?.list) {
+          if (cache && !labels?.[resourceId]) {
+            addLabels(resourceId, res.list)
+          }
+          callback(res.list)
         }
-        callback(res.list)
       })
     }
   }
@@ -188,10 +190,12 @@ const ControlProvider = ({ children }) => {
         extension: AccessControlRepository.maxAccess,
         parameters: parameters
       }).then(res => {
-        if (cache && !access?.[resourceId]) {
-          addAccess(resourceId, res)
+        if (res?.record) {
+          if (cache && !access?.[resourceId]) {
+            addAccess(resourceId, res)
+          }
+          callback(res)
         }
-        callback(res)
       })
     }
   }
