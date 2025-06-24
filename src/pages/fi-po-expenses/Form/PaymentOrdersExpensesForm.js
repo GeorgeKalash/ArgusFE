@@ -99,7 +99,6 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
       currencyId: yup.number().required(),
       date: yup.date().required(),
       paymentMethod: yup.number().required(),
-      amount: yup.number().required(),
       expenses: yup
         .array()
         .of(
@@ -425,7 +424,7 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
 
     formik.setFieldValue('vatPct', parseInt(res.record.value) ?? 0)
 
-    return vatPctValue
+    return parseInt(res.record.value) ?? 0
   }
 
   const columns = [
@@ -816,12 +815,11 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
                 <Grid item xs={6}>
                   <CustomNumberField
                     name='amount'
-                    required
                     label={labels.amount}
                     maxLength={'10'}
                     decimalScale={2}
                     readOnly
-                    value={formik.values.amount}
+                    value={totalAmount}
                     maxAccess={maxAccess}
                     onChange={async e => {
                       const updatedRateRow = getRate({
