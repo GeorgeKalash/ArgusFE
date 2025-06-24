@@ -24,7 +24,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function MaterialsForm({ labels, access, recordId, wsId, values, jobId }) {
+export default function MaterialsForm({ labels, access, recordId, wsId, values }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const functionId = SystemFunction.IssueOfMaterial
@@ -109,9 +109,6 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
       if (!obj.recordId) {
         formik.setFieldValue('recordId', res.recordId)
       }
-      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-      invalidate()
-
       const dimensionRecords = []
       for (const item of obj.items) {
         const { seqNo, dim1Id, dim1, dim2, dim2Id, dimension1, dimension2 } = item
@@ -141,6 +138,9 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
           record: JSON.stringify(record)
         })
       }
+
+      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+      invalidate()
 
       getData(res.recordId)
     }
