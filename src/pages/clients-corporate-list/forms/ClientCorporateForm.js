@@ -31,38 +31,36 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
   const { platformLabels } = useContext(ControlContext)
   const [formikSettings, setFormik] = useState({})
 
-  const [initialValues, setInitialData] = useState({
-    //ClientCorporate
-    clientId: null,
-    lgsId: null,
-    industry: null,
-    activityId: null,
-    capital: null,
-    trading: false,
-    outward: false,
-    inward: false,
-
-    //clientMaster
-    category: null,
-    reference: null,
-    name: null,
-    flName: null,
-    keyword: null,
-    nationalityId: null,
-    expiryDate: null,
-    addressId: null,
-    category: null,
-    createdDate: null,
-    status: -1,
-    addressId: null,
-    plantId: null,
-    cellPhone: null,
-    cellPhoneRepeat: null,
-    otp: null
-  })
-
   const { formik } = useForm({
-    initialValues,
+    initialValues: {
+      //ClientCorporate
+      clientId: null,
+      lgsId: null,
+      industry: null,
+      activityId: null,
+      capital: null,
+      trading: false,
+      outward: false,
+      inward: false,
+
+      //clientMaster
+      category: null,
+      reference: null,
+      name: null,
+      flName: null,
+      keyword: null,
+      nationalityId: null,
+      expiryDate: null,
+      addressId: null,
+      category: null,
+      createdDate: null,
+      status: -1,
+      addressId: null,
+      plantId: null,
+      cellPhone: null,
+      cellPhoneRepeat: null,
+      otp: null
+    },
     maxAccess: formikSettings.maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -77,8 +75,8 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
       industry: yup.string().required(),
       activityId: yup.number().required()
     }),
-    onSubmit: values => {
-      postRtDefault(values)
+    onSubmit: async values => {
+      await postRtDefault(values)
     }
   })
 
@@ -140,23 +138,25 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
       clientCorporate: obj1,
       address: obj3
     }
-    postRequest({
+
+    const res = await postRequest({
       extension: CTCLRepository.ClientCorporate.set2,
       record: JSON.stringify(data)
-    }).then(res => {
-      toast.success(platformLabels.Submit)
-      getClient(res.recordId)
     })
+    toast.success(platformLabels.Submit)
+    await getClient(res.recordId)
   }
 
-  async function getClient(_recordId) {
-    if (_recordId) {
+  async function getClient(recordId) {
+    if (recordId) {
       const res = await getRequest({
         extension: CTCLRepository.ClientCorporate.get,
-        parameters: `_clientId=${_recordId}`
+        parameters: `_clientId=${recordId}`
       })
       const obj = res?.record
-      setInitialData({
+      console.log(obj)
+
+      formik.setValues({
         ...obj.clientCorporate,
         ...obj.addressView,
         ...obj.clientMaster,
