@@ -34,7 +34,7 @@ const PaymentOrdersExpenses = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FinancialRepository.PaymentOrders.snapshot,
+        extension: FinancialRepository.PaymentOrders.snapshot2,
         parameters: `_filter=${filters.qry}`
       })
     } else {

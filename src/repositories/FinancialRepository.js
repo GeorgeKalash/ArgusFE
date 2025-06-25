@@ -259,6 +259,7 @@ export const FinancialRepository = {
     page2: service + 'page2PO',
     page3: service + 'page3PO',
     snapshot: service + 'snapshotPO',
+    snapshot2: service + 'snapshot2PO',
     cancel: service + 'cancelPO',
     close: service + 'closePO',
     reopen: service + 'reopenPO'
