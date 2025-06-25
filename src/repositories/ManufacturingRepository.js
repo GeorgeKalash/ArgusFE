@@ -373,5 +373,9 @@ export const ManufacturingRepository = {
   CostGroupOverhead: {
     set2: service + 'set2CGV',
     qry: service + 'qryCGV'
+  },
+  IssueOfMaterialDimension: {
+    set: service + 'setIMD',
+    qry: service + 'qryIMD'
   }
 }
