@@ -154,6 +154,6 @@ const AccessLevelForm = ({ labels, maxAccess, data, invalidate, moduleId, resour
 }
 
 AccessLevelForm.width = 450
-AccessLevelForm.height = 200
+AccessLevelForm.height = 300
 
 export default AccessLevelForm

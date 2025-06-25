@@ -59,14 +59,16 @@ export const getButtons = platformLabels => [
     label: platformLabels.Post,
     color: '#231f20',
     image: 'lock.png',
-    main: false
+    main: false,
+    access: accessMap[TrxType.POST]
   },
   {
     key: 'Unpost',
     label: platformLabels.Unpost,
     color: '#231f20',
     image: 'unlock.png',
-    main: false
+    main: false,
+    access: accessMap[TrxType.UNPOST]
   },
   {
     key: 'Bulk',
@@ -419,14 +421,16 @@ export const getButtons = platformLabels => [
     label: platformLabels.Lock,
     color: '#231f20',
     image: 'lock.png',
-    main: false
+    main: false,
+    access: accessMap[TrxType.POST]
   },
   {
     key: 'Unlock',
     label: platformLabels.Unlock,
     color: '#231f20',
     image: 'unlock.png',
-    main: false
+    main: false,
+    access: accessMap[TrxType.UNPOST]
   },
   {
     key: 'Aging',

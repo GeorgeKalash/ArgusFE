@@ -198,5 +198,5 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
   )
 }
 
-ResourceGlobalForm.width = 450
-ResourceGlobalForm.height = 300
+ResourceGlobalForm.width = 700
+ResourceGlobalForm.height = 400
