@@ -530,7 +530,7 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
       previewReport={editMode}
       actions={actions}
       functionId={SystemFunction.PaymentOrder}
-      disabledSubmit={isCancelled}
+      disabledSubmit={isCancelled || isClosed}
     >
       <VertLayout>
         <Fixed>
