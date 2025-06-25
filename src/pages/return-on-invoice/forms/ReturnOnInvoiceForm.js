@@ -795,9 +795,12 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     }
   ]
 
-  async function fillForm(retHeader, retItems, dtInfo, clientDiscount) {
+  async function fillForm(retHeader, retItems, dtInfo, clientDiscount, serialsList) {
     const billAdd = await getAddress(retHeader?.record?.billAddressId)
 
+    const serials = (serialsList || []).map((item, index) => {
+      return { ...item, id: index + 1 }
+    })
     retHeader?.record?.tdType == 1 || retHeader?.record?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
@@ -818,6 +821,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
                 returnNowQty: parseFloat(item.qty).toFixed(2),
                 taxDetails: taxDetailsResponse,
+                serials,
                 isEditMode: true
               }
             })
@@ -1107,9 +1111,15 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     const retItems = await getRetailInvoiceItems(recordId)
     const dtInfo = await onChangeDtId(retHeader.record.dtId)
     const clientDiscount = await getClientInfo(retHeader.record.clientId)
-    await fillForm(retHeader, retItems, dtInfo, clientDiscount)
+    const serialsList = await getReturnSerials(recordId)
+    await fillForm(retHeader, retItems, dtInfo, clientDiscount, serialsList?.list)
   }
-
+  async function getReturnSerials(retId) {
+    return await getRequest({
+      extension: SaleRepository.ReturnSerial.qry,
+      parameters: `_returnId=${retId}&_seqNo=0`
+    })
+  }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
       formik.setFieldValue(key, value)
