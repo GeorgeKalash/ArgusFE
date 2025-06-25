@@ -24,7 +24,8 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
 
   const conditions = {
     itemId: row => row?.itemId,
-    pcs: row => row?.pcs
+    size: row => row?.size,
+    pcs: row => row?.pcs < 32767
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
@@ -33,20 +34,19 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
       items: [{ id: 1 }]
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       items: yup.array().of(schema)
     }),
     onSubmit: async values => {
       const updatedRows = values?.items
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         .map(({ id, itemCategoryName, rawCategoryName, itemCategoryRef, rawCategoryRef, ...itemDetails }, index) => {
           return {
             ...itemDetails,
             seqNo: index + 1
           }
         })
-        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
 
       await postRequest({
         extension: ProductModelingRepository.ModellingMaterial.set2,
@@ -64,7 +64,7 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
       name: 'itemId',
       displayFieldWidth: 2,
       props: {
-        endpointId: InventoryRepository.UnfinishedGoods.snapshot,
+        endpointId: InventoryRepository.Materials.snapshot,
         displayField: 'sku',
         valueField: 'recordId',
         columnsInDropDown: [
@@ -119,11 +119,6 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
       name: 'pcs',
       props: {
         maxLength: 7
-      },
-      updateOn: 'blur',
-      onChange({ row: { update, newRow } }) {
-        if (newRow.pcs > 32767) update({ pcs: 0 })
-        else update({ pcs: newRow.pcs })
       }
     },
     {

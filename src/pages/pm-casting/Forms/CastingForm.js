@@ -134,16 +134,11 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       key: 'threeDPrinting',
       condition: true,
       onClick: async () => {
-        const threeDFormLabels = await getLabels(ResourceIds.Printing)
         stack({
           Component: ThreeDPrintForm,
           props: {
-            recordId: formik.values?.threeDPId,
-            labels: threeDFormLabels
-          },
-          width: 750,
-          height: 650,
-          title: threeDFormLabels.ThreeDPrint
+            recordId: formik.values?.threeDPId
+          }
         })
       },
       disabled: !formik.values.threeDPId

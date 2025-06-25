@@ -24,10 +24,13 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import { useWindow } from 'src/windows'
 
 export default function ModellingForm({ labels, access, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+
   const { recordId } = store
   const editMode = !!recordId
 
@@ -183,16 +186,11 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       key: 'threeDPrinting',
       condition: true,
       onClick: async () => {
-        const threeDFormLabels = await getLabels(ResourceIds.Printing)
         stack({
           Component: ThreeDPrintForm,
           props: {
-            recordId: formik.values?.threeDPId,
-            labels: threeDFormLabels
-          },
-          width: 750,
-          height: 650,
-          title: threeDFormLabels.ThreeDPrint
+            recordId: formik.values?.threeDPId
+          }
         })
       },
       disabled: !formik.values.threeDPId
