@@ -331,7 +331,7 @@ const AddressTab = ({
       <FormGrid item hideonempty xs={4}>
         <CustomTextField
           name='postalCode'
-          maxLength='50'
+          maxLength='5'
           label={labels.postalCode}
           readOnly={readOnly}
           value={addressValidation.values.postalCode}
