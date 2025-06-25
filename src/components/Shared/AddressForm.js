@@ -22,7 +22,7 @@ const AddressForm = ({
   const address = isControlled ? propAddress : localAddress
   const setAddress = isControlled ? setPropAddress : setLocalAddress
 
-  useSetWindow({ title: platformLabels.address, window })
+  useSetWindow({ title: platformLabels.Address, window })
 
   function onAddressSubmit(post) {
     const data = { ...post, recordId: recordId }

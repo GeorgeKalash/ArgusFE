@@ -140,7 +140,7 @@ const AddressTab = ({
           label={labels.name}
           value={addressValidation.values.name}
           readOnly={readOnly}
-          maxLength='20'
+          maxLength='50'
           required
           onChange={addressValidation.handleChange}
           onClear={() => addressValidation.setFieldValue('name', '')}
@@ -331,6 +331,7 @@ const AddressTab = ({
       <FormGrid item hideonempty xs={4}>
         <CustomTextField
           name='postalCode'
+          maxLength='50'
           label={labels.postalCode}
           readOnly={readOnly}
           value={addressValidation.values.postalCode}
@@ -361,7 +362,7 @@ const AddressTab = ({
               label={labels.phone}
               value={addressValidation.values.phone}
               readOnly={readOnly}
-              maxLength='15'
+              maxLength='40'
               required
               phone={true}
               onChange={addressValidation.handleChange}
@@ -375,7 +376,7 @@ const AddressTab = ({
               name='phone2'
               label={labels.phone2}
               value={addressValidation.values.phone2}
-              maxLength='15'
+              maxLength='40'
               phone={true}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
@@ -405,6 +406,7 @@ const AddressTab = ({
           <FormGrid item hideonempty xs={6}>
             <CustomTextField
               name='email1'
+              maxLength='50'
               label={labels.email1}
               value={addressValidation.values.email1}
               type='email'
@@ -421,6 +423,7 @@ const AddressTab = ({
             <CustomTextField
               name='email2'
               type='email'
+              maxLength='50'
               readOnly={readOnly}
               placeholder='johndoe@email.com'
               label={labels.email2}
