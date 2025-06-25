@@ -200,20 +200,33 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         date: formatDateToApi(obj.date),
         miscAmount: obj.miscAmount || 0
       }
+      delete copy.serials
+      let updatedSerials = []
 
       if (copy.rateCalcMethod == 1) copy.baseAmount = Number(copy.amount) * copy.exRate
       else if (copy.rateCalcMethod == 2) copy.baseAmount = Number(copy.amount) / copy.exRate
 
-      const updatedRows = formik.values.items.map((itemDetails, index) => ({
-        ...itemDetails,
-        seqNo: index + 1,
-        qty: itemDetails.sku ? itemDetails.returnNowQty || itemDetails.qty : itemDetails.qty
-      }))
+      const updatedRows = formik.values.items.map((itemDetails, index) => {
+        const itemSeqNo = index + 1
+        ;(itemDetails.serials || []).forEach(serialDetails => {
+          updatedSerials.push({
+            ...serialDetails,
+            seqNo: itemSeqNo,
+            returnId: copy.recordId
+          })
+        })
+
+        return {
+          ...itemDetails,
+          seqNo: itemSeqNo,
+          qty: itemDetails.sku ? itemDetails.returnNowQty || itemDetails.qty : itemDetails.qty
+        }
+      })
 
       const itemsGridData = {
         header: copy,
         items: updatedRows,
-        serials: [],
+        serials: updatedSerials || [],
         lots: []
       }
 
@@ -821,7 +834,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
                 returnNowQty: parseFloat(item.qty).toFixed(2),
                 taxDetails: taxDetailsResponse,
-                serials,
+                serials: serials?.filter(s => s.seqNo == item.seqNo),
                 isEditMode: true
               }
             })
