@@ -27,19 +27,19 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import FieldSet from 'src/components/Shared/FieldSet'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function OutwardsReturnForm({
-  labels,
-  maxAccess: access,
-  recordId,
-  plantId,
-  dtId,
-  isOpenOutwards = false,
-  refetch
-}) {
+const OutwardsReturnForm = ({ recordId, plantId, dtId, isOpenOutwards = false, refetch, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.OutwardsReturn
+  })
+
+  useSetWindow({ title: labels.outwardsReturn, window })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsReturn,
@@ -196,10 +196,7 @@ export default function OutwardsReturnForm({
         values: formik.values,
         recordId: recId,
         functionId: SystemFunction.OutwardsReturn
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
 
@@ -695,7 +692,7 @@ export default function OutwardsReturnForm({
                       values={formik.values}
                       onChange={(event, newValue) => {
                         formik.setFieldValue('reasonId', newValue ? newValue?.recordId : '')
-                        
+
                         if (newValue?.rateStatus == '1') {
                           formik.setFieldValue('lcAmount', formik.values.amount)
                           getExRateChangeStatus(formik?.values?.amount, formik?.values?.amount)
@@ -799,3 +796,8 @@ export default function OutwardsReturnForm({
     </FormShell>
   )
 }
+
+OutwardsReturnForm.width = 1200
+OutwardsReturnForm.height = 630
+
+export default OutwardsReturnForm

@@ -357,7 +357,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           { from: 'lotCategoryId', to: 'lotCategoryId' },
           { from: 'priceType', to: 'priceType' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'isInactive', to: 'isInactive' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -372,6 +373,17 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         if (!newRow?.itemId) {
           update({
             details: false
+          })
+
+          return
+        }
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.transfers[0],
+            id: newRow.id
+          })
+          stackError({
+            message: labels.inactiveItem
           })
 
           return
@@ -528,10 +540,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
               maxAccess: access,
               checkForSiteId: true,
               updateRow
-            },
-            width: 500,
-            height: 700,
-            title: platformLabels.serials
+            }
           })
         }
       }
@@ -623,9 +632,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       props: {
         functionId: SystemFunction.MaterialTransfer,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: labels.workflow
+      }
     })
   }
 

@@ -217,10 +217,10 @@ const SaTrx = () => {
     stack({
       Component: SaleTransactionForm,
       props: {
-        labels: labels,
-        recordId: recordId,
+        labels,
+        recordId,
         access,
-        functionId: functionId,
+        functionId,
         lockRecord,
         getResourceId,
         getGLResource
@@ -230,7 +230,6 @@ const SaTrx = () => {
       title: getCorrectLabel(parseInt(functionId))
     })
   }
-
 
   async function openForm(recordId, reference, status) {
     if (recordId && status !== 3) {
@@ -246,8 +245,6 @@ const SaTrx = () => {
             Component: NormalDialog,
             props: {
               DialogText: `${platformLabels.RecordLocked} ${name}`,
-              width: 600,
-              height: 200,
               title: platformLabels.Dialog
             }
           })

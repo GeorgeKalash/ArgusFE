@@ -1,6 +1,13 @@
+import { ControlContext } from 'src/providers/ControlContext'
 import ConfirmationDialog from '../ConfirmationDialog'
+import { useContext } from 'react'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const SuccessDialog = ({ window, fullScreen, open, message }) => {
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.Success, window })
+
   return (
     <ConfirmationDialog
       open={open}
@@ -11,5 +18,8 @@ const SuccessDialog = ({ window, fullScreen, open, message }) => {
     />
   )
 }
+
+SuccessDialog.width = 450
+SuccessDialog.height = 170
 
 export default SuccessDialog

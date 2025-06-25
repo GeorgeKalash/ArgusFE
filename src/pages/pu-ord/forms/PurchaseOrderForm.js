@@ -55,6 +55,7 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { useError } from 'src/error'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function PurchaseOrderForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -130,15 +131,15 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         seqNo: null,
         componentSeqNo: null,
         itemId: null,
-        sku: null,
-        itemName: null,
+        sku: '',
+        itemName: '',
         trackingStatusId: null,
         trackingStatusName: '',
         muId: null,
         spId: null,
         qty: 0,
         baseQty: 0,
-        unitPrice: 0,
+        unitPrice: null,
         baseLaborPrice: 0,
         isMetal: false,
         metalId: null,
@@ -181,9 +182,17 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     endpointId: PurchaseRepository.PurchaseOrder.page
   })
 
+  const conditions = {
+    sku: row => row?.sku,
+    itemName: row => row?.itemName,
+    qty: row => row?.qty > 0
+  }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
+    conditionSchema: ['items'],
     initialValues: initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -193,16 +202,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         currencyId: yup.number().required(),
         vendorId: yup.number().required()
       }),
-      items: yup
-        .array()
-        .of(
-          yup.object({
-            sku: yup.string().required(),
-            itemName: yup.string().required(),
-            qty: yup.number().required().min(1)
-          })
-        )
-        .required()
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const payload = {
@@ -212,12 +212,14 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
           tdPct: obj.header.tdPct || 0,
           tdAmount: obj.header.tdAmount || 0
         },
-        items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
-          ...rest,
-          seqNo: id,
-          applyVat: isVattable,
-          deliveryDate: rest.deliveryDate ? formatDateToApi(rest.deliveryDate) : null
-        }))
+        items: obj.items
+          .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+          .map(({ id, isVattable, taxDetails, ...rest }) => ({
+            ...rest,
+            seqNo: id,
+            applyVat: isVattable,
+            deliveryDate: rest.deliveryDate ? formatDateToApi(rest.deliveryDate) : null
+          }))
       }
 
       const puTrxRes = await postRequest({
@@ -247,12 +249,10 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
 
   const editMode = !!formik.values.header.recordId
 
-  async function getFilteredMU(itemId) {
+  async function getFilteredMU(itemId, msId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-
-    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    const arrayMU = measurements?.filter(item => item.msId === msId) || []
     filteredMeasurements.current = arrayMU
   }
 
@@ -292,7 +292,8 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
-          { from: 'msId', to: 'msId' }
+          { from: 'msId', to: 'msId' },
+          { from: 'isInactive', to: 'isInactive' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -310,7 +311,18 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
 
           return
         }
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.items[0],
+            id: newRow.id
+          })
+          stackError({
+            message: labels.inactiveItem
+          })
 
+          return
+        }
+        getFilteredMU(newRow?.itemId, newRow?.msId)
         const data = await getDataRow(newRow.itemId)
         update(data)
       }
@@ -422,9 +434,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
             props: {
               itemId: row?.itemId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.CostHistory
+            }
           })
         }
       }
@@ -451,9 +461,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -531,10 +539,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       props: {
         functionId,
         recordId: formik.values.header.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -635,7 +640,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         return acc
       }, {})
 
-      if (Object.keys(touchedFieldHeader).length || Object.keys(touchedFieldItems).length) {
+      if (touchedFieldItems && (Object.keys(touchedFieldHeader).length || Object.keys(touchedFieldItems).length)) {
         formik.setTouched(
           {
             ...formik.touched,
@@ -743,7 +748,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         date: formatDateFromApi(puTrxHeader?.date),
         deliveryDate: puTrxHeader?.deliveryDate && formatDateFromApi(puTrxHeader?.deliveryDate)
       },
-      items: modifiedList
+      items: modifiedList.length > 0 ? modifiedList : formik?.initialValues?.items
     })
   }
 
@@ -1562,11 +1567,11 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
               action === 'delete' && setReCal(true)
             }}
             onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId)
+              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             value={formik?.values?.items}
             initialValues={formik.initialValues.items[0]}
-            error={formik.touched.items && formik.errors.items}
+            error={formik.errors.items}
             allowDelete={!isClosed}
             name='items'
             columns={columns}

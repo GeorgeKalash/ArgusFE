@@ -6,9 +6,14 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function SalesTrxForm({ functionId, recordId, itemId, clientId }) {
+const SalesTrxForm = ({ functionId, recordId, itemId, clientId, window }) => {
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.SalesTransactions, window })
 
   const {
     query: { data },
@@ -105,3 +110,7 @@ export default function SalesTrxForm({ functionId, recordId, itemId, clientId })
     </VertLayout>
   )
 }
+
+SalesTrxForm.width = 1200
+
+export default SalesTrxForm

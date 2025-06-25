@@ -8,6 +8,7 @@ import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const OTPAuthentication = ({ loggedUser, onClose, window, PlantSupervisors = false, values }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
@@ -22,6 +23,8 @@ const OTPAuthentication = ({ loggedUser, onClose, window, PlantSupervisors = fal
   async function showError(props) {
     if (errorModel) await errorModel.stack(props)
   }
+
+  useSetWindow({ title: platformLabels.OTPVerification, window })
 
   const checkSMS = value => {
     if (value.length > 1) {
@@ -174,5 +177,8 @@ const OTPAuthentication = ({ loggedUser, onClose, window, PlantSupervisors = fal
     </div>
   )
 }
+
+OTPAuthentication.width = 400
+OTPAuthentication.height = 400
 
 export default OTPAuthentication

@@ -23,10 +23,22 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import AccountSummary from 'src/components/Shared/AccountSummary'
+import { useWindow } from 'src/windows'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function BalanceTransferForm({ labels, access, recordId, functionId, resourceId, getGLResourceId, window }) {
+export default function BalanceTransferForm({
+  labels,
+  access,
+  recordId,
+  functionId,
+  resourceId,
+  getGLResourceId,
+  window
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.BalanceTransfer.page
@@ -79,7 +91,10 @@ export default function BalanceTransferForm({ labels, access, recordId, function
       const { fromAccountName, fromAccountRef, templateId, ...rest } = obj
 
       const response = await postRequest({
-        extension: FinancialRepository.BalanceTransfer.set,
+        extension:
+          resourceId === ResourceIds.BalanceTransferPurchase
+            ? FinancialRepository.BalanceTransferPurchases.set
+            : FinancialRepository.BalanceTransferSales.set,
         record: JSON.stringify({ ...rest, date: formatDateToApi(rest.date), toAccountId: rest.fromAccountId })
       })
 
@@ -135,7 +150,7 @@ export default function BalanceTransferForm({ labels, access, recordId, function
     })
 
     toast.success(platformLabels.Unposted)
-    refetchForm()
+    refetchForm(recordId)
     invalidate()
   }
 
@@ -190,6 +205,20 @@ export default function BalanceTransferForm({ labels, access, recordId, function
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
       disabled: !editMode
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.fromAccountId),
+            moduleId: 1
+          }
+        })
+      },
+      disabled: !formik.values.fromAccountId
     }
   ]
 

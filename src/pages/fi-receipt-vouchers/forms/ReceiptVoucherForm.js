@@ -4,7 +4,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -30,6 +30,7 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { useWindow } from 'src/windows'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
+import AccountSummary from 'src/components/Shared/AccountSummary'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -46,11 +47,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     endpointId: FinancialRepository.ReceiptVouchers.page
   })
 
-  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-    endpointId: MultiCurrencyRepository.Currency.get,
-    datasetId: ResourceIds.MultiCurrencyRate
-  })
-
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
   const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
   const defaultAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
@@ -65,14 +61,14 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       reference: '',
       accountId: null,
       date: new Date(),
-      currencyId: currencyId,
+      currencyId,
       currencyName: '',
       dtId: null,
       sptId: null,
       dgId: '',
       amount: '',
       baseAmount: '',
-      checkNo: '',
+      checkNo: null,
       notes: '',
       oDocId: '',
       printStatus: '',
@@ -97,6 +93,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       paymentMethod: yup.string().required(),
       checkNo: yup
         .string()
+        .nullable()
         .test(
           'check-no-required-if-payment-method-3',
           'Check number is required when payment method is 3.',
@@ -164,8 +161,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     stack({
       Component: MultiCurrencyRateForm,
       props: {
-        labels: _labels,
-        maxAccess: MRCMaxAccess,
+        DatasetIdAccess: ResourceIds.MCRFIReceiptVoucher,
         data,
         onOk: childFormikValues => {
           formik.setValues(prevValues => ({
@@ -173,10 +169,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
             ...childFormikValues
           }))
         }
-      },
-      width: 500,
-      height: 500,
-      title: _labels.MultiCurrencyRate
+      }
     })
   }
 
@@ -276,12 +269,20 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     }
   }
 
+  const onReset = async () => {
+    await postRequest({
+      extension: FinancialRepository.ResetGL_RV.reset,
+      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
+    })
+  }
+
   const actions = [
     {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
       datasetId: ResourceIds.GLReceiptVoucher,
+      onReset,
       disabled: !editMode
     },
 
@@ -333,6 +334,20 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       condition: isVerified,
       onClick: onVerify,
       disabled: !isPosted
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.accountId),
+            moduleId: 1
+          }
+        })
+      },
+      disabled: !formik.values.accountId
     }
   ]
 
@@ -433,10 +448,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 form={formik}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Account Ref' },
-                  { key: 'name', value: 'Name' },
+                  { key: 'name', value: 'Name', grid: 4 },
                   { key: 'keywords', value: 'Keywords' }
                 ]}
-                displayFieldWidth={2}
+                displayFieldWidth={4}
                 filter={{ isInactive: val => val !== true }}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue ? newValue.recordId : null)
@@ -451,7 +466,12 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField name='accountGroupName' label={labels.accountGroup} value={formik.values.accountGroupName} readOnly />
+              <CustomTextField
+                name='accountGroupName'
+                label={labels.accountGroup}
+                value={formik.values.accountGroupName}
+                readOnly
+              />
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
@@ -488,7 +508,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   formik.setFieldValue('cashAccountId', null)
                   formik.setFieldValue('cashAccountRef', null)
                   formik.setFieldValue('cashAccountName', null)
-                  formik.setFieldValue('checkNo', '')
+                  formik.setFieldValue('checkNo', null)
                   formik.setFieldValue('paymentMethod', newValue?.key || null)
                 }}
                 error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
@@ -503,10 +523,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
                 maxLength={30}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('checkNo', '')}
+                onClear={() => formik.setFieldValue('checkNo', null)}
                 error={formik.touched.checkNo && Boolean(formik.errors.checkNo)}
-                readOnly={formik.values.paymentMethod !== 3}
-                required={formik.values.paymentMethod === 3}
+                readOnly={formik.values.paymentMethod != 3}
+                required={formik.values.paymentMethod == 3}
               />
             </Grid>
 

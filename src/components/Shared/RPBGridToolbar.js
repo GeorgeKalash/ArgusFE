@@ -46,10 +46,7 @@ const RPBGridToolbar = ({
         reportName: reportName,
         rpbParams,
         setRpbParams
-      },
-      width: 700,
-      height: 500,
-      title: 'Report Parameters Browser'
+      }
     })
   }
 
@@ -103,7 +100,7 @@ const RPBGridToolbar = ({
             search: search
           })
       },
-      disabled: false
+      disabled: !reportName
     }
   ].filter(item => !item?.hidden)
 

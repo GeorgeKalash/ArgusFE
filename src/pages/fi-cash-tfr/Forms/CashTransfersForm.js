@@ -4,7 +4,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
@@ -52,11 +52,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
     baseAmount: '',
     dtName: null,
     notes: '',
-    fromCARef: '',
-    toCARef: '',
     statusName: '',
-    fromCAName: '',
-    toCAName: '',
     functionId: SystemFunction.CashTransfers,
     reference: '',
     dtId: null,
@@ -125,11 +121,6 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
     }
   })
 
-  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-    endpointId: MultiCurrencyRepository.Currency.get,
-    datasetId: ResourceIds.MultiCurrencyRate
-  })
-
   function getDefaultsData() {
     const myObject = {}
 
@@ -146,8 +137,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
     stack({
       Component: MultiCurrencyRateForm,
       props: {
-        labels: _labels,
-        maxAccess: MRCMaxAccess,
+        DatasetIdAccess: ResourceIds.MCRCashTransfers,
         data,
         onOk: childFormikValues => {
           formik.setValues(prevValues => ({
@@ -155,10 +145,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
             ...childFormikValues
           }))
         }
-      },
-      width: 500,
-      height: 500,
-      title: _labels.MultiCurrencyRate
+      }
     })
   }
 
@@ -393,51 +380,45 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
             </Grid>
           </Grid>
           <Grid item xs={12}>
-            <ResourceLookup
-              endpointId={CashBankRepository.CashAccount.snapshot}
-              parameters={{
-                _type: 0
-              }}
-              valueField='reference'
-              displayField='name'
+            <ResourceComboBox
+              endpointId={CashBankRepository.CashAccount.qry}
+              parameters={`_type=0`}
               name='fromCashAccountId'
-              displayFieldWidth={2}
               label={labels.from}
-              form={formik}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              values={formik.values}
               required
-              valueShow='fromCARef'
-              secondValueShow='fromCAName'
-              onChange={(event, newValue) => {
+              maxAccess={maxAccess}
+              onChange={(_, newValue) => {
                 formik.setFieldValue('fromCashAccountId', newValue?.recordId || null)
-                formik.setFieldValue('fromCARef', newValue?.reference || null)
-                formik.setFieldValue('fromCAName', newValue?.name || null)
               }}
               error={formik.touched.fromCashAccountId && Boolean(formik.errors.fromCashAccountId)}
-              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
-            <ResourceLookup
-              endpointId={CashBankRepository.CashAccount.snapshot}
-              parameters={{
-                _type: 0
-              }}
-              valueField='reference'
-              displayField='name'
+            <ResourceComboBox
+              endpointId={CashBankRepository.CashAccount.qry}
+              parameters={`_type=0`}
               name='toCashAccountId'
-              displayFieldWidth={2}
               label={labels.to}
-              form={formik}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              values={formik.values}
               required
-              valueShow='toCARef'
-              secondValueShow='toCAName'
-              onChange={(event, newValue) => {
+              maxAccess={maxAccess}
+              onChange={(_, newValue) => {
                 formik.setFieldValue('toCashAccountId', newValue?.recordId || null)
-                formik.setFieldValue('toCARef', newValue?.reference || null)
-                formik.setFieldValue('toCAName', newValue?.name || null)
               }}
               error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
-              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -447,7 +428,6 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
               label={labels.amount}
               value={formik.values.amount}
               maxAccess={maxAccess}
-              thousandSeparator={false}
               onChange={async e => {
                 formik.setFieldValue('amount', e.target.value)
 

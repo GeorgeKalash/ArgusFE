@@ -113,27 +113,25 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
-                required
-                readOnly={editMode}
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=0`}
                 name='cashAccountId'
+                readOnly={editMode}
+                required
                 label={labels.accountRef}
-                valueField='reference'
-                displayField='name'
-                valueShow='cashAccountRef'
-                secondValueShow='cashAccountName'
-                form={formik}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue?.recordId || '')
-                  formik.setFieldValue('cashAccountRef', newValue?.reference || '')
-                  formik.setFieldValue('cashAccountName', newValue?.name || '')
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
-                maxAccess={maxAccess}
               />
             </Grid>
 

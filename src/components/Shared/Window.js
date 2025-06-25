@@ -3,6 +3,7 @@ import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButt
 import ClearIcon from '@mui/icons-material/Clear'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 import MinimizeIcon from '@mui/icons-material/Minimize'
+import RefreshIcon from '@mui/icons-material/Refresh'
 import Draggable from 'react-draggable'
 import WindowToolbar from './WindowToolbar'
 import { useSettings } from 'src/@core/hooks/useSettings'
@@ -41,6 +42,7 @@ const Window = React.memo(
     draggable = true,
     expandable = true,
     closable = true,
+    refresh = true,
     Title,
     nextToTitle,
     onSave,
@@ -175,6 +177,17 @@ const Window = React.memo(
                     >
                       <MinimizeIcon />
                     </IconButton>
+                    {refresh && (
+                      <IconButton
+                        tabIndex={-1}
+                        edge='end'
+                        onClick={props?.onRefresh}
+                        aria-label='refresh'
+                        sx={{ color: 'white !important' }}
+                      >
+                        <RefreshIcon />
+                      </IconButton>
+                    )}
                     {expandable && !minimized && (
                       <IconButton
                         tabIndex={-1}

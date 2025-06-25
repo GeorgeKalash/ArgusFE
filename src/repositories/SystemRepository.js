@@ -54,6 +54,7 @@ export const SystemRepository = {
   },
   Currency: {
     qry: service + 'qryCU',
+    qry2: service + 'qryCU2',
     page: service + 'pageCU',
     get: service + 'getCU',
     set: service + 'setCU',
@@ -153,9 +154,6 @@ export const SystemRepository = {
     get: service + 'getST',
     set: service + 'setST',
     del: service + 'delST'
-  },
-  Default: {
-    get: service + 'getDE'
   },
   Defaults: {
     qry: service + 'qryDE',

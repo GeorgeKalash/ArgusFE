@@ -81,13 +81,8 @@ const OutwardsOrder = () => {
       props: {
         plantId,
         userId: userData?.userId,
-        access,
-        labels: _labels,
         recordId
-      },
-      width: 1100,
-      height: 600,
-      title: _labels.OutwardsOrder
+      }
     })
   }
 
@@ -96,6 +91,12 @@ const OutwardsOrder = () => {
       field: 'reference',
       headerName: _labels.reference,
       flex: 1
+    },
+    {
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      type: 'date'
     },
     {
       field: 'countryRef',

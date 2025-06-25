@@ -33,15 +33,17 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
 import BeneficiaryListWindow from '../Windows/BeneficiaryListWindow'
 import { getStorageData } from 'src/storage/storage'
 import ReceiptVoucherForm from 'src/pages/rt-receipt-vouchers/forms/ReceiptVoucherForm'
 import CustomSwitch from 'src/components/Inputs/CustomSwitch'
 import CustomButton from 'src/components/Inputs/CustomButton'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function OutwardsForm({ labels, access, recordId, plantId, userId, dtId, window }) {
+const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -53,13 +55,16 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
   const [sysDefault, setDefault] = useState({ countryRef: '', currencyRef: '' })
 
-  const { labels: RVLabels, access: RVAccess } = useResourceQuery({
-    datasetId: ResourceIds.RemittanceReceiptVoucher
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.OutwardsOrder
   })
+
+  useSetWindow({ title: labels.OutwardsOrder, window })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsOrder,
     access,
+    objectName: 'header',
     hasDT: false
   })
 
@@ -339,6 +344,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
     const result = await refetchForm(res?.recordId)
     result?.record?.headerView?.status === 4 && openRV()
+    invalidate()
   }
 
   const onReopen = async () => {
@@ -491,8 +497,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           forceDisable: !!formik.values.recordId && !!beneficiaryId,
           onSuccess: (response, values) => HandleAddedBenificiary(response, values)
         },
-        width: 700,
-        height: 500,
         title: dispersalType === 1 ? labels.cash : labels.bank
       })
   }
@@ -626,7 +630,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       key: 'Receipt Voucher',
       condition: true,
       onClick: openRV,
-      disabled: !(formik.values.status == 4)
+      disabled: !(formik.values.header.status == 4)
     }
   ]
 
@@ -677,7 +681,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         },
         onProductSubmit
       },
-      width: 900,
+      width: 1200,
       height: 500,
       title: labels.products
     })
@@ -727,7 +731,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           }
         },
         width: 740,
-        height: 320,
+        height: 345,
         title: labels.instantCash
       })
     } else if (interfaceId === 2) {
@@ -784,15 +788,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     stack({
       Component: ReceiptVoucherForm,
       props: {
-        labels: RVLabels,
-        maxAccess: RVAccess,
         recordId: header?.receiptId,
         cashAccountId: cashAccountId,
         form: header?.receiptId ? null : header
-      },
-      width: 1200,
-      height: 500,
-      title: RVLabels.receiptVoucher
+      }
     })
   }
 
@@ -1055,7 +1054,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             beneficiaryName: '',
                             currencyId: newValue ? header.currencyId : '',
                             lcAmount: '',
-                            fcAmount: ''
+                            fcAmount: '',
+                            corRef: '',
+                            corName: '',
+                            exRate: 1,
+                            exRate2: 1,
+                            commission: 0
                           }
                         })
                       }}
@@ -1100,7 +1104,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                             currencyId: newValue?.currencyId,
                             currencyRef: newValue?.currencyRef,
                             lcAmount: '',
-                            fcAmount: ''
+                            fcAmount: '',
+                            corRef: '',
+                            corName: '',
+                            exRate: 1,
+                            exRate2: 1,
+                            commission: 0
                           }
                         })
                       }}
@@ -1597,3 +1606,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     </FormShell>
   )
 }
+
+OutwardsForm.width = 1100
+OutwardsForm.height = 600
+
+export default OutwardsForm

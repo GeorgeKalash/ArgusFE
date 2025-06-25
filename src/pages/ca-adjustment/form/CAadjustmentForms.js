@@ -4,7 +4,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -57,7 +57,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       currencyId: parseInt(getDefaultsData()?.currencyId),
       currencyName: '',
       status: 1,
-      cashAccountId,
+      cashAccountId: cashAccountId || null,
       amount: '',
       baseAmount: '',
       exRate: 1,
@@ -111,17 +111,11 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   const editMode = !!formik.values.recordId || !!recordId
   const isPosted = formik.values.status === 3
 
-  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-    endpointId: MultiCurrencyRepository.Currency.get,
-    datasetId: ResourceIds.MultiCurrencyRate
-  })
-
   function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
       props: {
-        labels: _labels,
-        maxAccess: MRCMaxAccess,
+        DatasetIdAccess: ResourceIds.MCRIncreaseDecreaseAdj,
         data,
         onOk: childFormikValues => {
           formik.setValues(prevValues => ({
@@ -129,10 +123,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
             ...childFormikValues
           }))
         }
-      },
-      width: 500,
-      height: 500,
-      title: _labels.MultiCurrencyRate
+      }
     })
   }
 
@@ -166,7 +157,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
 
       const cashAccountValue = res?.record?.cashAccountId ? res?.record?.cashAccountId : cashAccountId
 
-      formik.setFieldValue('cashAccountId', cashAccountValue)
+      formik.setFieldValue('cashAccountId', cashAccountValue || null)
       getCashAccount(cashAccountValue)
 
       formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
@@ -271,9 +262,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       props: {
         functionId: formik.values.functionId,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: 'Workflow'
+      }
     })
   }
 
@@ -409,6 +398,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 <Grid item xs={8}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Currency.qry}
+                    filter={item => item.currencyType === 1}
                     name='currencyId'
                     label={labels.currency}
                     readOnly={isPosted}
@@ -442,33 +432,25 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
               </Grid>
             </Grid>
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 2
-                }}
-                readOnly={isPosted}
-                valueField='reference'
-                displayField='name'
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=2`}
                 name='cashAccountId'
-                maxAccess={maxAccess}
+                readOnly={isPosted}
                 required
                 label={labels.cashAccount}
-                form={formik}
-                valueShow='cashAccountRef'
-                secondValueShow='cashAccountName'
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('cashAccountId', newValue?.recordId)
-                    formik.setFieldValue('cashAccountRef', newValue?.reference)
-                    formik.setFieldValue('cashAccountName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('cashAccountId', null)
-                    formik.setFieldValue('cashAccountRef', null)
-                    formik.setFieldValue('cashAccountName', null)
-                  }
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
-                errorCheck={'cashAccountId'}
+                error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
               />
             </Grid>
             <Grid item xs={12}>

@@ -85,14 +85,15 @@ const ProductsWindow = ({
     {
       field: '',
       headerName: '',
-      flex: 1,
+      flex: 0.65,
       cellRenderer: params => {
         if (params.data.interfaceId === 1)
           return (
             <Button
               variant='contained'
               size='small'
-              style={{ height: 25 }}
+              disabled={!!recordId}
+              style={{ height: 25, width: 40 }}
               onClick={() =>
                 stack({
                   Component: SelectAgent,
@@ -114,8 +115,6 @@ const ProductsWindow = ({
                     labels,
                     maxAccess
                   },
-                  width: 500,
-                  height: 200,
                   title: params.data?.productName
                 })
               }
@@ -128,18 +127,19 @@ const ProductsWindow = ({
     {
       field: 'fees',
       headerName: labels.Fees,
-      flex: 1
+      flex: 0.5,
+      type: 'number'
     },
     {
       field: 'originAmount',
       headerName: labels.originAmount,
-      flex: 1,
+      flex: 0.8,
       type: { field: 'number', decimal: 2 }
     },
     {
       field: 'baseAmount',
       headerName: labels.BaseAmount,
-      flex: 1,
+      flex: 0.8,
       type: { field: 'number', decimal: 2 }
     },
     {
@@ -168,6 +168,7 @@ const ProductsWindow = ({
     <VertLayout>
       <Grow>
         <Table
+          name='products'
           columns={columns}
           gridData={gridData}
           rowId={['productId']}
@@ -177,6 +178,9 @@ const ProductsWindow = ({
           pagination={false}
           showCheckboxColumn={true}
           ChangeCheckedRow={setGridData}
+          disable={() => {
+            return !!recordId
+          }}
         />
       </Grow>
       <Fixed>

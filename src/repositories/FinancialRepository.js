@@ -148,6 +148,7 @@ export const FinancialRepository = {
     qry: service + 'qryPV',
     page: service + 'pagePV',
     page2: service + 'pagePV2',
+    page3: service + 'pagePV3',
     get: service + 'getPV',
     set2: service + 'set2PV',
     set: service + 'setPV',
@@ -225,6 +226,12 @@ export const FinancialRepository = {
     page: service + 'pageTFR',
     snapshot: service + 'snapshotTFR'
   },
+  BalanceTransferSales: {
+    set: service + 'setTFS'
+  },
+  BalanceTransferPurchases: {
+    set: service + 'setTFP'
+  },
   PaymentReasons: {
     qry: service + 'qryPR',
     get: service + 'getPR',
@@ -232,5 +239,27 @@ export const FinancialRepository = {
     set: service + 'setPR',
     page: service + 'pagePR',
     snapshot: service + 'snapshotPR'
+  },
+  PaymentOrders: {
+    get: service + 'getPO',
+    del: service + 'delPO',
+    set2: service + 'set2PO',
+    page2: service + 'page2PO',
+    snapshot: service + 'snapshotPO',
+    cancel: service + 'cancelPO',
+    close: service + 'closePO',
+    reopen: service + 'reopenPO',
+  },
+  ResetGLMemo: {
+    reset: service + 'resetGL_Memo'
+  },
+  ResetGL_MTX: {
+    reset: service + 'resetGL_MTX'
+  },
+  ResetGL_PV: {
+    reset: service + 'resetGL_PV'
+  },
+  ResetGL_RV: {
+    reset: service + 'resetGL_RV'
   }
 }

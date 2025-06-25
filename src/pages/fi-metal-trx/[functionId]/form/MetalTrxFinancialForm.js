@@ -25,6 +25,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import AccountSummary from 'src/components/Shared/AccountSummary'
+import { useWindow } from 'src/windows'
 
 export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, getGLResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -32,6 +34,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const [metal, setMetal] = useState({})
   const [allMetals, setAllMetals] = useState([])
   const filteredItems = useRef()
+  const { stack } = useWindow()
 
   const getEndpoint = {
     [SystemFunction.MetalReceiptVoucher]: FinancialRepository.MetalReceiptVoucher.set2,
@@ -118,33 +121,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         .required()
     }),
     onSubmit: async obj => {
-      const { items: originalItems, ...header } = obj
-
-      const updatedHeader = {
-        ...header,
-        qty: originalItems?.reduce((sum, item) => sum + item.qty, 0) || 0,
-        pcs: originalItems?.reduce((sum, item) => sum + item.pcs, 0) || 0
-      }
-
-      const items = originalItems?.map(item => ({
-        trxId: obj?.recordId || 0,
-        seqNo: item.id,
-        metalId: item.metalId,
-        itemId: item.itemId,
-        qty: item.qty,
-        pcs: item.pcs,
-        creditAmount: item.creditAmount,
-        purity: item.purity / 1000,
-        totalCredit: item.totalCredit,
-        trackBy: item.trackBy || 0,
-        baseSalesMetalValue: item.baseSalesMetalValue,
-        qtyOnHand: item?.qtyOnHand || 0
-      }))
-
-      const payload = {
-        header: updatedHeader,
-        items
-      }
+      const payload = getPayload(obj)
 
       const response = await postRequest({
         extension: getEndpoint[formik.values.functionId],
@@ -156,6 +133,38 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       invalidate()
     }
   })
+
+  const getPayload = (obj) => {
+    const { items: originalItems, ...header } = obj
+
+    const updatedHeader = {
+      ...header,
+      qty: originalItems?.reduce((sum, item) => sum + item.qty, 0) || 0,
+      pcs: originalItems?.reduce((sum, item) => sum + item.pcs, 0) || 0
+    }
+
+    const items = originalItems?.map(item => ({
+      trxId: obj?.recordId || 0,
+      seqNo: item.id,
+      metalId: item.metalId,
+      itemId: item.itemId,
+      qty: item.qty,
+      pcs: item.pcs,
+      creditAmount: item.creditAmount,
+      purity: item.purity / 1000,
+      totalCredit: item.totalCredit,
+      trackBy: item.trackBy || 0,
+      baseSalesMetalValue: item.baseSalesMetalValue,
+      qtyOnHand: item?.qtyOnHand || 0
+    }))
+
+    const payload = {
+      header: updatedHeader,
+      items
+    }
+
+    return payload
+  }
 
   const editMode = !!formik.values?.recordId
   const isPosted = formik.values.status === 3
@@ -452,6 +461,14 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     }
   }
 
+  const onReset = async () => {
+    const payload = getPayload(formik.values)
+    await postRequest({
+      extension: FinancialRepository.ResetGL_MTX.reset,
+      record: JSON.stringify(payload)
+    })
+  }
+
   const actions = [
     {
       key: 'Locked',
@@ -477,6 +494,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       condition: true,
       onClick: 'onClickGL',
       datasetId: getGLResourceId(functionId),
+      onReset,
       disabled: !editMode
     },
     {
@@ -490,6 +508,20 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       condition: isVerified,
       onClick: onVerify,
       disabled: !isPosted
+    },
+    {
+      key: 'AccountSummary',
+      condition: true,
+      onClick: () => {
+        stack({
+          Component: AccountSummary,
+          props: {
+            accountId: parseInt(formik.values.accountId),
+            moduleId: 1
+          }
+        })
+      },
+      disabled: !formik.values.accountId
     }
   ]
 
@@ -772,34 +804,23 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 <Grid item xs={12}></Grid>
                 <Grid item xs={12}></Grid>
                 <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={FinancialRepository.PaymentReasons.snapshot}
+                  <ResourceComboBox
+                    endpointId={FinancialRepository.PaymentReasons.qry}
                     name='paymentReasonId'
                     label={labels.paymentReason}
-                    valueField='reference'
-                    displayField='name'
-                    valueShow='paymentReasonRef'
-                    secondValueShow='paymentReasonName'
-                    errorCheck={'paymentReasonId'}
-                    form={formik}
-                    secondDisplayField={true}
-                    firstValue={formik.values.paymentReasonRef}
-                    secondValue={formik.values.paymentReasonName}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
                     columnsInDropDown={[
-                      { key: 'reference', value: 'payment Reason Ref' },
+                      { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    displayFieldWidth={3}
-                    maxAccess={maxAccess}
-                    filter={{
-                      isInactive: val => val !== true
-                    }}
                     readOnly={isPosted}
+                    values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('paymentReasonId', newValue?.recordId)
-                      formik.setFieldValue('paymentReasonRef', newValue?.reference)
-                      formik.setFieldValue('paymentReasonName', newValue?.name)
+                      formik.setFieldValue('paymentReasonId', newValue?.recordId || null)
                     }}
+                    error={formik.touched.paymentReasonId && Boolean(formik.errors.paymentReasonId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
