@@ -42,6 +42,7 @@ import CustomPhoneNumber from 'src/components/Inputs/CustomPhoneNumber'
 import { isValidPhoneNumber } from 'libphonenumber-js'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
+import AddressForm from 'src/components/Shared/AddressForm'
 
 const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) => {
   const { stack } = useWindow()
@@ -1706,25 +1707,21 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                   <Grid container spacing={2}>
                     <Grid item xs={5}>
                       <CustomButton
-                        onClick={() =>
+                        onClick={() => {
                           stack({
-                            Component: AddressFormShell,
+                            Component: AddressForm,
                             props: {
-                              readOnly: editMode && !allowEdit,
-                              allowPost: true,
-                              optional: true,
-                              labels: labels,
+                              editMode: editMode && !allowEdit ? false : true,
+                              _labels: labels,
+                              maxAccess: maxAccess,
+                              address: address,
                               setAddress: setAddress,
                               onSubmit: onAddressSubmit,
-                              address: address,
-                              maxAccess: maxAccess,
                               isCleared: false
                             },
-                            width: 800,
-                            height: 350,
                             title: labels.workAddress
                           })
-                        }
+                        }}
                         label={labels.workAddress}
                         color='primary'
                       />

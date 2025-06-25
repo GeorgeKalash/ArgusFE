@@ -4,10 +4,10 @@ import { useContext, useEffect, useState } from 'react'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import ClientsAddressForm from './ClientsAddressForm'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import AddressForm from 'src/components/Shared/AddressForm'
 
 const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
   const { recordId } = store
@@ -52,18 +52,91 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
     openForm()
   }
 
-  function openForm(recordId) {
+  async function openForm(recordId) {
+    const clientId = store.recordId
+
+    const latestRecord = await getRequest({
+      extension: SaleRepository.Client.get,
+      parameters: `_recordId=${clientId}`
+    }).then(r => r.record)
+
+    const isDefaultShip = latestRecord?.shipAddressId === recordId
+    const isDefaultBill = latestRecord?.billAddressId === recordId
+
     stack({
-      Component: ClientsAddressForm,
+      Component: AddressForm,
       props: {
         recordId,
-        store,
-        setStore,
-        getAddressGridData
-      },
-      width: 600,
-      height: 500,
-      title: labels.address
+        onSubmit: async obj => {
+          if (obj) {
+            const data = {
+              clientId,
+              address: obj,
+              addressId: obj.recordId
+            }
+
+            await postRequest({
+              extension: SaleRepository.Address.set,
+              record: JSON.stringify(data)
+            })
+            toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+            getAddressGridData(clientId)
+            window.close()
+          }
+        },
+        actions: [
+          {
+            key: 'DefaultBilling',
+            condition: true,
+            onClick: async () => {
+              const latest = await getRequest({
+                extension: SaleRepository.Client.get,
+                parameters: `_recordId=${clientId}`
+              }).then(r => r.record)
+
+              await postRequest({
+                extension: SaleRepository.Client.set,
+                record: JSON.stringify({
+                  ...latest,
+                  billAddressId: recordId
+                })
+              })
+
+              setStore(prev => ({
+                ...prev,
+                record: { ...latest, billAddressId: recordId }
+              }))
+              toast.success(platformLabels.Updated)
+            },
+            disabled: !recordId || isDefaultBill
+          },
+          {
+            key: 'DefaultShipping',
+            condition: true,
+            onClick: async () => {
+              const latest = await getRequest({
+                extension: SaleRepository.Client.get,
+                parameters: `_recordId=${clientId}`
+              }).then(r => r.record)
+
+              await postRequest({
+                extension: SaleRepository.Client.set,
+                record: JSON.stringify({
+                  ...latest,
+                  shipAddressId: recordId
+                })
+              })
+
+              setStore(prev => ({
+                ...prev,
+                record: { ...latest, shipAddressId: recordId }
+              }))
+              toast.success(platformLabels.Updated)
+            },
+            disabled: !recordId || isDefaultShip
+          }
+        ]
+      }
     })
   }
 

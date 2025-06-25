@@ -4,8 +4,8 @@ import { useContext, useEffect, useState } from 'react'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
-import VendorsAddressForm from './VendorsAddressForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import AddressForm from 'src/components/Shared/AddressForm'
 
 const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) => {
   const { recordId } = store
@@ -23,27 +23,22 @@ const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) =>
     getRequest({
       extension: PurchaseRepository.Address.qry,
       parameters: parameters
+    }).then(res => {
+      res.list = res.list.map(row => (row = row.address))
+      setAddressGridData(res)
     })
-      .then(res => {
-        res.list = res.list.map(row => (row = row.address)) //sol
-        setAddressGridData(res)
-      })
-      .catch(error => {})
   }
 
-  const delAddress = obj => {
+  const delAddress = async obj => {
     const vendorId = recordId
     obj.vendorId = vendorId
     obj.addressId = obj.recordId
-    postRequest({
+    await postRequest({
       extension: PurchaseRepository.Address.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        toast.success(platformLabels.Deleted)
-        getAddressGridData(vendorId)
-      })
-      .catch(error => {})
+    toast.success(platformLabels.Deleted)
+    getAddressGridData(vendorId)
   }
 
   function addAddress() {
@@ -52,18 +47,31 @@ const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) =>
 
   function openForm(id) {
     stack({
-      Component: VendorsAddressForm,
+      Component: AddressForm,
       props: {
-        _labels: labels,
-        maxAccess,
-        editMode,
         recordId: id,
-        vendorId: recordId,
-        getAddressGridData: getAddressGridData
-      },
-      width: 600,
-      height: 500,
-      title: labels.address
+        isCleared: false,
+        onSubmit: async obj => {
+          console.log(obj)
+
+          if (obj) {
+            const data = {
+              vendorId: vendorId,
+              address: obj,
+              addressId: obj.recordId
+            }
+
+            await postRequest({
+              extension: PurchaseRepository.Address.set,
+              record: JSON.stringify(data)
+            })
+
+            toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+            getAddressGridData(recordId)
+            window.close()
+          }
+        }
+      }
     })
   }
 

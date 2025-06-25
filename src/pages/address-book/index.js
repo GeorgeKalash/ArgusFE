@@ -9,7 +9,7 @@ import { useWindow } from 'src/windows'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import AddressBookForm from './forms/AddressBookForm'
+import AddressForm from 'src/components/Shared/AddressForm'
 
 const AddressBook = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -98,18 +98,18 @@ const AddressBook = () => {
     openForm(obj?.recordId)
   }
 
-  function openForm(id) {
+  async function openForm(recordId) {
     stack({
-      Component: AddressBookForm,
+      Component: AddressForm,
       props: {
+        recordId,
+        onSubmit: async () => {
+          invalidate()
+          window.close()
+        },
         _labels: _labels,
-        access,
-        recordId: id,
-        invalidate
-      },
-      width: 600,
-      height: 500,
-      title: _labels.address
+        access
+      }
     })
   }
 

@@ -4,8 +4,8 @@ import { useContext, useEffect, useState } from 'react'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
-import BPAddressForm from './BPAddressForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import AddressForm from 'src/components/Shared/AddressForm'
 
 const AddressMasterDataForm = ({ store, labels, editMode, ...props }) => {
   const { recordId } = store
@@ -45,18 +45,26 @@ const AddressMasterDataForm = ({ store, labels, editMode, ...props }) => {
     openForm()
   }
 
-  function openForm(recordId) {
+  async function openForm(addressId) {
     stack({
-      Component: BPAddressForm,
+      Component: AddressForm,
       props: {
-        editMode: editMode,
-        recordId: recordId,
-        bpId: recordId,
-        getAddressGridData: getAddressGridData
-      },
-      width: 600,
-      height: 500,
-      title: labels.address
+        recordId: addressId,
+        editMode,
+        onSubmit: async obj => {
+          if (obj) {
+            obj.bpId = recordId
+            await postRequest({
+              extension: BusinessPartnerRepository.BPAddress.set,
+              record: JSON.stringify(obj)
+            })
+
+            toast.success(!addressId ? platformLabels.Added : platformLabels.Edited)
+            getAddressGridData(recordId)
+            window.close()
+          }
+        }
+      }
     })
   }
 
