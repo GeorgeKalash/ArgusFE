@@ -42,5 +42,7 @@ const PopupDialog = ({ DialogText, window }) => {
     </Box>
   )
 }
+PopupDialog.width = 550
+PopupDialog.height = 250
 
 export default PopupDialog

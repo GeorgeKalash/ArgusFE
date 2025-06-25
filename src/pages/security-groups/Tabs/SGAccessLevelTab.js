@@ -100,10 +100,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
         moduleId: filters.moduleId,
         invalidate,
         resourceId: ResourceIds.SecurityGroup
-      },
-      width: 450,
-      height: 350,
-      title: labels.accessLevel
+      }
     })
   }
 
@@ -116,10 +113,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
         row: row.data,
         invalidate,
         resourceId: ResourceIds.SecurityGroup
-      },
-      width: 700,
-      height: 400,
-      title: labels.accessLevel
+      }
     })
   }
 
@@ -133,8 +127,6 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
         invalidate,
         resourceId: ResourceIds.SecurityGroup
       },
-      width: 800,
-      height: 600,
       title: labels.controlAccessLevel
     })
   }

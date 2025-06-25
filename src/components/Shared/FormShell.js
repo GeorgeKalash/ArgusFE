@@ -147,10 +147,7 @@ export default function FormShell({
               props: {
                 recordId: form.values.remittanceRecordId ?? form.values.recordId,
                 functionId: form.values.functionId ?? functionId
-              },
-              width: 1000,
-              height: 500,
-              title: platformLabels.Approvals
+              }
             })
           }
           break
@@ -161,10 +158,7 @@ export default function FormShell({
               props: {
                 recordId: form.values?.recordId,
                 functionId: functionId
-              },
-              width: 1200,
-              height: 670,
-              title: platformLabels.CashTransaction
+              }
             })
           }
           break
@@ -175,10 +169,7 @@ export default function FormShell({
               props: {
                 functionId: functionId,
                 clientId: form?.values?.header?.clientId
-              },
-              width: 600,
-              height: 450,
-              title: platformLabels.ClientSalesTransaction
+              }
             })
           }
 
@@ -190,9 +181,7 @@ export default function FormShell({
               props: {
                 recordId: form.values.recordId,
                 functionId: functionId
-              },
-              width: 700,
-              title: platformLabels.InventoryTransaction
+              }
             })
           }
 
@@ -220,10 +209,7 @@ export default function FormShell({
                 valuesPath: action.valuesPath,
                 datasetId: action.datasetId,
                 onReset: action?.onReset
-              },
-              width: 1000,
-              height: 650,
-              title: platformLabels.GeneralLedger
+              }
             })
           }
           break
@@ -234,10 +220,7 @@ export default function FormShell({
               props: {
                 formValues: form.values,
                 functionId
-              },
-              width: 1000,
-              height: 620,
-              title: platformLabels.financialTransaction
+              }
             })
           }
           break
@@ -250,9 +233,7 @@ export default function FormShell({
                 functionId: functionId,
                 itemId: 0,
                 clientId: form?.values?.header?.clientId || 0
-              },
-              width: 1200,
-              title: platformLabels.SalesTransactions
+              }
             })
           }
           break
@@ -263,20 +244,14 @@ export default function FormShell({
               props: {
                 masterId: form.values?.recordId,
                 masterSource: action?.masterSource
-              },
-              width: 800,
-              height: 500,
-              title: platformLabels.IntegrationAccount
+              }
             })
           }
           break
         case 'onClickAC':
           action.onClick = () => {
             stack({
-              Component: AccountBalance,
-              width: 1000,
-              height: 620,
-              title: platformLabels.AccountBalance
+              Component: AccountBalance
             })
           }
           break
@@ -289,10 +264,7 @@ export default function FormShell({
                 name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
                 reference: form.values.reference,
                 category: form.values.category
-              },
-              width: 900,
-              height: 600,
-              title: platformLabels.ClientRelation
+              }
             })
           }
           break
@@ -302,10 +274,7 @@ export default function FormShell({
               Component: ClientBalance,
               props: {
                 recordId: form.values?.recordId
-              },
-              width: 500,
-              height: 350,
-              title: platformLabels.ClientBalance
+              }
             })
           }
           break
@@ -318,10 +287,7 @@ export default function FormShell({
                 name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
                 reference: form.values.reference,
                 formValidation: form
-              },
-              width: 500,
-              height: 420,
-              title: platformLabels.addClientRelation
+              }
             })
           }
           break
@@ -332,10 +298,7 @@ export default function FormShell({
               props: {
                 recordId: form.values?.recordId,
                 functionId
-              },
-              width: 1000,
-              height: 620,
-              title: platformLabels.Aging
+              }
             })
           }
           break
@@ -347,9 +310,6 @@ export default function FormShell({
                 props: {
                   handleMetalClick: action?.handleMetalClick
                 },
-                width: 600,
-                height: 550,
-                title: platformLabels.Metals,
                 expandable: false
               })
             }, 5)
@@ -362,24 +322,7 @@ export default function FormShell({
               props: {
                 onSuccess: action.onSuccess
               },
-              width: 500,
-              height: 300,
-              expandable: false,
-              title: platformLabels.UnpostConfirmation
-            })
-          }
-          break
-        case 'onClickAging':
-          action.onClick = () => {
-            stack({
-              Component: Aging,
-              props: {
-                recordId: form.values?.recordId,
-                functionId
-              },
-              width: 1000,
-              height: 620,
-              title: platformLabels.Aging
+              expandable: false
             })
           }
           break
@@ -391,10 +334,7 @@ export default function FormShell({
                 recordId: form.values?.recordId,
                 resourceId,
                 functionId
-              },
-              width: 1000,
-              height: 650,
-              title: platformLabels.Attachment
+              }
             })
           }
           break
@@ -476,10 +416,7 @@ export default function FormShell({
               props: {
                 recordId: form.values?.recordId ?? form.values.clientId,
                 resourceId: resourceId
-              },
-              width: 900,
-              height: 600,
-              title: platformLabels.TransactionLog
+              }
             })
           }
           isSaved={isSaved}

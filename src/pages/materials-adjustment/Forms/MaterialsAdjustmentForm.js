@@ -288,10 +288,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
               maxAccess,
               checkForSiteId: row.qty >= 0 ? false : true,
               updateRow
-            },
-            width: 500,
-            height: 700,
-            title: platformLabels.serials
+            }
           })
         }
       }

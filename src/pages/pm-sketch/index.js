@@ -147,10 +147,7 @@ const Sketch = () => {
       props: {
         recordId,
         invalidate
-      },
-      width: 900,
-      height: 720,
-      title: labels.Sketch
+      }
     })
   }
 
