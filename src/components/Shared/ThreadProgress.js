@@ -9,6 +9,7 @@ import CustomTextArea from '../Inputs/CustomTextArea'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomTextField from '../Inputs/CustomTextField'
 import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const ProgressBarLabel = styled.span`
   font-size: 16px;
@@ -60,6 +61,8 @@ function ProgressBarComponent({ label, topLabel, width }) {
 export const ThreadProgress = ({ recordId, access, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.Progress, window })
 
   const [data, setData] = useState({
     recordId,
@@ -165,3 +168,6 @@ export const ThreadProgress = ({ recordId, access, window }) => {
     </FormShell>
   )
 }
+
+ThreadProgress.width = 500
+ThreadProgress.height = 450

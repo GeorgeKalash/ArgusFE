@@ -6,7 +6,15 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
 
-const AddressGridTab = ({ addressGridData, getAddressGridData, addAddress, delAddress, editAddress, columns }) => {
+const AddressGridTab = ({
+  addressGridData,
+  getAddressGridData,
+  addAddress,
+  delAddress,
+  editAddress,
+  maxAccess,
+  columns
+}) => {
   const { labels: labels, access } = useResourceParams({
     datasetId: ResourceIds.Address
   })

@@ -473,9 +473,6 @@ const Table = ({
         fullScreen: false,
         onConfirm: () => props?.onDelete(obj)
       },
-      width: 450,
-      height: 170,
-      title: platformLabels.Delete,
       refresh: false
     })
   }
@@ -487,9 +484,6 @@ const Table = ({
           props?.onDelete(obj)
         }
       },
-      width: 500,
-      height: 300,
-      title: platformLabels.DeleteConfirmation,
       refresh: false
     })
   }

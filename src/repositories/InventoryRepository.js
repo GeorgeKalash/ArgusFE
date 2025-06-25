@@ -334,6 +334,9 @@ export const InventoryRepository = {
     set2: service + 'set2SPF'
   },
   SerialsProfileSequences: {
-    qry: service + 'qrySPS'
+    qry: service + 'qrySPS',
+  },
+  Materials: {
+    snapshot: service + 'snapshotUF'
   }
 }
