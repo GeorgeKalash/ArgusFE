@@ -55,7 +55,7 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
       recordId: null,
       reference: '',
       accountId: '',
-      accountType: null,
+      accountType: 3,
       currencyId: parseInt(currencyId),
       paymentMethod: null,
       date: new Date(),
@@ -581,7 +581,7 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
                   <ResourceComboBox
                     datasetId={DataSets.FI_PV_GROUP_TYPE}
                     name='accountType'
-                    filter={item => item.key == 1 || item.key == 4}
+                    filter={item => item.key == 3}
                     label={labels.accountType}
                     valueField='key'
                     displayField='value'
