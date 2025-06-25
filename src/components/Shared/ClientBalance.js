@@ -9,9 +9,14 @@ import CustomNumberField from '../Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import useResourceParams from 'src/hooks/useResourceParams'
 import FormShell from './FormShell'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export const ClientBalance = ({ recordId }) => {
+export const ClientBalance = ({ recordId, window }) => {
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.ClientBalance, window })
 
   const { labels: _labels, access } = useResourceParams({
     datasetId: ResourceIds.ClientBalance
@@ -98,3 +103,6 @@ export const ClientBalance = ({ recordId }) => {
     </FormShell>
   )
 }
+
+ClientBalance.width = 500
+ClientBalance.height = 350

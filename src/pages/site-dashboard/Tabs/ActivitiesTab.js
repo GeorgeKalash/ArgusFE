@@ -46,6 +46,7 @@ const ActivitiesTab = ({ data, pagination, refetch, access, labels: _labels }) =
     <VertLayout>
       <Grow>
         <Table
+          name='activities'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

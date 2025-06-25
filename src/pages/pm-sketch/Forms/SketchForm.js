@@ -23,8 +23,9 @@ import { ProductModelingRepository } from 'src/repositories/ProductModelingRepos
 import { DataSets } from 'src/resources/DataSets'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function SketchForm({ recordId, invalidate }) {
+export default function SketchForm({ recordId, invalidate, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
@@ -33,6 +34,8 @@ export default function SketchForm({ recordId, invalidate }) {
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.Sketch
   })
+
+  useSetWindow({ title: labels?.Sketch, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: systemFunction,

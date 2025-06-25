@@ -24,6 +24,10 @@ export const ManufacturingRepository = {
     del: service + 'delLIN'
   },
   CostGroup: {
+    page: service + 'pageCG',
+    set: service + 'setCG',
+    get: service + 'getCG',
+    del: service + 'delCG',
     qry: service + 'qryCG'
   },
   WorkCenter: {
@@ -297,7 +301,8 @@ export const ManufacturingRepository = {
     set: service + 'setJCA',
     get: service + 'getJCA',
     del: service + 'delJCA',
-    page: service + 'pageJCA'
+    page: service + 'pageJCA',
+    qry: service + 'qryJCA'
   },
   DesignGroup: {
     qry: service + 'qryDEG',
@@ -364,5 +369,13 @@ export const ManufacturingRepository = {
     del: service + 'delLIT',
     qry: service + 'qryLIT',
     page: service + 'pageLIT'
+  },
+  CostGroupOverhead: {
+    set2: service + 'set2CGV',
+    qry: service + 'qryCGV'
+  },
+  IssueOfMaterialDimension: {
+    set: service + 'setIMD',
+    qry: service + 'qryIMD'
   }
 }

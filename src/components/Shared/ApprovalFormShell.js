@@ -1,6 +1,5 @@
 import { useWindow } from 'src/windows'
 import FormShell from './FormShell'
-import { Approval } from '@mui/icons-material'
 import Approvals from './Approvals'
 
 export default function ApprovalFormShell(props) {
@@ -31,9 +30,7 @@ export default function ApprovalFormShell(props) {
       props: {
         recordId: form.values.recordId,
         functionId: form.values.functionId
-      },
-      width: 1000,
-      title: 'Approvals'
+      }
     })
   }
 

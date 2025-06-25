@@ -6,7 +6,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -62,6 +62,7 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import AccountSummary from 'src/components/Shared/AccountSummary'
 import { createConditionalSchema } from 'src/lib/validation'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 export default function SaleTransactionForm({
   labels,
@@ -95,11 +96,6 @@ export default function SaleTransactionForm({
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.SalesTransaction.qry
-  })
-
-  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-    endpointId: MultiCurrencyRepository.Currency.get,
-    datasetId: ResourceIds.MultiCurrencyRate
   })
 
   const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
@@ -321,23 +317,35 @@ export default function SaleTransactionForm({
 
   const itemsUpdate = useRef(formik?.values?.items)
 
+  const getResourceMCR = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.MCRSalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.MCRSalesReturn
+      case SystemFunction.ConsignmentIn:
+        return ResourceIds.MCRClientGOCIn
+      case SystemFunction.ConsignmentOut:
+        return ResourceIds.MCRClientGOCOut
+      default:
+        return null
+    }
+  }
+
   function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
       props: {
-        labels: _labels,
-        maxAccess: MRCMaxAccess,
-        data: data,
+        DatasetIdAccess: getResourceMCR(functionId),
+        data,
         onOk: childFormikValues => {
           formik.setFieldValue('header', {
             ...formik.values.header,
             ...childFormikValues
           })
         }
-      },
-      width: 500,
-      height: 500,
-      title: _labels.MultiCurrencyRate
+      }
     })
   }
 
@@ -752,9 +760,7 @@ export default function SaleTransactionForm({
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -793,9 +799,7 @@ export default function SaleTransactionForm({
             functionId: functionId,
             itemId: row?.itemId,
             clientId: formik?.values?.header?.clientId
-          },
-          width: 1200,
-          title: platformLabels.SalesTransactions
+          }
         })
       }
     },
@@ -833,10 +837,7 @@ export default function SaleTransactionForm({
               maxAccess,
               checkForSiteId: true,
               updateRow
-            },
-            width: 500,
-            height: 700,
-            title: platformLabels.serials
+            }
           })
         }
       }
@@ -877,10 +878,7 @@ export default function SaleTransactionForm({
       props: {
         functionId: functionId,
         recordId: formik.values.header.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -914,10 +912,9 @@ export default function SaleTransactionForm({
             Component: NormalDialog,
             props: {
               DialogText: `${platformLabels.RecordLocked} ${name}`,
-              width: 600,
-              height: 200,
               title: platformLabels.Dialog
-            }
+            },
+            title: platformLabels.Dialog
           })
         }
       })
@@ -1026,10 +1023,7 @@ export default function SaleTransactionForm({
           props: {
             accountId: parseInt(formik.values.header.accountId),
             moduleId: 1
-          },
-          width: 1000,
-          height: 500,
-          title: labels.accountSummary
+          }
         })
       },
       disabled: !formik.values.header.clientId
@@ -1149,7 +1143,7 @@ export default function SaleTransactionForm({
         )}&_rateDivision=${RateDivision.SALES}`
       })
 
-      return res.record.exRate * 1000
+      return res.record?.exRate * 1000
     }
   }
 
@@ -1559,10 +1553,7 @@ export default function SaleTransactionForm({
         form: formik.values.header,
         checkedAddressId: formik.values?.header?.billAddressId,
         handleAddressValues: setAddressValues
-      },
-      width: 950,
-      height: 600,
-      title: labels.AddressFilter
+      }
     })
   }
 

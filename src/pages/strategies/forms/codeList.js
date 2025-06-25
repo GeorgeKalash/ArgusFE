@@ -92,6 +92,7 @@ const CodeList = ({ store, labels, maxAccess }) => {
       </Fixed>
       <Grow>
         <Table
+          name='code'
           columns={columns}
           gridData={data}
           rowId={['codeId']}

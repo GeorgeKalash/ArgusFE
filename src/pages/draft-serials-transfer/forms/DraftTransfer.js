@@ -383,10 +383,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
       props: {
         functionId: SystemFunction.DraftTransfer,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -400,10 +397,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
         },
         onCloseimport: fillGrids,
         maxAccess: maxAccess
-      },
-      width: 550,
-      height: 270,
-      title: platformLabels.importSerials
+      }
     })
   }
 
@@ -826,8 +820,9 @@ export default function DraftTransfer({ labels, access, recordId }) {
           <Grid container spacing={16}>
             <Grid item xs={8}>
               <Grid container>
-                <Grid item xs={12} height={125} sx={{ display: 'flex', flex: 1 }}>
+                <Grid item xs={12} height={190} sx={{ display: 'flex', flex: 1 }}>
                   <Table
+                    name='metal'
                     gridData={{ count: 1, list: formik?.values?.metalGridData }}
                     maxAccess={access}
                     columns={[
@@ -839,8 +834,9 @@ export default function DraftTransfer({ labels, access, recordId }) {
                     pagination={false}
                   />
                 </Grid>
-                <Grid item xs={12} height={125} sx={{ display: 'flex', flex: 1 }}>
+                <Grid item xs={12} height={190} sx={{ display: 'flex', flex: 1 }}>
                   <Table
+                    name='item'
                     columns={[
                       { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 1 },
                       { field: 'sku', headerName: labels.sku, flex: 1 },

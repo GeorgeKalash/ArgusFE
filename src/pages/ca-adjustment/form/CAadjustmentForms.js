@@ -4,7 +4,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -111,17 +111,11 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   const editMode = !!formik.values.recordId || !!recordId
   const isPosted = formik.values.status === 3
 
-  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-    endpointId: MultiCurrencyRepository.Currency.get,
-    datasetId: ResourceIds.MultiCurrencyRate
-  })
-
   function openMCRForm(data) {
     stack({
       Component: MultiCurrencyRateForm,
       props: {
-        labels: _labels,
-        maxAccess: MRCMaxAccess,
+        DatasetIdAccess: ResourceIds.MCRIncreaseDecreaseAdj,
         data,
         onOk: childFormikValues => {
           formik.setValues(prevValues => ({
@@ -129,10 +123,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
             ...childFormikValues
           }))
         }
-      },
-      width: 500,
-      height: 500,
-      title: _labels.MultiCurrencyRate
+      }
     })
   }
 
@@ -271,9 +262,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       props: {
         functionId: formik.values.functionId,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: 'Workflow'
+      }
     })
   }
 
@@ -409,6 +398,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 <Grid item xs={8}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Currency.qry}
+                    filter={item => item.currencyType === 1}
                     name='currencyId'
                     label={labels.currency}
                     readOnly={isPosted}

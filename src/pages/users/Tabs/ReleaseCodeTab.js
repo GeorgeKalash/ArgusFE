@@ -92,6 +92,7 @@ const ReleaseCodeTab = ({ labels, maxAccess, storeRecordId }) => {
       </Fixed>
       <Grow>
         <Table
+          name='release'
           columns={columns}
           gridData={data ? data : { list: [] }}
           rowId={['codeId', 'userId']}

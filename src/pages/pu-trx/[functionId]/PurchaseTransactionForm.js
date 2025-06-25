@@ -33,7 +33,6 @@ import {
   DIRTYFIELD_TWPG,
   DIRTYFIELD_UNIT_PRICE,
   DIRTYFIELD_MDAMOUNT,
-  DIRTYFIELD_MDTYPE,
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_PCT,
   MDTYPE_AMOUNT
@@ -57,7 +56,11 @@ import ItemPromotion from 'src/components/Shared/ItemPromotion'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import { useError } from 'src/error'
+import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
+import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { createConditionalSchema } from 'src/lib/validation'
+import CustomButton from 'src/components/Inputs/CustomButton'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 export default function PurchaseTransactionForm({
   labels,
@@ -203,10 +206,7 @@ export default function PurchaseTransactionForm({
       Component: ItemPromotion,
       props: {
         invoiceId: formik.values.header.recordId
-      },
-      width: 1330,
-      height: 720,
-      title: platformLabels.ItemPromotion
+      }
     })
   }
 
@@ -556,9 +556,7 @@ export default function PurchaseTransactionForm({
             props: {
               itemId: row?.itemId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.CostHistory
+            }
           })
         }
       }
@@ -585,9 +583,7 @@ export default function PurchaseTransactionForm({
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -661,10 +657,7 @@ export default function PurchaseTransactionForm({
       props: {
         functionId: functionId,
         recordId: formik.values.header.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -1390,10 +1383,62 @@ export default function PurchaseTransactionForm({
               maxAccess,
               checkForSiteId: row.qty >= 0 ? false : true,
               updateRow
-            },
-            width: 500,
-            height: 700,
-            title: platformLabels.serials
+            }
+          })
+        }
+      }
+    })
+  }
+
+  async function getMultiCurrencyFormData(currencyId, date) {
+    if (currencyId && date) {
+      const res = await getRequest({
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${currencyId}&_date=${formatDateForGetApI(date)}&_rateDivision=${
+          RateDivision.FINANCIALS
+        }`
+      })
+
+      const updatedRateRow = getRate({
+        amount: amount === 0 ? 0 : amount ?? formik.values.header.amount,
+        exRate: res.record?.exRate,
+        baseAmount: 0,
+        rateCalcMethod: res.record?.rateCalcMethod,
+        dirtyField: DIRTYFIELD_RATE
+      })
+
+      formik.setFieldValue('header.baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+      formik.setFieldValue('header.exRate', res.record?.exRate)
+      formik.setFieldValue('header.rateCalcMethod', res.record?.rateCalcMethod)
+      formik.setFieldValue('header.rateCalcMethodName', res.record?.rateCalcMethodName)
+      formik.setFieldValue('header.rateTypeName', res.record?.rateTypeName)
+      formik.setFieldValue('header.exchangeId', res.record?.exchangeId)
+      formik.setFieldValue('header.exchangeName', res.record?.exchangeName)
+    }
+  }
+
+  const getResourceMCR = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.MCRPurchaseInvoice
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.MCRPurchaseReturn
+      default:
+        return null
+    }
+  }
+
+  function openMCRForm(data) {
+    stack({
+      Component: MultiCurrencyRateForm,
+      props: {
+        DatasetIdAccess: getResourceMCR(functionId),
+        data,
+        onOk: childFormikValues => {
+          formik.setFieldValue('header', {
+            ...formik.values.header,
+            ...childFormikValues
           })
         }
       }
@@ -1451,7 +1496,10 @@ export default function PurchaseTransactionForm({
                 label={labels.date}
                 readOnly={isPosted}
                 value={formik?.values?.header?.date}
-                onChange={(e, newValue) => formik.setFieldValue('header.date', newValue)}
+                onChange={(e, newValue) => {
+                  formik.setFieldValue('header.date', newValue)
+                  getMultiCurrencyFormData(formik.values.header.currencyId, newValue)
+                }}
                 editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('header.date', '')}
@@ -1567,6 +1615,7 @@ export default function PurchaseTransactionForm({
                 endpointId={SystemRepository.Currency.qry}
                 name='header.currencyId'
                 label={labels.currency}
+                filter={item => item.currencyType == 1}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 readOnly={isPosted}
@@ -1577,14 +1626,23 @@ export default function PurchaseTransactionForm({
                 required
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={async (event, newValue) => {
+                  await getMultiCurrencyFormData(newValue?.recordId, formik.values.header?.date)
                   formik.setFieldValue('header.currencyId', newValue?.recordId || null)
+                  formik.setFieldValue('header.currencyName', newValue?.name)
                 }}
                 error={formik.touched?.header?.currencyId && Boolean(formik.errors?.header?.currencyId)}
               />
             </Grid>
-            <Grid item xs={2.4}></Grid>
-
+            <Grid item xs={1}>
+              <CustomButton
+                onClick={() => openMCRForm(formik.values.header)}
+                label={platformLabels.add}
+                disabled={formik.values.header.currencyId === defaultsDataState?.currencyId}
+                image={'popup.png'}
+                color='#231f20'
+              />
+            </Grid>
             <Grid item xs={4.8}>
               <ResourceLookup
                 endpointId={PurchaseRepository.Vendor.snapshot}

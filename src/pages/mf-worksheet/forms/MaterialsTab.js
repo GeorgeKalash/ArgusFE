@@ -54,6 +54,12 @@ const MaterialsTab = ({ store, labels, access }) => {
       flex: 1
     },
     {
+      field: 'qty',
+      headerName: labels.qty,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'notes',
       headerName: labels.notes,
       flex: 1
@@ -79,7 +85,7 @@ const MaterialsTab = ({ store, labels, access }) => {
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.IssueOfMaterial,
     action: openForm,
-    hasDT: false
+    hasDT: true
   })
 
   function openForm(obj) {
@@ -92,9 +98,9 @@ const MaterialsTab = ({ store, labels, access }) => {
         access,
         values
       },
-      width: 1000,
+      width: 1200,
       height: 700,
-      title: labels.Materials
+      title: labels.issueOfMaterials
     })
   }
 
@@ -102,8 +108,8 @@ const MaterialsTab = ({ store, labels, access }) => {
     openForm(obj)
   }
 
-  const add = () => {
-    proxyAction()
+  const add = async () => {
+    await proxyAction()
   }
 
   return (

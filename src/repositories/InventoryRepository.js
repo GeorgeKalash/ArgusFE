@@ -302,7 +302,10 @@ export const InventoryRepository = {
     qry: service + 'qrySMA'
   },
   Replacement: {
-    qry: service + 'qryRPL'
+    qry: service + 'qryRPL',
+    page: service + 'pageRPL',
+    set2: service + 'set2RPL',
+    del: service + 'delRPL'
   },
   Lot: {
     get: service + 'getLOT',
@@ -333,7 +336,7 @@ export const InventoryRepository = {
   SerialsProfileSequences: {
     qry: service + 'qrySPS'
   },
-  UnfinishedGoods: {
+  Materials: {
     snapshot: service + 'snapshotUF'
   }
 }
