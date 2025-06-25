@@ -10,6 +10,7 @@ const AddressForm = ({
   recordId,
   editMode,
   onSubmit,
+  window,
   actions = [],
   address: propAddress,
   setAddress: setPropAddress,
