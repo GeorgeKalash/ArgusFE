@@ -155,7 +155,6 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
     importConfig.record.fields?.map(({ name, dataType, format, ...rest }) => ({
       field: name,
       headerName: name,
-      flex: importConfig.record.fields.length < 10 ? 1 : null,
       width: 130,
       dataType,
       ...rest
