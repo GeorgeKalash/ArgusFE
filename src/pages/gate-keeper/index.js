@@ -149,8 +149,6 @@ const GateKeeper = () => {
         fullScreen: false,
         onConfirm: () => onCancel(data)
       },
-      width: 450,
-      height: 170,
       title: platformLabels.Cancel
     })
   }

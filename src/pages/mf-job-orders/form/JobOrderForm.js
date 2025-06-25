@@ -284,10 +284,7 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       props: {
         functionId: SystemFunction.JobOrder,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
   function openSerials() {

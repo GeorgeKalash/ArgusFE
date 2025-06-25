@@ -185,6 +185,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       component: 'resourcelookup',
       label: labels.design,
       name: 'designId',
+      width: 150,
       props: {
         valueField: 'recordId',
         displayField: 'reference',
@@ -212,6 +213,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       component: 'resourcelookup',
       label: labels.sku,
       name: 'sku',
+      width: 100,
       props: {
         endpointId: InventoryRepository.Item.snapshot,
         valueField: 'sku',
@@ -232,6 +234,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      width: 200,
       props: {
         readOnly: true
       }
@@ -239,12 +242,14 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     {
       component: 'date',
       name: 'deliveryDate',
+      width: 150,
       label: labels?.deliveryDate
     },
     {
       component: 'resourcelookup',
       label: labels.routing,
       name: 'routingName',
+      width: 150,
       props: {
         valueField: 'reference',
         displayField: 'reference',
@@ -265,6 +270,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       component: 'numberfield',
       name: 'itemWeight',
       label: labels.stdWeight,
+      width: 100,
       props: {
         maxLength: 12,
         decimalScale: 3
@@ -279,6 +285,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       component: 'numberfield',
       name: 'pcs',
       label: labels.ExPcs,
+      width: 100,
       props: {
         maxLength: 4,
         decimalScale: 0
@@ -292,6 +299,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     {
       component: 'numberfield',
       name: 'qty',
+      width: 100,
       label: labels.ExQty,
       props: {
         maxLength: 12,
@@ -302,6 +310,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       component: 'resourcelookup',
       label: labels.sizeRef,
       name: 'sizeName',
+      width: 100,
       props: {
         endpointId: InventoryRepository.ItemSizes.snapshot,
         displayField: 'reference',
@@ -323,6 +332,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       component: 'resourcecombobox',
       label: labels.jobCategory,
       name: 'jobCategoryId',
+      width: 150,
       props: {
         endpointId: ManufacturingRepository.JobCategory.qry,
         valueField: 'recordId',
@@ -338,6 +348,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       component: 'resourcelookup',
       label: labels.client,
       name: 'clientName',
+      width: 100,
       props: {
         endpointId: SaleRepository.Client.snapshot,
         displayField: 'reference',
@@ -358,6 +369,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     {
       component: 'textfield',
       label: labels.notes,
+      width: 200,
       name: 'notes'
     }
   ]

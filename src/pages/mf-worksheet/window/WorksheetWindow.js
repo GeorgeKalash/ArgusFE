@@ -13,7 +13,7 @@ const WorksheetWindow = ({ recordId, labels, maxAccess, window }) => {
     values: null
   })
 
-  const tabs = [{ label: labels.Worksheet }, { label: labels.Materials, disabled: !store.recordId }]
+  const tabs = [{ label: labels.Worksheet }, { label: labels.issueOfMaterials, disabled: !store.recordId }]
 
   return (
     <>

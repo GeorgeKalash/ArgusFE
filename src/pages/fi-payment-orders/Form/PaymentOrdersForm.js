@@ -223,9 +223,7 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
       props: {
         functionId: SystemFunction.PaymentOrder,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: 'Workflow'
+      }
     })
   }
 

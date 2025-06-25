@@ -46,10 +46,7 @@ const RPBGridToolbar = ({
         reportName: reportName,
         rpbParams,
         setRpbParams
-      },
-      width: 700,
-      height: 500,
-      title: 'Report Parameters Browser'
+      }
     })
   }
 
