@@ -276,11 +276,11 @@ export default function JobsForm({ labels, maxAccess, store }) {
 
       return {
         ...item,
-        jobPct: jobPct.toString() + '%',
-        issuedWgt,
-        returnedWgt,
-        loss,
-        netWgt
+        jobPct: jobPct?.toFixed(2).toString() + '%',
+        issuedWgt: issuedWgt?.toFixed(2),
+        returnedWgt: returnedWgt?.toFixed(2),
+        loss: loss?.toFixed(2),
+        netWgt: netWgt?.toFixed(2)
       }
     })
 

@@ -85,17 +85,17 @@ export default function CastingForm({ store, setStore, access, labels }) {
       factor: yup.number().required(),
       stdLossRate: yup.number().required(),
       laborId: yup.number().required(),
-      grossWgt: yup.number().max(9999999.999).required(),
-      rmWgt: yup.number().max(9999999.999).required(),
-      mouldWgt: yup.number().max(9999999.999).required(),
-      netWgt: yup.number().max(9999999.999).required(),
-      suggestedWgt: yup.number().max(9999999.999).required(),
-      inputWgt: yup.number().max(9999999.999).required(),
-      netInputWgt: yup.number().max(9999999.999).required(),
-      outputWgt: yup.number().max(9999999.999).required(),
-      loss: yup.number().min(0).max(9999999.999).required(),
-      lossVariationPct: yup.number().max(100).required(),
-      lossPct: yup.number().max(100).required()
+      grossWgt: yup.number().required(),
+      rmWgt: yup.number().required(),
+      mouldWgt: yup.number().required(),
+      netWgt: yup.number().required(),
+      suggestedWgt: yup.number().required(),
+      inputWgt: yup.number().required(),
+      netInputWgt: yup.number().required(),
+      outputWgt: yup.number().required(),
+      loss: yup.number().min(0).required(),
+      lossVariationPct: yup.number().required(),
+      lossPct: yup.number().required()
     }),
     onSubmit: async obj => {
       const res = await postRequest({
@@ -504,6 +504,8 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.grossWgt}
                       required
                       readOnly
+                      maxLength={12}
+                      decimalScale={4}
                       onChange={e => formik.setFieldValue('grossWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('grossWgt', 0)}
                       error={formik.touched.grossWgt && Boolean(formik.errors.grossWgt)}
@@ -516,6 +518,8 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.rmWgt}
                       required
                       readOnly
+                      maxLength={12}
+                      decimalScale={4}
                       onChange={e => formik.setFieldValue('rmWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('rmWgt', 0)}
                       error={formik.touched.rmWgt && Boolean(formik.errors.rmWgt)}
@@ -528,6 +532,8 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.mouldWgt}
                       required
                       readOnly
+                      maxLength={12}
+                      decimalScale={4}
                       onChange={e => formik.setFieldValue('mouldWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('mouldWgt', 0)}
                       error={formik.touched.mouldWgt && Boolean(formik.errors.mouldWgt)}
@@ -540,6 +546,8 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.netWgt}
                       required
                       readOnly
+                      maxLength={12}
+                      decimalScale={4}
                       onChange={e => formik.setFieldValue('netWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('netWgt', 0)}
                       error={formik.touched.netWgt && Boolean(formik.errors.netWgt)}
@@ -552,6 +560,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.suggestedWgt}
                       required
                       readOnly
+                      maxLength={12}
                       decimalScale={3}
                       onChange={e => formik.setFieldValue('suggestedWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('suggestedWgt', 0)}
@@ -567,12 +576,13 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       decimalScale={3}
                       readOnly={isPosted || isCancelled}
                       onChange={e => {
-                        formik.setFieldValue('inputWgt', e.target.value)
+                        let value = Number(e.target.value) > 32767 ? 0 : Number(e.target.value)
+                        formik.setFieldValue('inputWgt', value)
                         setStore(prevStore => ({
                           ...prevStore,
                           castingInfo: {
                             ...prevStore.castingInfo,
-                            inputWgt: Number(e.target.value).toFixed(3)
+                            inputWgt: value?.toFixed(3) || 0
                           }
                         }))
                         setRecal(true)
@@ -606,12 +616,13 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       readOnly={isPosted || isCancelled}
                       onChange={e => {
                         setRecal(true)
-                        formik.setFieldValue('outputWgt', e.target.value)
+                        let value = Number(e.target.value) > 32767 ? 0 : Number(e.target.value)
+                        formik.setFieldValue('outputWgt', value)
                         setStore(prevStore => ({
                           ...prevStore,
                           castingInfo: {
                             ...prevStore.castingInfo,
-                            outputWgt: Number(e.target.value).toFixed(3)
+                            outputWgt: value?.toFixed(3) || 0
                           }
                         }))
                       }}
@@ -625,6 +636,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       label={labels.loss}
                       value={loss}
                       required
+                      maxLength={12}
                       decimalScale={3}
                       readOnly
                       onChange={e => {
@@ -640,6 +652,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       label={labels.lossPct}
                       value={lossPct}
                       required
+                      maxLength={3}
                       readOnly
                       decimalScale={3}
                       onChange={e => {
@@ -655,6 +668,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       label={labels.lossVariation}
                       value={lossVariationPct}
                       required
+                      maxLength={3}
                       readOnly
                       decimalScale={3}
                       onChange={e => formik.setFieldValue('lossVariationPct', e.target.value)}
