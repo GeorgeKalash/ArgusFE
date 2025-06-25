@@ -53,13 +53,6 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Post',
-    label: platformLabels.Post,
-    color: '#231f20',
-    image: 'lock.png',
-    main: false
-  },
-  {
     key: 'Bulk',
     label: platformLabels.Bulk,
     color: '#09235C',

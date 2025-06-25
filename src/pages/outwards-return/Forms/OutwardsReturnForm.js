@@ -268,7 +268,7 @@ const OutwardsReturnForm = ({ recordId, plantId, dtId, isOpenOutwards = false, r
       disabled: !isClosed || isPosted
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: isPosted || !editMode || !isClosed

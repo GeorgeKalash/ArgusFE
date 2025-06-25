@@ -65,7 +65,7 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
         })
 
         toast.success(platformLabels.Added)
-        formik.setValues(obj)
+        formik.setValues({ ...obj , recordId: res.recordId })
 
         invalidate()
       } catch (error) {}
@@ -74,7 +74,7 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
 
   const actions = [
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: () => formik.handleSubmit(),
       disabled: false

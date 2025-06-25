@@ -527,7 +527,7 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
       disabled: !isClosed
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !isPosted

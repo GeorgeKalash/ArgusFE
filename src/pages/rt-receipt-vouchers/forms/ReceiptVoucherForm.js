@@ -301,7 +301,7 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
 
   const actions = [
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: e => onPost(e.target.value),
       disabled: isPosted || !editMode || !isOTPVerified || !isClosed
