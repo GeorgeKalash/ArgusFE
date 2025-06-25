@@ -491,13 +491,13 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={FoundryRepository.Mould.qry}
+                    endpointId={formik.values.header.lineId && FoundryRepository.Mould.qry2}
                     name='header.mouldId'
-                    parameters='_params=&_startAt=0&_pageSize=1000'
+                    parameters={formik.values.header.lineId && `_params=&_startAt=0&_pageSize=1000&_lineId=${formik.values.header.lineId}`}
                     label={labels.mould}
                     required
                     valueField='recordId'
-                    readOnly={isClosed}
+                    readOnly={isClosed || !formik.values.header.lineId}
                     displayField={['reference', 'lineName']}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -566,6 +566,9 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.lineId', newValue?.recordId || null)
+                      if (!newValue?.recordId) {
+                        formik.setFieldValue('header.mouldId', null)
+                      }
                     }}
                     error={formik.touched?.header?.lineId && Boolean(formik.errors?.header?.lineId)}
                   />
