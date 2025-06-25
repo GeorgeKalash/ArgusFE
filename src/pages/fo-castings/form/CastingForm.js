@@ -299,9 +299,9 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       displayField={['reference', 'name']}
                       values={formik.values}
                       maxAccess={maxAccess}
-                      onChange={(event, newValue) => {
-                        formik.setFieldValue('dtId', newValue?.recordId || null)
+                      onChange={async (event, newValue) => {
                         changeDT(newValue)
+                        formik.setFieldValue('dtId', newValue?.recordId || null)
                       }}
                       error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                     />
