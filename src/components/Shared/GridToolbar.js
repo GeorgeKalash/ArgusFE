@@ -1,7 +1,7 @@
 import { Grid, DialogActions } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useState, useContext, useEffect } from 'react'
-import { TrxType } from 'src/resources/AccessLevels'
+import { accessMap, TrxType } from 'src/resources/AccessLevels'
 import { ControlContext } from 'src/providers/ControlContext'
 import { getButtons } from './Buttons'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -25,7 +25,8 @@ const GridToolbar = ({
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess?.record?.accessFlags
-  const addBtnVisible = onAdd && maxAccess?.add
+  const addBtnVisible = onAdd && maxAccess && maxAccess[accessMap[TrxType.ADD]]
+
   const { getRequest } = useContext(RequestsContext)
   const [searchValue, setSearchValue] = useState('')
   const { platformLabels } = useContext(ControlContext)
