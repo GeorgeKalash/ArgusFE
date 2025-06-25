@@ -24,7 +24,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
-const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) => {
+const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [referenceRequired, setReferenceRequired] = useState(true)
   const [editMode, setEditMode] = useState(!!recordId)
@@ -600,4 +600,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
   )
 }
 
-export default ClientTemplateForm
+ClientCorporateForm.width = 1100
+
+export default ClientCorporateForm

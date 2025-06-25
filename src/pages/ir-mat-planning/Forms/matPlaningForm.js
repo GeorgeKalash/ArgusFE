@@ -121,10 +121,7 @@ export default function MatPlaningForm({ labels, access, recordId }) {
       props: {
         functionId: SystemFunction.MRP,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 

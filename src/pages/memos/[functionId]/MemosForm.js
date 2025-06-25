@@ -29,14 +29,7 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import AccountSummary from 'src/components/Shared/AccountSummary'
 
-export default function MemosForm({
-  labels,
-  access,
-  recordId,
-  functionId,
-  getEndpoint,
-  getGLResourceId
-}) {
+export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
@@ -348,10 +341,7 @@ export default function MemosForm({
           props: {
             accountId: parseInt(formik.values.accountId),
             moduleId: 1
-          },
-          width: 1000,
-          height: 500,
-          title: platformLabels.AccountSummary
+          }
         })
       },
       disabled: !formik.values.accountId
@@ -401,10 +391,7 @@ export default function MemosForm({
             ...childFormikValues
           }))
         }
-      },
-      width: 500,
-      height: 500,
-      title: platformLabels.MultiCurrencyRate
+      }
     })
   }
 

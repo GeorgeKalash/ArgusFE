@@ -35,6 +35,7 @@ const ClientsList = () => {
       default: { category: 1 }
     }
   })
+
   async function fetchWithSearch({ options = {}, filters }) {
     const { _startAt = 0, _pageSize = 50 } = options
 
@@ -113,10 +114,7 @@ const ClientsList = () => {
         plantId: _plantId,
         maxAccess: access,
         allowEdit: true
-      },
-      width: 1100,
-      height: 600,
-      title: labels.pageTitle
+      }
     })
   }
 
