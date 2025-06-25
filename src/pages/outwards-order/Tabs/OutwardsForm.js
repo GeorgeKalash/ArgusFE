@@ -497,8 +497,6 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
           forceDisable: !!formik.values.recordId && !!beneficiaryId,
           onSuccess: (response, values) => HandleAddedBenificiary(response, values)
         },
-        width: 700,
-        height: 500,
         title: dispersalType === 1 ? labels.cash : labels.bank
       })
   }

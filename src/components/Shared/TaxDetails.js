@@ -9,10 +9,15 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const TaxDetails = props => {
-  const { taxId, obj } = props
+  const { taxId, obj, window } = props
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.TaxDetails, window })
 
   const vatAmount = (taxDetail, taxItem) => {
     switch (taxDetail.taxBase) {

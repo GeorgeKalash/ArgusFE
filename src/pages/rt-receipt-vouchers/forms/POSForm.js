@@ -85,8 +85,6 @@ export default function POSForm({ labels, data, maxAccess, amount }) {
           props: {
             DialogText: formattedText
           },
-          width: 550,
-          height: 250,
           expandable: false,
           closable: false
         })

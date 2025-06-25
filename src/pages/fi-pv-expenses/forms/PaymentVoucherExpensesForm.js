@@ -5,7 +5,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
@@ -115,50 +115,50 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         .required()
     }),
     onSubmit: async obj => {
-      const copy = { ...obj }
-      delete copy.expenses
-      copy.date = formatDateToApi(copy.date)
-      copy.amount = totalAmount
-      copy.baseAmount = totalAmount
-      const costCentersValues = []
+      const payload = getPayload(obj)
 
-      const updatedRows = formik.values.expenses.map((expensesDetails, index) => {
-        const { costCenters, ...restDetails } = expensesDetails
-        if (costCenters) {
-          costCentersValues.push(...costCenters)
-        }
-
-        return {
-          ...restDetails,
-          seqNo: index + 1,
-          pvId: formik.values.recordId || 0
-        }
+      const response = await postRequest({
+        extension: FinancialRepository.PaymentVouchers.set2,
+        record: JSON.stringify(payload)
       })
 
-      const data = {
-        header: copy,
-        items: updatedRows,
-        costCenters: costCentersValues
-      }
-      try {
-        const response = await postRequest({
-          extension: FinancialRepository.PaymentVouchers.set2,
-          record: JSON.stringify(data)
-        })
-
-        !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
-        const res2 = await getPaymentVouchers(response.recordId)
-        res2.record.date = formatDateFromApi(res2.record.date)
-        await getExpenses(res2.record)
-        invalidate()
-      } catch (error) {}
+      !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
+      const res2 = await getPaymentVouchers(response.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
+      await getExpenses(res2.record)
+      invalidate()
     }
   })
 
-  const { labels: _labels, access: MRCMaxAccess } = useResourceQuery({
-    endpointId: MultiCurrencyRepository.Currency.get,
-    datasetId: ResourceIds.MultiCurrencyRate
-  })
+  const getPayload = obj => {
+    const copy = { ...obj }
+    delete copy.expenses
+    copy.date = formatDateToApi(copy.date)
+    copy.amount = totalAmount
+    copy.baseAmount = totalAmount
+    const costCentersValues = []
+
+    const updatedRows = formik.values.expenses.map((expensesDetails, index) => {
+      const { costCenters, ...restDetails } = expensesDetails
+      if (costCenters) {
+        costCentersValues.push(...costCenters)
+      }
+
+      return {
+        ...restDetails,
+        seqNo: index + 1,
+        pvId: formik.values.recordId || 0
+      }
+    })
+
+    const payload = {
+      header: copy,
+      items: updatedRows,
+      costCenters: costCentersValues
+    }
+
+    return payload
+  }
 
   const totalAmount = formik.values?.expenses?.reduce((amount, row) => {
     const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
@@ -256,9 +256,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       props: {
         functionId: SystemFunction.PaymentVoucher,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: 'Workflow'
+      }
     })
   }
 
@@ -305,6 +303,15 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     }
   }
 
+  const onReset = async () => {
+    getDefaultVAT()
+    const payload = getPayload(formik.values)
+    await postRequest({
+      extension: FinancialRepository.ResetGL_PV.reset,
+      record: JSON.stringify(payload)
+    })
+  }
+
   const actions = [
     {
       key: 'Locked',
@@ -342,6 +349,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       condition: true,
       onClick: 'onClickGL',
       datasetId: ResourceIds.GLPaymentVoucherExpenses,
+      onReset,
       disabled: !editMode
     },
     {
@@ -502,10 +510,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
             row,
             updateRow,
             readOnly: isPosted || isCancelled
-          },
-          width: 700,
-          height: 600,
-          title: labels.costCenter
+          }
         })
       }
     }
@@ -597,8 +602,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     stack({
       Component: MultiCurrencyRateForm,
       props: {
-        labels: _labels,
-        maxAccess: MRCMaxAccess,
+        DatasetIdAccess: ResourceIds.MCRPaymentVoucherExpenses,
         data: {
           ...data,
           amount: amountSum
@@ -609,10 +613,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
             ...childFormikValues
           }))
         }
-      },
-      width: 500,
-      height: 500,
-      title: _labels.MultiCurrencyRate
+      }
     })
   }
 

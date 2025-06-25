@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import * as yup from 'yup'
 
-export function useForm({ documentType = {}, maxAccess, validate = () => {}, ...formikProps }) {
+export function useForm({ documentType = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
   function explode(str) {
     const parts = str.split('.')
 
@@ -65,29 +65,31 @@ export function useForm({ documentType = {}, maxAccess, validate = () => {}, ...
             const { gridName, fieldName } = explode(controlId)
 
             if (Array.isArray(values?.[gridName])) {
-              ;(values?.[gridName] || [])?.forEach((row, index) => {
-                if (!maxAccessErrors[gridName]) {
-                  maxAccessErrors[gridName] = []
-                }
-
-                if (!maxAccessErrors[gridName][index]) {
-                  maxAccessErrors[gridName][index] = {}
-                }
-
-                if (!row[fieldName] || row[fieldName] == 0) {
-                  maxAccessErrors[gridName][index][fieldName] = `${fieldName} is required.`
-                } else {
-                  if (maxAccessErrors[gridName][index][fieldName]) delete maxAccessErrors[gridName][index][fieldName]
-
-                  if (Object.keys(maxAccessErrors[gridName][index])?.length === 0) {
-                    delete maxAccessErrors[gridName][index]
+              if (conditionSchema.indexOf(gridName) < 0) {
+                ;(values?.[gridName] || [])?.forEach((row, index) => {
+                  if (!maxAccessErrors[gridName]) {
+                    maxAccessErrors[gridName] = []
                   }
-                }
 
-                if (maxAccessErrors[gridName]?.every(obj => Object.keys(obj)?.length === 0)) {
-                  delete maxAccessErrors[gridName]
-                }
-              })
+                  if (!maxAccessErrors[gridName][index]) {
+                    maxAccessErrors[gridName][index] = {}
+                  }
+
+                  if (!row[fieldName] || row[fieldName] == 0) {
+                    maxAccessErrors[gridName][index][fieldName] = `${fieldName} is required.`
+                  } else {
+                    if (maxAccessErrors[gridName][index][fieldName]) delete maxAccessErrors[gridName][index][fieldName]
+
+                    if (Object.keys(maxAccessErrors[gridName][index])?.length === 0) {
+                      delete maxAccessErrors[gridName][index]
+                    }
+                  }
+
+                  if (maxAccessErrors[gridName]?.every(obj => Object.keys(obj)?.length === 0)) {
+                    delete maxAccessErrors[gridName]
+                  }
+                })
+              }
             } else {
               if (!maxAccessErrors[gridName]) {
                 maxAccessErrors[gridName] = {}

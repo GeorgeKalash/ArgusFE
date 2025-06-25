@@ -690,10 +690,7 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
       props: {
         functionId: formik.values.functionId,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -705,10 +702,7 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
         functionId: formik.values.functionId,
         editMode: formik.values.status != 1,
         totalBaseAmount: totalLoc
-      },
-      width: 1200,
-      height: 670,
-      title: labels.shipments
+      }
     })
   }
 
@@ -719,10 +713,7 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
         recordId: formik.values.recordId,
         functionId: formik.values.functionId,
         editMode: formik.values.status != 1
-      },
-      width: 700,
-      height: 430,
-      title: labels.transportation
+      }
     })
   }
 

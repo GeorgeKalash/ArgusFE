@@ -15,6 +15,8 @@ import CustomTextField from '../Inputs/CustomTextField'
 import { useError } from 'src/error'
 import CustomDateTimePicker from '../Inputs/CustomDateTimePicker'
 import CustomNumberField from '../Inputs/CustomNumberField'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const formatDateTo = value => {
   const date = new Date(value)
@@ -139,6 +141,8 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
     newParams = `_dimension=${field?.data}`
   } else if (apiDetails?.endpoint === FinancialRepository.FIDimension.qry) {
     newParams = `_dimension=${field?.data}`
+  } else if (apiDetails?.endpoint === SystemRepository.Currency.qry2) {
+    newParams += `_currencyType=${field?.data}`
   }
 
   return (
@@ -344,6 +348,9 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
   const [items, setItems] = useState([])
   const [parameters, setParameters] = useState([])
   const { stack: stackError } = useError()
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.ReportParametersBrowser, window })
 
   const getParameterDefinition = reportName => {
     const parameters = `_reportName=${reportName}`
@@ -483,5 +490,8 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     </FormShell>
   )
 }
+
+ReportParameterBrowser.width = 700
+ReportParameterBrowser.height = 500
 
 export default ReportParameterBrowser

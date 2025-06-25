@@ -397,10 +397,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
         functionId: formik.values.functionId,
         setEditMode: setEditMode,
         getData: getClient
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
 
@@ -1025,10 +1022,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                                 labels: labels,
                                 idTypes,
                                 refreshProf
-                              },
-                              title: labels.fetch,
-                              width: 400,
-                              height: 400
+                              }
                             })
                           }
                           disabled={

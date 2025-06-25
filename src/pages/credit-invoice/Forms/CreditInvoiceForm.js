@@ -451,9 +451,7 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
       props: {
         functionId: formik.values.functionId,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: labels.workflow
+      }
     })
   }
 
@@ -465,10 +463,7 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
         functionId: formik.values.functionId,
         editMode: formik.values.status != 1,
         totalBaseAmount: totalLoc
-      },
-      width: 1200,
-      height: 670,
-      title: labels.shipments
+      }
     })
   }
 
@@ -479,10 +474,7 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
         recordId: formik.values.recordId,
         functionId: formik.values.functionId,
         editMode: formik.values.status != 1
-      },
-      width: 700,
-      height: 430,
-      title: labels.transportation
+      }
     })
   }
 

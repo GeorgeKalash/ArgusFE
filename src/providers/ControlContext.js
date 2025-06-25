@@ -9,6 +9,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
 import { debounce } from 'lodash'
 import { commonResourceIds } from 'src/resources/commonResourceIds'
+import { useLabelsAccessContext } from './LabelsAccessContext'
 
 const ControlContext = createContext()
 
@@ -18,16 +19,13 @@ const ControlProvider = ({ children }) => {
   const userData = window.sessionStorage.getItem('userData')
   const [defaultsData, setDefaultsData] = useState([])
   const [userDefaultsData, setUserDefaultsData] = useState([])
-  const [apiPlatformLabels, setApiPlatformLabels] = useState(null)
   const [systemChecks, setSystemChecks] = useState([])
   const [loading, setLoading] = useState(false)
   const errorModel = useError()
-
-  const [labels, selLabels] = useState({})
-  const [access, setAccess] = useState({})
+  const { labels, setLabels, access, setAccess, apiPlatformLabels, setApiPlatformLabels } = useLabelsAccessContext()
 
   const addLabels = (resourceId, labels) => {
-    selLabels(prevData => ({
+    setLabels(prevData => ({
       ...prevData,
       [resourceId]: labels
     }))
@@ -118,7 +116,7 @@ const ControlProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
+    !apiPlatformLabels && getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
   }, [user?.languageId, languageId])
 
   const debouncedCloseLoading = debounce(() => {
@@ -169,10 +167,12 @@ const ControlProvider = ({ children }) => {
         extension: KVSRepository.getLabels,
         parameters: parameters
       }).then(res => {
-        if (cache && !labels?.[resourceId]) {
-          addLabels(resourceId, res.list)
+        if (res?.list) {
+          if (cache && !labels?.[resourceId]) {
+            addLabels(resourceId, res.list)
+          }
+          callback(res.list)
         }
-        callback(res.list)
       })
     }
   }
@@ -188,10 +188,12 @@ const ControlProvider = ({ children }) => {
         extension: AccessControlRepository.maxAccess,
         parameters: parameters
       }).then(res => {
-        if (cache && !access?.[resourceId]) {
-          addAccess(resourceId, res)
+        if (res?.record) {
+          if (cache && !access?.[resourceId]) {
+            addAccess(resourceId, res)
+          }
+          callback(res)
         }
-        callback(res)
       })
     }
   }

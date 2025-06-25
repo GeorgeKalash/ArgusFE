@@ -785,9 +785,7 @@ export default function RetailTransactionsForm({
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }

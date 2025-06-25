@@ -23,6 +23,7 @@ import { ProductModelingRepository } from 'src/repositories/ProductModelingRepos
 import { DataSets } from 'src/resources/DataSets'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function SketchForm({ recordId, invalidate, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,6 +34,8 @@ export default function SketchForm({ recordId, invalidate, window }) {
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.Sketch
   })
+
+  useSetWindow({ title: labels?.Sketch, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: systemFunction,
@@ -126,8 +129,6 @@ export default function SketchForm({ recordId, invalidate, window }) {
       ...res.record
     })
   }
-
-  useSetWindow({ title: labels?.Sketch, window })
 
   const onClose = async () => {
     await postRequest({

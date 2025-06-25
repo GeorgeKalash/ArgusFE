@@ -268,10 +268,7 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => 
         functionId: SystemFunction.CashTransfer,
         editMode: isClosed,
         totalBaseAmount: totalLoc
-      },
-      width: 1200,
-      height: 670,
-      title: 'Shipments'
+      }
     })
   }
 
@@ -298,9 +295,7 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => 
       props: {
         functionId: SystemFunction.CashTransfer,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: 'Workflow'
+      }
     })
   }
 

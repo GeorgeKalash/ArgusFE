@@ -41,7 +41,6 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
       trackBy: '',
       pieces: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       year: yup.string().required(),

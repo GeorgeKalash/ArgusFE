@@ -142,10 +142,7 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
         onSuccess: () => {
           onClose(recordId)
         }
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
 
@@ -289,10 +286,7 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
                     recordId: Id,
                     functionId: SystemFunction.OutwardsTransfer,
                     resourceId: ResourceIds.OutwardsTransfer
-                  },
-                  width: 1150,
-                  height: 700,
-                  title: platformLabels.PreviewReport
+                  }
                 })
               }
               resourceId={ResourceIds.OutwardsTransfer}
@@ -300,8 +294,6 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
             />
           </Fixed>
         ),
-        width: 600,
-        height: 200,
         title: platformLabels.Post
       }
     })

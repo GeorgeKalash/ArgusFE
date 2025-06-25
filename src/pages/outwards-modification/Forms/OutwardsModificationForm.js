@@ -249,10 +249,7 @@ const OutwardsModificationForm = ({ recordId, window }) => {
         onSuccess: () => {
           onClose(recId)
         }
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
   async function refetchForm(recordId) {
