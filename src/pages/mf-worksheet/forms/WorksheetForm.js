@@ -4,14 +4,13 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
 import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
@@ -22,7 +21,6 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import Table from 'src/components/Shared/Table'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { SystemFunction } from 'src/resources/SystemFunction'
@@ -405,15 +403,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField
-                    name='itemCategoryName'
-                    label={labels.itemCategory}
-                    value={formik.values.itemCategoryName}
-                    readOnly
-                    maxAccess={access}
-                  />
-                </Grid>
-                <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={ManufacturingRepository.Labor.snapshot}
                     parameters={{ _workCenterId: formik.values.workCenterId }}
@@ -494,6 +483,15 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     name='pgItemName'
                     label={labels.pgItem}
                     value={formik.values.pgItemName}
+                    readOnly
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='itemCategoryName'
+                    label={labels.itemCategory}
+                    value={formik.values.itemCategoryName}
                     readOnly
                     maxAccess={access}
                   />
@@ -594,7 +592,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     seqNo={0}
                     recordId={recordId}
                     customWidth={320}
-                    customHeight={180}
+                    customHeight={190}
                   />
                 </Grid>
                 <Grid item xs={12}>
