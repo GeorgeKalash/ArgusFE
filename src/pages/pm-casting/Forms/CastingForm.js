@@ -125,7 +125,7 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
 
   const actions = [
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted

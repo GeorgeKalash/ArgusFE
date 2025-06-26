@@ -230,7 +230,7 @@ const InwardTransferForm = ({ recordId, plantId, userId, dtId, window }) => {
       disabled: !editMode
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: formik.values.status != 4
