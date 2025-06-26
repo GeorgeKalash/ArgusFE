@@ -323,7 +323,7 @@ const CashCountForm = ({ recordId, window }) => {
       disabled: !editMode
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !editMode || formik.values.status !== 4 || isPosted
