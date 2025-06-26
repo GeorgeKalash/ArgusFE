@@ -11,11 +11,16 @@ import CustomNumberField from '../Inputs/CustomNumberField'
 import { useContext } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
+import { useResourceQuery } from 'src/hooks/resource'
 
-export default function ExpensesCostCenters({ labels, maxAccess, row, window, updateRow, recordId, readOnly }) {
+export default function ExpensesCostCenters({ row, window, updateRow, recordId, readOnly }) {
   const { platformLabels } = useContext(ControlContext)
 
   useSetWindow({ title: platformLabels.CostCenter, window })
+
+  const { labels, access: maxAccess } = useResourceQuery({
+    datasetId: ResourceIds.CostCenter
+  })
 
   const { formik } = useForm({
     maxAccess,
@@ -56,7 +61,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
         parameters: `_params=&_startAt=0&_pageSize=1000&`,
         valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 1.5,
+        displayFieldWidth: 3,
         readOnly,
         mapping: [
           { from: 'recordId', to: 'ccId' },
@@ -110,7 +115,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
 
   return (
     <FormShell
-      resourceId={ResourceIds.PaymentVoucherExpenses}
+      resourceId={ResourceIds.CostCenter}
       form={formik}
       maxAccess={maxAccess}
       isCleared={false}
