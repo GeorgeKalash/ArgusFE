@@ -12,10 +12,10 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
-import ModellingWindow from './Windows/ModellingWindow'
+import FOCastingWindow from './window/FOCastingWindow'
+import { FoundryRepository } from 'src/repositories/FoundryRepository'
 
-const ModelMaker = () => {
+const FoCastings = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -30,8 +30,8 @@ const ModelMaker = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ProductModelingRepository.ModelMaker.page,
-    datasetId: ResourceIds.ModelMaker,
+    endpointId: FoundryRepository.Casting.page,
+    datasetId: ResourceIds.FoCastings,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -39,13 +39,77 @@ const ModelMaker = () => {
 
   const columns = [
     {
-      field: 'dtName',
-      headerName: labels.documentType,
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     },
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'loss',
+      headerName: labels.loss,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'outputWgt',
+      headerName: labels.outputWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'netInputWgt',
+      headerName: labels.netInputWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'inputWgt',
+      headerName: labels.inputWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'suggestedWgt',
+      headerName: labels.suggestedWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'netWgt',
+      headerName: labels.netWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'mouldWgt',
+      headerName: labels.mouldWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'rmWgt',
+      headerName: labels.rmWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'grossWgt',
+      headerName: labels.grossWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'metalColorRef',
+      headerName: labels.metalColor,
+      flex: 1
+    },
+    {
+      field: 'metalRef',
+      headerName: labels.metal,
+      flex: 1
+    },
+    {
+      field: 'mouldRef',
+      headerName: labels.mould,
       flex: 1
     },
     {
@@ -55,56 +119,8 @@ const ModelMaker = () => {
       type: 'date'
     },
     {
-      field: 'startDate',
-      headerName: labels.startDate,
-      flex: 1,
-      type: 'date'
-    },
-    {
-      field: 'endDate',
-      headerName: labels.endDate,
-      flex: 1,
-      type: 'date'
-    },
-    {
-      field: 'threeDPRef',
-      headerName: labels.print,
-      flex: 1
-    },
-    {
-      field: 'laborRef',
-      headerName: labels.labor,
-      flex: 1
-    },
-    {
-      field: 'weight',
-      headerName: labels.weight,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'productionLineName',
-      headerName: labels.productionLine,
-      flex: 1
-    },
-    {
-      field: 'rsName',
-      headerName: labels.rsName,
-      flex: 1
-    },
-    {
-      field: 'statusName',
-      headerName: labels.status,
-      flex: 1
-    },
-    {
-      field: 'wipName',
-      headerName: labels.wip,
-      flex: 1
-    },
-    {
-      field: 'notes',
-      headerName: labels.notes,
+      field: 'reference',
+      headerName: labels.reference,
       flex: 1
     }
   ]
@@ -113,8 +129,8 @@ const ModelMaker = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: ProductModelingRepository.ModelMaker.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
+      extension: FoundryRepository.Casting.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -123,42 +139,42 @@ const ModelMaker = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
       return await getRequest({
-        extension: ProductModelingRepository.ModelMaker.snapshot,
+        extension: FoundryRepository.Casting.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.ModelMaker,
+    functionId: SystemFunction.Casting,
     action: openForm
   })
 
-  const add = async () => {
+  const add = () => {
     proxyAction()
   }
 
-  const editMDL = obj => {
+  const editCAS = obj => {
     openForm(obj?.recordId)
   }
 
   async function openForm(recordId) {
     stack({
-      Component: ModellingWindow,
+      Component: FOCastingWindow,
       props: {
         labels,
         access,
         recordId
       },
-      width: 900,
-      height: 680,
-      title: labels.modelMaker
+      width: 1150,
+      height: 700,
+      title: labels.castings
     })
   }
 
-  const delMDL = async obj => {
+  const delCAS = async obj => {
     await postRequest({
-      extension: ProductModelingRepository.ModelMaker.del,
+      extension: FoundryRepository.Casting.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -168,17 +184,17 @@ const ModelMaker = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'PMMDL'} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'FOCAS'} />
       </Fixed>
       <Grow>
         <Table
-          name='table'
+          name='casting'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={editMDL}
+          onEdit={editCAS}
           refetch={refetch}
-          onDelete={delMDL}
+          onDelete={delCAS}
           deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
@@ -191,4 +207,4 @@ const ModelMaker = () => {
   )
 }
 
-export default ModelMaker
+export default FoCastings

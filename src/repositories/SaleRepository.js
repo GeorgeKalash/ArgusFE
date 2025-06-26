@@ -306,5 +306,8 @@ export const SaleRepository = {
   ReturnItem: {
     qry: service + 'qryREI',
     balance: service + 'balanceREI'
+  },
+  ReturnSerial: {
+    qry: service + 'qryRES'
   }
 }

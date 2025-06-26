@@ -9,68 +9,57 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import JTCheckoutForm from './forms/JTCheckoutForm'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import PaymentOrdersExpensesForm from './Form/PaymentOrdersExpensesForm'
 
-const JTCheckout = () => {
+const PaymentOrdersExpenses = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params = [] } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: ManufacturingRepository.JobTransfer.page,
+      extension: FinancialRepository.PaymentOrders.page3,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: FinancialRepository.PaymentOrders.snapshot2,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
+  }
+
   const {
     query: { data },
-    filterBy,
-    refetch,
     labels,
-    access,
+    filterBy,
     paginationParameters,
+    refetch,
+    access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.JobTransfer.page,
-    datasetId: ResourceIds.JTCheckOut,
+    endpointId: FinancialRepository.PaymentOrders.page3,
+    datasetId: ResourceIds.PaymentOrderExpenses,
     filter: {
       filterFn: fetchWithFilter
     }
   })
 
-  async function fetchWithFilter({ filters, pagination = {} }) {
-    const { _startAt = 0, _size = 50 } = pagination
-    if (filters.qry) {
-      const response = await getRequest({
-        extension: ManufacturingRepository.JobTransfer.snapshot,
-        parameters: `_filter=${filters.qry}&_startAt=${_startAt}&_size=${_size}`
-      })
-
-      return { ...response, _startAt: _startAt }
-    } else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-  }
-
   const columns = [
-    {
-      field: 'dtName',
-      headerName: labels.docType,
-      flex: 1
-    },
-    {
-      field: 'reference',
-      headerName: labels.reference,
-      flex: 1
-    },
     {
       field: 'date',
       headerName: labels.date,
@@ -78,77 +67,93 @@ const JTCheckout = () => {
       type: 'date'
     },
     {
-      field: 'jobRef',
-      headerName: labels.jobOrder,
+      field: 'reference',
+      headerName: labels.reference,
       flex: 1
     },
     {
-      field: 'designRef',
-      headerName: labels.designRef,
+      field: 'accountTypeName',
+      headerName: labels.accountType,
       flex: 1
     },
     {
-      field: 'fromWCName',
-      headerName: labels.fromWorkCenter,
+      field: 'accountRef',
+      headerName: labels.account,
       flex: 1
     },
     {
-      field: 'toWCName',
-      headerName: labels.toWorkCenter,
+      field: 'accountName',
+      headerName: labels.accountName,
       flex: 1
     },
     {
-      field: 'pcs',
-      headerName: labels.pieces,
+      field: 'cashAccountName',
+      headerName: labels.cashAccount,
+      flex: 1
+    },
+    {
+      field: 'amount',
+      headerName: labels.amount,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'qty',
-      headerName: labels.qty,
-      flex: 1,
-      type: {
-        field: 'number',
-        decimal: 2
-      }
+      field: 'currencyRef',
+      headerName: labels.currency,
+      flex: 1
+    },
+    {
+      field: 'notes',
+      headerName: labels.notes,
+      flex: 1
     },
     {
       field: 'statusName',
       headerName: labels.status,
       flex: 1
+    },
+    {
+      field: 'rsName',
+      headerName: labels.releaseStatus,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: labels.wip,
+      flex: 1
     }
   ]
 
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.JTCheckOut,
-    action: openForm
-  })
-
-  function openForm(obj) {
-    stack({
-      Component: JTCheckoutForm,
-      props: {
-        labels,
-        recordId: obj?.recordId,
-        access
-      },
-      width: 1200,
-      height: 700,
-      title: labels.jtCheckout
-    })
+  const add = async () => {
+    await proxyAction()
   }
 
   const edit = obj => {
-    openForm(obj)
+    openForm(obj?.recordId)
   }
 
-  const add = () => {
-    proxyAction()
+  function openForm(recordId) {
+    stack({
+      Component: PaymentOrdersExpensesForm,
+      props: {
+        labels,
+        recordId,
+        maxAccess: access
+      },
+      width: 1300,
+      height: 700,
+      title: labels.PaymentOrderExpenses
+    })
   }
+
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.PaymentOrder,
+    action: openForm
+  })
 
   const del = async obj => {
     await postRequest({
-      extension: ManufacturingRepository.JobTransfer.del,
+      extension: FinancialRepository.PaymentOrders.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -158,7 +163,7 @@ const JTCheckout = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'MFTFR'} />
+        <RPBGridToolbar labels={labels} onAdd={add} maxAccess={access} reportName={'FIPO'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
@@ -168,10 +173,11 @@ const JTCheckout = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          isLoading={false}
+          deleteConfirmationType={'strict'}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
-          deleteConfirmationType={'strict'}
           refetch={refetch}
           maxAccess={access}
         />
@@ -180,4 +186,4 @@ const JTCheckout = () => {
   )
 }
 
-export default JTCheckout
+export default PaymentOrdersExpenses
