@@ -54,13 +54,13 @@ export default function EndSiteCountForm({ _labels, access }) {
 
   const actions = [
     {
-      key: 'Lock',
+      key: 'Locked',
       condition: formik.values.status === 3,
       onClick: () => formik.handleSubmit(),
       disabled: false
     },
     {
-      key: 'Unlock',
+      key: 'Unlocked',
       condition: formik.values.status !== 3,
       onClick: () => formik.handleSubmit(),
       disabled: false

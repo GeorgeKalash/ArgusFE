@@ -434,9 +434,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
             props: {
               itemId: row?.itemId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.CostHistory
+            }
           })
         }
       }
@@ -463,9 +461,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -543,10 +539,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       props: {
         functionId,
         recordId: formik.values.header.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 

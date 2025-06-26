@@ -110,10 +110,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
         onConfirm: () => {
           formik.submitForm()
         }
-      },
-      width: 450,
-      height: 170,
-      title: 'Confirmation'
+      }
     })
   }
 

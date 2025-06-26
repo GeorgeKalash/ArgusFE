@@ -335,5 +335,8 @@ export const InventoryRepository = {
   },
   SerialsProfileSequences: {
     qry: service + 'qrySPS'
+  },
+  Materials: {
+    snapshot: service + 'snapshotUF'
   }
 }

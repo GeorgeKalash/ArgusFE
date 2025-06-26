@@ -140,10 +140,7 @@ const PhysicalCountItem = () => {
           setData({ list: [] })
           setSiteStore([])
         }
-      },
-      width: 570,
-      height: 170,
-      title: platformLabels.Clear
+      }
     })
   }
 

@@ -146,8 +146,6 @@ const DraftSerialsInvoices = () => {
         recordId,
         invalidate
       },
-      width: 1300,
-      height: 750,
       title: labels.draftSerInv
     })
   }
