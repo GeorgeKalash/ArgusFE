@@ -95,7 +95,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
 
   const balance = row.amount - totalAmount
 
-  const canSubmit = balance > 0 || balance < 0
+  const canSubmit = balance > 0 || balance < 0 || readOnly
 
   return (
     <FormShell

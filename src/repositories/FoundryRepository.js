@@ -18,6 +18,7 @@ export const FoundryRepository = {
     post: service + 'postWAX',
     unpost: service + 'unpostWAX',
     close: service + 'closeWAX',
+    open: service + 'openWAX',
     reopen: service + 'reopenWAX'
   },
   WaxJob: {
@@ -46,6 +47,23 @@ export const FoundryRepository = {
     qry2: service + 'qry2WAJ'
   },
   Casting: {
-    qry: service + 'qryCAS'
+    page: service + 'pageCAS',
+    get: service + 'getCAS',
+    set: service + 'setCAS',
+    del: service + 'delCAS',
+    cancel: service + 'cancelCAS',
+    post: service + 'postCAS',
+    snapshot: service + 'snapshotCAS'
+  },
+  CastingDisassembly: {
+    qry: service + 'qryCDA',
+    set2: service + 'set2CDA'
+  },
+  MetalScrap: {
+    qry: service + 'qryMSC'
+  },
+  CastingJob: {
+    qry: service + 'qryCAJ',
+    set2: service + 'set2CAJ'
   }
 }
