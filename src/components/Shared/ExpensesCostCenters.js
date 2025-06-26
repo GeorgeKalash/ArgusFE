@@ -87,7 +87,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
     },
     {
       component: 'textfield',
-      label: labels.groupName,
+      label: labels.group,
       name: 'ccgName',
       props: {
         readOnly: true
