@@ -14,9 +14,15 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
 import { useForm } from 'src/hooks/form'
 import { useError } from 'src/error'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { useContext } from 'react'
 
 export default function ChangeClient({ form, window }) {
   const { stack: stackError } = useError()
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.ChangeClient, window })
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.ChangeClient
@@ -179,3 +185,6 @@ export default function ChangeClient({ form, window }) {
     </FormShell>
   )
 }
+
+ChangeClient.width = 500
+ChangeClient.height = 570

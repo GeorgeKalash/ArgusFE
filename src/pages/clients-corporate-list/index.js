@@ -4,11 +4,10 @@ import { useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { useWindow } from 'src/windows'
-import ClientTemplateForm from './forms/ClientTemplateForm'
+import ClientCorporateForm from './forms/ClientCorporateForm'
 import { useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -140,14 +139,13 @@ const ClientsCorporateList = () => {
 
   function openForm(recordId) {
     stack({
-      Component: ClientTemplateForm,
+      Component: ClientCorporateForm,
       props: {
         _labels: _labels,
         maxAccess: access,
         editMode: editMode,
         recordId: recordId ? recordId : null
       },
-      width: 1100,
       title: _labels.clientCorporate
     })
   }

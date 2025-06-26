@@ -442,7 +442,7 @@ export const ResourceIds = {
   ProductionOrder: 42337,
   YearlyComparativeSales: 51550,
   PurchaseTransactions: 50303,
-  ItemReplacement : 41212,
+  ItemReplacement: 41212,
   SManagement: 41213,
   OpenPOs: 50312,
   NotificationLabels: 23106,
@@ -494,6 +494,7 @@ export const ResourceIds = {
   Currency: 20136,
   PaymentOrder: 31333,
   POTracking: 50309,
+  Moulds: 47200,
   FoCastings: 47301,
 
   // GL

@@ -68,10 +68,7 @@ const BeneficiaryBank = () => {
             ? (obj.clientId * 100).toString() + (obj.beneficiaryId * 10).toString() + obj?.seqNo
             : null,
         dispersalType: 2
-      },
-      width: 700,
-      height: 500,
-      title: _labels.bank
+      }
     })
   }
 

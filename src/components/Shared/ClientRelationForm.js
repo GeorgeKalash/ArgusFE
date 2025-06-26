@@ -13,7 +13,6 @@ import * as yup from 'yup'
 import { ResourceLookup } from './ResourceLookup'
 import ResourceComboBox from './ResourceComboBox'
 import CustomDatePicker from '../Inputs/CustomDatePicker'
-import { Checkbox, FormControlLabel } from '@mui/material'
 import { useForm } from 'src/hooks/form'
 import OTPPhoneVerification from './OTPPhoneVerification'
 import { SystemFunction } from 'src/resources/SystemFunction'
@@ -21,10 +20,15 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
+export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.addClientRelation, window })
 
   const { labels: _labels, access } = useResourceParams({
     datasetId: ResourceIds.ClientRelation
@@ -91,10 +95,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
             values: formValidation.values,
             functionId: SystemFunction.ClientRelation,
             onSuccess: verified
-          },
-          width: 400,
-          height: 400,
-          title: _labels.OTPVerification
+          }
         })
         toast.success('Record Successfully')
       })
@@ -199,3 +200,6 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
     </FormShell>
   )
 }
+
+ClientRelationForm.width = 500
+ClientRelationForm.height = 450

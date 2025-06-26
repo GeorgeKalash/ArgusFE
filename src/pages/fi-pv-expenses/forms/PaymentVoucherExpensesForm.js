@@ -159,7 +159,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
 
     return payload
   }
-  
+
   const totalAmount = formik.values?.expenses?.reduce((amount, row) => {
     const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
 
@@ -256,9 +256,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       props: {
         functionId: SystemFunction.PaymentVoucher,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: 'Workflow'
+      }
     })
   }
 
@@ -512,10 +510,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
             row,
             updateRow,
             readOnly: isPosted || isCancelled
-          },
-          width: 700,
-          height: 600,
-          title: labels.costCenter
+          }
         })
       }
     }
@@ -618,10 +613,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
             ...childFormikValues
           }))
         }
-      },
-      width: 500,
-      height: 500,
-      title: platformLabels.MultiCurrencyRate
+      }
     })
   }
 
