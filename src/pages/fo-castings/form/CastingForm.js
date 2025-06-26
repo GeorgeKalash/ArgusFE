@@ -102,6 +102,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
         extension: FoundryRepository.Casting.set,
         record: JSON.stringify({
           ...obj,
+          lossPct: parseFloat(obj?.lossPct || 0),
           date: obj?.date ? formatDateToApi(obj?.date) : null
         })
       })
