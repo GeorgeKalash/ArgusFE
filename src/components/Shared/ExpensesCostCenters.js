@@ -8,8 +8,15 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from '../Inputs/CustomTextField'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import { useContext } from 'react'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function ExpensesCostCenters({ labels, maxAccess, row, window, updateRow, recordId, readOnly }) {
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.CostCenter, window })
+
   const { formik } = useForm({
     maxAccess,
     enableReinitialize: true,
@@ -88,7 +95,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
 
   const balance = row.amount - totalAmount
 
-  const canSubmit = balance > 0 || balance < 0
+  const canSubmit = balance > 0 || balance < 0 || readOnly
 
   return (
     <FormShell
@@ -153,3 +160,6 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
     </FormShell>
   )
 }
+
+ExpensesCostCenters.width = 700
+ExpensesCostCenters.height = 600

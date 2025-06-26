@@ -95,10 +95,7 @@ const Plant = () => {
       Component: Tree,
       props: {
         data: data
-      },
-      width: 500,
-      height: 400,
-      title: _labels.tree
+      }
     })
   }
 

@@ -7,10 +7,15 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-const Aging = ({ recordId, functionId }) => {
+const Aging = ({ recordId, functionId, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const [gridData, setGridData] = useState({})
+
+  const { platformLabels } = useContext(ControlContext)
+  useSetWindow({ title: platformLabels.Aging, window })
 
   async function fetchGridData() {
     let data = {
@@ -95,5 +100,8 @@ const Aging = ({ recordId, functionId }) => {
     </VertLayout>
   )
 }
+
+Aging.width = 1000
+Aging.height = 620
 
 export default Aging

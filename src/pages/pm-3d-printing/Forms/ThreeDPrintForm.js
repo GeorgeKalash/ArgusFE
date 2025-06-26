@@ -27,19 +27,27 @@ import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import ThreeDDesignForm from 'src/pages/pm-3d-design/forms/ThreeDDesignForm'
 import { useWindow } from 'src/windows'
+import useSetWindow from 'src/hooks/useSetWindow'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function ThreeDPrintForm({ labels, maxAccess: access, recordId }) {
+export default function ThreeDPrintForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
   const systemFunction = SystemFunction.ThreeDPrint
   const { stack } = useWindow()
 
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.Printing
+  })
+
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: systemFunction,
     access,
     enabled: !recordId
   })
+
+  useSetWindow({ title: platformLabels.threeDPrinting, window })
 
   const invalidate = useInvalidate({
     endpointId: ProductModelingRepository.Printing.page
@@ -164,7 +172,7 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
 
   const actions = [
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted || !isReleased
@@ -565,3 +573,6 @@ export default function ThreeDPrintForm({ labels, maxAccess: access, recordId })
     </FormShell>
   )
 }
+
+ThreeDPrintForm.width = 750
+ThreeDPrintForm.height = 650

@@ -3,10 +3,13 @@ import CustomTextField from '../Inputs/CustomTextField'
 import WindowToolbar from './WindowToolbar'
 import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const StrictDeleteConfirmation = ({ window, action }) => {
   const [confirmationText, setConfirmationText] = useState('')
   const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.DeleteConfirmation, window })
 
   const handleChange = event => {
     const value = event.target.value
@@ -56,5 +59,8 @@ const StrictDeleteConfirmation = ({ window, action }) => {
     </Grid>
   )
 }
+
+StrictDeleteConfirmation.width = 500
+StrictDeleteConfirmation.height = 300
 
 export default StrictDeleteConfirmation

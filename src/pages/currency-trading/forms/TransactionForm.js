@@ -38,8 +38,10 @@ import PaymentGrid from 'src/components/Shared/PaymentGrid'
 import { DataSets } from 'src/resources/DataSets'
 import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
 import CustomRadioButtonGroup from 'src/components/Inputs/CustomRadioButtonGroup'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function TransactionForm({ recordId, labels, access, plantId }) {
+const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
@@ -72,6 +74,12 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const invalidate = useInvalidate({
     endpointId: CTTRXrepository.CurrencyTrading.snapshot
   })
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.CashInvoice
+  })
+
+  useSetWindow({ title: labels?.cashInvoice, window: windowStack })
 
   const initialValues = {
     recordId: null,
@@ -439,8 +447,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       (!row.lcAmount || row.lcAmount == 0)
   )
 
-  const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
-
   const onClose = async recId => {
     const res = await getRequest({
       extension: CTTRXrepository.CurrencyTrading.get2,
@@ -579,7 +585,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       return record?.clientIndividual?.clientId
     }
   }
-  const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
+  const { userId } = JSON.parse(window?.sessionStorage?.getItem('userData'))
 
   async function fetchRate({ currencyId }) {
     if (currencyId) {
@@ -659,10 +665,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         onSuccess: () => {
           onClose(recId)
         }
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
 
@@ -705,10 +708,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         onClose: () => Post()
       },
       expandable: false,
-      width: 400,
-      height: 400,
-      spacing: false,
-      title: platformLabels.OTPVerification
+      spacing: false
     })
   }
 
@@ -755,7 +755,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
   const actions = [
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: isPosted
@@ -1032,10 +1032,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                                 idTypes: idTypeStore,
                                 clientformik: formik,
                                 labels: labels
-                              },
-                              title: labels.fetch,
-                              width: 400,
-                              height: 400
+                              }
                             })
                           }
                           disabled={
@@ -1574,3 +1571,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     </FormShell>
   )
 }
+
+TransactionForm.width = 1200
+TransactionForm.height = 600
+
+export default TransactionForm
