@@ -92,7 +92,7 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore }) 
       label: labels.weight,
       name: 'weight',
       props: {
-        maxLength: 12,
+        maxLength: 11,
         decimals: 4,
         allowNegative: false
       }

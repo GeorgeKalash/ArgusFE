@@ -300,7 +300,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       values={formik.values}
                       maxAccess={maxAccess}
                       onChange={async (event, newValue) => {
-                        changeDT(newValue)
+                        await changeDT(newValue)
                         formik.setFieldValue('dtId', newValue?.recordId || null)
                       }}
                       error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -504,7 +504,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.grossWgt}
                       required
                       readOnly
-                      maxLength={12}
+                      maxLength={11}
                       decimalScale={4}
                       onChange={e => formik.setFieldValue('grossWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('grossWgt', 0)}
@@ -518,7 +518,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.rmWgt}
                       required
                       readOnly
-                      maxLength={12}
+                      maxLength={11}
                       decimalScale={4}
                       onChange={e => formik.setFieldValue('rmWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('rmWgt', 0)}
@@ -532,7 +532,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.mouldWgt}
                       required
                       readOnly
-                      maxLength={12}
+                      maxLength={11}
                       decimalScale={4}
                       onChange={e => formik.setFieldValue('mouldWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('mouldWgt', 0)}
@@ -546,7 +546,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.netWgt}
                       required
                       readOnly
-                      maxLength={12}
+                      maxLength={11}
                       decimalScale={4}
                       onChange={e => formik.setFieldValue('netWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('netWgt', 0)}
@@ -560,7 +560,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       value={formik.values.suggestedWgt}
                       required
                       readOnly
-                      maxLength={12}
+                      maxLength={11}
                       decimalScale={3}
                       onChange={e => formik.setFieldValue('suggestedWgt', e.target.value)}
                       onClear={() => formik.setFieldValue('suggestedWgt', 0)}
@@ -636,7 +636,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       label={labels.loss}
                       value={loss}
                       required
-                      maxLength={12}
+                      maxLength={11}
                       decimalScale={3}
                       readOnly
                       onChange={e => {
