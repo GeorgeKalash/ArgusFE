@@ -548,7 +548,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         ? formik.values.transfer.recordId
                         : null
                     }
-                    customWidth={370}
+                    customWidth={330}
                     customHeight={240}
                     disabled
                   />
