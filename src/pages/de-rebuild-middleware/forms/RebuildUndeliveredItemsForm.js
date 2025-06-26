@@ -65,7 +65,7 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
         })
 
         toast.success(platformLabels.Added)
-        formik.setValues({ ...obj , recordId: res.recordId })
+        formik.setValues(obj)
 
         invalidate()
       } catch (error) {}
