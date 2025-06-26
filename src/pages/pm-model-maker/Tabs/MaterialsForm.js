@@ -62,7 +62,6 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
       component: 'resourcelookup',
       label: labels.sku,
       name: 'itemId',
-      displayFieldWidth: 2,
       props: {
         endpointId: InventoryRepository.Materials.snapshot,
         displayField: 'sku',
@@ -77,7 +76,7 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
           { from: 'sku', to: 'sku' },
           { from: 'categoryName', to: 'itemCategoryName' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 3
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow.itemId) {
@@ -118,7 +117,8 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
       label: labels.pcs,
       name: 'pcs',
       props: {
-        maxLength: 7
+        maxLength: 7,
+        decimalScale: 0
       }
     },
     {
