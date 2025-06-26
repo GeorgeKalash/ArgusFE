@@ -492,8 +492,9 @@ export const ResourceIds = {
   ChangeClient: 51336,
   WCConsumptionImport: 42702,
   Currency: 20136,
-  PaymentOrder: 31333,
   POTracking: 50309,
+  PaymentOrder: 31333,
+  PaymentOrderExpenses: 31614,
   Moulds: 47200,
   
   // GL
