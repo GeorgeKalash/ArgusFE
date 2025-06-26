@@ -181,10 +181,7 @@ const PhysicalCountSerial = () => {
           setSiteStore([])
           setEditMode(false)
         }
-      },
-      width: 570,
-      height: 170,
-      title: platformLabels.Clear
+      }
     })
   }
 

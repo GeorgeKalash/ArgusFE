@@ -34,8 +34,9 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { LOTransportationForm } from 'src/components/Shared/LOTransportationForm'
 import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function CreditOrderForm({ labels, access, recordId, plantId, userData, window }) {
+const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -86,14 +87,16 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     ]
   })
 
-  const { maxAccess } = useDocumentType({
-    functionId: selectedFunctionId,
-    access: access,
-    enabled: !recordId
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.CreditOrder
   })
 
-  const { labels: _labels, access: accessINV } = useResourceParams({
-    datasetId: ResourceIds.CreditInvoice
+  useSetWindow({ title: labels.creditOrder, window })
+
+  const { maxAccess } = useDocumentType({
+    functionId: selectedFunctionId,
+    access,
+    enabled: !recordId
   })
 
   const invalidate = useInvalidate({
@@ -264,15 +267,15 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     stack({
       Component: CreditInvoiceForm,
       props: {
-        _labels,
-        access: accessINV,
+        labels,
+        access,
         recordId: res?.recordId,
         plantId,
         userData
       },
       width: 900,
       height: 600,
-      title: _labels.creditInvoice
+      title: labels.creditInvoice
     })
   }
 
@@ -687,10 +690,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       props: {
         functionId: formik.values.functionId,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -702,10 +702,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
         functionId: formik.values.functionId,
         editMode: formik.values.status != 1,
         totalBaseAmount: totalLoc
-      },
-      width: 1200,
-      height: 670,
-      title: _labels.shipments
+      }
     })
   }
 
@@ -716,10 +713,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
         recordId: formik.values.recordId,
         functionId: formik.values.functionId,
         editMode: formik.values.status != 1
-      },
-      width: 700,
-      height: 430,
-      title: _labels.transportation
+      }
     })
   }
 
@@ -1005,3 +999,8 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     </FormShell>
   )
 }
+
+CreditOrderForm.width = 1000
+CreditOrderForm.height = 650
+
+export default CreditOrderForm

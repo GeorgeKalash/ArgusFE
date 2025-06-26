@@ -147,13 +147,8 @@ const ThreeDPrinting = () => {
     stack({
       Component: ThreeDPrintForm,
       props: {
-        labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 1000,
-      height: 750,
-      title: labels.ThreeDPrint
+        recordId
+      }
     })
   }
 

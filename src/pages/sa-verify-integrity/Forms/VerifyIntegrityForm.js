@@ -45,10 +45,7 @@ export default function VerifyIntegrityForm({ _labels, maxAccess }) {
             open: true,
             fullScreen: false,
             message: platformLabels.EverythingIsOk
-          },
-          width: 450,
-          height: 170,
-          title: platformLabels.Success
+          }
         })
       }
     }

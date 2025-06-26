@@ -281,9 +281,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       props: {
         functionId: SystemFunction.DeliveryOrder,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: labels.WorkFlow
+      }
     })
   }
 
@@ -462,10 +460,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
         form: formik.values,
         handleAddressValues: setAddressValues,
         checkedAddressId: formik.values.addressId
-      },
-      width: 950,
-      height: 600,
-      title: labels.AddressFilter
+      }
     })
   }
 
