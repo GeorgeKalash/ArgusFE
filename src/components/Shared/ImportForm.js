@@ -156,6 +156,7 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
       field: name,
       headerName: name,
       width: 130,
+      type: (dataType === 2 && format === '1') || dataType === 3 ? 'number' : undefined,
       dataType,
       ...rest
     })) || []
