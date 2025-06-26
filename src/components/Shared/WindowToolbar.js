@@ -128,11 +128,7 @@ const WindowToolbar = ({
             .filter(button => actions.some(action => action.key === button.key))
             .map(button => {
               const correspondingAction = actions.find(action => action.key === button.key)
-
-              const isVisible = eval(
-                correspondingAction.condition &&
-                  (button.access ? maxAccess?.record?.accessFlags[button.access] !== false : true)
-              )
+              const isVisible = eval(button.access ? maxAccess?.record?.accessFlags[button.access] !== false : true)
               const isDisabled = eval(correspondingAction.disabled)
               const handleClick = functionMapping[correspondingAction.onClick] || correspondingAction.onClick
 
