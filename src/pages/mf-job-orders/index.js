@@ -14,11 +14,12 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import JobOrderWindow from './window/JobOrderWindow'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import NormalDialog from 'src/components/Shared/NormalDialog'
 
 const JobOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
 
   const {
     query: { data },
@@ -147,16 +148,17 @@ const JobOrder = () => {
   }
 
   const editJOB = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
-  async function openForm(recordId) {
+  async function openStack(recordId) {
     stack({
       Component: JobOrderWindow,
       props: {
         labels,
         access,
         recordId,
+        lockRecord,
         invalidate
       },
       width: 1150,
@@ -173,6 +175,32 @@ const JobOrder = () => {
     invalidate()
     toast.success(platformLabels.Deleted)
   }
+
+  async function openForm(recordId, reference, status) {
+      if (recordId && status !== 3) {
+        await lockRecord({
+          recordId: recordId,
+          reference: reference,
+          resourceId: ResourceIds.MFJobOrders,
+          onSuccess: () => {
+            openStack(recordId)
+          },
+          isAlreadyLocked: name => {
+            stack({
+              Component: NormalDialog,
+              props: {
+                DialogText: `${platformLabels.RecordLocked} ${name}`,
+                width: 600,
+                height: 200,
+                title: platformLabels.Dialog
+              }
+            })
+          }
+        })
+      } else {
+        openStack(recordId)
+      }
+    }
 
   return (
     <VertLayout>
