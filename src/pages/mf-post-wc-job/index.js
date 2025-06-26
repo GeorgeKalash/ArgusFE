@@ -69,7 +69,8 @@ const PostWorkCenterJob = () => {
       extension: ManufacturingRepository.JobWorkCenter.close,
       record: JSON.stringify({
         jobId: formik.values.jobId,
-        seqNo: formik.values.seqNo
+        seqNo: formik.values.seqNo,
+        workCenterId: formik.values.workCenterId
       })
     })
     toast.success(platformLabels.Posted)
@@ -81,7 +82,8 @@ const PostWorkCenterJob = () => {
       extension: ManufacturingRepository.JobWorkCenter.reopen,
       record: JSON.stringify({
         jobId: formik.values.jobId,
-        seqNo: formik.values.seqNo
+        seqNo: formik.values.seqNo,
+        workCenterId: formik.values.workCenterId
       })
     })
     toast.success(platformLabels.Unposted)
@@ -133,6 +135,7 @@ const PostWorkCenterJob = () => {
           formik.setValues({
             ...formik.values,
             ...jobRes?.record,
+            workCenterId: jobRes?.record?.workCenterId || '',
             workCenterName: jobRes?.record?.wcName || '',
             workCenterRef: jobRes?.record?.wcRef || '',
             pcs: jobRes?.record?.pcs || 0,
@@ -152,6 +155,14 @@ const PostWorkCenterJob = () => {
           getData(newValue, jobRes?.record?.routingSeqNo).then(res => {
             formik.setFieldValue('data', { list: res })
           })
+
+          const res = await getRequest({
+            extension: ManufacturingRepository.JobRouting.get,
+            parameters: `_jobOrderId=${newValue?.recordId}&_seqNo=${parseInt(jobRes?.record?.routingSeqNo) + 1}`
+          })
+
+          formik.setFieldValue('toWorkCenterName', res?.record?.workCenterName || '')
+          formik.setFieldValue('toWorkCenterRef', res?.record?.workCenterRef || '')
         } else {
           stackError({
             message: platformLabels.MandatoryRoutingSeqNo
@@ -226,7 +237,7 @@ const PostWorkCenterJob = () => {
             <Grid item xs={3}>
               <CustomTextField
                 name='workCenterRef'
-                label={labels.workCenter}
+                label={labels.fromWorkCenter}
                 value={formik.values.workCenterRef}
                 readOnly
               />
@@ -241,17 +252,34 @@ const PostWorkCenterJob = () => {
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
+              <CustomTextField
+                name='toWorkCenterRef'
+                label={labels.toWorkCenter}
+                value={formik.values.toWorkCenterRef}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='toWorkCenterName'
+                label={labels.name}
+                value={formik.values.toWorkCenterName}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={6}></Grid>
+            <Grid item xs={3}>
               <CustomNumberField name='qtyIn' label={labels.qtyIn} value={formik.values.qtyIn} readOnly />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='qty' label={labels.qty} value={formik.values.qty} readOnly />
+              <CustomNumberField name='qty' label={labels.qtyOut} value={formik.values.qty} readOnly />
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
               <CustomNumberField name='pcsIn' label={labels.pcsIn} value={formik.values.pcsIn} readOnly />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='pcs' label={labels.pcs} value={formik.values.pcs} readOnly />
+              <CustomNumberField name='pcs' label={labels.pcsOut} value={formik.values.pcs} readOnly />
             </Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={3}>
