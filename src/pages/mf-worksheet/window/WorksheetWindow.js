@@ -3,6 +3,7 @@ import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import WorksheetForm from '../forms/WorksheetForm.js'
 import MaterialsTab from '../forms/MaterialsTab.js'
+import OperationsTab from '../forms/OperationsTab.js'
 
 const WorksheetWindow = ({ recordId, labels, maxAccess, window }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -13,7 +14,11 @@ const WorksheetWindow = ({ recordId, labels, maxAccess, window }) => {
     values: null
   })
 
-  const tabs = [{ label: labels.Worksheet }, { label: labels.issueOfMaterials, disabled: !store.recordId }]
+  const tabs = [
+    { label: labels.Worksheet },
+    { label: labels.issueOfMaterials, disabled: !store.recordId },
+    { label: labels.Summary, disabled: !store.recordId }
+  ]
 
   return (
     <>
@@ -23,6 +28,9 @@ const WorksheetWindow = ({ recordId, labels, maxAccess, window }) => {
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
         <MaterialsTab labels={labels} access={maxAccess} store={store} />
+      </CustomTabPanel>
+      <CustomTabPanel index={2} value={activeTab}>
+        <OperationsTab labels={labels} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
     </>
   )
