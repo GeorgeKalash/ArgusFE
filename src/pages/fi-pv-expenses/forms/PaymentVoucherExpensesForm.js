@@ -327,12 +327,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       disabled: !editMode || isCancelled
     },
     {
-      key: 'Post',
-      condition: true,
-      onClick: onPost,
-      disabled: isPosted || !editMode || isCancelled
-    },
-    {
       key: 'Cancel',
       condition: true,
       onClick: onCancel,

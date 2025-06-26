@@ -27,7 +27,7 @@ const StrictUnpostConfirmation = ({ window, onSuccess }) => {
 
   const actions = [
     {
-      key: 'Unpost',
+      key: 'Unlocked',
       condition: true,
       onClick: handleSubmit,
       disabled: confirmationText.toLowerCase() !== 'unpost'
