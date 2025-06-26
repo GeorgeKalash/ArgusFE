@@ -7,7 +7,7 @@ import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import AddressForm from 'src/components/Shared/AddressForm'
 
-const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) => {
+const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([])
@@ -51,9 +51,7 @@ const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) =>
       props: {
         recordId: id,
         isCleared: false,
-        onSubmit: async obj => {
-          console.log(obj)
-
+        onSubmit: async (obj, window) => {
           if (obj) {
             const data = {
               vendorId: vendorId,
@@ -102,9 +100,7 @@ const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) =>
       addAddress={addAddress}
       delAddress={delAddress}
       editAddress={editAddress}
-      labels={labels}
       columns={columns}
-      maxAccess={maxAccess}
       {...props}
     />
   )

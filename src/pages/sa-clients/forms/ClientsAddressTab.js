@@ -5,8 +5,6 @@ import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import useResourceParams from 'src/hooks/useResourceParams'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import AddressForm from 'src/components/Shared/AddressForm'
 
 const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
@@ -15,10 +13,6 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
   const [addressGridData, setAddressGridData] = useState([])
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
-
-  const { labels: labels, access: maxAccess } = useResourceParams({
-    datasetId: ResourceIds.Address
-  })
 
   const getAddressGridData = recordId => {
     setAddressGridData([])
@@ -55,19 +49,46 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
   async function openForm(recordId) {
     const clientId = store.recordId
 
-    const latestRecord = await getRequest({
+    let latestRecord = await getRequest({
       extension: SaleRepository.Client.get,
       parameters: `_recordId=${clientId}`
     }).then(r => r.record)
 
-    const isDefaultShip = latestRecord?.shipAddressId === recordId
-    const isDefaultBill = latestRecord?.billAddressId === recordId
+    async function updateAndRefreshDefault(type) {
+      latestRecord = await getRequest({
+        extension: SaleRepository.Client.get,
+        parameters: `_recordId=${clientId}`
+      }).then(r => r.record)
+
+      const updatePayload = {
+        ...latestRecord,
+        [`${type === 'bill' ? 'billAddressId' : 'shipAddressId'}`]: recordId
+      }
+
+      await postRequest({
+        extension: SaleRepository.Client.set,
+        record: JSON.stringify(updatePayload)
+      })
+
+      setStore(prev => ({
+        ...prev,
+        record: updatePayload
+      }))
+
+      toast.success(platformLabels.Updated)
+
+      isDefaultBill = updatePayload.billAddressId === recordId
+      isDefaultShip = updatePayload.shipAddressId === recordId
+    }
+
+    let isDefaultBill = latestRecord?.billAddressId === recordId
+    let isDefaultShip = latestRecord?.shipAddressId === recordId
 
     stack({
       Component: AddressForm,
       props: {
         recordId,
-        onSubmit: async obj => {
+        onSubmit: async (obj, window) => {
           if (obj) {
             const data = {
               clientId,
@@ -79,6 +100,7 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
               extension: SaleRepository.Address.set,
               record: JSON.stringify(data)
             })
+
             toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
             getAddressGridData(clientId)
             window.close()
@@ -89,51 +111,21 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
             key: 'DefaultBilling',
             condition: true,
             onClick: async () => {
-              const latest = await getRequest({
-                extension: SaleRepository.Client.get,
-                parameters: `_recordId=${clientId}`
-              }).then(r => r.record)
-
-              await postRequest({
-                extension: SaleRepository.Client.set,
-                record: JSON.stringify({
-                  ...latest,
-                  billAddressId: recordId
-                })
-              })
-
-              setStore(prev => ({
-                ...prev,
-                record: { ...latest, billAddressId: recordId }
-              }))
-              toast.success(platformLabels.Updated)
+              await updateAndRefreshDefault('bill')
             },
-            disabled: !recordId || isDefaultBill
+            get disabled() {
+              return !recordId || isDefaultBill
+            }
           },
           {
             key: 'DefaultShipping',
             condition: true,
             onClick: async () => {
-              const latest = await getRequest({
-                extension: SaleRepository.Client.get,
-                parameters: `_recordId=${clientId}`
-              }).then(r => r.record)
-
-              await postRequest({
-                extension: SaleRepository.Client.set,
-                record: JSON.stringify({
-                  ...latest,
-                  shipAddressId: recordId
-                })
-              })
-
-              setStore(prev => ({
-                ...prev,
-                record: { ...latest, shipAddressId: recordId }
-              }))
-              toast.success(platformLabels.Updated)
+              await updateAndRefreshDefault('ship')
             },
-            disabled: !recordId || isDefaultShip
+            get disabled() {
+              return !recordId || isDefaultShip
+            }
           }
         ]
       }
@@ -151,12 +143,12 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
   const columns = [
     {
       field: 'city',
-      headerName: labels.city,
+      headerName: platformLabels.city,
       flex: 1
     },
     {
       field: 'street1',
-      headerName: labels.street1,
+      headerName: platformLabels.street,
       flex: 1
     }
   ]
@@ -167,9 +159,7 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
       addAddress={addAddress}
       delAddress={delAddress}
       editAddress={editAddress}
-      labels={labels}
       columns={columns}
-      maxAccess={maxAccess}
       {...props}
     />
   )

@@ -103,7 +103,7 @@ const AddressBook = () => {
       Component: AddressForm,
       props: {
         recordId,
-        onSubmit: async () => {
+        onSubmit: async window => {
           invalidate()
           window.close()
         },

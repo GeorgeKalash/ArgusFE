@@ -42,7 +42,7 @@ const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
         <RelationList store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={3} height={height} value={activeTab}>
-        <AddressMasterDataForm store={store} setStore={setStore} labels={labels} />
+        <AddressMasterDataForm store={store} setStore={setStore} />
       </CustomTabPanel>
     </VertLayout>
   )

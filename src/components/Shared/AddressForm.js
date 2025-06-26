@@ -36,9 +36,9 @@ const AddressForm = ({
 
       if (recordId) {
         toast.success(platformLabels.Edited)
-        onSubmit()
+        onSubmit(null, window)
       } else {
-        onSubmit(data)
+        onSubmit(data, window)
       }
     })
   }

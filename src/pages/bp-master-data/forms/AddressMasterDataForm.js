@@ -7,7 +7,7 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import AddressForm from 'src/components/Shared/AddressForm'
 
-const AddressMasterDataForm = ({ store, labels, editMode, ...props }) => {
+const AddressMasterDataForm = ({ store, editMode, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([])
@@ -52,7 +52,7 @@ const AddressMasterDataForm = ({ store, labels, editMode, ...props }) => {
         recordId: addressId,
         editMode,
         onSubmit: async obj => {
-          if (obj) {
+          if ((obj, window)) {
             obj.bpId = recordId
             await postRequest({
               extension: BusinessPartnerRepository.BPAddress.set,
@@ -82,7 +82,6 @@ const AddressMasterDataForm = ({ store, labels, editMode, ...props }) => {
       addAddress={addAddress}
       delAddress={delAddress}
       editAddress={editAddress}
-      labels={labels}
       {...props}
     />
   )
