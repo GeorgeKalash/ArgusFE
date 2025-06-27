@@ -10,7 +10,6 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 
@@ -25,8 +24,9 @@ const PUFinancialIntegrators = () => {
     })
     formik.setValues({
       ...formik.values,
-      rows: res.list.map(({ ...rest }, index) => ({
+      items: res.list.map(({ ...rest }, index) => ({
         id: index + 1,
+        
         ...rest
       }))
     })
@@ -41,17 +41,13 @@ const PUFinancialIntegrators = () => {
     maxAccess,
     validateOnChange: true,
     initialValues: {
-      rows: []
+      items: []
     },
     onSubmit: async values => {
-      await Promise.all(
-        values.rows.map(row =>
-          postRequest({
-            extension: PurchaseRepository.FinancialGroup.set,
-            record: JSON.stringify(row)
-          })
-        )
-      )
+      await postRequest({
+        extension: PurchaseRepository.FinancialGroup.set2,
+        record: JSON.stringify(values)
+      })
 
       toast.success(platformLabels.Updated)
       await getGridData()
@@ -104,10 +100,10 @@ const PUFinancialIntegrators = () => {
       <Grow>
         <DataGrid
           onChange={value => {
-            formik.setFieldValue('rows', value)
+            formik.setFieldValue('items', value)
           }}
-          value={formik.values?.rows}
-          error={formik.errors?.rows}
+          value={formik.values?.items}
+          error={formik.errors?.items}
           columns={columns}
           allowDelete={false}
           allowAddNewLine={false}
