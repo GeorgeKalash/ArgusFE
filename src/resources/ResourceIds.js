@@ -540,6 +540,7 @@ export const ResourceIds = {
   GLReturnOnInvoice: 51606,
   IomProperties: 42606,
   SyncPurchaseTrx: 50602,
+  IRPlantSettings: 46100,
 
   //MCR
   MCRSalesInvoice: 51607,
