@@ -1706,8 +1706,6 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                             Component: AddressForm,
                             props: {
                               editMode: editMode && !allowEdit ? false : true,
-                              _labels: labels,
-                              maxAccess: maxAccess,
                               address: address,
                               setAddress: setAddress,
                               onSubmit: onAddressSubmit,

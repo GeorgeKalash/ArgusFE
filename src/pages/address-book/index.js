@@ -106,9 +106,7 @@ const AddressBook = () => {
         onSubmit: async window => {
           invalidate()
           window.close()
-        },
-        _labels: _labels,
-        access
+        }
       }
     })
   }

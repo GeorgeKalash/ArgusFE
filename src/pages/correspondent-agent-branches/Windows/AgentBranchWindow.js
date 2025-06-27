@@ -79,8 +79,6 @@ const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
         <AddressFormShell
-          _labels={labels}
-          maxAccess={maxAccess}
           editMode={editMode}
           address={store.address}
           setAddress={addr =>

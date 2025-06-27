@@ -234,10 +234,12 @@ const AddressTab = ({
       </FormGrid>
       <FormGrid item hideonempty xs={4}>
         <ResourceLookup
-          endpointId={SystemRepository.CityDistrict.snapshot}
-          parameters={{
-            _cityId: addressValidation.values.cityId
-          }}
+          endpointId={addressValidation.values.cityId && SystemRepository.CityDistrict.snapshot}
+          parameters={
+            addressValidation.values.cityId && {
+              _cityId: addressValidation.values.cityId
+            }
+          }
           valueField='name'
           displayField='name'
           name='cityDistrict'
