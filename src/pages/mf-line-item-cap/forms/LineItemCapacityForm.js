@@ -30,9 +30,9 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
 
   const conditions = {
     lineId: row => row?.lineId > 0,
-    fullCapacityWgtPerHr: row => row?.fullCapacityWgtPerHr,
-    preparationHrs: row => row?.preparationHrs,
-    nbOfLabors: row => row?.nbOfLabors
+    fullCapacityWgtPerHr: row => row?.fullCapacityWgtPerHr != null,
+    preparationHrs: row => row?.preparationHrs != null,
+    nbOfLabors: row => row?.nbOfLabors != null
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'data')
 
@@ -42,7 +42,7 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
       itemName: '',
       sku: '',
       class: '',
-      data: [{ id: 1, lineId: null, fullCapacityWgtPerHr: 0, preparationHrs: 0, nbOfLabors: 0 }]
+      data: [{ id: 1, lineId: null, fullCapacityWgtPerHr: null, preparationHrs: null, nbOfLabors: null }]
     },
     maxAccess,
     conditionSchema: ['data'],
