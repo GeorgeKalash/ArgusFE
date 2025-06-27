@@ -63,7 +63,7 @@ const RequisitionDocTypeDefault = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: InventoryRepository.DocumentTypeDefaults.del,
+      extension: PurchaseRepository.DocumentTypeDefault.del,
       record: JSON.stringify(obj)
     })
     invalidate()
