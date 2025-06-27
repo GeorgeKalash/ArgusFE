@@ -77,16 +77,6 @@ const PaymentOrdersExpenses = () => {
       flex: 1
     },
     {
-      field: 'accountRef',
-      headerName: labels.account,
-      flex: 1
-    },
-    {
-      field: 'accountName',
-      headerName: labels.accountName,
-      flex: 1
-    },
-    {
       field: 'cashAccountName',
       headerName: labels.cashAccount,
       flex: 1
