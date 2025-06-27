@@ -47,5 +47,9 @@ export const IVReplenishementRepository = {
   },
   PurchaseRequest: {
     generate: service + 'generatePR'
+  },
+  PlantSettings: {
+    get: service + 'getPLT',
+    set: service + 'setPLT'
   }
 }
