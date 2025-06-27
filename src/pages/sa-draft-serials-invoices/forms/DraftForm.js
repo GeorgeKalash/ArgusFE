@@ -768,11 +768,11 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
       var seqNo = 0
 
-      const itemMap = serials.reduce((acc, { sku, itemId, itemName, weight }) => {
+      const itemMap = serials.reduce((acc, { sku, itemId, itemName, weight, categoryName }) => {
         if (itemId) {
           if (!acc[itemId]) {
             seqNo++
-            acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, seqNo: seqNo }
+            acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, seqNo: seqNo, categoryName: categoryName }
           }
           acc[itemId].pcs += 1
           acc[itemId].weight = parseFloat((acc[itemId].weight + parseFloat(weight || 0)).toFixed(2))
@@ -1138,6 +1138,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 0.75 },
                 { field: 'sku', headerName: labels.sku, flex: 1 },
                 { field: 'itemName', headerName: labels.itemDesc, flex: 2 },
+                { field: 'categoryName', headerName: labels.category, flex: 2 },
                 { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
                 { field: 'weight', headerName: labels.weight, type: 'number', flex: 1 }
               ]}
