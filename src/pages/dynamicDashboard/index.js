@@ -133,7 +133,7 @@ const DashboardLayout = () => {
     setLoading(false)
   }, 500)
 
-  const { labels } = useResourceParams({
+  const { labels, access } = useResourceParams({
     datasetId: ResourceIds.UserDashboard
   })
 
@@ -543,6 +543,7 @@ const DashboardLayout = () => {
               </SummaryCard>
               <Box style={{ height: '350px', display: 'flex' }}>
                 <Table
+                  name='table'
                   columns={[
                     {
                       field: 'reference',
@@ -563,6 +564,7 @@ const DashboardLayout = () => {
                   gridData={data?.authorization}
                   rowId={['recordId']}
                   pagination={false}
+                  maxAccess={access}
                 />
               </Box>
             </ChartCard>
