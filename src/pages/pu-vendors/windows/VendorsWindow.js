@@ -21,13 +21,7 @@ const VendorsWindow = ({ labels, maxAccess, recordId }) => {
         <VendorsForm labels={labels} maxAccess={maxAccess} recordId={recordId} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <VendorsAddressGrid
-          labels={labels}
-          recordId={store.recordId}
-          maxAccess={maxAccess}
-          store={store}
-          setStore={setStore}
-        />
+        <VendorsAddressGrid labels={labels} recordId={store.recordId} store={store} setStore={setStore} />
       </CustomTabPanel>
     </>
   )
