@@ -507,6 +507,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
+                      formik.setFieldValue('header.mouldRef', newValue?.reference || null)
                       formik.setFieldValue('header.mouldId', newValue?.recordId || null)
                     }}
                     error={formik.touched?.header?.mouldId && Boolean(formik.errors?.header?.mouldId)}
@@ -564,9 +565,9 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     ]}
                     values={formik.values.header}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={async (event, newValue) => {
                       if (!newValue?.recordId) {
-                        formik.setFieldValue('header.mouldId', null)
+                        await formik.setFieldValue('header.mouldId', null)
                       }
                       formik.setFieldValue('header.lineId', newValue?.recordId || null)
                     }}
