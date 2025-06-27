@@ -30,8 +30,17 @@ import SerialsLots from './SerialsLots'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import Samples from './Samples'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
+import NormalDialog from 'src/components/Shared/NormalDialog'
 
-export default function JobOrderForm({ labels, maxAccess: access, setStore, store, setRefetchRouting, invalidate }) {
+export default function JobOrderForm({
+  labels,
+  maxAccess: access,
+  setStore,
+  store,
+  setRefetchRouting,
+  invalidate,
+  lockRecord
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -271,6 +280,26 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       })
     })
     toast.success(platformLabels.Post)
+    lockRecord({
+      recordId: res.recordId,
+      reference: formik.values.reference,
+      resourceId: ResourceIds.MFJobOrders,
+      onSuccess: () => {
+        refetchForm(res.recordId)
+      },
+      isAlreadyLocked: name => {
+        window.close()
+        stack({
+          Component: NormalDialog,
+          props: {
+            DialogText: `${platformLabels.RecordLocked} ${name}`,
+            width: 600,
+            height: 200,
+            title: platformLabels.Dialog
+          }
+        })
+      }
+    })
     invalidate()
     await refetchForm(res.recordId)
     setStore(prevStore => ({
@@ -342,6 +371,12 @@ export default function JobOrderForm({ labels, maxAccess: access, setStore, stor
       isPosted: res?.record.status == 3,
       isCancelled: res?.record.status == -1
     }))
+    !formik.values.recordId &&
+      lockRecord({
+        recordId: res?.record.recordId,
+        reference: res?.record.reference,
+        resourceId: ResourceIds.MFJobOrders
+      })
   }
 
   async function getRouting(recordId) {
