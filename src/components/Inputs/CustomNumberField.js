@@ -120,7 +120,7 @@ const CustomNumberField = ({
       thousandSeparator={thousandSeparator}
       decimalSeparator='.'
       decimalScale={decimalScale}
-      value={value}
+      value={value ?? ''}
       variant={variant}
       size={size}
       fullWidth

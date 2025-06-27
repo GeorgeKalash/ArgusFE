@@ -49,7 +49,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
         update({
           id,
           field,
-          value: ''
+          value: null
         })
       }}
       onBlur={() => {
