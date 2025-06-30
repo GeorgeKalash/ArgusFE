@@ -50,6 +50,7 @@ export const IVReplenishementRepository = {
   },
   PlantSettings: {
     get: service + 'getPLT',
-    set: service + 'setPLT'
+    set: service + 'setPLT',
+    del: service + 'delPLT'
   }
 }

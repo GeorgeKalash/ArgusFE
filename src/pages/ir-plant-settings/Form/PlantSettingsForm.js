@@ -36,7 +36,8 @@ export default function PlantSettingsForm({ labels, maxAccess, recordId, window 
     maxAccess,
     validationSchema: yup.object({
       dtId: yup.number().required(),
-      siteId: yup.number().required()
+      siteId: yup.number().required(),
+      plantId: yup.number().required()
     }),
     validateOnChange: true,
     onSubmit: async obj => {
@@ -45,49 +46,64 @@ export default function PlantSettingsForm({ labels, maxAccess, recordId, window 
         record: JSON.stringify(obj)
       })
 
-      toast.success(!recordId ? platformLabels.Added : platformLabels.Edited)
+      toast.success(platformLabels.Edited)
 
       invalidate()
       window.close()
     }
   })
-  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res = await getRequest({
-          extension: IVReplenishementRepository.PlantSettings.get,
-          parameters: `_plantId=${recordId}`
-        })
+      const res = await getRequest({
+        extension: IVReplenishementRepository.PlantSettings.get,
+        parameters: `_plantId=${recordId}`
+      })
 
-        if (!res.recordId) {
-          formik.setValues({
-            ...formik.values,
-            recordId,
-            plantId: recordId
-          })
-        }
-
-        formik.setValues({
-          ...formik.values,
-          ...res.record,
-          recordId,
-          plantId: recordId
-        })
-      }
+      formik.setValues({
+        ...formik.values,
+        ...(res?.record || {}),
+        recordId,
+        plantId: recordId
+      })
+    }
     })()
   }, [])
 
-  console.log(formik)
+  const onClear = async () => {
+    await postRequest({
+      extension: IVReplenishementRepository.PlantSettings.del,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (recordId) {
+      formik.setValues({
+        recordId,
+        plantId: recordId
+      })
+    }
+    toast.success(platformLabels.Deleted)
+  }
+
+  const actions = [
+    {
+      key: 'Clear',
+      condition: true,
+      onClick: onClear,
+      disabled: !formik.values.siteId || !formik.values.dtId
+    }
+  ]
 
   return (
     <FormShell
       resourceId={ResourceIds.IRPlantSettings}
       form={formik}
       maxAccess={maxAccess}
-      editMode={editMode}
-      functionId={SystemFunction.MaterialTransfer}
+      editMode={true}
+      actions={actions}
+      disabledSubmit={!formik.values.siteId || !formik.values.dtId}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>
@@ -103,9 +119,10 @@ export default function PlantSettingsForm({ labels, maxAccess, recordId, window 
                   { key: 'reference', value: 'Ref' },
                   { key: 'name', value: 'Name' }
                 ]}
+                required
                 values={formik.values}
                 maxAccess={maxAccess}
-                readOnly={editMode}
+                readOnly
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId || null)
                 }}
