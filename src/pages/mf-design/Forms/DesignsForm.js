@@ -82,9 +82,9 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       if (!obj.recordId) {
         formik.setFieldValue('recordId', res.recordId)
         setStore({ recordId: res.recordId })
-        invalidate()
       }
       toast.success(!obj.recordId ? platformLabels.Edited : platformLabels.Added)
+      invalidate()
     }
   })
 
@@ -101,17 +101,20 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       extension: ManufacturingRepository.Design.get,
       parameters: `_recordId=${recordId}`
     }).then(async res => {
-      const res2 = await getRequest({
-        extension: ManufacturingRepository.DesignGroup.get,
-        parameters: `_recordId=${res?.record?.groupId}`
-      })
+      if (res?.record?.groupId) {
+        const res2 = await getRequest({
+          extension: ManufacturingRepository.DesignGroup.get,
+          parameters: `_recordId=${res?.record?.groupId}`
+        })
+
+        changeDT(res2.record)
+      }
 
       formik.setValues({
         ...res.record,
         designDate: formatDateFromApi(res?.record?.designDate)
       })
-      
-      changeDT(res2.record)
+
       setStore({
         recordId: res.record.recordId
       })
