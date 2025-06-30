@@ -32,7 +32,7 @@ const PUFinancialIntegrators = () => {
     })
   }
 
-  const { labels: labels, maxAccess } = useResourceQuery({
+  const { labels, maxAccess } = useResourceQuery({
     queryFn: getGridData,
     datasetId: ResourceIds.PUFinancialIntegrators
   })
@@ -102,6 +102,7 @@ const PUFinancialIntegrators = () => {
           onChange={value => {
             formik.setFieldValue('items', value)
           }}
+          name={'financialIntegrator'}
           value={formik.values?.items}
           error={formik.errors?.items}
           columns={columns}
