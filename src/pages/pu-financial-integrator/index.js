@@ -102,7 +102,7 @@ const PUFinancialIntegrators = () => {
           onChange={value => {
             formik.setFieldValue('items', value)
           }}
-          name={'financialIntegrator'}
+          name='financialIntegrator'
           value={formik.values?.items}
           error={formik.errors?.items}
           columns={columns}
