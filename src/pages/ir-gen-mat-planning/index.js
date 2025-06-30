@@ -14,12 +14,15 @@ import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const GenerateMaterialPlaning = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const [values, setValues] = useState({
-    search: '',
+    searchValue: '',
+    search: false,
     mrpId: ''
   })
 
@@ -32,17 +35,22 @@ const GenerateMaterialPlaning = () => {
     })
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params, show: true })
+  }
+
   const {
     query: { data },
     labels,
     filterBy,
     access
   } = useResourceQuery({
-    datasetAccessId: ResourceIds.GenerateMRPs,
-    datasetId: ResourceIds.MaterialReqPlannings,
-
+    datasetId: ResourceIds.GenerateMRPs,
     endpointId: IVReplenishementRepository.materialPlaning.preview,
-    queryFn: fetchGridData
+    queryFn: fetchGridData,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [
@@ -72,27 +80,26 @@ const GenerateMaterialPlaning = () => {
       extension: IVReplenishementRepository.MatPlanningItem.append,
       record: JSON.stringify({ mrpId: values.mrpId, items: data.list.filter(item => item?.checked) })
     })
+
+    toast.success(platformLabels.Generated)
   }
 
   const actions = [
     {
       key: 'add',
       condition: true,
-      onClick: add
+      onClick: add,
+      disabled: !values.mrpId
     }
   ]
 
-  console.log(data)
-
-  console.log(values?.search)
-
-  const result = data?.list?.filter(
-    item =>
-      item?.sku?.toLowerCase()?.includes(values?.search?.toLowerCase()) ||
-      item?.name?.toLowerCase().includes(values?.search?.toLowerCase())
-  )
-
-  console.log(result)
+  const result =
+    values.search &&
+    data?.list?.filter(
+      item =>
+        item?.sku?.toLowerCase()?.includes(values?.searchValue?.toLowerCase()) ||
+        item?.name?.toLowerCase().includes(values?.searchValue?.toLowerCase())
+    )
 
   return (
     <VertLayout>
@@ -107,24 +114,26 @@ const GenerateMaterialPlaning = () => {
               <CustomTextField
                 name='search'
                 label={labels.search}
-                value={values.search}
+                value={values.searchValue}
                 search
                 onChange={e =>
                   setValues(prev => ({
                     ...prev,
-                    search: e.target.value
+                    searchValue: e.target.value,
+                    search: false
                   }))
                 }
                 onSearch={value =>
                   setValues(prev => ({
                     ...prev,
-                    search: value
+                    search: true
                   }))
                 }
                 onClear={() =>
                   setValues(prev => ({
                     ...prev,
-                    search: ''
+                    searchValue: '',
+                    search: true
                   }))
                 }
                 maxAccess={access}
@@ -135,12 +144,11 @@ const GenerateMaterialPlaning = () => {
             <ResourceComboBox
               endpointId={IVReplenishementRepository.MatPlanning.qry}
               filter={item => item.status === 1}
-              label={labels.materialRequestPlaning}
+              label={labels.matReqPlan}
               name='moduleId'
               values={values}
               valueField='recordId'
               displayField='reference'
-              required
               onChange={(event, newValue) => {
                 setValues(prev => ({
                   ...prev,
