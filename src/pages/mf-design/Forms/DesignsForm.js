@@ -20,7 +20,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import { useFieldBehavior } from 'src/hooks/useFieldBehaviors'
+import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 
 export default function DesignsForm({ labels, access, store, setStore }) {
   const { recordId } = store
@@ -32,9 +32,10 @@ export default function DesignsForm({ labels, access, store, setStore }) {
     endpointId: ManufacturingRepository.Design.page
   })
 
-  const { maxAccess, changeDT } = useFieldBehavior({
+  const { changeDT, maxAccess } = useRefBehavior({
     access,
-    editMode: !!recordId
+    readOnlyOnEditMode: false,
+    name: 'reference'
   })
 
   const { formik } = useForm({
@@ -144,6 +145,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                 <Grid item xs={12}>
                   <CustomTextField
                     name='reference'
+                    readOnly={editMode}
                     label={labels.reference}
                     value={formik.values.reference}
                     onChange={formik.handleChange}
