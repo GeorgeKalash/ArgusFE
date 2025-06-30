@@ -22,7 +22,6 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { useWindow } from 'src/windows'
 import Confirmation from 'src/components/Shared/Confirmation'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import BeneficiaryWindow from '../Windows/BeneficiaryWindow'
 import { useInvalidate } from 'src/hooks/resource'
@@ -1705,11 +1704,11 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           stack({
                             Component: AddressForm,
                             props: {
-                              editMode: editMode && !allowEdit ? false : true,
+                              editMode: editMode,
                               address: address,
                               setAddress: setAddress,
                               onSubmit: onAddressSubmit,
-                              isCleared: false
+                              readOnly: editMode && !allowEdit && true
                             },
                             title: labels.workAddress
                           })
