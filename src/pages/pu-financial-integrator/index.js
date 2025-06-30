@@ -26,7 +26,7 @@ const PUFinancialIntegrators = () => {
       ...formik.values,
       items: res.list.map(({ ...rest }, index) => ({
         id: index + 1,
-        
+        sameNumber: false,
         ...rest
       }))
     })
