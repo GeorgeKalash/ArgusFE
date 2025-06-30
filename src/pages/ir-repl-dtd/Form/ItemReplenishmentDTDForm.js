@@ -76,7 +76,6 @@ export default function ItemReplenishmentDTDForm({ labels, maxAccess, recordId, 
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      functionId={SystemFunction.MaterialRequest}
     >
       <VertLayout>
         <Grow>
