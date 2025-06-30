@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import CustomButton from '../Inputs/CustomButton'
+import { Box } from '@mui/material'
 
 export default function PreviewReport({
   recordId,
@@ -16,6 +18,7 @@ export default function PreviewReport({
 }) {
   const { postRequest } = useContext(RequestsContext)
   const [pdfURL, setPdfUrl] = useState(null)
+
   useEffect(() => {
     generateReport()
   }, [selectedReport])
@@ -53,10 +56,27 @@ export default function PreviewReport({
       extension: DevExpressRepository.generate,
       record: JSON.stringify(obj)
     }).then(res => {
-      onSuccess()
+      onSuccess?.()
       setPdfUrl(res.recordId)
     })
   }
 
-  return <>{pdfURL && <iframe title={'Preview'} src={pdfURL} width='100%' height='100%' allowFullScreen />}</>
+  return (
+    <>
+      {pdfURL && (
+        <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+          <iframe title='Preview' src={pdfURL} width='100%' height='100%' allowFullScreen />
+          <Box position='absolute' top={20} right={130} zIndex={1}>
+            <CustomButton
+              image='popup.png'
+              color='#231F20'
+              onClick={() => {
+                window.open(pdfURL, '_blank')
+              }}
+            />
+          </Box>
+        </Box>
+      )}
+    </>
+  )
 }
