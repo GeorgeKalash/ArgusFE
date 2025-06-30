@@ -21,6 +21,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import ClearGridConfirmation from 'src/components/Shared/ClearGridConfirmation'
 import { useWindow } from 'src/windows'
+import ImportForm from 'src/components/Shared/ImportForm'
 
 const PhysicalCountItemDe = () => {
   const { stack } = useWindow()
@@ -444,6 +445,23 @@ const PhysicalCountItemDe = () => {
     })
   }
 
+  async function onImportClick() {
+    stack({
+      Component: ImportForm,
+      props: {
+        resourceId: ResourceIds.PhysicalCountItemDetailsImport,
+        access,
+        platformLabels,
+        onSuccess: async res => {
+          console.log(res)
+        }
+      },
+      width: 1000,
+      height: 600,
+      title: platformLabels.import
+    })
+  }
+
   const actions = [
     {
       key: 'Metals',
@@ -476,6 +494,12 @@ const PhysicalCountItemDe = () => {
       condition: true,
       onClick: onClearAllConfirmation,
       disabled: formik.values.controllerId == null
+    },
+    {
+      key: 'Import',
+      condition: true,
+      onClick: onImportClick,
+      disabled: formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3
     }
   ]
 
