@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext, useRef } from 'react'
 import { Autocomplete, Box, TextField } from '@mui/material'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -17,11 +17,25 @@ const ReportViewer = ({ resourceId }) => {
   const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
   const [pdf, setPDF] = useState(null)
 
+  const [hoveredViewer, setHoveredViewer] = useState(false)
+  const hoverTimeoutRef = useRef(null)
+
+  const handleMouseEnter = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredViewer(true)
+    }, 600)
+  }
+
+  const handleMouseLeave = () => {
+    clearTimeout(hoverTimeoutRef.current)
+    setHoveredViewer(false)
+  }
+
   const getReportLayout = () => {
-    var parameters = `_resourceId=${resourceId}`
+    const parameters = `_resourceId=${resourceId}`
     getRequest({
       extension: SystemRepository.ReportLayout,
-      parameters: parameters
+      parameters
     }).then(res => {
       setReportStore(prevReportStore => [
         ...prevReportStore,
@@ -37,10 +51,10 @@ const ReportViewer = ({ resourceId }) => {
   }
 
   const getReportTemplate = () => {
-    var parameters = `_resourceId=${resourceId}`
+    const parameters = `_resourceId=${resourceId}`
     getRequest({
       extension: SystemRepository.ReportTemplate.qry,
-      parameters: parameters
+      parameters
     }).then(res => {
       setReportStore(prevReportStore => [
         ...prevReportStore,
@@ -72,7 +86,6 @@ const ReportViewer = ({ resourceId }) => {
         case 1:
           setPDF(res.recordId)
           break
-
         default:
           window.location.href = res.recordId
           break
@@ -86,10 +99,9 @@ const ReportViewer = ({ resourceId }) => {
   }, [])
 
   useEffect(() => {
-    if (reportStore.length > 0 && !selectedReport)
-      setSelectedReport(() => {
-        return reportStore[0]
-      })
+    if (reportStore.length > 0 && !selectedReport) {
+      setSelectedReport(reportStore[0])
+    }
   }, [reportStore])
 
   const onApply = ({ rpbParams, paramsDict }) => {
@@ -129,28 +141,32 @@ const ReportViewer = ({ resourceId }) => {
                 sx={{ width: 200, pl: 2, height: 35 }}
                 disableClearable
               />
-              {pdf && (
-                <CustomButton
-                  style={{ ml: 4 }}
-                  onClick={() => {
-                    if (pdf) {
-                      window.open(pdf, '_blank')
-                    }
-                  }}
-                  image={'popup.png'}
-                  color='#231F20'
-                />
-              )}
             </Box>
           }
         />
       </Fixed>
       {pdf && (
-        <>
-          <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
-            <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
-          </Box>
-        </>
+        <Box
+          id='reportContainer'
+          sx={{ flex: 1, display: 'flex', p: 2, position: 'relative' }}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
+          {hoveredViewer && (
+            <Box position='absolute' top={20} right={130} zIndex={1}>
+              <CustomButton
+                image='popup.png'
+                color='#231F20'
+                onClick={() => {
+                  if (pdf) {
+                    window.open(pdf, '_blank')
+                  }
+                }}
+              />
+            </Box>
+          )}
+        </Box>
       )}
     </VertLayout>
   )
