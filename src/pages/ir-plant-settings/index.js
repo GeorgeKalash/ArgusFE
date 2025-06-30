@@ -77,6 +77,7 @@ const PlantSettings = () => {
     <VertLayout>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['dtId']}
