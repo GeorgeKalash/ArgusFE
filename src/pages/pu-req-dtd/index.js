@@ -94,6 +94,7 @@ const RequisitionDocTypeDefault = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['dtId']}
