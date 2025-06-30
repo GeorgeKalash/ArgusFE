@@ -13,9 +13,14 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { formatDateForGetApI } from 'src/lib/date-helper'
 import { RateDivision } from 'src/resources/RateDivision'
 import { useResourceQuery } from 'src/hooks/resource'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, window }) {
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.MultiCurrencyRate, window })
 
   const { labels, access: maxAccess } = useResourceQuery({
     endpointId: MultiCurrencyRepository.Currency.get,
@@ -216,3 +221,6 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
     </FormShell>
   )
 }
+
+MultiCurrencyRateForm.width = 500
+MultiCurrencyRateForm.height = 500

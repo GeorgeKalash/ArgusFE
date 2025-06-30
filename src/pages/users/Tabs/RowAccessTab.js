@@ -18,6 +18,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
 const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const [data, setData] = useState([])
@@ -105,6 +106,13 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
         parameters: '_filter='
       })
 
+    const costCenterRequestPromise =
+      classId == ResourceIds.CostCenter &&
+      getRequest({
+        extension: GeneralLedgerRepository.CostCenter.qry,
+        parameters: '_params=&_startAt=0&_pageSize=1000'
+      })
+
     const rowAccessUserPromise = getRequest({
       extension: AccessControlRepository.RowAccessUserView.qry,
       parameters: `_resourceId=${classId}&_userId=${storeRecordId}`
@@ -117,8 +125,9 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
       plantRequestPromise,
       posRequestPromise,
       salesPersonRequestPromise,
-      rowAccessUserPromise
-    ]).then(([cashAccountRequest, plantRequest, posRequest, salesPersonRequest, rowAccessUser]) => {
+      rowAccessUserPromise,
+      costCenterRequestPromise
+    ]).then(([cashAccountRequest, plantRequest, posRequest, salesPersonRequest, rowAccessUser, costCenterRequest]) => {
       if (classId == ResourceIds.Plants || classId === 'undefined') {
         rar = plantRequest.list?.map(item => {
           return {
@@ -148,6 +157,15 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
         })
       } else if (classId == ResourceIds.PointOfSale) {
         rar = posRequest.list?.map(item => {
+          return {
+            recordId: item.recordId,
+            name: item.name,
+            reference: item.reference,
+            hasAccess: false
+          }
+        })
+      } else if (classId == ResourceIds.CostCenter) {
+        rar = costCenterRequest.list?.map(item => {
           return {
             recordId: item.recordId,
             name: item.name,
@@ -238,6 +256,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
         </Fixed>
         <Grow>
           <Table
+            name='rowAccess'
             columns={rowColumns}
             gridData={filteredData}
             rowId={['recordId']}

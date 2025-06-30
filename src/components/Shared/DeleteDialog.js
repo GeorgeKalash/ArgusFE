@@ -1,9 +1,12 @@
 import { ControlContext } from 'src/providers/ControlContext'
 import ConfirmationDialog from '../ConfirmationDialog'
 import { useContext } from 'react'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const DeleteDialog = ({ window, onConfirm, fullScreen, open }) => {
   const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.Delete, window })
 
   return (
     <ConfirmationDialog
@@ -17,5 +20,7 @@ const DeleteDialog = ({ window, onConfirm, fullScreen, open }) => {
     />
   )
 }
+DeleteDialog.width = 450
+DeleteDialog.height = 170
 
 export default DeleteDialog

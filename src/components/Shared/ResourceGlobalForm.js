@@ -12,9 +12,14 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate, window, resourceId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.resourceGlobal, window })
 
   const { formik } = useForm({
     maxAccess,
@@ -123,3 +128,6 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
     </FormShell>
   )
 }
+
+ResourceGlobalForm.width = 450
+ResourceGlobalForm.height = 300

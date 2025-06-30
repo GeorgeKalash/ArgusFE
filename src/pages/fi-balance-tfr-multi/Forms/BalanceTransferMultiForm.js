@@ -304,10 +304,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
           props: {
             accountId: parseInt(formik.values.header.accountId),
             moduleId: 1
-          },
-          width: 1000,
-          height: 500,
-          title: platformLabels.AccountSummary
+          }
         })
       },
       disabled: !formik.values.header.accountId

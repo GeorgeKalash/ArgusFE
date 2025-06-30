@@ -216,9 +216,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
-            <Grid item xs={6}>
+            <Grid item xs={8}>
               <Grid container spacing={2}>
-                <Grid item xs={6}>
+                <Grid item xs={8}>
                   <ResourceComboBox
                     dataGrid
                     endpointId={InventoryRepository.Items.pack}
@@ -229,12 +229,12 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     name='categoryId'
                     label={labels.category}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['caRef', 'name']}
                     readOnly={editMode}
                     displayFieldWidth={1}
                     columnsInDropDown={[
                       { key: 'caRef', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
+                      { key: 'name', value: 'Name', width: 8 }
                     ]}
                     required
                     maxAccess={maxAccess}
@@ -266,7 +266,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.categoryId && formik.errors.categoryId}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={4}>
                   <ResourceComboBox
                     dataGrid
                     endpointId={InventoryRepository.Items.pack}
@@ -294,7 +294,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.priceType && formik.errors.priceType}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={8}>
                   <CustomTextField
                     name='sku'
                     required
@@ -307,7 +307,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.sku && formik.errors.sku}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={4}>
                   <ResourceComboBox
                     dataGrid
                     endpointId={InventoryRepository.Items.pack}
@@ -377,7 +377,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     name='groupId'
                     label={labels.itemGroup}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['reference', 'name']}
                     displayFieldWidth={1}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -419,7 +419,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     name='msId'
                     label={labels.measure}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['reference', 'name']}
                     displayFieldWidth={1}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -481,7 +481,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
               </Grid>
             </Grid>
 
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ImageUpload ref={imageUploadRef} resourceId={ResourceIds.Items} seqNo={0} recordId={recordId} />

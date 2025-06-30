@@ -200,20 +200,33 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         date: formatDateToApi(obj.date),
         miscAmount: obj.miscAmount || 0
       }
+      delete copy.serials
+      let updatedSerials = []
 
       if (copy.rateCalcMethod == 1) copy.baseAmount = Number(copy.amount) * copy.exRate
       else if (copy.rateCalcMethod == 2) copy.baseAmount = Number(copy.amount) / copy.exRate
 
-      const updatedRows = formik.values.items.map((itemDetails, index) => ({
-        ...itemDetails,
-        seqNo: index + 1,
-        qty: itemDetails.sku ? itemDetails.returnNowQty || itemDetails.qty : itemDetails.qty
-      }))
+      const updatedRows = formik.values.items.map((itemDetails, index) => {
+        const itemSeqNo = index + 1
+        ;(itemDetails.serials || []).forEach(serialDetails => {
+          updatedSerials.push({
+            ...serialDetails,
+            seqNo: itemSeqNo,
+            returnId: copy.recordId
+          })
+        })
+
+        return {
+          ...itemDetails,
+          seqNo: itemSeqNo,
+          qty: itemDetails.sku ? itemDetails.returnNowQty || itemDetails.qty : itemDetails.qty
+        }
+      })
 
       const itemsGridData = {
         header: copy,
         items: updatedRows,
-        serials: [],
+        serials: updatedSerials || [],
         lots: []
       }
 
@@ -498,10 +511,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
               maxAccess,
               checkForSiteId: row.qty < 0,
               updateRow
-            },
-            width: 500,
-            height: 700,
-            title: platformLabels.serials
+            }
           })
         }
       }
@@ -580,9 +590,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                 ...row,
                 basePrice: metalPrice !== 0 ? metalPrice * metalPurity : 0
               }
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -663,10 +671,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       props: {
         functionId: SystemFunction.ReturnOnInvoice,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -795,9 +800,12 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     }
   ]
 
-  async function fillForm(retHeader, retItems, dtInfo, clientDiscount) {
+  async function fillForm(retHeader, retItems, dtInfo, clientDiscount, serialsList) {
     const billAdd = await getAddress(retHeader?.record?.billAddressId)
 
+    const serials = (serialsList || []).map((item, index) => {
+      return { ...item, id: index + 1 }
+    })
     retHeader?.record?.tdType == 1 || retHeader?.record?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
@@ -818,6 +826,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
                 returnNowQty: parseFloat(item.qty).toFixed(2),
                 taxDetails: taxDetailsResponse,
+                serials: serials?.filter(s => s.seqNo == item.seqNo),
                 isEditMode: true
               }
             })
@@ -1107,9 +1116,15 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     const retItems = await getRetailInvoiceItems(recordId)
     const dtInfo = await onChangeDtId(retHeader.record.dtId)
     const clientDiscount = await getClientInfo(retHeader.record.clientId)
-    await fillForm(retHeader, retItems, dtInfo, clientDiscount)
+    const serialsList = await getReturnSerials(recordId)
+    await fillForm(retHeader, retItems, dtInfo, clientDiscount, serialsList?.list)
   }
-
+  async function getReturnSerials(retId) {
+    return await getRequest({
+      extension: SaleRepository.ReturnSerial.qry,
+      parameters: `_returnId=${retId}&_seqNo=0`
+    })
+  }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
       formik.setFieldValue(key, value)
@@ -1126,10 +1141,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         checkedAddressId: formik.values?.billAddId,
         form: formik.values,
         handleAddressValues: setAddressValues
-      },
-      width: 950,
-      height: 600,
-      title: labels.AddressFilter
+      }
     })
   }
 
@@ -1439,10 +1451,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                         Component: ChangeClient,
                         props: {
                           form: formik
-                        },
-                        width: 500,
-                        height: 570,
-                        title: labels.changeClient
+                        }
                       })
                     }}
                     image='popup.png'

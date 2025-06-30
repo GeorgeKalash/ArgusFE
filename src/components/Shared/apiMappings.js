@@ -633,7 +633,11 @@ export const apiMappings = {
     endpoint: FoundryRepository.Mould.qry,
     parameters: `_params=&_startAt=0&_pageSize=1000`,
     valueField: 'recordId',
-    displayField: 'reference'
+    displayField: 'reference',
+    columnsInDropDown: [
+      { key: 'reference', value: 'Mould' },
+      { key: 'lineName', value: 'Production Line' }
+    ]
   },
   [ResourceIds.PointOfSale]: {
     type: COMBOBOX,
@@ -1116,5 +1120,12 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
+  },
+  [ResourceIds.FoWaxes]: {
+    type: LOOKUP,
+    endpoint: FoundryRepository.Wax.snapshot,
+    firstField: 'reference',
+    secondDisplayField: false,
+    valueOnSelection: 'recordId'
   }
 }

@@ -30,8 +30,10 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_AMOUNT, getRate } from 'src/utils/RateCalculator'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function CashTransferTab({ labels, recordId, access, plantId, cashAccountId, dtId }) {
+const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -42,6 +44,12 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.CashTransfer.page
   })
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.CashTransfer
+  })
+
+  useSetWindow({ title: labels.cashTransfer, window })
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
@@ -260,10 +268,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
         functionId: SystemFunction.CashTransfer,
         editMode: isClosed,
         totalBaseAmount: totalLoc
-      },
-      width: 1200,
-      height: 670,
-      title: 'Shipments'
+      }
     })
   }
 
@@ -290,9 +295,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       props: {
         functionId: SystemFunction.CashTransfer,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: 'Workflow'
+      }
     })
   }
 
@@ -587,3 +590,8 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
     </FormShell>
   )
 }
+
+CashTransferTab.width = 1100
+CashTransferTab.height = 650
+
+export default CashTransferTab

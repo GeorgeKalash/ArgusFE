@@ -518,10 +518,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           props: {
             accountId: parseInt(formik.values.accountId),
             moduleId: 1
-          },
-          width: 1000,
-          height: 500,
-          title: platformLabels.AccountSummary
+          }
         })
       },
       disabled: !formik.values.accountId

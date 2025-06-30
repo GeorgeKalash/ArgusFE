@@ -245,8 +245,6 @@ const SaTrx = () => {
             Component: NormalDialog,
             props: {
               DialogText: `${platformLabels.RecordLocked} ${name}`,
-              width: 600,
-              height: 200,
               title: platformLabels.Dialog
             }
           })

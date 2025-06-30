@@ -301,7 +301,8 @@ export const ManufacturingRepository = {
     set: service + 'setJCA',
     get: service + 'getJCA',
     del: service + 'delJCA',
-    page: service + 'pageJCA'
+    page: service + 'pageJCA',
+    qry: service + 'qryJCA'
   },
   DesignGroup: {
     qry: service + 'qryDEG',
@@ -372,5 +373,9 @@ export const ManufacturingRepository = {
   CostGroupOverhead: {
     set2: service + 'set2CGV',
     qry: service + 'qryCGV'
+  },
+  IssueOfMaterialDimension: {
+    set: service + 'setIMD',
+    qry: service + 'qryIMD'
   }
 }
