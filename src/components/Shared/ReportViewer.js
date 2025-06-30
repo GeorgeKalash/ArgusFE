@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { Autocomplete, Box, TextField } from '@mui/material'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -16,20 +16,6 @@ const ReportViewer = ({ resourceId }) => {
   const [selectedReport, setSelectedReport] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
   const [pdf, setPDF] = useState(null)
-
-  const [hoveredViewer, setHoveredViewer] = useState(false)
-  const hoverTimeoutRef = useRef(null)
-
-  const handleMouseEnter = () => {
-    hoverTimeoutRef.current = setTimeout(() => {
-      setHoveredViewer(true)
-    }, 600)
-  }
-
-  const handleMouseLeave = () => {
-    clearTimeout(hoverTimeoutRef.current)
-    setHoveredViewer(false)
-  }
 
   const getReportLayout = () => {
     const parameters = `_resourceId=${resourceId}`
@@ -145,27 +131,21 @@ const ReportViewer = ({ resourceId }) => {
           }
         />
       </Fixed>
+
       {pdf && (
-        <Box
-          id='reportContainer'
-          sx={{ flex: 1, display: 'flex', p: 2, position: 'relative' }}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
+        <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2, position: 'relative' }}>
           <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
-          {hoveredViewer && (
-            <Box position='absolute' top={20} right={130} zIndex={1}>
-              <CustomButton
-                image='popup.png'
-                color='#231F20'
-                onClick={() => {
-                  if (pdf) {
-                    window.open(pdf, '_blank')
-                  }
-                }}
-              />
-            </Box>
-          )}
+          <Box position='absolute' top={20} right={130} zIndex={1}>
+            <CustomButton
+              image='popup.png'
+              color='#231F20'
+              onClick={() => {
+                if (pdf) {
+                  window.open(pdf, '_blank')
+                }
+              }}
+            />
+          </Box>
         </Box>
       )}
     </VertLayout>
