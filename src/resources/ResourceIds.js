@@ -498,6 +498,7 @@ export const ResourceIds = {
   Moulds: 47200,
   FoCastings: 47301,
   RequisitionDocumentTypeDefaults: 50612,
+  PUFinancialIntegrators: 50102,
   IRMaterialDocTypeDefaults: 46101,
 
   // GL
