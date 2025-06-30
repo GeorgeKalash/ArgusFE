@@ -96,7 +96,7 @@ const validateMandatoryFields = (rows, columns, stackError) => {
   return true
 }
 
-const getImportData = (gridData, columns) => {
+const getImportData = (gridData, columns, stackError) => {
   const mandatoryColumns = columns.filter(col => col.mandatory)
 
   const missingFields = gridData.list.flatMap(row =>
@@ -186,7 +186,7 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
 
   const handleSubmit = async () => {
     const isValid = validateMandatoryFields(parsedFileContent.list, columns, stackError)
-    const convertedData = getImportData(parsedFileContent, columns)
+    const convertedData = getImportData(parsedFileContent, columns, stackError)
     const payload = { [objectName]: convertedData }
 
     if (!isValid) return

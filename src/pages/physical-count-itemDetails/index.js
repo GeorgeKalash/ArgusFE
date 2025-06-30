@@ -22,6 +22,7 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import ClearGridConfirmation from 'src/components/Shared/ClearGridConfirmation'
 import { useWindow } from 'src/windows'
 import ImportForm from 'src/components/Shared/ImportForm'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const PhysicalCountItemDe = () => {
   const { stack } = useWindow()
@@ -35,7 +36,7 @@ const PhysicalCountItemDe = () => {
   const [showDefaultQty, setShowDefaultQty] = useState(false)
   const [disableItemDuplicate, setDisableItemDuplicate] = useState(false)
 
-  const { labels: _labels, access } = useResourceQuery({
+  const { labels: labels, access } = useResourceQuery({
     datasetId: ResourceIds.IVPhysicalCountItemDetails
   })
 
@@ -70,7 +71,6 @@ const PhysicalCountItemDe = () => {
         }
       ]
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       stockCountId: yup.string().required(),
@@ -153,7 +153,7 @@ const PhysicalCountItemDe = () => {
         }
       }
 
-      setEditMode(res.list.length > 0)
+      setEditMode(res?.list?.length > 0)
     })
   }
 
@@ -244,7 +244,7 @@ const PhysicalCountItemDe = () => {
     {
       component: disSkuLookup ? 'textfield' : 'resourcelookup',
       name: 'sku',
-      label: _labels.sku,
+      label: labels.sku,
       ...(disSkuLookup && { updateOn: 'blur' }),
       jumpToNextLine: jumpToNextLine,
       disableDuplicate: disableItemDuplicate,
@@ -324,19 +324,19 @@ const PhysicalCountItemDe = () => {
     {
       component: 'textfield',
       name: 'itemName',
-      label: _labels.name,
+      label: labels.name,
       props: {
         readOnly: true
       }
     },
     {
       component: 'numberfield',
-      label: _labels.qty,
+      label: labels.qty,
       name: 'countedQty'
     },
     {
       component: 'numberfield',
-      label: _labels.metalPurity,
+      label: labels.metalPurity,
       name: 'metalPurity',
       props: {
         readOnly: true
@@ -344,7 +344,7 @@ const PhysicalCountItemDe = () => {
     },
     {
       component: 'numberfield',
-      label: _labels.weight,
+      label: labels.weight,
       name: 'weight',
       props: {
         readOnly: true
@@ -360,8 +360,6 @@ const PhysicalCountItemDe = () => {
   }
 
   const handleMetalClick = async () => {
-    console.log('rowsUpdate?.current', rowsUpdate?.current)
-
     const metalItemsList = rowsUpdate?.current
       ?.filter(item => item.metalId)
       .map(item => ({
@@ -453,7 +451,7 @@ const PhysicalCountItemDe = () => {
         access,
         platformLabels,
         onSuccess: async res => {
-          console.log(res)
+          if (formik.values?.controllerId) fetchGridData(formik.values?.controllerId)
         }
       },
       width: 1000,
@@ -520,7 +518,6 @@ const PhysicalCountItemDe = () => {
       form={formik}
       isInfo={false}
       isCleared={false}
-      isSavedClear={false}
       disabledSubmit={!isSaved}
       actions={actions}
       maxAccess={access}
@@ -535,7 +532,7 @@ const PhysicalCountItemDe = () => {
                 endpointId={SCRepository.StockCount.qry}
                 parameters={`_startAt=0&_pageSize=1000&_params=`}
                 name='stockCountId'
-                label={_labels.stockCount}
+                label={labels.stockCount}
                 valueField='recordId'
                 displayField='reference'
                 values={formik.values}
@@ -566,7 +563,7 @@ const PhysicalCountItemDe = () => {
               <ResourceComboBox
                 name='siteId'
                 store={siteStore}
-                label={_labels.site}
+                label={labels.site}
                 valueField='siteId'
                 displayField={['siteRef', 'siteName']}
                 columnsInDropDown={[
@@ -597,7 +594,7 @@ const PhysicalCountItemDe = () => {
               <ResourceComboBox
                 name='controllerId'
                 store={controllerStore}
-                label={_labels.controller}
+                label={labels.controller}
                 valueField='controllerId'
                 displayField='controllerName'
                 values={formik.values}
@@ -639,25 +636,23 @@ const PhysicalCountItemDe = () => {
         <Fixed>
           <Grid container justifyContent='flex-end' spacing={2} sx={{ pt: 5 }}>
             <Grid item xs={2}>
-              <CustomTextField
+              <CustomNumberField
                 name='totalQty'
-                label={_labels.totalQty}
+                label={labels.totalQty}
                 value={getFormattedNumber(totalQty.toFixed(2))}
-                readOnly={true}
+                readOnly
                 hidden={!formik.values.controllerId}
                 maxAccess={access}
-                numberField={true}
               />
             </Grid>
             <Grid item xs={2}>
-              <CustomTextField
+              <CustomNumberField
                 name='totalWeight'
-                label={_labels.totalWeight}
+                label={labels.totalWeight}
                 value={getFormattedNumber(totalWeight.toFixed(2))}
-                readOnly={true}
+                readOnly
                 hidden={!formik.values.controllerId}
                 maxAccess={access}
-                numberField={true}
               />
             </Grid>
           </Grid>
