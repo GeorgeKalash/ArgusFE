@@ -22,7 +22,7 @@ export function WindowProvider({ children }) {
       extension: AccessControlRepository.LockedRecords.get,
       parameters: `_resourceId=${obj.resourceId}&_recordId=${obj.recordId}`
     }).then(res => {
-      if (res.record && res.record.userId != obj.userId) {
+      if (res.record && res.record.userId != userId) {
         obj.isAlreadyLocked ? obj.isAlreadyLocked(res.record.userName) : null
 
         return

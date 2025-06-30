@@ -174,12 +174,8 @@ export default function RubberForm({ labels, access, recordId }) {
         stack({
           Component: ThreeDPrintForm,
           props: {
-            recordId: formik.values?.threeDPId,
-            labels
-          },
-          width: 750,
-          height: 650,
-          title: platformLabels.threeDPrinting
+            recordId: formik.values?.threeDPId
+          }
         })
       },
       disabled: !formik.values.threeDPId

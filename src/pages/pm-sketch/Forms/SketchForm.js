@@ -175,7 +175,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
       disabled: !isClosed
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted || !isClosed

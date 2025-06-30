@@ -8,7 +8,7 @@ import OverheadTab from '../form/OverheadTab'
 import MaterialsTab from '../form/MaterialsTab'
 import SizesTab from '../form/SizesTab'
 
-const JobOrderWindow = ({ recordId, access, labels, invalidate }) => {
+const JobOrderWindow = ({ recordId, access, labels, invalidate, lockRecord }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [store, setStore] = useState({ recordId, isPosted: false, isCancelled: false })
   const [refetchRouting, setRefetchRouting] = useState(false)
@@ -33,6 +33,7 @@ const JobOrderWindow = ({ recordId, access, labels, invalidate }) => {
           maxAccess={access}
           setRefetchRouting={setRefetchRouting}
           invalidate={invalidate}
+          lockRecord={lockRecord}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>

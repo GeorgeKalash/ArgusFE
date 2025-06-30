@@ -442,7 +442,7 @@ export const ResourceIds = {
   ProductionOrder: 42337,
   YearlyComparativeSales: 51550,
   PurchaseTransactions: 50303,
-  ItemReplacement : 41212,
+  ItemReplacement: 41212,
   SManagement: 41213,
   OpenPOs: 50312,
   NotificationLabels: 23106,
@@ -492,10 +492,13 @@ export const ResourceIds = {
   ChangeClient: 51336,
   WCConsumptionImport: 42702,
   Currency: 20136,
-  PaymentOrder: 31333,
   POTracking: 50309,
+  PaymentOrder: 31333,
+  PaymentOrderExpenses: 31614,
   Moulds: 47200,
-  
+  FoCastings: 47301,
+  IRMaterialDocTypeDefaults: 46101,
+
   // GL
   GLSalesInvoice: 51604,
   GLSalesReturn: 51605,
