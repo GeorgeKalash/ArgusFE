@@ -787,8 +787,8 @@ const Table = ({
 
         return {
           ...col,
-          width: savedCol?.width ?? 'auto',
-          flex: col?.width ? undefined : savedCol?.width ?? totalWidth / tableSettings?.length,
+          width: savedCol?.width ?? 120,
+          flex: null,
           sortColumn: lastColumn ? columnDefs?.length + 1 : indexSort > -1 ? indexSort : index,
           sort: savedCol?.sort ?? col?.sort
         }
