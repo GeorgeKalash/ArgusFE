@@ -75,7 +75,6 @@ export default function RequisitionDocTypeDefaultForm({ labels, maxAccess, recor
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      functionId={SystemFunction.PurchaseRequisition}
     >
       <VertLayout>
         <Grow>
