@@ -47,5 +47,11 @@ export const IVReplenishementRepository = {
   },
   PurchaseRequest: {
     generate: service + 'generatePR'
+  },
+  DocumentTypeDefault: {
+    get: service + 'getDTD',
+    set: service + 'setDTD',
+    del: service + 'delDTD',
+    page: service + 'pageDTD'
   }
 }
