@@ -498,6 +498,7 @@ export const ResourceIds = {
   Moulds: 47200,
   FoCastings: 47301,
   RequisitionDocumentTypeDefaults: 50612,
+  IRMaterialDocTypeDefaults: 46101,
 
   // GL
   GLSalesInvoice: 51604,
