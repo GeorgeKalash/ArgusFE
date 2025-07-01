@@ -494,7 +494,7 @@ const PhysicalCountItemDe = () => {
       key: 'Import',
       condition: true,
       onClick: onImportClick,
-      disabled: formik.values?.SCStatus == 3 || formik.values?.EndofSiteStatus == 3 || formik.values?.status == 3
+      disabled: false
     }
   ]
 
