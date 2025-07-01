@@ -4,10 +4,10 @@ import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomButton from '../Inputs/CustomButton'
 
-export default function PreviewReport({ pdf, window }) {
+export default function PreviewReport({ pdf, window: windowInstance }) {
   const { platformLabels } = useContext(ControlContext)
 
-  useSetWindow({ title: platformLabels.PreviewReport, window })
+  useSetWindow({ title: platformLabels.PreviewReport, window: windowInstance })
 
   return (
     <>
@@ -18,7 +18,7 @@ export default function PreviewReport({ pdf, window }) {
             image='popup.png'
             color='#231F20'
             onClick={() => {
-              window.open(pdfURL, '_blank')
+              window.open(pdf, '_blank')
             }}
           />
         </Box>
