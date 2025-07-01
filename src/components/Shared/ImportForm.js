@@ -155,7 +155,7 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
     importConfig.record.fields?.map(({ name, dataType, format, ...rest }) => ({
       field: name,
       headerName: name,
-      flex: 1,
+      width: 130,
       type: (dataType === 2 && format === '1') || dataType === 3 ? 'number' : undefined,
       dataType,
       ...rest
@@ -258,7 +258,15 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
 
       <Grow>
         <Table
-          columns={[{ field: 'recordId', headerName: '' }, ...columns]}
+          name='table'
+          columns={[
+            {
+              field: 'recordId',
+              headerName: '',
+              width: 130
+            },
+            ...columns
+          ]}
           gridData={parsedFileContent}
           rowId={['recordId']}
           isLoading={false}
