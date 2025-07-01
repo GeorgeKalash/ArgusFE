@@ -119,10 +119,14 @@ export const PurchaseRepository = {
     terminate: service + 'terminateORD',
     transfer: service + 'transfer1ORD'
   },
-  Request: {
-    snapshot: service + 'snapshotREQ'
+  PurchaseRequisition: {
+    snapshot: service + 'snapshotREQ',
+    page: service + 'pageREQ',
+    get: service + 'getREQ',
+    set: service + 'setREQ',
+    del: service + 'delREQ'
   },
-  Requisition: {
+  RequisitionDetail: {
     qry: service + 'qryREI'
   },
   QuotationItem: {
@@ -130,7 +134,7 @@ export const PurchaseRepository = {
   },
   OrderItem: {
     qry: service + 'qryORI',
-    set2: service + 'set2ORI',
+    set2: service + 'set2ORI'
   },
   FinancialGroup: {
     qry: service + 'qryFII',
