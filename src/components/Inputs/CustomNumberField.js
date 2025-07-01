@@ -27,7 +27,7 @@ const CustomNumberField = ({
   hasBorder = true,
   autoSelect = false,
   editMode = false,
-  maxLength = 1000,
+  maxLength = 15,
   thousandSeparator = ',',
   min,
   max,
@@ -65,6 +65,7 @@ const CustomNumberField = ({
   const handleNumberChangeValue = e => {
     const value = formatNumber(e)
     if (value) e.target.value = value
+
     onChange(e, parseInputValue(value))
   }
 
@@ -91,13 +92,12 @@ const CustomNumberField = ({
 
   const handleInput = e => {
     const inputValue = e?.target?.value?.replaceAll(',', '').replaceAll('.', '')
-    const integerPart = e?.target?.value?.indexOf('.') > -1 ? e?.target?.value?.split('.')?.[0] : e?.target?.value
-    const integerPartLength = integerPart?.replaceAll(',', '')?.length > 15
 
     if (e?.target?.value?.indexOf('.') > 0) {
-      if (inputValue?.length > maxLength || integerPartLength) e.target.value = value
+      if (inputValue?.length > maxLength) e.target.value = value
     } else {
-      if (inputValue?.length > maxLength - decimalScale || integerPartLength) {
+      if (inputValue?.length > maxLength - (decimalScale || 0)) {
+        console.log(value)
         e.target.value = value
       }
     }
