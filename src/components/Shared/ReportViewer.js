@@ -37,10 +37,10 @@ const ReportViewer = ({ resourceId }) => {
   }
 
   const getReportLayout = () => {
-    var parameters = `_resourceId=${resourceId}`
+    const parameters = `_resourceId=${resourceId}`
     getRequest({
       extension: SystemRepository.ReportLayout,
-      parameters: parameters
+      parameters
     }).then(res => {
       res.list &&
         setReportStore(prevReportStore => [
@@ -57,10 +57,10 @@ const ReportViewer = ({ resourceId }) => {
   }
 
   const getReportTemplate = () => {
-    var parameters = `_resourceId=${resourceId}`
+    const parameters = `_resourceId=${resourceId}`
     getRequest({
       extension: SystemRepository.ReportTemplate.qry,
-      parameters: parameters
+      parameters
     }).then(res => {
       setReportStore(prevReportStore => [
         ...prevReportStore,
@@ -160,9 +160,21 @@ const ReportViewer = ({ resourceId }) => {
           }
         />
       </Fixed>
+
       {pdf && (
-        <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
+        <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2, position: 'relative' }}>
           <iframe title={report.selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
+          <Box position='absolute' top={20} right={130} zIndex={1}>
+            <CustomButton
+              image='popup.png'
+              color='#231F20'
+              onClick={() => {
+                if (pdf) {
+                  window.open(pdf, '_blank')
+                }
+              }}
+            />
+          </Box>
         </Box>
       )}
     </VertLayout>
