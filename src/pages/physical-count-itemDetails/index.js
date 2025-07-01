@@ -36,7 +36,7 @@ const PhysicalCountItemDe = () => {
   const [showDefaultQty, setShowDefaultQty] = useState(false)
   const [disableItemDuplicate, setDisableItemDuplicate] = useState(false)
 
-  const { labels: labels, access } = useResourceQuery({
+  const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.IVPhysicalCountItemDetails
   })
 
