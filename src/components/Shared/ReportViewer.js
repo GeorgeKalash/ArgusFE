@@ -8,6 +8,7 @@ import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import RPBGridToolbar from './RPBGridToolbar'
 import PopperComponent from './Popper/PopperComponent'
+import CustomButton from '../Inputs/CustomButton'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -17,10 +18,10 @@ const ReportViewer = ({ resourceId }) => {
   const [pdf, setPDF] = useState(null)
 
   const getReportLayout = () => {
-    var parameters = `_resourceId=${resourceId}`
+    const parameters = `_resourceId=${resourceId}`
     getRequest({
       extension: SystemRepository.ReportLayout,
-      parameters: parameters
+      parameters
     }).then(res => {
       setReportStore(prevReportStore => [
         ...prevReportStore,
@@ -36,10 +37,10 @@ const ReportViewer = ({ resourceId }) => {
   }
 
   const getReportTemplate = () => {
-    var parameters = `_resourceId=${resourceId}`
+    const parameters = `_resourceId=${resourceId}`
     getRequest({
       extension: SystemRepository.ReportTemplate.qry,
-      parameters: parameters
+      parameters
     }).then(res => {
       setReportStore(prevReportStore => [
         ...prevReportStore,
@@ -71,7 +72,6 @@ const ReportViewer = ({ resourceId }) => {
         case 1:
           setPDF(res.recordId)
           break
-
         default:
           window.location.href = res.recordId
           break
@@ -85,10 +85,9 @@ const ReportViewer = ({ resourceId }) => {
   }, [])
 
   useEffect(() => {
-    if (reportStore.length > 0 && !selectedReport)
-      setSelectedReport(() => {
-        return reportStore[0]
-      })
+    if (reportStore.length > 0 && !selectedReport) {
+      setSelectedReport(reportStore[0])
+    }
   }, [reportStore])
 
   const onApply = ({ rpbParams, paramsDict }) => {
@@ -103,7 +102,7 @@ const ReportViewer = ({ resourceId }) => {
           hasSearch={false}
           reportName={selectedReport?.parameters}
           leftSection={
-            <Box sx={{ display: 'flex', padding: 2, justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', padding: 2, alignItems: 'center' }}>
               <Autocomplete
                 size='small'
                 options={reportStore}
@@ -132,9 +131,21 @@ const ReportViewer = ({ resourceId }) => {
           }
         />
       </Fixed>
+
       {pdf && (
-        <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
+        <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2, position: 'relative' }}>
           <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
+          <Box position='absolute' top={20} right={130} zIndex={1}>
+            <CustomButton
+              image='popup.png'
+              color='#231F20'
+              onClick={() => {
+                if (pdf) {
+                  window.open(pdf, '_blank')
+                }
+              }}
+            />
+          </Box>
         </Box>
       )}
     </VertLayout>
