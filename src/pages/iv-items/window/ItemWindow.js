@@ -27,8 +27,11 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess }) => {
     _reference: null,
     _isMetal: false,
     _metal: null,
-    nraId: null
+    nraId: null,
+    productionLevel: null
   })
+
+  console.log(store)
 
   const tabs = [
     { label: labels.items },

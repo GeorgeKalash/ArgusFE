@@ -17,8 +17,10 @@ import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ItemProductionForm({ labels, editMode, maxAccess, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { recordId } = store
+  const { recordId, productionLevel } = store
   const { platformLabels } = useContext(ControlContext)
+
+  console.log(store)
 
   const { formik } = useForm({
     initialValues: {
@@ -34,10 +36,12 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
       standardId: '',
       cgId: '',
       rmcId: '',
-      bomId: null
+      bomId: null,
+      wipItemId: null,
+      wipItemSku: '',
+      wipItemName: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async obj => {
       await postRequest({
@@ -84,7 +88,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={ManufacturingRepository.ProductionLine.qry}
@@ -244,6 +248,26 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 onChange={(event, newValue) => {
                   formik.setFieldValue('bomId', newValue?.recordId || '')
                 }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={InventoryRepository.Item.snapshot}
+                name='wipItemId'
+                label={labels.wipItem}
+                valueField='sku'
+                displayField='name'
+                valueShow='wipItemSku'
+                secondValueShow='wipItemName'
+                form={formik}
+                readOnly={store.productionLevel != 4}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('wipItemSku', newValue?.sku || null)
+                  formik.setFieldValue('wipItemName', newValue?.name || '')
+                  formik.setFieldValue('wipItemId', newValue?.recordId || '')
+                }}
+                error={formik.touched.wipItemId && Boolean(formik.errors.wipItemId)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
