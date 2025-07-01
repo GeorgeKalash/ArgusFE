@@ -12,6 +12,7 @@ import { formatDate, formatDateDefault } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const formatDateForImport = dateString => {
   const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10))
@@ -135,6 +136,8 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
   const [parsedFileContent, setParsedFileContent] = useState({ count: 0, list: [] })
   const [file, setFile] = useState(null)
   const imageInputRef = useRef(null)
+
+  useSetWindow({ title: platformLabels.import, window })
 
   useEffect(() => {
     if (resourceId) {
@@ -276,5 +279,8 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
     </VertLayout>
   )
 }
+
+ImportForm.width = 1000
+ImportForm.height = 600
 
 export default ImportForm

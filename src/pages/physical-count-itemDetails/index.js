@@ -453,10 +453,7 @@ const PhysicalCountItemDe = () => {
         onSuccess: async res => {
           if (formik.values?.controllerId) fetchGridData(formik.values?.controllerId)
         }
-      },
-      width: 1000,
-      height: 600,
-      title: platformLabels.import
+      }
     })
   }
 
