@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from 'src/lib/date-helper'
 import { Button, Grid } from '@mui/material'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -33,7 +33,6 @@ import {
   DIRTYFIELD_TWPG,
   DIRTYFIELD_UNIT_PRICE,
   DIRTYFIELD_MDAMOUNT,
-  DIRTYFIELD_MDTYPE,
   DIRTYFIELD_UPO,
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_PCT,
@@ -1597,15 +1596,21 @@ export default function SaleTransactionForm({
     return res
   }
 
-  const filteredData = formik.values.search
-    ? formik.values.items.filter(
+  const filteredData = useMemo(() => {
+    if (formik?.values?.search) {
+      const filtered = formik.values.items.filter(
         item =>
           item.barcode?.toString()?.includes(formik.values.search) ||
           item.sku?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
           item.itemName?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
           item.qty?.toString()?.includes(formik.values.search)
       )
-    : formik.values.items
+
+      return filtered.length > 0 ? filtered : []
+    }
+
+    return formik.values.items
+  }, [formik.values.search, formik.values.items])
 
   const handleSearchChange = event => {
     const { value } = event.target
@@ -2040,8 +2045,6 @@ export default function SaleTransactionForm({
                   formik.setFieldValue('search', '')
                 }}
                 onChange={handleSearchChange}
-                onSearch={e => formik.setFieldValue('search', e)}
-                search={true}
               />
             </Grid>
             <Grid item xs={3}>
@@ -2060,11 +2063,21 @@ export default function SaleTransactionForm({
         <Grow>
           <DataGrid
             onChange={(value, action) => {
-              formik.setFieldValue('items', value)
-              itemsUpdate.current = value
+              if (formik.values.search) {
+                const updatedItems = formik.values.items.map(item => {
+                  const updated = value.find(newItem => newItem.id === item.id)
+
+                  return updated ? { ...item, ...updated } : item
+                })
+                formik.setFieldValue('items', updatedItems)
+                itemsUpdate.current = updatedItems
+              } else {
+                formik.setFieldValue('items', value)
+                itemsUpdate.current = value
+              }
               action === 'delete' && setReCal(true)
             }}
-            value={filteredData || formik?.initialValues?.items[0]}
+            value={filteredData}
             error={formik.errors.items}
             initialValues={formik?.initialValues?.items[0]}
             onSelectionChange={(row, update, field) => {
@@ -2074,6 +2087,7 @@ export default function SaleTransactionForm({
             columns={columns}
             maxAccess={maxAccess}
             allowDelete={!isPosted}
+            allowAddNewLine={!formik.values.search}
             disabled={isPosted || !formik.values.header.clientId || !formik.values.header.currencyId}
           />
         </Grow>
