@@ -31,8 +31,6 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess }) => {
     productionLevel: null
   })
 
-  console.log(store)
-
   const tabs = [
     { label: labels.items },
     { label: labels.barcode, disabled: !store.recordId },
