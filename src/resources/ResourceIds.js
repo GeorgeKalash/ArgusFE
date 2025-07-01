@@ -497,6 +497,9 @@ export const ResourceIds = {
   PaymentOrderExpenses: 31614,
   Moulds: 47200,
   FoCastings: 47301,
+  RequisitionDocumentTypeDefaults: 50612,
+  PUFinancialIntegrators: 50102,
+  IRMaterialDocTypeDefaults: 46101,
   GenerateMRPs: 46304,
 
   // GL

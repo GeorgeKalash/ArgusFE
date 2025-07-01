@@ -1,12 +1,10 @@
-import { Box, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { AuthContext } from 'src/providers/AuthContext'
-import { DataSets } from 'src/resources/DataSets'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -15,6 +13,7 @@ import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRep
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { ControlContext } from 'src/providers/ControlContext'
+import toast from 'react-hot-toast'
 
 const GenerateMaterialPlaning = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

@@ -15,7 +15,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -490,19 +489,26 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={FoundryRepository.Mould.qry}
+                    endpointId={formik.values.header.lineId && FoundryRepository.Mould.qry2}
                     name='header.mouldId'
-                    parameters='_params=&_startAt=0&_pageSize=1000'
+                    parameters={
+                      formik.values.header.lineId &&
+                      `_params=&_startAt=0&_pageSize=1000&_lineId=${formik.values.header.lineId}`
+                    }
                     label={labels.mould}
                     required
                     valueField='recordId'
-                    readOnly={isClosed}
-                    displayField={'reference'}
+                    readOnly={isClosed || !formik.values.header.lineId}
+                    displayField={['reference', 'lineName']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'lineName', value: 'Production Line' }
+                    ]}
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
+                      formik.setFieldValue('header.mouldRef', newValue?.reference || null)
                       formik.setFieldValue('header.mouldId', newValue?.recordId || null)
-                      formik.setFieldValue('header.mouldRef', newValue?.reference || '')
                     }}
                     error={formik.touched?.header?.mouldId && Boolean(formik.errors?.header?.mouldId)}
                   />
@@ -559,7 +565,10 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     ]}
                     values={formik.values.header}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={async (event, newValue) => {
+                      if (!newValue?.recordId) {
+                        await formik.setFieldValue('header.mouldId', null)
+                      }
                       formik.setFieldValue('header.lineId', newValue?.recordId || null)
                     }}
                     error={formik.touched?.header?.lineId && Boolean(formik.errors?.header?.lineId)}
