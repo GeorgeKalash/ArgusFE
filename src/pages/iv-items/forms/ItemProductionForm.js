@@ -20,8 +20,6 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
   const { recordId, productionLevel } = store
   const { platformLabels } = useContext(ControlContext)
 
-  console.log(store)
-
   const { formik } = useForm({
     initialValues: {
       itemId: store.recordId,
@@ -260,7 +258,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 valueShow='wipItemSku'
                 secondValueShow='wipItemName'
                 form={formik}
-                readOnly={store.productionLevel != 4}
+                readOnly={productionLevel != 4}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('wipItemSku', newValue?.sku || null)
                   formik.setFieldValue('wipItemName', newValue?.name || '')
