@@ -47,6 +47,7 @@ import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function SalesQuotationForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -59,6 +60,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   const [measurements, setMeasurements] = useState([])
   const [defaults, setDefaults] = useState(null)
   const [reCal, setReCal] = useState(false)
+  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesQuotation,
@@ -149,9 +151,16 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     endpointId: SaleRepository.SalesQuotations.page
   })
 
+  const conditions = {
+    sku: row => row?.sku,
+    qty: row => row?.qty > 0
+  }
+  const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines, maxAccess, 'items')
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
+    conditionSchema: ['items'],
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -161,13 +170,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       clientId: yup.string().test('clientId-required', 'Client ID is required if bpId is empty', function (value) {
         return this.parent.bpId ? true : !!value
       }),
-      items: yup.array().of(
-        yup.object().shape({
-          qty: yup.string().test('check-value', 'qty must be at least 1', function (value) {
-            return !!this.parent.sku ? Number(value) > 0 : true
-          })
-        })
-      )
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const copy = {
@@ -193,7 +196,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       }
 
       const updatedRows = formik.values.items
-        .filter(item => item.sku)
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         .map((itemDetails, index) => {
           const { physicalProperty, ...rest } = itemDetails
 
@@ -453,9 +456,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -489,9 +490,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             functionId: SystemFunction.SalesInvoice,
             itemId: row?.itemId,
             clientId: formik?.values?.clientId
-          },
-          width: 1000,
-          title: labels?.salesTrx
+          }
         })
       }
     },
@@ -585,10 +584,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       props: {
         functionId: SystemFunction.SalesQuotation,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -1014,10 +1010,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         checkedAddressId: formik.values?.shipToAddressId,
         form: formik.values,
         handleAddressValues: setAddressValues
-      },
-      width: 950,
-      height: 600,
-      title: labels.AddressFilter
+      }
     })
   }
   function openAddressForm() {

@@ -53,20 +53,6 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Post',
-    label: platformLabels.Post,
-    color: '#231f20',
-    image: 'lock.png',
-    main: false
-  },
-  {
-    key: 'Unpost',
-    label: platformLabels.Unpost,
-    color: '#231f20',
-    image: 'unlock.png',
-    main: false
-  },
-  {
     key: 'Bulk',
     label: platformLabels.Bulk,
     color: '#09235C',
@@ -99,6 +85,13 @@ export const getButtons = platformLabels => [
     label: platformLabels.Stop,
     color: '#D3D3D3',
     image: 'stop.png',
+    main: false
+  },
+  {
+    key: 'Received',
+    label: platformLabels.Received,
+    color: '#D3D3D3',
+    image: 'received.png',
     main: false
   },
   {
@@ -397,17 +390,10 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Lock',
-    label: platformLabels.Lock,
-    color: '#231f20',
-    image: 'lock.png',
-    main: false
-  },
-  {
-    key: 'Unlock',
-    label: platformLabels.Unlock,
-    color: '#231f20',
-    image: 'unlock.png',
+    key: 'ImportAll',
+    label: platformLabels.importAll,
+    color: '#000',
+    image: 'importAll.png',
     main: false
   },
   {
@@ -436,6 +422,20 @@ export const getButtons = platformLabels => [
     label: platformLabels.Metals,
     color: '#ADD8E6',
     image: 'metals-icon.png',
+    main: false
+  },
+  {
+    key: 'Verify',
+    label: platformLabels.Verify,
+    color: '#047DFA',
+    image: 'checkmark-icon.png',
+    main: false
+  },
+  {
+    key: 'Unverify',
+    label: platformLabels.Unverify,
+    color: '#047DFA',
+    image: 'unverify-icon.png',
     main: false
   },
   {
@@ -583,17 +583,10 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Verify',
-    label: platformLabels.Verify,
-    color: '#047DFA',
-    image: 'checkmark-icon.png',
-    main: false
-  },
-  {
-    key: 'Unverify',
-    label: platformLabels.Unverify,
-    color: '#047DFA',
-    image: 'unverify-icon.png',
+    key: 'Reset',
+    label: platformLabels.Reset,
+    image: 'undo-arrow-icon.png',
+    color: '#231f20',
     main: false
   }
 ]

@@ -31,13 +31,21 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { getStorageData } from 'src/storage/storage'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function InwardSettlementForm({ labels, recordId, access, plantId, cashAccountId, dtId }) {
+const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const userId = getStorageData('userData').userId
   const [mismatchedFields, setMismatchedFields] = useState([])
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.InwardSettlement
+  })
+
+  useSetWindow({ title: labels.InwardSettlement, window })
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.InwardSettlement.snapshot
@@ -519,7 +527,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       disabled: !isClosed
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !isPosted
@@ -1322,3 +1330,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     </FormShell>
   )
 }
+InwardSettlementForm.width = 1200
+InwardSettlementForm.height = 650
+
+export default InwardSettlementForm

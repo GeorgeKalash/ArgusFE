@@ -56,7 +56,6 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       umcpnl: false,
       is2FAEnabled: false
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       fullName: yup.string().required(),

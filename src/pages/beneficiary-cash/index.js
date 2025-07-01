@@ -65,10 +65,7 @@ const BeneficiaryCash = () => {
             ? (obj.clientId * 100).toString() + (obj.beneficiaryId * 10).toString() + obj?.seqNo
             : null,
         dispersalType: 1
-      },
-      width: 700,
-      height: 500,
-      title: _labels.cash
+      }
     })
   }
 

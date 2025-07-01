@@ -26,6 +26,7 @@ const AvailabilitiesTab = ({ data, pagination, refetch, access, labels: _labels 
     <VertLayout>
       <Grow>
         <Table
+          name='availabilities'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

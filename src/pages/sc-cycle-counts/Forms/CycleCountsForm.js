@@ -122,9 +122,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       props: {
         functionId: SystemFunction.StockCount,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: 'Workflow'
+      }
     })
   }
 

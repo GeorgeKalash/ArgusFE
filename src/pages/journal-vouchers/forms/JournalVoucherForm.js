@@ -122,7 +122,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       disabled: !editMode
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !isRaw || !editMode

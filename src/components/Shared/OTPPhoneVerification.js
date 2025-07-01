@@ -7,11 +7,13 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ControlContext } from 'src/providers/ControlContext'
-import { ContactSupportOutlined } from '@mui/icons-material'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose, getData, onSuccess, window }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { defaultsData } = useContext(ControlContext)
+  const { defaultsData, platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.OTPVerification, window })
 
   const { labels: labels } = useResourceParams({
     datasetId: ResourceIds.OTPVerify
@@ -190,5 +192,8 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
     </div>
   )
 }
+
+OTPPhoneVerification.width = 400
+OTPPhoneVerification.height = 400
 
 export default OTPPhoneVerification

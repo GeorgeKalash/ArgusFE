@@ -264,9 +264,6 @@ export const SaleRepository = {
     import: service + 'importSRL',
     qry: service + 'qrySRL'
   },
-  InvoiceReturnBalance: {
-    balance: service + 'balanceRET'
-  },
   VerifyIntegrity: {
     check: service + 'checkTRX'
   },
@@ -294,5 +291,23 @@ export const SaleRepository = {
     set: service + 'setPGC',
     del: service + 'delPGC',
     page: service + 'pagePGC'
+  },
+  ReturnOnInvoice: {
+    snapshot: service + 'snapshotRET',
+    page: service + 'pageRET',
+    get: service + 'getRET',
+    set2: service + 'set2RET',
+    del: service + 'delRET',
+    verify: service + 'verifyRET',
+    post: service + 'postRET',
+    unpost: service + 'unpostRET',
+    balance: service + 'balanceRET'
+  },
+  ReturnItem: {
+    qry: service + 'qryREI',
+    balance: service + 'balanceREI'
+  },
+  ReturnSerial: {
+    qry: service + 'qryRES'
   }
 }

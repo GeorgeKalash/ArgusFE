@@ -1,6 +1,13 @@
+import { ControlContext } from 'src/providers/ControlContext'
 import ConfirmationDialog from '../ConfirmationDialog'
+import { useContext } from 'react'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const ImportConfirmation = ({ window, onConfirm, fullScreen, open, dialogText }) => {
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.import, window })
+
   return (
     <ConfirmationDialog
       open={open?.flag || false}
@@ -17,5 +24,8 @@ const ImportConfirmation = ({ window, onConfirm, fullScreen, open, dialogText })
     />
   )
 }
+
+ImportConfirmation.width = 470
+ImportConfirmation.height = 170
 
 export default ImportConfirmation

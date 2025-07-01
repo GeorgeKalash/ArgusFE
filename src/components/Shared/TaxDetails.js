@@ -9,10 +9,15 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const TaxDetails = props => {
-  const { taxId, obj } = props
+  const { taxId, obj, window } = props
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.TaxDetails, window })
 
   const vatAmount = (taxDetail, taxItem) => {
     switch (taxDetail.taxBase) {
@@ -23,7 +28,9 @@ const TaxDetails = props => {
       case 3:
         return (taxItem.basePrice != null ? (taxItem.basePrice * taxItem.qty * taxDetail.amount) / 100 : 0).toFixed(2)
       case 4:
-        return (taxItem.baseLaborPrice != null ? (taxItem.baseLaborPrice * taxItem.qty * taxDetail.amount) / 100 : 0).toFixed(2)
+        return (
+          taxItem.baseLaborPrice != null ? (taxItem.baseLaborPrice * taxItem.qty * taxDetail.amount) / 100 : 0
+        ).toFixed(2)
       default:
         return null
     }
@@ -112,5 +119,7 @@ const TaxDetails = props => {
     </VertLayout>
   )
 }
+
+TaxDetails.width = 1000
 
 export default TaxDetails

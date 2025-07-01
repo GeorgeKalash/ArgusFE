@@ -254,7 +254,9 @@ export const InventoryRepository = {
   Serial: {
     qry: service + 'qrySRL',
     get2: service + 'get2SRL',
-    get: service + 'getSRL'
+    set: service + 'setSRL',
+    get: service + 'getSRL',
+    del: service + 'delSRL'
   },
   MaterialTransferSerial: {
     qry: service + 'qryTFS'
@@ -300,7 +302,10 @@ export const InventoryRepository = {
     qry: service + 'qrySMA'
   },
   Replacement: {
-    qry: service + 'qryRPL'
+    qry: service + 'qryRPL',
+    page: service + 'pageRPL',
+    set2: service + 'set2RPL',
+    del: service + 'delRPL'
   },
   Lot: {
     get: service + 'getLOT',
@@ -326,9 +331,12 @@ export const InventoryRepository = {
     get: service + 'getSPF',
     del: service + 'delSPF',
     page: service + 'pageSPF',
-    set2: service + 'set2SPF',
+    set2: service + 'set2SPF'
   },
   SerialsProfileSequences: {
-    qry: service + 'qrySPS',
+    qry: service + 'qrySPS'
+  },
+  Materials: {
+    snapshot: service + 'snapshotUF'
   }
 }

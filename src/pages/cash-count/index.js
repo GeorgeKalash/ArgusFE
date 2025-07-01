@@ -104,13 +104,8 @@ const CashCount = () => {
     stack({
       Component: CashCountForm,
       props: {
-        labels: _labels,
-        recordId: recordId ? recordId : null,
-        maxAccess: access
-      },
-      width: 1100,
-      height: 700,
-      title: _labels.cashCount
+        recordId
+      }
     })
   }
 

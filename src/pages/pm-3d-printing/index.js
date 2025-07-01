@@ -70,14 +70,16 @@ const ThreeDPrinting = () => {
       type: 'date'
     },
     {
-      field: 'machineName',
-      headerName: labels.machine,
-      flex: 1
+      field: 'startDate',
+      headerName: labels.startDate,
+      flex: 1,
+      type: 'date'
     },
     {
-      field: 'machineRef',
-      headerName: labels.machineRef,
-      flex: 1
+      field: 'endDate',
+      headerName: labels.endDate,
+      flex: 1,
+      type: 'date'
     },
     {
       field: 'threeDDRef',
@@ -86,7 +88,39 @@ const ThreeDPrinting = () => {
     },
     {
       field: 'fileReference',
-      headerName: labels.fileReference,
+      headerName: labels.threeDFile,
+      flex: 1
+    },
+    {
+      field: 'machineName',
+      headerName: labels.machine,
+      flex: 1
+    },
+    {
+      field: 'setPcs',
+      headerName: labels.threeDPrintPcs,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'weight',
+      headerName: labels.threeDPrintWGT,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'productionLineName',
+      headerName: labels.productionLineName,
+      flex: 1
+    },
+    {
+      field: 'itemGroupName',
+      headerName: labels.itemGroup,
+      flex: 1
+    },
+    {
+      field: 'collectionName',
+      headerName: labels.collection,
       flex: 1
     },
     {
@@ -113,13 +147,8 @@ const ThreeDPrinting = () => {
     stack({
       Component: ThreeDPrintForm,
       props: {
-        labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 700,
-      height: 650,
-      title: labels.ThreeDPrint
+        recordId
+      }
     })
   }
 
@@ -144,6 +173,7 @@ const ThreeDPrinting = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           paginationType='api'

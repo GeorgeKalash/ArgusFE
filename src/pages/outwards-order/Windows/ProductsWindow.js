@@ -115,8 +115,6 @@ const ProductsWindow = ({
                     labels,
                     maxAccess
                   },
-                  width: 500,
-                  height: 200,
                   title: params.data?.productName
                 })
               }
@@ -170,6 +168,7 @@ const ProductsWindow = ({
     <VertLayout>
       <Grow>
         <Table
+          name='products'
           columns={columns}
           gridData={gridData}
           rowId={['productId']}

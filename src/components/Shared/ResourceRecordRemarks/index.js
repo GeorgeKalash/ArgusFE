@@ -79,9 +79,7 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
         fullScreen: false,
         onConfirm: () => onDelete(obj)
       },
-      width: 450,
-      height: 170,
-      title: platformLabels.Delete
+      refresh: false
     })
   }
 

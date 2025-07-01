@@ -162,14 +162,9 @@ const SalesOrder = () => {
     stack({
       Component: SalesOrderForm,
       props: {
-        labels,
-        access,
         currency,
         recordId
-      },
-      width: 1300,
-      height: 730,
-      title: labels.salesOrder
+      }
     })
   }
 
