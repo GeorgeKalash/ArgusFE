@@ -57,7 +57,7 @@ const CustomNumberField = ({
     if (val.endsWith('.') && !/\.\d+$/.test(val)) {
       val = val.slice(0, -1)
     }
-    const num = Number(val)
+    const num = val != '' ? Number(val) : null
 
     return isNaN(num) ? null : num
   }
@@ -100,7 +100,6 @@ const CustomNumberField = ({
       if (inputValue?.length > maxLength - decimalScale || integerPartLength) {
         e.target.value = value
       }
-      onChange(e)
     }
   }
 
