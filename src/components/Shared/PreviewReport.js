@@ -66,7 +66,7 @@ export default function PreviewReport({
       {pdfURL && (
         <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
           <iframe title='Preview' src={pdfURL} width='100%' height='100%' allowFullScreen />
-          <Box position='absolute' top={20} right={130} zIndex={1}>
+          <Box position='absolute' top={10} right={130} zIndex={1}>
             <CustomButton
               image='popup.png'
               color='#231F20'
