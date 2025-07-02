@@ -15,7 +15,7 @@ export const AddressFormShell = ({
   allowPost,
   optional = false,
   onSubmit,
-  isSavedClear = false,
+  isSavedClear = true,
   isCleared = true,
   actions,
   ...props
@@ -34,9 +34,8 @@ export const AddressFormShell = ({
     onSubmit: values => {
       setAddress(values)
       if (allowPost) {
-        onSubmit(values)
+        onSubmit(values, window)
       }
-      window.close()
     }
   })
 

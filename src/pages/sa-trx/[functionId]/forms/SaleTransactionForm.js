@@ -1563,8 +1563,7 @@ export default function SaleTransactionForm({
       props: {
         address: address,
         setAddress: setAddress,
-        isCleared: false,
-        isSavedClear: false
+        isCleared: false
       }
     })
   }
