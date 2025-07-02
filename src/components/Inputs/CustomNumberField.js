@@ -97,7 +97,6 @@ const CustomNumberField = ({
       if (inputValue?.length > maxLength) e.target.value = value
     } else {
       if (inputValue?.length > maxLength - (decimalScale || 0)) {
-        console.log(value)
         e.target.value = value
       }
     }
