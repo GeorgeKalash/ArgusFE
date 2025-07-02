@@ -89,7 +89,8 @@ export const PurchaseRepository = {
     qry: service + 'qryIVIM'
   },
   Serials: {
-    qry: service + 'qrySRL'
+    qry: service + 'qrySRL',
+    import: service + 'importSRL'
   },
   Shipment: {
     get: service + 'getSHP',
@@ -130,6 +131,20 @@ export const PurchaseRepository = {
   },
   OrderItem: {
     qry: service + 'qryORI',
-    set2: service + 'set2ORI',
+    set2: service + 'set2ORI'
+  },
+  PUDraftReturn: {
+    set2: service + 'set2DRE',
+    get: service + 'getDRE',
+    page: service + 'pageDRE',
+    snapshot: service + 'snapshotDRE',
+    del: service + 'delDRE'
+  },
+  PUDraftReturnSerial: {
+    get2: service + 'get2DRS',
+    qry: service + 'qryDRS',
+    del: service + 'delDRS',
+    append: service + 'appendDRS',
+    batch: service + 'batchDRS'
   }
 }

@@ -497,6 +497,7 @@ export const ResourceIds = {
   PaymentOrderExpenses: 31614,
   Moulds: 47200,
   FoCastings: 47301,
+  PUDraftSerialReturns: 50328,
 
   // GL
   GLSalesInvoice: 51604,
