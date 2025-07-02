@@ -20,8 +20,6 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
   const { recordId, productionLevel } = store
   const { platformLabels } = useContext(ControlContext)
 
-  console.log(recordId)
-
   const { formik } = useForm({
     initialValues: {
       itemId: recordId,
