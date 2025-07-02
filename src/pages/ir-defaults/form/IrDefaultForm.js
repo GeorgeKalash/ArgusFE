@@ -33,21 +33,10 @@ const IrDefaultForm = ({ _labels, access }) => {
     formik.setFieldValue('recordId', 'N/A')
   }
 
-  const { formik } = useForm({
+  const { formik, setFieldValidation } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: { ir_amcShortTerm: null, ir_amcLongTerm: null, ir_tfr_DocTypeId: null, recordId: 'N/A' },
-    validationSchema: yup.object().shape({
-      ir_amcShortTerm: yup
-        .number()
-        .nullable()
-        .test(function (value) {
-          const { ir_amcLongTerm } = this.parent
-
-          return value == null || ir_amcLongTerm == null || value <= ir_amcLongTerm
-        }),
-      ir_amcLongTerm: yup.number().nullable()
-    }),
     onSubmit: values => {
       postDefault(values)
     }
@@ -106,6 +95,8 @@ const IrDefaultForm = ({ _labels, access }) => {
                 onClear={() => formik.setFieldValue('ir_amcShortTerm', '')}
                 name='ir_amcShortTerm'
                 onChange={formik.handleChange}
+                setFieldValidation={setFieldValidation}
+                maxValue={formik.values.ir_amcLongTerm}
                 label={_labels.shortTerm}
                 value={formik.values.ir_amcShortTerm}
                 error={formik.touched.ir_amcShortTerm && Boolean(formik.errors.ir_amcShortTerm)}
@@ -116,6 +107,8 @@ const IrDefaultForm = ({ _labels, access }) => {
                 onClear={() => formik.setFieldValue('ir_amcLongTerm', '')}
                 name='ir_amcLongTerm'
                 onChange={formik.handleChange}
+                setFieldValidation={setFieldValidation}
+                minValue={formik.values.ir_amcShortTerm}
                 label={_labels.longTerm}
                 value={formik.values.ir_amcLongTerm}
                 error={formik.touched.ir_amcLongTerm && Boolean(formik.errors.ir_amcLongTerm)}

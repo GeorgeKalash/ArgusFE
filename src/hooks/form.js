@@ -1,9 +1,37 @@
 import { useFormik } from 'formik'
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import * as yup from 'yup'
 
 export function useForm({ documentType = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
+  // const [Validation, setValidation] = useState()
+
+  // console.log(Validation)
+
+  // const setFieldValidation = (field, errors) => {
+  //   setValidation(prev => {
+  //     const updatedValidation = { ...prev }
+  //     if (errors === '') {
+  //       delete updatedValidation[field]
+  //     } else {
+  //       updatedValidation[field] = errors
+  //     }
+
+  //     return updatedValidation
+  //   })
+  // }
+
+  const Validation = useRef({})
+
+  const setFieldValidation = (field, error) => {
+    if (error === '') {
+      delete Validation.current[field]
+    } else {
+      Validation.current[field] = error
+    }
+    formik.validateForm() // <-- this forces Formik to pick up the new errors immediately
+  }
+
   function explode(str) {
     const parts = str.split('.')
 
@@ -47,6 +75,7 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
   }
 
   const formik = useFormik({
+    Validation,
     ...formikProps,
     validate(values) {
       let maxAccessErrors = {}
@@ -110,10 +139,12 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
             }
           }
       })
+      const mergedValidation = Validation.current
 
       return {
         ...maxAccessErrors,
-        ...validate(values)
+        ...validate(values),
+        ...mergedValidation
       }
     }
   })
@@ -132,5 +163,5 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
     }
   }, [reference?.isEmpty])
 
-  return { formik }
+  return { formik, setFieldValidation }
 }

@@ -19,6 +19,7 @@ const CustomTextField = ({
   autoComplete = 'off',
   numberField = false,
   editMode = false,
+  minLength,
   maxLength = '1000',
   position,
   dir = 'ltr',
@@ -28,6 +29,7 @@ const CustomTextField = ({
   language = '',
   hasBorder = true,
   forceUpperCase = false,
+  setFieldValidation,
   ...props
 }) => {
   const name = props.name
@@ -38,6 +40,17 @@ const CustomTextField = ({
 
   const [focus, setFocus] = useState(!hasBorder)
   const [isFocused, setIsFocused] = useState(false)
+
+  useEffect(() => {
+    if (typeof setFieldValidation === 'function')
+      if (value && ((minLength && value?.length < minLength) || (maxLength && value?.length > maxLength))) {
+        setFieldValidation([name], ' ')
+      } else if (_required && !value) {
+        setFieldValidation([name], ' ')
+      } else {
+        setFieldValidation([name], '')
+      }
+  }, [value])
 
   useEffect(() => {
     if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && value?.length < 1) {

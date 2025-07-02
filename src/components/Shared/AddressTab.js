@@ -17,7 +17,8 @@ const AddressTab = ({
   defaultReadOnly = {},
   required = true,
   setFormik,
-  access
+  access,
+  setFieldValidation
 }) => {
   const { getRequest } = useContext(RequestsContext)
 
@@ -301,7 +302,9 @@ const AddressTab = ({
           name='bldgNo'
           label={labels.bldgNo}
           value={addressValidation.values.bldgNo}
-          maxLength='10'
+          minLength={4}
+          maxLength={4}
+          setFieldValidation={setFieldValidation}
           readOnly={readOnly}
           onChange={addressValidation.handleChange}
           onClear={() => addressValidation.setFieldValue('bldgNo', '')}
@@ -314,7 +317,8 @@ const AddressTab = ({
           name='unitNo'
           label={labels.unitNo}
           value={addressValidation.values.unitNo}
-          maxLength='10'
+          minLength={4}
+          setFieldValidation={setFieldValidation}
           readOnly={readOnly}
           onChange={addressValidation.handleChange}
           onClear={() => addressValidation.setFieldValue('unitNo', '')}
@@ -338,7 +342,8 @@ const AddressTab = ({
       <FormGrid item hideonempty xs={4}>
         <CustomTextField
           name='postalCode'
-          maxLength='5'
+          minLength={5}
+          maxLength={5}
           label={labels.postalCode}
           readOnly={readOnly}
           value={addressValidation.values.postalCode}
