@@ -14,6 +14,7 @@ const AddressForm = ({
   actions = [],
   address: propAddress,
   setAddress: setPropAddress,
+  required = true,
   ...props
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -26,21 +27,26 @@ const AddressForm = ({
   useSetWindow({ title: platformLabels.Address, window })
 
   function onAddressSubmit(post) {
-    const data = { ...post, recordId: recordId }
+    if (required) {
+      const data = { ...post, recordId: recordId }
 
-    postRequest({
-      extension: SystemRepository.Address.set,
-      record: JSON.stringify(data)
-    }).then(res => {
-      data.addressId = res.recordId
+      postRequest({
+        extension: SystemRepository.Address.set,
+        record: JSON.stringify(data)
+      }).then(res => {
+        data.addressId = res.recordId
 
-      if (recordId) {
-        toast.success(platformLabels.Edited)
-        onSubmit(null, window)
-      } else {
-        onSubmit(data, window)
-      }
-    })
+        if (recordId) {
+          toast.success(platformLabels.Edited)
+          onSubmit(null, window)
+        } else {
+          onSubmit(data, window)
+        }
+      })
+    } else {
+      setAddress(post)
+      onSubmit(post, window)
+    }
   }
 
   useEffect(() => {

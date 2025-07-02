@@ -858,10 +858,11 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
     !formik.values.govCellVerified &&
     !systemChecks?.some(item => item.checkId === SystemChecks.CT_DISABLE_MOBILE_VERIFICATION)
 
-  function onAddressSubmit(values) {
+  function onAddressSubmit(values, window) {
     setAddress({
       ...values
     })
+    window.close()
   }
 
   return (
@@ -1690,7 +1691,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                       labels={labels}
                       defaultReadOnly={{ countryId: true }}
                       addressValidation={formik}
-                      readOnly={editMode && !allowEdit && true}
+                      readOnly={editMode && !allowEdit}
                       access={maxAccess}
                       setFormik={setFormik}
                     />
@@ -1708,7 +1709,8 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               address: address,
                               setAddress: setAddress,
                               onSubmit: onAddressSubmit,
-                              readOnly: editMode && !allowEdit && true
+                              readOnly: editMode && !allowEdit,
+                              required: false
                             },
                             title: labels.workAddress
                           })

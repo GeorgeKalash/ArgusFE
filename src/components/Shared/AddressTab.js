@@ -15,6 +15,7 @@ const AddressTab = ({
   addressValidation,
   readOnly = false,
   defaultReadOnly = {},
+  required = true,
   setFormik,
   access
 }) => {
@@ -71,15 +72,19 @@ const AddressTab = ({
       optional) ||
     !optional
 
-  const validate = options && {
-    name: yup.string().required(),
-    street1: yup.string().required(),
-    phone: yup.string().required(),
-    countryId: yup.number().required(),
-    city: yup.string().required(),
-    email1: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true }),
-    email2: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true })
-  }
+  const validate = options &&
+    required && {
+      name: yup.string().required(),
+      street1: yup.string().required(),
+      phone: yup.string().required(),
+      countryId: yup.number().required(),
+      city: yup.string().required(),
+      email1: yup
+        .string()
+        .nullable()
+        .matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true }),
+      email2: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true })
+    }
   useEffect(() => {
     if (address?.recordId !== lastRecordIdRef.current) {
       lastRecordIdRef.current = address?.recordId
@@ -141,7 +146,7 @@ const AddressTab = ({
           value={addressValidation.values.name}
           readOnly={readOnly}
           maxLength='50'
-          required
+          required={required}
           onChange={addressValidation.handleChange}
           onClear={() => addressValidation.setFieldValue('name', '')}
           error={addressValidation.touched?.name && Boolean(addressValidation.errors?.name)}
@@ -157,7 +162,7 @@ const AddressTab = ({
           displayField={['reference', 'name']}
           readOnly={readOnly || defaultReadOnly?.countryId}
           displayFieldWidth={1.5}
-          required
+          required={required}
           columnsInDropDown={[
             { key: 'reference', value: 'Reference' },
             { key: 'name', value: 'Name' },
@@ -214,7 +219,7 @@ const AddressTab = ({
           valueField='name'
           displayField='name'
           name='city'
-          required
+          required={required}
           label={labels.city}
           readOnly={readOnly || !addressValidation.values.countryId}
           form={addressValidation}
@@ -267,7 +272,7 @@ const AddressTab = ({
               name='street1'
               label={labels.street1}
               value={addressValidation.values.street1}
-              required
+              required={required}
               readOnly={readOnly}
               maxLength='100'
               onChange={addressValidation.handleChange}
@@ -365,7 +370,7 @@ const AddressTab = ({
               value={addressValidation.values.phone}
               readOnly={readOnly}
               maxLength='40'
-              required
+              required={required}
               phone={true}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone', '')}

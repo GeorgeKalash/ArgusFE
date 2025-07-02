@@ -154,7 +154,6 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
         parameters: `_clientId=${recordId}`
       })
       const obj = res?.record
-      console.log(obj)
 
       formik.setValues({
         ...obj.clientCorporate,
