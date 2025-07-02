@@ -146,5 +146,9 @@ export const PurchaseRepository = {
     del: service + 'delDRS',
     append: service + 'appendDRS',
     batch: service + 'batchDRS'
+  },
+  FinancialGroup: {
+    qry: service + 'qryFII',
+    set2: service + 'set2FII'
   }
 }

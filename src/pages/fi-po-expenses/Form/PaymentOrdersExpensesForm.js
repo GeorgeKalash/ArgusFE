@@ -54,7 +54,6 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
     initialValues: {
       recordId: null,
       reference: '',
-      accountId: '',
       accountType: 3,
       currencyId: parseInt(currencyId),
       paymentMethod: null,
@@ -587,14 +586,9 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
                     displayField='value'
                     values={formik.values}
                     required
-                    readOnly={isClosed || isCancelled}
+                    readOnly
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      if (!newValue?.key) {
-                        formik.setFieldValue('accountId', null)
-                        formik.setFieldValue('accountRef', '')
-                        formik.setFieldValue('accountName', '')
-                      }
                       formik.setFieldValue('accountType', newValue?.key || null)
                     }}
                     error={formik.touched.accountType && Boolean(formik.errors.accountType)}
@@ -612,35 +606,6 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
                     onClear={() => formik.setFieldValue('date', null)}
                     readOnly={isClosed || isCancelled}
                     error={formik.touched.date && Boolean(formik.errors.date)}
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={FinancialRepository.Account.snapshot}
-                    name='accountId'
-                    readOnly={isClosed || isCancelled || !formik.values.accountType}
-                    label={labels.accountReference}
-                    valueField='reference'
-                    displayField='name'
-                    valueShow='accountRef'
-                    secondValueShow='accountName'
-                    form={formik}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Account Ref' },
-                      { key: 'name', value: 'Name', grid: 4 },
-                      { key: 'keywords', value: 'Keywords' }
-                    ]}
-                    firstFieldWidth={4}
-                    displayFieldWidth={4}
-                    filter={{ type: formik.values.accountType, isInactive: val => val !== true }}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('accountRef', newValue?.reference || '')
-                      formik.setFieldValue('accountName', newValue?.name || '')
-                      formik.setFieldValue('accountGroupName', newValue?.groupName || '')
-                      formik.setFieldValue('accountId', newValue?.recordId || null)
-                    }}
-                    error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                     maxAccess={maxAccess}
                   />
                 </Grid>

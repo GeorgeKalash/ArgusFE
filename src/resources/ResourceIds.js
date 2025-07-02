@@ -498,6 +498,10 @@ export const ResourceIds = {
   Moulds: 47200,
   FoCastings: 47301,
   PUDraftSerialReturns: 50328,
+  RequisitionDocumentTypeDefaults: 50612,
+  PUFinancialIntegrators: 50102,
+  IRMaterialDocTypeDefaults: 46101,
+  PhysicalCountItemDetailsImport: 44305,
 
   // GL
   GLSalesInvoice: 51604,
@@ -541,6 +545,7 @@ export const ResourceIds = {
   GLReturnOnInvoice: 51606,
   IomProperties: 42606,
   SyncPurchaseTrx: 50602,
+  IRPlantSettings: 46100,
 
   //MCR
   MCRSalesInvoice: 51607,
