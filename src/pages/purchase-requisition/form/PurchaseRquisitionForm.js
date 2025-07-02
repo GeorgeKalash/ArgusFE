@@ -1,6 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
+import Table from 'src/components/Shared/Table'
 import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -16,49 +17,27 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { DataGrid } from 'src/components/Shared/DataGrid'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useForm } from 'src/hooks/form'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import {
-  getIPR,
-  DIRTYFIELD_QTY,
-  DIRTYFIELD_BASE_PRICE,
-  DIRTYFIELD_UNIT_PRICE,
-  DIRTYFIELD_MDAMOUNT,
-  DIRTYFIELD_UPO,
-  DIRTYFIELD_EXTENDED_PRICE,
-  DIRTYFIELD_MDTYPE,
-  MDTYPE_PCT,
-  MDTYPE_AMOUNT
-} from 'src/utils/ItemPriceCalculator'
-import { getVatCalc } from 'src/utils/VatCalculator'
-import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
-import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
-import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
-import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
-import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
-import TaxDetails from 'src/components/Shared/TaxDetails'
-import { createConditionalSchema } from 'src/lib/validation'
-import useResourceParams from 'src/hooks/useResourceParams'
-import useSetWindow from 'src/hooks/useSetWindow'
 import { DataSets } from 'src/resources/DataSets'
 import { companyStructureRepository } from 'src/repositories/companyStructureRepository'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import CustomButton from 'src/components/Inputs/CustomButton'
+import ItemDetailsForm from './ItemDetailsForm'
 
 export default function PurchaseRquisitionForm({ recordId, labels, access }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
+  const [maxSeqNo, setMaxSeqNo] = useState(1)
+  const defaultPlant = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PurchaseRequisition,
@@ -70,19 +49,9 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
     endpointId: PurchaseRepository.PurchaseRequisition.page
   })
 
-  const conditions = {
-    sku: row => row?.sku,
-    itemName: row => row?.itemName,
-    qty: row => row?.qty > 0,
-    muId: row => row?.muId
-  }
-
-  const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines, maxAccess, 'items')
-
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    conditionSchema: ['items'],
     initialValues: {
       recordId,
       dtId: null,
@@ -92,50 +61,96 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
       date: new Date(),
       procurementType: null,
       siteId: null,
-      deliveryDate: new Date(),
+      deliveryDate: null,
       notes: '',
       vendorId: null,
-      plantId: null,
+      plantId: defaultPlant,
       departmentId: null,
       releaseStatus: null,
       wip: 1,
-      items: [
-        {
-          id: 1,
-          trxId: recordId,
-          sku: null,
-          seqNo: null,
-          itemId: null,
-          itemName: '',
-          siteId: null,
-          muId: null,
-          muQty: 0,
-          qty: 0,
-          baseQty: 0,
-          deliveryDate: new Date(),
-          status: null,
-          vendorId: null,
-          onHand: 0,
-          lastPurchaseDate: null,
-          lastPurchaseCurrencyId: null,
-          lastPurchaseUnitPrice: 0,
-          unitCost: 0,
-          totalCost: 0,
-          justification: ''
-        }
-      ]
+      totalCost: 0,
+      items: {}
     },
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
-      procurementType: yup.date().required(),
-      items: yup.array().of(schema)
+      procurementType: yup.date().required()
     }),
-    onSubmit: async obj => {}
+    onSubmit: async values => {
+      const obj = { ...values }
+      delete obj.items
+
+      const res = await postRequest({
+        extension: PurchaseRepository.PurchaseRequisition.set,
+        record: JSON.stringify({
+          ...obj,
+          date: obj?.date ? formatDateToApi(obj?.date) : null,
+          deliveryDate: obj?.deliveryDate ? formatDateToApi(obj?.deliveryDate) : null
+        })
+      })
+
+      invalidate()
+      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+      refetchForm(res?.recordId)
+    }
   })
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip == 2
+
+  const actions = []
+
+  const columns = [
+    {
+      field: 'sku',
+      headerName: labels.sku,
+      flex: 1
+    },
+    {
+      field: 'itemName',
+      headerName: labels.name,
+      flex: 1
+    },
+    {
+      field: 'siteName',
+      headerName: labels.site,
+      flex: 1
+    },
+    {
+      field: 'muName',
+      headerName: labels.measurement,
+      flex: 1
+    },
+    {
+      field: 'qty',
+      headerName: labels.qty,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'deliveryDate',
+      headerName: labels.deliveryDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'vendorName',
+      headerName: labels.vendor,
+      flex: 1
+    },
+    {
+      field: 'unitCost',
+      headerName: labels.unitCost,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'totalCost',
+      headerName: labels.totalCost,
+      flex: 1,
+      type: 'number'
+    }
+  ]
 
   async function getFilteredMU(itemId) {
     if (!itemId) return
@@ -145,6 +160,95 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
     const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
     filteredMeasurements.current = arrayMU
   }
+
+  const getMeasurementUnits = async () => {
+    return await getRequest({
+      extension: InventoryRepository.MeasurementUnit.qry,
+      parameters: `_msId=0`
+    })
+  }
+
+  async function refetchForm(recordId) {
+    const requisitionData = await getRequisitionData(recordId)
+    const itemDetails = await getItemDetails(recordId)
+    fillForm(requisitionData, itemDetails)
+  }
+
+  async function getRequisitionData(recordId) {
+    const requisitionData = await getRequest({
+      extension: PurchaseRepository.PurchaseRequisition.get,
+      parameters: `_recordId=${recordId}`
+    })
+
+    return requisitionData?.record
+  }
+
+  async function getItemDetails(recordId) {
+    const itemDetails = await getRequest({
+      extension: PurchaseRepository.RequisitionDetail.qry,
+      parameters: `_trxId=${recordId}`
+    })
+
+    return itemDetails
+  }
+  function fillForm(requisitionData, itemDetails) {
+    let headerTotalCost = 0
+
+    const modifiedList = itemDetails?.list?.map(item => {
+      headerTotalCost += item?.unitCost * item?.qty
+      if (item?.seqNo > maxSeqNo) setMaxSeqNo(item?.seqNo)
+
+      return {
+        ...item,
+        totalCost: (item?.unitCost * item?.qty || 0).toFixed(2),
+        unitCost: (item?.unitCost || 0).toFixed(2),
+        qty: (item?.qty || 0).toFixed(2)
+      }
+    })
+
+    formik.setValues({
+      ...requisitionData,
+      date: formatDateFromApi(requisitionData?.date),
+      deliveryDate: formatDateFromApi(requisitionData?.deliveryDate),
+      totalCost: headerTotalCost.toFixed(2),
+      items: { list: modifiedList }
+    })
+  }
+
+  const openPurchaseDetails = obj => {
+    stack({
+      Component: ItemDetailsForm,
+      props: {
+        recordId,
+        labels,
+        maxAccess,
+        isClosed,
+        maxSeqNo,
+        seqNo: obj?.seqNo,
+        refetchTable: refetchForm
+      },
+      width: 800,
+      height: 450,
+      title: labels.purchaseDetails
+    })
+  }
+
+  const delPurchaseDetails = async obj => {
+    await postRequest({
+      extension: PurchaseRepository.RequisitionDetail.del,
+      record: JSON.stringify(obj)
+    })
+    refetchForm(recordId)
+    toast.success(platformLabels.Deleted)
+  }
+
+  useEffect(() => {
+    ;(async function () {
+      const muList = await getMeasurementUnits()
+      setMeasurements(muList?.list)
+      if (recordId) refetchForm(recordId)
+    })()
+  }, [])
 
   return (
     <FormShell
@@ -166,7 +270,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PurchaseRequisition}`}
                     name='dtId'
-                    label={labels.documentType}
+                    label={labels.docType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -217,6 +321,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                     values={formik.values}
                     valueField='key'
                     displayField='value'
+                    required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('procurementType', newValue?.key || null)
@@ -258,12 +363,24 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                     readOnly={isClosed}
                     label={labels.department}
                     values={formik.values}
-                    displayField='name'
+                    columnsInDropDown={[
+                      { key: 'departmentRef', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    displayField={['departmentRef', 'name']}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('departmentId', newValue?.recordId || null)
                     }}
                     error={formik.touched.departmentId && Boolean(formik.errors.departmentId)}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <CustomButton
+                    onClick={openPurchaseDetails}
+                    style={{ border: '1px solid #4eb558' }}
+                    color={'transparent'}
+                    image={'add.png'}
                   />
                 </Grid>
               </Grid>
@@ -283,7 +400,6 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                     values={formik.values}
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('siteId', newValue?.recordId || null)
@@ -298,13 +414,12 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                     readOnly={isClosed}
                     value={formik?.values?.deliveryDate}
                     onChange={formik.setFieldValue}
-                    required
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('deliveryDate', null)}
                     error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
                     name='plantId'
@@ -341,16 +456,29 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
             </Grid>
           </Grid>
         </Fixed>
-        <Grow></Grow>
+        <Grow>
+          <Table
+            name='itemTable'
+            columns={columns}
+            gridData={formik.values.items}
+            rowId={['recordId']}
+            onEdit={openPurchaseDetails}
+            onDelete={delPurchaseDetails}
+            maxAccess={maxAccess}
+            pagination={false}
+          />
+        </Grow>
         <Fixed>
-          <Grid container xs={6}>
-            <CustomTextField
-              name='totalCost'
-              label={labels.totalCost}
-              maxAccess={maxAccess}
-              value={totalCost}
-              readOnly
-            />
+          <Grid container justifyContent='flex-end'>
+            <Grid item xs={6} sm={4} md={3}>
+              <CustomTextField
+                name='totalCost'
+                label={labels.totalCost}
+                maxAccess={maxAccess}
+                value={formik.values.totalCost}
+                readOnly
+              />
+            </Grid>
           </Grid>
         </Fixed>
       </VertLayout>

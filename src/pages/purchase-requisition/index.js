@@ -122,7 +122,10 @@ export default function PurchaseRquisition() {
         labels,
         access,
         recordId
-      }
+      },
+      width: 1100,
+      height: 700,
+      title: labels.purchaseRequisition
     })
   }
 

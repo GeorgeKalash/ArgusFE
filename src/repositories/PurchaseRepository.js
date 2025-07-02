@@ -127,7 +127,10 @@ export const PurchaseRepository = {
     del: service + 'delREQ'
   },
   RequisitionDetail: {
-    qry: service + 'qryREI'
+    qry: service + 'qryREI',
+    set: service + 'setREI',
+    get: service + 'getREI',
+    del: service + 'delREI'
   },
   QuotationItem: {
     preview: service + 'previewQTI'
