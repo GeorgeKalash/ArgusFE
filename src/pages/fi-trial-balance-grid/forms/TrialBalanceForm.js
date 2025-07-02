@@ -1,133 +1,102 @@
-import { useContext, useEffect } from 'react'
-import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import * as yup from 'yup'
-import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useForm } from 'src/hooks/form'
-import { DataSets } from 'src/resources/DataSets'
-import { Grid, Table } from '@mui/material'
+import { Grid } from '@mui/material'
 import { RGFinancialRepository } from 'src/repositories/RGFinancialRepository'
-import { useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import Table from 'src/components/Shared/Table'
 
-const TrialBalanceForm = ({ maxAccess, labels, obj }) => {
+const TrialBalanceForm = ({ access, labels, obj, params }) => {
   const { getRequest } = useContext(RequestsContext)
+  const [data, setData] = useState({ list: [] })
 
-  // async function fetchGridData() {
-  //   const response = await getRequest({
-  //     extension: RGFinancialRepository.TrialBalance.FI401o2,
-  //     parameters: `_filter=&_size=30&_startAt=0&_fiscalYear=2025&_startDate=2025-01-01&_endDate=2025-07-01&_accountId=2&_currencyId=1`
-  //   })
+  async function fetchGridData() {
+    const response = await getRequest({
+      extension: RGFinancialRepository.TrialBalance.FI401o2,
+      parameters: `_filter=&_size=30&_startAt=0&_fiscalYear=${params?.[1]}&_startDate=${params?.[2]}&_endDate=${params?.[3]}&_accountId=${obj.accountId}&_currencyId=${obj.currencyId}`
+    })
 
-  //   return response
-  // }
+    setData(response)
+  }
 
-  // const {
-  //   query: { data },
-
-  //   // labels,
-  //   filterBy,
-  //   refetch
-
-  //   // access
-  // } = useResourceQuery({
-  //   endpointId: RGFinancialRepository.TrialBalance.FI401o2,
-
-  //   // datasetId: ResourceIds.FITrialBalanceGridView,
-  //   queryFn: fetchGridData
-  // })
+  useEffect(() => {
+    fetchGridData()
+  }, [])
 
   const columns = [
     {
-      field: 'currencyRef',
+      field: 'date',
       headerName: labels.currency,
-      flex: 1
+      flex: 1,
+      type: 'date'
     },
-
     {
-      field: 'accountRef',
-      headerName: labels.account,
-      flex: 1
-    },
-
-    {
-      field: 'accountName',
-      headerName: labels.name,
+      field: 'reference',
+      headerName: labels.reference,
       flex: 1
     },
     {
-      field: 'opening_base_credit',
-      headerName: labels.opening,
+      field: 'functionName',
+      headerName: labels.functionName,
+      flex: 1
+    },
+    {
+      field: 'description',
+      headerName: labels.description,
+      flex: 1
+    },
+    {
+      field: 'debit',
+      headerName: labels.debit,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'previous_base_credit',
-      headerName: labels.previous,
+      field: 'credit',
+      headerName: labels.credit,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'period_debit',
-      headerName: labels.periodDebit,
-      flex: 1
-    },
-    {
-      field: 'balance_credit',
-      headerName: labels.periodCredit,
-      flex: 1
-    },
-    {
-      field: 'balance_debit',
-      headerName: labels.periodBalance,
-      flex: 1
-    },
-    {
-      field: 'balance_credit',
-      headerName: labels.finalBalance,
-      flex: 1
+      field: 'runningBalance',
+      headerName: labels.runningBalance,
+      flex: 1,
+      type: 'number'
     }
   ]
 
   return (
     <VertLayout>
       <Fixed>
-        <Grid container spacing={1} sx={{ p: 2 }}>
+        <Grid container spacing={2} sx={{ p: 2 }}>
           <Grid item xs={6}>
-            <CustomTextField label={labels.sku} value={obj.currencyRef} readOnly />
+            <CustomTextField label={labels.currency} value={obj.currencyRef} readOnly />
           </Grid>
           <Grid item xs={6}></Grid>
           <Grid item xs={6}>
-            <CustomTextField label={labels.itemName} value={obj.accountRef} readOnly />
+            <CustomTextField label={labels.account} value={obj.accountRef} readOnly />
           </Grid>
-          <Grid item xs={7}></Grid>
+          <Grid item xs={6}></Grid>
           <Grid item xs={6}>
-            <CustomTextField label={labels.itemName} value={obj.name} readOnly />
+            <CustomTextField label={labels.name} value={obj.accountName} readOnly />
           </Grid>
         </Grid>
       </Fixed>
-      {/* <Grow>
+
+      <Grow>
         <Table
           name='TrialBalance'
           columns={columns}
           gridData={data}
-          rowId={['accountId', 'currencyId', 'fiscalYear']}
-          onEdit={edit}
-          isLoading={false}
           pageSize={50}
-          disableSorting={true}
-          refetch={refetch}
           paginationType='client'
+          refetch={fetchGridData}
           maxAccess={access}
           pagination={true}
         />
-      </Grow> */}
+      </Grow>
     </VertLayout>
   )
 }

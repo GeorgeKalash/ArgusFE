@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -11,14 +11,39 @@ import { RGFinancialRepository } from 'src/repositories/RGFinancialRepository'
 import { useWindow } from 'src/windows'
 import TrialBalanceForm from './forms/TrialBalanceForm'
 
+function formatParams(input) {
+  const parts = input?.split('^')
+  let result = {}
+
+  for (const part of parts) {
+    const [key, value] = part.split('|')
+    if (!value || !key) continue
+
+    if (/^\d{8}$/.test(value)) {
+      const year = value.substring(0, 4)
+      const month = value.substring(4, 6)
+      const day = value.substring(6, 8)
+      result = { ...result, [key]: `${year}-${month}-${day}` }
+    } else {
+      result = { ...result, [key]: value }
+    }
+  }
+
+  return result
+}
+
 const FiTrialBalanceGrid = () => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
+  const [params, setParams] = useState({})
+
   async function fetchGridData(options = {}) {
+    options.params && setParams(formatParams(options.params))
+
     const response = await getRequest({
       extension: RGFinancialRepository.TrialBalance.FI402View,
-      parameters: `_startAt=${0}&_size=${30}&_params=${options.params || ''}`
+      parameters: `_startAt=0&_size=30&_params=${options.params || ''}`
     })
 
     return response
@@ -77,22 +102,26 @@ const FiTrialBalanceGrid = () => {
     {
       field: 'period_debit',
       headerName: labels.periodDebit,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'balance_credit',
       headerName: labels.periodCredit,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'balance_debit',
       headerName: labels.periodBalance,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'balance_credit',
       headerName: labels.finalBalance,
-      flex: 1
+      flex: 1,
+      type: 'number'
     }
   ]
 
@@ -106,16 +135,14 @@ const FiTrialBalanceGrid = () => {
       props: {
         labels,
         access,
-        obj
+        obj,
+        params
       },
-      width: 1150,
-      height: 700
-
-      // title: labels.jobOrder
+      width: 1000,
+      height: 700,
+      title: labels.statementOfAccount
     })
   }
-
-  console.log('data', data)
 
   return (
     <VertLayout>
@@ -127,7 +154,6 @@ const FiTrialBalanceGrid = () => {
           name='table'
           columns={columns}
           gridData={data}
-          rowId={['accountId', 'currencyId', 'fiscalYear']}
           onEdit={edit}
           isLoading={false}
           pageSize={50}
