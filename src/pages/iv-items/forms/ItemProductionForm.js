@@ -20,9 +20,11 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
   const { recordId, productionLevel } = store
   const { platformLabels } = useContext(ControlContext)
 
+  console.log(recordId)
+
   const { formik } = useForm({
     initialValues: {
-      itemId: store.recordId,
+      itemId: recordId,
       lineId: '',
       spfId: '',
       ltId: '',
@@ -44,7 +46,10 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
     onSubmit: async obj => {
       await postRequest({
         extension: InventoryRepository.ItemProduction.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify({
+          ...obj,
+          itemId: recordId
+        })
       })
 
       formik.setValues(obj)
@@ -264,7 +269,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                   formik.setFieldValue('wipItemName', newValue?.name || '')
                   formik.setFieldValue('wipItemId', newValue?.recordId || '')
                 }}
-                error={formik.touched.wipItemId && Boolean(formik.errors.wipItemId)}
+                errorCheck={'wipItemId'}
                 maxAccess={maxAccess}
               />
             </Grid>
