@@ -1131,7 +1131,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
           />
         </Grow>
         <Grid container spacing={3}>
-          <Grid item xs={6.5} height={120} sx={{ display: 'flex', flex: 1 }}>
+          <Grid item xs={6.5} sx={{ display: 'flex', flex: 1 }}>
             <Table
               name='item'
               columns={[
@@ -1147,7 +1147,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
               pagination={false}
             />
           </Grid>
-          <Grid item xs={3} height={120} sx={{ display: 'flex', flex: 1 }}>
+          <Grid item xs={3} sx={{ display: 'flex', flex: 1 }}>
             <Table
               name='metal'
               gridData={{ count: 1, list: formik?.values?.metalGridData }}

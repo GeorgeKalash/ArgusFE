@@ -1179,7 +1179,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
           />
         </Grow>
         <Grid container spacing={3}>
-          <Grid item xs={5} sx={{ display: 'flex', flex: 1 }}>
+          <Grid item xs={5}  sx={{ display: 'flex', flex: 1 }}>
             <Table
               name='metal'
               gridData={{ count: 1, list: formik?.values?.metalGridData }}
