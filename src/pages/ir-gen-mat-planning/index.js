@@ -1,8 +1,7 @@
 import { Grid } from '@mui/material'
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import Table from 'src/components/Shared/Table'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -14,36 +13,33 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
+import { useForm } from 'src/hooks/form'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { useError } from 'src/error'
 
 const GenerateMaterialPlaning = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  const [values, setValues] = useState({
-    searchValue: '',
-    search: false,
-    mrpId: ''
-  })
+  const { stack: stackError } = useError()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params } = options
-
-    return await getRequest({
+    const response = await getRequest({
       extension: IVReplenishementRepository.materialPlaning.preview,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
+      parameters: `_startAt=${0}&_pageSize=${10000}&_params=${options.params || ''}`
     })
+
+    const items = response?.list?.map((item, index) => ({
+      ...item,
+      id: index + 1
+    }))
+    formik.setFieldValue('items', items)
   }
 
-  async function fetchWithFilter({ filters, pagination }) {
-    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params, show: true })
+  async function fetchWithFilter({ filters }) {
+    return fetchGridData({ params: filters?.params })
   }
 
-  const {
-    query: { data },
-    labels,
-    filterBy,
-    access
-  } = useResourceQuery({
+  const { labels, filterBy, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateMRPs,
     endpointId: IVReplenishementRepository.materialPlaning.preview,
     queryFn: fetchGridData,
@@ -52,35 +48,233 @@ const GenerateMaterialPlaning = () => {
     }
   })
 
+  const { formik } = useForm({
+    maxAccess: access,
+    initialValues: {
+      searchValue: '',
+      search: false,
+      mrpId: '',
+      items: []
+    },
+    onSubmit: async obj => {
+      await postRequest({
+        extension: IVReplenishementRepository.MatPlanningItem.append,
+        record: JSON.stringify({
+          mrpId: obj.mrpId,
+          items: obj?.items?.filter(item => item?.checked).map(({ id, isChecked, ...item }) => item)
+        })
+      })
+
+      if (!obj?.item?.length) {
+        stackError({ message: labels.checkItem })
+
+        return
+      }
+      toast.success(platformLabels.Generated)
+    }
+  })
+  const isCheckedAll = formik.values.items?.length > 0 && formik.values.items?.every(item => item?.isChecked)
+
   const columns = [
-    { field: 'sku', headerName: labels.sku, width: 130 },
-    { field: 'name', headerName: labels.name, width: 150 },
-    { field: 'onhand', headerName: labels.onHand, width: 130 },
-    { field: 'openPr', headerName: labels.openPR, width: 130 },
-    { field: 'openPO', headerName: labels.openPo, width: 130 },
-    { field: 'leadTime', headerName: labels.leadTime, width: 130 },
-    { field: 'safetyStock', headerName: labels.safetyStock, width: 130 },
-    { field: 'reorderPoint', headerName: labels.reorderPoint, width: 130 },
-    { field: 'minStock', headerName: labels.min, width: 130 },
-    { field: 'maxStock', headerName: labels.max, width: 130 },
-    { field: 'amcShortTerm', headerName: labels.amcShortTerm, width: 130 },
-    { field: 'amcLongTerm', headerName: labels.amcLongTerm, width: 130 },
-    { field: 'siteCoverageStock', headerName: labels.siteCoverageStock, width: 130 },
-    { field: 'totalStockCoverage', headerName: labels.totalCoverageStock, width: 130 },
-    { field: 'msRef', headerName: labels.mu, width: 130 },
-    { field: 'unitCost', headerName: labels.unitCost, width: 130 },
-    { field: 'totalCost', headerName: labels.totalCost, width: 130 },
-    { field: 'suggestedPRQty', headerName: labels.sugQty, width: 130 },
-    { field: 'qty', headerName: labels.reqQty, width: 130 }
+    {
+      component: 'checkbox',
+      name: 'isChecked',
+      flex: 0.3,
+      checkAll: {
+        value: isCheckedAll,
+        visible: true,
+        onChange({ checked }) {
+          const items = formik.values.items.map(({ isChecked, ...item }) => ({
+            ...item,
+            isChecked: checked,
+            deliverNow: checked ? item.suggestedPRQty : 0
+          }))
+
+          formik.setFieldValue('items', items)
+        }
+      },
+      async onChange({ row: { update, newRow } }) {
+        newRow?.isChecked && update({ qty: newRow.suggestedPRQty })
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.sku,
+      name: 'sku',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.name,
+      name: 'name',
+      width: 150,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.onHand,
+      name: 'onhand',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.openPr,
+      name: 'openPR',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.openPo,
+      name: 'openPO',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.leadTime,
+      name: 'leadTime',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.safetyStock,
+      name: 'safetyStock',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.reorderPoint,
+      name: 'reorderPoint',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.min,
+      name: 'minStock',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.max,
+      name: 'maxStock',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.amcShortTerm,
+      name: 'amcShortTerm',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.amcLongTerm,
+      name: 'amcLongTerm',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.siteCoverageStock,
+      name: 'siteCoverageStock',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.totalCoverageStock,
+      name: 'totalStockCoverage',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.mu,
+      name: 'msRef',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.unitCost,
+      name: 'unitCost',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.totalCost,
+      name: 'totalCost',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.sugQty,
+      name: 'suggestedPRQty',
+      width: 100,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.reqQty,
+      name: 'qty',
+      width: 100,
+      props: {
+        decimalScale: 2
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row.isChecked }
+      }
+    }
   ]
 
-  const add = async () => {
-    await postRequest({
-      extension: IVReplenishementRepository.MatPlanningItem.append,
-      record: JSON.stringify({ mrpId: values.mrpId, items: data.list.filter(item => item?.checked) })
-    })
-
-    toast.success(platformLabels.Generated)
+  const add = () => {
+    formik.handleSubmit()
   }
 
   const actions = [
@@ -88,17 +282,15 @@ const GenerateMaterialPlaning = () => {
       key: 'add',
       condition: true,
       onClick: add,
-      disabled: !values.mrpId
+      disabled: !formik.values.mrpId
     }
   ]
 
-  const result =
-    values.search &&
-    data?.list?.filter(
-      item =>
-        item?.sku?.toLowerCase()?.includes(values?.searchValue?.toLowerCase()) ||
-        item?.name?.toLowerCase().includes(values?.searchValue?.toLowerCase())
-    )
+  const result = formik.values?.items?.filter(
+    item =>
+      item?.sku?.toLowerCase()?.includes(formik.values?.searchValue?.toLowerCase()) ||
+      item?.name?.toLowerCase().includes(formik.values?.searchValue?.toLowerCase())
+  )
 
   return (
     <VertLayout>
@@ -113,28 +305,17 @@ const GenerateMaterialPlaning = () => {
               <CustomTextField
                 name='search'
                 label={labels.search}
-                value={values.searchValue}
+                value={formik.values.searchValue}
                 search
-                onChange={e =>
-                  setValues(prev => ({
-                    ...prev,
-                    searchValue: e.target.value,
-                    search: false
-                  }))
-                }
-                onSearch={value =>
-                  setValues(prev => ({
-                    ...prev,
-                    search: true
-                  }))
-                }
-                onClear={() =>
-                  setValues(prev => ({
-                    ...prev,
-                    searchValue: '',
-                    search: true
-                  }))
-                }
+                onChange={e => {
+                  formik.setFieldValue('searchValue', e.target.value)
+                  formik.setFieldValue('search', false)
+                }}
+                onSearch={value => formik.setFieldValue('search', true)}
+                onClear={() => {
+                  formik.setFieldValue('searchValue', '')
+                  formik.setFieldValue('search', true)
+                }}
                 maxAccess={access}
               />
             </Grid>
@@ -144,15 +325,12 @@ const GenerateMaterialPlaning = () => {
               endpointId={IVReplenishementRepository.MatPlanning.qry}
               filter={item => item.status === 1}
               label={labels.matReqPlan}
-              name='moduleId'
-              values={values}
+              name='mrpId'
+              values={formik.values}
               valueField='recordId'
               displayField='reference'
               onChange={(event, newValue) => {
-                setValues(prev => ({
-                  ...prev,
-                  mrpId: newValue?.recordId || null
-                }))
+                formik.setFieldValue('mrpId', newValue?.recordId || null)
               }}
               maxAccess={access}
             />
@@ -160,16 +338,15 @@ const GenerateMaterialPlaning = () => {
         />
       </Fixed>
       <Grow>
-        <Table
-          name='table'
+        <DataGrid
+          onChange={value => formik.setFieldValue('items', value)}
+          value={result}
+          error={formik.errors.items}
           columns={columns}
-          gridData={values?.search ? { list: result } : data}
-          rowId={['recordId']}
-          isLoading={false}
-          pageSize={50}
+          name='items'
+          allowDelete={false}
+          allowAddNewLine={false}
           maxAccess={access}
-          pagination={false}
-          showCheckboxColumn={true}
         />
       </Grow>
       <Fixed>
