@@ -173,6 +173,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           nraId: res2?.record?.nraId,
           _msId: res.record.msId,
           _kit: res.record.kitItem,
+          productionLevel: res.record.productionLevel,
           measurementId: res.record.defSaleMUId,
           priceGroupId: res.record.pgId,
           returnPolicy: res.record.returnPolicyId,
@@ -536,6 +537,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('productionLevel', newValue?.key || '')
+                      setStore(prevStore => ({
+                        ...prevStore,
+                        productionLevel: newValue?.key
+                      }))
                     }}
                     maxAccess={maxAccess}
                     error={formik.touched.productionLevel && Boolean(formik.errors.productionLevel)}
