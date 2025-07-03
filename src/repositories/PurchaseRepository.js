@@ -142,5 +142,8 @@ export const PurchaseRepository = {
   FinancialGroup: {
     qry: service + 'qryFII',
     set2: service + 'set2FII'
+  },
+  ItemLastPurchaseInfo: {
+    last: service + 'lastIVI'
   }
 }

@@ -29,6 +29,7 @@ import { companyStructureRepository } from 'src/repositories/companyStructureRep
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import ItemDetailsForm from './ItemDetailsForm'
+import { getStorageData } from 'src/storage/storage'
 
 export default function PurchaseRquisitionForm({ recordId, labels, access }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -38,6 +39,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
   const [measurements, setMeasurements] = useState([])
   const [maxSeqNo, setMaxSeqNo] = useState(1)
   const defaultPlant = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const userId = getStorageData('userData').userId
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PurchaseRequisition,
@@ -168,6 +170,26 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
     })
   }
 
+  async function getUserInfo() {
+    const res = await getRequest({
+      extension: SystemRepository.Users.get,
+      parameters: `_recordId=${userId}`
+    })
+
+    return res?.record
+  }
+
+  async function getDefaultDepartment(employeeId) {
+    if (!employeeId) return
+
+    const res = await getRequest({
+      extension: EmployeeRepository.Employee.get1,
+      parameters: `_recordId=${employeeId}`
+    })
+
+    return res?.record
+  }
+
   async function refetchForm(recordId) {
     const requisitionData = await getRequisitionData(recordId)
     const itemDetails = await getItemDetails(recordId)
@@ -191,6 +213,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
 
     return itemDetails
   }
+
   function fillForm(requisitionData, itemDetails) {
     let headerTotalCost = 0
 
@@ -247,6 +270,11 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       if (recordId) refetchForm(recordId)
+      else {
+        const userInfo = await getUserInfo()
+        const department = await getDefaultDepartment(userInfo?.employeeId)
+        formik.setFieldValue('departmentId', department?.departmentId || null)
+      }
     })()
   }, [])
 

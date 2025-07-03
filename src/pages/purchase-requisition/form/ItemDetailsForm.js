@@ -18,6 +18,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import { useError } from 'src/error'
 
 export default function ItemDetailsForm({
   recordId,
@@ -31,12 +32,13 @@ export default function ItemDetailsForm({
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack: stackError } = useError()
 
   const { formik } = useForm({
     maxAccess,
     initialValues: {
       trxId: recordId,
-      sku: null,
+      sku: '',
       seqNo: null,
       itemId: null,
       itemName: '',
@@ -47,7 +49,6 @@ export default function ItemDetailsForm({
       baseQty: null,
       deliveryDate: new Date(),
       status: 1,
-      itemId: null,
       onHand: null,
       lastPurchaseDate: null,
       lastPurchaseCurrencyId: null,
@@ -79,7 +80,53 @@ export default function ItemDetailsForm({
 
   const editMode = !!formik.values.recordId
 
-  async function refetchForm(recordId) {
+  async function getAvailability(itemId) {
+    if (!itemId) {
+      formik.setFieldValue('onHand', 0)
+
+      return
+    }
+
+    const res = await getRequest({
+      extension: InventoryRepository.Availability.get,
+      parameters: `_itemId=${itemId}&_seqNo=0`
+    })
+    formik.setFieldValue('onHand', res?.record?.onHand || 0)
+  }
+  async function getlastIVI(itemId) {
+    if (!itemId) {
+      formik.setFieldValue('lastPurchaseUnitPrice', 0)
+      formik.setFieldValue('lastPurchaseDate', null)
+      formik.setFieldValue('lastPurchaseCurrencyId', null)
+
+      return
+    }
+
+    const lastResp = await getRequest({
+      extension: PurchaseRepository.ItemLastPurchaseInfo.last,
+      parameters: `_itemId=${itemId}&_vendorId=${formik?.values?.vendorId || 0}`
+    })
+    formik.setFieldValue('lastPurchaseUnitPrice', lastResp?.record?.invoiceItem?.unitPrice || 0)
+    formik.setFieldValue('lastPurchaseDate', lastResp?.record?.invoice?.date)
+    formik.setFieldValue('lastPurchaseCurrencyId', lastResp?.record?.invoice?.currencyId)
+  }
+
+  async function getCurrentCost(itemId) {
+    if (!itemId) {
+      formik.setFieldValue('unitCost', 0)
+
+      return
+    }
+
+    const res = await getRequest({
+      extension: InventoryRepository.CurrentCost.get,
+      parameters: `_itemId=${itemId}`
+    })
+    formik.setFieldValue('unitCost', res?.record?.currentCost || 0)
+  }
+  async function refetchForm() {
+    if (!seqNo) return
+
     const res = await getRequest({
       extension: PurchaseRepository.RequisitionDetail.get,
       parameters: `_trxId=${recordId}&_seqNo=${seqNo}`
@@ -91,7 +138,7 @@ export default function ItemDetailsForm({
   }
 
   useEffect(() => {
-    if (recordId) refetchForm(recordId)
+    refetchForm()
   }, [])
 
   return (
@@ -129,6 +176,19 @@ export default function ItemDetailsForm({
                       { key: 'name', value: 'Name' }
                     ]}
                     onChange={async (event, newValue) => {
+                      if (newValue?.isInactive) {
+                        stackError({
+                          message: labels.inactiveItem
+                        })
+
+                        formik.resetForm()
+
+                        return
+                      }
+                      await getAvailability(newValue?.recordId)
+                      await getlastIVI(newValue?.recordId)
+                      await getCurrentCost(newValue?.recordId)
+                      formik.setFieldValue('totalCost', formik.values.qty || 0 * formik.values.unitCost || 0)
                       formik.setFieldValue('itemName', newValue?.name || '')
                       formik.setFieldValue('sku', newValue?.sku || '')
                       formik.setFieldValue('itemId', newValue?.recordId || null)
@@ -182,7 +242,11 @@ export default function ItemDetailsForm({
                     name='qty'
                     label={labels.qty}
                     value={formik.values.qty}
-                    onChange={formik.handleChange}
+                    onChange={e => {
+                      let qty = Number(e.target.value.replace(/,/g, ''))
+                      formik.setFieldValue('qty', qty)
+                      formik.setFieldValue('totalCost', qty || 0 * formik.values.unitCost || 0)
+                    }}
                     onClear={() => formik.setFieldValue('qty', '')}
                     readOnly={isClosed}
                     required
