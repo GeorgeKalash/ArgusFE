@@ -295,7 +295,7 @@ const DocumentsOnHold = () => {
       type: 'date'
     },
     {
-      width: 100,
+      field: 'approval',
       cellRenderer: row => (
         <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
           <IconButton size='small' onClick={() => edit(row.data)}>

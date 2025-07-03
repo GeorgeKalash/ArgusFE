@@ -213,13 +213,13 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
               flex: 1
             },
             {
-              field: '',
+              field: 'resourceGlobal',
               headerName: labels.resourceGlobal,
               width: 200,
               cellRenderer: row => (
                 <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
                   <IconButton size='small' onClick={() => openResourceGlobal(row)}>
-                    <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                    <Icon icon='mdi:application-edit-outline' width={18} height={18} />
                   </IconButton>
                 </Box>
               )
@@ -231,7 +231,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
               cellRenderer: row => (
                 <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
                   <IconButton size='small' onClick={() => openFieldGlobal(row)}>
-                    <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                    <Icon icon='mdi:application-edit-outline' width={18} height={18} />
                   </IconButton>
                 </Box>
               )
