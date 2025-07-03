@@ -110,7 +110,7 @@ const SaTrx = () => {
       field: 'amount',
       headerName: labels.net,
       flex: 1,
-      type: 'number'
+      type: { field: 'number', decimal: 2 }
     },
     {
       field: 'spName',
