@@ -69,6 +69,14 @@ const FiTrialBalanceGrid = () => {
     defaultLoad: false
   })
 
+  const list = data?.list.map(item => ({
+    ...item,
+    opening_base_credit: item.opening_debit - item.opening_credit,
+    previous_base_credit: item.previous_debit - item.previous_credit,
+    period_balance: item.period_debit - item.period_credit,
+    final_balance: item.balance_debit - item.balance_credit
+  }))
+
   const columns = [
     {
       field: 'currencyRef',
@@ -106,19 +114,19 @@ const FiTrialBalanceGrid = () => {
       type: 'number'
     },
     {
-      field: 'balance_credit',
+      field: 'period_credit',
       headerName: labels.periodCredit,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'balance_debit',
+      field: 'period_balance',
       headerName: labels.periodBalance,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'balance_credit',
+      field: 'final_balance',
       headerName: labels.finalBalance,
       flex: 1,
       type: 'number'
@@ -153,15 +161,13 @@ const FiTrialBalanceGrid = () => {
         <Table
           name='table'
           columns={columns}
-          gridData={data}
+          gridData={{ ...data, list }}
           onEdit={edit}
           isLoading={false}
           pageSize={50}
-          disableSorting={true}
           refetch={refetch}
           paginationType='client'
           maxAccess={access}
-          pagination={true}
         />
       </Grow>
     </VertLayout>

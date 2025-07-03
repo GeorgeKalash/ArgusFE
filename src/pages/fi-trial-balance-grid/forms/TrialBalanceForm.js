@@ -70,17 +70,17 @@ const TrialBalanceForm = ({ access, labels, obj, params }) => {
   return (
     <VertLayout>
       <Fixed>
-        <Grid container spacing={2} sx={{ p: 2 }}>
-          <Grid item xs={6}>
-            <CustomTextField label={labels.currency} value={obj.currencyRef} readOnly />
-          </Grid>
-          <Grid item xs={6}></Grid>
-          <Grid item xs={6}>
-            <CustomTextField label={labels.account} value={obj.accountRef} readOnly />
-          </Grid>
-          <Grid item xs={6}></Grid>
-          <Grid item xs={6}>
-            <CustomTextField label={labels.name} value={obj.accountName} readOnly />
+        <Grid container sx={{ p: 2 }}>
+          <Grid item container spacing={2} xs={6}>
+            <Grid item xs={12}>
+              <CustomTextField label={labels.currency} value={obj.currencyRef} readOnly />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField label={labels.account} value={obj.accountRef} readOnly />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField label={labels.name} value={obj.accountName} readOnly />
+            </Grid>
           </Grid>
         </Grid>
       </Fixed>
@@ -94,7 +94,6 @@ const TrialBalanceForm = ({ access, labels, obj, params }) => {
           paginationType='client'
           refetch={fetchGridData}
           maxAccess={access}
-          pagination={true}
         />
       </Grow>
     </VertLayout>
