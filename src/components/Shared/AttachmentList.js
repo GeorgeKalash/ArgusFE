@@ -39,6 +39,7 @@ const AttachmentList = ({ resourceId, recordId }) => {
     },
     {
       width: 100,
+      field: 'preview',
       headerName: _labels.preview,
       cellRenderer: row => {
         return (
@@ -70,6 +71,7 @@ const AttachmentList = ({ resourceId, recordId }) => {
     },
     {
       width: 100,
+      field: 'download',
       headerName: _labels.download,
       cellRenderer: row => {
         return (
