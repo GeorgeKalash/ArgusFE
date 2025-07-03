@@ -32,7 +32,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
       name: '',
       description: '',
       groupId: '',
-      isCostElement: false,
+      disableManualEntry: false,
       sign: '',
       activeStatus: ''
     },
@@ -179,10 +179,10 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
             </Grid>
             <Grid item xs={12}>
               <CustomCheckBox
-                name='isCostElement'
-                value={formik.values?.isCostElement}
-                onChange={event => formik.setFieldValue('isCostElement', event.target.checked)}
-                label={labels.isCostElement}
+                name='disableManualEntry'
+                value={formik.values?.disableManualEntry}
+                onChange={event => formik.setFieldValue('disableManualEntry', event.target.checked)}
+                label={labels.disableManualEntry}
                 maxAccess={maxAccess}
               />
             </Grid>

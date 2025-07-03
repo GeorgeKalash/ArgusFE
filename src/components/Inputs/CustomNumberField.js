@@ -27,7 +27,7 @@ const CustomNumberField = ({
   hasBorder = true,
   autoSelect = false,
   editMode = false,
-  maxLength = 1000,
+  maxLength = 15,
   thousandSeparator = ',',
   min,
   max,
@@ -52,10 +52,21 @@ const CustomNumberField = ({
     }
   }
 
+  const parseInputValue = val => {
+    val = val.replace(/,/g, '')
+    if (val.endsWith('.') && !/\.\d+$/.test(val)) {
+      val = val.slice(0, -1)
+    }
+    const num = val != '' ? Number(val) : null
+
+    return isNaN(num) ? null : num
+  }
+
   const handleNumberChangeValue = e => {
     const value = formatNumber(e)
     if (value) e.target.value = value
-    onChange(e)
+
+    onChange(e, parseInputValue(value))
   }
 
   const handleNumberMouseLeave = e => {
@@ -81,13 +92,13 @@ const CustomNumberField = ({
 
   const handleInput = e => {
     const inputValue = e?.target?.value?.replaceAll(',', '').replaceAll('.', '')
+
     if (e?.target?.value?.indexOf('.') > 0) {
       if (inputValue?.length > maxLength) e.target.value = value
     } else {
-      if (inputValue?.length > maxLength - decimalScale) {
+      if (inputValue?.length > maxLength - (decimalScale || 0)) {
         e.target.value = value
       }
-      onChange(e)
     }
   }
 
@@ -107,7 +118,7 @@ const CustomNumberField = ({
       thousandSeparator={thousandSeparator}
       decimalSeparator='.'
       decimalScale={decimalScale}
-      value={value}
+      value={value ?? ''}
       variant={variant}
       size={size}
       fullWidth
@@ -119,7 +130,6 @@ const CustomNumberField = ({
       onBlur={e => {
         onBlur(e)
         if (e.target.value?.endsWith('.')) {
-          e.target.value = e.target.value.slice(0, -1)
           handleNumberChangeValue(e)
         }
       }}
