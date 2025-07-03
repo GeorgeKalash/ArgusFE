@@ -542,6 +542,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                         productionLevel: newValue?.key
                       }))
                     }}
+                    readOnly={editMode}
                     maxAccess={maxAccess}
                     error={formik.touched.productionLevel && Boolean(formik.errors.productionLevel)}
                   />
