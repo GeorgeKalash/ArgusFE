@@ -23,7 +23,7 @@ export const AddressFormShell = ({
   const [required, setRequired] = useState(!optional)
   const [formikSettings, setFormik] = useState({})
 
-  const { formik } = useForm({
+  const { formik, setFieldValidation } = useForm({
     maxAccess: formikSettings.maxAccess,
     initialValues: {},
     validateOnChange: true,
@@ -75,6 +75,7 @@ export const AddressFormShell = ({
             setFormik={setFormik}
             optional={optional}
             address={address}
+            setFieldValidation={setFieldValidation}
             {...props}
           />
         </Fixed>

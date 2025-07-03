@@ -1,27 +1,15 @@
 import { useFormik } from 'formik'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import * as yup from 'yup'
+import { debounce } from 'lodash'
 
 export function useForm({ documentType = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
-  // const [Validation, setValidation] = useState()
-
-  // console.log(Validation)
-
-  // const setFieldValidation = (field, errors) => {
-  //   setValidation(prev => {
-  //     const updatedValidation = { ...prev }
-  //     if (errors === '') {
-  //       delete updatedValidation[field]
-  //     } else {
-  //       updatedValidation[field] = errors
-  //     }
-
-  //     return updatedValidation
-  //   })
-  // }
-
   const Validation = useRef({})
+
+  const debouncedValidateForm = debounce(() => {
+    formik.validateForm()
+  }, 300)
 
   const setFieldValidation = (field, error) => {
     if (error === '') {
@@ -29,7 +17,8 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
     } else {
       Validation.current[field] = error
     }
-    formik.validateForm() // <-- this forces Formik to pick up the new errors immediately
+
+    debouncedValidateForm()
   }
 
   function explode(str) {
