@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -22,6 +22,8 @@ const GenerateMaterialPlaning = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
 
+  const [searchValue, setSearchValue] = useState('')
+
   async function fetchGridData(options = {}) {
     const response = await getRequest({
       extension: IVReplenishementRepository.materialPlaning.preview,
@@ -30,7 +32,10 @@ const GenerateMaterialPlaning = () => {
 
     const items = response?.list?.map((item, index) => ({
       ...item,
-      id: index + 1
+      id: index + 1,
+      totalStockCoverage: item?.totalStockCoverage ? Number(item.totalStockCoverage?.toFixed(2)) : 0,
+      siteCoverageStock: item?.siteCoverageStock ? Number(item.siteCoverageStock?.toFixed(2)) : 0,
+      qty: item.qty || 0
     }))
     formik.setFieldValue('items', items)
   }
@@ -57,15 +62,16 @@ const GenerateMaterialPlaning = () => {
       items: []
     },
     onSubmit: async obj => {
+      const items = obj?.items?.filter(item => item?.isChecked).map(({ id, isChecked, ...item }) => item)
       await postRequest({
         extension: IVReplenishementRepository.MatPlanningItem.append,
         record: JSON.stringify({
           mrpId: obj.mrpId,
-          items: obj?.items?.filter(item => item?.checked).map(({ id, isChecked, ...item }) => item)
+          items
         })
       })
 
-      if (!obj?.item?.length) {
+      if (!items?.length) {
         stackError({ message: labels.checkItem })
 
         return
@@ -73,7 +79,12 @@ const GenerateMaterialPlaning = () => {
       toast.success(platformLabels.Generated)
     }
   })
+
   const isCheckedAll = formik.values.items?.length > 0 && formik.values.items?.every(item => item?.isChecked)
+
+  useEffect(() => {
+    formik.values.search && setSearchValue(formik.values.searchValue)
+  }, [formik.values.search, formik.values.searchValue])
 
   const columns = [
     {
@@ -87,14 +98,14 @@ const GenerateMaterialPlaning = () => {
           const items = formik.values.items.map(({ isChecked, ...item }) => ({
             ...item,
             isChecked: checked,
-            deliverNow: checked ? item.suggestedPRQty : 0
+            qty: checked ? item.suggestedPRQty : 0
           }))
 
           formik.setFieldValue('items', items)
         }
       },
       async onChange({ row: { update, newRow } }) {
-        newRow?.isChecked && update({ qty: newRow.suggestedPRQty })
+        update({ qty: newRow?.isChecked ? newRow?.suggestedPRQty : 0 })
       }
     },
     {
@@ -273,24 +284,16 @@ const GenerateMaterialPlaning = () => {
     }
   ]
 
-  const add = () => {
-    formik.handleSubmit()
-  }
-
   const actions = [
     {
       key: 'add',
       condition: true,
-      onClick: add,
+      onClick: () => {
+        formik.handleSubmit()
+      },
       disabled: !formik.values.mrpId
     }
   ]
-
-  const result = formik.values?.items?.filter(
-    item =>
-      item?.sku?.toLowerCase()?.includes(formik.values?.searchValue?.toLowerCase()) ||
-      item?.name?.toLowerCase().includes(formik.values?.searchValue?.toLowerCase())
-  )
 
   return (
     <VertLayout>
@@ -309,7 +312,7 @@ const GenerateMaterialPlaning = () => {
                 search
                 onChange={e => {
                   formik.setFieldValue('searchValue', e.target.value)
-                  formik.setFieldValue('search', false)
+                  formik.setFieldValue('search', e.target.value?.length > 0 ? false : true)
                 }}
                 onSearch={value => formik.setFieldValue('search', true)}
                 onClear={() => {
@@ -339,8 +342,12 @@ const GenerateMaterialPlaning = () => {
       </Fixed>
       <Grow>
         <DataGrid
-          onChange={value => formik.setFieldValue('items', value)}
-          value={result}
+          searchValue={searchValue}
+          onChange={value => {
+            console.log(value)
+            formik.setFieldValue('items', value)
+          }}
+          value={formik.values?.items}
           error={formik.errors.items}
           columns={columns}
           name='items'

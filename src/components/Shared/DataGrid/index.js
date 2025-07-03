@@ -28,6 +28,7 @@ export function DataGrid({
   autoDelete,
   initialValues,
   bg,
+  searchValue,
   onValidationRequired
 }) {
   const gridApiRef = useRef(null)
@@ -774,6 +775,10 @@ export function DataGrid({
       process(params, data, setData)
     }
   }
+
+  useEffect(() => {
+    gridApiRef.current?.setQuickFilter(searchValue)
+  }, [searchValue])
 
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>
