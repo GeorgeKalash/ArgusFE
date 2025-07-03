@@ -2062,20 +2062,29 @@ export default function SaleTransactionForm({
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={(value, action) => {
+            onChange={(value, action, row) => {
+              let updatedValue = value
+
               if (formik.values.search) {
                 const updatedItems = formik.values.items.map(item => {
-                  const updated = value.find(newItem => newItem.id === item.id)
+                  const updated = updatedValue.find(newItem => newItem.id === item.id)
 
                   return updated ? { ...item, ...updated } : item
                 })
+
                 formik.setFieldValue('items', updatedItems)
                 itemsUpdate.current = updatedItems
               } else {
-                formik.setFieldValue('items', value)
-                itemsUpdate.current = value
+                formik.setFieldValue('items', updatedValue)
+                itemsUpdate.current = updatedValue
               }
-              action === 'delete' && setReCal(true)
+              if (action === 'delete') {
+                const filteredItems = formik.values.items.filter(item => item.id !== row.id)
+                updatedValue = value.filter(item => item.id !== row.id)
+
+                formik.setFieldValue('items', filteredItems)
+                setReCal(true)
+              }
             }}
             value={filteredData}
             error={formik.errors.items}
