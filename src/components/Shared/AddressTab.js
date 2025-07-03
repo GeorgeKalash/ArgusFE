@@ -97,6 +97,18 @@ const AddressTab = ({
   }, [address?.recordId])
 
   useEffect(() => {
+    if (!address?.recordId) {
+      const hasAddressData = address && Object.values(address).some(val => val !== null && val !== '')
+      if (hasAddressData && address !== lastRecordIdRef.current) {
+        lastRecordIdRef.current = address
+        Object.entries(initialValues).forEach(([key, value]) => {
+          addressValidation.setFieldValue(key, value, false)
+        })
+      }
+    }
+  }, [address])
+
+  useEffect(() => {
     if (maxAccess) {
       const filteredControls = options
         ? maxAccess?.record?.controls || []
