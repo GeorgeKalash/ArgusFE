@@ -200,12 +200,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
               flex: 1
             },
             {
-              field: 'accessLevelString',
-              headerName: labels.accessLevel,
-              flex: 1
-            },
-            {
-              field: '',
+              field: 'Resource Access',
               headerName: labels.resourceGlobal,
               width: 200,
               cellRenderer: row => (

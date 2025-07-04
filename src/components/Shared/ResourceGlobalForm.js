@@ -5,13 +5,12 @@ import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { DataSets } from 'src/resources/DataSets'
 import { useForm } from 'src/hooks/form.js'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CustomCheckBox from '../Inputs/CustomCheckBox'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
 
@@ -26,16 +25,22 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
     initialValues: {
       resourceId: row?.resourceId,
       resourceName: row?.resourceName,
-      accessLevel: row?.accessLevel,
       moduleId: row?.moduleId,
-      accessLevelName: row?.accessLevelName,
-      sgId: row?.sgId
+      sgId: row?.sgId,
+      accessFlags: {
+        get: false,
+        add: false,
+        edit: false,
+        del: false,
+        close: false,
+        reopen: false,
+        post: false,
+        unpost: false
+      }
     },
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
-      accessLevel: yup.string().required()
-    }),
+
     onSubmit: async obj => {
       if (resourceId == ResourceIds.SecurityGroup) {
         await postRequest({
@@ -49,7 +54,7 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
           record: JSON.stringify(obj)
         })
       }
-      toast.success('Record Edited Successfully')
+      toast.success(platformLabels.Edited)
       invalidate()
       window.close()
     }
@@ -57,12 +62,20 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
 
   useEffect(() => {
     ;(async function () {
-      if (row.resourceId && resourceId == ResourceIds.GlobalAuthorization) {
-        const res = await getRequest({
-          extension: AccessControlRepository.AuthorizationResourceGlobal.get,
-          parameters: `_resourceId=${row.resourceId}`
-        })
-        if (res.record) formik.setValues(res.record)
+      if (row.resourceId) {
+        if (resourceId == ResourceIds.GlobalAuthorization) {
+          const res = await getRequest({
+            extension: AccessControlRepository.AuthorizationResourceGlobal.get,
+            parameters: `_resourceId=${row.resourceId}`
+          })
+          if (res.record) formik.setValues(res.record)
+        } else if (resourceId == ResourceIds.SecurityGroup) {
+          const res = await getRequest({
+            extension: AccessControlRepository.ModuleClass.get,
+            parameters: `_resourceId=${row.resourceId}&_sgId=${row.sgId}`
+          })
+          if (res.record) formik.setValues(res.record)
+        }
       }
     })()
   }, [])
@@ -78,7 +91,7 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
-            <Grid item xs={12}>
+            <Grid item xs={4}>
               <CustomTextField
                 name='resourceId'
                 label={labels.resourceId}
@@ -92,7 +105,7 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
                 helperText={formik.touched.resourceId && formik.errors.resourceId}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={8}>
               <CustomTextField
                 name='resourceName'
                 label={labels.resourceName}
@@ -106,20 +119,76 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
                 helperText={formik.touched.resourceName && formik.errors.resourceName}
               />
             </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                datasetId={DataSets.ACCESS_LEVEL}
-                name='accessLevel'
-                label={labels.accessLevel}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                required
+            <Grid item xs={6}>
+              <CustomCheckBox
+                name='accessFlags.get'
+                value={formik.values?.accessFlags?.get}
+                onChange={event => formik.setFieldValue('accessFlags.get', event.target.checked)}
+                label={labels.get}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('accessLevel', newValue?.key || '')
-                }}
-                error={formik.touched.accessLevel && Boolean(formik.errors.accessLevel)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomCheckBox
+                name='accessFlags.close'
+                value={formik.values?.accessFlags?.close}
+                onChange={event => formik.setFieldValue('accessFlags.close', event.target.checked)}
+                label={labels.close}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomCheckBox
+                name='accessFlags.add'
+                value={formik.values?.accessFlags?.add}
+                onChange={event => formik.setFieldValue('accessFlags.add', event.target.checked)}
+                label={labels.add}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomCheckBox
+                name='accessFlags.reopen'
+                value={formik.values?.accessFlags?.reopen}
+                onChange={event => formik.setFieldValue('accessFlags.reopen', event.target.checked)}
+                label={labels.reopen}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomCheckBox
+                name='accessFlags.edit'
+                value={formik.values?.accessFlags?.edit}
+                onChange={event => formik.setFieldValue('accessFlags.edit', event.target.checked)}
+                label={labels.edit}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomCheckBox
+                name='accessFlags.post'
+                value={formik.values?.accessFlags?.post}
+                onChange={event => formik.setFieldValue('accessFlags.post', event.target.checked)}
+                label={labels.post}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomCheckBox
+                name='del'
+                value={formik.values?.accessFlags?.del}
+                onChange={event => formik.setFieldValue('accessFlags.del', event.target.checked)}
+                label={labels.del}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomCheckBox
+                name='accessFlags.unpost'
+                value={formik.values?.accessFlags?.unpost}
+                onChange={event => formik.setFieldValue('accessFlags.unpost', event.target.checked)}
+                label={labels.unpost}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
@@ -129,5 +198,5 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
   )
 }
 
-ResourceGlobalForm.width = 450
-ResourceGlobalForm.height = 300
+ResourceGlobalForm.width = 700
+ResourceGlobalForm.height = 400
