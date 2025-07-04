@@ -68,6 +68,7 @@ const DocumentAging = () => {
 
       const agingList = legs.map(leg => {
         const matchedAmount = amounts.find(a => a.seqNo === leg.seqNo)
+
         return {
           age: leg.caption,
           balance: matchedAmount?.amount || 0
@@ -107,6 +108,7 @@ const DocumentAging = () => {
         const parentRows = (res2?.list || []).map(parent => {
           const parentId = `${parent.functionId}|${parent.recordId}`
           const hasChildren = mappings.some(m => m.toId === parentId)
+
           return {
             ...parent,
             amount: Math.floor(Math.abs(parent.amount || 0)),
@@ -124,7 +126,9 @@ const DocumentAging = () => {
             .filter(m => m.toId === parentId)
             .map(map => {
               const child = childrenList.find(c => `${c.functionId}|${c.recordId}` === map.fromId)
-              if (!child) return null
+              if (!child) {
+                return null
+              }
 
               totalApplied += child.amount || 0
 
@@ -244,7 +248,7 @@ const DocumentAging = () => {
     return amount + amountValue
   }, 0)
 
-  const balance = (totalAmount - amountAppliedRef.current) || 0
+  const balance = totalAmount - amountAppliedRef.current || 0
 
   return (
     <VertLayout>
