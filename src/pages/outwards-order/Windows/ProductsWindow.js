@@ -83,7 +83,7 @@ const ProductsWindow = ({
       flex: 1
     },
     {
-      field: '',
+      field: 'moreInfo',
       headerName: '',
       flex: 0.65,
       cellRenderer: params => {

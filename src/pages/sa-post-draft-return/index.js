@@ -127,6 +127,7 @@ const PostDraftReturn = () => {
       flex: 1
     },
     {
+      field: 'post',
       flex: 0.5,
       headerName: labels.post,
       cellRenderer: row => {

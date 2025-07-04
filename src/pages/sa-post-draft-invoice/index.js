@@ -127,6 +127,7 @@ const PostDraftInvoice = () => {
       flex: 1
     },
     {
+      field: 'post',
       flex: 0.55,
       headerName: labels.post,
       cellRenderer: row => {
