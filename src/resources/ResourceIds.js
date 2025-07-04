@@ -500,6 +500,8 @@ export const ResourceIds = {
   RequisitionDocumentTypeDefaults: 50612,
   PUFinancialIntegrators: 50102,
   IRMaterialDocTypeDefaults: 46101,
+  PhysicalCountItemDetailsImport: 44305,
+  GenerateMRPs: 46304,
   FITrialBalanceGridView: 31402,
 
   // GL
