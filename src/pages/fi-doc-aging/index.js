@@ -76,6 +76,7 @@ const DocumentAging = () => {
       })
 
       const totalBalance = agingList.reduce((sum, row) => sum + row.balance, 0)
+      
       formik.setFieldValue('aging', agingList)
       formik.setFieldValue('balance', totalBalance)
 
@@ -106,6 +107,7 @@ const DocumentAging = () => {
         let totalApplied = 0
 
         const parentRows = (res2?.list || []).map(parent => {
+
           const parentId = `${parent.functionId}|${parent.recordId}`
           const hasChildren = mappings.some(m => m.toId === parentId)
 
@@ -123,12 +125,13 @@ const DocumentAging = () => {
         const allRows = parentRows.flatMap(parent => {
 
           const parentId = `${parent.functionId}|${parent.recordId}`
+          
           const childRows = mappings
             .filter(m => m.toId === parentId)
             .map(map => {
 
               const child = childrenList.find(c => `${c.functionId}|${c.recordId}` === map.fromId)
-              
+
               if (!child) {
                 return null
               }
@@ -155,6 +158,7 @@ const DocumentAging = () => {
         fullRowDataRef.current = allRows
 
         const visibleRows = allRows.flatMap(row =>
+
           row.level === 0 ? [row, ...(row.isExpanded ? allRows.filter(c => c.parent === row.reference) : [])] : []
         )
 
