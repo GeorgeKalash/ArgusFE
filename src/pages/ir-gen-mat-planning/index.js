@@ -63,6 +63,13 @@ const GenerateMaterialPlaning = () => {
     },
     onSubmit: async obj => {
       const items = obj?.items?.filter(item => item?.isChecked).map(({ id, isChecked, ...item }) => item)
+
+      if (!items?.length) {
+        stackError({ message: labels.checkItem })
+
+        return
+      }
+
       await postRequest({
         extension: IVReplenishementRepository.MatPlanningItem.append,
         record: JSON.stringify({
@@ -71,11 +78,6 @@ const GenerateMaterialPlaning = () => {
         })
       })
 
-      if (!items?.length) {
-        stackError({ message: labels.checkItem })
-
-        return
-      }
       toast.success(platformLabels.Generated)
     }
   })
