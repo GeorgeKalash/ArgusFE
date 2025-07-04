@@ -28,7 +28,7 @@ const TrialBalanceForm = ({ access, labels, obj, params }) => {
   const columns = [
     {
       field: 'date',
-      headerName: labels.currency,
+      headerName: labels.date,
       flex: 1,
       type: 'date'
     },
