@@ -147,9 +147,9 @@ const GridToolbar = ({
             reportStore={reportStore}
           />
         )}
-      </Grid>
-      <Grid item xs={3}>
-        {rightSection}
+        <Grid item xs={3}>
+          {rightSection}
+        </Grid>
       </Grid>
       {bottomSection}
     </DialogActions>
