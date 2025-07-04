@@ -501,6 +501,7 @@ export const ResourceIds = {
   PUFinancialIntegrators: 50102,
   IRMaterialDocTypeDefaults: 46101,
   PhysicalCountItemDetailsImport: 44305,
+  GenerateMRPs: 46304,
 
   // GL
   GLSalesInvoice: 51604,

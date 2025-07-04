@@ -577,6 +577,12 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'add',
+    label: platformLabels.add,
+    color: '#231f20',
+    main: false
+  },
+  {
     key: 'SHP',
     label: platformLabels.shp,
     color: '#231f20',
