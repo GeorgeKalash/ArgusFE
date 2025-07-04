@@ -46,7 +46,16 @@ const FiTrialBalanceGrid = () => {
       parameters: `_startAt=0&_size=30&_params=${options.params || ''}`
     })
 
-    return response
+    return {
+      ...data,
+      list: response?.list.map(item => ({
+        ...item,
+        opening_base_credit: item.opening_debit - item.opening_credit,
+        previous_base_credit: item.previous_debit - item.previous_credit,
+        period_balance: item.period_debit - item.period_credit,
+        final_balance: item.balance_debit - item.balance_credit
+      }))
+    }
   }
 
   async function fetchWithFilter({ filters }) {
@@ -68,14 +77,6 @@ const FiTrialBalanceGrid = () => {
     },
     defaultLoad: false
   })
-
-  const list = data?.list.map(item => ({
-    ...item,
-    opening_base_credit: item.opening_debit - item.opening_credit,
-    previous_base_credit: item.previous_debit - item.previous_credit,
-    period_balance: item.period_debit - item.period_credit,
-    final_balance: item.balance_debit - item.balance_credit
-  }))
 
   const columns = [
     {
@@ -161,7 +162,7 @@ const FiTrialBalanceGrid = () => {
         <Table
           name='table'
           columns={columns}
-          gridData={{ ...data, list }}
+          gridData={data}
           onEdit={edit}
           isLoading={false}
           pageSize={50}
