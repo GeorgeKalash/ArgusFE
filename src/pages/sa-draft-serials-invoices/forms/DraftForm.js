@@ -144,7 +144,8 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       )
     }),
     onSubmit: async obj => {
-      const { serials, date, ...rest } = obj
+      const { taxDetailsStore, itemGridData, metalGridData, search, autoSrlNo, disSkuLookup, serials, date, ...rest } =
+        obj
 
       const header = {
         ...rest,
@@ -322,16 +323,17 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
   }
 
   async function saveHeader(lastLine) {
+    const { taxDetailsStore, itemGridData, metalGridData, search, autoSrlNo, disSkuLookup, serials, date, ...rest } =
+      formik?.values
+
     const DraftInvoicePack = {
       header: {
-        ...formik?.values,
+        ...rest,
         pcs: 0,
-        date: formatDateToApi(formik.values.date)
+        date: formatDateToApi(date)
       },
       items: []
     }
-
-    delete DraftInvoicePack.header.serials
 
     const diRes = await postRequest({
       extension: SaleRepository.DraftInvoice.set2,
@@ -398,6 +400,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
                 metalRef: res?.record?.metalRef || '',
                 designId: res?.record?.designId || null,
                 designRef: res?.record?.designRef || null,
+                categoryName: res?.record?.categoryName,
                 volume: res?.record?.volume || 0,
                 baseLaborPrice: res?.record?.baseLaborPrice || 0,
                 unitPrice: parseFloat(res?.record?.unitPrice).toFixed(2) || 0,

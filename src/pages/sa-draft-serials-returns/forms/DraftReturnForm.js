@@ -149,7 +149,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       )
     }),
     onSubmit: async obj => {
-      const { serials, date, ...rest } = obj
+      const { taxDetailsStore, itemGridData, metalGridData, search, disSkuLookup, serials, date, ...rest } = obj
 
       const header = {
         ...rest,
@@ -342,11 +342,14 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
   }
 
   async function saveHeader(lastLine, type) {
+    const { taxDetailsStore, itemGridData, metalGridData, search, disSkuLookup, serials, date, ...rest } =
+      formik?.values
+
     const DraftReturnPack = {
       header: {
-        ...formik?.values,
+        ...rest,
         pcs: 0,
-        date: formatDateToApi(formik.values.date)
+        date: formatDateToApi(date)
       },
       items: []
     }
@@ -421,6 +424,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
               metalRef: res?.record?.metalRef,
               designId: res?.record?.designId,
               designRef: res?.record?.designRef,
+              categoryName: res?.record?.categoryName,
               invoiceReference: res?.record?.invoiceRef,
               volume: res?.record?.volume || 0,
               baseLaborPrice: res?.record?.laborPrice || 0,
