@@ -13,6 +13,7 @@ export const ResourceIds = {
   TodayRetailOrders: 60110,
   TodaySalesOrders: 60111,
   GlobalSalesYTD: 60112,
+  SalesTeamOrdersSummary: 60113,
 
   // inventory
   InventoryBelowMinimum: 60200,
