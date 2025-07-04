@@ -323,7 +323,11 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                     name='returnPolicyId'
                     label={labels.returnPolicy}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
