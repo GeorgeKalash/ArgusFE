@@ -437,10 +437,7 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
             invalidate()
           }
         }
-      },
-      width: 1000,
-      height: 600,
-      title: platformLabels.import
+      }
     })
   }
 

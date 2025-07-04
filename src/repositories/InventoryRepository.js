@@ -8,6 +8,7 @@ export const InventoryRepository = {
   },
   Item: {
     snapshot: service + 'snapshotIT',
+    snapshot3: service + 'snapshotIT3',
     get: service + 'getIT',
     quickView: service + 'quickViewIT'
   },
