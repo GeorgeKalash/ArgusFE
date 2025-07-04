@@ -121,6 +121,7 @@ const DocumentAging = () => {
         })
 
         const allRows = parentRows.flatMap(parent => {
+          
           const parentId = `${parent.functionId}|${parent.recordId}`
           const childRows = mappings
             .filter(m => m.toId === parentId)
@@ -341,7 +342,7 @@ const DocumentAging = () => {
               readOnly
             />
           </Grid>
-          <Grid item xs={1}>
+          <Grid item xs={.5}>
             <CustomButton
               onClick={() => {
                 setIsPreview(true)
@@ -352,7 +353,7 @@ const DocumentAging = () => {
               color='#231f20'
             />
           </Grid>
-          <Grid item xs={1}>
+          <Grid item xs={.5}>
             <CustomButton
               onClick={() => {
                 setIsPreview(false)
@@ -367,7 +368,7 @@ const DocumentAging = () => {
               color='#f44336'
             />
           </Grid>
-          <Grid item xs={1}>
+          <Grid item xs={.5}>
             <CustomButton
               onClick={confirmationRebuild}
               label={platformLabels.RebuildButton}
@@ -377,7 +378,7 @@ const DocumentAging = () => {
               color='#231f20'
             />
           </Grid>
-          <Grid item xs={3}></Grid>
+          <Grid item xs={4.5}></Grid>
           <Grid item xs={6}>
             <CustomNumberField
               name='balance'
