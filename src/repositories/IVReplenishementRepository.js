@@ -50,6 +50,11 @@ export const IVReplenishementRepository = {
   PurchaseRequest: {
     generate: service + 'generatePR'
   },
+  PlantSettings: {
+    get: service + 'getPLT',
+    set: service + 'setPLT',
+    del: service + 'delPLT'
+  },
   DocumentTypeDefault: {
     get: service + 'getDTD',
     set: service + 'setDTD',
