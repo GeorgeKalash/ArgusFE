@@ -20,7 +20,6 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useForm } from 'src/hooks/form'
 import WorkFlow from 'src/components/Shared/WorkFlow'
@@ -38,7 +37,7 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 import AccountSummary from 'src/components/Shared/AccountSummary'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 
-export default function PUDraftReturnForm({ labels, access, recordId, invalidate }) {
+export default function PUDraftReturnForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -51,15 +50,17 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
     enabled: !recordId
   })
 
+  const invalidate = useInvalidate({
+    endpointId: PurchaseRepository.PUDraftReturn.page
+  })
+
   useEffect(() => {
     if (documentType?.dtId) {
       onChangeDtId(documentType.dtId)
     }
   }, [documentType?.dtId])
 
-  //check
   const defCurrencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
-  const defplId = parseInt(defaultsData?.list?.find(obj => obj.key === 'plId')?.value)
   const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const { formik } = useForm({
@@ -83,6 +84,9 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
       disSkuLookup: false,
       invoiceId: null,
       invoiceRef: '',
+      subTotal: 0,
+      vatAmount: 0,
+      amount: 0,
       search: '',
       serials: [
         {
@@ -106,7 +110,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
           taxId: null,
           taxDetails: null,
           taxDetailsButton: true,
-          priceType: 0,
           volume: 0,
           invoiceReference: '',
           invoiceTrxId: null,
@@ -142,7 +145,19 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
       )
     }),
     onSubmit: async obj => {
-      const { serials, date, ...rest } = obj
+      const {
+        invoiceId,
+        invoiceRef,
+        taxId,
+        disSkuLookup,
+        search,
+        taxDetailsStore,
+        metalGridData,
+        itemGridData,
+        serials,
+        date,
+        ...rest
+      } = obj
 
       const header = {
         ...rest,
@@ -213,7 +228,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
     formik.setFieldValue('taxDetailsStore', taxDet?.list)
   }
 
-  //check
   function getItemPriceRow(newRow, dirtyField) {
     !reCal && setReCal(true)
 
@@ -253,7 +267,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
 
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
   const editMode = !!formik.values.recordId
-  const isClosed = formik.values.wip === 2
+  const isPosted = formik.values.status === 3
 
   const assignStoreTaxDetails = serials => {
     if (serials.length) {
@@ -336,16 +350,28 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
   }
 
   async function saveHeader(lastLine, type) {
+    const {
+      invoiceId,
+      invoiceRef,
+      taxId,
+      disSkuLookup,
+      search,
+      taxDetailsStore,
+      metalGridData,
+      itemGridData,
+      serials,
+      date,
+      ...rest
+    } = formik?.values
+
     const DraftReturnPack = {
       header: {
-        ...formik?.values,
+        ...rest,
         pcs: 0,
-        date: formatDateToApi(formik.values.date)
+        date: formatDateToApi(date)
       },
       items: []
     }
-
-    delete DraftReturnPack.header.serials
 
     const diRes = await postRequest({
       extension: PurchaseRepository.PUDraftReturn.set2,
@@ -393,7 +419,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
 
         if (newRow?.srlNo && newRow.srlNo !== oldRow?.srlNo) {
           const res = await getRequest({
-            extension: PurchaseRepository.Serials.import,
+            extension: PurchaseRepository.Serials.last,
             parameters: `_currencyId=${formik?.values?.currencyId}&_vendorId=${formik?.values?.vendorId}&_srlNo=${newRow?.srlNo}`
           })
 
@@ -410,7 +436,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
               itemName: res?.record?.itemName,
               weight: res?.record?.weight || 0,
               itemId: res?.record?.itemId,
-              priceType: res?.record?.priceType || 0,
               metalId: res?.record?.metalId,
               metalRef: res?.record?.metalRef,
               designId: res?.record?.designId,
@@ -420,6 +445,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
               baseLaborPrice: res?.record?.laborPrice || 0,
               unitPrice: parseFloat(res?.record?.unitPrice).toFixed(2) || 0,
               vatPct: res?.record?.vatPct || 0,
+              extendedPrice: res?.record?.extendedPrice || 0,
               vatAmount: parseFloat(res?.record?.vatAmount).toFixed(2) || 0,
               invoiceTrxId: res?.record?.trxId || 0,
 
@@ -577,6 +603,23 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
     })
   }
 
+  const onPost = async () => {
+    const { serials, ...restValues } = formik.values
+
+    await postRequest({
+      extension: PurchaseRepository.PUDraftReturn.post,
+      record: JSON.stringify({
+        ...restValues,
+        date: formatDateToApi(formik.values.date),
+        wip: 2
+      })
+    }).then(async () => {
+      toast.success(platformLabels.Posted)
+      invalidate()
+      await refetchForm(formik?.values?.recordId)
+    })
+  }
+
   const actions = [
     {
       key: 'WorkFlow',
@@ -588,7 +631,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
       key: 'Import',
       condition: true,
       onClick: onImportClick,
-      disabled: !editMode || formik.values.status != 1 || isClosed
+      disabled: !editMode || isPosted
     },
     {
       key: 'AccountSummary',
@@ -601,8 +644,18 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
             moduleId: 1
           }
         })
-      },
-      disabled: !formik.values.clientId
+      }
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      disabled: true
     }
   ]
 
@@ -630,7 +683,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
     await formik.setValues({
       ...formik.values,
       ...diHeader.record,
-      plId: defplId || formik?.values?.plId,
       amount: diHeader?.record?.amount,
       vatAmount: diHeader?.record?.vatAmount,
       subTotal: diHeader?.record?.subTotal,
@@ -662,7 +714,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
     await formik.setValues({
       ...formik.values,
       ...diHeader.record,
-      plId: defplId || formik?.values?.plId,
       amount: diHeader?.record?.amount,
       vatAmount: diHeader?.record?.vatAmount,
       subTotal: diHeader?.record?.subTotal,
@@ -794,11 +845,6 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
 
   useEffect(() => {
     ;(async function () {
-      if (!defplId)
-        stackError({
-          message: labels.noSelectedplId
-        })
-
       fillTaxStore()
 
       if (formik?.values?.recordId) {
@@ -903,11 +949,11 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
       form={formik}
       maxAccess={maxAccess}
       previewReport={editMode}
-      isClosed={isClosed}
+      isPosted={isPosted}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={isClosed && !editMode}
-      disabledSavedClear={isClosed && !editMode}
+      disabledSubmit={isPosted && !editMode}
+      disabledSavedClear={isPosted && !editMode}
     >
       <VertLayout>
         <Fixed>
@@ -942,7 +988,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
-                    readOnly={isClosed}
+                    readOnly={isPosted}
                     label={labels.site}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -1010,7 +1056,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
                       formik.setFieldValue('invoiceRef', '')
                     }}
                     editMode={editMode}
-                    readOnly={isClosed}
+                    readOnly={isPosted}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('date', '')}
                     error={formik.touched.date && Boolean(formik.errors.date)}
@@ -1049,7 +1095,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
                 value={formik.values.description}
                 rows={4.2}
                 editMode={editMode}
-                readOnly={isClosed}
+                readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('description', e.target.value)}
                 onClear={() => formik.setFieldValue('description', '')}
@@ -1059,7 +1105,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
             <Grid item xs={8}>
               <ResourceLookup
                 endpointId={PurchaseRepository.Vendor.snapshot}
-                //filter={{ isInactive: false }}
+                filter={{ isInactive: false }}
                 valueField='reference'
                 displayField='name'
                 secondFieldLabel={labels.name}
@@ -1067,7 +1113,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
                 label={labels.vendor}
                 form={formik}
                 required
-                readOnly={isClosed}
+                readOnly={isPosted}
                 displayFieldWidth={2}
                 firstFieldWidth={3}
                 valueShow='vendorRef'
@@ -1083,11 +1129,11 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
                   formik.setFieldValue('vendorName', newValue?.name || '')
                   formik.setFieldValue('vendorRef', newValue?.reference || '')
 
-                  /* formik.setFieldValue('accountId', newValue?.accountId || null)
-                      formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
-                      formik.setFieldValue('taxId', newValue?.taxId || null)
-                      formik.setFieldValue('invoiceId', null)
-                      formik.setFieldValue('invoiceRef', '') */
+                  formik.setFieldValue('accountId', newValue?.accountId || null)
+                  formik.setFieldValue('isVattable', newValue?.isTaxable || false)
+                  formik.setFieldValue('taxId', newValue?.taxId || null)
+                  formik.setFieldValue('invoiceId', null)
+                  formik.setFieldValue('invoiceRef', '')
                   formik.setFieldValue('vendorId', newValue?.recordId || null)
                 }}
                 errorCheck={'vendorId'}
@@ -1115,16 +1161,18 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                key={`${formik.values.clientId}-${formik.values.date?.toISOString()}-${formik.values.currencyId}`}
-                endpointId={formik?.values?.clientId && formik?.values?.date && SaleRepository.ReturnOnInvoice.balance}
-                parameters={`_clientId=${formik?.values?.clientId}&_returnDate=${formik?.values?.date?.toISOString()}`}
+                key={`${formik.values.vendorId}-${formik.values.date?.toISOString()}-${formik.values.currencyId}`}
+                endpointId={
+                  formik?.values?.vendorId && formik?.values?.date && PurchaseRepository.PUInvoiceRetBalance.balance
+                }
+                parameters={`_vendorId=${formik?.values?.vendorId}&_returnDate=${formik?.values?.date?.toISOString()}`}
                 filter={item => item.currencyId == formik?.values?.currencyId}
                 name='invoiceId'
                 label={labels.puInv}
                 valueField='recordId'
                 displayField={'reference'}
                 displayFieldWidth={1}
-                readOnly={isClosed}
+                readOnly={isPosted}
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
@@ -1140,7 +1188,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
                 label={platformLabels.import}
                 image={'import.png'}
                 color='#000'
-                disabled={!formik?.values?.invoiceId || isClosed}
+                disabled={!formik?.values?.invoiceId || isPosted}
               />
             </Grid>
             <Grid item xs={4}>
@@ -1167,8 +1215,8 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
             columns={serialsColumns}
             name='serials'
             maxAccess={maxAccess}
-            disabled={isClosed || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
-            allowDelete={!isClosed}
+            disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
+            allowDelete={!isPosted}
             allowAddNewLine={
               !formik?.values?.search &&
               (formik.values?.serials?.length === 0 ||
@@ -1179,7 +1227,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
           />
         </Grow>
         <Grid container spacing={3}>
-          <Grid item xs={5}  sx={{ display: 'flex', flex: 1 }}>
+          <Grid item xs={5} height={135} sx={{ display: 'flex', flex: 1 }}>
             <Table
               name='metal'
               gridData={{ count: 1, list: formik?.values?.metalGridData }}
@@ -1196,7 +1244,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
           <Grid item xs={0.5}></Grid>
           <Grid item xs={2}>
             <Grid container spacing={2}>
-              <Grid item xs={12}></Grid>
+              <Grid item xs={12} height={20}></Grid>
               <Grid item xs={12}>
                 <CustomNumberField
                   name='weight'
@@ -1208,7 +1256,7 @@ export default function PUDraftReturnForm({ labels, access, recordId, invalidate
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={8} sx={{ display: 'flex', flex: 1 }}>
+          <Grid item xs={8} height={135} sx={{ display: 'flex', flex: 1 }}>
             <Table
               name='item'
               columns={[

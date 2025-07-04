@@ -122,8 +122,7 @@ const PUDraftSerialsReturns = () => {
       props: {
         labels,
         access,
-        recordId,
-        invalidate
+        recordId
       },
       width: 1300,
       height: 750,

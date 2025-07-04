@@ -90,7 +90,8 @@ export const PurchaseRepository = {
   },
   Serials: {
     qry: service + 'qrySRL',
-    import: service + 'importSRL'
+    import: service + 'importSRL',
+    last: service + 'lastSRL'
   },
   Shipment: {
     get: service + 'getSHP',
@@ -138,7 +139,8 @@ export const PurchaseRepository = {
     get: service + 'getDRE',
     page: service + 'pageDRE',
     snapshot: service + 'snapshotDRE',
-    del: service + 'delDRE'
+    del: service + 'delDRE',
+    post: service + 'postDRE'
   },
   PUDraftReturnSerial: {
     get2: service + 'get2DRS',
@@ -150,5 +152,8 @@ export const PurchaseRepository = {
   FinancialGroup: {
     qry: service + 'qryFII',
     set2: service + 'set2FII'
+  },
+  PUInvoiceRetBalance: {
+    balance: service + 'balanceRET'
   }
 }
