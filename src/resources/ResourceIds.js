@@ -503,6 +503,7 @@ export const ResourceIds = {
   DocumentsAging: 31409,
   PhysicalCountItemDetailsImport: 44305,
   GenerateMRPs: 46304,
+  FITrialBalanceGridView: 31402,
 
   // GL
   GLSalesInvoice: 51604,

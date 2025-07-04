@@ -13,5 +13,9 @@ export const RGFinancialRepository = {
   DocumentAging: {
     AgingFI406a: service + 'FI406a',
     AgingFI406b: service + 'FI406b'
+  },
+  TrialBalance: {
+    FI402View: service + 'FI402o',
+    FI401o2: service + 'FI401o2'
   }
 }

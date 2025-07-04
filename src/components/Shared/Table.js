@@ -427,7 +427,7 @@ const Table = ({
                 </IconButton>
                 {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
                 {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}
-                {platformLabels.Of} {totalRecords}
+                {' ' + platformLabels.Of} {totalRecords}
               </Box>
               <Box>
                 <IconButton onClick={onReset}>
