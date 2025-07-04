@@ -121,12 +121,14 @@ const DocumentAging = () => {
         })
 
         const allRows = parentRows.flatMap(parent => {
-          
+
           const parentId = `${parent.functionId}|${parent.recordId}`
           const childRows = mappings
             .filter(m => m.toId === parentId)
             .map(map => {
+
               const child = childrenList.find(c => `${c.functionId}|${c.recordId}` === map.fromId)
+              
               if (!child) {
                 return null
               }
