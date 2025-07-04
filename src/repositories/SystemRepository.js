@@ -256,5 +256,11 @@ export const SystemRepository = {
     set: service + 'setAT',
     get: service + 'getAT',
     del: service + 'delAT'
-  }
+  },
+  Folders: {
+    qry: service + 'qryFO',
+    get: service + 'getFO',
+    set: service + 'setFO',
+    del: service + 'delFO'
+  },
 }

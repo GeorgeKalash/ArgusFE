@@ -1,3 +1,5 @@
+import { Folder } from "@mui/icons-material";
+
 export const ResourceIds = {
   //Dashboard
   WeeklySalesYTD: 60100,
@@ -501,6 +503,7 @@ export const ResourceIds = {
   PUFinancialIntegrators: 50102,
   IRMaterialDocTypeDefaults: 46101,
   PhysicalCountItemDetailsImport: 44305,
+  Folders:70111,
 
   // GL
   GLSalesInvoice: 51604,
