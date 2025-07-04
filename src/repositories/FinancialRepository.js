@@ -184,6 +184,9 @@ export const FinancialRepository = {
   Apply3: {
     qry: service + 'qryAPL3'
   },
+  Apply: {
+    qry: service + 'qryAPL'
+  },
   AgingLeg: {
     qry: service + 'qryAGL'
   },

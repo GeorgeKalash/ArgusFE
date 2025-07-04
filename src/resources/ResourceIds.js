@@ -500,6 +500,7 @@ export const ResourceIds = {
   RequisitionDocumentTypeDefaults: 50612,
   PUFinancialIntegrators: 50102,
   IRMaterialDocTypeDefaults: 46101,
+  DocumentsAging: 31409,
 
   // GL
   GLSalesInvoice: 51604,

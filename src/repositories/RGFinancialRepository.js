@@ -9,5 +9,9 @@ export const RGFinancialRepository = {
   },
   AccountSummary: {
     AccFI405b: service + 'FI405b'
+  },
+  DocumentAging: {
+    AgingFI406a: service + 'FI406a',
+    AgingFI406b: service + 'FI406b'
   }
 }

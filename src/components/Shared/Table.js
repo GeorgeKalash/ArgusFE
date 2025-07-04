@@ -45,6 +45,7 @@ const Table = ({
   selectionMode = 'row',
   rowDragManaged = false,
   onRowDragEnd = false,
+  setRowData = null,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -776,6 +777,31 @@ const Table = ({
     return (a.sortColumn ?? 0) - (b.sortColumn ?? 0)
   })
 
+  const handleRowClick = params => {
+    const clickedRef = params.data?.[props?.field]
+
+    props.fullRowDataRef.current = props.fullRowDataRef.current.map(row => {
+      if (row.reference === clickedRef && row.level === 0) {
+        return { ...row, isExpanded: !row.isExpanded }
+      }
+
+      return row
+    })
+
+    const updatedVisibleRows = []
+    for (const row of props.fullRowDataRef.current) {
+      if (row.level === 0) {
+        updatedVisibleRows.push(row)
+        if (row.isExpanded) {
+          const children = props.fullRowDataRef.current.filter(child => child.parent === row.reference)
+          updatedVisibleRows.push(...children)
+        }
+      }
+    }
+
+    setRowData(updatedVisibleRows)
+  }
+
   return (
     <VertLayout>
       <Grow>
@@ -821,6 +847,9 @@ const Table = ({
             gridOptions={gridOptions}
             rowDragManaged={rowDragManaged}
             onRowDragEnd={onRowDragEnd}
+            {...(setRowData && {
+              onRowClicked: handleRowClick
+            })}
             onColumnMoved={onColumnMoved}
             onColumnResized={onColumnResized}
             onSortChanged={onSortChanged}
