@@ -20,6 +20,7 @@ import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRep
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { SaleRepository } from 'src/repositories/SaleRepository'
 
 const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -48,6 +49,7 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
       metalId: '',
       priceType: '',
       taxId: '',
+      returnPolicyId: null,
       applyVAT: false,
       allowNegativeQty: false,
       isInactive: false
@@ -313,6 +315,21 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                     }}
                     error={formik.touched.replenishmentGroupId && Boolean(formik.errors.replenishmentGroupId)}
                     maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SaleRepository.ReturnPolicy.qry}
+                    name='returnPolicyId'
+                    label={labels.returnPolicy}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('returnPolicyId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.returnPolicyId && Boolean(formik.errors.returnPolicyId)}
                   />
                 </Grid>
               </Grid>
