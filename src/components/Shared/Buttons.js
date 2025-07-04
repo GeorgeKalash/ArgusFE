@@ -489,7 +489,7 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'lock.png',
     main: false,
-    access: accessMap[TrxType.POST]
+    access: accessMap[TrxType.UNPOST]
   },
   {
     key: 'Unlocked',
@@ -497,7 +497,7 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'unlock.png',
     main: false,
-    access: accessMap[TrxType.UNPOST]
+    access: accessMap[TrxType.POST]
   },
   {
     key: 'Ok',
