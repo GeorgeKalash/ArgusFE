@@ -219,16 +219,6 @@ const DocumentAging = () => {
     }
   ]
 
-  const amountApplied = fullRowDataRef.current?.reduce((total, row) => {
-    if (row.level === 1) {
-      const value = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
-
-      return total + value
-    }
-
-    return total
-  }, 0)
-
   const { labels: _labels, access: maxAccess } = useResourceQuery({
     datasetId: ResourceIds.RebuildAging
   })
@@ -254,7 +244,7 @@ const DocumentAging = () => {
     return amount + amountValue
   }, 0)
 
-  const balance = totalAmount - amountApplied
+  const balance = (totalAmount - amountAppliedRef.current) || 0
 
   return (
     <VertLayout>
@@ -364,6 +354,8 @@ const DocumentAging = () => {
                 setIsPreview(false)
                 formik.resetForm()
                 setRowData([])
+                amountAppliedRef.current = 0
+                formik.setFieldValue('balance', null)
               }}
               label={platformLabels.Clear}
               tooltipText={platformLabels.Clear}
