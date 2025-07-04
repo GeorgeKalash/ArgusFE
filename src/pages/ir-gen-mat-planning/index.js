@@ -307,7 +307,7 @@ const GenerateMaterialPlaning = () => {
             <Grid item xs={3}>
               <CustomTextField
                 name='search'
-                label={labels.search}
+                label={platformLabels.Search}
                 value={formik.values.searchValue}
                 search
                 onChange={e => {
