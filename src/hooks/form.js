@@ -7,15 +7,21 @@ import { debounce } from 'lodash'
 export function useForm({ documentType = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
   const Validation = useRef({})
 
+  const formId = useRef(Math.random().toString(36).substring(2, 10)) // unique ID for this form
+
   const debouncedValidateForm = debounce(() => {
     formik.validateForm()
   }, 300)
 
   const setFieldValidation = (field, error) => {
+    if (!Validation.current[formId.current]) {
+      Validation.current[formId.current] = {}
+    }
+
     if (error === '') {
-      delete Validation.current[field]
+      delete Validation.current[formId.current][field]
     } else {
-      Validation.current[field] = error
+      Validation.current[formId.current][field] = error
     }
 
     debouncedValidateForm()
@@ -128,7 +134,7 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
             }
           }
       })
-      const mergedValidation = Validation.current
+      const mergedValidation = Validation.current[formId.current] || {}
 
       return {
         ...maxAccessErrors,

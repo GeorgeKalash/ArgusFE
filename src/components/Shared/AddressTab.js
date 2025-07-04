@@ -73,6 +73,8 @@ const AddressTab = ({
       optional) ||
     !optional
 
+  console.log('addressValidation', addressValidation)
+
   const validate = options &&
     required && {
       name: yup.string().required(),
