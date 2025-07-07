@@ -35,8 +35,6 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
-  const filteredMeasurements = useRef([])
-  const [measurements, setMeasurements] = useState([])
   const [maxSeqNo, setMaxSeqNo] = useState(1)
   const defaultPlant = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
   const userId = getStorageData('userData').userId
@@ -154,22 +152,6 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
     }
   ]
 
-  async function getFilteredMU(itemId) {
-    if (!itemId) return
-
-    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-
-    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
-    filteredMeasurements.current = arrayMU
-  }
-
-  const getMeasurementUnits = async () => {
-    return await getRequest({
-      extension: InventoryRepository.MeasurementUnit.qry,
-      parameters: `_msId=0`
-    })
-  }
-
   async function getUserInfo() {
     const res = await getRequest({
       extension: SystemRepository.Users.get,
@@ -267,8 +249,6 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
 
   useEffect(() => {
     ;(async function () {
-      const muList = await getMeasurementUnits()
-      setMeasurements(muList?.list)
       if (recordId) refetchForm(recordId)
       else {
         const userInfo = await getUserInfo()

@@ -107,7 +107,7 @@ export default function ItemDetailsForm({
       parameters: `_itemId=${itemId}&_vendorId=${formik?.values?.vendorId || 0}`
     })
     formik.setFieldValue('lastPurchaseUnitPrice', lastResp?.record?.invoiceItem?.unitPrice || 0)
-    formik.setFieldValue('lastPurchaseDate', lastResp?.record?.invoice?.date)
+    formik.setFieldValue('lastPurchaseDate', formatDateFromApi(lastResp?.record?.invoice?.date))
     formik.setFieldValue('lastPurchaseCurrencyId', lastResp?.record?.invoice?.currencyId)
   }
 
@@ -124,6 +124,7 @@ export default function ItemDetailsForm({
     })
     formik.setFieldValue('unitCost', res?.record?.currentCost || 0)
   }
+
   async function refetchForm() {
     if (!seqNo) return
 
@@ -133,7 +134,8 @@ export default function ItemDetailsForm({
     })
     formik.setValues({
       ...res.record,
-      deliveryDate: res?.record?.deliveryDate ? formatDateFromApi(res?.record?.deliveryDate) : null
+      deliveryDate: res?.record?.deliveryDate ? formatDateFromApi(res?.record?.deliveryDate) : null,
+      lastPurchaseDate: res?.record?.lastPurchaseDate ? formatDateFromApi(res?.record?.lastPurchaseDate) : null
     })
   }
 
@@ -182,12 +184,15 @@ export default function ItemDetailsForm({
                         })
 
                         formik.resetForm()
+                        formik.setFieldValue('sku', null)
 
                         return
                       }
                       await getAvailability(newValue?.recordId)
                       await getlastIVI(newValue?.recordId)
                       await getCurrentCost(newValue?.recordId)
+                      formik.setFieldValue('msId', newValue?.msId || null)
+                      formik.setFieldValue('muId', null)
                       formik.setFieldValue('totalCost', formik.values.qty || 0 * formik.values.unitCost || 0)
                       formik.setFieldValue('itemName', newValue?.name || '')
                       formik.setFieldValue('sku', newValue?.sku || '')
@@ -218,8 +223,8 @@ export default function ItemDetailsForm({
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.MeasurementUnit.qry}
-                    parameters={`_msId=${0}`}
+                    endpointId={formik.values.msId && InventoryRepository.MeasurementUnit.qry}
+                    parameters={`_msId=${formik.values.msId}`}
                     name='muId'
                     readOnly={editMode}
                     label={labels.measurement}
