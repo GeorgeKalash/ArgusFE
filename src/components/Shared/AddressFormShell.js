@@ -17,7 +17,8 @@ export const AddressFormShell = ({
   onSubmit,
   isSavedClear = true,
   isCleared = true,
-  actions,
+  changeClear = false,
+  actions = [],
   ...props
 }) => {
   const [required, setRequired] = useState(!optional)
@@ -25,7 +26,31 @@ export const AddressFormShell = ({
 
   const { formik } = useForm({
     maxAccess: formikSettings.maxAccess,
-    initialValues: {},
+    initialValues: {
+      recordId: null,
+      name: '',
+      countryId: null,
+      countryName: '',
+      stateId: null,
+      stateName: '',
+      cityId: null,
+      city: '',
+      street1: '',
+      street2: '',
+      email1: '',
+      email2: '',
+      phone: '',
+      phone2: '',
+      phone3: '',
+      addressId: null,
+      postalCode: '',
+      cityDistrictId: null,
+      cityDistrict: '',
+      bldgNo: '',
+      unitNo: '',
+      subNo: '',
+      poBox: ''
+    },
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
@@ -63,6 +88,16 @@ export const AddressFormShell = ({
       editMode={editMode}
       isSavedClear={isSavedClear}
       isCleared={isCleared}
+      onClear={
+        changeClear
+          ? () => {
+              setAddress(formik.initialValues)
+              formik.resetForm({
+                values: formik.initialValues
+              })
+            }
+          : undefined
+      }
       actions={actions}
       {...props}
     >

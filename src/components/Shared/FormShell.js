@@ -5,7 +5,6 @@ import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ClientRelationList } from './ClientRelationList'
 import { useGlobalRecord, useWindow } from 'src/windows'
-import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
 import Approvals from './Approvals'
 import ResourceRecordRemarks from './ResourceRecordRemarks'
@@ -64,6 +63,7 @@ export default function FormShell({
   clientRelation = false,
   addClientRelation = false,
   previewReport = false,
+  onClear = () => {},
   previewBtnClicked = () => {},
   setIDInfoAutoFilled,
   visibleClear,
@@ -346,21 +346,25 @@ export default function FormShell({
   })
 
   function handleReset() {
-    if (typeof form.values?.recordId === 'undefined') {
-      form.resetForm({
-        values: form.initialValues
-      })
+    if (typeof onClear === 'function') {
+      onClear()
     } else {
-      if (typeof clear === 'function') {
-        clear()
-      } else {
+      if (typeof form.values?.recordId === 'undefined') {
         form.resetForm({
           values: form.initialValues
         })
+      } else {
+        if (typeof clear === 'function') {
+          clear()
+        } else {
+          form.resetForm({
+            values: form.initialValues
+          })
+        }
       }
-    }
-    if (setIDInfoAutoFilled) {
-      setIDInfoAutoFilled(false)
+      if (setIDInfoAutoFilled) {
+        setIDInfoAutoFilled(false)
+      }
     }
   }
 
