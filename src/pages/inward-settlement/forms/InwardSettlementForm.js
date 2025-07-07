@@ -42,7 +42,8 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
   const [mismatchedFields, setMismatchedFields] = useState([])
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.InwardSettlement
+    datasetId: ResourceIds.InwardSettlement,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.InwardSettlement, window })

@@ -10,6 +10,7 @@ import DeleteDialog from '../DeleteDialog'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { accessMap, TrxType } from 'src/resources/AccessLevels'
 
 export function DataGrid({
   name, // maxAccess
@@ -257,7 +258,7 @@ export function DataGrid({
     }
   }
 
-  const allColumns = columns.filter(
+  const allColumns = columns?.filter(
     ({ name: field, hidden }) =>
       (accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN && !hidden) ||
       (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
@@ -573,6 +574,14 @@ export function DataGrid({
       ? (gridWidth - totalWidth) / allColumns?.length
       : 0
 
+  const generalMaxAccess = maxAccess && maxAccess?.record?.accessFlags
+
+  const isAccessDenied = maxAccess?.editMode
+    ? generalMaxAccess && !generalMaxAccess[accessMap[TrxType.EDIT]]
+    : generalMaxAccess && !generalMaxAccess[accessMap[TrxType.ADD]]
+
+  const _disabled = isAccessDenied || disabled
+
   const columnDefs = [
     ...allColumns.map(column => ({
       ...column,
@@ -580,7 +589,7 @@ export function DataGrid({
       field: column.name,
       headerName: column.label || column.name,
       headerTooltip: column.label,
-      editable: !disabled,
+      editable: !_disabled,
       flex: column.flex || (!column.width && 1),
       sortable: false,
       cellRenderer: CustomCellRenderer,
@@ -619,7 +628,7 @@ export function DataGrid({
         return event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter' ? true : false
       }
     })),
-    allowDelete
+    allowDelete && !isAccessDenied
       ? {
           field: 'actions',
           headerName: '',

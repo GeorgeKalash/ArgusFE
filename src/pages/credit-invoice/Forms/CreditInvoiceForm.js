@@ -43,7 +43,8 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CreditInvoice
+    datasetId: ResourceIds.CreditInvoice,
+    editMode: !!recordId
   })
 
   const invalidate = useInvalidate({
