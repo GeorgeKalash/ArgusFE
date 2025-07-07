@@ -892,6 +892,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           unitPrice: x.unitPrice,
           vatAmount: x.vatAmount,
           metalRef: x.metalRef,
+          categoryName: x.categoryName,
           seqNo: lId + 1,
           id: lId + 1,
           ...(res?.record?.taxId && {
