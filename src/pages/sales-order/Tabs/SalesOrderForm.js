@@ -265,6 +265,12 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     return currentAmount
   }
 
+  const onCondition = row => {
+    return {
+      disabled: !row.taxId
+    }
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -482,19 +488,18 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
+        onCondition
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
