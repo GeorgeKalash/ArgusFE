@@ -68,7 +68,7 @@ const Folders = () => {
       },
       width: 500,
       height: 250,
-      title: '📝Folder'
+      title: labels.folder
     })
   }
 
