@@ -200,8 +200,8 @@ export default function SaleTransactionForm({
           taxId: null,
           taxDetails: null,
           notes: '',
-          saTrx: true,
-          taxDetailsButton: true
+          saTrx: false,
+          taxDetailsButton: false
         }
       ],
       serials: [],
@@ -504,6 +504,12 @@ export default function SaleTransactionForm({
     }
   }
 
+  const taxCondition = row => {
+    return {
+      disabled: !row.taxId
+    }
+  }
+
   const iconKey = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
 
@@ -750,19 +756,18 @@ export default function SaleTransactionForm({
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
+        onCondition: taxCondition
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {

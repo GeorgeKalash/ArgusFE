@@ -165,7 +165,7 @@ export default function RetailTransactionsForm({
         taxId: null,
         taxId_base: null,
         taxId_amount: null,
-        taxDetailsButton: true
+        taxDetailsButton: false
       }
     ],
     cash: [
@@ -322,8 +322,7 @@ export default function RetailTransactionsForm({
       mdAmount: 0,
       mdValue: 0,
       taxId: row?.taxId || formik.values.header.taxId,
-      taxDetails: taxDetailsInfo || null,
-      taxDetailsButton: true
+      taxDetails: taxDetailsInfo || null
     }
     update(result)
     if (result?.unitPrice) {
@@ -651,6 +650,12 @@ export default function RetailTransactionsForm({
     return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
+  const onCondition = row => {
+    return {
+      disabled: !row.taxId
+    }
+  }
+
   const columns = [
     {
       component: 'textfield',
@@ -775,19 +780,18 @@ export default function RetailTransactionsForm({
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
+        onCondition
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {

@@ -187,8 +187,8 @@ export default function PurchaseTransactionForm({
         taxDetails: null,
         promotionTypeName: initialPromotionType?.value,
         promotionType: initialPromotionType?.key,
-        costHistory: true,
-        taxDetailsButton: true,
+        costHistory: false,
+        taxDetailsButton: false,
         notes: ''
       }
     ],
@@ -337,6 +337,12 @@ export default function PurchaseTransactionForm({
 
     const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
     filteredMeasurements.current = arrayMU
+  }
+
+  const taxCondition = row => {
+    return {
+      disabled: !row.taxId
+    }
   }
 
   const columns = [
@@ -546,19 +552,22 @@ export default function PurchaseTransactionForm({
       component: 'button',
       name: 'costHistory',
       props: {
-        imgSrc: '/images/buttonsIcons/popup-black.png'
+        imgSrc: '/images/buttonsIcons/popup-black.png',
+        onCondition: row => {
+          return {
+            disabled: !row?.itemId
+          }
+        }
       },
       label: labels.costHistory,
       onClick: (e, row) => {
-        if (row?.itemId) {
-          stack({
-            Component: ItemCostHistory,
-            props: {
-              itemId: row?.itemId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: ItemCostHistory,
+          props: {
+            itemId: row?.itemId,
+            obj: row
+          }
+        })
       }
     },
     {
@@ -573,19 +582,18 @@ export default function PurchaseTransactionForm({
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
+        onCondition: taxCondition
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
@@ -1000,8 +1008,7 @@ export default function PurchaseTransactionForm({
       mdValue: 0,
       taxId: rowTax,
       taxDetails: rowTaxDetails,
-      costHistory: true,
-      taxDetailsButton: true
+      costHistory: true
     })
 
     formik.setFieldValue(

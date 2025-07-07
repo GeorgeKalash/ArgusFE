@@ -141,7 +141,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         applyVat: false,
         taxId: null,
         taxDetails: null,
-        taxDetailsButton: true,
+        taxDetailsButton: false,
         notes: null
       }
     ]
@@ -241,6 +241,12 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
+  const onCondition = row => {
+    return {
+      disabled: !row.taxId
+    }
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -331,7 +337,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
           saTrx: true,
-          taxDetailsButton: true,
           baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
         })
 
@@ -446,19 +451,18 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
+        onCondition
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
