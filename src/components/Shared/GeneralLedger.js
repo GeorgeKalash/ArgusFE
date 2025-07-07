@@ -306,8 +306,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
     }
   ]
 
-  console.log(formik2)
-
   return (
     <FormShell
       resourceId={ResourceIds.JournalVoucher}
