@@ -325,7 +325,7 @@ const TabsProvider = ({ children }) => {
                   label={
                     <Box display='flex' alignItems='center'>
                       <span>{activeTab.label}</span>
-                      {activeTab.route === '/default/' && (
+                      {activeTab.route === '/default/' && currentTabIndex === i && (
                         <IconButton
                           size='small'
                           onClick={e => {
