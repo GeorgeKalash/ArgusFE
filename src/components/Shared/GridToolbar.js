@@ -132,6 +132,7 @@ const GridToolbar = ({
                         onClick={handleClick}
                         image={button.image}
                         tooltip={button.label}
+                        label={button.label}
                         disabled={isDisabled}
                       />
                     )
