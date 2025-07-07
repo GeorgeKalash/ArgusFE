@@ -152,7 +152,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         applyVat: false,
         taxId: '',
         taxDetails: null,
-        taxDetailsButton: true,
+        taxDetailsButton: false,
         notes: ''
       }
     ]
@@ -351,7 +351,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
           saTrx: true,
-          taxDetailsButton: true
+          taxDetailsButton: false
         })
       }
     },
