@@ -118,6 +118,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
             seqNo: id,
             ...rest
           })),
+          editStatus: values?.editStatus,
           date: formatDateToApi(values.date),
           functionId: values.functionId,
           recordId: formValues.recordId,
@@ -305,6 +306,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
     }
   ]
 
+  console.log(formik2)
+
   return (
     <FormShell
       resourceId={ResourceIds.JournalVoucher}
@@ -360,7 +363,10 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
         )}
         <Grow>
           <DataGrid
-            onChange={value => formik2.setFieldValue('glTransactions', value)}
+            onChange={value => {
+              formik2.setFieldValue('glTransactions', value)
+              formik2.setFieldValue('editStatus', 2)
+            }}
             allowDelete={!isProcessed}
             allowAddNewLine={!isProcessed}
             value={formik2?.values.glTransactions}
