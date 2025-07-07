@@ -35,7 +35,7 @@ import { SystemChecks } from 'src/resources/SystemChecks'
 import { useError } from 'src/error'
 import AccountSummary from 'src/components/Shared/AccountSummary'
 
-export default function DraftForm({ labels, access, recordId, invalidate }) {
+const DraftForm = ({ labels, access, recordId, invalidate }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -507,9 +507,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -572,10 +570,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
       props: {
         functionId: SystemFunction.DraftSerialsIn,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -589,10 +584,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
         },
         onCloseimport: fillGrids,
         maxAccess: maxAccess
-      },
-      width: 550,
-      height: 270,
-      title: platformLabels.importSerials
+      }
     })
   }
 
@@ -630,10 +622,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
           props: {
             accountId: parseInt(formik.values.accountId),
             moduleId: 1
-          },
-          width: 1000,
-          height: 500,
-          title: labels.accountSummary
+          }
         })
       },
       disabled: !formik.values.clientId
@@ -1218,3 +1207,7 @@ export default function DraftForm({ labels, access, recordId, invalidate }) {
     </FormShell>
   )
 }
+DraftForm.width = 1300
+DraftForm.height = 750
+
+export default DraftForm

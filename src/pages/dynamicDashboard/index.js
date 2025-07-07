@@ -133,7 +133,7 @@ const DashboardLayout = () => {
     setLoading(false)
   }, 500)
 
-  const { labels } = useResourceParams({
+  const { labels, access } = useResourceParams({
     datasetId: ResourceIds.UserDashboard
   })
 
@@ -523,6 +523,21 @@ const DashboardLayout = () => {
               />
             </ChartCard>
           )}
+          {containsApplet(ResourceIds.SalesTeamOrdersSummary) && (
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.salesTeamOrdersSummary}</Title>
+              </SummaryCard>
+              <HorizontalBarChartDark
+                id='salesTeamOrdersSummaries'
+                labels={data?.dashboard?.salesTeamOrdersSummaries?.map(c => c.spName) || []}
+                data={data?.dashboard?.salesTeamOrdersSummaries?.map(c => c.amount) || []}
+                label={labels.amount}
+                color='#73aa2e'
+                hoverColor='#818181'
+              />
+            </ChartCard>
+          )}
           {containsApplet(ResourceIds.AverageRevenuePerItem) && (
             <ChartCard>
               <SummaryCard>
@@ -543,6 +558,7 @@ const DashboardLayout = () => {
               </SummaryCard>
               <Box style={{ height: '350px', display: 'flex' }}>
                 <Table
+                  name='table'
                   columns={[
                     {
                       field: 'reference',
@@ -563,6 +579,7 @@ const DashboardLayout = () => {
                   gridData={data?.authorization}
                   rowId={['recordId']}
                   pagination={false}
+                  maxAccess={access}
                 />
               </Box>
             </ChartCard>

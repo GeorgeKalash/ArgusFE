@@ -56,6 +56,7 @@ export const AccessControlRepository = {
   },
   ModuleClass: {
     qry: service + 'qryRES',
+    get: service + 'getRES',
     qry0: service + 'qryRES0',
     qry2: service + 'qryRES2',
     set: service + 'setRES',

@@ -94,7 +94,7 @@ const Components = ({ store, maxAccess, labels }) => {
     const updateItemsList =
       res?.list?.length != 0
         ? await Promise.all(
-            res.list.map(async (item, index) => {
+            res?.list?.map(async (item, index) => {
               return {
                 ...item,
                 id: index + 1

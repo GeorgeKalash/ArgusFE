@@ -37,7 +37,7 @@ function createConditionalSchema(fieldValidators, allowNoLines, maxAccess, array
     const [parent, id] = controlId?.split('.')
     if (parent === arrayName)
       if (accessLevel === 2 && !(id in updatedValidators)) {
-        updatedValidators[id] = row => row?.[id]
+        updatedValidators[id] = row => row?.[id] != null
       }
 
     if ((accessLevel === 1 || accessLevel === 4) && id in updatedValidators) {

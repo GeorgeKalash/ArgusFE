@@ -312,10 +312,7 @@ const PhysicalCountSerialDe = () => {
           setEditMode(false)
         },
         dialogText: clearOption === 'clearAll' ? platformLabels.ClearFormGrid : platformLabels.DeleteGridConf
-      },
-      width: 570,
-      height: 170,
-      title: platformLabels.Clear
+      }
     })
   }
 
@@ -373,10 +370,7 @@ const PhysicalCountSerialDe = () => {
         },
         onCloseimport: fetchGridData,
         maxAccess: access
-      },
-      width: 550,
-      height: 270,
-      title: platformLabels.importSerials
+      }
     })
   }
 

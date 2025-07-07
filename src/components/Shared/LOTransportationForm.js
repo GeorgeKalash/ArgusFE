@@ -15,9 +15,14 @@ import { DataSets } from 'src/resources/DataSets'
 import toast from 'react-hot-toast'
 import CustomNumberField from '../Inputs/CustomNumberField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
+export const LOTransportationForm = ({ recordId, functionId, editMode, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.Transportation, window })
 
   const { formik } = useForm({
     initialValues: {
@@ -279,3 +284,6 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
     </FormShell>
   )
 }
+
+LOTransportationForm.width = 700
+LOTransportationForm.height = 430

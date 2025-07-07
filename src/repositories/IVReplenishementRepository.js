@@ -40,12 +40,28 @@ export const IVReplenishementRepository = {
     get: service + 'getMPL',
     set2: service + 'set2MPL',
     reopen: service + 'reopenMPL',
-    close: service + 'closeMPL'
+    close: service + 'closeMPL',
+    qry: service + 'qryMPL'
   },
   MatPlanningItem: {
-    qry: service + 'qryMPI'
+    qry: service + 'qryMPI',
+    append: service + 'appendMPI'
   },
   PurchaseRequest: {
     generate: service + 'generatePR'
+  },
+  PlantSettings: {
+    get: service + 'getPLT',
+    set: service + 'setPLT',
+    del: service + 'delPLT'
+  },
+  DocumentTypeDefault: {
+    get: service + 'getDTD',
+    set: service + 'setDTD',
+    del: service + 'delDTD',
+    page: service + 'pageDTD'
+  },
+  materialPlaning: {
+    preview: service + 'previewMRP'
   }
 }
