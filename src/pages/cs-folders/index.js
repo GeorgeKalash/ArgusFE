@@ -34,6 +34,7 @@ const Folders = () => {
     labels,
     paginationParameters,
     refetch,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -67,7 +68,7 @@ const Folders = () => {
       },
       width: 500,
       height: 250,
-      title: labels.Folders
+      title: '📝Folder'
     })
   }
 
@@ -77,7 +78,7 @@ const Folders = () => {
       record: JSON.stringify(obj)
     })
     toast.success(platformLabels.Deleted)
-    refetch()
+    invalidate()
   }
 
   return (

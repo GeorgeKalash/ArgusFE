@@ -21,13 +21,10 @@ export default function CsFoldersForm({ labels, maxAccess, recordId }) {
     endpointId: SystemRepository.Folders.page
   })
 
-  const [submittedName, setSubmittedName] = useState('')
-
   const { formik } = useForm({
     initialValues: {
       recordId: null,
-      name: '',
-      submittedName: ''
+      name: ''
     },
     maxAccess,
     validateOnChange: true,
@@ -44,14 +41,14 @@ export default function CsFoldersForm({ labels, maxAccess, recordId }) {
       if (!obj.recordId) {
         formik.setFieldValue('recordId', response.recordId)
       }
-      await invalidate()
-      setSubmittedName(obj.name)
-      formik.setFieldValue('submittedName', obj.name)
-
-      // (you could also clear the input here: formik.resetForm({ values: { recordId: response.recordId, name: '' } }))
+      invalidate()
+      formik.setValues({
+        recordId: null,
+        name: '' //
+      })
+      formik.setTouched({}, false)
     }
   })
-
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
@@ -67,33 +64,31 @@ export default function CsFoldersForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <>
-      <FormShell resourceId={ResourceIds.Folders} form={formik} maxAccess={maxAccess} editMode={editMode}>
-        <VertLayout>
-          <Grow>
-            <Grid container spacing={4}>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='name'
-                  label={labels.name}
-                  value={formik.values.name}
-                  required
-                  maxAccess={maxAccess}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('name', '')}
-                  error={formik.touched.name && Boolean(formik.errors.name)}
-                />
-              </Grid>
+    <FormShell
+      resourceId={ResourceIds.Folders}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      title={labels.Folder}
+    >
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
             </Grid>
-          </Grow>
-        </VertLayout>
-      </FormShell>
-
-      {submittedName && (
-        <p style={{ marginTop: '1rem' }}>
-          {labels.name} Submitted: <strong>{submittedName}</strong>
-        </p>
-      )}
-    </>
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
