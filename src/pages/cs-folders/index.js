@@ -22,7 +22,7 @@ const Folders = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: SystemRepository.Folders.qry, // SY.FO endpoint
+      extension: SystemRepository.Folders.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -31,21 +31,20 @@ const Folders = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     paginationParameters,
     refetch,
-    access,
-    invalidate
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.Folders.qry,
+    endpointId: SystemRepository.Folders.page,
     datasetId: ResourceIds.Folders
   })
 
   const columns = [
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     }
   ]
@@ -55,45 +54,30 @@ const Folders = () => {
   }
 
   const edit = obj => {
-    console.log('Edit clicked for record:', obj)
-
-    // Ensure recordId exists in your data, else adjust field name here:
-    const id = obj?.recordId || obj?.id
-    if (!id) {
-      toast.error('Record ID not found for edit')
-      
-return
-    }
-    openForm(id)
+    openForm(obj?.recordId)
   }
 
   function openForm(recordId) {
     stack({
       Component: CsFoldersForm,
       props: {
-        labels: _labels,
+        labels,
         recordId,
-        maxAccess: access,
-        invalidate, // pass invalidate so form can refresh list after save
+        maxAccess: access
       },
       width: 500,
       height: 250,
-      title: _labels.Folders
+      title: labels.Folders
     })
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SystemRepository.Folders.del,
-        record: JSON.stringify(obj)
-      })
-      toast.success(platformLabels.Deleted)
-      invalidate() // refresh list after delete
-    } catch (error) {
-      console.error('Delete failed:', error)
-      toast.error('Failed to delete folder')
-    }
+    await postRequest({
+      extension: SystemRepository.Folders.del,
+      record: JSON.stringify(obj)
+    })
+    toast.success(platformLabels.Deleted)
+    refetch()
   }
 
   return (
@@ -105,12 +89,12 @@ return
         <Table
           columns={columns}
           gridData={data}
-          rowId={['recordId']} // confirm your record ID field name here
+          rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={!data}
+          isLoading={false}
           pageSize={50}
-          paginationType="api"
+          paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}
           maxAccess={access}

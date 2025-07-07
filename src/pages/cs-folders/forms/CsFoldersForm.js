@@ -18,44 +18,37 @@ export default function CsFoldersForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.Folders.qry
+    endpointId: SystemRepository.Folders.page
   })
 
-  const [loading, setLoading] = useState(false)
+  const [submittedName, setSubmittedName] = useState('')
 
   const { formik } = useForm({
     initialValues: {
       recordId: null,
-      name: ''
+      name: '',
+      submittedName: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      setLoading(true)
-      try {
-        const response = await postRequest({
-          extension: SystemRepository.Folders.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: SystemRepository.Folders.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-
-        await invalidate()
-      } catch (error) {
-        console.error('Save failed:', error)
-        toast.error('Failed to save folder.')
-      } finally {
-        setLoading(false)
+      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+      if (!obj.recordId) {
+        formik.setFieldValue('recordId', response.recordId)
       }
+      await invalidate()
+      setSubmittedName(obj.name)
+      formik.setFieldValue('submittedName', obj.name)
+
+      // (you could also clear the input here: formik.resetForm({ values: { recordId: response.recordId, name: '' } }))
     }
   })
 
@@ -64,56 +57,43 @@ export default function CsFoldersForm({ labels, maxAccess, recordId }) {
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        try {
-          const res = await getRequest({
-            extension: SystemRepository.Folders.get,
-            parameters: `_recordId=${recordId}`
-          })
-
-          if (res.record) {
-            formik.setValues(res.record)
-          } else {
-            toast.error('Folder record not found')
-          }
-        } catch (error) {
-          console.error('Fetch failed:', error)
-          toast.error('Failed to load folder.')
-        }
+        const res = await getRequest({
+          extension: SystemRepository.Folders.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res?.record)
       }
     })()
-  }, [recordId])
+  }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Folders}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      title="Folder"
-      disabled={loading}
-    >
-      <VertLayout>
-        <Grow>
-          <Grid container spacing={4}>
-            <Grid item xs={12} style={{ display: 'flex', alignItems: 'center' }}>
-                <label htmlFor="name" style={{ marginRight: 8, minWidth: 60, fontWeight: 'bold' }}>
-                    Name:
-                </label>
-              <CustomTextField
-                name="name"
-                label={labels.name}
-                value={formik.values.name}
-                required
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('name', '')}
-                error={formik.touched.name && Boolean(formik.errors.name)}
-                disabled={loading}
-              />
+    <>
+      <FormShell resourceId={ResourceIds.Folders} form={formik} maxAccess={maxAccess} editMode={editMode}>
+        <VertLayout>
+          <Grow>
+            <Grid container spacing={4}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='name'
+                  label={labels.name}
+                  value={formik.values.name}
+                  required
+                  maxAccess={maxAccess}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('name', '')}
+                  error={formik.touched.name && Boolean(formik.errors.name)}
+                />
+              </Grid>
             </Grid>
-          </Grid>
-        </Grow>
-      </VertLayout>
-    </FormShell>
+          </Grow>
+        </VertLayout>
+      </FormShell>
+
+      {submittedName && (
+        <p style={{ marginTop: '1rem' }}>
+          {labels.name} Submitted: <strong>{submittedName}</strong>
+        </p>
+      )}
+    </>
   )
 }
