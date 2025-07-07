@@ -381,8 +381,16 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
   }
 
   const onCondition = row => {
-    return {
-      disabled: !row.taxId
+    if (row.itemId && row.taxId) {
+      return {
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
     }
   }
 

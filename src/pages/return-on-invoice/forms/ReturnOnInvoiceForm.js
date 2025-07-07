@@ -270,8 +270,16 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   }
 
   const taxCondition = row => {
-    return {
-      disabled: !row.taxId
+    if (row.itemId && row.taxId) {
+      return {
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
     }
   }
 

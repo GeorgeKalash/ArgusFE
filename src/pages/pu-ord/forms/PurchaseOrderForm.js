@@ -121,7 +121,8 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       vendorDocRef: '',
       deliveryMethodId: null,
       ptId: null,
-      taxId: null
+      taxId: null,
+      taxDetailsButton: false
     },
     items: [
       {
@@ -263,7 +264,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
   }
 
   const onCondition = row => {
-    if (row.taxId) {
+    if (row.itemId && row.taxId) {
       return {
         imgSrc: '/images/buttonsIcons/tax-icon.png',
         hidden: false
@@ -449,21 +450,19 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     },
     {
       component: 'button',
-      name: 'taxDetails',
+      name: 'taxDetailsButton',
       props: {
         onCondition
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {

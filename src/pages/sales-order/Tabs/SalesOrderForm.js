@@ -266,8 +266,16 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   }
 
   const onCondition = row => {
-    return {
-      disabled: !row.taxId
+    if (row.itemId && row.taxId) {
+      return {
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
     }
   }
 
@@ -356,7 +364,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           mdType: 1,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
-          saTrx: true,
+          saTrx: true
         })
       }
     },
