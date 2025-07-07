@@ -49,21 +49,16 @@ const CustomNumberField = ({
 
   useEffect(() => {
     if (typeof setFieldValidation === 'function') {
-      if (_required && !value) {
-        setFieldValidation([name], ' ')
-      } else if (value) {
-        const numericValue = parseFloat(value)
-        if ((minValue && numericValue < parseFloat(minValue)) || (maxValue && numericValue > parseFloat(maxValue))) {
-          setFieldValidation([name], ' ')
-        } else {
-          setFieldValidation([name], '')
+      setFieldValidation(prev => ({
+        ...prev,
+        [name]: {
+          required: _required,
+          minValue,
+          maxValue
         }
-      } else {
-        setFieldValidation([name], '')
-        props.error = ''
-      }
+      }))
     }
-  }, [value, minValue, maxValue, props.required])
+  }, [maxValue, maxValue])
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/

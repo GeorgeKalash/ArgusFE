@@ -42,15 +42,16 @@ const CustomTextField = ({
   const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
-    if (typeof setFieldValidation === 'function')
-      if (value && ((minLength && value?.length < minLength) || (maxLength && value?.length > maxLength))) {
-        setFieldValidation([name], ' ')
-      } else if (_required && !value) {
-        setFieldValidation([name], ' ')
-      } else {
-        setFieldValidation([name], '')
-      }
-  }, [value])
+    if (typeof setFieldValidation === 'function') {
+      setFieldValidation(prev => ({
+        ...prev,
+        [name]: {
+          required: _required,
+          minLength
+        }
+      }))
+    }
+  }, [])
 
   useEffect(() => {
     if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && value?.length < 1) {

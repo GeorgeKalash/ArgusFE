@@ -108,7 +108,7 @@ const IrDefaultForm = ({ _labels, access }) => {
                 name='ir_amcLongTerm'
                 onChange={formik.handleChange}
                 setFieldValidation={setFieldValidation}
-                minValue={formik.values.ir_amcShortTerm}
+                minValue={100}
                 label={_labels.longTerm}
                 value={formik.values.ir_amcLongTerm}
                 error={formik.touched.ir_amcLongTerm && Boolean(formik.errors.ir_amcLongTerm)}

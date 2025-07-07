@@ -1,31 +1,10 @@
 import { useFormik } from 'formik'
-import { useEffect, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import * as yup from 'yup'
-import { debounce } from 'lodash'
 
 export function useForm({ documentType = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
-  const Validation = useRef({})
-
-  const formId = useRef(Math.random().toString(36).substring(2, 10)) // unique ID for this form
-
-  const debouncedValidateForm = debounce(() => {
-    formik.validateForm()
-  }, 300)
-
-  const setFieldValidation = (field, error) => {
-    if (!Validation.current[formId.current]) {
-      Validation.current[formId.current] = {}
-    }
-
-    if (error === '') {
-      delete Validation.current[formId.current][field]
-    } else {
-      Validation.current[formId.current][field] = error
-    }
-
-    debouncedValidateForm()
-  }
+  const [validation, setFieldValidation] = useState({})
 
   function explode(str) {
     const parts = str.split('.')
@@ -70,11 +49,41 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
   }
 
   const formik = useFormik({
-    Validation,
     ...formikProps,
     validate(values) {
       let maxAccessErrors = {}
 
+      const rules = validation || {}
+
+      Object.keys(rules).forEach(field => {
+        const value = values[field]
+        const rule = rules[field]
+        if (rule.required && (value === '' || value == null)) {
+          maxAccessErrors[field] = `${field} is required.`
+        } else {
+          console.log(value, field, rule.maxValue, rule.minValue)
+
+          // if (typeof value === 'string') {
+          if (value != '' && value != null && rule.minLength != null && value.length < rule.minLength) {
+            maxAccessErrors[field] = `${field} must be at least ${rule.minLength} characters`
+          }
+
+          if (value != '' && value != null && rule.maxValue != null && value > rule.maxValue) {
+            maxAccessErrors[field] = `${field} value must less than ${rule.maxValue}`
+          }
+          if (value != '' && value != null && rule.minValue != null && value < rule.minValue) {
+            maxAccessErrors[field] = `${field} value must be more than  ${rule.minValue}`
+          }
+
+          // }
+
+          // if (typeof value === 'number') {
+          //   if (rule.minLength != null && value < rule.minLength) {
+          //     maxAccessErrors[field] = `${field} must be at least ${rule.minLength}`
+          //   }
+          // }
+        }
+      })
       ;(maxAccess?.record?.controls ?? []).forEach(obj => {
         const { controlId, accessLevel } = obj
         if (accessLevel === MANDATORY)
@@ -134,18 +143,20 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
             }
           }
       })
-      const mergedValidation = Validation.current[formId.current] || {}
+
+      // const mergedValidation = Validation.current[formId.current] || {}
+      console.log(maxAccessErrors)
 
       return {
         ...maxAccessErrors,
-        ...validate(values),
-        ...mergedValidation
+        ...validate(values)
+
+        // ...mergedValidation
       }
     }
   })
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
-
   const { key, value, reference } = documentType
 
   useEffect(() => {
