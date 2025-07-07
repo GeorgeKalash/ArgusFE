@@ -28,7 +28,6 @@ function LoadingOverlay() {
     ></Box>
   )
 }
-
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props
   const { loading } = useContext(RequestsContext)
@@ -89,9 +88,11 @@ const TabsProvider = ({ children }) => {
   } = useContext(MenuContext)
 
   const [anchorEl, setAnchorEl] = useState(null)
+
   const [tabsIndex, setTabsIndex] = useState(null)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
   const { dashboardId } = JSON.parse(window.sessionStorage.getItem('userData'))
+
   const open = Boolean(anchorEl)
 
   const OpenItems = (event, i) => {
@@ -142,8 +143,11 @@ const TabsProvider = ({ children }) => {
     const isHomeTabSelected = selectedTab.route === homeTab.route
 
     const newOpenTabs = openTabs.filter((tab, index) => index === 0 || index === tabIndex)
+
     window.history.replaceState(null, '', selectedTab.route)
+
     setOpenTabs(newOpenTabs)
+
     setCurrentTabIndex(isHomeTabSelected ? 0 : newOpenTabs.length - 1)
   }
 
@@ -159,9 +163,13 @@ const TabsProvider = ({ children }) => {
 
     if (currentTabIndex === index) {
       const newValue = index === activeTabsLength - 1 ? index - 1 : index + 1
+
+      // if closing last tab
+
       if (newValue === index - 1 || router.asPath === window?.history?.state?.as) {
         setCurrentTabIndex(newValue)
       }
+
       window.history.replaceState(null, '', openTabs?.[newValue]?.route)
     } else if (index < currentTabIndex) {
       setCurrentTabIndex(currentValue => currentValue - 1)
@@ -196,9 +204,17 @@ const TabsProvider = ({ children }) => {
 
   useEffect(() => {
     if (initialLoadDone) {
-      const isTabOpen = openTabs.some(tab => tab.route === router.asPath || !window?.history?.state?.as)
+      const isTabOpen = openTabs.some((activeTab, index) => {
+        if (activeTab.route === router.asPath || !window?.history?.state?.as) {
+          return true
+        }
+
+        return false
+      })
+
       if (!isTabOpen) {
         const newValueState = openTabs.length
+
         setOpenTabs(prevState => [
           ...prevState,
           {
@@ -210,17 +226,24 @@ const TabsProvider = ({ children }) => {
               : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
           }
         ])
+
         setCurrentTabIndex(newValueState)
       } else {
-        setOpenTabs(prevState => prevState.map(tab => (tab.route === router.asPath ? { ...tab, page: children } : tab)))
+        setOpenTabs(prevState =>
+          prevState.map(tab => {
+            if (tab.route === router.asPath) {
+              return { ...tab, page: children }
+            }
+
+            return tab
+          })
+        )
       }
     }
   }, [router.asPath, window.history?.state?.as])
 
   useEffect(() => {
-    if (openTabs[currentTabIndex]?.route === reloadOpenedPage?.path + '/') {
-      reopenTab(reloadOpenedPage?.path + '/')
-    }
+    if (openTabs[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
 
     if (!initialLoadDone && router.asPath && (menu.length > 0 || dashboardId)) {
       const newTabs = [
@@ -241,7 +264,10 @@ const TabsProvider = ({ children }) => {
             ? lastOpenedPage.name
             : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
         })
-        setCurrentTabIndex(newTabs.findIndex(tab => tab.route === router.asPath))
+
+        const index = newTabs.findIndex(tab => tab.route === router.asPath)
+
+        setCurrentTabIndex(index)
       }
 
       setOpenTabs(newTabs)
@@ -283,66 +309,75 @@ const TabsProvider = ({ children }) => {
               },
               '.MuiTabs-indicator': {
                 backgroundColor: 'white'
+              },
+              '.MuiSvgIcon-root': {
+                color: 'white!important'
+              },
+              '.MuiTab-root .MuiSvgIcon-root': {
+                color: '#5A585E !important'
               }
             }}
           >
-            {openTabs.map((activeTab, i) => (
-              <Tab
-                key={activeTab?.id}
-                label={
-                  <Box display='flex' alignItems='center'>
-                    <span>{activeTab.label}</span>
-                    {activeTab.route === '/default/' && (
+            {openTabs.length > 0 &&
+              openTabs.map((activeTab, i) => (
+                <Tab
+                  key={activeTab?.id}
+                  label={
+                    <Box display='flex' alignItems='center'>
+                      <span>{activeTab.label}</span>
+                      {activeTab.route === '/default/' && (
+                        <IconButton
+                          size='small'
+                          onClick={e => {
+                            e.stopPropagation()
+                            refreshHomeTab()
+                          }}
+                          sx={{ ml: 1, p: 0.5 }}
+                        >
+                          <RefreshIcon fontSize='small' />
+                        </IconButton>
+                      )}
+                    </Box>
+                  }
+                  onContextMenu={event => OpenItems(event, i)}
+                  icon={
+                    activeTab.route === '/default/' ? null : (
                       <IconButton
                         size='small'
-                        onClick={e => {
-                          e.stopPropagation()
-                          refreshHomeTab()
+                        onClick={event => {
+                          event.stopPropagation()
+                          closeTab(activeTab.route)
                         }}
-                        sx={{ ml: 1, p: 0.5 }}
                       >
-                        <RefreshIcon fontSize='small' />
+                        <CloseIcon fontSize='small' />
                       </IconButton>
-                    )}
-                  </Box>
-                }
-                onContextMenu={event => OpenItems(event, i)}
-                icon={
-                  activeTab.route === '/default/' ? null : (
-                    <IconButton
-                      size='small'
-                      onClick={event => {
-                        event.stopPropagation()
-                        closeTab(activeTab.route)
-                      }}
-                    >
-                      <CloseIcon fontSize='small' />
-                    </IconButton>
-                  )
-                }
-                iconPosition='end'
-                sx={{
-                  minHeight: '35px !important',
-                  borderTopLeftRadius: 5,
-                  borderTopRightRadius: 5,
-                  py: '0px !important',
-                  mb: '0px !important',
-                  mr: '2px !important',
-                  pr: '0px !important',
-                  pl: '10px !important',
-                  display: activeTab.route === '/default/' && dashboardId === null ? 'none' : 'flex'
-                }}
-              />
-            ))}
+                    )
+                  }
+                  iconPosition='end'
+                  sx={{
+                    minHeight: '35px !important',
+                    borderTopLeftRadius: 5,
+                    borderTopRightRadius: 5,
+                    py: '0px !important',
+                    mb: '0px !important',
+                    borderBottom: '0px !important',
+                    mr: '2px !important',
+                    fontWeight: '1.5rem',
+                    pr: '0px !important',
+                    pl: '10px !important',
+                    display: activeTab.route === '/default/' && dashboardId === null ? 'none' : 'flex'
+                  }}
+                />
+              ))}
           </Tabs>
         </Box>
-        {openTabs.map((activeTab, i) => (
-          <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
-            {activeTab.page}
-          </CustomTabPanel>
-        ))}
+        {openTabs.length > 0 &&
+          openTabs.map((activeTab, i) => (
+            <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
+              {activeTab.page}
+            </CustomTabPanel>
+          ))}
       </Box>
-
       <Menu
         anchorEl={anchorEl}
         id='account-menu'
