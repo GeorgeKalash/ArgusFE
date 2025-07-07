@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from 'src/lib/date-helper'
 import { Button, Grid } from '@mui/material'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -33,7 +33,6 @@ import {
   DIRTYFIELD_TWPG,
   DIRTYFIELD_UNIT_PRICE,
   DIRTYFIELD_MDAMOUNT,
-  DIRTYFIELD_MDTYPE,
   DIRTYFIELD_UPO,
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_PCT,
@@ -113,6 +112,7 @@ export default function SaleTransactionForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
       recordId: recordId || null,
+      search: '',
       header: {
         dgId: functionId,
         recordId: null,
@@ -345,10 +345,7 @@ export default function SaleTransactionForm({
             ...childFormikValues
           })
         }
-      },
-      width: 500,
-      height: 500,
-      title: platformLabels.MultiCurrencyRate
+      }
     })
   }
 
@@ -763,9 +760,7 @@ export default function SaleTransactionForm({
             props: {
               taxId: row?.taxId,
               obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
+            }
           })
         }
       }
@@ -804,9 +799,7 @@ export default function SaleTransactionForm({
             functionId: functionId,
             itemId: row?.itemId,
             clientId: formik?.values?.header?.clientId
-          },
-          width: 1200,
-          title: platformLabels.SalesTransactions
+          }
         })
       }
     },
@@ -844,10 +837,7 @@ export default function SaleTransactionForm({
               maxAccess,
               checkForSiteId: true,
               updateRow
-            },
-            width: 500,
-            height: 700,
-            title: platformLabels.serials
+            }
           })
         }
       }
@@ -888,10 +878,7 @@ export default function SaleTransactionForm({
       props: {
         functionId: functionId,
         recordId: formik.values.header.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -925,10 +912,9 @@ export default function SaleTransactionForm({
             Component: NormalDialog,
             props: {
               DialogText: `${platformLabels.RecordLocked} ${name}`,
-              width: 600,
-              height: 200,
               title: platformLabels.Dialog
-            }
+            },
+            title: platformLabels.Dialog
           })
         }
       })
@@ -1037,10 +1023,7 @@ export default function SaleTransactionForm({
           props: {
             accountId: parseInt(formik.values.header.accountId),
             moduleId: 1
-          },
-          width: 1000,
-          height: 500,
-          title: labels.accountSummary
+          }
         })
       },
       disabled: !formik.values.header.clientId
@@ -1160,7 +1143,7 @@ export default function SaleTransactionForm({
         )}&_rateDivision=${RateDivision.SALES}`
       })
 
-      return res.record.exRate * 1000
+      return res.record?.exRate * 1000
     }
   }
 
@@ -1570,10 +1553,7 @@ export default function SaleTransactionForm({
         form: formik.values.header,
         checkedAddressId: formik.values?.header?.billAddressId,
         handleAddressValues: setAddressValues
-      },
-      width: 950,
-      height: 600,
-      title: labels.AddressFilter
+      }
     })
   }
 
@@ -1616,20 +1596,26 @@ export default function SaleTransactionForm({
     return res
   }
 
+  const filteredData = useMemo(() => {
+    if (formik?.values?.search) {
+      const filtered = formik.values.items.filter(
+        item =>
+          item.barcode?.toString()?.includes(formik.values.search) ||
+          item.sku?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
+          item.itemName?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
+          item.qty?.toString()?.includes(formik.values.search)
+      )
+
+      return filtered.length > 0 ? filtered : []
+    }
+
+    return formik.values.items
+  }, [formik.values.search, formik.values.items])
+
   const handleSearchChange = event => {
     const { value } = event.target
-    formik.setFieldValue('header.search', value)
+    formik.setFieldValue('search', value)
   }
-
-  const filteredData = formik.values.header.search
-    ? formik.values.items.filter(
-        item =>
-          item.barcode?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.sku?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.itemName?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase())
-      )
-    : formik.values.items
-
   async function onChangeDtId(recordId) {
     const dtd = await getDTD(recordId)
     if (dtd?.record != null) {
@@ -2052,15 +2038,13 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <CustomTextField
-                name='header.search'
-                value={formik.values.header.search}
+                name='search'
+                value={formik.values.search}
                 label={platformLabels.Search}
                 onClear={() => {
-                  formik.setFieldValue('header.search', '')
+                  formik.setFieldValue('search', '')
                 }}
                 onChange={handleSearchChange}
-                onSearch={e => formik.setFieldValue('header.search', e)}
-                search={true}
               />
             </Grid>
             <Grid item xs={3}>
@@ -2078,12 +2062,31 @@ export default function SaleTransactionForm({
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={(value, action) => {
-              formik.setFieldValue('items', value)
-              itemsUpdate.current = value
-              action === 'delete' && setReCal(true)
+            onChange={(value, action, row) => {
+              let updatedValue = value
+
+              if (formik.values.search) {
+                const updatedItems = formik.values.items.map(item => {
+                  const updated = updatedValue.find(newItem => newItem.id === item.id)
+
+                  return updated ? { ...item, ...updated } : item
+                })
+
+                formik.setFieldValue('items', updatedItems)
+                itemsUpdate.current = updatedItems
+              } else {
+                formik.setFieldValue('items', updatedValue)
+                itemsUpdate.current = updatedValue
+              }
+              if (action === 'delete') {
+                const filteredItems = formik.values.items.filter(item => item.id !== row.id)
+                updatedValue = value.filter(item => item.id !== row.id)
+
+                formik.setFieldValue('items', filteredItems)
+                setReCal(true)
+              }
             }}
-            value={filteredData || formik?.initialValues?.items[0]}
+            value={filteredData}
             error={formik.errors.items}
             initialValues={formik?.initialValues?.items[0]}
             onSelectionChange={(row, update, field) => {
@@ -2093,6 +2096,7 @@ export default function SaleTransactionForm({
             columns={columns}
             maxAccess={maxAccess}
             allowDelete={!isPosted}
+            allowAddNewLine={!formik.values.search}
             disabled={isPosted || !formik.values.header.clientId || !formik.values.header.currencyId}
           />
         </Grow>

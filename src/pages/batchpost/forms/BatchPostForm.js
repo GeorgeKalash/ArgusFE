@@ -55,10 +55,7 @@ export default function BatchPostForm({ access }) {
           props: {
             recordId: res.recordId
           },
-          width: 500,
-          height: 450,
-          closable: false,
-          title: platformLabels.Progress
+          closable: false
         })
 
         toast.success(platformLabels.Added)
@@ -71,7 +68,7 @@ export default function BatchPostForm({ access }) {
 
   const actions = [
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: () => formik.handleSubmit(),
       disabled: false

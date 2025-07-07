@@ -1,5 +1,31 @@
-import React from 'react'
+import { Box } from '@mui/material'
+import React, { useContext } from 'react'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
+import CustomButton from '../Inputs/CustomButton'
 
-export default function PreviewReport({ pdf }) {
-  return <>{pdf && <iframe src={pdf} width='100%' height='500px' title='Report Preview' />}</>
+export default function PreviewReport({ pdf, window: windowInstance }) {
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.PreviewReport, window: windowInstance })
+
+  return (
+    <>
+      <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+        <iframe title='Preview' src={pdf} width='100%' height='100%' allowFullScreen />
+        <Box position='absolute' top={12} right={130} zIndex={1}>
+          <CustomButton
+            image='popup.png'
+            color='#231F20'
+            onClick={() => {
+              window.open(pdf, '_blank')
+            }}
+          />
+        </Box>
+      </Box>
+    </>
+  )
 }
+
+PreviewReport.width = 1000
+PreviewReport.height = 500

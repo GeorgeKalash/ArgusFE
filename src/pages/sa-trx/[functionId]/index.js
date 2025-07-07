@@ -110,7 +110,7 @@ const SaTrx = () => {
       field: 'amount',
       headerName: labels.net,
       flex: 1,
-      type: 'number'
+      type: { field: 'number', decimal: 2 }
     },
     {
       field: 'spName',
@@ -245,8 +245,6 @@ const SaTrx = () => {
             Component: NormalDialog,
             props: {
               DialogText: `${platformLabels.RecordLocked} ${name}`,
-              width: 600,
-              height: 200,
               title: platformLabels.Dialog
             }
           })

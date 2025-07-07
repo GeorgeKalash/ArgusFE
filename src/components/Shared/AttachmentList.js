@@ -13,12 +13,15 @@ import GridToolbar from './GridToolbar'
 import AttachmentForm from './AttachmentForm'
 import toast from 'react-hot-toast'
 import { Box, Button } from '@mui/material'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-const AttachmentList = ({ resourceId, recordId }) => {
+const AttachmentList = ({ resourceId, recordId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const [maxSeqNo, setMaxSeqNo] = useState(0)
+
+  useSetWindow({ title: platformLabels.Attachment, window })
 
   const {
     query: { data },
@@ -131,10 +134,7 @@ const AttachmentList = ({ resourceId, recordId }) => {
         recordId,
         resourceId,
         seqNo: maxSeqNo
-      },
-      width: 800,
-      height: 500,
-      title: _labels.Attachment
+      }
     })
   }
 
@@ -170,5 +170,8 @@ const AttachmentList = ({ resourceId, recordId }) => {
     </VertLayout>
   )
 }
+
+AttachmentList.width = 1000
+AttachmentList.height = 650
 
 export default AttachmentList

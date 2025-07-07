@@ -22,7 +22,7 @@ export function WindowProvider({ children }) {
       extension: AccessControlRepository.LockedRecords.get,
       parameters: `_resourceId=${obj.resourceId}&_recordId=${obj.recordId}`
     }).then(res => {
-      if (res.record && res.record.userId != obj.userId) {
+      if (res.record && res.record.userId != userId) {
         obj.isAlreadyLocked ? obj.isAlreadyLocked(res.record.userName) : null
 
         return
@@ -87,7 +87,21 @@ export function WindowProvider({ children }) {
   }
 
   function addToStack(options) {
-    setStack(stack => [...stack, { ...options, id: uuidv4() }])
+    const { Component } = options
+
+    setStack(stack => [
+      ...stack,
+      {
+        ...options,
+        width: Component?.width || options.width,
+        height: Component?.height || options.height,
+        id: uuidv4()
+      }
+    ])
+  }
+
+  function updateWindow(id, updates) {
+    setStack(prev => prev.map(w => (w.id === id ? { ...w, ...updates } : w)))
   }
 
   return (
@@ -173,9 +187,10 @@ export function WindowProvider({ children }) {
                 {...props}
                 {...(props?.maxAccess
                   ? { maxAccess: { ...props?.maxAccess, editMode: !!props.recordId } }
-                  : { access: { ...props.access, editMode: !!props.recordId } })}
+                  : { access: { ...props?.access, editMode: !!props?.recordId } })}
                 window={{
-                  close: () => closeWindowById(id)
+                  close: () => closeWindowById(id),
+                  setTitle: newTitle => updateWindow(id, { title: title || newTitle })
                 }}
               />
             </Window>

@@ -20,7 +20,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import { useFieldBehavior } from 'src/hooks/useFieldBehaviors'
+import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 
 export default function DesignsForm({ labels, access, store, setStore }) {
   const { recordId } = store
@@ -32,9 +32,10 @@ export default function DesignsForm({ labels, access, store, setStore }) {
     endpointId: ManufacturingRepository.Design.page
   })
 
-  const { maxAccess, changeDT } = useFieldBehavior({
+  const { changeDT, maxAccess } = useRefBehavior({
     access,
-    editMode: !!recordId
+    readOnlyOnEditMode: false,
+    name: 'reference'
   })
 
   const { formik } = useForm({
@@ -81,9 +82,9 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       if (!obj.recordId) {
         formik.setFieldValue('recordId', res.recordId)
         setStore({ recordId: res.recordId })
-        invalidate()
       }
       toast.success(!obj.recordId ? platformLabels.Edited : platformLabels.Added)
+      invalidate()
     }
   })
 
@@ -95,11 +96,20 @@ export default function DesignsForm({ labels, access, store, setStore }) {
     }
   }, [])
 
-  function fetchData(recordId) {
+  async function fetchData(recordId) {
     getRequest({
       extension: ManufacturingRepository.Design.get,
       parameters: `_recordId=${recordId}`
-    }).then(res => {
+    }).then(async res => {
+      if (res?.record?.groupId) {
+        const res2 = await getRequest({
+          extension: ManufacturingRepository.DesignGroup.get,
+          parameters: `_recordId=${res?.record?.groupId}`
+        })
+
+        changeDT(res2.record)
+      }
+
       formik.setValues({
         ...res.record,
         designDate: formatDateFromApi(res?.record?.designDate)
@@ -144,6 +154,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                 <Grid item xs={12}>
                   <CustomTextField
                     name='reference'
+                    readOnly={editMode}
                     label={labels.reference}
                     value={formik.values.reference}
                     onChange={formik.handleChange}

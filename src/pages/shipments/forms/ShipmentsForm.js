@@ -277,9 +277,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       props: {
         functionId: SystemFunction.Shipment,
         recordId: formik.values.header.recordId
-      },
-      width: 950,
-      title: labels.WorkFlow
+      }
     })
   }
 

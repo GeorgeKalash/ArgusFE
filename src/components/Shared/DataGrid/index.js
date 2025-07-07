@@ -28,6 +28,7 @@ export function DataGrid({
   autoDelete,
   initialValues,
   bg,
+  searchValue,
   onValidationRequired
 }) {
   const gridApiRef = useRef(null)
@@ -69,7 +70,7 @@ export function DataGrid({
     })
   }
 
-  const process = (params, oldRow, setData) => {
+  const process = (params, oldRow, setData, disableRefocus) => {
     const column = columns.find(({ name }) => name === params.colDef.field)
 
     if (params.colDef?.disableDuplicate && checkDuplicates(params.colDef.field, params.data)) {
@@ -86,7 +87,7 @@ export function DataGrid({
 
       const isUpdatedColumn = Object.keys(changes || {}).includes(colId)
 
-      if (isUpdatedColumn) {
+      if (isUpdatedColumn && !disableRefocus) {
         params.api.stopEditing()
 
         setTimeout(() => {
@@ -196,11 +197,8 @@ export function DataGrid({
         fullScreen: false,
         onConfirm: () => deleteRow(params)
       },
-      width: 450,
-      height: 170,
       canExpand: false,
-      refresh: false,
-      title: 'Delete'
+      refresh: false
     })
   }
 
@@ -748,6 +746,7 @@ export function DataGrid({
   }
 
   const onCellEditingStopped = params => {
+    const disableRefocus = true
     const cellId = `${params.node.id}-${params.column.colId}`
     const { data, colDef } = params
     let newValue = params?.data[params.column.colId]
@@ -762,7 +761,7 @@ export function DataGrid({
       }
       setData(changes, params)
       commit(changes)
-      if (colDef.updateOn != 'blur') process(params, data, setData)
+      if (colDef.updateOn != 'blur') process(params, data, setData, disableRefocus)
     }
 
     if (lastCellStopped.current == cellId) return
@@ -774,9 +773,13 @@ export function DataGrid({
         return
       }
 
-      process(params, data, setData)
+      process(params, data, setData, disableRefocus)
     }
   }
+
+  useEffect(() => {
+    gridApiRef.current?.setQuickFilter(searchValue)
+  }, [searchValue])
 
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>

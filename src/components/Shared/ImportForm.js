@@ -12,6 +12,7 @@ import { formatDate, formatDateDefault } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const formatDateForImport = dateString => {
   const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10))
@@ -96,7 +97,7 @@ const validateMandatoryFields = (rows, columns, stackError) => {
   return true
 }
 
-const getImportData = (gridData, columns) => {
+const getImportData = (gridData, columns, stackError) => {
   const mandatoryColumns = columns.filter(col => col.mandatory)
 
   const missingFields = gridData.list.flatMap(row =>
@@ -135,6 +136,8 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
   const [parsedFileContent, setParsedFileContent] = useState({ count: 0, list: [] })
   const [file, setFile] = useState(null)
   const imageInputRef = useRef(null)
+
+  useSetWindow({ title: platformLabels.import, window })
 
   useEffect(() => {
     if (resourceId) {
@@ -186,7 +189,7 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
 
   const handleSubmit = async () => {
     const isValid = validateMandatoryFields(parsedFileContent.list, columns, stackError)
-    const convertedData = getImportData(parsedFileContent, columns)
+    const convertedData = getImportData(parsedFileContent, columns, stackError)
     const payload = { [objectName]: convertedData }
 
     if (!isValid) return
@@ -284,5 +287,8 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
     </VertLayout>
   )
 }
+
+ImportForm.width = 1000
+ImportForm.height = 600
 
 export default ImportForm
