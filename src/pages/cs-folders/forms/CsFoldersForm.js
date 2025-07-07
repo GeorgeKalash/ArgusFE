@@ -42,10 +42,6 @@ export default function CsFoldersForm({ labels, maxAccess, recordId }) {
         formik.setFieldValue('recordId', response.recordId)
       }
       invalidate()
-      formik.setValues({
-        recordId: null,
-        name: '' //
-      })
       formik.setTouched({}, false)
     }
   })
