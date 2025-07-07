@@ -101,7 +101,7 @@ const getChartOptions = (label, type) => {
   }
 }
 
-export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio = 3 }) => {
+export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio = 3, rotation, hasLegend }) => {
   useEffect(() => {
     const ctx = document.getElementById(id).getContext('2d')
 
@@ -111,13 +111,13 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
         labels,
         datasets: [
           {
-            label: label1,
+            label: label1 || null,
             data: data1,
             backgroundColor: 'rgb(88, 2, 1)',
             hoverBackgroundColor: 'rgb(113, 27, 26)'
           },
           {
-            label: label2,
+            label: label2 || null,
             data: data2,
             backgroundColor: 'rgb(5, 28, 104)',
             hoverBackgroundColor: 'rgb(33, 58, 141)'
@@ -166,21 +166,24 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
               return barHeight >= 120 ? '#fff' : '#000'
             },
             offset: 0,
-            rotation: 0,
+            rotation: rotation || 0,
             font: {
               size: 14
             },
             formatter: (value, context) => {
-              const dataset = context.dataset
-              const label = dataset.label || ''
-
+              const datasetIndex = context.datasetIndex
+              const label = datasetIndex === 0 ? label1 : label2
               const roundedValue = Math.ceil(value)
 
-              return `${label}:\n${roundedValue.toLocaleString()}`
+              if (hasLegend) {
+                return `${roundedValue.toLocaleString()}`
+              }
+
+              return `${label ? label + ':\n' : ''}${roundedValue.toLocaleString()}`
             }
           },
           legend: {
-            display: false
+            display: hasLegend || false
           }
         },
 
@@ -206,7 +209,7 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
     return () => {
       chart.destroy()
     }
-  }, [id, labels, data1, data2, label1, label2])
+  }, [id, labels, data1, data2, label1, label2, rotation])
 
   return <canvas id={id} style={{ width: '100%', height: '300px', position: 'relative' }}></canvas>
 }
