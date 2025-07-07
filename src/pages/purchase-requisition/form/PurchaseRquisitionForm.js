@@ -2,7 +2,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
 import Table from 'src/components/Shared/Table'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -97,8 +97,95 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip == 2
+  const isCancelled = formik.values.status == -1
 
-  const actions = []
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.PurchaseRequisition,
+        recordId: formik.values.recordId
+      }
+    })
+  }
+
+  async function onClose() {
+    const res = await postRequest({
+      extension: PurchaseRepository.PurchaseRequisition.close,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(platformLabels.Closed)
+    invalidate()
+    refetchForm(res?.recordId)
+  }
+
+  async function onReopen() {
+    const res = await postRequest({
+      extension: PurchaseRepository.PurchaseRequisition.reopen,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(platformLabels.Reopened)
+    invalidate()
+    refetchForm(res?.recordId)
+  }
+
+  async function onCancel() {
+    const res = await postRequest({
+      extension: PurchaseRepository.PurchaseRequisition.cancel,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(platformLabels.Cancelled)
+    invalidate()
+    refetchForm(res?.recordId)
+  }
+
+  const actions = [
+    {
+      key: 'Attachment',
+      condition: true,
+      onClick: 'onClickAttachment',
+      disabled: !editMode
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
+    },
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode || isCancelled
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || isCancelled
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
+    {
+      key: 'Cancel',
+      condition: true,
+      onClick: onCancel,
+      disabled: !editMode || isCancelled
+    }
+  ]
 
   const columns = [
     {
@@ -179,6 +266,8 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
   }
 
   async function getRequisitionData(recordId) {
+    if (!recordId) return
+
     const requisitionData = await getRequest({
       extension: PurchaseRepository.PurchaseRequisition.get,
       parameters: `_recordId=${recordId}`
@@ -188,6 +277,8 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
   }
 
   async function getItemDetails(recordId) {
+    if (!recordId) return
+
     const itemDetails = await getRequest({
       extension: PurchaseRepository.RequisitionDetail.qry,
       parameters: `_trxId=${recordId}`
@@ -227,7 +318,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
         recordId,
         labels,
         maxAccess,
-        isClosed,
+        readOnlyField: isClosed || isCancelled,
         maxSeqNo,
         seqNo: obj?.seqNo,
         refetchTable: refetchForm
@@ -261,6 +352,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
   return (
     <FormShell
       resourceId={ResourceIds.PurchaseRequisition}
+      functionId={SystemFunction.PurchaseRequisition}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -283,7 +375,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     values={formik.values}
@@ -301,7 +393,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                     label={labels.reference}
                     value={formik?.values?.reference}
                     maxAccess={!editMode && maxAccess}
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -311,7 +403,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                   <CustomDatePicker
                     name='date'
                     label={labels.date}
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     value={formik?.values?.date}
                     onChange={formik.setFieldValue}
                     required
@@ -325,7 +417,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                     datasetId={DataSets.PROCUREMENT_TYPE}
                     name='procurementType'
                     label={labels.procurementType}
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     values={formik.values}
                     valueField='key'
                     displayField='value'
@@ -345,7 +437,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                     name='vendorId'
                     label={labels.vendor}
                     form={formik}
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     displayFieldWidth={3}
                     valueShow='vendorRef'
                     secondValueShow='vendorName'
@@ -368,7 +460,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                     endpointId={companyStructureRepository.DepartmentFilters.qry}
                     parameters={`_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`}
                     name='departmentId'
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     label={labels.department}
                     values={formik.values}
                     columnsInDropDown={[
@@ -389,6 +481,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                     style={{ border: '1px solid #4eb558' }}
                     color={'transparent'}
                     image={'add.png'}
+                    disabled={!editMode || isClosed}
                   />
                 </Grid>
               </Grid>
@@ -399,7 +492,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     label={labels.site}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -419,7 +512,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                   <CustomDatePicker
                     name='deliveryDate'
                     label={labels.deliveryDate}
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     value={formik?.values?.deliveryDate}
                     onChange={formik.setFieldValue}
                     maxAccess={maxAccess}
@@ -432,7 +525,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                     endpointId={SystemRepository.Plant.qry}
                     name='plantId'
                     label={labels.plant}
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -453,7 +546,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
                     label={labels.notes}
                     value={formik?.values?.notes}
                     rows={2.5}
-                    readOnly={isClosed}
+                    readOnly={isClosed || isCancelled}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('notes', '')}
@@ -471,7 +564,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
             gridData={formik.values.items}
             rowId={['recordId']}
             onEdit={openPurchaseDetails}
-            onDelete={delPurchaseDetails}
+            onDelete={isClosed || isCancelled ? undefined : delPurchaseDetails}
             maxAccess={maxAccess}
             pagination={false}
           />

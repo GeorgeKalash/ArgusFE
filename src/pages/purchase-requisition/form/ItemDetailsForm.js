@@ -26,7 +26,7 @@ export default function ItemDetailsForm({
   seqNo,
   labels,
   maxAccess,
-  isClosed,
+  readOnlyField,
   refetchTable,
   window
 }) {
@@ -49,7 +49,7 @@ export default function ItemDetailsForm({
       baseQty: null,
       deliveryDate: new Date(),
       status: 1,
-      onHand: null,
+      onhand: null,
       lastPurchaseDate: null,
       lastPurchaseCurrencyId: null,
       lastPurchaseUnitPrice: null,
@@ -82,7 +82,7 @@ export default function ItemDetailsForm({
 
   async function getAvailability(itemId) {
     if (!itemId) {
-      formik.setFieldValue('onHand', 0)
+      formik.setFieldValue('onhand', 0)
 
       return
     }
@@ -91,7 +91,7 @@ export default function ItemDetailsForm({
       extension: InventoryRepository.Availability.get,
       parameters: `_itemId=${itemId}&_seqNo=0`
     })
-    formik.setFieldValue('onHand', res?.record?.onHand || 0)
+    formik.setFieldValue('onhand', res?.record?.onhand || 0)
   }
   async function getlastIVI(itemId) {
     if (!itemId) {
@@ -151,7 +151,7 @@ export default function ItemDetailsForm({
       editMode={true}
       isInfo={false}
       isCleared={false}
-      disabledSubmit={isClosed}
+      disabledSubmit={readOnlyField}
     >
       <VertLayout>
         <Fixed>
@@ -166,7 +166,7 @@ export default function ItemDetailsForm({
                     name='itemId'
                     label={labels.item}
                     form={formik}
-                    readOnly={isClosed}
+                    readOnly={readOnlyField}
                     displayFieldWidth={3}
                     valueShow='sku'
                     secondValueShow='itemName'
@@ -205,7 +205,7 @@ export default function ItemDetailsForm({
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
                     name='siteId'
-                    readOnly={isClosed}
+                    readOnly={readOnlyField}
                     label={labels.site}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -226,7 +226,7 @@ export default function ItemDetailsForm({
                     endpointId={formik.values.msId && InventoryRepository.MeasurementUnit.qry}
                     parameters={`_msId=${formik.values.msId}`}
                     name='muId'
-                    readOnly={editMode}
+                    readOnly={editMode || readOnlyField}
                     label={labels.measurement}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -250,10 +250,10 @@ export default function ItemDetailsForm({
                     onChange={e => {
                       let qty = Number(e.target.value.replace(/,/g, ''))
                       formik.setFieldValue('qty', qty)
-                      formik.setFieldValue('totalCost', qty || 0 * formik.values.unitCost || 0)
+                      formik.setFieldValue('totalCost', (qty || 0) * (formik.values.unitCost || 0))
                     }}
                     onClear={() => formik.setFieldValue('qty', '')}
-                    readOnly={isClosed}
+                    readOnly={readOnlyField}
                     required
                     error={formik.touched.qty && Boolean(formik.errors.qty)}
                   />
@@ -282,13 +282,13 @@ export default function ItemDetailsForm({
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='onHand'
+                    name='onhand'
                     label={labels.onHand}
-                    value={formik.values.onHand}
+                    value={formik.values.onhand}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('onHand', '')}
+                    onClear={() => formik.setFieldValue('onhand', '')}
                     readOnly
-                    error={formik.touched.onHand && Boolean(formik.errors.onHand)}
+                    error={formik.touched.onhand && Boolean(formik.errors.onhand)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -299,7 +299,7 @@ export default function ItemDetailsForm({
                     name='vendorId'
                     label={labels.vendor}
                     form={formik}
-                    readOnly={isClosed}
+                    readOnly={readOnlyField}
                     displayFieldWidth={3}
                     valueShow='vendorRef'
                     secondValueShow='vendorName'
@@ -325,7 +325,7 @@ export default function ItemDetailsForm({
                   <CustomDatePicker
                     name='deliveryDate'
                     label={labels.deliveryDate}
-                    readOnly={isClosed}
+                    readOnly={readOnlyField}
                     value={formik?.values?.deliveryDate}
                     onChange={formik.setFieldValue}
                     maxAccess={maxAccess}
@@ -378,7 +378,7 @@ export default function ItemDetailsForm({
                     label={labels.justification}
                     value={formik?.values?.justification}
                     rows={2.5}
-                    readOnly={isClosed}
+                    readOnly={readOnlyField}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('justification', '')}

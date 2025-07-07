@@ -124,7 +124,10 @@ export const PurchaseRepository = {
     page: service + 'pageREQ',
     get: service + 'getREQ',
     set: service + 'setREQ',
-    del: service + 'delREQ'
+    del: service + 'delREQ',
+    cancel: service + 'cancelREQ',
+    reopen: service + 'reopenREQ',
+    close: service + 'closeREQ'
   },
   RequisitionDetail: {
     qry: service + 'qryREI',
