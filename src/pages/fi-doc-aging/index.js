@@ -240,8 +240,7 @@ const DocumentAging = () => {
       props: {
         _labels,
         access: maxAccess,
-        values: formik.values,
-        readOnly: true
+        values: formik.values
       },
       width: 450,
       height: 160,

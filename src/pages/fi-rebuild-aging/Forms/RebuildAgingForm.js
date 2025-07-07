@@ -15,7 +15,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useWindow } from 'src/windows'
 import { ThreadProgress } from 'src/components/Shared/ThreadProgress'
 
-export default function RebuildAgingForm({ _labels, access, values, readOnly }) {
+export default function RebuildAgingForm({ _labels, access, values }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -114,7 +114,7 @@ export default function RebuildAgingForm({ _labels, access, values, readOnly }) 
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                 }}
-                readOnly={readOnly}
+                readOnly={values?.accountId}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={access}
               />
