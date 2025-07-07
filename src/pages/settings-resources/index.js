@@ -168,12 +168,12 @@ const GlobalAuthorization = () => {
           {
             field: 'value',
             headerName: labels.resourceName,
-            flex: 3
+            flex: 4
           },
           {
             field: 'Report Layout',
             headerName: labels.reportLayout,
-            width: 1,
+            flex: 1,
 
             cellRenderer: row => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
@@ -186,7 +186,7 @@ const GlobalAuthorization = () => {
           {
             field: 'Custom Layout',
             headerName: labels.customLayout,
-            width: 1,
+            flex: 1,
             cellRenderer: row => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
                 <IconButton size='small' onClick={() => openCustomLayout(row)}>
@@ -198,7 +198,7 @@ const GlobalAuthorization = () => {
           {
             field: 'Custom Rules',
             headerName: labels.customRules,
-            width: 1,
+            flex: 1,
             cellRenderer: row => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
                 <IconButton size='small' onClick={() => openCustomRules(row)}>
@@ -210,8 +210,7 @@ const GlobalAuthorization = () => {
           {
             field: 'Security Groups',
             headerName: labels.securityGroup,
-            width: 1,
-
+            flex: 1,
             cellRenderer: row => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
                 <IconButton size='small' onClick={() => openSecurityGroupsForm(row)}>
