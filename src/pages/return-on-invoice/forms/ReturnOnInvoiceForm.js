@@ -539,6 +539,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       props: {
         decimalScale: 5
       },
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
       }
@@ -550,6 +551,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       props: {
         decimalScale: 5
       },
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
       }
