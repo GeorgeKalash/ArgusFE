@@ -263,7 +263,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
   }
 
   const onCondition = row => {
-    if (row.taxId) {
+    if (row.itemId && row.taxId) {
       return {
         imgSrc: '/images/buttonsIcons/tax-icon.png',
         hidden: false
@@ -424,19 +424,22 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       component: 'button',
       name: 'costHistory',
       props: {
-        imgSrc: '/images/buttonsIcons/popup-black.png'
+        imgSrc: '/images/buttonsIcons/popup-black.png',
+        onCondition: row => {
+          return {
+            disabled: !row.itemId
+          }
+        }
       },
       label: labels.costHistory,
       onClick: (e, row) => {
-        if (row?.itemId) {
-          stack({
-            Component: ItemCostHistory,
-            props: {
-              itemId: row?.itemId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: ItemCostHistory,
+          props: {
+            itemId: row?.itemId,
+            obj: row
+          }
+        })
       }
     },
     {
@@ -449,21 +452,19 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     },
     {
       component: 'button',
-      name: 'taxDetails',
+      name: 'taxDetailsButton',
       props: {
         onCondition
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
