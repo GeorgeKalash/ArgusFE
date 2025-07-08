@@ -40,6 +40,7 @@ export const SystemChecks = {
   POS_JUMP_TO_NEXT_LINE: Module.PointOfSale * 100 + 1,
   SINGLE_CASH_POS: Module.PointOfSale * 100 + 2,
   POS_SKU_DISABLE_LOOKUP: Module.PointOfSale * 100 + 3,
+  AUTO_POST_POS_ACTIVITY_ON_SAVE: Module.PointOfSale * 100 + 5,
   ENABLE_RETAIL_SCALE_BARCODE: Module.PointOfSale * 100 + 6,
 
   CT_YAKEEN_INFORMATION: Module.CurrencyTrading * 100 + 5,

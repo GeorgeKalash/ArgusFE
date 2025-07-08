@@ -118,6 +118,7 @@ const AvailabilitiesBySite = () => {
       flex: 1
     },
     {
+      field: 'S/L',
       flex: 1,
       headerName: 'S/L',
       cellRenderer: row => {

@@ -237,6 +237,26 @@ const DashboardLayout = () => {
             </ChartCard>
           </TopRow>
         )}
+        {containsApplet(ResourceIds.SalesTeamOrdersSummary) && (
+          <TopRow>
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.salesTeamOrdersSummary}</Title>
+              </SummaryCard>
+              <MixedBarChart
+                id='salesTeamOrdersSummaries'
+                labels={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.spRef) || []}
+                data1={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.amount) || []}
+                data2={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.orderCount) || []}
+                ratio={5}
+                label1={labels.amount}
+                label2={labels.orderCount}
+                hasLegend={true}
+                rotation={-90}
+              />
+            </ChartCard>
+          </TopRow>
+        )}
         <MiddleRow>
           {containsApplet(ResourceIds.MyYearlyUnitsSoldList) && (
             <ChartCard>
@@ -519,21 +539,6 @@ const DashboardLayout = () => {
                 data={data?.dashboard?.topCustomers?.map(c => c.amount) || []}
                 label={labels.revenue}
                 color='#d5b552'
-                hoverColor='#818181'
-              />
-            </ChartCard>
-          )}
-          {containsApplet(ResourceIds.SalesTeamOrdersSummary) && (
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.salesTeamOrdersSummary}</Title>
-              </SummaryCard>
-              <HorizontalBarChartDark
-                id='salesTeamOrdersSummaries'
-                labels={data?.dashboard?.salesTeamOrdersSummaries?.map(c => c.spName) || []}
-                data={data?.dashboard?.salesTeamOrdersSummaries?.map(c => c.amount) || []}
-                label={labels.amount}
-                color='#73aa2e'
                 hoverColor='#818181'
               />
             </ChartCard>
