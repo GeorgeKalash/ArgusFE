@@ -26,11 +26,27 @@ const DocumentAging = () => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const fullRowDataRef = useRef([])
-  const [rowData, setRowData] = useState([])
+  const fullRowDataRef = useRef([
+    { reference: 'DN-00002', level: 0, isExpanded: false, hasChildren: true },
+    { reference: 'SI-00012', level: 0, isExpanded: false, hasChildren: true },
+    { reference: 'CN-00001', level: 1, parent: 'SI-00012' },
+    { reference: 'RV-0094', level: 1, parent: 'SI-00012' },
+    { reference: 'CN-0081', level: 1, parent: 'SI-00012' },
+    { reference: 'CN-00001', level: 1, parent: 'DN-00002' },
+    { reference: 'RV-0094', level: 1, parent: 'DN-00002' },
+    { reference: 'CN-0081', level: 1, parent: 'DN-00002' }
+  ])
+
+  const [rowData, setRowData] = useState(() =>
+    fullRowDataRef.current.flatMap(row =>
+      row.level === 0
+        ? [row, ...(row.isExpanded ? fullRowDataRef.current.filter(c => c.parent === row.reference) : [])]
+        : []
+    )
+  )
+
   const { stack } = useWindow()
-  const amountAppliedRef = useRef(0)
-  const [isPreview, setIsPreview] = useState(false)
+  const amountAppliedRef = useRef()
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.DocumentsAging
@@ -71,12 +87,12 @@ const DocumentAging = () => {
 
         return {
           age: leg.caption,
-          balance: matchedAmount?.amount || 0
+          balance: Math.floor(Math.abs(matchedAmount?.amount || 0))
         }
       })
 
       const totalBalance = agingList.reduce((sum, row) => sum + row.balance, 0)
-      
+
       formik.setFieldValue('aging', agingList)
       formik.setFieldValue('balance', totalBalance)
 
@@ -107,7 +123,6 @@ const DocumentAging = () => {
         let totalApplied = 0
 
         const parentRows = (res2?.list || []).map(parent => {
-
           const parentId = `${parent.functionId}|${parent.recordId}`
           const hasChildren = mappings.some(m => m.toId === parentId)
 
@@ -118,18 +133,17 @@ const DocumentAging = () => {
             reference: parent.reference,
             days: calculateDays(parent.date),
             level: 0,
-            isExpanded: hasChildren
+            isExpanded: hasChildren,
+            hasChildren
           }
         })
 
         const allRows = parentRows.flatMap(parent => {
-
           const parentId = `${parent.functionId}|${parent.recordId}`
-          
+
           const childRows = mappings
             .filter(m => m.toId === parentId)
             .map(map => {
-
               const child = childrenList.find(c => `${c.functionId}|${c.recordId}` === map.fromId)
 
               if (!child) {
@@ -158,7 +172,6 @@ const DocumentAging = () => {
         fullRowDataRef.current = allRows
 
         const visibleRows = allRows.flatMap(row =>
-
           row.level === 0 ? [row, ...(row.isExpanded ? allRows.filter(c => c.parent === row.reference) : [])] : []
         )
 
@@ -186,13 +199,45 @@ const DocumentAging = () => {
     const { data, value } = props
     const indent = data.level * 20
     const isParent = data.level === 0
+
+    // const arrow = isParent && data.hasChildren ? (data.isExpanded ? '▼' : '▶') : ''
+    // cursor: isParent && data.hasChildren ? 'pointer' : 'default'
+
     const arrow = isParent ? (data.isExpanded ? '▼' : '▶') : ''
 
     return (
-      <div style={{ paddingLeft: indent, cursor: isParent ? 'pointer' : 'default' }}>
+      <div
+        style={{ paddingLeft: indent, cursor: isParent ? 'pointer' : 'default' }}
+        onClick={() => handleRowClick(data)}
+      >
         {arrow} {value}
       </div>
     )
+  }
+
+  const handleRowClick = data => {
+    const clickedRef = data?.reference
+
+    fullRowDataRef.current = fullRowDataRef.current.map(row => {
+      if (row.reference === clickedRef && row.level === 0) {
+        return { ...row, isExpanded: !row.isExpanded }
+      }
+
+      return row
+    })
+
+    const updatedVisibleRows = []
+    for (const row of fullRowDataRef.current) {
+      if (row.level === 0) {
+        updatedVisibleRows.push(row)
+        if (row.isExpanded) {
+          const children = fullRowDataRef.current.filter(child => child.parent === row.reference)
+          updatedVisibleRows.push(...children)
+        }
+      }
+    }
+
+    setRowData(updatedVisibleRows)
   }
 
   const columnsAgingTree = [
@@ -249,12 +294,12 @@ const DocumentAging = () => {
   }
 
   const totalAmount = formik.values?.agingTree?.reduce((amount, row) => {
-    const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
+    const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || null
 
     return amount + amountValue
-  }, 0)
+  }, null)
 
-  const balance = totalAmount - amountAppliedRef.current || 0
+  const balance = totalAmount - amountAppliedRef.current || null
 
   return (
     <VertLayout>
@@ -271,7 +316,7 @@ const DocumentAging = () => {
               secondValueShow='accountName'
               form={formik}
               required
-              readOnly={isPreview}
+              readOnly={formik.values.aging.length > 0 || formik.values.agingTree.length > 0}
               maxAccess={access}
               columnsInDropDown={[
                 { key: 'reference', value: 'Reference' },
@@ -293,7 +338,7 @@ const DocumentAging = () => {
               label={labels.profile}
               values={formik.values}
               valueField='recordId'
-              readOnly={isPreview}
+              readOnly={formik.values.aging.length > 0 || formik.values.agingTree.length > 0}
               displayField={'name'}
               maxAccess={access}
               required
@@ -321,14 +366,9 @@ const DocumentAging = () => {
               endpointId={SystemRepository.Currency.qry}
               name='currencyId'
               label={labels.currency}
-              readOnly={isPreview}
+              readOnly={formik.values.aging.length > 0 || formik.values.agingTree.length > 0}
               valueField='recordId'
-              displayField={['reference', 'name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' },
-                { key: 'flName', value: 'FL Name' }
-              ]}
+              displayField={'name'}
               values={formik.values}
               required
               maxAccess={access}
@@ -347,10 +387,9 @@ const DocumentAging = () => {
               readOnly
             />
           </Grid>
-          <Grid item xs={.5}>
+          <Grid item xs={0.5}>
             <CustomButton
               onClick={() => {
-                setIsPreview(true)
                 formik.handleSubmit()
               }}
               tooltipText={platformLabels.Preview}
@@ -358,14 +397,19 @@ const DocumentAging = () => {
               color='#231f20'
             />
           </Grid>
-          <Grid item xs={.5}>
+          <Grid item xs={0.5}>
             <CustomButton
-              onClick={() => {
-                setIsPreview(false)
+              onClick={async () => {
                 formik.resetForm()
                 setRowData([])
-                amountAppliedRef.current = 0
+                amountAppliedRef.current = null
                 formik.setFieldValue('balance', null)
+                await formik.validateForm()
+                formik.setTouched({
+                  accountId: true,
+                  profileId: true,
+                  currencyId: true
+                })
               }}
               label={platformLabels.Clear}
               tooltipText={platformLabels.Clear}
@@ -373,7 +417,7 @@ const DocumentAging = () => {
               color='#f44336'
             />
           </Grid>
-          <Grid item xs={.5}>
+          <Grid item xs={0.5}>
             <CustomButton
               onClick={confirmationRebuild}
               label={platformLabels.RebuildButton}

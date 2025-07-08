@@ -28,7 +28,6 @@ export default function RebuildAgingForm({ _labels, access, values }) {
       accountName: values?.accountName || '',
       recordId: 'N/A'
     },
-    enableReinitialize: true,
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
