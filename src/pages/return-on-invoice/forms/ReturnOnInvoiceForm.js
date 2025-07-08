@@ -157,7 +157,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         returnedQty: 0,
         trackBy: null,
         isEditMode: false,
-        taxDetailsButton: false,
         serials: []
       }
     ]
