@@ -533,7 +533,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       name: 'taxDetailsButton',
       flex: 0.75,
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png',
         onCondition
       },
       label: labels.tax,

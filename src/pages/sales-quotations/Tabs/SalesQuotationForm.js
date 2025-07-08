@@ -459,7 +459,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png',
         onCondition
       },
       label: labels.tax,

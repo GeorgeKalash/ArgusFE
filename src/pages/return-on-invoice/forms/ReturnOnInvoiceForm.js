@@ -588,7 +588,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png',
         onCondition: taxCondition
       },
       label: labels.tax,

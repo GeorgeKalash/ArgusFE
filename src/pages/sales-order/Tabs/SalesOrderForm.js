@@ -496,7 +496,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png',
         onCondition
       },
       label: labels.tax,
