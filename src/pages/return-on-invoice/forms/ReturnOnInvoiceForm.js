@@ -966,7 +966,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
       qty: parseFloat(newRow?.returnNowQty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
-      mdAmount: parseFloat(newRow?.mdAmount),
+      mdAmount: parseFloat(newRow?.mdAmount) || 0,
       mdType: newRow?.mdType,
       baseLaborPrice: parseFloat(newRow.baseLaborPrice || 0),
       totalWeightPerG: 0,
