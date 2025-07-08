@@ -62,12 +62,13 @@ export default function RetailTransactionsForm({
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, systemChecks } = useContext(ControlContext)
   const [address, setAddress] = useState({})
   const [reCal, setReCal] = useState(false)
   const [cashGridData, setCashGridData] = useState({ cashAccounts: [], creditCards: [], creditCardFees: [] })
   const [addressModified, setAddressModified] = useState(false)
   const filteredCreditCard = useRef([])
+  const autoPostAfterSavePos = systemChecks.some(check => check.checkId === SystemChecks.AUTO_POST_POS_ACTIVITY_ON_SAVE)
 
   const getEndpoint = {
     [SystemFunction.RetailInvoice]: PointofSaleRepository.RetailInvoice.set2,
@@ -267,8 +268,9 @@ export default function RetailTransactionsForm({
       const retailRes = await setRetail(getEndpoint[functionId], payload)
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
       toast.success(actionMessage)
-      await refetchForm(retailRes?.recordId)
+      const retailPack = await refetchForm(retailRes?.recordId)
       invalidate()
+      if (autoPostAfterSavePos) await onPost(retailPack?.header)
     }
   })
   async function setRetail(endPoint, payload) {
@@ -404,10 +406,10 @@ export default function RetailTransactionsForm({
     updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
-  const onPost = async () => {
+  const onPost = async header => {
     await postRequest({
       extension: PointofSaleRepository.RetailInvoice.post,
-      record: JSON.stringify(formik.values.header)
+      record: JSON.stringify(header)
     })
 
     toast.success(platformLabels.Posted)
@@ -463,7 +465,9 @@ export default function RetailTransactionsForm({
     {
       key: 'Unlocked',
       condition: !isPosted,
-      onClick: onPost,
+      onClick: () => {
+        onPost(formik.values.header)
+      },
       disabled: !editMode
     }
   ]
@@ -898,6 +902,8 @@ export default function RetailTransactionsForm({
   async function refetchForm(recordId) {
     const retailTrxPack = await getRetailTransactionPack(recordId)
     await fillForm(retailTrxPack)
+
+    return retailTrxPack
   }
 
   async function setMetalPriceOperations() {
@@ -1084,8 +1090,6 @@ export default function RetailTransactionsForm({
       await fillCashObjects()
     })()
   }, [])
-
-  console.log(formik)
 
   return (
     <FormShell
