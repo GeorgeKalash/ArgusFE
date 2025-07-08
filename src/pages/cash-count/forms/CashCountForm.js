@@ -375,12 +375,6 @@ const CashCountForm = ({ recordId, window }) => {
     }
   }
 
-  const onCondition = row => {
-    return {
-      disabled: !row?.currencyId
-    }
-  }
-
   return (
     <FormShell
       actions={actions}
@@ -575,7 +569,11 @@ const CashCountForm = ({ recordId, window }) => {
                 name: 'enabled',
                 label: labels.currencyNotes,
                 props: {
-                  onCondition
+                  onCondition: row => {
+                    return {
+                      disabled: !row?.currencyId
+                    }
+                  }
                 },
                 onClick: (e, row, update, updateRow) => {
                   stack({

@@ -649,20 +649,6 @@ export default function RetailTransactionsForm({
     return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
-  const onCondition = row => {
-    if (row.itemId && row.taxId) {
-      return {
-        imgSrc: '/images/buttonsIcons/tax-icon.png',
-        hidden: false
-      }
-    } else {
-      return {
-        imgSrc: '',
-        hidden: true
-      }
-    }
-  }
-
   const columns = [
     {
       component: 'textfield',
@@ -787,7 +773,19 @@ export default function RetailTransactionsForm({
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        onCondition
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {

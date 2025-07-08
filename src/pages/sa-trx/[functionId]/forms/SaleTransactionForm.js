@@ -502,30 +502,10 @@ export default function SaleTransactionForm({
     }
   }
 
-  const taxCondition = row => {
-    if (row.itemId && row.taxId) {
-      return {
-        imgSrc: '/images/buttonsIcons/tax-icon.png',
-        hidden: false
-      }
-    } else {
-      return {
-        imgSrc: '',
-        hidden: true
-      }
-    }
-  }
-
   const iconKey = ({ value, data }) => {
     const mdType = value?.mdType || data?.mdType
 
     return mdType === MDTYPE_PCT ? '%' : '123'
-  }
-
-  const saTrxCondition = row => {
-    return {
-      disabled: !row.itemId
-    }
   }
 
   const columns = [
@@ -768,7 +748,19 @@ export default function SaleTransactionForm({
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        onCondition: taxCondition
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {
@@ -805,7 +797,11 @@ export default function SaleTransactionForm({
       name: 'saTrx',
       props: {
         imgSrc: '/images/buttonsIcons/popup-black.png',
-        onCondition: saTrxCondition
+        onCondition: row => {
+          return {
+            disabled: !row.itemId
+          }
+        }
       },
       label: labels.salesTrx,
       onClick: (e, row, update, newRow) => {

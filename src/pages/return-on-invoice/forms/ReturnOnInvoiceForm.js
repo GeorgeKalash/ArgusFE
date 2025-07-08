@@ -269,20 +269,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     }
   }
 
-  const taxCondition = row => {
-    if (row.itemId && row.taxId) {
-      return {
-        imgSrc: '/images/buttonsIcons/tax-icon.png',
-        hidden: false
-      }
-    } else {
-      return {
-        imgSrc: '',
-        hidden: true
-      }
-    }
-  }
-
   const columns = [
     !formik.values.invoiceId && {
       component: 'resourcecombobox',
@@ -588,7 +574,19 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        onCondition: taxCondition
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {

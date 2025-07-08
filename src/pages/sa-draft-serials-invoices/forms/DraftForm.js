@@ -357,20 +357,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     }
   }
 
-  const onCondition = row => {
-    if (row.itemId && row.taxId) {
-      return {
-        imgSrc: '/images/buttonsIcons/tax-icon.png',
-        hidden: false
-      }
-    } else {
-      return {
-        imgSrc: '',
-        hidden: true
-      }
-    }
-  }
-
   const serialsColumns = [
     {
       component: 'textfield',
@@ -504,7 +490,19 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       name: 'taxDetailsButton',
       flex: 0.75,
       props: {
-        onCondition
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {

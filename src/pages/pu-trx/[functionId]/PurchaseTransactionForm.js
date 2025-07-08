@@ -337,20 +337,6 @@ export default function PurchaseTransactionForm({
     filteredMeasurements.current = arrayMU
   }
 
-  const taxCondition = row => {
-    if (row.itemId && row.taxId) {
-      return {
-        imgSrc: '/images/buttonsIcons/tax-icon.png',
-        hidden: false
-      }
-    } else {
-      return {
-        imgSrc: '',
-        hidden: true
-      }
-    }
-  }
-
   const columns = [
     {
       component: 'resourcecombobox',
@@ -588,7 +574,19 @@ export default function PurchaseTransactionForm({
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        onCondition: taxCondition
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {

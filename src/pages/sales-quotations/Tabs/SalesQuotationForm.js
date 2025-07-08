@@ -240,26 +240,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
-  const onCondition = row => {
-    if (row.itemId && row.taxId) {
-      return {
-        imgSrc: '/images/buttonsIcons/tax-icon.png',
-        hidden: false
-      }
-    } else {
-      return {
-        imgSrc: '',
-        hidden: true
-      }
-    }
-  }
-
-  const saTrxCondition = row => {
-    return {
-      disabled: !row.itemId
-    }
-  }
-
   const columns = [
     {
       component: 'resourcelookup',
@@ -459,7 +439,19 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        onCondition
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {
@@ -494,7 +486,11 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       name: 'saTrx',
       label: labels.salesTrx,
       props: {
-        onCondition: saTrxCondition
+        onCondition: row => {
+          return {
+            disabled: !row.itemId
+          }
+        }
       },
       onClick: (e, row, update, newRow) => {
         stack({
