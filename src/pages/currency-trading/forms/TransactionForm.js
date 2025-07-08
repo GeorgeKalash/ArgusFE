@@ -755,7 +755,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
 
   const actions = [
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: isPosted

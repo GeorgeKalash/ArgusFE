@@ -104,7 +104,7 @@ export default function FormShell({
   }, [loading, editMode, maxAccess])
 
   useEffect(() => {
-    if (!form?.values.recordId) {
+    if (!form?.values?.recordId) {
       return
     }
 
@@ -121,7 +121,7 @@ export default function FormShell({
     } else {
       setRecord(form.values.recordId)
     }
-  }, [form?.values.recordId])
+  }, [form?.values?.recordId])
 
   actions?.filter(Boolean)?.forEach(action => {
     if (typeof action?.onClick !== 'function') {
@@ -438,6 +438,7 @@ export default function FormShell({
           previewReport={previewReport}
           visibleClear={visibleClear}
           functionId={functionId}
+          maxAccess={maxAccess}
         />
       )}
     </>

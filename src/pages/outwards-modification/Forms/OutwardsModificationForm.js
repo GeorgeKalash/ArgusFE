@@ -232,7 +232,7 @@ const OutwardsModificationForm = ({ recordId, window }) => {
       disabled: !isClosed
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !isPosted

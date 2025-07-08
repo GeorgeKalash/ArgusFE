@@ -68,7 +68,7 @@ export default function BatchPostForm({ access }) {
 
   const actions = [
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: () => formik.handleSubmit(),
       disabled: false

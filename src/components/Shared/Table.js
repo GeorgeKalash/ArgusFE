@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
@@ -13,7 +13,7 @@ import LastPageIcon from '@mui/icons-material/LastPage'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import { ControlContext } from 'src/providers/ControlContext'
 import { AuthContext } from 'src/providers/AuthContext'
-import { TrxType } from 'src/resources/AccessLevels'
+import { TrxType, accessMap } from 'src/resources/AccessLevels'
 import deleteIcon from '../../../public/images/TableIcons/delete.png'
 import { useWindow } from 'src/windows'
 import DeleteDialog from './DeleteDialog'
@@ -55,13 +55,15 @@ const Table = ({
   const [startAt, setStartAt] = useState(0)
   const { languageId } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
-  const maxAccess = props?.maxAccess && props?.maxAccess.record.maxAccess
+  const maxAccess = props?.maxAccess && props?.maxAccess.record.accessFlags
   const columnsAccess = props?.maxAccess && props?.maxAccess.record.controls
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
   const [focus, setFocus] = useState(false)
   const hasRowId = gridData?.list?.[0]?.id
   const storeName = 'tableSettings'
+  const gridRef = useRef(null)
+  const [hoveredTable, setHoveredTable] = useState(false)
 
   const columns = props?.columns
     .filter(
@@ -424,7 +426,7 @@ const Table = ({
                 </IconButton>
                 {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
                 {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}
-                {platformLabels.Of} {totalRecords}
+                {' ' + platformLabels.Of} {totalRecords}
               </Box>
               <Box>
                 <IconButton onClick={onReset}>
@@ -605,6 +607,19 @@ const Table = ({
     )
   }
 
+  const containerWidth = gridRef?.current?.offsetWidth - 2
+
+  const totalFixedColumnWidth =
+    filteredColumns
+      .filter(col => col?.width !== undefined && col.type !== 'checkbox')
+      ?.reduce((sum, col) => sum + col.width, 0) +
+    (filteredColumns?.some(column => column.field === 'actions') ? 100 : 0)
+
+  const additionalWidth =
+    totalFixedColumnWidth > 0 && filteredColumns?.length > 0 && containerWidth > totalFixedColumnWidth
+      ? (containerWidth - totalFixedColumnWidth) / filteredColumns?.length
+      : 0
+
   const columnDefs = [
     ...(showCheckboxColumn
       ? [
@@ -632,13 +647,19 @@ const Table = ({
       : []),
     ...filteredColumns.map(column => ({
       ...column,
+      width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
+      flex: column.flex,
       sort: column.sort || '',
       cellRenderer: column.cellRenderer ? column.cellRenderer : FieldWrapper
     }))
   ]
 
   if (props?.onEdit || props?.onDelete) {
-    const deleteBtnVisible = maxAccess ? props?.onDelete && maxAccess > TrxType.EDIT : props?.onDelete ? true : false
+    const deleteBtnVisible = maxAccess
+      ? props?.onDelete && maxAccess[accessMap[TrxType.DEL]]
+      : props?.onDelete
+      ? true
+      : false
 
     if (!columnDefs?.some(column => column.field === 'actions'))
       columnDefs?.push({
@@ -727,7 +748,7 @@ const Table = ({
   }
 
   const onColumnResized = params => {
-    if (params?.source === 'uiColumnResized' && tableName) {
+    if (tableName && params?.source === 'uiColumnResized') {
       const columnState = params.columnApi.getColumnState()
 
       saveToDB(storeName, tableName, columnState)
@@ -764,8 +785,8 @@ const Table = ({
 
         return {
           ...col,
-          width: savedCol?.width ?? 'auto',
-          flex: col?.width ? undefined : savedCol?.width ?? totalWidth / tableSettings?.length,
+          width: savedCol?.width ?? 120,
+          flex: null,
           sortColumn: lastColumn ? columnDefs?.length + 1 : indexSort > -1 ? indexSort : index,
           sort: savedCol?.sort ?? col?.sort
         }
@@ -776,16 +797,36 @@ const Table = ({
     return (a.sortColumn ?? 0) - (b.sortColumn ?? 0)
   })
 
+  const hoverTimeoutRef = useRef(null)
+
+  const handleMouseEnter = () => {
+    if (!pagination)
+      hoverTimeoutRef.current = setTimeout(() => {
+        setHoveredTable(true)
+      }, 600)
+  }
+
+  const handleMouseLeave = () => {
+    if (!pagination) {
+      clearTimeout(hoverTimeoutRef.current)
+      setHoveredTable(false)
+    }
+  }
+
   return (
     <VertLayout>
       <Grow>
         <Box
+          ref={gridRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           className='ag-theme-alpine'
           style={{
             flex: !props.maxHeight && !props.height && 1,
             width: '1000px !important',
             height: props?.maxHeight ? height : props?.height || 'auto',
-            maxHeight: props?.maxHeight || 'auto'
+            maxHeight: props?.maxHeight || 'auto',
+            position: 'relative'
           }}
           sx={{
             '.ag-header': {
@@ -804,6 +845,13 @@ const Table = ({
             }
           }}
         >
+          {hoveredTable && !pagination && (
+            <Box position='absolute' top={0} right={0} zIndex={9999} boxShadow={3} borderRadius={1} bgcolor='white'>
+              <IconButton size='small' onClick={onReset}>
+                <CachedIcon fontSize='small' />
+              </IconButton>
+            </Box>
+          )}
           <AgGridReact
             rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
             enableClipboard={true}
@@ -816,6 +864,7 @@ const Table = ({
             paginationPageSize={pageSize}
             rowSelection={'single'}
             suppressAggFuncInHeader={true}
+            suppressDragLeaveHidesColumns={true}
             rowHeight={35}
             onFirstDataRendered={onFirstDataRendered}
             gridOptions={gridOptions}
@@ -827,17 +876,9 @@ const Table = ({
           />
         </Box>
       </Grow>
-      {pagination ? (
+      {pagination && (
         <Fixed>
           <CustomPagination />
-        </Fixed>
-      ) : (
-        <Fixed>
-          <Box display='flex' justifyContent='flex-end'>
-            <IconButton onClick={onReset}>
-              <CachedIcon />
-            </IconButton>
-          </Box>
         </Fixed>
       )}
     </VertLayout>

@@ -240,16 +240,6 @@ export const FinancialRepository = {
     page: service + 'pagePR',
     snapshot: service + 'snapshotPR'
   },
-  PaymentOrders: {
-    get: service + 'getPO',
-    del: service + 'delPO',
-    set2: service + 'set2PO',
-    page2: service + 'page2PO',
-    snapshot: service + 'snapshotPO',
-    cancel: service + 'cancelPO',
-    close: service + 'closePO',
-    reopen: service + 'reopenPO',
-  },
   ResetGLMemo: {
     reset: service + 'resetGL_Memo'
   },
@@ -261,5 +251,23 @@ export const FinancialRepository = {
   },
   ResetGL_RV: {
     reset: service + 'resetGL_RV'
+  },
+  PaymentOrders: {
+    get: service + 'getPO',
+    del: service + 'delPO',
+    set2: service + 'set2PO',
+    page2: service + 'page2PO',
+    page3: service + 'page3PO',
+    snapshot: service + 'snapshotPO',
+    snapshot2: service + 'snapshot2PO',
+    cancel: service + 'cancelPO',
+    close: service + 'closePO',
+    reopen: service + 'reopenPO'
+  },
+  PaymentOrdersExpenses: {
+    qry2: service + 'qry2POX'
+  },
+  PaymentOrdersCostCenters: {
+    qry: service + 'qryPOC'
   }
 }

@@ -26,7 +26,8 @@ const MfSettingForm = () => {
       mf_ava_siteId: null,
       mf_fg_siteId: null,
       mf_rm_siteId: null,
-      mf_jo_pic_source: null
+      mf_jo_pic_source: null,
+      mf_pico_dataSource: null
     },
     onSubmit: async obj => {
       const data = Object.entries(obj).map(([key, value]) => ({
@@ -50,7 +51,7 @@ const MfSettingForm = () => {
         parameters: `_filter=`
       })
 
-      const keysToExtract = ['mf_fg_siteId', 'mf_rm_siteId', 'mf_ava_siteId', 'mf_jo_pic_source']
+      const keysToExtract = ['mf_fg_siteId', 'mf_rm_siteId', 'mf_ava_siteId', 'mf_jo_pic_source', 'mf_pico_dataSource']
 
       const myObject = res.list.reduce((acc, { key, value }) => {
         if (keysToExtract.includes(key)) {
@@ -134,6 +135,20 @@ const MfSettingForm = () => {
                 formik.setFieldValue('mf_jo_pic_source', newValue?.key || null)
               }}
               error={formik.touched.mf_jo_pic_source && Boolean(formik.errors.mf_jo_pic_source)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              datasetId={DataSets.MF_PRODUCED_ITEM_COST_DATA_SOURCE}
+              name='mf_pico_dataSource'
+              label={labels.producedItemCost}
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('mf_pico_dataSource', newValue?.key || null)
+              }}
+              error={formik.touched.mf_pico_dataSource && Boolean(formik.errors.mf_pico_dataSource)}
             />
           </Grid>
         </Grid>

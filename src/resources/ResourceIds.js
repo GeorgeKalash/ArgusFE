@@ -13,6 +13,7 @@ export const ResourceIds = {
   TodayRetailOrders: 60110,
   TodaySalesOrders: 60111,
   GlobalSalesYTD: 60112,
+  SalesTeamOrdersSummary: 60113,
 
   // inventory
   InventoryBelowMinimum: 60200,
@@ -442,7 +443,7 @@ export const ResourceIds = {
   ProductionOrder: 42337,
   YearlyComparativeSales: 51550,
   PurchaseTransactions: 50303,
-  ItemReplacement : 41212,
+  ItemReplacement: 41212,
   SManagement: 41213,
   OpenPOs: 50312,
   NotificationLabels: 23106,
@@ -492,10 +493,18 @@ export const ResourceIds = {
   ChangeClient: 51336,
   WCConsumptionImport: 42702,
   Currency: 20136,
-  PaymentOrder: 31333,
   POTracking: 50309,
+  PaymentOrder: 31333,
+  PaymentOrderExpenses: 31614,
   Moulds: 47200,
-  
+  FoCastings: 47301,
+  RequisitionDocumentTypeDefaults: 50612,
+  PUFinancialIntegrators: 50102,
+  IRMaterialDocTypeDefaults: 46101,
+  PhysicalCountItemDetailsImport: 44305,
+  GenerateMRPs: 46304,
+  FITrialBalanceGridView: 31402,
+
   // GL
   GLSalesInvoice: 51604,
   GLSalesReturn: 51605,
@@ -538,6 +547,7 @@ export const ResourceIds = {
   GLReturnOnInvoice: 51606,
   IomProperties: 42606,
   SyncPurchaseTrx: 50602,
+  IRPlantSettings: 46100,
 
   //MCR
   MCRSalesInvoice: 51607,
