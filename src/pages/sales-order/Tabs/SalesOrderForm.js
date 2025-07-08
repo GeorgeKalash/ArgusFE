@@ -64,7 +64,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.SalesOrder
+    datasetId: ResourceIds.SalesOrder,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.salesOrder, window })
@@ -308,7 +309,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) {
-
           return
         }
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
