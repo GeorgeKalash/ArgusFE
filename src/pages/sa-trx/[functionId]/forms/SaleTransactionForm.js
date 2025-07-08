@@ -199,9 +199,7 @@ export default function SaleTransactionForm({
           applyVat: false,
           taxId: null,
           taxDetails: null,
-          notes: '',
-          saTrx: false,
-          taxDetailsButton: false
+          notes: ''
         }
       ],
       serials: [],
@@ -524,6 +522,12 @@ export default function SaleTransactionForm({
     return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
+  const saTrxCondition = row => {
+    return {
+      disabled: !row.itemId
+    }
+  }
+
   const columns = [
     {
       component: 'textfield',
@@ -801,7 +805,8 @@ export default function SaleTransactionForm({
       component: 'button',
       name: 'saTrx',
       props: {
-        imgSrc: '/images/buttonsIcons/popup-black.png'
+        imgSrc: '/images/buttonsIcons/popup-black.png',
+        onCondition: saTrxCondition
       },
       label: labels.salesTrx,
       onClick: (e, row, update, newRow) => {
@@ -1086,7 +1091,6 @@ export default function SaleTransactionForm({
           upo: parseFloat(item.upo).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-          saTrx: true,
           serials: serials?.list?.map((serialDetail, index) => {
             return {
               ...serialDetail,

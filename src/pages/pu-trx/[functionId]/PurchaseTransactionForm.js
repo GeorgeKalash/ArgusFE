@@ -187,8 +187,6 @@ export default function PurchaseTransactionForm({
         taxDetails: null,
         promotionTypeName: initialPromotionType?.value,
         promotionType: initialPromotionType?.key,
-        costHistory: false,
-        taxDetailsButton: false,
         notes: ''
       }
     ],
@@ -1015,8 +1013,7 @@ export default function PurchaseTransactionForm({
       extendedPrice: parseFloat('0').toFixed(2),
       mdValue: 0,
       taxId: rowTax,
-      taxDetails: rowTaxDetails,
-      costHistory: true
+      taxDetails: rowTaxDetails
     })
 
     formik.setFieldValue(

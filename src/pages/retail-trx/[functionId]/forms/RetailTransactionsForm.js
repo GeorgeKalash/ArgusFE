@@ -164,8 +164,7 @@ export default function RetailTransactionsForm({
         posFlags: null,
         taxId: null,
         taxId_base: null,
-        taxId_amount: null,
-        taxDetailsButton: false
+        taxId_amount: null
       }
     ],
     cash: [

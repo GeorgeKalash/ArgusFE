@@ -111,7 +111,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           unitPrice: 0,
           taxId: null,
           taxDetails: null,
-          taxDetailsButton: false,
           priceType: 0,
           volume: 0,
           invoiceReference: '',
