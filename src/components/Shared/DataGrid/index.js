@@ -258,7 +258,7 @@ export function DataGrid({
     }
   }
 
-  const allColumns = columns?.filter(
+  const allColumns = columns.filter(
     ({ name: field, hidden }) =>
       (accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN && !hidden) ||
       (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
