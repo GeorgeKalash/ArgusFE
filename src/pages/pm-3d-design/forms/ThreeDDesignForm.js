@@ -657,7 +657,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
   )
 }
 
-ThreeDDesignForm.width = 1150
+ThreeDDesignForm.width = 1200
 ThreeDDesignForm.height = 700
 
 export default ThreeDDesignForm
