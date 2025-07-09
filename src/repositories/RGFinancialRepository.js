@@ -9,5 +9,9 @@ export const RGFinancialRepository = {
   },
   AccountSummary: {
     AccFI405b: service + 'FI405b'
+  },
+  TrialBalance: {
+    FI402View: service + 'FI402o',
+    FI401o2: service + 'FI401o2'
   }
 }

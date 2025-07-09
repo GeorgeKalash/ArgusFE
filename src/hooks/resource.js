@@ -10,13 +10,15 @@ export function useResourceQuery({
   queryFn,
   search,
   enabled = true,
-  enabledOnApplyOnly = false
+  enabledOnApplyOnly = false,
+  defaultLoad = true
 }) {
   const [searchValue, setSearchValue] = useState('')
   const [filters, setFilters] = useState(filter?.default || {})
   const [apiOption, setApiOption] = useState('')
   const isSearchMode = !!searchValue
   const [isdisabled, setIsDisabled] = useState(enabledOnApplyOnly)
+  const [autoLoad, setAutoload] = useState(defaultLoad)
 
   const isFilterMode =
     Object.keys(filters).length > 0 &&
@@ -44,9 +46,7 @@ export function useResourceQuery({
             filters,
             pagination: apiOption
           })
-      : apiOption
-      ? () => queryFn(apiOption)
-      : () => queryFn(),
+      : autoLoad && (apiOption ? () => queryFn(apiOption) : () => queryFn()),
     enabled: access?.record?.maxAccess > 0 && enabled && !isdisabled
   })
 
@@ -62,6 +62,7 @@ export function useResourceQuery({
       }
     },
     filterBy(name, value, report) {
+      !autoLoad && setAutoload(true)
       if (value === filters[name]) {
         query.refetch()
       } else if (report || name === 'params') {

@@ -502,6 +502,7 @@ export const ResourceIds = {
   IRMaterialDocTypeDefaults: 46101,
   PhysicalCountItemDetailsImport: 44305,
   GenerateMRPs: 46304,
+  FITrialBalanceGridView: 31402,
 
   // GL
   GLSalesInvoice: 51604,
