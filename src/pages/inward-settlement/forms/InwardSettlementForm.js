@@ -90,6 +90,7 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.InwardSettlement,
     access,
+    enabled: !recordId,
     hasDT: false
   })
 
@@ -602,7 +603,7 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
                   name='reference'
                   label={labels.reference}
                   value={formik?.values?.reference}
-                  maxAccess={!editMode && maxAccess}
+                  maxAccess={maxAccess}
                   maxLength='30'
                   readOnly={isClosed}
                   onChange={formik.handleChange}
