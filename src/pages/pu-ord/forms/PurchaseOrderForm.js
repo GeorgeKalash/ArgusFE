@@ -121,8 +121,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       vendorDocRef: '',
       deliveryMethodId: null,
       ptId: null,
-      taxId: null,
-      taxDetailsButton: false
+      taxId: null
     },
     items: [
       {
@@ -1210,8 +1209,6 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
           'msId',
           'muRef',
           'muQty',
-          'costHistory',
-          'taxDetailsButton',
           'metalId',
           'baseLaborPrice',
           'TotPricePerG'
