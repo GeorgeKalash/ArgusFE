@@ -189,6 +189,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
       label: labels.returnNow,
       flex: 2,
       name: 'returnNow',
+      updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
         if (!newRow.returnNow) {
           update({ returnNow: 0 })

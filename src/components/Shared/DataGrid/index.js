@@ -28,6 +28,7 @@ export function DataGrid({
   autoDelete,
   initialValues,
   bg,
+  searchValue,
   onValidationRequired
 }) {
   const gridApiRef = useRef(null)
@@ -271,7 +272,8 @@ export function DataGrid({
             accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
       (typeof allColumns?.[i]?.props?.disableCondition !== 'function' ||
         !allColumns?.[i]?.props?.disableCondition(data)) &&
-      (typeof allColumns?.[i]?.props?.onCondition !== 'function' || !allColumns?.[i]?.props?.onCondition(data)?.hidden)
+      (typeof allColumns?.[i]?.props?.onCondition !== 'function' || !allColumns?.[i]?.props?.onCondition(data)?.hidden) && 
+      (typeof allColumns?.[i]?.props?.onCondition !== 'function' || !allColumns?.[i]?.props?.onCondition(data)?.disabled)
     )
   }
 
@@ -775,6 +777,10 @@ export function DataGrid({
       process(params, data, setData, disableRefocus)
     }
   }
+
+  useEffect(() => {
+    gridApiRef.current?.setQuickFilter(searchValue)
+  }, [searchValue])
 
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>

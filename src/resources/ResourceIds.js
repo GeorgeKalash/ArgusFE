@@ -1,4 +1,4 @@
-import { Folder } from "@mui/icons-material";
+import { Folder } from '@mui/icons-material'
 
 export const ResourceIds = {
   //Dashboard
@@ -15,6 +15,7 @@ export const ResourceIds = {
   TodayRetailOrders: 60110,
   TodaySalesOrders: 60111,
   GlobalSalesYTD: 60112,
+  SalesTeamOrdersSummary: 60113,
 
   // inventory
   InventoryBelowMinimum: 60200,
@@ -503,8 +504,9 @@ export const ResourceIds = {
   PUFinancialIntegrators: 50102,
   IRMaterialDocTypeDefaults: 46101,
   PhysicalCountItemDetailsImport: 44305,
-  Folders:70111,
-
+  GenerateMRPs: 46304,
+  FITrialBalanceGridView: 31402,
+  Folders: 70111,
   // GL
   GLSalesInvoice: 51604,
   GLSalesReturn: 51605,

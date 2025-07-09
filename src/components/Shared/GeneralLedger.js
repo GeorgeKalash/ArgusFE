@@ -118,6 +118,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
             seqNo: id,
             ...rest
           })),
+          editStatus: values?.editStatus,
           date: formatDateToApi(values.date),
           functionId: values.functionId,
           recordId: formValues.recordId,
@@ -360,7 +361,10 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
         )}
         <Grow>
           <DataGrid
-            onChange={value => formik2.setFieldValue('glTransactions', value)}
+            onChange={value => {
+              formik2.setFieldValue('glTransactions', value)
+              formik2.setFieldValue('editStatus', 2)
+            }}
             allowDelete={!isProcessed}
             allowAddNewLine={!isProcessed}
             value={formik2?.values.glTransactions}
@@ -582,7 +586,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                     dirtyField: DIRTYFIELD_RATE
                   })
                   update({
-                    exRate: updatedRateRow.exRate,
                     amount: updatedRateRow.amount,
                     baseAmount: updatedRateRow.baseAmount
                   })
@@ -605,7 +608,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                   })
                   update({
                     exRate: updatedRateRow.exRate,
-                    amount: updatedRateRow.amount,
                     baseAmount: updatedRateRow.baseAmount
                   })
                 }
@@ -627,8 +629,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                   })
                   update({
                     exRate: updatedRateRow.exRate,
-                    amount: updatedRateRow.amount,
-                    baseAmount: updatedRateRow.baseAmount
+                    amount: updatedRateRow.amount
                   })
                 }
               }
