@@ -22,7 +22,7 @@ const HrRlt = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: EmployeeRepository.RelationshipTypes.qry,
+      extension: EmployeeRepository.RelationshipTypes.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -88,12 +88,12 @@ const HrRlt = () => {
       </Fixed>
       <Grow>
         <Table
-          columns={columns}
-          gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
+          columns={columns}
+          gridData={data}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

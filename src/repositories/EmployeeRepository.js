@@ -24,7 +24,6 @@ export const EmployeeRepository = {
     page: service + 'pageRT',
     set: service + 'setRT',
     get: service + 'getRT',
-    del: service + 'delRT',
-    qry: service + 'qryRT'
+    del: service + 'delRT'
   }
 }
