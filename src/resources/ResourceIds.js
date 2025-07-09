@@ -507,6 +507,7 @@ export const ResourceIds = {
   GenerateMRPs: 46304,
   FITrialBalanceGridView: 31402,
   Folders: 70111,
+  BgCheck: 71103,
 
   // GL
   GLSalesInvoice: 51604,
