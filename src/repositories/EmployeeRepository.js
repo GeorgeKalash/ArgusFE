@@ -19,5 +19,12 @@ export const EmployeeRepository = {
   },
   SponsorFilters: {
     qry: service + 'qrySP'
+  },
+  BonusTypes: {
+    qry: service + 'qryBT',
+    get: service + 'getBT',
+    set: service + 'setBT',
+    page: service + 'pageBT',
+    del: service + 'delBT'
   }
 }
