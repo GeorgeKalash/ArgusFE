@@ -14,7 +14,7 @@ import i18n from 'src/configs/i18n'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const PersonalSettings = ({ _labels }) => {
+const PersonalSettings = ({ _labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   useEffect(() => {
@@ -110,6 +110,7 @@ const PersonalSettings = ({ _labels }) => {
               label={_labels.name}
               value={formik.values.fullName}
               required
+              maxAccess={access}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('fullName', '')}
               error={formik.touched.fullName && Boolean(formik.errors.fullName)}
@@ -123,6 +124,7 @@ const PersonalSettings = ({ _labels }) => {
               valueField='key'
               displayField='value'
               values={formik.values}
+              maxAccess={access}
               required
               onChange={(event, newValue) => {
                 formik.setFieldValue('languageId', newValue?.key ?? '')
@@ -137,6 +139,7 @@ const PersonalSettings = ({ _labels }) => {
               label={_labels.menuTheme}
               valueField='key'
               displayField='value'
+              maxAccess={access}
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('menuTheme', newValue?.key)

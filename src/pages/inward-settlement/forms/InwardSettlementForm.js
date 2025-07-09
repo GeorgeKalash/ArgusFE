@@ -789,6 +789,7 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
                   valueField='key'
                   displayField='value'
                   values={formik.values}
+                  maxAccess={maxAccess}
                   readOnly={isClosed}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('type', '')
@@ -1222,6 +1223,7 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
                 displayField='name'
                 readOnly={isClosed}
                 values={formik.values}
+                maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('relationId', newValue?.recordId || '')
                 }}
