@@ -666,6 +666,7 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
                   required={formik.values.interfaceId}
                   readOnly={isClosed && !formik.values.interfaceId}
                   label={labels.inwardRef}
+                  maxAccess={maxAccess}
                   form={formik}
                   onChange={async (event, newValue) => {
                     formik.setFieldValue('inwardId', newValue ? newValue.recordId : '')
