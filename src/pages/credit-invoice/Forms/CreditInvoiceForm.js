@@ -912,6 +912,7 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
             error={formik.errors.rows}
             allowAddNewLine={!visible}
             allowDelete={!visible}
+            maxAccess={access}
             columns={columns}
             bg={
               formik.values.functionId &&
