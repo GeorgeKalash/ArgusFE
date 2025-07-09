@@ -263,7 +263,6 @@ export const SystemRepository = {
     page: service + 'pageFO',
     get: service + 'getFO',
     set: service + 'setFO',
-    del: service + 'delFO',
-    save: service + 'saveFO'
+    del: service + 'delFO'
   }
 }

@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -42,7 +42,6 @@ export default function CsFoldersForm({ labels, maxAccess, recordId }) {
         formik.setFieldValue('recordId', response.recordId)
       }
       invalidate()
-      formik.setTouched({}, false)
     }
   })
   const editMode = !!formik.values.recordId
@@ -60,13 +59,7 @@ export default function CsFoldersForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Folders}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      title={labels.Folder}
-    >
+    <FormShell resourceId={ResourceIds.Folders} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -77,6 +70,7 @@ export default function CsFoldersForm({ labels, maxAccess, recordId }) {
                 value={formik.values.name}
                 required
                 maxAccess={maxAccess}
+                maxLength='30'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
