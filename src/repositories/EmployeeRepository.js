@@ -1,3 +1,5 @@
+import { set } from 'nprogress'
+
 const service = 'EP.asmx/'
 
 export const EmployeeRepository = {
@@ -19,5 +21,12 @@ export const EmployeeRepository = {
   },
   SponsorFilters: {
     qry: service + 'qrySP'
+  },
+  SalaryChangeReasons: {
+    qry: service + 'qrySC',
+    get: service + 'getSC',
+    set: service + 'setSC',
+    del: service + 'delSC',
+    page: service + 'pageSC'
   }
 }
