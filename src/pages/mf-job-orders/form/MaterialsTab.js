@@ -40,6 +40,12 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
       flex: 1
     },
     {
+      field: 'loss',
+      headerName: labels.loss,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'qty',
       headerName: labels.qty,
       flex: 1,
@@ -61,8 +67,9 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
 
   const totQty = data?.list?.reduce((qtySum, row) => {
     const qtyValue = parseFloat(row?.qty?.toString().replace(/,/g, '')) || 0
+    const loss = parseFloat(row?.loss?.toString().replace(/,/g, '')) || 0
 
-    return qtySum + qtyValue
+    return qtySum + qtyValue - loss
   }, 0)
 
   async function fetchGridData() {
