@@ -63,11 +63,10 @@ const Window = React.memo(
     const [expanded, setExpanded] = useState(false)
     const [minimized, setMinimized] = useState(false)
     const paperRef = useRef(null)
+    const maxAccess = props.maxAccess?.record.maxAccess
+
     const { loading } = useContext(RequestsContext)
     const [showOverlay, setShowOverlay] = useState(false)
-    const memoizedChildren = useMemo(() => children, [])
-
-    const maxAccess = props.maxAccess?.record.maxAccess
 
     const windowToolbarVisible = useMemo(
       () => (editMode ? maxAccess >= TrxType.EDIT : maxAccess >= TrxType.ADD),
@@ -85,6 +84,12 @@ const Window = React.memo(
         transactionLogInfo.style.height = expanded ? '30vh' : '18vh'
       }
     }, [expanded])
+
+    // useEffect(() => {
+    //   if (paperRef.current) {
+    //     paperRef.current.focus()
+    //   }
+    // }, [])
 
     useEffect(() => {
       if (!loading) {
@@ -140,11 +145,18 @@ const Window = React.memo(
                 tabIndex={-1}
                 sx={{
                   transition: 'width 0.3s, height 0.3s',
+                  height: !minimized
+                    ? controlled
+                      ? expanded
+                        ? containerHeight
+                        : height
+                      : expanded
+                      ? containerHeight
+                      : height
+                    : '40px',
                   width: expanded ? containerWidth : width,
-                  height: minimized && '40px',
                   display: controlled ? 'flex' : 'block',
-                  flexDirection: controlled ? 'column' : 'unset',
-                  overflow: 'hidden'
+                  flexDirection: controlled ? 'column' : 'unset'
                 }}
               >
                 <DialogTitle
@@ -156,10 +168,13 @@ const Window = React.memo(
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     py: '0px !important',
-                    m: 0,
+                    margin: '0px !important',
                     backgroundColor: '#231F20',
-                    height: '40px',
-                    borderRadius: minimized ? '10px' : '5px 5px 0 0'
+                    borderTopLeftRadius: '5px',
+                    borderTopRightRadius: '5px',
+                    borderBottomLeftRadius: '0px',
+                    borderBottomRightRadius: '0px',
+                    height: '40px'
                   }}
                 >
                   <Box>
@@ -217,7 +232,7 @@ const Window = React.memo(
                 {!minimized && (
                   <>
                     {tabs && (
-                      <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+                      <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
                         {tabs.map((tab, i) => (
                           <Tab key={i} label={tab.label} disabled={tab?.disabled} />
                         ))}
@@ -228,7 +243,7 @@ const Window = React.memo(
 
                     {!controlled ? (
                       <>
-                        <DialogContent sx={{ p: 2 }}>{memoizedChildren}</DialogContent>
+                        <DialogContent sx={{ p: 2 }}>{children}</DialogContent>
                         {windowToolbarVisible && (
                           <WindowToolbar
                             onSave={onSave}
@@ -242,7 +257,7 @@ const Window = React.memo(
                         )}
                       </>
                     ) : (
-                      React.Children.map(memoizedChildren, child => {
+                      React.Children.map(children, child => {
                         return React.cloneElement(child, {
                           expanded: expanded,
                           height: expanded ? containerHeightPanel : heightPanel
