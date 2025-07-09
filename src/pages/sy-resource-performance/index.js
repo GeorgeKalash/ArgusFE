@@ -165,7 +165,7 @@ const ResourcePerformance = () => {
         <Table
           columns={columns}
           gridData={formik.values.data}
-          rowId={['key']}
+          rowId={['logId']}
           pageSize={50}
           maxAccess={access}
           paginationType='client'
