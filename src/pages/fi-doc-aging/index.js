@@ -87,7 +87,7 @@ const DocumentAging = () => {
 
         return {
           age: leg.caption,
-          balance: Math.floor(Math.abs(matchedAmount?.amount || 0))
+          balance: Math.round(Math.abs(matchedAmount?.amount || 0))
         }
       })
 
@@ -128,8 +128,8 @@ const DocumentAging = () => {
 
           return {
             ...parent,
-            amount: Math.floor(Math.abs(parent.amount || 0)),
-            balance: Math.floor(Math.abs(parent.balance || 0)),
+            amount: Math.round(Math.abs(parent.amount || 0)),
+            balance: Math.round(Math.abs(parent.balance || 0)),
             reference: parent.reference,
             days: calculateDays(parent.date),
             level: 0,
@@ -154,8 +154,8 @@ const DocumentAging = () => {
 
               return {
                 ...child,
-                amount: Math.floor(Math.abs(child.amount || 0)),
-                balance: Math.floor(Math.abs(child.balance || 0)),
+                amount: Math.round(Math.abs(child.amount || 0)),
+                balance: Math.round(Math.abs(child.balance || 0)),
                 reference: child.reference,
                 days: calculateDays(child.date),
                 level: 1,
