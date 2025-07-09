@@ -375,6 +375,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.quantity,
       name: 'qty',
+      updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update(data)
@@ -408,6 +409,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       props: {
         decimalScale: 5
       },
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_BASE_PRICE)
         update(data)
@@ -420,6 +422,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       props: {
         decimalScale: 5
       },
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_UNIT_PRICE)
         update(data)
@@ -429,6 +432,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.upo,
       name: 'upo',
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_UPO)
         update(data)
@@ -465,6 +469,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.markdown,
       name: 'mdAmount',
+      updateOn: 'blur',
       flex: 2,
       props: {
         ShowDiscountIcons: true,
@@ -498,6 +503,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.extendedprice,
       name: 'extendedPrice',
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_EXTENDED_PRICE)
         update(data)
