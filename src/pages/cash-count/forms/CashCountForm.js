@@ -83,7 +83,8 @@ const CashCountForm = ({ recordId, window }) => {
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CashCountTransaction
+    datasetId: ResourceIds.CashCountTransaction,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.cashCount, window })

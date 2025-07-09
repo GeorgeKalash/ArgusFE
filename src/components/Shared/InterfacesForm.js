@@ -19,7 +19,8 @@ export const InterfacesForm = ({ recordId, resourceId, name }) => {
   const { getAllKvsByDataset } = useContext(CommonContext)
 
   const { labels: _labels, access } = useResourceParams({
-    datasetId: ResourceIds.InterfaceMap
+    datasetId: ResourceIds.InterfaceMap,
+    editMode: !!recordId
   })
 
   const { formik } = useForm({

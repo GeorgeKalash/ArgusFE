@@ -40,7 +40,8 @@ const InwardTransferForm = ({ recordId, plantId, userId, dtId, window }) => {
   const { platformLabels, defaultsData } = useContext(ControlContext)
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.InwardTransfer
+    datasetId: ResourceIds.InwardTransfer,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.InwardTransfer, window })

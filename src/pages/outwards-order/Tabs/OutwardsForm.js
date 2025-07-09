@@ -56,7 +56,8 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
   const [sysDefault, setDefault] = useState({ countryRef: '', currencyRef: '' })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.OutwardsOrder
+    datasetId: ResourceIds.OutwardsOrder,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.OutwardsOrder, window })

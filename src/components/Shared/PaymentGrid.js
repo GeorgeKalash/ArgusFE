@@ -11,7 +11,8 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   const editMode = !!rest.data.recordId
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds?.POSPayment
+    datasetId: ResourceIds?.POSPayment,
+    editMode
   })
   const { stack } = useWindow()
 

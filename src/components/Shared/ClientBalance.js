@@ -19,7 +19,8 @@ export const ClientBalance = ({ recordId, window }) => {
   useSetWindow({ title: platformLabels.ClientBalance, window })
 
   const { labels: _labels, access } = useResourceParams({
-    datasetId: ResourceIds.ClientBalance
+    datasetId: ResourceIds.ClientBalance,
+    editMode: !!recordId
   })
 
   const { formik } = useForm({
