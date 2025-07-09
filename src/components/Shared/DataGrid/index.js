@@ -48,6 +48,14 @@ export function DataGrid({
 
   const gridContainerRef = useRef(null)
 
+  const generalMaxAccess = maxAccess && maxAccess?.record?.accessFlags
+
+  const isAccessDenied = maxAccess?.editMode
+    ? generalMaxAccess && !generalMaxAccess[accessMap[TrxType.EDIT]]
+    : generalMaxAccess && !generalMaxAccess[accessMap[TrxType.ADD]]
+
+  const _disabled = isAccessDenied || disabled
+
   function checkDuplicates(field, data) {
     return value.find(
       item => item.id != data.id && item?.[field] && item?.[field]?.toLowerCase() === data?.[field]?.toLowerCase()
@@ -356,7 +364,7 @@ export function DataGrid({
       (currentColumnIndex === allColumns.length - 1 - skip || !countColumn) &&
       node.rowIndex === api.getDisplayedRowCount() - 1
     ) {
-      if (allowAddNewLine && !error) {
+      if (allowAddNewLine && !error && !_disabled) {
         event.stopPropagation()
         addNewRow()
       }
@@ -573,14 +581,6 @@ export function DataGrid({
     totalWidth > 0 && allColumns?.length > 0 && gridWidth > totalWidth
       ? (gridWidth - totalWidth) / allColumns?.length
       : 0
-
-  const generalMaxAccess = maxAccess && maxAccess?.record?.accessFlags
-
-  const isAccessDenied = maxAccess?.editMode
-    ? generalMaxAccess && !generalMaxAccess[accessMap[TrxType.EDIT]]
-    : generalMaxAccess && !generalMaxAccess[accessMap[TrxType.ADD]]
-
-  const _disabled = isAccessDenied || disabled
 
   const columnDefs = [
     ...allColumns.map(column => ({

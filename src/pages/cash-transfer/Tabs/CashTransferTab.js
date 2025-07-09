@@ -527,8 +527,8 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => 
                   if (newRow.currencyId) {
                     const result = await getCurrencyApi(newRow?.currencyId)
                     update({
-                      exRate: result.record.exRate,
-                      rateCalcMethod: result.record.rateCalcMethod
+                      exRate: result.record?.exRate,
+                      rateCalcMethod: result.record?.rateCalcMethod
                     })
                   }
                 }
