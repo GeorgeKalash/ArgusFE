@@ -256,5 +256,8 @@ export const SystemRepository = {
     set: service + 'setAT',
     get: service + 'getAT',
     del: service + 'delAT'
+  },
+  ResourcePerformance: {
+    qry: service + 'qryTLP'
   }
 }
