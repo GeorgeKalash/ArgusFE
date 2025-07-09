@@ -68,7 +68,7 @@ const CheckForm = () => {
       },
       width: 500,
       height: 250,
-      title: labels.CheckType || 'Check Type'
+      title: labels.checkType
     })
   }
 
