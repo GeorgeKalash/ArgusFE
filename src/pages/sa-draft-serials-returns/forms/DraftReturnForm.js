@@ -111,7 +111,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           unitPrice: 0,
           taxId: null,
           taxDetails: null,
-          taxDetailsButton: true,
           priceType: 0,
           volume: 0,
           invoiceReference: '',
@@ -434,8 +433,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 taxDetails: await FilteredListByTaxId(
                   formik?.values?.taxDetailsStore,
                   formik.values?.taxId || res?.record?.taxId
-                ),
-                taxDetailsButton: true
+                )
               })
             }
           }
@@ -521,21 +519,31 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       name: 'taxDetailsButton',
       flex: 0.75,
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {
         row.qty = row.weight
         row.basePrice = 0
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
@@ -670,7 +678,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           amount: parseFloat(item.amount).toFixed(2),
-          taxDetailsButton: true,
           taxDetails: taxDetailsResponse
         }
       })
@@ -702,7 +709,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           amount: parseFloat(item.amount).toFixed(2),
-          taxDetailsButton: true,
           taxDetails: taxDetailsResponse
         }
       })
@@ -891,8 +897,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           seqNo: lId + 1,
           id: lId + 1,
           ...(res?.record?.taxId && {
-            taxId: formik.values?.taxId || res?.record?.taxId,
-            taxDetailsButton: true
+            taxId: formik.values?.taxId || res?.record?.taxId
           })
         }
 
