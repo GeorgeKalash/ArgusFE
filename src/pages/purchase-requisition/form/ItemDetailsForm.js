@@ -134,6 +134,7 @@ export default function ItemDetailsForm({
     })
     formik.setValues({
       ...res.record,
+      onhand: res?.record?.onHand || 0,
       deliveryDate: res?.record?.deliveryDate ? formatDateFromApi(res?.record?.deliveryDate) : null,
       lastPurchaseDate: res?.record?.lastPurchaseDate ? formatDateFromApi(res?.record?.lastPurchaseDate) : null
     })

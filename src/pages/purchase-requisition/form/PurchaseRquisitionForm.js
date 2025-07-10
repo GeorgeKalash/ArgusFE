@@ -30,6 +30,7 @@ import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import ItemDetailsForm from './ItemDetailsForm'
 import { getStorageData } from 'src/storage/storage'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function PurchaseRquisitionForm({ recordId, labels, access }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -572,13 +573,7 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
         <Fixed>
           <Grid container justifyContent='flex-end'>
             <Grid item xs={6} sm={4} md={3}>
-              <CustomTextField
-                name='totalCost'
-                label={labels.totalCost}
-                maxAccess={maxAccess}
-                value={formik.values.totalCost}
-                readOnly
-              />
+              <CustomNumberField name='totalCost' label={labels.totalCost} value={formik.values.totalCost} readOnly />
             </Grid>
           </Grid>
         </Fixed>
