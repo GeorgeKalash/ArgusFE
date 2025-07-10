@@ -21,7 +21,6 @@ export const EmployeeRepository = {
     qry: service + 'qrySP'
   },
   CertificateLvl: {
-    qry: service + 'qryCL',
     get: service + 'getCL',
     set: service + 'setCL',
     del: service + 'delCL',

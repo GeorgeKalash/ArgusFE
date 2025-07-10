@@ -1,5 +1,3 @@
-import MetalColor from 'src/pages/iv-metal-color'
-
 const service = 'SY.asmx/'
 
 export const SystemRepository = {
