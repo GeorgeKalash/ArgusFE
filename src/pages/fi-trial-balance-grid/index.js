@@ -47,7 +47,7 @@ const FiTrialBalanceGrid = () => {
     })
 
     return {
-      ...data,
+      ...response,
       list: response?.list.map(item => ({
         ...item,
         opening_base_credit: item.opening_debit - item.opening_credit,
