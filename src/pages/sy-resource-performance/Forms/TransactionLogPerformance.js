@@ -7,7 +7,6 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
-import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -27,9 +26,9 @@ export default function TransactionLogPerformance({ recordId }) {
       masterRef: null,
       recordId: null,
       resourceId: null,
-      resourceName: null,
-      ttName: null,
-      userName: null
+      resourceName: '',
+      ttName: '',
+      userName: ''
     },
     maxAccess,
     validateOnChange: true
