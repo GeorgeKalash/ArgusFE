@@ -19,5 +19,11 @@ export const EmployeeRepository = {
   },
   SponsorFilters: {
     qry: service + 'qrySP'
+  },
+  CertificateLvl: {
+    get: service + 'getCL',
+    set: service + 'setCL',
+    del: service + 'delCL',
+    page: service + 'pageCL'
   }
 }
