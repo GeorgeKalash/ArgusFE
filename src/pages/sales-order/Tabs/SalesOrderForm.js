@@ -64,7 +64,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.SalesOrder
+    datasetId: ResourceIds.SalesOrder,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.salesOrder, window })
@@ -230,6 +231,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
       toast.success(actionMessage)
       await refetchForm(soRes.recordId)
+
       invalidate()
     }
   })

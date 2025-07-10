@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function useResourceParams({ datasetId, DatasetIdAccess }) {
+export default function useResourceParams({ datasetId, DatasetIdAccess, editMode }) {
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
 
@@ -23,6 +23,6 @@ export default function useResourceParams({ datasetId, DatasetIdAccess }) {
 
   return {
     labels: _labels,
-    access
+    access: editMode ? { ...access, editMode } : access
   }
 }

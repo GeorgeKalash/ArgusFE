@@ -38,7 +38,8 @@ export default function ThreeDPrintForm({ recordId, window }) {
   const { stack } = useWindow()
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.Printing
+    datasetId: ResourceIds.Printing,
+    editMode: !!recordId
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({

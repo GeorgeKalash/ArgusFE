@@ -88,7 +88,8 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CreditOrder
+    datasetId: ResourceIds.CreditOrder,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.creditOrder, window })

@@ -38,7 +38,8 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
   const [selectedReport, setSelectedReport] = useState(null)
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.RemittanceReceiptVoucher
+    datasetId: ResourceIds.RemittanceReceiptVoucher,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.receiptVoucher, window })

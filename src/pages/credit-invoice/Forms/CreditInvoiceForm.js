@@ -43,7 +43,8 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CreditInvoice
+    datasetId: ResourceIds.CreditInvoice,
+    editMode: !!recordId
   })
 
   const invalidate = useInvalidate({
@@ -911,6 +912,7 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
             error={formik.errors.rows}
             allowAddNewLine={!visible}
             allowDelete={!visible}
+            maxAccess={access}
             columns={columns}
             bg={
               formik.values.functionId &&
