@@ -25,5 +25,11 @@ export const EmployeeRepository = {
     set: service + 'setRT',
     get: service + 'getRT',
     del: service + 'delRT'
+},
+  BgCheck: {
+    page: service + 'pageCT',
+    set: service + 'setCT',
+    get: service + 'getCT',
+    del: service + 'delCT'
   }
 }
