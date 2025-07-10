@@ -120,17 +120,15 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={newValue => {
+                onChange={(event, newValue) => {
                   formik.setFieldValue('supervisorId', newValue?.recordId)
                 }}
                 error={formik.touched.supervisorId && Boolean(formik.errors.supervisorId)}
-                helperText={formik.touched.supervisorId && formik.errors.supervisorId}
               />
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
-                parameters={`_startAt=0&_pageSize=100&_filter=`}
                 name='siteId'
                 label={labels.site}
                 columnsInDropDown={[
@@ -141,8 +139,8 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={newValue => {
-                  formik.setFieldValue('siteId', newValue?.recordId)
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('siteId', newValue?.recordId || null)
                 }}
                 required
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
@@ -151,7 +149,6 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
-                parameters={`_startAt=0&_pageSize=100&_filter=`}
                 name='plantId'
                 label={labels.plantName}
                 columnsInDropDown={[
@@ -162,8 +159,8 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={newValue => {
-                  formik.setFieldValue('plantId', newValue?.recordId)
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('plantId', newValue?.recordId || null)
                 }}
                 required
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
@@ -184,7 +181,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
                 values={formik.values}
                 readOnly={editMode}
                 maxAccess={maxAccess}
-                onChange={newValue => {
+                onChange={(event, newValue) => {
                   formik.setFieldValue('costCenterId', newValue?.recordId)
                 }}
                 error={formik.touched.costCenterId && Boolean(formik.errors.costCenterId)}
@@ -193,7 +190,6 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={ManufacturingRepository.ProductionLine.qry}
-                parameters={`_startAt=0&_pageSize=100`}
                 name='lineId'
                 label={labels.productionLine}
                 columnsInDropDown={[
@@ -204,7 +200,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={newValue => {
+                onChange={(event, newValue) => {
                   formik.setFieldValue('lineId', newValue?.recordId)
                 }}
                 error={formik.touched.lineId && Boolean(formik.errors.lineId)}
