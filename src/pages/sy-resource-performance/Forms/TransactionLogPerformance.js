@@ -64,16 +64,40 @@ export default function TransactionLogPerformance({ recordId }) {
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
-              <CustomTextField name='data' value={formik?.values?.data} label={labels.data} readOnly />
+              <CustomTextField
+                name='data'
+                value={formik?.values?.data}
+                label={labels.data}
+                readOnly
+                maxAccess={maxAccess}
+              />
             </Grid>
             <Grid item xs={12}>
-              <CustomDateTimePicker name='eventDt' label={labels.eventDt} value={formik?.values?.eventDt} readOnly />
+              <CustomDateTimePicker
+                name='eventDt'
+                label={labels.eventDt}
+                value={formik?.values?.eventDt}
+                readOnly
+                maxAccess={maxAccess}
+              />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField name='masterRef' value={formik?.values?.masterRef} label={labels.masterRef} readOnly />
+              <CustomTextField
+                name='masterRef'
+                value={formik?.values?.masterRef}
+                label={labels.masterRef}
+                readOnly
+                maxAccess={maxAccess}
+              />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField name='recordId' value={formik?.values?.recordId} label={labels.recordId} readOnly />
+              <CustomTextField
+                name='recordId'
+                value={formik?.values?.recordId}
+                label={labels.recordId}
+                readOnly
+                maxAccess={maxAccess}
+              />
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
@@ -81,6 +105,7 @@ export default function TransactionLogPerformance({ recordId }) {
                 value={formik?.values?.resourceId}
                 label={labels.resourceId}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -89,13 +114,26 @@ export default function TransactionLogPerformance({ recordId }) {
                 value={formik?.values?.resourceName}
                 label={labels.resourceName}
                 readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField name='ttName' value={formik?.values?.ttName} label={labels.ttName} readOnly />
+              <CustomTextField
+                name='ttName'
+                value={formik?.values?.ttName}
+                label={labels.ttName}
+                readOnly
+                maxAccess={maxAccess}
+              />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField name='userName' value={formik?.values?.userName} label={labels.username} readOnly />
+              <CustomTextField
+                name='userName'
+                value={formik?.values?.userName}
+                label={labels.username}
+                readOnly
+                maxAccess={maxAccess}
+              />
             </Grid>
           </Grid>
         </Grow>
