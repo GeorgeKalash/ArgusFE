@@ -491,8 +491,6 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                 label: labels.expectedPcs,
                 name: 'designPcs',
                 props: {
-                  maxLength: 6,
-                  decimalScale: 5,
                   readOnly: true
                 }
               },
