@@ -251,7 +251,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
 
   const editMode = !!formik?.values?.header?.recordId
   const totalQty = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.qty, 0) : 0
-  const totalPcs = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.pcs || 0, 0) : 0
+  const totalPcs = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.pcs, 0) : 0
 
   const totalExpQty = formik.values.items
     ? formik.values.items.reduce((acc, item) => acc + parseInt(item.designQty), 0)
@@ -260,8 +260,6 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
   const totalExpPcs = formik.values.items
     ? formik.values.items.reduce((acc, item) => acc + parseInt(item.designPcs), 0)
     : 0
-
-  console.log(formik.values.items)
 
   return (
     <FormShell resourceId={resourceId} form={formik} maxAccess={maxAccess} editMode={editMode}>
