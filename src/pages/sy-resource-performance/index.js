@@ -196,7 +196,10 @@ const ResourcePerformance = () => {
               variant='contained'
               label={platformLabels.Preview}
               image={'preview.png'}
-              onClick={refetch}
+              onClick={() => {
+                refetch()
+                formik.validateForm()
+              }}
               color='#231f20'
             />
           </Grid>
