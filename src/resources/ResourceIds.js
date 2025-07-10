@@ -506,6 +506,7 @@ export const ResourceIds = {
   PhysicalCountItemDetailsImport: 44305,
   GenerateMRPs: 46304,
   FITrialBalanceGridView: 31402,
+  Folder: 70111,
   BgCheck: 71103,
 
   // GL

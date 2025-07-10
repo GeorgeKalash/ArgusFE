@@ -1,5 +1,3 @@
-import BgCheckForm from 'src/pages/hr-bgcheck-types/forms/BgCheckForm'
-
 const service = 'SY.asmx/'
 
 export const SystemRepository = {
