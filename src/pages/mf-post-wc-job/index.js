@@ -54,6 +54,12 @@ const PostWorkCenterJob = () => {
       type: 'number'
     },
     {
+      field: 'loss',
+      headerName: labels.loss,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'wipPcs',
       headerName: labels.pcs,
       flex: 1,
