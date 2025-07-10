@@ -5,7 +5,7 @@ export const EmployeeRepository = {
     snapshot: service + 'snapshotEM',
     get1: service + 'getEM1'
   },
-  CertificateFilters: {
+  Certificate: {
     qry: service + 'qryCL',
     get: service + 'getCL',
     set: service + 'setCL',
