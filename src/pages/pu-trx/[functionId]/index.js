@@ -24,17 +24,6 @@ const PuTrx = () => {
 
   const { functionId } = Router()
 
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.PurchaseInvoice:
-        return ResourceIds.PurchaseInvoice
-      case SystemFunction.PurchaseReturn:
-        return ResourceIds.PurchaseReturn
-      default:
-        return null
-    }
-  }
-
   const {
     query: { data },
     filterBy,
@@ -189,18 +178,6 @@ const PuTrx = () => {
     }
   }
 
-  const getGLResource = functionId => {
-    const fn = Number(functionId)
-    switch (fn) {
-      case SystemFunction.PurchaseInvoice:
-        return ResourceIds.GLPurchaseInvoice
-      case SystemFunction.PurchaseReturn:
-        return ResourceIds.GLPurchaseReturn
-      default:
-        return null
-    }
-  }
-
   async function openForm(recordId) {
     stack({
       Component: PurchaseTransactionForm,
@@ -208,9 +185,7 @@ const PuTrx = () => {
         labels,
         recordId,
         access,
-        functionId,
-        getResourceId,
-        getGLResource
+        functionId
       },
       width: 1330,
       height: 720,
