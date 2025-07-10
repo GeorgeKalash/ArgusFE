@@ -52,6 +52,12 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
       type: 'number'
     },
     {
+      field: 'loss',
+      headerName: labels.loss,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'unitCost',
       headerName: labels.unitCost,
       flex: 1,
