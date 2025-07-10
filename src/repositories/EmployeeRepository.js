@@ -19,5 +19,11 @@ export const EmployeeRepository = {
   },
   SponsorFilters: {
     qry: service + 'qrySP'
+  },
+  BgCheck: {
+    page: service + 'pageCT',
+    set: service + 'setCT',
+    get: service + 'getCT',
+    del: service + 'delCT'
   }
 }
