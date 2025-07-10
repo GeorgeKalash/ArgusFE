@@ -535,7 +535,7 @@ export default function PurchaseTransactionForm({
       label: labels.unitPrice,
       name: 'unitPrice',
       props: {
-        decimalScale: 3
+        decimalScale: 2
       },
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
