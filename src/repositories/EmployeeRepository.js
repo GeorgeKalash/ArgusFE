@@ -1,3 +1,5 @@
+import { get } from 'react-hook-form'
+
 const service = 'EP.asmx/'
 
 export const EmployeeRepository = {
@@ -19,5 +21,11 @@ export const EmployeeRepository = {
   },
   SponsorFilters: {
     qry: service + 'qrySP'
+  },
+  NoticePeriods: {
+    get: service + 'getNP',
+    set: service + 'setNP',
+    del: service + 'delNP',
+    page: service + 'pageNP'
   }
 }
