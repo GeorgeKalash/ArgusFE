@@ -18,7 +18,7 @@ export default function HrSalaryForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: EmployeeRepository.SalaryChangeReasons.qry
+    endpointId: EmployeeRepository.SalaryChangeReasons.page
   })
 
   const { formik } = useForm({

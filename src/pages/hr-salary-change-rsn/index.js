@@ -38,7 +38,7 @@ const HrSalary = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: EmployeeRepository.SalaryChangeReasons.qry,
+    endpointId: EmployeeRepository.SalaryChangeReasons.page,
     datasetId: ResourceIds.SalaryChangeReasons
   })
 

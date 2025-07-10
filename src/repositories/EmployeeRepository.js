@@ -23,7 +23,6 @@ export const EmployeeRepository = {
     qry: service + 'qrySP'
   },
   SalaryChangeReasons: {
-    qry: service + 'qrySC',
     get: service + 'getSC',
     set: service + 'setSC',
     del: service + 'delSC',
