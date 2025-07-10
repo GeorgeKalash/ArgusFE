@@ -11,6 +11,8 @@ export function View({ value, data, ...props }) {
 
   const symbol = props?.column?.props?.iconKey && props?.column?.props?.iconKey({ data })
 
+  const decimalScale = props?.column?.props?.decimalScale
+
   const formatValue = val => {
     if (!val && val !== 0) return ''
     if (isNaN(val)) return val
@@ -20,7 +22,10 @@ export function View({ value, data, ...props }) {
       .replace(/(\.\d*?[1-9])0+$/, '$1')
   }
 
-  const formattedValue = viewDecimals ? getFormattedNumber(formatValue(value)) : getFormattedNumber(value)
+  const formattedValue = viewDecimals
+    ? getFormattedNumber(formatValue(parseFloat(value).toFixed(decimalScale)))
+    : getFormattedNumber(parseFloat(value).toFixed(decimalScale))
+
   const icon = symbol && iconMapView[symbol]
 
   return (
