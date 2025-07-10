@@ -894,6 +894,7 @@ export default function JobOrderForm({
                       : null
                   }
                   disabled={imageSource != 3}
+                  isAbsolutePath={true}
                 />
               </Grid>
 
