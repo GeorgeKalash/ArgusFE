@@ -80,7 +80,6 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
       ]
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -244,6 +243,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
           id: index + 1,
           ...item,
           pcs: item.pcs || 0,
+          qty: item.qty || 0,
         })) || formik.values.items
       )
     }
