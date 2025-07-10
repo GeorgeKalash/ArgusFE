@@ -258,6 +258,6 @@ export const SystemRepository = {
     del: service + 'delAT'
   },
   ResourcePerformance: {
-    qry: service + 'qryTLP'
+    page: service + 'pageTLP'
   }
 }

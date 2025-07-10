@@ -12,44 +12,83 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { ControlContext } from 'src/providers/ControlContext'
 import { formatDateForGetApI } from 'src/lib/date-helper'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
+import { useWindow } from 'src/windows'
+import TransactionLogPerformance from './Forms/TransactionLogPerformance'
 
 const ResourcePerformance = () => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
 
-  const { labels, access } = useResourceQuery({
-    datasetId: ResourceIds.TransactionLogPerformance
-  })
+  const tomorrowEnd = new Date()
+  tomorrowEnd.setDate(tomorrowEnd.getDate() + 1)
+  tomorrowEnd.setHours(23, 59, 0, 0)
 
   const { formik } = useForm({
     initialValues: {
       resourceId: null,
       moduleId: null,
       minimumDuration: null,
-      fromDT: null,
-      toDT: null,
-      data: { list: [] }
+      fromDT: todayStart,
+      toDT: tomorrowEnd
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      minimumDuration: yup.number().required()
-    }),
-    onSubmit: async values => {
-      const res = await getRequest({
-        extension: SystemRepository.ResourcePerformance.qry,
-        parameters: `_resourceId=${values.resourceId || 0}&_minimumDuration=${values.minimumDuration}&_fromDT=${
-          values.fromDT ? formatDateForGetApI(values.fromDT) : ''
-        }&_toDT=${values.toDT ? formatDateForGetApI(values.toDT) : ''}`
-      })
-
-      formik.setFieldValue('data', res)
-    }
+      minimumDuration: yup.number().required(),
+      fromDT: yup.date().required(),
+      toDT: yup.date().required()
+    })
   })
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    if (formik.values.minimumDuration === null || formik.values.fromDT === null || formik.values.toDT === null) {
+      return
+    }
+
+    const response = await getRequest({
+      extension: SystemRepository.ResourcePerformance.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_resourceId=${
+        formik.values.resourceId || 0
+      }&_minimumDuration=${formik.values.minimumDuration}&_fromDT=${formatDateForGetApI(
+        formik.values.fromDT
+      )}&_toDT=${formatDateForGetApI(formik.values.toDT)}`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+
+  const {
+    query: { data },
+    labels,
+    access,
+    refetch,
+    paginationParameters
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SystemRepository.ResourcePerformance.page,
+    datasetId: ResourceIds.TransactionLogPerformance
+  })
+
+  const openInfo = async obj => {
+    stack({
+      Component: TransactionLogPerformance,
+      props: {
+        recordId: obj?.logId
+      },
+      width: 500,
+      height: 500,
+      title: platformLabels.TransactionLog
+    })
+  }
 
   const columns = [
     {
@@ -71,13 +110,13 @@ const ResourcePerformance = () => {
       field: 'requestTime',
       headerName: labels.requestTime,
       flex: 1,
-      type: 'date'
+      type: 'dateTime'
     },
     {
       field: 'responseTime',
       headerName: labels.responseTime,
       flex: 1,
-      type: 'date'
+      type: 'dateTime'
     }
   ]
 
@@ -123,31 +162,33 @@ const ResourcePerformance = () => {
               value={formik.values.minimumDuration}
               maxAccess={access}
               required
-              onChange={formik.handleChange}
+              onChange={e => formik.setFieldValue('minimumDuration', e.target.value)}
               onClear={() => formik.setFieldValue('minimumDuration', null)}
-              error={formik.touched.minimumDuration && Boolean(formik.errors.minimumDuration)}
+              error={formik.errors.minimumDuration && Boolean(formik.errors.minimumDuration)}
             />
           </Grid>
           <Grid item xs={2}>
-            <CustomDatePicker
+            <CustomDateTimePicker
               name='fromDT'
               label={labels.fromDT}
-              value={formik.values.fromDT}
               onChange={formik.setFieldValue}
               maxAccess={access}
+              required
               onClear={() => formik.setFieldValue('fromDT', null)}
-              error={formik.touched.fromDT && Boolean(formik.errors.fromDT)}
+              value={formik.values?.fromDT}
+              error={formik.errors?.fromDT && Boolean(formik.errors?.fromDT)}
             />
           </Grid>
           <Grid item xs={2}>
-            <CustomDatePicker
+            <CustomDateTimePicker
               name='toDT'
               label={labels.toDT}
-              value={formik.values.toDT}
               onChange={formik.setFieldValue}
               maxAccess={access}
+              required
               onClear={() => formik.setFieldValue('toDT', null)}
-              error={formik.touched.toDT && Boolean(formik.errors.toDT)}
+              value={formik.values?.toDT}
+              error={formik.errors?.toDT && Boolean(formik.errors?.toDT)}
             />
           </Grid>
           <Grid item xs={2}>
@@ -155,7 +196,7 @@ const ResourcePerformance = () => {
               variant='contained'
               label={platformLabels.Preview}
               image={'preview.png'}
-              onClick={() => formik.handleSubmit()}
+              onClick={refetch}
               color='#231f20'
             />
           </Grid>
@@ -164,11 +205,14 @@ const ResourcePerformance = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={formik.values.data}
+          gridData={data}
           rowId={['logId']}
           pageSize={50}
+          paginationType='api'
+          onEdit={openInfo}
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
-          paginationType='client'
         />
       </Grow>
     </VertLayout>
