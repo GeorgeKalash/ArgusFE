@@ -15,6 +15,7 @@ import { useResourceQuery } from 'src/hooks/resource'
 import Table from 'src/components/Shared/Table'
 import PurchaseTransactionForm from './PurchaseTransactionForm'
 import { Router } from 'src/lib/useRouter'
+import toast from 'react-hot-toast'
 
 const PuTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)

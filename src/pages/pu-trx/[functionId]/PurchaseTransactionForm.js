@@ -534,6 +534,9 @@ export default function PurchaseTransactionForm({
       component: 'numberfield',
       label: labels.unitPrice,
       name: 'unitPrice',
+      props: {
+        decimalScale: 3
+      },
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_UNIT_PRICE)
@@ -798,7 +801,7 @@ export default function PurchaseTransactionForm({
           ...item,
           id: index + 1,
           basePrice: item.basePrice ? parseFloat(item.basePrice).toFixed(5) : 0,
-          unitPrice: item.unitPrice ? parseFloat(item.unitPrice).toFixed(3) : 0,
+          unitPrice: item.unitPrice ? parseFloat(item.unitPrice) : 0,
           vatAmount: item.vatAmount ? parseFloat(item.vatAmount).toFixed(2) : 0,
           extendedPrice: item.extendedPrice ? parseFloat(item.extendedPrice).toFixed(2) : 0,
           puTrx: true,
@@ -997,7 +1000,7 @@ export default function PurchaseTransactionForm({
       basePrice: basePriceValue,
       baseLaborPrice: baseLaborPrice,
       TotPricePerG: TotPricePerG,
-      unitPrice: unitPrice,
+      unitPrice,
       priceType: itemInfo?.priceType || 1,
       qty: 0,
       msId: itemInfo?.msId,
@@ -1110,7 +1113,7 @@ export default function PurchaseTransactionForm({
       volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
       weight: itemPriceRow?.weight ? parseFloat(itemPriceRow.weight).toFixed(2) : 0,
       basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
-      unitPrice: itemPriceRow?.unitPrice ? parseFloat(itemPriceRow.unitPrice).toFixed(3) : 0,
+      unitPrice: itemPriceRow?.unitPrice ? parseFloat(itemPriceRow.unitPrice) : 0,
       extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
