@@ -22,7 +22,7 @@ const HrCert = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: EmployeeRepository.CertificateLvl.page,
+      extension: EmployeeRepository.CertificateFilters.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -38,7 +38,7 @@ const HrCert = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: EmployeeRepository.CertificateLvl.page,
+    endpointId: EmployeeRepository.CertificateFilters.page,
     datasetId: ResourceIds.CertificateLevels
   })
 
@@ -74,7 +74,7 @@ const HrCert = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: EmployeeRepository.CertificateLvl.del,
+      extension: EmployeeRepository.CertificateFilters.del,
       record: JSON.stringify(obj)
     })
     toast.success(platformLabels.Deleted)

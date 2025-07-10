@@ -18,7 +18,7 @@ export default function CertificateForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: EmployeeRepository.CertificateLvl.page
+    endpointId: EmployeeRepository.CertificateFilters.page
   })
 
   const { formik } = useForm({
@@ -33,7 +33,7 @@ export default function CertificateForm({ labels, maxAccess, recordId }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: EmployeeRepository.CertificateLvl.set,
+        extension: EmployeeRepository.CertificateFilters.set,
         record: JSON.stringify(obj)
       })
 
@@ -50,7 +50,7 @@ export default function CertificateForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: EmployeeRepository.CertificateLvl.get,
+          extension: EmployeeRepository.CertificateFilters.get,
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res?.record)
