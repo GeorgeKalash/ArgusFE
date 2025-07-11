@@ -85,7 +85,7 @@ const ResourcePerformance = () => {
         recordId: obj?.logId
       },
       width: 500,
-      height: 500,
+      height: 600,
       title: platformLabels.TransactionLog
     })
   }
@@ -159,12 +159,12 @@ const ResourcePerformance = () => {
             <CustomNumberField
               name='minimumDuration'
               label={labels.minimumDuration}
-              value={formik.values.minimumDuration}
-              maxAccess={access}
               required
-              onChange={e => formik.setFieldValue('minimumDuration', e.target.value)}
-              onClear={() => formik.setFieldValue('minimumDuration', null)}
-              error={formik.errors.minimumDuration && Boolean(formik.errors.minimumDuration)}
+              value={formik?.values?.minimumDuration}
+              maxAccess={access}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('minimumDuration', '')}
+              error={formik.touched.minimumDuration && Boolean(formik.errors.minimumDuration)}
             />
           </Grid>
           <Grid item xs={2}>
@@ -197,8 +197,16 @@ const ResourcePerformance = () => {
               label={platformLabels.Preview}
               image={'preview.png'}
               onClick={() => {
+                formik.validateForm().then(() => {
+                  formik.setTouched({
+                    moduleId: true,
+                    resourceId: true,
+                    minimumDuration: true,
+                    fromDT: true,
+                    toDT: true
+                  })
+                })
                 refetch()
-                formik.validateForm()
               }}
               color='#231f20'
             />

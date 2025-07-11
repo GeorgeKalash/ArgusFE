@@ -11,6 +11,7 @@ import { formatDateFromApi } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 export default function TransactionLogPerformance({ recordId }) {
   const { getRequest } = useContext(RequestsContext)
@@ -21,7 +22,7 @@ export default function TransactionLogPerformance({ recordId }) {
 
   const { formik } = useForm({
     initialValues: {
-      data: null,
+      data: '',
       eventDt: null,
       masterRef: null,
       recordId: null,
@@ -65,36 +66,18 @@ export default function TransactionLogPerformance({ recordId }) {
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <CustomTextField
-                name='data'
-                value={formik?.values?.data}
-                label={labels.data}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomDateTimePicker
-                name='eventDt'
-                label={labels.eventDt}
-                value={formik?.values?.eventDt}
+                name='userName'
+                value={formik?.values?.userName}
+                label={labels.username}
                 readOnly
                 maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
-                name='masterRef'
-                value={formik?.values?.masterRef}
-                label={labels.masterRef}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='recordId'
-                value={formik?.values?.recordId}
-                label={labels.recordId}
+                name='ttName'
+                value={formik?.values?.ttName}
+                label={labels.ttName}
                 readOnly
                 maxAccess={maxAccess}
               />
@@ -119,18 +102,37 @@ export default function TransactionLogPerformance({ recordId }) {
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
-                name='ttName'
-                value={formik?.values?.ttName}
-                label={labels.ttName}
+                name='recordId'
+                value={formik?.values?.recordId}
+                label={labels.recordId}
                 readOnly
                 maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
-                name='userName'
-                value={formik?.values?.userName}
-                label={labels.username}
+                name='masterRef'
+                value={formik?.values?.masterRef}
+                label={labels.masterRef}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDateTimePicker
+                name='eventDt'
+                label={labels.eventDt}
+                value={formik?.values?.eventDt}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextArea
+                name='data'
+                label={labels.data}
+                value={formik?.values?.data}
+                rows={6}
                 readOnly
                 maxAccess={maxAccess}
               />
