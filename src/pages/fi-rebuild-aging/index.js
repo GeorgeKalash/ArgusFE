@@ -8,7 +8,6 @@ const RebuildAging = () => {
       datasetId={ResourceIds.RebuildAging}
       labelKey={'rebuildAging'}
       Component={RebuildAgingForm}
-      height={460}
     />
   )
 }
