@@ -1,10 +1,8 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import WorkCentersWindow from './window/WorkCentersWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -12,13 +10,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ControlContext } from 'src/providers/ControlContext'
+import { useWindow } from 'src/windows'
+import WorkCentersForm from './forms/WorkCentersForm'
 
 const WorkCenter = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
   const { platformLabels } = useContext(ControlContext)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
@@ -34,7 +32,7 @@ const WorkCenter = () => {
   const {
     query: { data },
     filterBy,
-    labels: _labels,
+    labels,
     access,
     paginationParameters,
     refetch,
@@ -60,64 +58,83 @@ const WorkCenter = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'siteName',
-      headerName: _labels.sitename,
+      headerName: labels.sitename,
       flex: 1
     },
     {
       field: 'siteRef',
-      headerName: _labels.siteRef,
+      headerName: labels.siteRef,
       flex: 1
     },
     {
       field: 'plantName',
-      headerName: _labels.plantName,
+      headerName: labels.plantName,
       flex: 1
     },
     {
       field: 'supervisorName',
-      headerName: _labels.supervisor,
+      headerName: labels.supervisor,
       flex: 1
     },
     {
       field: 'lineRef',
-      headerName: _labels.productionLine,
+      headerName: labels.productionLine,
       flex: 1
     },
     {
       field: 'lineName',
-      headerName: _labels.productionLine,
+      headerName: labels.productionLine,
       flex: 1
     },
     {
       field: 'costCenterName',
-      headerName: _labels.costCenter,
+      headerName: labels.costCenter,
       flex: 1
     },
     {
+      field: 'isSerialCreator',
+      headerName: labels.isSerialCreator,
+      flex: 1,
+      type: 'checkbox'
+    },
+    {
       field: 'isInactive',
-      headerName: _labels.inactive,
+      headerName: labels.inactive,
       flex: 1,
       type: 'checkbox'
     }
   ]
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
+  }
+
+  function openForm(record) {
+    stack({
+      Component: WorkCentersForm,
+      props: {
+        labels,
+        recordId: record?.recordId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 550,
+      title: labels.workCenter
+    })
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj)
   }
 
   const del = async obj => {
@@ -144,24 +161,10 @@ const WorkCenter = () => {
           refetch={refetch}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
         />
       </Grow>
-      {windowOpen && (
-        <WorkCentersWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

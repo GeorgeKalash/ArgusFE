@@ -141,7 +141,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         applyVat: false,
         taxId: null,
         taxDetails: null,
-        taxDetailsButton: true,
         notes: null
       }
     ]
@@ -267,10 +266,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) {
-          update({
-            saTrx: false
-          })
-
           return
         }
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
@@ -280,7 +275,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         let rowTaxDetails = null
 
         if (!formik.values.taxId) {
-          if (itemInfo.taxId) {
+          if (itemInfo?.taxId) {
             const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
 
             const details = taxDetailsResponse.map(item => ({
@@ -330,8 +325,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           mdType: 1,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
-          saTrx: true,
-          taxDetailsButton: true,
           baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
         })
 
@@ -375,6 +368,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.quantity,
       name: 'qty',
+      updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update(data)
@@ -408,6 +402,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       props: {
         decimalScale: 5
       },
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_BASE_PRICE)
         update(data)
@@ -420,6 +415,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       props: {
         decimalScale: 5
       },
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_UNIT_PRICE)
         update(data)
@@ -429,6 +425,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.upo,
       name: 'upo',
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_UPO)
         update(data)
@@ -446,25 +443,36 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
       component: 'numberfield',
       label: labels.markdown,
       name: 'mdAmount',
+      updateOn: 'blur',
       flex: 2,
       props: {
         ShowDiscountIcons: true,
@@ -482,6 +490,13 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'button',
       name: 'saTrx',
       label: labels.salesTrx,
+      props: {
+        onCondition: row => {
+          return {
+            disabled: !row.itemId
+          }
+        }
+      },
       onClick: (e, row, update, newRow) => {
         stack({
           Component: SalesTrxForm,
@@ -498,6 +513,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.extendedprice,
       name: 'extendedPrice',
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_EXTENDED_PRICE)
         update(data)
@@ -642,7 +658,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                 upo: parseFloat(item.upo).toFixed(2),
                 vatAmount: parseFloat(item.vatAmount).toFixed(2),
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-                saTrx: true,
                 taxDetails: taxDetailsResponse
               }
             })
