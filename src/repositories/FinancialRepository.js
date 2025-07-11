@@ -269,5 +269,12 @@ export const FinancialRepository = {
   },
   PaymentOrdersCostCenters: {
     qry: service + 'qryPOC'
+  },
+  AGD: {
+    qry: service + 'qryAGD'
+  },
+  ApplyManual: {
+    set2: service + 'set2APLM',
+    qry: service + 'qryAPLM'
   }
 }

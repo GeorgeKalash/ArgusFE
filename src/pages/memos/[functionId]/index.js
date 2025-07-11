@@ -204,7 +204,7 @@ const Financial = () => {
         getEndpoint,
         getGLResourceId
       },
-      width: 1000,
+      width: 1200,
       height: 670,
       title: getcorrectLabel(parseInt(functionId))
     })
