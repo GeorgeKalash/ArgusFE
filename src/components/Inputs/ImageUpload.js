@@ -19,7 +19,10 @@ const ImageUpload = forwardRef(
       customWidth,
       customHeight,
       rerender,
-      disabled = false
+      disabled = false,
+      isAbsolutePath = false,
+      parentImage,
+      setParentImage
     },
     ref
   ) => {
@@ -34,22 +37,39 @@ const ImageUpload = forwardRef(
       validateOnChange: true,
       initialValues
     })
-    const uniqueRecord = recordId || ref?.current?.value
+    const parentRecordId = parentImage?.recordId
+    const parentResourceId = parentImage?.resourceId
 
     useEffect(() => {
-      if (rerender || uniqueRecord) {
+      console.log(rerender, parentImage)
+      if (rerender && parentImage != null) {
         getData()
       } else handleInputImageReset()
-    }, [uniqueRecord, rerender])
+    }, [parentImage, rerender])
 
     async function getData() {
       if (!resourceId) return
+      if (isAbsolutePath && parentResourceId == resourceId) {
+        const result = await getRequest({
+          extension: SystemRepository.Attachment.get2,
+          parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${rerender || parentRecordId}`
+        })
+        setInitialData(result?.record)
+        setImage(result?.record?.fileName)
+      } else {
+        const result = await getRequest({
+          extension: SystemRepository.Attachment.get,
+          parameters: `_resourceId=${parentResourceId || resourceId}&_seqNo=${seqNo}&_recordId=${
+            parentRecordId || rerender
+          }`
+        })
 
-      const result = await getRequest({
-        extension: SystemRepository.Attachment.get,
-        parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${rerender || uniqueRecord}`
-      })
-      setInitialData(result?.record)
+        //setInitialData(result?.record)
+        setInitialData({ ...result?.record, resourceId: formik.values.resourceId })
+        setImage(result?.record?.url)
+
+        // if (parentImage) setParentImage({recordId: })
+      }
     }
 
     const handleClick = () => {
@@ -66,7 +86,7 @@ const ImageUpload = forwardRef(
 
         let data = {
           resourceId: resourceId,
-          recordId: uniqueRecord,
+          recordId: rerender,
           seqNo: 0,
           fileName: file.name,
           folderId: null,
@@ -98,25 +118,40 @@ const ImageUpload = forwardRef(
 
     const submit = () => {
       if (disabled) return
-
-      if (formik.values?.file) {
-        const obj = { ...formik.values, recordId: ref.current.value || recordId }
+      if (isAbsolutePath) {
+        const obj = {
+          ...formik.values,
+          fileName: formik?.values?.file?.name || formik.values.url,
+          recordId: ref.current.value || recordId
+        }
 
         return postRequest({
-          extension: SystemRepository.Attachment.set,
+          extension: SystemRepository.Attachment.set2,
           record: JSON.stringify(obj),
           file: formik.values?.file
         }).then(res => {
           return res
         })
-      } else if (!image && initialValues?.url && !formik.values?.url) {
-        return postRequest({
-          extension: SystemRepository.Attachment.del,
-          record: JSON.stringify(initialValues),
-          file: initialValues?.url
-        }).then(res => {
-          return res
-        })
+      } else {
+        if (formik.values?.file) {
+          const obj = { ...formik.values, recordId: ref.current.value || recordId }
+
+          return postRequest({
+            extension: SystemRepository.Attachment.set,
+            record: JSON.stringify(obj),
+            file: formik.values?.file
+          }).then(res => {
+            return res
+          })
+        } else if (!image && initialValues?.url && !formik.values?.url) {
+          return postRequest({
+            extension: SystemRepository.Attachment.del,
+            record: JSON.stringify(initialValues),
+            file: initialValues?.url
+          }).then(res => {
+            return res
+          })
+        }
       }
     }
     useImperativeHandle(ref, () => ({
@@ -128,7 +163,7 @@ const ImageUpload = forwardRef(
         <img
           src={`${
             image ||
-            (formik?.values?.url && formik?.values?.url + `?${new Date().getTime()}`) ||
+            (formik?.values?.fileName && formik?.values?.fileName + `?${new Date().getTime()}`) ||
             '/images/emptyPhoto.jpg'
           }`}
           alt=''

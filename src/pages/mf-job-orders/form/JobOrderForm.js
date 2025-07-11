@@ -47,7 +47,7 @@ export default function JobOrderForm({
   const imageUploadRef = useRef(null)
   const [plStore, setPlStore] = useState([])
   const recordId = store?.recordId
-  const [imageSource, setImageSource] = useState(null)
+  const [parentImage, setParentImage] = useState({ recordId: null, resourceId: null })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrder,
@@ -129,11 +129,11 @@ export default function JobOrderForm({
         })
       })
 
-      if (imageUploadRef.current) {
-        imageUploadRef.current.value = parseInt(res.recordId)
+      // if (imageUploadRef.current) {
+      //   imageUploadRef.current.value = parseInt(res.recordId)
 
-        await imageUploadRef.current.submit()
-      }
+      //   await imageUploadRef.current.submit()
+      // }
 
       invalidate()
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
@@ -371,6 +371,12 @@ export default function JobOrderForm({
       isPosted: res?.record.status == 3,
       isCancelled: res?.record.status == -1
     }))
+
+    setParentImage({
+      recordId: res?.record.recordId,
+      resourceId: ResourceIds.MFJobOrders
+    })
+
     !formik.values.recordId &&
       lockRecord({
         recordId: res?.record.recordId,
@@ -390,7 +396,7 @@ export default function JobOrderForm({
 
   async function fillItemInfo(values) {
     if (!values?.recordId) {
-      imageUploadRef.current.value = null
+      //imageUploadRef.current.value = null
       formik.setFieldValue('itemId', null)
       formik.setFieldValue('itemName', null)
       formik.setFieldValue('sku', null)
@@ -398,6 +404,10 @@ export default function JobOrderForm({
       formik.setFieldValue('itemWeight', null)
       formik.setFieldValue('itemCategoryId', null)
       formik.setFieldValue('itemFromDesign', false)
+      setParentImage({
+        recordId: values.recordId,
+        resourceId: ResourceIds.Item
+      })
 
       return
     }
@@ -420,7 +430,11 @@ export default function JobOrderForm({
     formik.setFieldValue('itemCategoryId', values?.categoryId)
   }
   async function fillDesignInfo(values) {
-    imageUploadRef.current.value = values?.recordId || null
+    //imageUploadRef.current.value = values?.recordId || null
+    setParentImage({
+      recordId: values?.recordId,
+      resourceId: ResourceIds.Design
+    })
     formik.setFieldValue('designId', values?.recordId)
     formik.setFieldValue('designRef', values?.reference)
     formik.setFieldValue('designName', values?.name)
@@ -515,11 +529,11 @@ export default function JobOrderForm({
 
   useEffect(() => {
     ;(async function () {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=mf_jo_pic_source`
-      })
-      setImageSource(res?.record?.value || 3)
+      // const res = await getRequest({
+      //   extension: SystemRepository.Defaults.get,
+      //   parameters: `_filter=&_key=mf_jo_pic_source`
+      // })
+      // setImageSource(res?.record?.value || 3)
       if (recordId) await refetchForm(recordId)
       else await getAllLines()
     })()
@@ -872,28 +886,15 @@ export default function JobOrderForm({
               <Grid item>
                 <ImageUpload
                   ref={imageUploadRef}
-                  resourceId={
-                    imageSource == 1
-                      ? ResourceIds.Design
-                      : imageSource == 2
-                      ? ResourceIds.Item
-                      : imageSource == 3
-                      ? ResourceIds.MFJobOrders
-                      : null
-                  }
+                  resourceId={ResourceIds.MFJobOrders}
                   seqNo={0}
                   customWidth={300}
                   customHeight={180}
-                  rerender={
-                    imageSource == 1
-                      ? formik.values.designId
-                      : imageSource == 2
-                      ? formik.values.itemId
-                      : imageSource == 3
-                      ? formik.values.recordId
-                      : null
-                  }
-                  disabled={imageSource != 3}
+                  rerender={formik.values.recordId}
+                  disabled={isCancelled || isReleased || isPosted}
+                  isAbsolutePath={true}
+                  parentImage={parentImage}
+                  setParentImage={setParentImage}
                 />
               </Grid>
 
