@@ -37,32 +37,34 @@ export default function ItemDetailsForm({
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      trxId: recordId,
-      sku: '',
-      seqNo: null,
-      itemId: null,
-      itemName: '',
-      siteId: null,
-      muId: null,
-      muQty: null,
-      qty: null,
-      baseQty: null,
-      deliveryDate: new Date(),
-      status: 1,
-      onhand: null,
-      lastPurchaseDate: null,
-      lastPurchaseCurrencyId: null,
-      lastPurchaseUnitPrice: null,
-      unitCost: null,
-      totalCost: null,
-      justification: ''
+      details: {
+        trxId: recordId,
+        sku: '',
+        seqNo: null,
+        itemId: null,
+        itemName: '',
+        siteId: null,
+        muId: null,
+        muQty: null,
+        qty: null,
+        baseQty: null,
+        deliveryDate: new Date(),
+        status: 1,
+        onhand: null,
+        lastPurchaseDate: null,
+        lastPurchaseCurrencyId: null,
+        lastPurchaseUnitPrice: null,
+        unitCost: null,
+        totalCost: null,
+        justification: ''
+      }
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      itemId: yup.number().required(),
-      qty: yup.number().required()
+      details: yup.object({ itemId: yup.number().required(), qty: yup.number().required() })
     }),
     onSubmit: async obj => {
+      obj = obj.details
       if (!obj.seqNo && !obj.recordId) obj.seqNo = maxSeqNo + 1
       await postRequest({
         extension: PurchaseRepository.RequisitionDetail.set,
@@ -78,11 +80,11 @@ export default function ItemDetailsForm({
     }
   })
 
-  const editMode = !!formik.values.recordId
+  const editMode = !!formik.values.details.recordId
 
   async function getAvailability(itemId) {
     if (!itemId) {
-      formik.setFieldValue('onhand', 0)
+      formik.setFieldValue('details.onhand', 0)
 
       return
     }
@@ -91,13 +93,13 @@ export default function ItemDetailsForm({
       extension: InventoryRepository.Availability.get,
       parameters: `_itemId=${itemId}&_seqNo=0`
     })
-    formik.setFieldValue('onhand', res?.record?.onhand || 0)
+    formik.setFieldValue('details.onhand', res?.record?.onhand || 0)
   }
   async function getlastIVI(itemId) {
     if (!itemId) {
-      formik.setFieldValue('lastPurchaseUnitPrice', 0)
-      formik.setFieldValue('lastPurchaseDate', null)
-      formik.setFieldValue('lastPurchaseCurrencyId', null)
+      formik.setFieldValue('details.lastPurchaseUnitPrice', 0)
+      formik.setFieldValue('details.lastPurchaseDate', null)
+      formik.setFieldValue('details.lastPurchaseCurrencyId', null)
 
       return
     }
@@ -106,14 +108,14 @@ export default function ItemDetailsForm({
       extension: PurchaseRepository.ItemLastPurchaseInfo.last,
       parameters: `_itemId=${itemId}&_vendorId=${formik?.values?.vendorId || 0}`
     })
-    formik.setFieldValue('lastPurchaseUnitPrice', lastResp?.record?.invoiceItem?.unitPrice || 0)
-    formik.setFieldValue('lastPurchaseDate', formatDateFromApi(lastResp?.record?.invoice?.date))
-    formik.setFieldValue('lastPurchaseCurrencyId', lastResp?.record?.invoice?.currencyId)
+    formik.setFieldValue('details.lastPurchaseUnitPrice', lastResp?.record?.invoiceItem?.unitPrice || 0)
+    formik.setFieldValue('details.lastPurchaseDate', formatDateFromApi(lastResp?.record?.invoice?.date))
+    formik.setFieldValue('details.lastPurchaseCurrencyId', lastResp?.record?.invoice?.currencyId)
   }
 
   async function getCurrentCost(itemId) {
     if (!itemId) {
-      formik.setFieldValue('unitCost', 0)
+      formik.setFieldValue('details.unitCost', 0)
 
       return
     }
@@ -122,7 +124,7 @@ export default function ItemDetailsForm({
       extension: InventoryRepository.CurrentCost.get,
       parameters: `_itemId=${itemId}`
     })
-    formik.setFieldValue('unitCost', res?.record?.currentCost || 0)
+    formik.setFieldValue('details.unitCost', res?.record?.currentCost || 0)
   }
 
   async function refetchForm() {
@@ -133,10 +135,13 @@ export default function ItemDetailsForm({
       parameters: `_trxId=${recordId}&_seqNo=${seqNo}`
     })
     formik.setValues({
-      ...res.record,
-      onhand: res?.record?.onHand || 0,
-      deliveryDate: res?.record?.deliveryDate ? formatDateFromApi(res?.record?.deliveryDate) : null,
-      lastPurchaseDate: res?.record?.lastPurchaseDate ? formatDateFromApi(res?.record?.lastPurchaseDate) : null
+      details: {
+        ...res.record,
+        onhand: res?.record?.onHand || 0,
+        totalCost: (res?.record?.qty || 0) * (res?.record?.unitCost || 0),
+        deliveryDate: res?.record?.deliveryDate ? formatDateFromApi(res?.record?.deliveryDate) : null,
+        lastPurchaseDate: res?.record?.lastPurchaseDate ? formatDateFromApi(res?.record?.lastPurchaseDate) : null
+      }
     })
   }
 
@@ -164,7 +169,7 @@ export default function ItemDetailsForm({
                     endpointId={InventoryRepository.Item.snapshot}
                     valueField='reference'
                     displayField='name'
-                    name='itemId'
+                    name='details.itemId'
                     label={labels.item}
                     form={formik}
                     readOnly={readOnlyField}
@@ -174,6 +179,7 @@ export default function ItemDetailsForm({
                     maxAccess={maxAccess}
                     required
                     editMode={editMode}
+                    formObject={formik.values.details}
                     columnsInDropDown={[
                       { key: 'sku', value: 'SKU' },
                       { key: 'name', value: 'Name' }
@@ -185,111 +191,115 @@ export default function ItemDetailsForm({
                         })
 
                         formik.resetForm()
-                        formik.setFieldValue('sku', null)
+                        formik.setFieldValue('details.sku', null)
 
                         return
                       }
                       await getAvailability(newValue?.recordId)
                       await getlastIVI(newValue?.recordId)
                       await getCurrentCost(newValue?.recordId)
-                      formik.setFieldValue('msId', newValue?.msId || null)
-                      formik.setFieldValue('muId', null)
-                      formik.setFieldValue('totalCost', formik.values.qty || 0 * formik.values.unitCost || 0)
-                      formik.setFieldValue('itemName', newValue?.name || '')
-                      formik.setFieldValue('sku', newValue?.sku || '')
-                      formik.setFieldValue('itemId', newValue?.recordId || null)
+                      formik.setFieldValue('details.msId', newValue?.msId || null)
+                      formik.setFieldValue('details.muId', null)
+                      formik.setFieldValue(
+                        'details.totalCost',
+                        formik.values.details.qty || 0 * formik.values.details.unitCost || 0
+                      )
+                      formik.setFieldValue('details.itemName', newValue?.name || '')
+                      formik.setFieldValue('details.sku', newValue?.sku || '')
+                      formik.setFieldValue('details.itemId', newValue?.recordId || null)
                     }}
-                    errorCheck={'itemId'}
+                    errorCheck={'details.itemId'}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
-                    name='siteId'
+                    name='details.siteId'
                     readOnly={readOnlyField}
                     label={labels.site}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    values={formik.values}
+                    values={formik.values.details}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId || null)
+                      formik.setFieldValue('details.siteId', newValue?.recordId || null)
                     }}
-                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                    error={formik?.touched.details?.siteId && Boolean(formik?.errors.details?.siteId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={formik.values.msId && InventoryRepository.MeasurementUnit.qry}
-                    parameters={`_msId=${formik.values.msId}`}
-                    name='muId'
+                    endpointId={formik.values.details.msId && InventoryRepository.MeasurementUnit.qry}
+                    parameters={`_msId=${formik.values.details.msId}`}
+                    name='details.muId'
                     readOnly={editMode || readOnlyField}
                     label={labels.measurement}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    values={formik.values}
+                    values={formik.values.details}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('muId', newValue?.recordId || '')
-                      formik.setFieldValue('muQty', newValue?.qty)
+                      formik.setFieldValue('details.muId', newValue?.recordId || '')
+                      formik.setFieldValue('details.muQty', newValue?.qty)
                     }}
+                    error={formik?.touched.details?.muId && Boolean(formik?.errors.details?.muId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='qty'
+                    name='details.qty'
                     label={labels.qty}
-                    value={formik.values.qty}
+                    value={formik.values.details.qty}
                     onChange={e => {
                       let qty = Number(e.target.value.replace(/,/g, ''))
-                      formik.setFieldValue('qty', qty)
-                      formik.setFieldValue('totalCost', (qty || 0) * (formik.values.unitCost || 0))
+                      formik.setFieldValue('details.qty', qty)
+                      formik.setFieldValue('details.totalCost', (qty || 0) * (formik.values.details.unitCost || 0))
                     }}
-                    onClear={() => formik.setFieldValue('qty', '')}
+                    onClear={() => formik.setFieldValue('details.qty', '')}
                     readOnly={readOnlyField}
                     required
-                    error={formik.touched.qty && Boolean(formik.errors.qty)}
+                    error={formik?.touched.details?.qty && Boolean(formik?.errors.details?.qty)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='unitCost'
+                    name='details.unitCost'
                     label={labels.unitCost}
-                    value={formik.values.unitCost}
+                    value={formik.values.details.unitCost}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('unitCost', '')}
+                    onClear={() => formik.setFieldValue('details.unitCost', '')}
                     readOnly
-                    error={formik.touched.unitCost && Boolean(formik.errors.unitCost)}
+                    error={formik?.touched.details?.unitCost && Boolean(formik?.errors.details?.unitCost)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='totalCost'
+                    name='details.totalCost'
                     label={labels.totalCost}
-                    value={formik.values.totalCost}
+                    value={formik.values.details.totalCost}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('totalCost', '')}
+                    onClear={() => formik.setFieldValue('details.totalCost', '')}
                     readOnly
-                    error={formik.touched.totalCost && Boolean(formik.errors.totalCost)}
+                    error={formik?.touched.details?.totalCost && Boolean(formik?.errors.details?.totalCost)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='onhand'
+                    name='details.onhand'
                     label={labels.onHand}
-                    value={formik.values.onhand}
+                    value={formik.values.details.onhand}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('onhand', '')}
+                    onClear={() => formik.setFieldValue('details.onhand', '')}
                     readOnly
-                    error={formik.touched.onhand && Boolean(formik.errors.onhand)}
+                    error={formik?.touched.details?.onhand && Boolean(formik?.errors.details?.onhand)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -297,7 +307,7 @@ export default function ItemDetailsForm({
                     endpointId={PurchaseRepository.Vendor.snapshot}
                     valueField='reference'
                     displayField='name'
-                    name='vendorId'
+                    name='details.vendorId'
                     label={labels.vendor}
                     form={formik}
                     readOnly={readOnlyField}
@@ -305,17 +315,18 @@ export default function ItemDetailsForm({
                     valueShow='vendorRef'
                     secondValueShow='vendorName'
                     maxAccess={maxAccess}
+                    formObject={formik.values.details}
                     editMode={editMode}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('vendorId', newValue?.recordId || null)
-                      formik.setFieldValue('vendorName', newValue?.name || '')
-                      formik.setFieldValue('vendorRef', newValue?.reference || '')
+                      formik.setFieldValue('details.vendorId', newValue?.recordId || null)
+                      formik.setFieldValue('details.vendorName', newValue?.name || '')
+                      formik.setFieldValue('details.vendorRef', newValue?.reference || '')
                     }}
-                    errorCheck={'vendorId'}
+                    errorCheck={'details.vendorId'}
                   />
                 </Grid>
               </Grid>
@@ -324,66 +335,74 @@ export default function ItemDetailsForm({
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomDatePicker
-                    name='deliveryDate'
+                    name='details.deliveryDate'
                     label={labels.deliveryDate}
                     readOnly={readOnlyField}
-                    value={formik?.values?.deliveryDate}
+                    value={formik?.values?.details.deliveryDate}
                     onChange={formik.setFieldValue}
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('deliveryDate', null)}
-                    error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
+                    onClear={() => formik.setFieldValue('details.deliveryDate', null)}
+                    error={formik?.touched.details?.deliveryDate && Boolean(formik?.errors.details?.deliveryDate)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='lastPurchaseUnitPrice'
+                    name='details.lastPurchaseUnitPrice'
                     label={labels.lastPurchaseUnitPrice}
-                    value={formik.values.lastPurchaseUnitPrice}
+                    value={formik.values.details.lastPurchaseUnitPrice}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('lastPurchaseUnitPrice', '')}
+                    onClear={() => formik.setFieldValue('details.lastPurchaseUnitPrice', '')}
                     readOnly
-                    error={formik.touched.lastPurchaseUnitPrice && Boolean(formik.errors.lastPurchaseUnitPrice)}
+                    error={
+                      formik?.touched.details?.lastPurchaseUnitPrice &&
+                      Boolean(formik?.errors.details?.lastPurchaseUnitPrice)
+                    }
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Currency.qry}
-                    name='lastPurchaseCurrencyId'
+                    name='details.lastPurchaseCurrencyId'
                     label={labels.lastPurchaseCurrency}
                     valueField='recordId'
                     displayField='name'
                     readOnly
-                    values={formik.values}
+                    values={formik.values.details}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('lastPurchaseCurrencyId', newValue?.recordId || null)
+                      formik.setFieldValue('details.lastPurchaseCurrencyId', newValue?.recordId || null)
                     }}
-                    error={formik.touched.lastPurchaseCurrencyId && Boolean(formik.errors.lastPurchaseCurrencyId)}
+                    error={
+                      formik?.touched.details?.lastPurchaseCurrencyId &&
+                      Boolean(formik?.errors.details?.lastPurchaseCurrencyId)
+                    }
                     maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
-                    name='lastPurchaseDate'
+                    name='details.lastPurchaseDate'
                     label={labels.lastPurchaseDate}
                     readOnly
-                    value={formik?.values?.lastPurchaseDate}
+                    value={formik?.values?.details.lastPurchaseDate}
                     onChange={formik.setFieldValue}
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('lastPurchaseDate', null)}
-                    error={formik.touched.lastPurchaseDate && Boolean(formik.errors.lastPurchaseDate)}
+                    onClear={() => formik.setFieldValue('details.lastPurchaseDate', null)}
+                    error={
+                      formik?.touched.details?.lastPurchaseDate && Boolean(formik?.errors.details?.lastPurchaseDate)
+                    }
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
-                    name='justification'
+                    name='details.justification'
                     label={labels.justification}
-                    value={formik?.values?.justification}
+                    value={formik?.values?.details.justification}
                     rows={2.5}
                     readOnly={readOnlyField}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('justification', '')}
-                    error={formik.touched.justification && Boolean(formik.errors.justification)}
+                    onClear={() => formik.setFieldValue('details.justification', '')}
+                    error={formik?.touched.details?.justification && Boolean(formik?.errors.details?.justification)}
                   />
                 </Grid>
               </Grid>
