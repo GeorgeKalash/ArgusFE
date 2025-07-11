@@ -26,7 +26,7 @@ const BeneficiaryWindow = ({ clientId }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
-    onSubmit: values => {}
+    onSubmit: () => {}
   })
   const { getRequest } = useContext(RequestsContext)
 

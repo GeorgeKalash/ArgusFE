@@ -51,7 +51,6 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { RateDivision } from 'src/resources/RateDivision'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import NormalDialog from 'src/components/Shared/NormalDialog'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -60,6 +59,7 @@ import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import AccountSummary from 'src/components/Shared/AccountSummary'
+import AddressForm from 'src/components/Shared/AddressForm'
 import { createConditionalSchema } from 'src/lib/validation'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
@@ -1571,16 +1571,12 @@ export default function SaleTransactionForm({
 
   function openAddressForm() {
     stack({
-      Component: AddressFormShell,
+      Component: AddressForm,
       props: {
         address: address,
         setAddress: setAddress,
-        isCleared: false,
-        isSavedClear: false
-      },
-      width: 850,
-      height: 620,
-      title: labels.address
+        isCleared: false
+      }
     })
   }
 

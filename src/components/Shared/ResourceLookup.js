@@ -27,9 +27,11 @@ export const ResourceLookup = ({
     setStore([])
     setRenderOption(false)
     if (!endpointId) {
-      const res = await rest?.onLookup(searchQry)
-      setStore(res)
-      setRenderOption(true)
+      if (rest.onLookup) {
+        const res = await rest?.onLookup(searchQry)
+        setStore(res)
+        setRenderOption(true)
+      }
     } else {
       if (searchQry?.length >= minChars) {
         setIsLoading(true)
