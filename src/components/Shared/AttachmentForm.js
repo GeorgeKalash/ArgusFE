@@ -23,8 +23,8 @@ const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
 
   const { formik } = useForm({
     initialValues: {
-      resourceId: resourceId,
-      seqNo: seqNo
+      resourceId,
+      seqNo
     },
     enableReinitialize: false,
     validateOnChange: false,
@@ -48,12 +48,7 @@ const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
     >
       <VertLayout>
         <Grow>
-          <FileUpload
-            ref={fileUploadRef}
-            resourceId={ResourceIds.SystemAttachments}
-            seqNo={seqNo}
-            recordId={recordId}
-          />
+          <FileUpload ref={fileUploadRef} resourceId={resourceId} seqNo={seqNo} recordId={recordId} />
         </Grow>
       </VertLayout>
     </FormShell>

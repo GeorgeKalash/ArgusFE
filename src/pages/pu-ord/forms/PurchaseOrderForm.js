@@ -1176,7 +1176,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     }
 
     const response = await getRequest({
-      extension: PurchaseRepository.Requisition.qry,
+      extension: PurchaseRepository.RequisitionDetail.qry,
       parameters: `_trxId=${formik.values.requestId}`
     })
 

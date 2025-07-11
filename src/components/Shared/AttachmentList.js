@@ -114,9 +114,11 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
   ]
 
   async function fetchGridData() {
+    if (!recordId || !resourceId) return
+
     return await getRequest({
       extension: SystemRepository.Attachment.qry,
-      parameters: `_resourceId=${ResourceIds.SystemAttachments}&_recordId=${recordId}`
+      parameters: `_resourceId=${resourceId}&_recordId=${recordId}`
     })
   }
 
