@@ -1710,8 +1710,9 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               setAddress: setAddress,
                               onSubmit: onAddressSubmit,
                               readOnly: editMode && !allowEdit,
-                              required: false,
-                              changeClear: true
+                              optional: true,
+                              changeClear: true,
+                              allowPost: false
                             },
                             title: labels.workAddress
                           })

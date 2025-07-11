@@ -12,7 +12,7 @@ export const AddressFormShell = ({
   editMode,
   window,
   readOnly,
-  allowPost,
+  allowPost = true,
   optional = false,
   onSubmit,
   isSavedClear = true,
@@ -60,6 +60,8 @@ export const AddressFormShell = ({
       setAddress(values)
       if (allowPost) {
         onSubmit(values, window)
+      } else {
+        window.close()
       }
     }
   })
@@ -91,7 +93,6 @@ export const AddressFormShell = ({
       onClear={
         changeClear
           ? () => {
-              setAddress(formik.initialValues)
               formik.resetForm({
                 values: formik.initialValues
               })
@@ -108,7 +109,6 @@ export const AddressFormShell = ({
             readOnly={readOnly}
             required={required}
             setFormik={setFormik}
-            optional={optional}
             address={address}
             {...props}
           />
