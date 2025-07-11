@@ -805,7 +805,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
         if (itemId) {
           if (!acc[itemId]) {
             seqNo++
-            acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, seqNo: seqNo, categoryName: categoryName }
+            acc[itemId] = { sku, pcs: 0, weight: 0, itemName, seqNo, categoryName }
           }
           acc[itemId].pcs += 1
           acc[itemId].weight = parseFloat((acc[itemId].weight + parseFloat(weight || 0)).toFixed(2))
