@@ -24,6 +24,17 @@ const PuTrx = () => {
 
   const { functionId } = Router()
 
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.PurchaseInvoice
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.PurchaseReturn
+      default:
+        return null
+    }
+  }
+
   const {
     query: { data },
     filterBy,
