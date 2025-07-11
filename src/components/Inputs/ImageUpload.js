@@ -41,6 +41,7 @@ const ImageUpload = forwardRef(
     const parentResourceId = parentImage?.resourceId
 
     useEffect(() => {
+      console.log(rerender, parentImage)
       if (rerender && parentImage != null) {
         getData()
       } else handleInputImageReset()
@@ -116,12 +117,13 @@ const ImageUpload = forwardRef(
     }
 
     const submit = () => {
-      //if (disabled) return
-
+      if (disabled) return
       if (isAbsolutePath) {
-        const obj = { ...formik.values, fileName: formik.values.url, recordId: ref.current.value || recordId }
-        console.log(formik.values)
-        console.log(obj)
+        const obj = {
+          ...formik.values,
+          fileName: formik?.values?.file?.name || formik.values.url,
+          recordId: ref.current.value || recordId
+        }
 
         return postRequest({
           extension: SystemRepository.Attachment.set2,
@@ -161,7 +163,7 @@ const ImageUpload = forwardRef(
         <img
           src={`${
             image ||
-            (formik?.values?.url && formik?.values?.url + `?${new Date().getTime()}`) ||
+            (formik?.values?.fileName && formik?.values?.fileName + `?${new Date().getTime()}`) ||
             '/images/emptyPhoto.jpg'
           }`}
           alt=''

@@ -47,7 +47,6 @@ export default function JobOrderForm({
   const imageUploadRef = useRef(null)
   const [plStore, setPlStore] = useState([])
   const recordId = store?.recordId
-  const [imageSource, setImageSource] = useState(null)
   const [parentImage, setParentImage] = useState({ recordId: null, resourceId: null })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -130,11 +129,11 @@ export default function JobOrderForm({
         })
       })
 
-      if (imageUploadRef.current) {
-        imageUploadRef.current.value = parseInt(res.recordId)
+      // if (imageUploadRef.current) {
+      //   imageUploadRef.current.value = parseInt(res.recordId)
 
-        await imageUploadRef.current.submit()
-      }
+      //   await imageUploadRef.current.submit()
+      // }
 
       invalidate()
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
@@ -397,7 +396,7 @@ export default function JobOrderForm({
 
   async function fillItemInfo(values) {
     if (!values?.recordId) {
-      imageUploadRef.current.value = null
+      //imageUploadRef.current.value = null
       formik.setFieldValue('itemId', null)
       formik.setFieldValue('itemName', null)
       formik.setFieldValue('sku', null)
@@ -405,6 +404,10 @@ export default function JobOrderForm({
       formik.setFieldValue('itemWeight', null)
       formik.setFieldValue('itemCategoryId', null)
       formik.setFieldValue('itemFromDesign', false)
+      setParentImage({
+        recordId: values.recordId,
+        resourceId: ResourceIds.Item
+      })
 
       return
     }
@@ -888,6 +891,7 @@ export default function JobOrderForm({
                   customWidth={300}
                   customHeight={180}
                   rerender={formik.values.recordId}
+                  disabled={isCancelled || isReleased || isPosted}
                   isAbsolutePath={true}
                   parentImage={parentImage}
                   setParentImage={setParentImage}
