@@ -119,13 +119,8 @@ export default function PurchaseRquisition() {
     stack({
       Component: PurchaseRquisitionForm,
       props: {
-        labels,
-        access,
         recordId
-      },
-      width: 1100,
-      height: 700,
-      title: labels.purchaseRequisition
+      }
     })
   }
 

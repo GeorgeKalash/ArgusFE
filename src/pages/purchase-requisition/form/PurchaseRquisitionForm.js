@@ -31,14 +31,22 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 import ItemDetailsForm from './ItemDetailsForm'
 import { getStorageData } from 'src/storage/storage'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import useSetWindow from 'src/hooks/useSetWindow'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function PurchaseRquisitionForm({ recordId, labels, access }) {
+export default function PurchaseRquisitionForm({ recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const [maxSeqNo, setMaxSeqNo] = useState(1)
   const defaultPlant = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
   const userId = getStorageData('userData').userId
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.PurchaseRequisition
+  })
+
+  useSetWindow({ title: labels?.purchaseRequisition })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PurchaseRequisition,
@@ -81,12 +89,19 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
       const obj = { ...values }
       delete obj.items
 
+      let updatedDate = null
+      if (obj?.deliveryDate) {
+        updatedDate = new Date(obj.deliveryDate)
+        updatedDate.setHours(updatedDate.getHours() + 3)
+        updatedDate = formatDateToApi(updatedDate)
+      }
+
       const res = await postRequest({
         extension: PurchaseRepository.PurchaseRequisition.set,
         record: JSON.stringify({
           ...obj,
           date: obj?.date ? formatDateToApi(obj?.date) : null,
-          deliveryDate: obj?.deliveryDate ? formatDateToApi(obj?.deliveryDate) : null
+          deliveryDate: updatedDate
         })
       })
 
@@ -581,3 +596,6 @@ export default function PurchaseRquisitionForm({ recordId, labels, access }) {
     </FormShell>
   )
 }
+
+PurchaseRquisitionForm.width = 1100
+PurchaseRquisitionForm.height = 700
