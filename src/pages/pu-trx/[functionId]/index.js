@@ -173,8 +173,7 @@ const PuTrx = () => {
         : stackError({
             message: labels.noSelectedCurrency
           })
-    },
-    hasDT: false
+    }
   })
 
   const edit = obj => {

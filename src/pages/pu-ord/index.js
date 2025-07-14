@@ -41,8 +41,7 @@ const PuTrx = () => {
     functionId: SystemFunction.PurchaseOrder,
     action: async () => {
       openForm()
-    },
-    hasDT: true
+    }
   })
 
   const columns = [
