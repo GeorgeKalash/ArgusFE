@@ -91,7 +91,6 @@ const HrRlt = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           columns={columns}
           gridData={data}
           pageSize={50}
