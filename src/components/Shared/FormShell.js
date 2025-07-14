@@ -63,7 +63,7 @@ export default function FormShell({
   clientRelation = false,
   addClientRelation = false,
   previewReport = false,
-  onClear = () => {},
+  onClear,
   previewBtnClicked = () => {},
   setIDInfoAutoFilled,
   visibleClear,
