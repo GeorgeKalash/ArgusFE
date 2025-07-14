@@ -262,5 +262,8 @@ export const SystemRepository = {
     get: service + 'getFO',
     set: service + 'setFO',
     del: service + 'delFO'
+  },
+  ResourcePerformance: {
+    page: service + 'pageTLP'
   }
 }
