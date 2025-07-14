@@ -199,9 +199,7 @@ export default function SaleTransactionForm({
           applyVat: false,
           taxId: null,
           taxDetails: null,
-          notes: '',
-          saTrx: true,
-          taxDetailsButton: true
+          notes: ''
         }
       ],
       serials: [],
@@ -750,19 +748,29 @@ export default function SaleTransactionForm({
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
@@ -788,7 +796,12 @@ export default function SaleTransactionForm({
       component: 'button',
       name: 'saTrx',
       props: {
-        imgSrc: '/images/buttonsIcons/popup-black.png'
+        imgSrc: '/images/buttonsIcons/popup-black.png',
+        onCondition: row => {
+          return {
+            disabled: !row.itemId
+          }
+        }
       },
       label: labels.salesTrx,
       onClick: (e, row, update, newRow) => {
@@ -1073,7 +1086,6 @@ export default function SaleTransactionForm({
           upo: parseFloat(item.upo).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-          saTrx: true,
           serials: serials?.list?.map((serialDetail, index) => {
             return {
               ...serialDetail,

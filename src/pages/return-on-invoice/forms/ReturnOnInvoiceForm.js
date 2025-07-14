@@ -157,7 +157,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         returnedQty: 0,
         trackBy: null,
         isEditMode: false,
-        taxDetailsButton: true,
         serials: []
       }
     ]
@@ -461,7 +460,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
           applyVat: formik.values.isVattable,
-          taxDetailsButton: true,
           trackBy: newRow?.trackBy
         })
       },
@@ -577,24 +575,34 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          const metalPrice = Number(formik.values.metalPrice) || 0
-          const metalPurity = Number(row.metalPurity) || 0
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: {
-                ...row,
-                basePrice: metalPrice !== 0 ? metalPrice * metalPurity : 0
-              }
+        const metalPrice = Number(formik.values.metalPrice) || 0
+        const metalPurity = Number(row.metalPurity) || 0
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: {
+              ...row,
+              basePrice: metalPrice !== 0 ? metalPrice * metalPurity : 0
             }
-          })
-        }
+          }
+        })
       }
     },
     {

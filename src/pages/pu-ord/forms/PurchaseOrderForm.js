@@ -262,20 +262,6 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
-  const onCondition = row => {
-    if (row.taxId) {
-      return {
-        imgSrc: '/images/buttonsIcons/tax-icon.png',
-        hidden: false
-      }
-    } else {
-      return {
-        imgSrc: '',
-        hidden: true
-      }
-    }
-  }
-
   const columns = [
     {
       component: 'resourcelookup',
@@ -424,19 +410,22 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       component: 'button',
       name: 'costHistory',
       props: {
-        imgSrc: '/images/buttonsIcons/popup-black.png'
+        imgSrc: '/images/buttonsIcons/popup-black.png',
+        onCondition: row => {
+          return {
+            disabled: !row.itemId
+          }
+        }
       },
       label: labels.costHistory,
       onClick: (e, row) => {
-        if (row?.itemId) {
-          stack({
-            Component: ItemCostHistory,
-            props: {
-              itemId: row?.itemId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: ItemCostHistory,
+          props: {
+            itemId: row?.itemId,
+            obj: row
+          }
+        })
       }
     },
     {
@@ -451,19 +440,29 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       component: 'button',
       name: 'taxDetails',
       props: {
-        onCondition
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
@@ -1210,8 +1209,6 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
           'msId',
           'muRef',
           'muQty',
-          'costHistory',
-          'taxDetailsButton',
           'metalId',
           'baseLaborPrice',
           'TotPricePerG'

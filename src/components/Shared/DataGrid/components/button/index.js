@@ -20,7 +20,7 @@ function DataGridButton({ data, column: { props, field, ...column }, update, upd
           column?.onClick(e, data, update, updateRow)
         }}
         variant={!!imgSrc ? '' : 'contained'}
-        disabled={checkCondition?.disabled || data?.[field]}
+        disabled={checkCondition?.disabled}
       >
         {!!imgSrc ? (
           <img
