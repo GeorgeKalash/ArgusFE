@@ -55,13 +55,13 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         operationId: null,
         type: null,
         reference: '',
-        wsJobRef: '',
-        joJobRef: '',
+        wsJobRef: values.reference,
+        joJobRef: values.jobRef,
         date: values.date,
-        pgItemName: '',
-        laborName: '',
-        wipQty: 0,
-        wipPcs: 0
+        pgItemName: values.pgItemName,
+        laborName: values.laborName,
+        wipQty: values.wipQty || 0,
+        wipPcs: values.wipPcs || 0
       },
       items: [
         {
@@ -80,7 +80,6 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
       ]
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -99,7 +98,14 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         ...obj,
         jobId: values.jobId,
         siteId: values.siteId,
-        date: values.date
+        date: values.date,
+        items: obj?.items?.map((item, index) => {
+          return {
+            ...item,
+            unitCost: item.unitCost || 0,
+            seqNo: index + 1,
+          }
+        })
       }
 
       const res = await postRequest({
@@ -235,15 +241,17 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         'items',
         items?.list?.map(({ ...item }, index) => ({
           id: index + 1,
-          ...item
+          ...item,
+          pcs: item.pcs || 0,
+          qty: item.qty || 0,
         })) || formik.values.items
       )
     }
   }
 
   const editMode = !!formik?.values?.header?.recordId
-  const totalQty = formik.values.items ? formik.values.items.reduce((acc, item) => acc + parseInt(item.qty), 0) : 0
-  const totalPcs = formik.values.items ? formik.values.items.reduce((acc, item) => acc + parseInt(item.pcs), 0) : 0
+  const totalQty = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.qty, 0) : 0
+  const totalPcs = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.pcs, 0) : 0
 
   const totalExpQty = formik.values.items
     ? formik.values.items.reduce((acc, item) => acc + parseInt(item.designQty), 0)
@@ -484,8 +492,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                 label: labels.expectedPcs,
                 name: 'designPcs',
                 props: {
-                  maxLength: 6,
-                  decimalScale: 5
+                  readOnly: true
                 }
               },
               ...(getValueFromDefaultsData('mfimd1')
