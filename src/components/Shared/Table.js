@@ -27,7 +27,6 @@ import { Fixed } from './Layouts/Fixed'
 import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteRowDB } from 'src/lib/indexDB'
-import { useParams } from 'next/navigation'
 
 const Table = ({
   name,
