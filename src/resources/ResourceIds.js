@@ -512,6 +512,7 @@ export const ResourceIds = {
   BgCheck: 71103,
   NoticePeriods: 71111,
   TransactionLogPerformance: 20137,
+  SyncJobOrderRouting: 42704,
 
   // GL
   GLSalesInvoice: 51604,

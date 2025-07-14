@@ -204,7 +204,8 @@ export const ManufacturingRepository = {
     get: service + 'getJRO',
     set: service + 'setJRO',
     set2: service + 'set2JRO',
-    del: service + 'delJRO'
+    del: service + 'delJRO',
+    sync: service + 'syncJRO',
   },
   Worksheet: {
     snapshot: service + 'snapshotWST',
