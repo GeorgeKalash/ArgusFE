@@ -78,6 +78,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
       releaseStatus: null,
       wip: 1,
       totalCost: 0,
+      totalQty: 0,
       items: {}
     },
     validateOnChange: true,
@@ -305,9 +306,11 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
 
   function fillForm(requisitionData, itemDetails) {
     let headerTotalCost = 0
+    let headerTotalQty = 0
 
     const modifiedList = itemDetails?.list?.map(item => {
       headerTotalCost += item?.unitCost * item?.qty
+      headerTotalQty += item?.qty || 0
       if (item?.seqNo > maxSeqNo) setMaxSeqNo(item?.seqNo)
 
       return {
@@ -323,6 +326,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
       date: formatDateFromApi(requisitionData?.date),
       deliveryDate: formatDateFromApi(requisitionData?.deliveryDate),
       totalCost: headerTotalCost.toFixed(2),
+      totalQty: headerTotalQty.toFixed(2),
       items: { list: modifiedList }
     })
   }
@@ -586,8 +590,11 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
           />
         </Grow>
         <Fixed>
-          <Grid container justifyContent='flex-end'>
-            <Grid item xs={6} sm={4} md={3}>
+          <Grid container justifyContent='flex-end' spacing={2}>
+            <Grid item>
+              <CustomNumberField name='totalQty' label={labels.totalQty} value={formik.values.totalQty} readOnly />
+            </Grid>
+            <Grid item>
               <CustomNumberField name='totalCost' label={labels.totalCost} value={formik.values.totalCost} readOnly />
             </Grid>
           </Grid>
