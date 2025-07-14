@@ -120,7 +120,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
-  const isClosed = formik?.values?.wip === 2
+  const isClosed = formik.values.wip === 2
 
   const totalQty = formik.values?.rows
     ?.reduce((qtySum, row) => {
@@ -407,7 +407,6 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       props: {
         resourceId: ResourceIds.ImportProductionOrder,
         access: maxAccess,
-        platformLabels,
         onSuccess: async () => {
           if (recordId) refetchForm(recordId)
         }
@@ -474,6 +473,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       editMode={editMode}
       previewReport={editMode}
       disabledSubmit={isPosted || isClosed}
+      functionId={SystemFunction.ProductionOrder}
     >
       <VertLayout>
         <Fixed>

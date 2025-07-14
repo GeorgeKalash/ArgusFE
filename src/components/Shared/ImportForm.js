@@ -13,6 +13,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
 import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const formatDateForImport = dateString => {
   const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10))
@@ -129,9 +130,10 @@ const getImportData = (gridData, columns, stackError) => {
   return convertedData
 }
 
-const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) => {
+const ImportForm = ({ onSuccess, resourceId, access, window }) => {
   const { stack: stackError } = useError()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [importConfig, setImportConfig] = useState(null)
   const [parsedFileContent, setParsedFileContent] = useState({ count: 0, list: [] })
   const [file, setFile] = useState(null)

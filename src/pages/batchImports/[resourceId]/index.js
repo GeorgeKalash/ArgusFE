@@ -8,7 +8,6 @@ import { useResourceQuery } from 'src/hooks/resource'
 
 const BatchImports = () => {
   const { stack } = useWindow()
-  const { platformLabels } = useContext(ControlContext)
   const { resourceId } = Router()
   const { access } = useResourceQuery({ datasetId: resourceId })
 
@@ -16,7 +15,6 @@ const BatchImports = () => {
     <ImportForm
       resourceId={resourceId}
       access={access}
-      platformLabels={platformLabels}
       onSuccess={res => {
         stack({
           Component: ThreadProgress,
