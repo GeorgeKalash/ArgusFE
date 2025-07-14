@@ -508,6 +508,7 @@ export const ResourceIds = {
   FITrialBalanceGridView: 31402,
   Folder: 70111,
   BgCheck: 71103,
+  HRStatus: 71107,
 
   // GL
   GLSalesInvoice: 51604,
