@@ -29,11 +29,17 @@ export const EmployeeRepository = {
     set: service + 'setBT',
     page: service + 'pageBT',
     del: service + 'delBT'
-},
+  },
   BgCheck: {
     page: service + 'pageCT',
     set: service + 'setCT',
     get: service + 'getCT',
     del: service + 'delCT'
+  },
+  NoticePeriods: {
+    get: service + 'getNP',
+    set: service + 'setNP',
+    del: service + 'delNP',
+    page: service + 'pageNP'
   }
 }
