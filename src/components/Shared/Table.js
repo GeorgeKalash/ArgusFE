@@ -27,6 +27,7 @@ import { Fixed } from './Layouts/Fixed'
 import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteRowDB } from 'src/lib/indexDB'
+import { useParams } from 'next/navigation'
 
 const Table = ({
   name,
@@ -620,6 +621,48 @@ const Table = ({
       ? (containerWidth - totalFixedColumnWidth) / filteredColumns?.length
       : 0
 
+  const IndentedCellRenderer = props => {
+    const { data, value } = props
+    const indent = data.level * 20
+    const isParent = data.level === 0
+
+    const arrow = isParent ? (data.isExpanded ? '▼' : '▶') : ''
+
+    return (
+      <div
+        style={{ paddingLeft: indent, cursor: isParent ? 'pointer' : 'default' }}
+        onClick={() => handleRowClick(data)}
+      >
+        {arrow} {value}
+      </div>
+    )
+  }
+
+  const handleRowClick = params => {
+    const clickedRef = params?.[props?.field]
+
+    props.fullRowDataRef.current = props?.fullRowDataRef.current.map(row => {
+      if (row.reference === clickedRef && row.level === 0) {
+        return { ...row, isExpanded: !row.isExpanded }
+      }
+
+      return row
+    })
+
+    const updatedVisibleRows = []
+    for (const row of props?.fullRowDataRef.current) {
+      if (row.level === 0) {
+        updatedVisibleRows.push(row)
+        if (row.isExpanded) {
+          const children = props?.fullRowDataRef.current.filter(child => child.parent === row.reference)
+          updatedVisibleRows.push(...children)
+        }
+      }
+    }
+
+    props?.setRowData(updatedVisibleRows)
+  }
+
   const columnDefs = [
     ...(showCheckboxColumn
       ? [
@@ -650,7 +693,11 @@ const Table = ({
       width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
       flex: column.flex,
       sort: column.sort || '',
-      cellRenderer: column.cellRenderer ? column.cellRenderer : FieldWrapper
+      cellRenderer: column.cellRendererTree
+        ? IndentedCellRenderer
+        : column.cellRenderer
+        ? column.cellRenderer
+        : FieldWrapper
     }))
   ]
 

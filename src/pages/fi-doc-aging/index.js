@@ -26,9 +26,24 @@ const DocumentAging = () => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const fullRowDataRef = useRef([])
+  const fullRowDataRef = useRef([
+    { reference: 'DN-00002', level: 0, isExpanded: false, hasChildren: true },
+    { reference: 'SI-00012', level: 0, isExpanded: false, hasChildren: true },
+    { reference: 'CN-00001', level: 1, parent: 'SI-00012' },
+    { reference: 'RV-0094', level: 1, parent: 'SI-00012' },
+    { reference: 'CN-0081', level: 1, parent: 'SI-00012' },
+    { reference: 'CN-00001', level: 1, parent: 'DN-00002' },
+    { reference: 'RV-0094', level: 1, parent: 'DN-00002' },
+    { reference: 'CN-0081', level: 1, parent: 'DN-00002' }
+  ])
 
-  const [rowData, setRowData] = useState()
+  const [rowData, setRowData] = useState(() =>
+    fullRowDataRef.current.flatMap(row =>
+      row.level === 0
+        ? [row, ...(row.isExpanded ? fullRowDataRef.current.filter(c => c.parent === row.reference) : [])]
+        : []
+    )
+  )
 
   const { stack } = useWindow()
   const amountAppliedRef = useRef()
@@ -178,54 +193,13 @@ const DocumentAging = () => {
     }
   ]
 
-  const IndentedCellRenderer = props => {
-    const { data, value } = props
-    const indent = data.level * 20
-    const isParent = data.level === 0
-
-    const arrow = isParent && data.hasChildren ? (data.isExpanded ? '▼' : '▶') : ''
-
-    return (
-      <div
-        style={{ paddingLeft: indent, cursor: isParent && data.hasChildren ? 'pointer' : 'default' }}
-        onClick={() => handleRowClick(data)}
-      >
-        {arrow} {value}
-      </div>
-    )
-  }
-
-  const handleRowClick = data => {
-    const clickedRef = data?.reference
-
-    fullRowDataRef.current = fullRowDataRef.current.map(row => {
-      if (row.reference === clickedRef && row.level === 0) {
-        return { ...row, isExpanded: !row.isExpanded }
-      }
-
-      return row
-    })
-
-    const updatedVisibleRows = []
-    for (const row of fullRowDataRef.current) {
-      if (row.level === 0) {
-        updatedVisibleRows.push(row)
-        if (row.isExpanded) {
-          const children = fullRowDataRef.current.filter(child => child.parent === row.reference)
-          updatedVisibleRows.push(...children)
-        }
-      }
-    }
-
-    setRowData(updatedVisibleRows)
-  }
 
   const columnsAgingTree = [
     {
       field: 'reference',
       headerName: labels.documentReference,
       flex: 1,
-      cellRenderer: IndentedCellRenderer
+      cellRendererTree: true
     },
     {
       field: 'date',
