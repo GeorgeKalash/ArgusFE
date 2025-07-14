@@ -20,10 +20,11 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { useError } from 'src/error'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
-export default function SerialsForm({ labels, maxAccess, recordId }) {
+export default function SerialsForm({ labels, maxAccess, store, setStore }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
+  const { recordId } = store
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Serial.qry
@@ -37,7 +38,6 @@ export default function SerialsForm({ labels, maxAccess, recordId }) {
       itemId: null,
       weight: null,
       admissionDate: null,
-      siteId: null,
       warrantyStartDate: null,
       warrantyEndDate: null,
       productionDate: null,
@@ -97,6 +97,11 @@ export default function SerialsForm({ labels, maxAccess, recordId }) {
         warrantyEndDate: formatDateFromApi(res?.record?.warrantyEndDate),
         expirationDate: formatDateFromApi(res?.record?.expirationDate)
       })
+
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId
+      }))
     }
   }
 
@@ -132,201 +137,205 @@ export default function SerialsForm({ labels, maxAccess, recordId }) {
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <CustomTextField
-                name='srlNo'
-                label={labels.srlNo}
-                value={formik.values?.srlNo}
-                required
-                readOnly={editMode}
-                maxAccess={maxAccess}
-                onChange={e => {
-                  formik.handleChange(e)
-                }}
-                onBlur={e => {
-                  if (e.target.value && !editMode) {
-                    checkSrlNo(e.target.value)
-                  }
-                }}
-                onClear={() => formik.setFieldValue('srlNo', '')}
-                error={formik.touched.srlNo && Boolean(formik.errors.srlNo)}
-                maxLength={20}
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='srlNo'
+                    label={labels.srlNo}
+                    value={formik.values?.srlNo}
+                    required
+                    readOnly={editMode}
+                    maxAccess={maxAccess}
+                    onChange={e => {
+                      formik.handleChange(e)
+                    }}
+                    onBlur={e => {
+                      if (e.target.value && !editMode) {
+                        checkSrlNo(e.target.value)
+                      }
+                    }}
+                    onClear={() => formik.setFieldValue('srlNo', '')}
+                    error={formik.touched.srlNo && Boolean(formik.errors.srlNo)}
+                    maxLength={20}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={InventoryRepository.Item.snapshot}
+                    name='itemId'
+                    label={labels.sku}
+                    readOnly={editMode}
+                    valueField='sku'
+                    displayField='name'
+                    valueShow='sku'
+                    displayFieldWidth={2}
+                    secondValueShow='itemName'
+                    form={formik}
+                    required
+                    columnsInDropDown={[
+                      { key: 'sku', value: 'SKU' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('itemId', newValue?.recordId || null)
+                      formik.setFieldValue('itemName', newValue?.name || '')
+                      formik.setFieldValue('sku', newValue?.sku || '')
+                      getMetal(newValue?.recordId)
+                    }}
+                    errorCheck={'itemId'}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='weight'
+                    label={labels.weight}
+                    value={formik.values.weight}
+                    maxAccess={maxAccess}
+                    readOnly={editMode}
+                    maxLength={10}
+                    decimalScale={3}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('weight', 0)}
+                    error={formik.touched.weight && Boolean(formik.errors.weight)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={ManufacturingRepository.Design.snapshot}
+                    valueField='reference'
+                    displayField='name'
+                    displayFieldWidth={2}
+                    name='designId'
+                    label={labels.design}
+                    form={formik}
+                    secondDisplayField={true}
+                    firstValue={formik.values.designRef}
+                    secondValue={formik.values.designName}
+                    errorCheck={'designId'}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('designId', newValue?.recordId || null)
+                      formik.setFieldValue('designRef', newValue?.reference || '')
+                      formik.setFieldValue('designName', newValue?.name || '')
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='metalRef'
+                    label={labels.metal}
+                    value={formik.values?.metalRef}
+                    readOnly
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='metalPurity'
+                    label={labels.metalPurity}
+                    value={formik.values?.metalPurity}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={InventoryRepository.ItemSizes.qry}
-                name='sizeId'
-                label={labels.size}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                maxAccess={maxAccess}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('sizeId', newValue?.recordId || null)
-                }}
-                error={formik.touched.sizeId && Boolean(formik.errors.sizeId)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <ResourceLookup
-                endpointId={InventoryRepository.Item.snapshot}
-                name='itemId'
-                label={labels.sku}
-                readOnly={editMode}
-                valueField='sku'
-                displayField='name'
-                valueShow='sku'
-                displayFieldWidth={2}
-                secondValueShow='itemName'
-                form={formik}
-                required
-                columnsInDropDown={[
-                  { key: 'sku', value: 'SKU' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('itemId', newValue?.recordId || null)
-                  formik.setFieldValue('itemName', newValue?.name || '')
-                  formik.setFieldValue('sku', newValue?.sku || '')
-                  getMetal(newValue?.recordId)
-                }}
-                errorCheck={'itemId'}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomDatePicker
-                name='productionDate'
-                label={labels.productionDate}
-                value={formik.values.productionDate}
-                onChange={formik.setFieldValue}
-                maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('productionDate', null)}
-                error={formik.touched.productionDate && Boolean(formik.errors.productionDate)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='weight'
-                label={labels.weight}
-                value={formik.values.weight}
-                maxAccess={maxAccess}
-                readOnly={editMode}
-                maxLength={10}
-                decimalScale={3}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('weight', 0)}
-                error={formik.touched.weight && Boolean(formik.errors.weight)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomDatePicker
-                name='admissionDate'
-                label={labels.admissionDate}
-                value={formik.values.admissionDate}
-                onChange={formik.setFieldValue}
-                maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('admissionDate', null)}
-                error={formik.touched.admissionDate && Boolean(formik.errors.admissionDate)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='siteName'
-                label={labels.site}
-                value={formik.values?.siteName}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomDatePicker
-                name='warrantyStartDate'
-                label={labels.warrantyStartDate}
-                value={formik.values.warrantyStartDate}
-                onChange={formik.setFieldValue}
-                maxAccess={maxAccess}
-                max={formik.values.warrantyEndDate}
-                onClear={() => formik.setFieldValue('warrantyStartDate', null)}
-                error={formik.touched.warrantyStartDate && Boolean(formik.errors.warrantyStartDate)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <ResourceLookup
-                endpointId={ManufacturingRepository.Design.snapshot}
-                valueField='reference'
-                displayField='name'
-                displayFieldWidth={2}
-                name='designId'
-                label={labels.design}
-                form={formik}
-                secondDisplayField={true}
-                firstValue={formik.values.designRef}
-                secondValue={formik.values.designName}
-                errorCheck={'designId'}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('designId', newValue?.recordId || null)
-                  formik.setFieldValue('designRef', newValue?.reference || '')
-                  formik.setFieldValue('designName', newValue?.name || '')
-                }}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomDatePicker
-                name='warrantyEndDate'
-                label={labels.warrantyEndDate}
-                min={formik.values.warrantyStartDate}
-                value={formik.values.warrantyEndDate}
-                onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('warrantyEndDate', null)}
-                error={formik.touched.warrantyEndDate && Boolean(formik.errors.warrantyEndDate)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='metalRef'
-                label={labels.metal}
-                value={formik.values?.metalRef}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomDatePicker
-                name='expirationDate'
-                label={labels.expirationDate}
-                value={formik.values.expirationDate}
-                maxAccess={maxAccess}
-                onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('expirationDate', null)}
-                error={formik.touched.expirationDate && Boolean(formik.errors.expirationDate)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='metalPurity'
-                label={labels.metalPurity}
-                value={formik.values?.metalPurity}
-                maxAccess={maxAccess}
-                readOnly
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='mfrSrlNo'
-                label={labels.producerSerialNo}
-                value={formik.values?.mfrSrlNo}
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('mfrSrlNo', '')}
-                error={formik.touched.mfrSrlNo && Boolean(formik.errors.mfrSrlNo)}
-                maxLength={20}
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.ItemSizes.qry}
+                    name='sizeId'
+                    label={labels.size}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('sizeId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.sizeId && Boolean(formik.errors.sizeId)}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='productionDate'
+                    label={labels.productionDate}
+                    value={formik.values.productionDate}
+                    onChange={formik.setFieldValue}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('productionDate', null)}
+                    error={formik.touched.productionDate && Boolean(formik.errors.productionDate)}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='admissionDate'
+                    label={labels.admissionDate}
+                    value={formik.values.admissionDate}
+                    onChange={formik.setFieldValue}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('admissionDate', null)}
+                    error={formik.touched.admissionDate && Boolean(formik.errors.admissionDate)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='warrantyStartDate'
+                    label={labels.warrantyStartDate}
+                    value={formik.values.warrantyStartDate}
+                    onChange={formik.setFieldValue}
+                    maxAccess={maxAccess}
+                    max={formik.values.warrantyEndDate}
+                    onClear={() => formik.setFieldValue('warrantyStartDate', null)}
+                    error={formik.touched.warrantyStartDate && Boolean(formik.errors.warrantyStartDate)}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='warrantyEndDate'
+                    label={labels.warrantyEndDate}
+                    min={formik.values.warrantyStartDate}
+                    value={formik.values.warrantyEndDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('warrantyEndDate', null)}
+                    error={formik.touched.warrantyEndDate && Boolean(formik.errors.warrantyEndDate)}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='expirationDate'
+                    label={labels.expirationDate}
+                    value={formik.values.expirationDate}
+                    maxAccess={maxAccess}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('expirationDate', null)}
+                    error={formik.touched.expirationDate && Boolean(formik.errors.expirationDate)}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='mfrSrlNo'
+                    label={labels.producerSerialNo}
+                    value={formik.values?.mfrSrlNo}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('mfrSrlNo', '')}
+                    error={formik.touched.mfrSrlNo && Boolean(formik.errors.mfrSrlNo)}
+                    maxLength={20}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </Grow>
