@@ -89,7 +89,8 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.CashTransfer,
     access: access,
-    enabled: !recordId
+    enabled: !recordId,
+    hasDT: false
   })
 
   const { formik } = useForm({
