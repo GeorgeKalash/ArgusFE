@@ -467,13 +467,13 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
   return (
     <FormShell
       resourceId={ResourceIds.ProductionOrder}
+      functionId={SystemFunction.ProductionOrder}
       form={formik}
       maxAccess={maxAccess}
       actions={actions}
       editMode={editMode}
       previewReport={editMode}
       disabledSubmit={isPosted || isClosed}
-      functionId={SystemFunction.ProductionOrder}
     >
       <VertLayout>
         <Fixed>
