@@ -6,7 +6,11 @@ export const EmployeeRepository = {
     get1: service + 'getEM1'
   },
   CertificateFilters: {
-    qry: service + 'qryCL'
+    qry: service + 'qryCL',
+    get: service + 'getCL',
+    set: service + 'setCL',
+    del: service + 'delCL',
+    page: service + 'pageCL'
   },
   HRDocTypeFilters: {
     qry: service + 'qryDT'
@@ -24,10 +28,22 @@ export const EmployeeRepository = {
   SponsorFilters: {
     qry: service + 'qrySP'
   },
+  BonusTypes: {
+    get: service + 'getBT',
+    set: service + 'setBT',
+    page: service + 'pageBT',
+    del: service + 'delBT'
+  },
   BgCheck: {
     page: service + 'pageCT',
     set: service + 'setCT',
     get: service + 'getCT',
     del: service + 'delCT'
+  },
+  NoticePeriods: {
+    get: service + 'getNP',
+    set: service + 'setNP',
+    del: service + 'delNP',
+    page: service + 'pageNP'
   }
 }

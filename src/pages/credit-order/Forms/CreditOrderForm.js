@@ -88,7 +88,8 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CreditOrder
+    datasetId: ResourceIds.CreditOrder,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.creditOrder, window })
@@ -96,7 +97,8 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
   const { maxAccess } = useDocumentType({
     functionId: selectedFunctionId,
     access,
-    enabled: !recordId
+    enabled: !recordId,
+    hasDT: false
   })
 
   const invalidate = useInvalidate({

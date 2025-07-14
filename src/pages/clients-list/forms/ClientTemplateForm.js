@@ -68,7 +68,8 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   const trialDays = defaultsData?.list?.find(({ key }) => key === 'ct-client-trial-days')?.value
 
   const { labels, access: maxAccess } = useResourceParams({
-    datasetId: ResourceIds.ClientMaster
+    datasetId: ResourceIds.ClientMaster,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.pageTitle, window })

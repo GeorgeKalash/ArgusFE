@@ -130,8 +130,7 @@ const SalesQuotations = () => {
         : stackError({
             message: labels.noSelectedCurrency
           })
-    },
-    hasDT: true
+    }
   })
 
   const add = async () => {
