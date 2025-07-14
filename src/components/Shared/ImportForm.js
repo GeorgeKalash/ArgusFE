@@ -263,7 +263,7 @@ const ImportForm = ({ onSuccess, resourceId, access, window }) => {
 
       <Grow>
         <Table
-          name='table'
+          name='import'
           columns={[
             {
               field: 'recordId',
