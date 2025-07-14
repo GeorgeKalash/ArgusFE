@@ -96,7 +96,8 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
   const { maxAccess } = useDocumentType({
     functionId: selectedFunctionId,
     access,
-    enabled: !recordId
+    enabled: !recordId,
+    hasDT: false
   })
 
   const invalidate = useInvalidate({

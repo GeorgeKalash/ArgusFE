@@ -99,7 +99,8 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
   const { maxAccess } = useDocumentType({
     functionId: selectedFunctionId,
     access: access,
-    enabled: !recordId
+    enabled: !recordId,
+    hasDT: false
   })
 
   useSetWindow({ title: labels.creditInvoice, window })

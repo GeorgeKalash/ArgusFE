@@ -126,8 +126,7 @@ const ReturnOnInvoice = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.ReturnOnInvoice,
-    action: openForm,
-    hasDT: true
+    action: openForm
   })
 
   const add = async () => {

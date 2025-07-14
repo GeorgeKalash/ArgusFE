@@ -149,8 +149,7 @@ const RetailTrx = () => {
         return
       }
       openForm()
-    },
-    hasDT: false
+    }
   })
 
   const edit = obj => {

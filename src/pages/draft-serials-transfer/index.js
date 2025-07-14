@@ -120,8 +120,7 @@ const DraftSerialsTranfer = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.DraftTransfer,
-    action: openForm,
-    hasDT: true
+    action: openForm
   })
 
   const add = async () => {
