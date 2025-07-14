@@ -68,7 +68,7 @@ const HrNotice = () => {
       },
       width: 500,
       height: 250,
-      title: labels.folder
+      title: labels.noticePeriod
     })
   }
 

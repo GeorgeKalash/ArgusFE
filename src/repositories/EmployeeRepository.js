@@ -1,5 +1,3 @@
-import { get } from 'react-hook-form'
-
 const service = 'EP.asmx/'
 
 export const EmployeeRepository = {
