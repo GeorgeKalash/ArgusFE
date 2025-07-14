@@ -26,24 +26,9 @@ const DocumentAging = () => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const fullRowDataRef = useRef([
-    { reference: 'DN-00002', level: 0, isExpanded: false, hasChildren: true },
-    { reference: 'SI-00012', level: 0, isExpanded: false, hasChildren: true },
-    { reference: 'CN-00001', level: 1, parent: 'SI-00012' },
-    { reference: 'RV-0094', level: 1, parent: 'SI-00012' },
-    { reference: 'CN-0081', level: 1, parent: 'SI-00012' },
-    { reference: 'CN-00001', level: 1, parent: 'DN-00002' },
-    { reference: 'RV-0094', level: 1, parent: 'DN-00002' },
-    { reference: 'CN-0081', level: 1, parent: 'DN-00002' }
-  ])
+  const fullRowDataRef = useRef([])
 
-  const [rowData, setRowData] = useState(() =>
-    fullRowDataRef.current.flatMap(row =>
-      row.level === 0
-        ? [row, ...(row.isExpanded ? fullRowDataRef.current.filter(c => c.parent === row.reference) : [])]
-        : []
-    )
-  )
+  const [rowData, setRowData] = useState()
 
   const { stack } = useWindow()
   const amountAppliedRef = useRef()
@@ -78,16 +63,14 @@ const DocumentAging = () => {
       })
 
       const legs = response?.record?.legs || []
-      const agings = response?.record?.agings || []
-      const currencyId = values?.currencyId
-      const amounts = agings[0]?.amounts?.filter(a => a.currencyId === currencyId) || []
+      const amounts = response?.record?.agings?.[0]?.amounts || []
 
       const agingList = legs.map(leg => {
-        const matchedAmount = amounts.find(a => a.seqNo === leg.seqNo)
+        const firstMatch = amounts.find(a => a.seqNo === leg.seqNo)
 
         return {
           age: leg.caption,
-          balance: Math.round(Math.abs(matchedAmount?.amount || 0))
+          balance: Math.round(Math.abs(firstMatch?.amount || 0))
         }
       })
 
@@ -200,14 +183,11 @@ const DocumentAging = () => {
     const indent = data.level * 20
     const isParent = data.level === 0
 
-    // const arrow = isParent && data.hasChildren ? (data.isExpanded ? '▼' : '▶') : ''
-    // cursor: isParent && data.hasChildren ? 'pointer' : 'default'
-
-    const arrow = isParent ? (data.isExpanded ? '▼' : '▶') : ''
+    const arrow = isParent && data.hasChildren ? (data.isExpanded ? '▼' : '▶') : ''
 
     return (
       <div
-        style={{ paddingLeft: indent, cursor: isParent ? 'pointer' : 'default' }}
+        style={{ paddingLeft: indent, cursor: isParent && data.hasChildren ? 'pointer' : 'default' }}
         onClick={() => handleRowClick(data)}
       >
         {arrow} {value}
