@@ -507,11 +507,8 @@ export const ResourceIds = {
   GenerateMRPs: 46304,
   FITrialBalanceGridView: 31402,
   Folders: 70111,
-  RelationshipTypes: 71109,
-=========
-  Folders: 70111,
   BgCheck: 71103,
->>>>>>>>> Temporary merge branch 2
+  RelationshipTypes: 71109,
 
   // GL
   GLSalesInvoice: 51604,
