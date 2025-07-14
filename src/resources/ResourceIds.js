@@ -510,7 +510,6 @@ export const ResourceIds = {
   Folders: 70111,
   CertificateLevels: 71102,
   BgCheck: 71103,
-  HRStatus: 71107,
 
   // GL
   GLSalesInvoice: 51604,

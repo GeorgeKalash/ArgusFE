@@ -19,11 +19,7 @@ export const EmployeeRepository = {
     qry: service + 'qrySC'
   },
   EmploymentStatusFilters: {
-    qry: service + 'qryST',
-    get: service + 'getST',
-    set: service + 'setST',
-    page: service + 'pageST',
-    del: service + 'delST'
+    qry: service + 'qryST'
   },
   SponsorFilters: {
     qry: service + 'qrySP'
@@ -33,7 +29,7 @@ export const EmployeeRepository = {
     set: service + 'setBT',
     page: service + 'pageBT',
     del: service + 'delBT'
-},
+  },
   BgCheck: {
     page: service + 'pageCT',
     set: service + 'setCT',
