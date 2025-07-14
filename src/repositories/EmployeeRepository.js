@@ -21,6 +21,12 @@ export const EmployeeRepository = {
     qry: service + 'qrySP'
   },
   RelationshipTypes: {
+    page: service + 'pageRT',
+    set: service + 'setRT',
+    get: service + 'getRT',
+    del: service + 'delRT'
+  },
+  BgCheck: {
     page: service + 'pageCT',
     set: service + 'setCT',
     get: service + 'getCT',
