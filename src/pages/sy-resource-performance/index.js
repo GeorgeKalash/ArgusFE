@@ -14,7 +14,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { ControlContext } from 'src/providers/ControlContext'
-import { formatDateForGetApI } from 'src/lib/date-helper'
+import { formatDateTimeForGetAPI } from 'src/lib/date-helper'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 import { useWindow } from 'src/windows'
@@ -58,9 +58,9 @@ const ResourcePerformance = () => {
       extension: SystemRepository.ResourcePerformance.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_resourceId=${
         formik.values.resourceId || 0
-      }&_minimumDuration=${formik.values.minimumDuration}&_fromDT=${formatDateForGetApI(
+      }&_minimumDuration=${formik.values.minimumDuration}&_fromDT=${formatDateTimeForGetAPI(
         formik.values.fromDT
-      )}&_toDT=${formatDateForGetApI(formik.values.toDT)}`
+      )}&_toDT=${formatDateTimeForGetAPI(formik.values.toDT)}`
     })
 
     return { ...response, _startAt: _startAt }
