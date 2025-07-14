@@ -15,7 +15,11 @@ export const EmployeeRepository = {
     qry: service + 'qrySC'
   },
   EmploymentStatusFilters: {
-    qry: service + 'qryST'
+    qry: service + 'qryST',
+    page: service + 'pageST',
+    set: service + 'setST',
+    get: service + 'getST',
+    del: service + 'delST'
   },
   SponsorFilters: {
     qry: service + 'qrySP'
