@@ -18,7 +18,7 @@ export default function HrSalaryForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: EmployeeRepository.SalaryChangeReasons.page
+    endpointId: EmployeeRepository.SalaryChangeReasonFilters.page
   })
 
   const { formik } = useForm({
@@ -33,7 +33,7 @@ export default function HrSalaryForm({ labels, maxAccess, recordId }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: EmployeeRepository.SalaryChangeReasons.set,
+        extension: EmployeeRepository.SalaryChangeReasonFilters.set,
         record: JSON.stringify(obj)
       })
 
@@ -50,7 +50,7 @@ export default function HrSalaryForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: EmployeeRepository.SalaryChangeReasons.get,
+          extension: EmployeeRepository.SalaryChangeReasonFilters.get,
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res?.record)
@@ -59,7 +59,12 @@ export default function HrSalaryForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.SalaryChangeReasons} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.SalaryChangeReasonFilters}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
