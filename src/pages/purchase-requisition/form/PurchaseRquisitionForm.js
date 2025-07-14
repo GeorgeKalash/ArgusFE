@@ -34,7 +34,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import useSetWindow from 'src/hooks/useSetWindow'
 import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function PurchaseRquisitionForm({ recordId }) {
+export default function PurchaseRquisitionForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
@@ -46,7 +46,7 @@ export default function PurchaseRquisitionForm({ recordId }) {
     datasetId: ResourceIds.PurchaseRequisition
   })
 
-  useSetWindow({ title: labels?.purchaseRequisition })
+  useSetWindow({ title: labels?.purchaseRequisition, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PurchaseRequisition,
