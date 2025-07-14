@@ -507,7 +507,8 @@ export const ResourceIds = {
   GenerateMRPs: 46304,
   FITrialBalanceGridView: 31402,
   BonusTypes: 71101,
-  Folder: 70111,
+  Folders: 70111,
+  CertificateLevels: 71102,
   BgCheck: 71103,
 
   // GL
