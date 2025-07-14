@@ -511,6 +511,7 @@ export const ResourceIds = {
   CertificateLevels: 71102,
   BgCheck: 71103,
   NoticePeriods: 71111,
+  TransactionLogPerformance: 20137,
 
   // GL
   GLSalesInvoice: 51604,
