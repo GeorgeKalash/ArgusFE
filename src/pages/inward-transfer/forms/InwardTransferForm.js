@@ -115,7 +115,8 @@ const InwardTransferForm = ({ recordId, plantId, userId, dtId, window }) => {
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.InwardTransfer,
     access,
-    enabled: !recordId
+    enabled: !recordId,
+    hasDT: false
   })
 
   const { formik } = useForm({
