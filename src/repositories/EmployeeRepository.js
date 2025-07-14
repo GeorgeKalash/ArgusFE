@@ -6,7 +6,11 @@ export const EmployeeRepository = {
     get1: service + 'getEM1'
   },
   CertificateFilters: {
-    qry: service + 'qryCL'
+    qry: service + 'qryCL',
+    get: service + 'getCL',
+    set: service + 'setCL',
+    del: service + 'delCL',
+    page: service + 'pageCL'
   },
   HRDocTypeFilters: {
     qry: service + 'qryDT'
