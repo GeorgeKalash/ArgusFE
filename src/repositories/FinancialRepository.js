@@ -206,7 +206,8 @@ export const FinancialRepository = {
   },
   AgingDoc: {
     snapshot: service + 'snapshotAGD',
-    rebuild: service + 'rebuildAGD'
+    rebuild: service + 'rebuildAGD',
+    qry: service + 'qryAGD',
   },
   BalanceTransferMultiAccounts: {
     page: service + 'pageTMA',
@@ -269,9 +270,6 @@ export const FinancialRepository = {
   },
   PaymentOrdersCostCenters: {
     qry: service + 'qryPOC'
-  },
-  AGD: {
-    qry: service + 'qryAGD'
   },
   ApplyManual: {
     set2: service + 'set2APLM',

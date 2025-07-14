@@ -294,7 +294,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         recordId: formik.values.recordId,
         accountId: formik.values.accountId,
         currencyId: formik.values.currencyId,
-        functionId: formik.values.functionId,
+        functionId,
         readOnly: isPosted || isCancelled
       }
     })
@@ -364,7 +364,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       key: 'Apply',
       condition: true,
       onClick: openApply,
-      disabled: !editMode
+      disabled: !editMode || !formik.values.accountId || !formik.values.currencyId
     }
   ]
 

@@ -4,6 +4,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from './DataGrid'
+import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { useForm } from 'src/hooks/form'
 import { Grow } from './Layouts/Grow'
@@ -34,7 +35,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
           toFunctionId: null,
           toRecordId: null,
           toCurrencyId: null,
-          amount: null
+          amount: 0
         }
       ]
     },
@@ -72,7 +73,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
         record: JSON.stringify(resultObject)
       })
 
-      fetchData()
+      toast.success(platformLabels.Updated)
     }
   })
 
@@ -82,7 +83,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
       label: labels.toReference,
       name: 'toRecordId',
       props: {
-        endpointId: FinancialRepository.AGD.qry,
+        endpointId: FinancialRepository.AgingDoc.qry,
         parameters: `_accountId=${accountId}&_currencyId=${currencyId}`,
         displayField: 'reference',
         valueField: 'recordId',
@@ -99,7 +100,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
   ]
 
   const fetchData = async () => {
-    if (recordId) {
+    if (recordId && functionId) {
       const res = await getRequest({
         extension: FinancialRepository.ApplyManual.qry,
         parameters: `_fromFunctionId=${functionId}&_fromRecordId=${recordId}`
@@ -109,7 +110,6 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
         'items',
         res?.list?.map(({ seqNo, ...rest }, index) => ({
           id: index + 1,
-          seqNo: index + 1,
           ...rest
         })) || []
       )
@@ -132,7 +132,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
       <VertLayout>
         <Grow>
           <DataGrid
-            name={'applyManual'}
+            name='applyManual'
             onChange={value => {
               formik.setFieldValue('items', value)
             }}
