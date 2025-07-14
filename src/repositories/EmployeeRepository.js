@@ -35,5 +35,11 @@ export const EmployeeRepository = {
     set: service + 'setCT',
     get: service + 'getCT',
     del: service + 'delCT'
+  },
+  NoticePeriods: {
+    get: service + 'getNP',
+    set: service + 'setNP',
+    del: service + 'delNP',
+    page: service + 'pageNP'
   }
 }
