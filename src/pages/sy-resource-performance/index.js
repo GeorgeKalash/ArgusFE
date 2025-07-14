@@ -66,8 +66,6 @@ const ResourcePerformance = () => {
     return { ...response, _startAt: _startAt }
   }
 
-  console.log(formik.values.fromDT)
-
   const {
     query: { data },
     labels,
