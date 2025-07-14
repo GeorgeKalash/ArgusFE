@@ -449,7 +449,6 @@ const PhysicalCountItemDe = () => {
       props: {
         resourceId: ResourceIds.PhysicalCountItemDetailsImport,
         access,
-        platformLabels,
         onSuccess: async res => {
           if (formik.values?.controllerId) fetchGridData(formik.values?.controllerId)
         }
