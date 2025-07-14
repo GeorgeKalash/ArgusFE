@@ -104,9 +104,10 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           tdPct: form.values.tdPct,
           taxDetails: form.values.isVattable ? taxDetailList : null
         })
+        const { muId, ...restItem } = item
 
         return {
-          ...item,
+          ...restItem,
           id: index + 1,
           basePrice: itemPriceRow.basePrice,
           unitPrice: itemPriceRow.unitPrice,

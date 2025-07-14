@@ -148,7 +148,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       )
     }),
     onSubmit: async obj => {
-      const { serials, date, ...rest } = obj
+      const { taxDetailsStore, itemGridData, metalGridData, search, disSkuLookup, serials, date, ...rest } = obj
 
       const header = {
         ...rest,
@@ -341,11 +341,14 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
   }
 
   async function saveHeader(lastLine, type) {
+    const { taxDetailsStore, itemGridData, metalGridData, search, disSkuLookup, serials, date, ...rest } =
+      formik?.values
+
     const DraftReturnPack = {
       header: {
-        ...formik?.values,
+        ...rest,
         pcs: 0,
-        date: formatDateToApi(formik.values.date)
+        date: formatDateToApi(date)
       },
       items: []
     }
@@ -420,6 +423,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
               metalRef: res?.record?.metalRef,
               designId: res?.record?.designId,
               designRef: res?.record?.designRef,
+              categoryName: res?.record?.categoryName,
               invoiceReference: res?.record?.invoiceRef,
               volume: res?.record?.volume || 0,
               baseLaborPrice: res?.record?.laborPrice || 0,
@@ -803,11 +807,11 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
 
       var seqNo = 0
 
-      const itemMap = serials.reduce((acc, { sku, itemId, itemName, weight }) => {
+      const itemMap = serials.reduce((acc, { sku, itemId, itemName, weight, categoryName }) => {
         if (itemId) {
           if (!acc[itemId]) {
             seqNo++
-            acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, seqNo: seqNo }
+            acc[itemId] = { sku, pcs: 0, weight: 0, itemName, seqNo, categoryName }
           }
           acc[itemId].pcs += 1
           acc[itemId].weight = parseFloat((acc[itemId].weight + parseFloat(weight || 0)).toFixed(2))
@@ -894,6 +898,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           unitPrice: x.unitPrice,
           vatAmount: x.vatAmount,
           metalRef: x.metalRef,
+          categoryName: x.categoryName,
           seqNo: lId + 1,
           id: lId + 1,
           ...(res?.record?.taxId && {
@@ -1308,6 +1313,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 0.75 },
                 { field: 'sku', headerName: labels.sku, flex: 1 },
                 { field: 'itemName', headerName: labels.itemDesc, flex: 2 },
+                { field: 'categoryName', headerName: labels.category, flex: 2 },
                 { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
                 { field: 'weight', headerName: labels.weight, type: 'number', flex: 1 }
               ]}
