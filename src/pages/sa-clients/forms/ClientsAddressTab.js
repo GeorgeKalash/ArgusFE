@@ -88,7 +88,6 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
       Component: AddressForm,
       props: {
         recordId,
-        changeClear: true,
         onSubmit: async (obj, window) => {
           if (obj) {
             const data = {
