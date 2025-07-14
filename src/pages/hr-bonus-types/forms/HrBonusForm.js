@@ -62,7 +62,7 @@ export default function HrBonusForm({ labels, maxAccess, recordId }) {
     <FormShell resourceId={ResourceIds.BonusTypes} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'

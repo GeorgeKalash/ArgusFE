@@ -21,7 +21,6 @@ export const EmployeeRepository = {
     qry: service + 'qrySP'
   },
   BonusTypes: {
-    qry: service + 'qryBT',
     get: service + 'getBT',
     set: service + 'setBT',
     page: service + 'pageBT',
