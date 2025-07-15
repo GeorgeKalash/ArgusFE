@@ -199,7 +199,7 @@ const DocumentAging = () => {
       field: 'reference',
       headerName: labels.documentReference,
       flex: 1,
-      cellRendererTree: true
+      isTree: true
     },
     {
       field: 'date',

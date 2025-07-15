@@ -692,7 +692,7 @@ const Table = ({
       width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
       flex: column.flex,
       sort: column.sort || '',
-      cellRenderer: column.cellRendererTree
+      cellRenderer: column.isTree
         ? IndentedCellRenderer
         : column.cellRenderer
         ? column.cellRenderer
