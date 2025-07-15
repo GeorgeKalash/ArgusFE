@@ -110,13 +110,15 @@ const ResourcePerformance = () => {
       field: 'requestTime',
       headerName: labels.requestTime,
       flex: 1,
-      type: 'dateTime'
+      type: 'dateTime',
+      dateFormat: 'hh:mm:ss a'
     },
     {
       field: 'responseTime',
       headerName: labels.responseTime,
       flex: 1,
-      type: 'dateTime'
+      type: 'dateTime',
+      dateFormat: 'hh:mm:ss a'
     }
   ]
 
