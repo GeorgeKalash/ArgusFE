@@ -68,7 +68,7 @@ const HRStatus = () => {
       },
       width: 500,
       height: 250,
-      title: labels.folder
+      title: labels.employmentStatus
     })
   }
 

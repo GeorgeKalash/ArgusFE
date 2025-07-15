@@ -12,6 +12,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function EmpForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -24,12 +25,14 @@ export default function EmpForm({ labels, maxAccess, recordId }) {
   const { formik } = useForm({
     initialValues: {
       recordId: null,
-      name: ''
+      name: '',
+      isActive: false
     },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required()
+      name: yup.string().required(),
+      isActive: yup.boolean()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -44,6 +47,7 @@ export default function EmpForm({ labels, maxAccess, recordId }) {
       invalidate()
     }
   })
+
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
@@ -74,6 +78,17 @@ export default function EmpForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='isActive'
+                label={labels.excludeSocialSecurity}
+                value={formik.values.isActive}
+                onChange={e => formik.setFieldValue('isActive', e.target.checked)}
+                maxAccess={maxAccess}
+                editMode={editMode}
               />
             </Grid>
           </Grid>
