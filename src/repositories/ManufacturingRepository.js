@@ -138,6 +138,7 @@ export const ManufacturingRepository = {
     del: service + 'delJOB',
     snapshot: service + 'snapshotJOB',
     snapshot2: service + 'snapshotJOB2',
+    snapshot3: service + 'snapshotJOB3',
     cancel: service + 'cancelJOB',
     post: service + 'postJOB',
     start: service + 'startJOB',
