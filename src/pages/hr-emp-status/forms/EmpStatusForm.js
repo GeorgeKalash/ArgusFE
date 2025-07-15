@@ -26,13 +26,13 @@ export default function EmpForm({ labels, maxAccess, recordId }) {
     initialValues: {
       recordId: null,
       name: '',
-      isActive: false
+      excludeSS: false
     },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      isActive: yup.boolean()
+      excludeSS: yup.boolean()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -83,10 +83,10 @@ export default function EmpForm({ labels, maxAccess, recordId }) {
 
             <Grid item xs={12}>
               <CustomCheckBox
-                name='isActive'
+                name='excludeSS'
                 label={labels.excludeSocialSecurity}
-                value={formik.values.isActive}
-                onChange={e => formik.setFieldValue('isActive', e.target.checked)}
+                value={formik.values.excludeSS}
+                onChange={e => formik.setFieldValue('excludeSS', e.target.checked)}
                 maxAccess={maxAccess}
                 editMode={editMode}
               />
