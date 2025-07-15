@@ -40,7 +40,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
   })
 
   const initialValues = {
-    recordId: null,
+    recordId,
     currencyId: parseInt(getDefaultsData()?.currencyId),
     currencyRef: '',
     currencyName: '',
@@ -309,6 +309,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
               label={labels.date}
               value={formik?.values?.date}
               required
+              autoFocus={!editMode}
               onChange={async (e, newValue) => {
                 formik.setFieldValue('date', newValue)
                 await getMultiCurrencyFormData(formik.values.currencyId, newValue, RateDivision.FINANCIALS)

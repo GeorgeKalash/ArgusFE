@@ -506,9 +506,14 @@ export const ResourceIds = {
   PhysicalCountItemDetailsImport: 44305,
   GenerateMRPs: 46304,
   FITrialBalanceGridView: 31402,
-  Folder: 70111,
+  Folders: 70111,
+  BonusTypes: 71101,
+  CertificateLevels: 71102,
   BgCheck: 71103,
   ApplyManual: 31117,
+  ImportProductionOrder: 42703,
+  NoticePeriods: 71111,
+  TransactionLogPerformance: 20137,
 
   // GL
   GLSalesInvoice: 51604,

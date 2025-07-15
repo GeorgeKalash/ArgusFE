@@ -31,7 +31,8 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
   useSetWindow({ title: platformLabels.addClientRelation, window })
 
   const { labels: _labels, access } = useResourceParams({
-    datasetId: ResourceIds.ClientRelation
+    datasetId: ResourceIds.ClientRelation,
+    editMode: !!clientId
   })
 
   useEffect(() => {

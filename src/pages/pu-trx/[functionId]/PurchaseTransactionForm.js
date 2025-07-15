@@ -62,15 +62,7 @@ import { createConditionalSchema } from 'src/lib/validation'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function PurchaseTransactionForm({
-  labels,
-  access,
-  recordId,
-  functionId,
-  window,
-  getResourceId,
-  getGLResource
-}) {
+export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
@@ -198,6 +190,18 @@ export default function PurchaseTransactionForm({
   const invalidate = useInvalidate({
     endpointId: PurchaseRepository.PurchaseInvoiceHeader.qry
   })
+
+  const getGLResource = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.GLPurchaseInvoice
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.GLPurchaseReturn
+      default:
+        return null
+    }
+  }
 
   const onClick = () => {
     stack({
@@ -1452,6 +1456,17 @@ export default function PurchaseTransactionForm({
         }
       }
     })
+  }
+
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.PurchaseInvoice
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.PurchaseReturn
+      default:
+        return null
+    }
   }
 
   return (

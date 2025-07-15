@@ -40,12 +40,6 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
       flex: 1
     },
     {
-      field: 'loss',
-      headerName: labels.loss,
-      flex: 1,
-      type: 'number'
-    },
-    {
       field: 'qty',
       headerName: labels.qty,
       flex: 1,

@@ -43,7 +43,8 @@ const ThreeDDesignForm = ({ recordId, window }) => {
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.ThreeDDesign
+    datasetId: ResourceIds.ThreeDDesign,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.ThreeDDesign, window })

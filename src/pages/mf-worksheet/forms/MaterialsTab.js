@@ -84,8 +84,7 @@ const MaterialsTab = ({ store, labels, access }) => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.IssueOfMaterial,
-    action: openForm,
-    hasDT: true
+    action: openForm
   })
 
   function openForm(obj) {
