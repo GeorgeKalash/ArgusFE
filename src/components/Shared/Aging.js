@@ -34,7 +34,7 @@ const Aging = ({ recordId, functionId, window }) => {
       functionId == SystemFunction.MetalPaymentVoucher
     )
       data = await getRequest({
-        extension: FinancialRepository.Apply2.qry,
+        extension: FinancialRepository.Apply.qry2,
         parameters: `_fromFunctionId=${functionId}&_fromRecordId=${recordId}`
       })
     else if (
@@ -44,7 +44,7 @@ const Aging = ({ recordId, functionId, window }) => {
       functionId == SystemFunction.PurchaseReturn
     )
       data = await getRequest({
-        extension: FinancialRepository.Apply3.qry,
+        extension: FinancialRepository.Apply.qry3,
         parameters: `_toFunctionId=${functionId}&_toRecordId=${recordId}`
       })
 

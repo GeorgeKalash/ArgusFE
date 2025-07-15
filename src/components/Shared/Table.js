@@ -620,6 +620,46 @@ const Table = ({
       ? (containerWidth - totalFixedColumnWidth) / filteredColumns?.length
       : 0
 
+  const IndentedCellRenderer = props => {
+    const { data, value } = props
+    const indent = data.level * 20
+    const isParent = data.level === 0
+
+    const arrow = isParent && data.hasChildren ? (data.isExpanded ? '▼' : '▶') : ''
+
+    return (
+      <div
+        style={{ paddingLeft: indent, cursor: isParent && data.hasChildren ? 'pointer' : 'default' }}
+        onClick={() => handleRowClick(data)}
+      >
+        {arrow} {value}
+      </div>
+    )
+  }
+
+  const handleRowClick = params => {
+    props.fullRowData.current = props?.fullRowData.current.map(row => {
+      if (row?.[props?.field] === params?.[props?.field] && row.level === 0) {
+        return { ...row, isExpanded: !row.isExpanded }
+      }
+
+      return row
+    })
+
+    const updatedVisibleRows = []
+    for (const row of props?.fullRowData.current) {
+      if (row.level === 0) {
+        updatedVisibleRows.push(row)
+        if (row.isExpanded) {
+          const children = props?.fullRowData.current.filter(child => child.parent === row?.[props?.field])
+          updatedVisibleRows.push(...children)
+        }
+      }
+    }
+
+    props?.setRowData(updatedVisibleRows)
+  }
+
   const columnDefs = [
     ...(showCheckboxColumn
       ? [
@@ -650,7 +690,7 @@ const Table = ({
       width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
       flex: column.flex,
       sort: column.sort || '',
-      cellRenderer: column.cellRenderer ? column.cellRenderer : FieldWrapper
+      cellRenderer: column.isTree ? IndentedCellRenderer : column.cellRenderer ? column.cellRenderer : FieldWrapper
     }))
   ]
 
