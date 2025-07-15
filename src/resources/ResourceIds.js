@@ -510,10 +510,11 @@ export const ResourceIds = {
   BgCheck: 71103,
   BonusTypes: 71101,
   CertificateLevels: 71102,
-  SalaryChangeReasons: 71105,
-
+  BgCheck: 71103,
+  ImportProductionOrder: 42703,
   NoticePeriods: 71111,
   TransactionLogPerformance: 20137,
+  SalaryChangeReasons: 71105,
 
   // GL
   GLSalesInvoice: 51604,
