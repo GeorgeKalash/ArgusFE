@@ -59,7 +59,12 @@ export default function HrSalaryForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.SalaryChangeReasons} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.SalaryChangeReasonFilter}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

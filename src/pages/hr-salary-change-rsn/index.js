@@ -39,7 +39,7 @@ const HrSalary = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: EmployeeRepository.SalaryChangeReasonFilters.page,
-    datasetId: ResourceIds.SalaryChangeReasons
+    datasetId: ResourceIds.SalaryChangeReasonFilter
   })
 
   const columns = [

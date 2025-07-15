@@ -513,7 +513,6 @@ export const ResourceIds = {
   ImportProductionOrder: 42703,
   NoticePeriods: 71111,
   TransactionLogPerformance: 20137,
-  SalaryChangeReasons: 71105,
 
   // GL
   GLSalesInvoice: 51604,
