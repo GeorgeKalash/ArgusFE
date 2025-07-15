@@ -28,6 +28,7 @@ import { useWindow } from 'src/windows'
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import AccountSummary from 'src/components/Shared/AccountSummary'
+import { ApplyManual } from 'src/components/Shared/ApplyManual'
 
 export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -286,6 +287,19 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     })
   }
 
+  const openApply = () => {
+    stack({
+      Component: ApplyManual,
+      props: {
+        recordId: formik.values.recordId,
+        accountId: formik.values.accountId,
+        currencyId: formik.values.currencyId,
+        functionId,
+        readOnly: isPosted || isCancelled
+      }
+    })
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -345,6 +359,12 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         })
       },
       disabled: !formik.values.accountId
+    },
+    {
+      key: 'Apply',
+      condition: true,
+      onClick: openApply,
+      disabled: !editMode || !formik.values.accountId || !formik.values.currencyId
     }
   ]
 
