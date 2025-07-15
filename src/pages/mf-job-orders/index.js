@@ -139,8 +139,7 @@ const JobOrder = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.JobOrder,
-    action: openForm,
-    hasDT: false
+    action: openForm
   })
 
   const add = async () => {
@@ -177,30 +176,30 @@ const JobOrder = () => {
   }
 
   async function openForm(recordId, reference, status) {
-      if (recordId && status !== 3) {
-        await lockRecord({
-          recordId: recordId,
-          reference: reference,
-          resourceId: ResourceIds.MFJobOrders,
-          onSuccess: () => {
-            openStack(recordId)
-          },
-          isAlreadyLocked: name => {
-            stack({
-              Component: NormalDialog,
-              props: {
-                DialogText: `${platformLabels.RecordLocked} ${name}`,
-                width: 600,
-                height: 200,
-                title: platformLabels.Dialog
-              }
-            })
-          }
-        })
-      } else {
-        openStack(recordId)
-      }
+    if (recordId && status !== 3) {
+      await lockRecord({
+        recordId: recordId,
+        reference: reference,
+        resourceId: ResourceIds.MFJobOrders,
+        onSuccess: () => {
+          openStack(recordId)
+        },
+        isAlreadyLocked: name => {
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              width: 600,
+              height: 200,
+              title: platformLabels.Dialog
+            }
+          })
+        }
+      })
+    } else {
+      openStack(recordId)
     }
+  }
 
   return (
     <VertLayout>

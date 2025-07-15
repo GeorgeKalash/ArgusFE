@@ -55,7 +55,7 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
         const { controlId, accessLevel } = obj
         if (accessLevel === MANDATORY)
           if (controlId?.indexOf('.') < 0) {
-            const keys = Object.keys(formik.initialValues)
+            const keys = Object.keys(formik.values)
             if (!values[controlId] && keys?.indexOf(controlId) > -1)
               maxAccessErrors = {
                 ...maxAccessErrors,

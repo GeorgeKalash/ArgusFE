@@ -511,7 +511,9 @@ export const ResourceIds = {
   Folders: 70111,
   CertificateLevels: 71102,
   BgCheck: 71103,
+  ImportProductionOrder: 42703,
   NoticePeriods: 71111,
+  TransactionLogPerformance: 20137,
   PurchaseRequisition: 50301,
 
   // GL
