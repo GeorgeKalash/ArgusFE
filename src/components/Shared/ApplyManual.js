@@ -108,9 +108,9 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
 
       formik.setFieldValue(
         'items',
-        res?.list?.map(({ seqNo, ...rest }, index) => ({
+        res?.list?.map((item, index) => ({
           id: index + 1,
-          ...rest
+          ...item
         })) || []
       )
     }
