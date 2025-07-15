@@ -58,13 +58,10 @@ const CustomNumberField = ({
       val = val.slice(0, -1)
     }
 
-    if (val === '.') {
-      return '0' + val
-    }
-
     const num = val != '' ? Number(val) : null
-
-    return isNaN(num) ? null : num
+    if (val !== '.') {
+      return isNaN(num) ? null : num
+    }
   }
 
   const handleNumberChangeValue = e => {
