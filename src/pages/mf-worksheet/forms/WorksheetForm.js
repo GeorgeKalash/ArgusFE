@@ -92,7 +92,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       wipQty: yup.number().required(),
       siteId: yup.number().required(),
       qty: yup.number().required(),
-      eopQty: yup.number().required(),
       jobQty: yup.number().required()
     }),
     onSubmit: async obj => {
@@ -464,7 +463,22 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  <CustomNumberField name='eopQty' readOnly label={labels.eopQty} maxAccess={access} />
+                  <CustomNumberField
+                    name='eopQty'
+                    readOnly
+                    label={labels.eopQty}
+                    value={formik?.values?.eopQty}
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='endPcs'
+                    readOnly
+                    label={labels.endPcs}
+                    value={(formik?.values?.wipPcs || 0) - (formik?.values?.damagedPcs || 0)}
+                    maxAccess={access}
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
