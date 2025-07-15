@@ -28,6 +28,12 @@ export const EmployeeRepository = {
   SponsorFilters: {
     qry: service + 'qrySP'
   },
+  RelationshipTypes: {
+    page: service + 'pageRT',
+    set: service + 'setRT',
+    get: service + 'getRT',
+    del: service + 'delRT'
+  },
   BonusTypes: {
     get: service + 'getBT',
     set: service + 'setBT',

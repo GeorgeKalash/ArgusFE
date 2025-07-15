@@ -509,6 +509,7 @@ export const ResourceIds = {
   FITrialBalanceGridView: 31402,
   Folders: 70111,
   BgCheck: 71103,
+  RelationshipTypes: 71109,
   BonusTypes: 71101,
   CertificateLevels: 71102,
   ApplyManual: 31117,
