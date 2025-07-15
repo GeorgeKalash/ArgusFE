@@ -15,7 +15,7 @@ const AvailabilityForm = ({ labels, recordId: srlNo, access }) => {
 
     const response = await getRequest({
       extension: InventoryRepository.AvailabilitySerial.qry,
-      parameters: `_itemId=0&_siteId=0&_srlNo=${srlNo}&_startAt=0&_pageSize=${_pageSize}`
+      parameters: `_itemId=0&_siteId=0&_srlNo=${srlNo}&_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     const filteredList = response.list.filter(item => item.pcs > 0)
@@ -79,7 +79,6 @@ const AvailabilityForm = ({ labels, recordId: srlNo, access }) => {
           columns={columns}
           gridData={data}
           rowId={['siteRef']}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

@@ -146,9 +146,7 @@ export default function SerialsForm({ labels, maxAccess, store, setStore }) {
                     required
                     readOnly={editMode}
                     maxAccess={maxAccess}
-                    onChange={e => {
-                      formik.handleChange(e)
-                    }}
+                    onChange={formik.handleChange}
                     onBlur={e => {
                       if (e.target.value && !editMode) {
                         checkSrlNo(e.target.value)
