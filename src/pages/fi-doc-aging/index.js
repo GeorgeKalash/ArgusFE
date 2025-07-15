@@ -26,24 +26,9 @@ const DocumentAging = () => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const fullRowDataRef = useRef([
-    { reference: 'DN-00002', level: 0, isExpanded: false, hasChildren: true },
-    { reference: 'SI-00012', level: 0, isExpanded: false, hasChildren: true },
-    { reference: 'CN-00001', level: 1, parent: 'SI-00012' },
-    { reference: 'RV-0094', level: 1, parent: 'SI-00012' },
-    { reference: 'CN-0081', level: 1, parent: 'SI-00012' },
-    { reference: 'CN-00001', level: 1, parent: 'DN-00002' },
-    { reference: 'RV-0094', level: 1, parent: 'DN-00002' },
-    { reference: 'CN-0081', level: 1, parent: 'DN-00002' }
-  ])
+  const fullRowData = useRef([])
 
-  const [rowData, setRowData] = useState(() =>
-    fullRowDataRef.current.flatMap(row =>
-      row.level === 0
-        ? [row, ...(row.isExpanded ? fullRowDataRef.current.filter(c => c.parent === row.reference) : [])]
-        : []
-    )
-  )
+  const [rowData, setRowData] = useState()
 
   const { stack } = useWindow()
   const amountAppliedRef = useRef()
@@ -167,7 +152,7 @@ const DocumentAging = () => {
 
         amountAppliedRef.current = totalApplied
 
-        fullRowDataRef.current = allRows
+        fullRowData.current = allRows
 
         const visibleRows = allRows.flatMap(row =>
           row.level === 0 ? [row, ...(row.isExpanded ? allRows.filter(c => c.parent === row.reference) : [])] : []
@@ -413,7 +398,7 @@ const DocumentAging = () => {
               columns={columnsAgingTree}
               setRowData={setRowData}
               field='reference'
-              fullRowDataRef={fullRowDataRef}
+              fullRowData={fullRowData}
               gridData={{ list: rowData }}
               rowId={['recordId']}
               pagination={false}
