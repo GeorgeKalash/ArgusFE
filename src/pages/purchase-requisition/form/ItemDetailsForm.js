@@ -260,11 +260,12 @@ export default function ItemDetailsForm({
                     value={formik.values.details.qty}
                     onChange={e => {
                       let qty = Number(e.target.value.replace(/,/g, ''))
-                      formik.setFieldValue('details.qty', qty)
                       formik.setFieldValue('details.totalCost', (qty || 0) * (formik.values.details.unitCost || 0))
+                      formik.setFieldValue('details.qty', qty)
                     }}
                     onClear={() => formik.setFieldValue('details.qty', '')}
                     readOnly={readOnlyField}
+                    maxAccess={maxAccess}
                     required
                     error={formik?.touched.details?.qty && Boolean(formik?.errors.details?.qty)}
                   />
@@ -277,6 +278,7 @@ export default function ItemDetailsForm({
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('details.unitCost', '')}
                     readOnly
+                    maxAccess={maxAccess}
                     error={formik?.touched.details?.unitCost && Boolean(formik?.errors.details?.unitCost)}
                   />
                 </Grid>
@@ -288,6 +290,7 @@ export default function ItemDetailsForm({
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('details.totalCost', '')}
                     readOnly
+                    maxAccess={maxAccess}
                     error={formik?.touched.details?.totalCost && Boolean(formik?.errors.details?.totalCost)}
                   />
                 </Grid>
@@ -299,6 +302,7 @@ export default function ItemDetailsForm({
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('details.onhand', '')}
                     readOnly
+                    maxAccess={maxAccess}
                     error={formik?.touched.details?.onhand && Boolean(formik?.errors.details?.onhand)}
                   />
                 </Grid>
@@ -353,6 +357,7 @@ export default function ItemDetailsForm({
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('details.lastPurchaseUnitPrice', '')}
                     readOnly
+                    maxAccess={maxAccess}
                     error={
                       formik?.touched.details?.lastPurchaseUnitPrice &&
                       Boolean(formik?.errors.details?.lastPurchaseUnitPrice)

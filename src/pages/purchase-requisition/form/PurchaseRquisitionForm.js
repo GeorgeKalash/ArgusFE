@@ -1,5 +1,5 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, formatDateToISO } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import { useContext, useEffect, useState } from 'react'
@@ -83,26 +83,19 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.string().required(),
-      procurementType: yup.date().required()
+      date: yup.date().required(),
+      procurementType: yup.string().required()
     }),
     onSubmit: async values => {
       const obj = { ...values }
       delete obj.items
-
-      let updatedDate = null
-      if (obj?.deliveryDate) {
-        updatedDate = new Date(obj.deliveryDate)
-        updatedDate.setHours(updatedDate.getHours() + 3)
-        updatedDate = formatDateToApi(updatedDate)
-      }
 
       const res = await postRequest({
         extension: PurchaseRepository.PurchaseRequisition.set,
         record: JSON.stringify({
           ...obj,
           date: obj?.date ? formatDateToApi(obj?.date) : null,
-          deliveryDate: updatedDate
+          deliveryDate: obj?.deliveryDate ? formatDateToISO(new Date(obj.deliveryDate)) : null
         })
       })
 
@@ -378,7 +371,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
       editMode={editMode}
       actions={actions}
       previewReport={editMode}
-      disabledSubmit={isClosed}
+      disabledSubmit={isClosed || isCancelled}
     >
       <VertLayout>
         <Fixed>
@@ -413,7 +406,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
                     label={labels.reference}
                     value={formik?.values?.reference}
                     maxAccess={!editMode && maxAccess}
-                    readOnly={isClosed || isCancelled}
+                    readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -458,7 +451,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
                     label={labels.vendor}
                     form={formik}
                     readOnly={isClosed || isCancelled}
-                    displayFieldWidth={3}
+                    displayFieldWidth={2}
                     valueShow='vendorRef'
                     secondValueShow='vendorName'
                     maxAccess={maxAccess}
@@ -468,9 +461,9 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('vendorId', newValue?.recordId || null)
                       formik.setFieldValue('vendorName', newValue?.name || '')
                       formik.setFieldValue('vendorRef', newValue?.reference || '')
+                      formik.setFieldValue('vendorId', newValue?.recordId || null)
                     }}
                     errorCheck={'vendorId'}
                   />

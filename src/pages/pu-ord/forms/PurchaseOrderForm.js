@@ -1331,7 +1331,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
-                    endpointId={PurchaseRepository?.PurchaseRequisition.snapshot}
+                    endpointId={PurchaseRepository.PurchaseRequisition.snapshot}
                     name='requestId'
                     label={labels.requisition}
                     filter={{ status: 4 }}

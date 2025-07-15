@@ -108,7 +108,7 @@ export default function PurchaseRquisition() {
   })
 
   const add = async () => {
-    proxyAction()
+    await proxyAction()
   }
 
   const editREQ = obj => {
@@ -148,7 +148,6 @@ export default function PurchaseRquisition() {
           refetch={refetch}
           onDelete={delREQ}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}
