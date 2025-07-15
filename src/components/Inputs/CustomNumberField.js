@@ -54,9 +54,14 @@ const CustomNumberField = ({
 
   const parseInputValue = val => {
     val = val.replace(/,/g, '')
-    if (val.endsWith('.') && !/\.\d+$/.test(val)) {
+    if (!val.startsWith('.') && val.endsWith('.') && !/\.\d+$/.test(val)) {
       val = val.slice(0, -1)
     }
+
+    if (val === '.') {
+      return '0' + val
+    }
+
     const num = val != '' ? Number(val) : null
 
     return isNaN(num) ? null : num
