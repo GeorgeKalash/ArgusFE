@@ -71,8 +71,8 @@ export default function SyncJobOrderRoutingForm({ _labels, access }) {
                   { key: 'description', value: 'Description' }
                 ]}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('jobId', newValue?.recordId || null)
                   formik.setFieldValue('jobRef', newValue?.reference || '')
+                  formik.setFieldValue('jobId', newValue?.recordId || null)
                 }}
                 errorCheck={'jobId'}
               />
@@ -87,7 +87,7 @@ export default function SyncJobOrderRoutingForm({ _labels, access }) {
                 decimalScale={0}
                 maxLength={4}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('seqNo', '')}
+                onClear={() => formik.setFieldValue('seqNo', null)}
                 error={formik.touched.seqNo && Boolean(formik.errors.seqNo)}
                 maxAccess={access}
               />
