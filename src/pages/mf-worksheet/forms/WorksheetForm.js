@@ -251,12 +251,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       condition: true,
       onClick: onDamage,
       disabled: !editMode
-    },
-    {
-      key: 'Refresh',
-      condition: true,
-      onClick: onRefresh,
-      disabled: !editMode || isPosted
     }
   ]
 
@@ -424,7 +418,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     maxAccess={access}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='wipQty'
                     required
@@ -438,7 +432,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     decimalScale={3}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='wipPcs'
                     readOnly={isPosted || editMode}
@@ -451,7 +445,16 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     decimalScale={3}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='rmQty'
+                    readOnly
+                    label={labels.rmQty}
+                    value={formik?.values?.rmQty}
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='damagedPcs'
                     readOnly
@@ -459,6 +462,9 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     value={formik?.values?.damagedPcs}
                     maxAccess={access}
                   />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField name='eopQty' readOnly label={labels.eopQty} maxAccess={access} />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
@@ -546,15 +552,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     maxAccess={access}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='rmQty'
-                    readOnly
-                    label={labels.rmQty}
-                    value={formik?.values?.rmQty}
-                    maxAccess={access}
-                  />
-                </Grid>
+
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='wgtBefore'
@@ -595,9 +593,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     customHeight={190}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField name='eopQty' readOnly label={labels.eopQty} maxAccess={access} />
-                </Grid>
+
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
