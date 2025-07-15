@@ -653,7 +653,7 @@ const Table = ({
       if (row.level === 0) {
         updatedVisibleRows.push(row)
         if (row.isExpanded) {
-          const children = props?.fullRowDataRef.current.filter(child => child.parent === row.reference)
+          const children = props?.fullRowDataRef.current.filter(child => child.parent === row?.[props?.field])
           updatedVisibleRows.push(...children)
         }
       }
