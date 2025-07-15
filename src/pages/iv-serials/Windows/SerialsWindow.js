@@ -6,7 +6,7 @@ import AvailabilityForm from '../Forms/AvailabilityForm'
 
 const SerialsWindow = ({ labels, maxAccess, recordId }) => {
   const [store, setStore] = useState({
-    recordId: recordId
+    recordId
   })
 
   const [activeTab, setActiveTab] = useState(0)

@@ -5,29 +5,37 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const AvailabilityForm = ({ labels, recordId: srlNo, access }) => {
   const { getRequest } = useContext(RequestsContext)
-  const [data, setData] = useState([])
 
-  async function fetchGridData() {
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
     const response = await getRequest({
       extension: InventoryRepository.AvailabilitySerial.qry,
-      parameters: `_itemId=0&_siteId=0&_srlNo=${srlNo}&_startAt=0&_pageSize=50`
+      parameters: `_itemId=0&_siteId=0&_srlNo=${srlNo}&_startAt=0&_pageSize=${_pageSize}`
     })
 
     const filteredList = response.list.filter(item => item.pcs > 0)
-    setData({ list: filteredList })
+
+    return { ...response, list: filteredList, count: filteredList.length, _startAt: _startAt }
   }
 
-  const { refetch, paginationParameters } = useResourceQuery({
+  const {
+    query: { data },
+    refetch,
+    paginationParameters
+  } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.AvailabilitySerial.qry
+    endpointId: InventoryRepository.AvailabilitySerial.qry,
+    datasetId: ResourceIds.IVSerials
   })
 
   useEffect(() => {
     fetchGridData()
-  }, [])
+  }, [srlNo])
 
   const columns = [
     {
@@ -70,7 +78,7 @@ const AvailabilityForm = ({ labels, recordId: srlNo, access }) => {
           name='serial'
           columns={columns}
           gridData={data}
-          rowId={['sku']}
+          rowId={['siteRef']}
           isLoading={false}
           pageSize={50}
           paginationType='api'

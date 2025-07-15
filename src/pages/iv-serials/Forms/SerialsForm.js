@@ -177,10 +177,11 @@ export default function SerialsForm({ labels, maxAccess, store, setStore }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('itemId', newValue?.recordId || null)
-                      formik.setFieldValue('itemName', newValue?.name || '')
-                      formik.setFieldValue('sku', newValue?.sku || '')
+                      formik.setFieldValue('itemName', newValue?.name || null)
+                      formik.setFieldValue('sku', newValue?.sku || null)
                       getMetal(newValue?.recordId)
+
+                      formik.setFieldValue('itemId', newValue?.recordId || null)
                     }}
                     errorCheck={'itemId'}
                     maxAccess={maxAccess}
