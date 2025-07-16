@@ -45,5 +45,11 @@ export const EmployeeRepository = {
     set: service + 'setNP',
     del: service + 'delNP',
     page: service + 'pageNP'
+  },
+  CustomProperties: {
+    get: service + 'getUP',
+    set: service + 'setUP',
+    del: service + 'delUP',
+    page: service + 'pageUP'
   }
 }
