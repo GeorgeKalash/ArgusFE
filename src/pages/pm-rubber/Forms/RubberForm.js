@@ -24,6 +24,8 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useWindow } from 'src/windows'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
 export default function RubberForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -48,22 +50,25 @@ export default function RubberForm({ labels, access, recordId }) {
       dtId: null,
       reference: '',
       date: new Date(),
+      productionLineId: null,
+      metalId: null,
       modelId: null,
+      modelRef: '',
       threeDPId: null,
       laborId: null,
       startDate: null,
       endDate: null,
-      pcs: null,
+      pcs: 0,
       jobId: null,
       status: 1,
       notes: ''
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      pcs: yup.number().moreThan(0, 'min'),
+      pcs: yup.number().required().moreThan(0, 'min'),
       laborId: yup.number().required(),
-      modelId: yup.number().required()
+      modelId: yup.number().required(),
+      date: yup.date().required()
     }),
     onSubmit: async obj => {
       postRequest({
@@ -94,7 +99,8 @@ export default function RubberForm({ labels, access, recordId }) {
       formik.setValues({
         ...res?.record,
         startDate: formatDateFromApi(res?.record?.startDate),
-        endDate: formatDateFromApi(res?.record?.endDate)
+        endDate: formatDateFromApi(res?.record?.endDate),
+        date: formatDateFromApi(res?.record?.date)
       })
     })
   }
@@ -168,12 +174,8 @@ export default function RubberForm({ labels, access, recordId }) {
         stack({
           Component: ThreeDPrintForm,
           props: {
-            recordId: formik.values?.threeDPId,
-            labels
-          },
-          width: 750,
-          height: 650,
-          title: platformLabels.threeDPrinting
+            recordId: formik.values?.threeDPId
+          }
         })
       },
       disabled: !formik.values.threeDPId
@@ -214,9 +216,29 @@ export default function RubberForm({ labels, access, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
+
+                  formik.setFieldValue('productionLineId', null)
+
+                  if (newValue?.recordId) {
+                    const { record } = await getRequest({
+                      extension: ProductModelingRepository.DocumentTypeDefault.get,
+                      parameters: `_dtId=${newValue?.recordId}`
+                    })
+
+                    if (record?.productionLineId) {
+                      formik.setFieldValue('modelRef', '')
+                      formik.setFieldValue('threeDPId', null)
+                      formik.setFieldValue('laborId', null)
+                      formik.setFieldValue('laborName', '')
+                      formik.setFieldValue('modelId', null)
+                      formik.setFieldValue('pcs', '')
+                      formik.setFieldValue('jobId', '')
+                    }
+                    formik.setFieldValue('productionLineId', record?.productionLineId || null)
+                  }
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
@@ -233,23 +255,54 @@ export default function RubberForm({ labels, access, recordId }) {
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
-
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={ProductModelingRepository.Modeling.qry}
-                parameters={`_startAt=0&_pageSize=200&_params=`}
+                endpointId={ManufacturingRepository.ProductionLine.qry}
+                values={formik.values}
+                name='productionLineId'
+                readOnly
+                label={labels.productionLine}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                displayFieldWidth={1}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('productionLineId', newValue?.recordId || null)
+                }}
+                error={formik.touched.productionLineId && formik.errors.productionLineId}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={ProductModelingRepository.ModelMaker.snapshot2}
+                parameters={{
+                  _productionLineId: formik.values.productionLineId || 0
+                }}
+                valueField='reference'
                 name='modelId'
                 label={labels.model}
-                valueField='recordId'
-                displayField='reference'
-                values={formik.values}
+                form={formik}
                 required
+                valueShow='modelRef'
+                secondDisplayField={false}
                 readOnly={isReleased || isPosted}
+                maxAccess={access}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Ref' },
+                  { key: 'date', value: 'Date', type: 'date' }
+                ]}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('modelId', newValue?.recordId || '')
+                  formik.setFieldValue('modelRef', newValue?.reference || '')
                   formik.setFieldValue('threeDPId', newValue?.threeDPId || '')
                   formik.setFieldValue('laborId', newValue?.laborId || null)
                   formik.setFieldValue('laborName', newValue?.laborName || '')
+                  formik.setFieldValue('metalId', newValue?.metalId || null)
+
                   if (newValue?.threeDPId) {
                     const response = await getRequest({
                       extension: ProductModelingRepository.Printing.get,
@@ -257,7 +310,7 @@ export default function RubberForm({ labels, access, recordId }) {
                     })
 
                     const jobId = response?.record?.jobId
-                    formik.setFieldValue('jobId', jobId || '')
+                    formik.setFieldValue('jobId', jobId || null)
 
                     if (jobId) {
                       const result = await getRequest({
@@ -267,12 +320,46 @@ export default function RubberForm({ labels, access, recordId }) {
 
                       formik.setFieldValue('pcs', result?.record?.pcs)
                     } else {
-                      formik.setFieldValue('pcs', null)
+                      formik.setFieldValue('pcs', '')
                     }
                   }
+                  formik.setFieldValue('modelId', newValue?.recordId || null)
                 }}
-                error={formik.touched.modelId && Boolean(formik.errors.modelId)}
+                errorCheck={'modelId'}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='date'
+                label={labels.date}
+                value={formik.values.date}
+                onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
+                required
+                readOnly={isReleased || isPosted}
+                onClear={() => formik.setFieldValue('date', null)}
+                error={formik.touched.date && Boolean(formik.errors.date)}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={InventoryRepository.Metals.qry}
+                  name='metalId'
+                  label={labels.metal}
+                  valueField='recordId'
+                  displayField={['reference']}
+                  values={formik.values}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('metalId', newValue?.recordId || null)
+                    formik.setFieldValue('metalPurity', newValue?.purity || null)
+                  }}
+                  readOnly={isReleased || isPosted}
+                  error={formik.touched.metalId && Boolean(formik.errors.metalId)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
             </Grid>
 
             <Grid item xs={12}>
@@ -301,12 +388,12 @@ export default function RubberForm({ labels, access, recordId }) {
                 name='pcs'
                 decimalScale={0}
                 required
-                label={labels.silverPieces}
+                label={labels.rubberpcs}
                 value={formik?.values?.pcs}
                 maxAccess={maxAccess}
                 readOnly={isReleased || isPosted}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('pcs', null)}
+                onClear={() => formik.setFieldValue('pcs', '')}
                 maxLength={4}
                 error={formik.touched.pcs && Boolean(formik.errors.pcs)}
               />

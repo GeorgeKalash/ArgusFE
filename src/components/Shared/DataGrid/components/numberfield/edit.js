@@ -35,12 +35,13 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
       autoSelect
       hasBorder={false}
       iconMapIndex='1'
-      onChange={e => {
+      onChange={(e, value) => {
         typing.current = true
+
         update({
           id,
           field,
-          value: e.target.value
+          value
         })
       }}
       onClear={() => {
@@ -48,7 +49,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
         update({
           id,
           field,
-          value: ''
+          value: null
         })
       }}
       onBlur={() => {

@@ -115,6 +115,7 @@ const GateKeeper = () => {
     },
     (!filters?.status || filters?.status == 2) && {
       flex: 0.5,
+      field: 'Cancel',
       headerName: 'Cancel',
       cellRenderer: row => {
         const { data } = row
@@ -149,8 +150,6 @@ const GateKeeper = () => {
         fullScreen: false,
         onConfirm: () => onCancel(data)
       },
-      width: 450,
-      height: 170,
       title: platformLabels.Cancel
     })
   }

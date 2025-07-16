@@ -125,10 +125,7 @@ const BeneficiaryWindow = ({ clientId }) => {
           beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: obj.seqNo },
           corId: 0,
           countryId: nationalityId
-        },
-        width: 700,
-        height: 500,
-        title: 'Cash'
+        }
       })
     } else if (dispersalType === 2) {
       stack({
@@ -139,10 +136,7 @@ const BeneficiaryWindow = ({ clientId }) => {
           beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: obj.seqNo },
           corId: 0,
           countryId: nationalityId
-        },
-        width: 900,
-        height: 600,
-        title: 'Bank'
+        }
       })
     }
   }

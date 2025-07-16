@@ -12,7 +12,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import DraftForm from '../sa-draft-serials-invoices/forms/DraftForm'
-import { IconButton } from '@mui/material'
+import { IconButton, Box } from '@mui/material'
 import Image from 'next/image'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 
@@ -63,8 +63,13 @@ const PostDraftInvoice = () => {
 
   const columns = [
     {
-      field: 'spRef',
-      headerName: labels.salesPerson,
+      field: 'plantName',
+      headerName: labels.plant,
+      flex: 1
+    },
+    {
+      field: 'reference',
+      headerName: labels.reference,
       flex: 1
     },
     {
@@ -74,14 +79,26 @@ const PostDraftInvoice = () => {
       type: 'date'
     },
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'clientRef',
+      headerName: labels.clientRef,
       flex: 1
     },
     {
       field: 'clientName',
-      headerName: labels.client,
+      headerName: labels.clientName,
       flex: 1
+    },
+    {
+      field: 'pcs',
+      headerName: labels.pcs,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'weight',
+      headerName: labels.weight,
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'amount',
@@ -90,10 +107,19 @@ const PostDraftInvoice = () => {
       type: 'number'
     },
     {
-      field: 'weight',
-      headerName: labels.totalWeight,
-      flex: 1,
-      type: 'number'
+      field: 'spName',
+      headerName: labels.salesPerson,
+      flex: 1
+    },
+    {
+      field: 'description',
+      headerName: labels.description,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
     },
     {
       field: 'wipName',
@@ -101,14 +127,17 @@ const PostDraftInvoice = () => {
       flex: 1
     },
     {
-      flex: 0.5,
+      field: 'post',
+      flex: 0.55,
       headerName: labels.post,
       cellRenderer: row => {
         if (row.data.wip === 2)
           return (
-            <IconButton size='small' onClick={() => confirmationPost(row.data)}>
-              <Image src={`/images/buttonsIcons/post-black.png`} width={18} height={18} alt='post.png' />
-            </IconButton>
+            <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
+              <IconButton size='small' onClick={() => confirmationPost(row.data)}>
+                <Image src={`/images/buttonsIcons/post-black.png`} width={18} height={18} alt='post.png' />
+              </IconButton>
+            </Box>
           )
       }
     }
@@ -123,8 +152,6 @@ const PostDraftInvoice = () => {
         recordId,
         invalidate
       },
-      width: 1300,
-      height: 750,
       title: labels.draftSerInv
     })
   }

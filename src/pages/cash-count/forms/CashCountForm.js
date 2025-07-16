@@ -28,8 +28,10 @@ import GenerateTransferForm from './GenerateTransferForm'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function CashCountForm({ labels, maxAccess: access, recordId }) {
+const CashCountForm = ({ recordId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [editMode, setEditMode] = useState(!!recordId)
@@ -80,6 +82,12 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
     endpointId: CashCountRepository.CashCountTransaction.qry
   })
 
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.CashCountTransaction
+  })
+
+  useSetWindow({ title: labels.cashCount, window })
+
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.CashCountTransaction,
     access: access,
@@ -115,7 +123,6 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
           system: '',
           variation: '',
           flag: '',
-          enabled: false,
           currencyNotes: []
         }
       ]
@@ -212,7 +219,6 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
         items: items.map(({ seqNo, variation, ...rest }, index) => ({
           id: seqNo,
           seqNo,
-          enabled: true,
           variation,
           flag: variation === 0 ? true : false,
           ...rest
@@ -297,9 +303,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
       props: {
         functionId: SystemFunction.CashCountTransaction,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: 'Workflow'
+      }
     })
   }
 
@@ -317,7 +321,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
       disabled: !editMode
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !editMode || formik.values.status !== 4 || isPosted
@@ -483,8 +487,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
                 label={labels.forceNotesCount}
                 maxAccess={maxAccess}
                 disabled={
-                  formik.values.items &&
-                  (formik.values?.items[0]?.currencyId || formik.values?.items[0]?.currencyId)
+                  formik.values.items && (formik.values?.items[0]?.currencyId || formik.values?.items[0]?.currencyId)
                 }
               />
             </Grid>
@@ -526,7 +529,6 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
                   if (newRow?.currencyId) {
                     const balance = await getSystem(newRow?.currencyId)
                     update({
-                      enabled: true,
                       system: balance
                     })
                   }
@@ -566,6 +568,13 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
                 component: 'button',
                 name: 'enabled',
                 label: labels.currencyNotes,
+                props: {
+                  onCondition: row => {
+                    return {
+                      disabled: !row?.currencyId
+                    }
+                  }
+                },
                 onClick: (e, row, update, updateRow) => {
                   stack({
                     Component: CashCountNotes,
@@ -590,3 +599,8 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
     </FormShell>
   )
 }
+
+CashCountForm.width = 1100
+CashCountForm.height = 700
+
+export default CashCountForm

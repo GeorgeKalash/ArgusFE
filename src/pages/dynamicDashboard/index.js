@@ -133,7 +133,7 @@ const DashboardLayout = () => {
     setLoading(false)
   }, 500)
 
-  const { labels } = useResourceParams({
+  const { labels, access } = useResourceParams({
     datasetId: ResourceIds.UserDashboard
   })
 
@@ -233,6 +233,26 @@ const DashboardLayout = () => {
                 label1={labels.sales}
                 label2={labels.target}
                 ratio={5}
+              />
+            </ChartCard>
+          </TopRow>
+        )}
+        {containsApplet(ResourceIds.SalesTeamOrdersSummary) && (
+          <TopRow>
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.salesTeamOrdersSummary}</Title>
+              </SummaryCard>
+              <MixedBarChart
+                id='salesTeamOrdersSummaries'
+                labels={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.spRef) || []}
+                data1={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.amount) || []}
+                data2={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.orderCount) || []}
+                ratio={5}
+                label1={labels.amount}
+                label2={labels.orderCount}
+                hasLegend={true}
+                rotation={-90}
               />
             </ChartCard>
           </TopRow>
@@ -543,6 +563,7 @@ const DashboardLayout = () => {
               </SummaryCard>
               <Box style={{ height: '350px', display: 'flex' }}>
                 <Table
+                  name='table'
                   columns={[
                     {
                       field: 'reference',
@@ -563,6 +584,7 @@ const DashboardLayout = () => {
                   gridData={data?.authorization}
                   rowId={['recordId']}
                   pagination={false}
+                  maxAccess={access}
                 />
               </Box>
             </ChartCard>

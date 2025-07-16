@@ -46,10 +46,7 @@ export default function FormShellDocument({
                 name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
                 reference: form.values.reference,
                 setErrorMessage: setErrorMessage
-              },
-              width: 900,
-              height: 600,
-              title: 'Client Relation'
+              }
             })
           }
           editMode={editMode}

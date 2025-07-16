@@ -47,6 +47,7 @@ import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function SalesQuotationForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -59,6 +60,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   const [measurements, setMeasurements] = useState([])
   const [defaults, setDefaults] = useState(null)
   const [reCal, setReCal] = useState(false)
+  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesQuotation,
@@ -139,7 +141,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         applyVat: false,
         taxId: null,
         taxDetails: null,
-        taxDetailsButton: true,
         notes: null
       }
     ]
@@ -149,9 +150,16 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     endpointId: SaleRepository.SalesQuotations.page
   })
 
+  const conditions = {
+    sku: row => row?.sku,
+    qty: row => row?.qty > 0
+  }
+  const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines, maxAccess, 'items')
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
+    conditionSchema: ['items'],
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -161,13 +169,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       clientId: yup.string().test('clientId-required', 'Client ID is required if bpId is empty', function (value) {
         return this.parent.bpId ? true : !!value
       }),
-      items: yup.array().of(
-        yup.object().shape({
-          qty: yup.string().test('check-value', 'qty must be at least 1', function (value) {
-            return !!this.parent.sku ? Number(value) > 0 : true
-          })
-        })
-      )
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const copy = {
@@ -193,7 +195,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       }
 
       const updatedRows = formik.values.items
-        .filter(item => item.sku)
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         .map((itemDetails, index) => {
           const { physicalProperty, ...rest } = itemDetails
 
@@ -264,10 +266,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) {
-          update({
-            saTrx: false
-          })
-
           return
         }
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
@@ -277,7 +275,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         let rowTaxDetails = null
 
         if (!formik.values.taxId) {
-          if (itemInfo.taxId) {
+          if (itemInfo?.taxId) {
             const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
 
             const details = taxDetailsResponse.map(item => ({
@@ -327,8 +325,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           mdType: 1,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
-          saTrx: true,
-          taxDetailsButton: true,
           baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
         })
 
@@ -372,6 +368,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.quantity,
       name: 'qty',
+      updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update(data)
@@ -405,6 +402,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       props: {
         decimalScale: 5
       },
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_BASE_PRICE)
         update(data)
@@ -417,6 +415,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       props: {
         decimalScale: 5
       },
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_UNIT_PRICE)
         update(data)
@@ -426,6 +425,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.upo,
       name: 'upo',
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_UPO)
         update(data)
@@ -443,27 +443,36 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            },
-            width: 1000,
-            title: platformLabels.TaxDetails
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
       component: 'numberfield',
       label: labels.markdown,
       name: 'mdAmount',
+      updateOn: 'blur',
       flex: 2,
       props: {
         ShowDiscountIcons: true,
@@ -481,6 +490,13 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'button',
       name: 'saTrx',
       label: labels.salesTrx,
+      props: {
+        onCondition: row => {
+          return {
+            disabled: !row.itemId
+          }
+        }
+      },
       onClick: (e, row, update, newRow) => {
         stack({
           Component: SalesTrxForm,
@@ -489,9 +505,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             functionId: SystemFunction.SalesInvoice,
             itemId: row?.itemId,
             clientId: formik?.values?.clientId
-          },
-          width: 1000,
-          title: labels?.salesTrx
+          }
         })
       }
     },
@@ -499,6 +513,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'numberfield',
       label: labels.extendedprice,
       name: 'extendedPrice',
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_EXTENDED_PRICE)
         update(data)
@@ -585,10 +600,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       props: {
         functionId: SystemFunction.SalesQuotation,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.workflow
+      }
     })
   }
 
@@ -646,7 +658,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                 upo: parseFloat(item.upo).toFixed(2),
                 vatAmount: parseFloat(item.vatAmount).toFixed(2),
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-                saTrx: true,
                 taxDetails: taxDetailsResponse
               }
             })
@@ -1014,10 +1025,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         checkedAddressId: formik.values?.shipToAddressId,
         form: formik.values,
         handleAddressValues: setAddressValues
-      },
-      width: 950,
-      height: 600,
-      title: labels.AddressFilter
+      }
     })
   }
   function openAddressForm() {

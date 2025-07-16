@@ -1,3 +1,5 @@
+import { accessMap, TrxType } from 'src/resources/AccessLevels'
+
 export const getButtons = platformLabels => [
   {
     key: 'Clear',
@@ -53,20 +55,6 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Post',
-    label: platformLabels.Post,
-    color: '#231f20',
-    image: 'lock.png',
-    main: false
-  },
-  {
-    key: 'Unpost',
-    label: platformLabels.Unpost,
-    color: '#231f20',
-    image: 'unlock.png',
-    main: false
-  },
-  {
     key: 'Bulk',
     label: platformLabels.Bulk,
     color: '#09235C',
@@ -99,6 +87,13 @@ export const getButtons = platformLabels => [
     label: platformLabels.Stop,
     color: '#D3D3D3',
     image: 'stop.png',
+    main: false
+  },
+  {
+    key: 'Received',
+    label: platformLabels.Received,
+    color: '#D3D3D3',
+    image: 'received.png',
     main: false
   },
   {
@@ -142,7 +137,8 @@ export const getButtons = platformLabels => [
     color: 'transparent',
     image: 'close.png',
     border: '1px solid #01a437',
-    main: false
+    main: false,
+    access: accessMap[TrxType.CLOSE]
   },
   {
     key: 'Reopen',
@@ -150,7 +146,8 @@ export const getButtons = platformLabels => [
     color: 'transparent',
     image: 'reopen.png',
     border: '1px solid #000000',
-    main: false
+    main: false,
+    access: accessMap[TrxType.REOPEN]
   },
   {
     key: 'Approval',
@@ -397,17 +394,10 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Lock',
-    label: platformLabels.Lock,
-    color: '#231f20',
-    image: 'lock.png',
-    main: false
-  },
-  {
-    key: 'Unlock',
-    label: platformLabels.Unlock,
-    color: '#231f20',
-    image: 'unlock.png',
+    key: 'ImportAll',
+    label: platformLabels.importAll,
+    color: '#000',
+    image: 'importAll.png',
     main: false
   },
   {
@@ -436,6 +426,20 @@ export const getButtons = platformLabels => [
     label: platformLabels.Metals,
     color: '#ADD8E6',
     image: 'metals-icon.png',
+    main: false
+  },
+  {
+    key: 'Verify',
+    label: platformLabels.Verify,
+    color: '#047DFA',
+    image: 'checkmark-icon.png',
+    main: false
+  },
+  {
+    key: 'Unverify',
+    label: platformLabels.Unverify,
+    color: '#047DFA',
+    image: 'unverify-icon.png',
     main: false
   },
   {
@@ -484,14 +488,16 @@ export const getButtons = platformLabels => [
     label: platformLabels.Locked,
     color: '#231f20',
     image: 'lock.png',
-    main: false
+    main: false,
+    access: accessMap[TrxType.UNPOST]
   },
   {
     key: 'Unlocked',
     label: platformLabels.Unlocked,
     color: '#231f20',
     image: 'unlock.png',
-    main: false
+    main: false,
+    access: accessMap[TrxType.POST]
   },
   {
     key: 'Ok',
@@ -577,23 +583,22 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'add',
+    label: platformLabels.add,
+    color: '#231f20',
+    main: false
+  },
+  {
     key: 'SHP',
     label: platformLabels.shp,
     color: '#231f20',
     main: false
   },
   {
-    key: 'Verify',
-    label: platformLabels.Verify,
-    color: '#047DFA',
-    image: 'checkmark-icon.png',
-    main: false
-  },
-  {
-    key: 'Unverify',
-    label: platformLabels.Unverify,
-    color: '#047DFA',
-    image: 'unverify-icon.png',
+    key: 'Reset',
+    label: platformLabels.Reset,
+    image: 'undo-arrow-icon.png',
+    color: '#231f20',
     main: false
   }
 ]

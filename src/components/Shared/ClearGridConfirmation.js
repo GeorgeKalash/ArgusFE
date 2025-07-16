@@ -1,6 +1,13 @@
+import { useContext } from 'react'
 import ConfirmationDialog from '../ConfirmationDialog'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const ClearGridConfirmation = ({ window, onConfirm, fullScreen, open, dialogText }) => {
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.Clear, window })
+
   return (
     <ConfirmationDialog
       open={open?.flag ? open?.flag : false}
@@ -17,5 +24,7 @@ const ClearGridConfirmation = ({ window, onConfirm, fullScreen, open, dialogText
     />
   )
 }
+ClearGridConfirmation.width = 570
+ClearGridConfirmation.height = 170
 
 export default ClearGridConfirmation

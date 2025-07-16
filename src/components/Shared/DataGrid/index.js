@@ -28,6 +28,7 @@ export function DataGrid({
   autoDelete,
   initialValues,
   bg,
+  searchValue,
   onValidationRequired
 }) {
   const gridApiRef = useRef(null)
@@ -43,6 +44,8 @@ export function DataGrid({
   const [ready, setReady] = useState(false)
 
   const skip = allowDelete ? 1 : 0
+
+  const gridContainerRef = useRef(null)
 
   function checkDuplicates(field, data) {
     return value.find(
@@ -67,7 +70,7 @@ export function DataGrid({
     })
   }
 
-  const process = (params, oldRow, setData) => {
+  const process = (params, oldRow, setData, disableRefocus) => {
     const column = columns.find(({ name }) => name === params.colDef.field)
 
     if (params.colDef?.disableDuplicate && checkDuplicates(params.colDef.field, params.data)) {
@@ -77,6 +80,23 @@ export function DataGrid({
     const updateCommit = changes => {
       setData(changes, params)
       commit({ changes: { ...params.node.data, changes } })
+
+      const focusedCell = params.api.getFocusedCell()
+
+      const colId = focusedCell.column.colId
+
+      const isUpdatedColumn = Object.keys(changes || {}).includes(colId)
+
+      if (isUpdatedColumn && !disableRefocus) {
+        params.api.stopEditing()
+
+        setTimeout(() => {
+          params.api.startEditingCell({
+            rowIndex: params.rowIndex,
+            colKey: colId
+          })
+        }, 0)
+      }
     }
 
     const updateRowCommit = changes => {
@@ -177,10 +197,8 @@ export function DataGrid({
         fullScreen: false,
         onConfirm: () => deleteRow(params)
       },
-      width: 450,
-      height: 170,
       canExpand: false,
-      title: 'Delete'
+      refresh: false
     })
   }
 
@@ -254,7 +272,8 @@ export function DataGrid({
             accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
       (typeof allColumns?.[i]?.props?.disableCondition !== 'function' ||
         !allColumns?.[i]?.props?.disableCondition(data)) &&
-      (typeof allColumns?.[i]?.props?.onCondition !== 'function' || !allColumns?.[i]?.props?.onCondition(data)?.hidden)
+      (typeof allColumns?.[i]?.props?.onCondition !== 'function' || !allColumns?.[i]?.props?.onCondition(data)?.hidden) && 
+      (typeof allColumns?.[i]?.props?.onCondition !== 'function' || !allColumns?.[i]?.props?.onCondition(data)?.disabled)
     )
   }
 
@@ -379,7 +398,7 @@ export function DataGrid({
     })
 
     const row = params.data
-    if (onSelectionChange) onSelectionChange(row)
+    if (onSelectionChange) onSelectionChange(row, '', field)
   }
 
   const CustomCellRenderer = params => {
@@ -544,13 +563,26 @@ export function DataGrid({
     )
   }
 
+  const gridWidth = gridContainerRef?.current?.offsetWidth - 2
+
+  const totalWidth =
+    allColumns.filter(col => col?.width !== undefined)?.reduce((sum, col) => sum + col.width, 0) +
+    (allowDelete ? 50 : 0)
+
+  const additionalWidth =
+    totalWidth > 0 && allColumns?.length > 0 && gridWidth > totalWidth
+      ? (gridWidth - totalWidth) / allColumns?.length
+      : 0
+
   const columnDefs = [
     ...allColumns.map(column => ({
       ...column,
+      ...{ width: column.width + additionalWidth },
       field: column.name,
       headerName: column.label || column.name,
+      headerTooltip: column.label,
       editable: !disabled,
-      flex: column.flex || 1,
+      flex: column.flex || (!column.width && 1),
       sortable: false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
@@ -631,8 +663,6 @@ export function DataGrid({
       }
     }
   }
-
-  const gridContainerRef = useRef(null)
 
   useEffect(() => {
     function handleBlur(event) {
@@ -717,6 +747,7 @@ export function DataGrid({
   }
 
   const onCellEditingStopped = params => {
+    const disableRefocus = true
     const cellId = `${params.node.id}-${params.column.colId}`
     const { data, colDef } = params
     let newValue = params?.data[params.column.colId]
@@ -731,7 +762,7 @@ export function DataGrid({
       }
       setData(changes, params)
       commit(changes)
-      if (colDef.updateOn != 'blur') process(params, data, setData)
+      if (colDef.updateOn != 'blur') process(params, data, setData, disableRefocus)
     }
 
     if (lastCellStopped.current == cellId) return
@@ -743,9 +774,13 @@ export function DataGrid({
         return
       }
 
-      process(params, data, setData)
+      process(params, data, setData, disableRefocus)
     }
   }
+
+  useEffect(() => {
+    gridApiRef.current?.setQuickFilter(searchValue)
+  }, [searchValue])
 
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>
@@ -800,6 +835,7 @@ export function DataGrid({
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}
               onCellEditingStopped={onCellEditingStopped}
+              enableBrowserTooltips={true}
             />
           )}
         </Box>

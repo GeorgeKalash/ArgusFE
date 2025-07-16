@@ -26,14 +26,22 @@ import { useInvalidate } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function OutwardsModificationForm({ access, labels, recordId }) {
+const OutwardsModificationForm = ({ recordId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const [resetForm, setResetForm] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [validSubmit, setValidSubmit] = useState(false)
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.OutwardsModification
+  })
+
+  useSetWindow({ title: labels.outwardsModification, window })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsModification,
@@ -224,7 +232,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       disabled: !isClosed
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !isPosted
@@ -241,10 +249,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
         onSuccess: () => {
           onClose(recId)
         }
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
   async function refetchForm(recordId) {
@@ -607,3 +612,8 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     </FormShell>
   )
 }
+
+OutwardsModificationForm.width = 1200
+OutwardsModificationForm.height = 650
+
+export default OutwardsModificationForm

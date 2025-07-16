@@ -23,8 +23,9 @@ import { ProductModelingRepository } from 'src/repositories/ProductModelingRepos
 import { DataSets } from 'src/resources/DataSets'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function SketchForm({ recordId, invalidate }) {
+export default function SketchForm({ recordId, invalidate, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
@@ -33,6 +34,8 @@ export default function SketchForm({ recordId, invalidate }) {
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.Sketch
   })
+
+  useSetWindow({ title: labels?.Sketch, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: systemFunction,
@@ -92,6 +95,23 @@ export default function SketchForm({ recordId, invalidate }) {
       toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
     }
   })
+
+  async function getDTD(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: ProductModelingRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      formik.setFieldValue('productionLineId', res?.record?.productionLineId || null)
+
+      return res
+    }
+  }
+
+  useEffect(() => {
+    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
+  }, [formik.values.dtId])
 
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
@@ -155,7 +175,7 @@ export default function SketchForm({ recordId, invalidate }) {
       disabled: !isClosed
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted || !isClosed
@@ -204,13 +224,20 @@ export default function SketchForm({ recordId, invalidate }) {
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
-                    readOnly={editMode}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['reference', 'name']}
+                    readOnly={editMode}
                     values={formik?.values}
                     onChange={async (event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
+                      if (!newValue?.recordId) {
+                        formik.setFieldValue('productionLineId', null)
+                      }
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                     maxAccess={maxAccess}
@@ -254,9 +281,11 @@ export default function SketchForm({ recordId, invalidate }) {
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
+                      { key: 'name', value: 'Name', width: 4 },
+                      { key: 'typeName', value: 'Type' }
                     ]}
-                    readOnly={isPosted || isClosed}
+                    displayFieldWidth={2}
+                    readOnly={isClosed}
                     maxAccess={maxAccess}
                     values={formik.values}
                     onChange={(event, newValue) => {
@@ -368,6 +397,23 @@ export default function SketchForm({ recordId, invalidate }) {
                       formik.setFieldValue('collectionId', newValue?.recordId || null)
                     }}
                     error={formik.touched.collectionId && Boolean(formik.errors.collectionId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.ProductionLine.qry}
+                    parameters='_startAt=0&_pageSize=1000'
+                    values={formik.values}
+                    name='productionLineId'
+                    label={labels.productionLine}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('productionLineId', newValue?.recordId || null)
+                    }}
+                    readOnly
+                    error={formik.touched.productionLineId && formik.errors.productionLineId}
                   />
                 </Grid>
                 <Grid item xs={12}>

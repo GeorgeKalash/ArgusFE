@@ -2,14 +2,46 @@ import React, { createContext, useEffect, useState, useContext } from 'react'
 import { useRouter } from 'next/router'
 import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
+import RefreshIcon from '@mui/icons-material/Refresh'
 import PropTypes from 'prop-types'
 import { MenuContext } from 'src/providers/MenuContext'
 import { v4 as uuidv4 } from 'uuid'
+import { RequestsContext } from './RequestsContext'
 
 const TabsContext = createContext()
 
+function LoadingOverlay() {
+  return (
+    <Box
+      style={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        left: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(250, 250, 250, 1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999
+      }}
+    ></Box>
+  )
+}
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props
+  const { loading } = useContext(RequestsContext)
+  const [showOverlay, setShowOverlay] = useState(false)
+
+  useEffect(() => {
+    if (!loading) {
+      const timer = setTimeout(() => {
+        setShowOverlay(true)
+      }, 300)
+
+      return () => clearTimeout(timer)
+    }
+  }, [loading])
 
   return (
     <Box
@@ -28,6 +60,7 @@ function CustomTabPanel(props) {
       }}
       {...other}
     >
+      {!showOverlay && LoadingOverlay()}
       {children}
     </Box>
   )
@@ -151,6 +184,14 @@ const TabsProvider = ({ children }) => {
       setReloadOpenedPage([])
     } else {
       router.push(tabRoute)
+    }
+  }
+
+  const refreshHomeTab = () => {
+    const homeTabIndex = openTabs.findIndex(tab => tab.route === '/default/')
+    if (homeTabIndex !== -1) {
+      setOpenTabs(prev => prev.map((tab, index) => (index === homeTabIndex ? { ...tab, id: uuidv4() } : tab)))
+      setReloadOpenedPage([])
     }
   }
 
@@ -281,7 +322,23 @@ const TabsProvider = ({ children }) => {
               openTabs.map((activeTab, i) => (
                 <Tab
                   key={activeTab?.id}
-                  label={activeTab?.label}
+                  label={
+                    <Box display='flex' alignItems='center'>
+                      <span>{activeTab.label}</span>
+                      {activeTab.route === '/default/' && currentTabIndex === i && (
+                        <IconButton
+                          size='small'
+                          onClick={e => {
+                            e.stopPropagation()
+                            refreshHomeTab()
+                          }}
+                          sx={{ ml: 1, p: 0.5 }}
+                        >
+                          <RefreshIcon fontSize='small' />
+                        </IconButton>
+                      )}
+                    </Box>
+                  }
                   onContextMenu={event => OpenItems(event, i)}
                   icon={
                     activeTab.route === '/default/' ? null : (

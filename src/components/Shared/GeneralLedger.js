@@ -24,14 +24,20 @@ import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 import { VertLayout } from './Layouts/VertLayout'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
+const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [formik, setformik] = useState(null)
   const [baseGridData, setBaseGridData] = useState({ credit: 0, debit: 0, balance: 0 })
   const [exRateValue, setExRateValue] = useState(null)
   const [currencyGridData, setCurrencyGridData] = useState([])
   const formValues = valuesPath ? valuesPath : values
+
+  useSetWindow({ title: platformLabels.GeneralLedger, window })
+
   async function fetchGridData() {
     return await getRequest({
       extension: GeneralLedgerRepository.GeneralLedger.qry,
@@ -112,6 +118,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
             seqNo: id,
             ...rest
           })),
+          editStatus: values?.editStatus,
           date: formatDateToApi(values.date),
           functionId: values.functionId,
           recordId: formValues.recordId,
@@ -287,6 +294,18 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
     return response
   }
 
+  const actions = [
+    {
+      key: 'Reset',
+      condition: onReset,
+      onClick: async () => {
+        await onReset()
+        window.close()
+      },
+      disabled: false
+    }
+  ]
+
   return (
     <FormShell
       resourceId={ResourceIds.JournalVoucher}
@@ -295,6 +314,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
       disabledSubmit={baseGridData.balance !== 0 || isProcessed}
       infoVisible={false}
       previewReport={true}
+      actions={actions}
     >
       <VertLayout>
         {formik && (
@@ -341,7 +361,10 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
         )}
         <Grow>
           <DataGrid
-            onChange={value => formik2.setFieldValue('glTransactions', value)}
+            onChange={value => {
+              formik2.setFieldValue('glTransactions', value)
+              formik2.setFieldValue('editStatus', 2)
+            }}
             allowDelete={!isProcessed}
             allowAddNewLine={!isProcessed}
             value={formik2?.values.glTransactions}
@@ -563,7 +586,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
                     dirtyField: DIRTYFIELD_RATE
                   })
                   update({
-                    exRate: updatedRateRow.exRate,
                     amount: updatedRateRow.amount,
                     baseAmount: updatedRateRow.baseAmount
                   })
@@ -586,7 +608,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
                   })
                   update({
                     exRate: updatedRateRow.exRate,
-                    amount: updatedRateRow.amount,
                     baseAmount: updatedRateRow.baseAmount
                   })
                 }
@@ -608,8 +629,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
                   })
                   update({
                     exRate: updatedRateRow.exRate,
-                    amount: updatedRateRow.amount,
-                    baseAmount: updatedRateRow.baseAmount
+                    amount: updatedRateRow.amount
                   })
                 }
               }
@@ -618,7 +638,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
         </Grow>
         <Fixed>
           <Grid container sx={{ flex: 1 }}>
-            <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={6} height={190} sx={{ display: 'flex', flex: 1 }}>
               <Table
                 gridData={{ count: 1, list: [baseGridData] }}
                 maxAccess={access}
@@ -632,8 +652,9 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
                 pagination={false}
               />
             </Grid>
-            <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={6} height={190} sx={{ display: 'flex', flex: 1 }}>
               <Table
+                name='generalLedger'
                 columns={[
                   { field: 'currency', headerName: 'Currency', flex: 1 },
                   { field: 'debit', headerName: 'Debit', type: 'number', flex: 1 },
@@ -653,5 +674,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId }) => {
     </FormShell>
   )
 }
+
+GeneralLedger.width = 1000
+GeneralLedger.height = 620
 
 export default GeneralLedger

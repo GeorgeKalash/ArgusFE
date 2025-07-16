@@ -277,9 +277,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       props: {
         functionId: SystemFunction.Shipment,
         recordId: formik.values.header.recordId
-      },
-      width: 950,
-      title: labels.WorkFlow
+      }
     })
   }
 
@@ -555,6 +553,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       props: {
         readOnly: isPosted
       },
+      updateOn: 'blur',
       async onChange({ row: { update, oldRow, newRow } }) {
         checkMaximum(newRow?.shippedNowQty, newRow, update)
         if (newRow?.muQty)
