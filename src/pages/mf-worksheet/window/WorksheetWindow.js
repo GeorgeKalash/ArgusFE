@@ -27,7 +27,7 @@ const WorksheetWindow = ({ recordId, labels, maxAccess, window }) => {
         <WorksheetForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} window={window} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <MaterialsTab labels={labels} access={maxAccess} store={store} />
+        <MaterialsTab store={store} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
         <OperationsTab labels={labels} store={store} maxAccess={maxAccess} />

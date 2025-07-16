@@ -28,7 +28,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const functionId = SystemFunction.IssueOfMaterial
-  const resourceId = ResourceIds.Worksheet
+  const resourceId = ResourceIds.IssueOfMaterials
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
@@ -230,6 +230,18 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
     }
   }
 
+  const totalQty = formik.values?.items?.reduce((qty, row) => {
+    const qtyValue = parseFloat(row?.qty?.toString().replace(/,/g, '')) || 0
+
+    return qty + qtyValue
+  }, 0)
+
+  const totalPcs = formik.values?.items?.reduce((pcs, row) => {
+    const pcsValue = parseFloat(row?.pcs?.toString().replace(/,/g, '')) || 0
+
+    return pcs + pcsValue
+  }, 0)
+
   async function fillGrid(type, operationId) {
     if (type == 1) {
       const items = await getRequest({
@@ -243,23 +255,25 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
           id: index + 1,
           ...item,
           pcs: item.pcs || 0,
-          qty: item.qty || 0,
+          qty: item.qty || 0
         })) || formik.values.items
       )
     }
   }
 
   const editMode = !!formik?.values?.header?.recordId
-  const totalQty = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.qty, 0) : 0
-  const totalPcs = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.pcs, 0) : 0
 
-  const totalExpQty = formik.values.items
-    ? formik.values.items.reduce((acc, item) => acc + parseInt(item.designQty), 0)
-    : 0
+  const totalExpPcs = formik.values?.items?.reduce((expPcs, row) => {
+    const expPcsValue = parseFloat(row?.designPcs?.toString().replace(/,/g, '')) || 0
 
-  const totalExpPcs = formik.values.items
-    ? formik.values.items.reduce((acc, item) => acc + parseInt(item.designPcs), 0)
-    : 0
+    return expPcs + expPcsValue
+  }, 0)
+
+  const totalExpQty = formik.values?.items?.reduce((expQty, row) => {
+    const expQtyValue = parseFloat(row?.designQty?.toString().replace(/,/g, '')) || 0
+
+    return expQty + expQtyValue
+  }, 0)
 
   return (
     <FormShell resourceId={resourceId} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -415,6 +429,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
             name='items'
             value={formik.values.items}
             error={formik.errors.items}
+            maxAccess={access}
             columns={[
               {
                 component: 'resourcelookup',
