@@ -199,20 +199,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
     })
   }
 
-  const onRefresh = () => {
-    window.close()
-    stack({
-      Component: WorksheetWindow,
-      props: {
-        labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 1200,
-      height: 780,
-      title: labels.Worksheet
-    })
-  }
 
   const actions = [
     {

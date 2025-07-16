@@ -157,9 +157,9 @@ const ControlProvider = ({ children }) => {
       })
   }
 
-  const getLabels = (resourceId, callback) => {
+  const getLabels = (resourceId, callback, disabled) => {
     const cache = commonResourceIds.includes(resourceId)
-    if (cache && labels?.[resourceId]) {
+    if (cache && labels?.[resourceId] || disabled) {
       callback(labels?.[resourceId])
     } else {
       var parameters = '_dataset=' + resourceId
@@ -177,10 +177,10 @@ const ControlProvider = ({ children }) => {
     }
   }
 
-  const getAccess = (resourceId, callback) => {
+  const getAccess = (resourceId, callback, disabled) => {
     const cache = commonResourceIds.includes(resourceId)
 
-    if (cache && access?.[resourceId]) {
+    if (cache && access?.[resourceId] || disabled) {
       callback(access?.[resourceId])
     } else {
       var parameters = '_resourceId=' + resourceId

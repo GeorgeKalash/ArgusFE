@@ -78,13 +78,8 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
     stack({
       Component: WorksheetWindow,
       props: {
-        labels: _labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 1200,
-      height: 650,
-      title: _labels.Worksheet
+        recordId
+      }
     })
   }
 
