@@ -14,7 +14,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
-export default function EmpForm({ labels, maxAccess, recordId }) {
+export default function EmpForm({ labels, maxAccess, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -44,6 +44,7 @@ export default function EmpForm({ labels, maxAccess, recordId }) {
         formik.setFieldValue('recordId', response.recordId)
       }
       invalidate()
+      window.close()
     }
   })
 
