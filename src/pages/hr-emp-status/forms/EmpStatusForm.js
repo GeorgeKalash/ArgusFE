@@ -31,8 +31,7 @@ export default function EmpForm({ labels, maxAccess, recordId }) {
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      excludeSS: yup.boolean()
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -63,7 +62,7 @@ export default function EmpForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.HRStatus} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.EmploymentStatusFilter} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid>
@@ -88,7 +87,6 @@ export default function EmpForm({ labels, maxAccess, recordId }) {
                 value={formik.values.excludeSS}
                 onChange={e => formik.setFieldValue('excludeSS', e.target.checked)}
                 maxAccess={maxAccess}
-                editMode={editMode}
               />
             </Grid>
           </Grid>

@@ -39,7 +39,7 @@ const HRStatus = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: EmployeeRepository.EmploymentStatusFilters.page,
-    datasetId: ResourceIds.HRStatus
+    datasetId: ResourceIds.EmploymentStatusFilter
   })
 
   const columns = [
@@ -47,6 +47,12 @@ const HRStatus = () => {
       field: 'name',
       headerName: labels.name,
       flex: 1
+    },
+    {
+      field: 'excludeSS',
+      headerName: labels.excludeSocialSecurity,
+      flex: 1,
+      type: 'checkbox'
     }
   ]
 

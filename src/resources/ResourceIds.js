@@ -1,6 +1,3 @@
-import { Folder } from '@mui/icons-material'
-import HRStatus from 'src/pages/hr-emp-status'
-
 export const ResourceIds = {
   //Dashboard
   WeeklySalesYTD: 60100,
@@ -509,7 +506,6 @@ export const ResourceIds = {
   FITrialBalanceGridView: 31402,
   Folder: 70111,
   BgCheck: 71103,
-  HRStatus: 71107,
 
   // GL
   GLSalesInvoice: 51604,
