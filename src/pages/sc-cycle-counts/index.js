@@ -114,8 +114,7 @@ const CycleCounts = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.StockCount,
-    action: openForm,
-    hasDT: false
+    action: openForm
   })
 
   const add = async () => {
