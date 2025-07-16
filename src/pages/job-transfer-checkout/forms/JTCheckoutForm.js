@@ -539,7 +539,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         : null
                     }
                     seqNo={0}
-                    rerender={
+                    recordId={
                       imageSource == 1
                         ? formik.values.transfer.designId
                         : imageSource == 2

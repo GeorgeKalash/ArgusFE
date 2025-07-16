@@ -130,11 +130,11 @@ export default function JobOrderForm({
         })
       })
 
-      // if (imageUploadRef.current) {
-      //   imageUploadRef.current.value = parseInt(res.recordId)
+      if (imageUploadRef.current) {
+        imageUploadRef.current.value = parseInt(res.recordId)
 
-      //   await imageUploadRef.current.submit()
-      // }
+        await imageUploadRef.current.submit()
+      }
 
       invalidate()
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
@@ -351,7 +351,7 @@ export default function JobOrderForm({
       title: titleText
     })
   }
-  async function refetchForm(recordId) {
+  async function refetchForm(recordId, imgSource) {
     if (!recordId) return
 
     const res = await getRequest({
@@ -372,6 +372,16 @@ export default function JobOrderForm({
       isPosted: res?.record.status == 3,
       isCancelled: res?.record.status == -1
     }))
+    updateParent(
+      imgSource == 1
+        ? res?.record.designId
+        : imgSource == 2
+        ? res?.record?.itemId
+        : imgSource == 3
+        ? res?.record?.recordId
+        : null,
+      imgSource
+    )
 
     !formik.values.recordId &&
       lockRecord({
@@ -391,7 +401,7 @@ export default function JobOrderForm({
   }
 
   async function fillItemInfo(values) {
-    if (imageSource == 2) updateParent(values.recordId)
+    if (imageSource == 2) updateParent(values.recordId, imageSource)
     if (!values?.recordId) {
       formik.setFieldValue('itemId', null)
       formik.setFieldValue('itemName', null)
@@ -422,9 +432,8 @@ export default function JobOrderForm({
     formik.setFieldValue('itemCategoryId', values?.categoryId)
   }
   async function fillDesignInfo(values) {
-    console.log('checl values', values, imageSource)
-    if (imageSource == 1) updateParent(values.recordId)
-    else if (imageSource == 2) updateParent(values.itemId)
+    if (imageSource == 1) updateParent(values.recordId, imageSource)
+    else if (imageSource == 2) updateParent(values.itemId, imageSource)
     formik.setFieldValue('designId', values?.recordId)
     formik.setFieldValue('designRef', values?.reference)
     formik.setFieldValue('designName', values?.name)
@@ -510,16 +519,15 @@ export default function JobOrderForm({
     formik.setFieldValue('wcName', res?.list[0]?.workCenterName)
     formik.setFieldValue('workCenterId', res?.list[0]?.workCenterId)
   }
-  function updateParent(recordId) {
-    console.log('check', recordId)
+  function updateParent(recordId, imgSource) {
     setParentImage({
       recordId,
       resourceId:
-        imageSource == 1
+        imgSource == 1
           ? ResourceIds.Design
-          : imageSource == 2
+          : imgSource == 2
           ? ResourceIds.Item
-          : imageSource == 3
+          : imgSource == 3
           ? ResourceIds.MFJobOrders
           : null
     })
@@ -538,7 +546,7 @@ export default function JobOrderForm({
       })
       setImageSource(res?.record?.value || 3)
 
-      if (recordId) await refetchForm(recordId)
+      if (recordId) await refetchForm(recordId, res?.record?.value || 3)
       else await getAllLines()
     })()
   }, [])
@@ -891,10 +899,10 @@ export default function JobOrderForm({
                 <ImageUpload
                   ref={imageUploadRef}
                   resourceId={ResourceIds.MFJobOrders}
+                  recordId={formik.values.recordId}
                   seqNo={0}
                   customWidth={300}
                   customHeight={180}
-                  rerender={parentImage?.recordId}
                   disabled={isCancelled || isReleased || isPosted}
                   isAbsolutePath={true}
                   parentImage={parentImage}

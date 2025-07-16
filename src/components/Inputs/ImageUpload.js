@@ -18,7 +18,6 @@ const ImageUpload = forwardRef(
       height = 140,
       customWidth,
       customHeight,
-      rerender,
       disabled = false,
       isAbsolutePath = false,
       parentImage
@@ -40,30 +39,29 @@ const ImageUpload = forwardRef(
     const parentResourceId = parentImage?.resourceId
 
     useEffect(() => {
-      console.log(rerender, parentImage)
-      if (rerender && parentImage != null) {
+      if (parentRecordId || recordId) {
         getData()
       } else handleInputImageReset()
-    }, [parentImage, rerender])
+    }, [parentImage, recordId])
 
     async function getData() {
       if (!resourceId) return
-      if (isAbsolutePath && parentResourceId == resourceId) {
+      if (isAbsolutePath && recordId) {
         const result = await getRequest({
           extension: SystemRepository.Attachment.get2,
-          parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${rerender || parentRecordId}`
+          parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${recordId}`
         })
-        setInitialData(result?.record)
+        setInitialData({ ...result?.record, resourceId })
         setImage(result?.record?.fileName)
       } else {
         const result = await getRequest({
           extension: SystemRepository.Attachment.get,
           parameters: `_resourceId=${parentResourceId || resourceId}&_seqNo=${seqNo}&_recordId=${
-            parentRecordId || rerender
+            parentRecordId || recordId
           }`
         })
 
-        setInitialData({ ...result?.record, resourceId: formik.values.resourceId })
+        setInitialData({ ...result?.record, resourceId: parentResourceId || resourceId })
         setImage(result?.record?.url)
       }
     }
@@ -82,7 +80,7 @@ const ImageUpload = forwardRef(
 
         let data = {
           resourceId: resourceId,
-          recordId: rerender,
+          recordId,
           seqNo: 0,
           fileName: file.name,
           folderId: null,
@@ -118,6 +116,7 @@ const ImageUpload = forwardRef(
         const obj = {
           ...formik.values,
           fileName: formik?.values?.file?.name || formik.values.url,
+          resourceId,
           recordId: ref.current.value || recordId
         }
 
