@@ -20,6 +20,8 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
     queryFn: fetchGridData,
     enabled: Boolean(recordId),
     endpointId: ManufacturingRepository.Worksheet.qry2,
+    defaultMaxAccess: maxAccess,
+    disableMaxAccess: true,
     datasetId: ResourceIds.MFJobOrders
   })
 
@@ -65,10 +67,6 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
       parameters: `_jobId=${recordId}`
     })
   }
-
-  const { labels: _labels, access } = useResourceQuery({
-    datasetId: ResourceIds.Worksheet
-  })
 
   const edit = obj => {
     openForm(obj?.recordId)
