@@ -102,6 +102,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         items: obj?.items?.map((item, index) => {
           return {
             ...item,
+            imaId: recordId || 0,
             unitCost: item.unitCost || 0,
             seqNo: index + 1,
           }
