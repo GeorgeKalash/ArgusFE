@@ -491,7 +491,7 @@ export function DataGrid({
 
       setData(changes, params)
 
-      if (column.colDef.updateOn !== 'blur') {
+      if (column.colDef.updateOn !== 'blur' && value !== '.') {
         commit(changes)
         process(params, oldRow, setData)
       }
@@ -763,10 +763,12 @@ export function DataGrid({
     const { data, colDef } = params
     let newValue = params?.data[params.column.colId]
     let currentValue = value?.[params.rowIndex]?.[params.column.colId]
-    if (newValue == currentValue) return
+    if (newValue == currentValue && newValue !== '.') return
 
     if (newValue?.toString()?.endsWith('.') && colDef.component === 'numberfield') {
       newValue = newValue.slice(0, -1).replace(/,/g, '')
+      newValue = newValue != '' ? Number(val) : null
+      newValue = isNaN(newValue) ? null : newValue
 
       const changes = {
         [colDef?.field]: newValue || undefined

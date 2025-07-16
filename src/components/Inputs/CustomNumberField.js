@@ -58,9 +58,10 @@ const CustomNumberField = ({
       val = val.slice(0, -1)
     }
 
-    if (val == '.' && !blur) {
+    if (val == '.') {
       return val
     }
+
     if (val == '.' && blur) {
       return null
     }
