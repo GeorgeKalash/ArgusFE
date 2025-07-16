@@ -21,8 +21,7 @@ const ImageUpload = forwardRef(
       rerender,
       disabled = false,
       isAbsolutePath = false,
-      parentImage,
-      setParentImage
+      parentImage
     },
     ref
   ) => {
@@ -64,11 +63,8 @@ const ImageUpload = forwardRef(
           }`
         })
 
-        //setInitialData(result?.record)
         setInitialData({ ...result?.record, resourceId: formik.values.resourceId })
         setImage(result?.record?.url)
-
-        // if (parentImage) setParentImage({recordId: })
       }
     }
 
