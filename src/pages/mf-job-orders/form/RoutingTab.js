@@ -281,7 +281,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
         <Fixed>
           <Grid container spacing={2}>
             <Grid item xs={4}>
-              <CustomTextField value={formik.values.jobReference} label={labels.reference} readOnly={true} />
+              <CustomTextField value={formik.values.jobReference} label={labels.reference} readOnly />
             </Grid>
           </Grid>
         </Fixed>
