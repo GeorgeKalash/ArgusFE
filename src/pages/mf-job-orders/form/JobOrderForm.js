@@ -369,6 +369,7 @@ export default function JobOrderForm({
       ...prevStore,
       recordId: res?.record.recordId,
       isPosted: res?.record.status == 3,
+      jobReference: res?.record.reference,
       isCancelled: res?.record.status == -1
     }))
     !formik.values.recordId &&

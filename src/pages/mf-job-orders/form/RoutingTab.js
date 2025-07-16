@@ -10,13 +10,16 @@ import * as yup from 'yup'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grid } from '@mui/material'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 export default function RoutingTab({ labels, maxAccess, store, refetchRouting, setRefetchRouting }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const operationStore = useRef([])
   const [allWorkCenters, setWorkCenters] = useState([])
-  const recordId = store?.recordId
+  const { recordId, jobReference } = store
   const editMode = !!recordId
 
   const { formik } = useForm({
@@ -24,6 +27,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     validateOnChange: true,
     initialValues: {
       jobId: recordId,
+      jobReference,
       routings: [
         {
           id: 1,
@@ -71,6 +75,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       component: 'numberfield',
       label: labels.seqNo,
       name: 'seqNo',
+      width: 65,
       propsReducer({ row, props }) {
         return { ...props, readOnly: [1, 2, 3, 4].includes(row.status) }
       }
@@ -79,7 +84,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       component: 'textfield',
       label: labels.seqName,
       name: 'name',
-      flex: 2,
+      flex: 1,
       propsReducer({ row, props }) {
         return { ...props, readOnly: [1, 2, 3, 4].includes(row.status) }
       }
@@ -88,7 +93,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       component: 'resourcelookup',
       label: labels.wcRef,
       name: 'workCenterRef',
-      flex: 2,
+      width: 100,
       props: {
         endpointId: ManufacturingRepository.WorkCenter.snapshot,
         displayField: 'reference',
@@ -132,7 +137,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       component: 'textfield',
       label: labels.wcName,
       name: 'workCenterName',
-      flex: 2,
+      width: 310,
       props: {
         readOnly: true
       }
@@ -141,7 +146,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       component: 'resourcecombobox',
       label: labels.operation,
       name: 'operationName',
-      flex: 2,
+      width: 100,
       props: {
         store: operationStore?.current,
         displayField: 'reference',
@@ -169,7 +174,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       component: 'textfield',
       label: labels.status,
       name: 'statusName',
-      flex: 2,
+      width: 100,
       props: {
         readOnly: true
       }
@@ -177,7 +182,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     {
       component: 'numberfield',
       label: labels.qtyIn,
-      flex: 2,
+      width: 65,
       name: 'qtyIn',
       props: {
         readOnly: true
@@ -186,7 +191,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     {
       component: 'numberfield',
       label: labels.pcsIn,
-      flex: 2,
+      width: 65,
       name: 'pcsIn',
       props: {
         readOnly: true
@@ -195,7 +200,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     {
       component: 'numberfield',
       label: labels.qty,
-      flex: 2,
+      width: 65,
       name: 'qty',
       props: {
         readOnly: true
@@ -204,7 +209,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     {
       component: 'numberfield',
       label: labels.pcs,
-      flex: 2,
+      width: 65,
       name: 'pcs',
       props: {
         readOnly: true
@@ -232,6 +237,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
 
     formik.setValues({
       jobId: recordId,
+      jobReference,
       routings: updateRoutingList
     })
   }
@@ -272,6 +278,13 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       disabledSubmit={store?.isCancelled || store?.isPosted}
     >
       <VertLayout>
+        <Fixed>
+          <Grid container spacing={2}>
+            <Grid item xs={4}>
+              <CustomTextField value={formik.values.jobReference} label={labels.reference} readOnly={true} />
+            </Grid>
+          </Grid>
+        </Fixed>
         <Grow>
           <DataGrid
             onChange={(value, action) => {
