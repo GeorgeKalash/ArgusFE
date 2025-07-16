@@ -265,5 +265,8 @@ export const SystemRepository = {
   },
   ResourcePerformance: {
     page: service + 'pageTLP'
+  },
+  FiscalYear: {
+    qry: service + 'qryFY'
   }
 }

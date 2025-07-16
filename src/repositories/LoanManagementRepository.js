@@ -1,3 +1,5 @@
+import { set } from 'nprogress'
+
 const service = 'LM.asmx/'
 
 export const LoanManagementRepository = {
@@ -6,5 +8,12 @@ export const LoanManagementRepository = {
   },
   LeaveScheduleFilters: {
     qry: service + 'qryLS'
+  },
+  LeaveManagementFilters: {
+    page: service + 'pageOBA',
+    set: service + 'setOBA',
+    get: service + 'getOBA',
+    del: service + 'delOBA',
+    qry: service + 'qryOBA'
   }
 }

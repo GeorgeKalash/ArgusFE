@@ -517,6 +517,7 @@ export const ResourceIds = {
   NoticePeriods: 71111,
   TransactionLogPerformance: 20137,
   SyncJobOrderRouting: 42704,
+  LMOpeningBalances: 73104,
 
   // GL
   GLSalesInvoice: 51604,
