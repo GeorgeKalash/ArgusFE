@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -28,8 +28,6 @@ import { useInvalidate } from 'src/hooks/resource'
 export default function JTCheckoutForm({ labels, recordId, access, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const imageUploadRef = useRef(null)
-  const [imageSource, setImageSource] = useState(null)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JTCheckOut,
@@ -101,11 +99,11 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
   })
 
   const getData = async recordId => {
+    if (!recordId) return
     await getRequest({
       extension: ManufacturingRepository.JobTransfer.get2,
       parameters: `_recordId=${recordId}`
     }).then(async res => {
-      imageUploadRef.current.value = res?.record?.transfer?.jobId
       formik.setValues({
         ...formik.values,
         recordId: res?.record?.transfer?.recordId || null,
@@ -119,15 +117,9 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
   }
 
   useEffect(() => {
-    ;(async function () {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=mf_jo_pic_source`
-      })
-      setImageSource(res?.record?.value || 3)
-      recordId && (await getData(recordId))
-    })()
+    getData(recordId)
   }, [])
+  console.log('check formik', formik.values.transfer)
 
   const totalQty =
     formik?.values?.categorySummary != [] ? formik?.values?.categorySummary.reduce((op, item) => op + item?.qty, 0) : 0
@@ -182,8 +174,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
 
   async function onJobSelection(jobId, routingSeq, transferUpdate) {
     if (jobId) {
-      imageUploadRef.current.value = jobId
-
       const routingRes = await getRequest({
         extension: ManufacturingRepository.JobRouting.qry,
         parameters: `_jobId=${jobId}&_workCenterId=0&_status=0`
@@ -217,7 +207,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
     } else {
       clearSelection(transferUpdate)
 
-      imageUploadRef.current.value = null
       formik.setFieldValue('categorySummary', [])
     }
   }
@@ -528,28 +517,12 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ImageUpload
-                    ref={imageUploadRef}
-                    resourceId={
-                      imageSource == 1
-                        ? ResourceIds.Design
-                        : imageSource == 2
-                        ? ResourceIds.Item
-                        : imageSource == 3
-                        ? ResourceIds.MFJobOrders
-                        : null
-                    }
+                    resourceId={ResourceIds.MFJobOrders}
                     seqNo={0}
-                    rerender={
-                      imageSource == 1
-                        ? formik.values.transfer.designId
-                        : imageSource == 2
-                        ? formik.values.transfer.itemId
-                        : imageSource == 3
-                        ? formik.values.transfer.recordId
-                        : null
-                    }
+                    recordId={formik.values.transfer.jobId}
                     customWidth={330}
                     customHeight={240}
+                    isAbsolutePath={true}
                     disabled
                   />
                 </Grid>
