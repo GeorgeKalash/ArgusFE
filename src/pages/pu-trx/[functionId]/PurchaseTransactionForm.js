@@ -81,7 +81,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     value: 2
   })
 
-  const { documentType, maxAccess } = useDocumentType({
+  const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
     enabled: !recordId,
@@ -1511,6 +1511,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                     formik.setFieldValue('header.KGmetalPrice', 0)
                     setmetalPriceVisibility(false)
                   }
+                  changeDT(newValue)
                 }}
                 error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
               />

@@ -221,7 +221,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       }
 
       toast.success(!values.recordId ? platformLabels.Added : platformLabels.Edited)
-      refetchForm(formik.values.recordId, true)
+      refetchForm(values.recordId, true)
       invalidate()
     }
   })
@@ -253,6 +253,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   }
 
   function calcTotalCost(rec) {
+    console.log(rec)
     if (rec.priceType === 1) return (Math.round(rec.qty * rec.unitCost * 100) / 100).toFixed(2)
     else if (rec.priceType === 2) return (Math.round(rec.qty * rec.unitCost * rec.volume * 100) / 100).toFixed(2)
     else if (rec.priceType === 3) return (Math.round(rec.qty * rec.unitCost * rec.weight * 100) / 100).toFixed(2)
@@ -343,7 +344,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         displayField: 'sku',
         mandatory: true,
         readOnly: isClosed,
-        displayFieldWidth: 3,
+        displayFieldWidth: 4,
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'msId', to: 'msId' },
@@ -858,7 +859,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
-                    readOnly={isPosted || isClosed}
+                    readOnly={isPosted || isClosed || editMode}
                     valueField='recordId'
                     displayField='name'
                     values={formik?.values}
@@ -1081,7 +1082,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                 <CustomTextField
                   name='totalWeight'
                   maxAccess={maxAccess}
-                  value={getFormattedNumber(totalWeight)}
+                  value={getFormattedNumber(Number(totalWeight).toFixed(2))}
                   label={labels.totalWeight}
                   readOnly
                 />
