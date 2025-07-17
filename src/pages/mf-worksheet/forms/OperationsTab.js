@@ -10,20 +10,18 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import Table from 'src/components/Shared/Table'
 
-export default function OperationsTab({ store }) {
+export default function OperationsTab({ store, labels, access }) {
   const { getRequest } = useContext(RequestsContext)
   const { recordId } = store
   const resourceId = ResourceIds.Worksheet
 
   const {
-    query: { data },
-    labels,
-    access
+    query: { data }
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.Worksheet.summary,
     datasetId: resourceId,
-    params: { disabledReqParams: true },
+    params: { disabledReqParams: true, maxAccess: access },
     enabled: Boolean(recordId)
   })
 
@@ -75,7 +73,7 @@ export default function OperationsTab({ store }) {
               <Grid item xs={3}>
                 <CustomNumberField name='totalConsumed' label={labels.totalConsumed} value={otalConsumed} readOnly />
               </Grid>
-              <Grid item xs={.2}></Grid>
+              <Grid item xs={0.2}></Grid>
             </Grid>
           </Grid>
         </Grid>

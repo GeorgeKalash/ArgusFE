@@ -17,23 +17,20 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-const MaterialsTab = ({ store }) => {
+const MaterialsTab = ({ store, labels, access }) => {
   const { platformLabels } = useContext(ControlContext)
   const { recordId, isPosted, values } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
-
   const {
     query: { data },
-    invalidate,
-    labels, 
-    access
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.WorksheetMaterials.qry,
     datasetId: ResourceIds.Worksheet,
-    params: { disabledReqParams: true },
+    params: { disabledReqParams: true, maxAccess: access },
     enabled: Boolean(recordId)
   })
 
