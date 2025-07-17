@@ -17,7 +17,7 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-const MaterialsTab = ({ store, access, labels }) => {
+const MaterialsTab = ({ store, labels, access }) => {
   const { platformLabels } = useContext(ControlContext)
   const { recordId, isPosted, values } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
