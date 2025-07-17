@@ -229,18 +229,6 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
     }
   }
 
-  const totalQty = formik.values?.items?.reduce((qty, row) => {
-    const qtyValue = parseFloat(row?.qty?.toString().replace(/,/g, '')) || 0
-
-    return qty + qtyValue
-  }, 0)
-
-  const totalPcs = formik.values?.items?.reduce((pcs, row) => {
-    const pcsValue = parseFloat(row?.pcs?.toString().replace(/,/g, '')) || 0
-
-    return pcs + pcsValue
-  }, 0)
-
   async function fillGrid(type, operationId) {
     if (type == 1) {
       const items = await getRequest({
@@ -261,18 +249,10 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
   }
 
   const editMode = !!formik?.values?.header?.recordId
-
-  const totalExpPcs = formik.values?.items?.reduce((expPcs, row) => {
-    const expPcsValue = parseFloat(row?.designPcs?.toString().replace(/,/g, '')) || 0
-
-    return expPcs + expPcsValue
-  }, 0)
-
-  const totalExpQty = formik.values?.items?.reduce((expQty, row) => {
-    const expQtyValue = parseFloat(row?.designQty?.toString().replace(/,/g, '')) || 0
-
-    return expQty + expQtyValue
-  }, 0)
+  const totalQty = formik.values.items?.reduce((acc, { qty = 0 }) => acc + qty, 0) ?? 0
+  const totalPcs = formik.values.items?.reduce((acc, { pcs = 0 }) => acc + pcs, 0) ?? 0
+  const totalExpQty = formik.values.items?.reduce((acc, { designQty = 0 }) => acc + designQty, 0) ?? 0
+  const totalExpPcs = formik.values.items?.reduce((acc, { designPcs = 0 }) => acc + designPcs, 0) ?? 0
 
   return (
     <FormShell resourceId={resourceId} form={formik} maxAccess={maxAccess} editMode={editMode}>
