@@ -14,6 +14,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
+import { mask } from 'primereact/utils'
 
 export default function CustomForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -26,12 +27,14 @@ export default function CustomForm({ labels, maxAccess, recordId }) {
   const { formik } = useForm({
     initialValues: {
       recordId: null,
-      name: ''
+      name: '',
+      mask: null
     },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required()
+      name: yup.string().required(),
+      mask: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -53,7 +56,7 @@ export default function CustomForm({ labels, maxAccess, recordId }) {
       if (recordId) {
         const res = await getRequest({
           extension: EmployeeRepository.CustomProperties.get,
-          parameters: `_recordId=${recordId}`
+          parameters: `_propertyId=${recordId}`
         })
         formik.setValues(res?.record)
       }
@@ -82,6 +85,7 @@ export default function CustomForm({ labels, maxAccess, recordId }) {
               <ResourceComboBox
                 datasetId={DataSets.MASK_PROPERTY}
                 name='mask'
+                required
                 label={labels.Mask}
                 valueField='key'
                 displayField='value'

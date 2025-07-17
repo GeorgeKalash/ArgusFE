@@ -13,7 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import CustomForm from './forms/CustomForm'
 
-const CustomF = () => {
+const CustomProp = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -109,4 +109,4 @@ const CustomF = () => {
   )
 }
 
-export default CustomF
+export default CustomProp
