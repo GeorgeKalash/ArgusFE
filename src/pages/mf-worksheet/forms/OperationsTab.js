@@ -10,7 +10,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import Table from 'src/components/Shared/Table'
 
-export default function OperationsTab({ labels, store, maxAccess }) {
+export default function OperationsTab({ store, labels, access }) {
   const { getRequest } = useContext(RequestsContext)
   const { recordId } = store
   const resourceId = ResourceIds.Worksheet
@@ -21,6 +21,7 @@ export default function OperationsTab({ labels, store, maxAccess }) {
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.Worksheet.summary,
     datasetId: resourceId,
+    params: { disabledReqParams: true, maxAccess: access },
     enabled: Boolean(recordId)
   })
 
@@ -42,7 +43,7 @@ export default function OperationsTab({ labels, store, maxAccess }) {
         <Table
           name='operationTable'
           gridData={data}
-          maxAccess={maxAccess}
+          maxAccess={access}
           columns={[
             { field: 'operationRef', headerName: labels.operationRef, flex: 1 },
             { field: 'operationName', headerName: labels.operationName, flex: 2 },
