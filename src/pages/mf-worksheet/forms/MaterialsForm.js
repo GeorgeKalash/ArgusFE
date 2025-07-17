@@ -146,7 +146,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
       invalidate()
 
-      getData(res.recordId)
+      await getData(res.recordId)
     }
   })
 
