@@ -20,8 +20,8 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
     queryFn: fetchGridData,
     enabled: Boolean(recordId),
     endpointId: ManufacturingRepository.Worksheet.qry2,
-    defaultMaxAccess: maxAccess,
-    disableMaxAccess: true,
+    maxAccess,
+    disabledReqParams: true,
     datasetId: ResourceIds.MFJobOrders
   })
 
