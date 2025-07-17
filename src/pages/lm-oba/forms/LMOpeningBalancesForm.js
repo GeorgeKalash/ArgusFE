@@ -35,9 +35,9 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(),
+      fiscalYear: yup.number().required(),
       employeeId: yup.string().required(),
-      lsId: yup.string().required(),
+      lsId: yup.number().required(),
       days: yup.number().required().min(0).max(999)
     }),
     onSubmit: async obj => {
@@ -112,7 +112,7 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
                   formik.setFieldValue('employeeName', newValue ? newValue.fullName : '')
                   formik.setFieldValue('employeeRef', newValue ? newValue.reference : '')
                 }}
-                error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
+                errorCheck={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
               />
             </Grid>
 
