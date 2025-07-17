@@ -150,13 +150,14 @@ const JobOrder = () => {
     openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
-  async function openStack(recordId) {
+  async function openStack(recordId, reference) {
     stack({
       Component: JobOrderWindow,
       props: {
         labels,
         access,
         recordId,
+        jobReference: reference,
         lockRecord,
         invalidate
       },
@@ -182,7 +183,7 @@ const JobOrder = () => {
         reference: reference,
         resourceId: ResourceIds.MFJobOrders,
         onSuccess: () => {
-          openStack(recordId)
+          openStack(recordId, reference)
         },
         isAlreadyLocked: name => {
           stack({
@@ -197,7 +198,7 @@ const JobOrder = () => {
         }
       })
     } else {
-      openStack(recordId)
+      openStack(recordId, reference)
     }
   }
 
