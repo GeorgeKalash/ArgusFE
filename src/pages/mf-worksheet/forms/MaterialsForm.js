@@ -103,7 +103,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
           return {
             ...item,
             unitCost: item.unitCost || 0,
-            seqNo: index + 1,
+            seqNo: index + 1
           }
         })
       }
@@ -243,7 +243,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
           id: index + 1,
           ...item,
           pcs: item.pcs || 0,
-          qty: item.qty || 0,
+          qty: item.qty || 0
         })) || formik.values.items
       )
     }
