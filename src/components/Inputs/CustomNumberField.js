@@ -52,14 +52,24 @@ const CustomNumberField = ({
     }
   }
 
+  function isDotFollowedByOnlyZeros(val) {
+    if (typeof val !== 'string') return false
+
+    return /^0?\.0+$/.test(val)
+  }
+
   const parseInputValue = (val, blur) => {
     val = val.replace(/,/g, '')
     if (!val.startsWith('.') && val.endsWith('.') && !/\.\d+$/.test(val)) {
       val = val.slice(0, -1)
     }
 
-    if (val == '.') {
+    if (val === '.' && !blur) {
       return val
+    }
+
+    if (isDotFollowedByOnlyZeros(val) && !blur) {
+      return val.startsWith('.') ? ('0' + val).toString() : val.toString()
     }
 
     if (val == '.' && blur) {
