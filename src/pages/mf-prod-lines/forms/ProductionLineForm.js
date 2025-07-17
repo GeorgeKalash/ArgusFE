@@ -14,6 +14,7 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
 export default function ProductionLineForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,6 +29,7 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
       recordId: null,
       reference: '',
       name: '',
+      ccId: null,
       headWCId: null
     },
     maxAccess,
@@ -93,6 +95,26 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={GeneralLedgerRepository.CostCenter.qry}
+                parameters={`_params=&_startAt=0&_pageSize=1000`}
+                name='ccId'
+                label={labels.costCenter}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('ccId', newValue?.recordId)
+                }}
+                error={formik.touched.ccId && Boolean(formik.errors.ccId)}
               />
             </Grid>
             <Grid item xs={12}>
