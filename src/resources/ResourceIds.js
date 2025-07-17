@@ -1,5 +1,3 @@
-import { Folder } from '@mui/icons-material'
-
 export const ResourceIds = {
   //Dashboard
   WeeklySalesYTD: 60100,
