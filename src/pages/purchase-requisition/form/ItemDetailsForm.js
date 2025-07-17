@@ -288,7 +288,7 @@ export default function ItemDetailsForm({
                     label={labels.totalCost}
                     value={formik.values.details.totalCost}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('details.totalCost', '')}
+                    onClear={() => formik.setFieldValue('details.totalCost', 0)}
                     readOnly
                     maxAccess={maxAccess}
                     error={formik?.touched.details?.totalCost && Boolean(formik?.errors.details?.totalCost)}
@@ -300,7 +300,7 @@ export default function ItemDetailsForm({
                     label={labels.onHand}
                     value={formik.values.details.onhand}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('details.onhand', '')}
+                    onClear={() => formik.setFieldValue('details.onhand', 0)}
                     readOnly
                     maxAccess={maxAccess}
                     error={formik?.touched.details?.onhand && Boolean(formik?.errors.details?.onhand)}

@@ -187,7 +187,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
-      disabled: !isClosed
+      disabled: !isClosed || isCancelled
     },
     {
       key: 'Cancel',
