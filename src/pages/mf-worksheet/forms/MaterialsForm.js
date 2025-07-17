@@ -103,7 +103,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
           return {
             ...item,
             unitCost: item.unitCost || 0,
-            seqNo: index + 1,
+            seqNo: index + 1
           }
         })
       }
@@ -243,23 +243,17 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
           id: index + 1,
           ...item,
           pcs: item.pcs || 0,
-          qty: item.qty || 0,
+          qty: item.qty || 0
         })) || formik.values.items
       )
     }
   }
 
   const editMode = !!formik?.values?.header?.recordId
-  const totalQty = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.qty, 0) : 0
-  const totalPcs = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.pcs, 0) : 0
-
-  const totalExpQty = formik.values.items
-    ? formik.values.items.reduce((acc, item) => acc + parseInt(item.designQty), 0)
-    : 0
-
-  const totalExpPcs = formik.values.items
-    ? formik.values.items.reduce((acc, item) => acc + parseInt(item.designPcs), 0)
-    : 0
+  const totalQty = formik.values.items?.reduce((acc, { qty = 0 }) => acc + qty, 0) ?? 0
+  const totalPcs = formik.values.items?.reduce((acc, { pcs = 0 }) => acc + pcs, 0) ?? 0
+  const totalExpQty = formik.values.items?.reduce((acc, { designQty = 0 }) => acc + designQty, 0) ?? 0
+  const totalExpPcs = formik.values.items?.reduce((acc, { designPcs = 0 }) => acc + designPcs, 0) ?? 0
 
   return (
     <FormShell resourceId={resourceId} form={formik} maxAccess={maxAccess} editMode={editMode}>
