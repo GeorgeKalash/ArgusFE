@@ -81,7 +81,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     value: 2
   })
 
-  const { documentType, maxAccess } = useDocumentType({
+  const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
     enabled: !recordId,
@@ -806,12 +806,14 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           vatAmount: item.vatAmount ? parseFloat(item.vatAmount).toFixed(2) : 0,
           extendedPrice: item.extendedPrice ? parseFloat(item.extendedPrice).toFixed(2) : 0,
           puTrx: true,
-          serials: puTrxSerials?.map((serialDetail, index) => {
-            return {
-              ...serialDetail,
-              id: index
-            }
-          }),
+          serials: puTrxSerials
+            ?.filter(row => row.seqNo == item.seqNo)
+            ?.map((serialDetail, index) => {
+              return {
+                ...serialDetail,
+                id: index
+              }
+            }),
           taxDetails: updatedpuTrxTaxes.filter(tax => tax.seqNo === item.seqNo)
         }
       })
@@ -1509,6 +1511,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                     formik.setFieldValue('header.KGmetalPrice', 0)
                     setmetalPriceVisibility(false)
                   }
+                  changeDT(newValue)
                 }}
                 error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
               />
