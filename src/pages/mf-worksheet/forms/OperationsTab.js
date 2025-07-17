@@ -45,7 +45,8 @@ export default function OperationsTab({ labels, store, maxAccess }) {
           maxAccess={maxAccess}
           columns={[
             { field: 'operationRef', headerName: labels.operationRef, flex: 1 },
-            { field: 'operationName', headerName: labels.operationName, flex: 1 },
+            { field: 'operationName', headerName: labels.operationName, flex: 2 },
+            { field: 'categoryName', headerName: labels.category, flex: 2 },
             { field: 'issued_qty', headerName: labels.issued, type: 'number', flex: 1 },
             { field: 'returned_qty', headerName: labels.returned, type: 'number', flex: 1 },
             { field: 'lost_qty', headerName: labels.loss, type: 'number', flex: 1 },
@@ -56,7 +57,7 @@ export default function OperationsTab({ labels, store, maxAccess }) {
         />
       </Grow>
       <Fixed>
-        <Grid container spacing={1}>
+        <Grid container spacing={1} sx={{ pt: 2 }}>
           <Grid item xs={6.8}></Grid>
           <Grid item xs={5}>
             <Grid container spacing={4}>
@@ -72,7 +73,7 @@ export default function OperationsTab({ labels, store, maxAccess }) {
               <Grid item xs={3}>
                 <CustomNumberField name='totalConsumed' label={labels.totalConsumed} value={otalConsumed} readOnly />
               </Grid>
-              <Grid item xs={.2}></Grid>
+              <Grid item xs={0.2}></Grid>
             </Grid>
           </Grid>
         </Grid>
