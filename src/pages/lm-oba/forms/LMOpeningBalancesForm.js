@@ -36,7 +36,7 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       fiscalYear: yup.number().required(),
-      employeeId: yup.string().required(),
+      employeeId: yup.number().required(),
       lsId: yup.number().required(),
       days: yup.number().required().min(0).max(999)
     }),
@@ -88,7 +88,7 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
                 }}
-                error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
+                errorCheck={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
             </Grid>
 
@@ -134,7 +134,7 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('lsId', newValue?.recordId || '')
                 }}
-                error={formik.touched.lsId && Boolean(formik.errors.lsId)}
+                errorCheck={formik.touched.lsId && Boolean(formik.errors.lsId)}
               />
             </Grid>
 
