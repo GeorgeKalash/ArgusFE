@@ -23,7 +23,7 @@ export default function OperationsTab({ store }) {
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.Worksheet.summary,
     datasetId: resourceId,
-    disabledReqParams: true,
+    params: { disabledReqParams: true },
     enabled: Boolean(recordId)
   })
 

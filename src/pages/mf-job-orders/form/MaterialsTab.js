@@ -20,8 +20,7 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
     queryFn: fetchGridData,
     enabled: Boolean(recordId),
     endpointId: ManufacturingRepository.JobMaterial.qry,
-    maxAccess,
-    disabledReqParams: true,
+    params: { disabledReqParams: true, maxAccess },
     datasetId: ResourceIds.MFJobOrders
   })
 

@@ -12,8 +12,7 @@ export function useResourceQuery({
   enabled = true,
   enabledOnApplyOnly = false,
   defaultLoad = true,
-  disabledReqParams = false,
-  maxAccess
+  params
 }) {
   const [searchValue, setSearchValue] = useState('')
   const [filters, setFilters] = useState(filter?.default || {})
@@ -31,11 +30,11 @@ export function useResourceQuery({
   const { access, labels } = useResourceParams({
     datasetId,
     DatasetIdAccess,
-    disabled: disabledReqParams
+    cacheOnlyMode: params?.disabledReqParams
   })
   const queryClient = useQueryClient()
 
-  const accessValue = access || maxAccess
+  const accessValue = access || params?.maxAccess
 
   const query = useQuery({
     retry: false,
@@ -52,7 +51,7 @@ export function useResourceQuery({
             pagination: apiOption
           })
       : autoLoad && (apiOption ? () => queryFn(apiOption) : () => queryFn()),
-    enabled: (maxAccess?.record?.maxAccess > 0 || access?.record?.maxAccess) && enabled && !isdisabled
+    enabled: accessValue?.record?.maxAccess > 0 && enabled && !isdisabled
   })
 
   return {

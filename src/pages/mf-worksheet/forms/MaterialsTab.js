@@ -33,7 +33,7 @@ const MaterialsTab = ({ store }) => {
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.WorksheetMaterials.qry,
     datasetId: ResourceIds.Worksheet,
-    disabledReqParams: true,
+    params: { disabledReqParams: true },
     enabled: Boolean(recordId)
   })
 
