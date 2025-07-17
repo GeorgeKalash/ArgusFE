@@ -1,5 +1,3 @@
-import { set } from 'nprogress'
-
 const service = 'LM.asmx/'
 
 export const LoanManagementRepository = {

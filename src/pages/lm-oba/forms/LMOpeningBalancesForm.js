@@ -7,8 +7,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
-import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -29,10 +27,10 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
 
   const { formik } = useForm({
     initialValues: {
-      fiscalYear: '',
-      employeeId: '',
-      lsId: '',
-      days: ''
+      fiscalYear: null,
+      employeeId: null,
+      lsId: null,
+      days: null
     },
     maxAccess,
     validateOnChange: true,
@@ -78,7 +76,7 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={SystemRepository.FiscalYear.qry}
+                endpointId={SystemRepository.FiscalYears.qry}
                 name='fiscalYear'
                 label={labels.fiscalYear}
                 values={formik.values}
@@ -88,7 +86,7 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear || '')
+                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
                 }}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
