@@ -7,7 +7,7 @@ export const LoanManagementRepository = {
   LeaveScheduleFilters: {
     qry: service + 'qryLS'
   },
-  LeaveManagementFilters: {
+  OpeningBalances: {
     page: service + 'pageOBA',
     set: service + 'setOBA',
     get: service + 'getOBA',

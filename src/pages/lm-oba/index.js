@@ -10,6 +10,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import LMOpeningBalancesForm from './forms/LMOpeningBalancesForm'
 import { LoanManagementRepository } from 'src/repositories/LoanManagementRepository'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { useContext } from 'react'
 
 const LmObaPage = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -20,7 +21,7 @@ const LmObaPage = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: LoanManagementRepository.LeaveManagementFilters.page,
+      extension: LoanManagementRepository.OpeningBalances.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
@@ -37,7 +38,7 @@ const LmObaPage = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: LoanManagementRepository.LeaveManagementFilters.page,
+    endpointId: LoanManagementRepository.OpeningBalances.page,
     datasetId: ResourceIds.LMOpeningBalances
   })
 
@@ -89,7 +90,7 @@ const LmObaPage = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: LoanManagementRepository.LeaveManagementFilters.del,
+      extension: LoanManagementRepository.OpeningBalances.del,
       record: JSON.stringify(obj)
     })
     toast.success(platformLabels.Deleted)

@@ -1,9 +1,9 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
+import { RequestsContext } from 'src/providers/RequestsContext'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
-import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
@@ -22,7 +22,7 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.LeaveManagementFilters.page
+    endpointId: LoanManagementRepository.OpeningBalances.page
   })
 
   const { formik } = useForm({
@@ -42,7 +42,7 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: LoanManagementRepository.LeaveManagementFilters.set,
+        extension: LoanManagementRepository.OpeningBalances.set,
         record: JSON.stringify(obj)
       })
 
@@ -60,7 +60,7 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: LoanManagementRepository.LeaveManagementFilters.get,
+          extension: LoanManagementRepository.OpeningBalances.get,
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res?.record)
