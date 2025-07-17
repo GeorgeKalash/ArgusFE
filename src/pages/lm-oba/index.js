@@ -70,17 +70,16 @@ const LmObaPage = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj)
   }
 
-  function openForm(recordId) {
+  function openForm(obj) {
     stack({
       Component: LMOpeningBalancesForm,
       props: {
         labels,
-        recordId,
-        maxAccess: access,
-        recordId: recordId ? String(employeeId * 100) + String(fiscalYear * 10) + String(lsId) : null
+        obj,
+        maxAccess: access
       },
       width: 500,
       height: 500,

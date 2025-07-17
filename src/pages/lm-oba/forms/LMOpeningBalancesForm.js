@@ -17,7 +17,7 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function LmObaForm({ labels, maxAccess, recordId }) {
+export default function LmObaForm({ labels, maxAccess, obj }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -53,18 +53,21 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
       invalidate()
     }
   })
-
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
+      if (obj?.employeeId && obj?.fiscalYear && obj?.lsId) {
+        const { record } = await getRequest({
           extension: LoanManagementRepository.OpeningBalances.get,
-          parameters: `_recordId=${recordId}`
+          parameters: `_employeeId=${obj.employeeId}&_fiscalYear=${obj.fiscalYear}&_lsId=${obj.lsId}`
         })
-        formik.setValues(res?.record)
-        recordId: String(employeeId * 100) + String(fiscalYear * 10) + String(lsId)
+
+        const recordId =
+          record.employeeId && record.fiscalYear && record.lsId
+            ? String(record.employeeId * 100) + String(record.fiscalYear * 10) + String(record.lsId)
+            : null
+        formik.setValues({ ...record, recordId })
       }
     })()
   }, [])
@@ -88,7 +91,7 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
                 }}
-                errorCheck={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
+                error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
             </Grid>
 
@@ -108,11 +111,11 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
                 secondValueShow='employeeName'
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('employeeId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('employeeName', newValue ? newValue.fullName : '')
-                  formik.setFieldValue('employeeRef', newValue ? newValue.reference : '')
+                  formik.setFieldValue('employeeName', newValue.fullName || '')
+                  formik.setFieldValue('employeeRef', newValue?.reference || '')
+                  formik.setFieldValue('employeeId', newValue?.recordId || null)
                 }}
-                errorCheck={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
+                errorCheck='employeeId'
               />
             </Grid>
 
@@ -132,9 +135,9 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
                 ]}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('lsId', newValue?.recordId || '')
+                  formik.setFieldValue('lsId', newValue?.recordId || null)
                 }}
-                errorCheck={formik.touched.lsId && Boolean(formik.errors.lsId)}
+                error={formik.touched.lsId && Boolean(formik.errors.lsId)}
               />
             </Grid>
 
