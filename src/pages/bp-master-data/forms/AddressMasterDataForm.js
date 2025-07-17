@@ -1,30 +1,44 @@
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import AddressForm from 'src/components/Shared/AddressForm'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { useResourceQuery } from 'src/hooks/resource'
 
 const AddressMasterDataForm = ({ store, editMode, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [addressGridData, setAddressGridData] = useState([])
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
-  const getAddressGridData = bpId => {
-    setAddressGridData([])
-    const defaultParams = `_bpId=${bpId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: BusinessPartnerRepository.BPAddress.qry,
-      parameters: parameters
-    }).then(res => {
-      res.list = res.list.map(row => (row = row.address))
-      setAddressGridData(res)
+  const fetchGridData = async (options = {}) => {
+    const { _startAt = 0, _pageSize = 50 } = options
+    const parameters = `_startAt=${_startAt}&_pageSize=${_pageSize}&_bpId=${recordId}`
+
+    const response = await getRequest({
+      extension: BusinessPartnerRepository.BPAddress.page,
+      parameters
     })
+
+    return { ...response, _startAt }
+  }
+
+  const {
+    query: { data, refetch },
+    paginationParameters
+  } = useResourceQuery({
+    enabled: !!recordId,
+    queryFn: fetchGridData,
+    endpointId: BusinessPartnerRepository.BPAddress.page,
+    datasetId: ResourceIds.Address
+  })
+
+  const refetchAddresses = () => {
+    if (recordId) refetch()
   }
 
   const delAddress = obj => {
@@ -37,7 +51,7 @@ const AddressMasterDataForm = ({ store, editMode, ...props }) => {
     }).then(res => {
       toast.success(platformLabels.Deleted)
 
-      getAddressGridData(bpId)
+      refetchAddresses()
     })
   }
 
@@ -72,13 +86,12 @@ const AddressMasterDataForm = ({ store, editMode, ...props }) => {
     openForm(obj.recordId)
   }
 
-  useEffect(() => {
-    recordId && getAddressGridData(recordId)
-  }, [recordId])
+  const addressGridData = { ...data, list: (data?.list || []).map(row => row.address) }
 
   return (
     <AddressGridTab
       addressGridData={addressGridData}
+      paginationParameters={paginationParameters}
       addAddress={addAddress}
       delAddress={delAddress}
       editAddress={editAddress}

@@ -171,6 +171,7 @@ export const SaleRepository = {
     qry: service + 'qryAD',
     set: service + 'setAD',
     del: service + 'delAD',
+    page: service + 'pageAD',
     get: service + 'getAD'
   },
   FilterAddress: {

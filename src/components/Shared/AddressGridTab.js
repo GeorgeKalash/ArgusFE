@@ -6,7 +6,15 @@ import { Grow } from './Layouts/Grow'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const AddressGridTab = ({ addressGridData, getAddressGridData, addAddress, delAddress, editAddress, columns }) => {
+const AddressGridTab = ({
+  addressGridData,
+  getAddressGridData,
+  addAddress,
+  delAddress,
+  editAddress,
+  columns,
+  paginationParameters
+}) => {
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.Address
   })
@@ -60,12 +68,13 @@ const AddressGridTab = ({ addressGridData, getAddressGridData, addAddress, delAd
           columns={columns || tableColumns}
           gridData={addressGridData}
           rowId={['recordId']}
-          api={getAddressGridData}
           onEdit={editAddress}
           onDelete={delAddress}
           isLoading={false}
           maxAccess={maxAccess}
-          pagination={false}
+          pageSize={50}
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Grow>
     </VertLayout>

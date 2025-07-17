@@ -1,52 +1,68 @@
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import AddressForm from 'src/components/Shared/AddressForm'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [addressGridData, setAddressGridData] = useState([])
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
-  const getAddressGridData = recordId => {
-    setAddressGridData([])
+  const fetchGridData = async (options = {}) => {
+    const { _startAt = 0, _pageSize = 50 } = options
+    const parameters = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=1|${recordId}`
 
-    const defaultParams = `_params=1|${recordId}`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: SaleRepository.Address.qry,
-      parameters: parameters
-    }).then(res => {
-      res.list = res.list.map(row => (row = row.address))
-      setAddressGridData(res)
+    const response = await getRequest({
+      extension: SaleRepository.Address.page,
+      parameters
     })
+
+    return { ...response, _startAt }
   }
 
-  const delAddress = obj => {
+  const {
+    query: { data, refetch },
+    paginationParameters
+  } = useResourceQuery({
+    enabled: !!recordId,
+    queryFn: fetchGridData,
+    endpointId: SaleRepository.Address.page,
+    datasetId: ResourceIds.Address
+  })
+
+  const refetchAddresses = () => {
+    if (recordId) refetch()
+  }
+
+  const delAddress = async obj => {
     const clientId = recordId
-    obj.clientId = clientId
-    obj.addressId = obj.recordId
-    postRequest({
+
+    const payload = {
+      clientId,
+      addressId: obj.recordId
+    }
+
+    await postRequest({
       extension: SaleRepository.Address.del,
-      record: JSON.stringify(obj)
-    }).then(res => {
-      toast.success(platformLabels.Deleted)
-      getAddressGridData(clientId)
+      record: JSON.stringify(payload)
     })
+
+    toast.success(platformLabels.Deleted)
+    refetchAddresses()
   }
 
-  function addAddress() {
+  const addAddress = () => {
     openForm()
   }
 
-  async function openForm(recordId) {
+  const openForm = async recordId => {
     const clientId = store.recordId
 
     let latestRecord = await getRequest({
@@ -54,7 +70,10 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
       parameters: `_recordId=${clientId}`
     }).then(r => r.record)
 
-    async function updateAndRefreshDefault(type) {
+    let isDefaultBill = latestRecord?.billAddressId === recordId
+    let isDefaultShip = latestRecord?.shipAddressId === recordId
+
+    const updateAndRefreshDefault = async type => {
       latestRecord = await getRequest({
         extension: SaleRepository.Client.get,
         parameters: `_recordId=${clientId}`
@@ -81,9 +100,6 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
       isDefaultShip = updatePayload.shipAddressId === recordId
     }
 
-    let isDefaultBill = latestRecord?.billAddressId === recordId
-    let isDefaultShip = latestRecord?.shipAddressId === recordId
-
     stack({
       Component: AddressForm,
       props: {
@@ -102,7 +118,7 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
             })
 
             toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
-            getAddressGridData(clientId)
+            refetchAddresses()
             window.close()
           }
         },
@@ -136,10 +152,6 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
     openForm(obj.recordId)
   }
 
-  useEffect(() => {
-    recordId && getAddressGridData(recordId)
-  }, [recordId])
-
   const columns = [
     {
       field: 'city',
@@ -153,12 +165,15 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
     }
   ]
 
+  const addressGridData = { ...data, list: (data?.list || []).map(row => row.address) }
+
   return (
     <AddressGridTab
       addressGridData={addressGridData}
       addAddress={addAddress}
       delAddress={delAddress}
       editAddress={editAddress}
+      paginationParameters={paginationParameters}
       columns={columns}
       {...props}
     />
