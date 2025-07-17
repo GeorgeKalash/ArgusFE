@@ -42,21 +42,25 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
       classId: ResourceIds.DocumentTypes
     },
     onSubmit: async () => {
-      for (const item of data?.list) {
-        item.hasAccess = item.checked
+      const updatedRows = data.list
+        .filter(obj => obj.checked)
+        .map(row => ({
+          recordId: row.recordId,
+          sgId: recordId,
+          resourceId: parseInt(formik.values.classId)
+        }))
 
-        if (item.checked) {
-          await postRequest({
-            extension: AccessControlRepository.DataAccessItem.set,
-            record: JSON.stringify(item)
-          })
-        } else {
-          await postRequest({
-            extension: AccessControlRepository.DataAccessItem.del,
-            record: JSON.stringify(item)
-          })
-        }
+      const resultObject = {
+        sgId: recordId,
+        resourceId: parseInt(formik.values.classId),
+        items: updatedRows
       }
+
+      await postRequest({
+        extension: AccessControlRepository.DataAccessItem.set2,
+        record: JSON.stringify(resultObject)
+      })
+
       toast.success(platformLabels.Updated)
     }
   })
