@@ -117,7 +117,7 @@ const ImageUpload = forwardRef(
           ...formik.values,
           fileName: formik?.values?.file?.name || formik.values.url,
           resourceId,
-          recordId: ref.current.value || recordId
+          recordId: ref?.current?.value || recordId
         }
 
         return postRequest({
@@ -129,7 +129,7 @@ const ImageUpload = forwardRef(
         })
       } else {
         if (formik.values?.file) {
-          const obj = { ...formik.values, recordId: ref.current.value || recordId }
+          const obj = { ...formik.values, recordId: ref?.current?.value || recordId }
 
           return postRequest({
             extension: SystemRepository.Attachment.set,
