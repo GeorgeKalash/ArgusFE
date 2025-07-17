@@ -60,14 +60,13 @@ const CustomNumberField = ({
 
   const parseInputValue = (val, blur) => {
     val = val.replace(/,/g, '')
-    if (!val.startsWith('.') && val.endsWith('.') && !/\.\d+$/.test(val)) {
+    if (!val.startsWith('.') && val.endsWith('.') && !/\.\d+$/.test(val) && blur) {
       val = val.slice(0, -1)
     }
 
-    if (val === '.' && !blur) {
+    if (val?.endsWith('.') && !blur) {
       return val
     }
-
     if (isDotFollowedByOnlyZeros(val) && !blur) {
       return val.startsWith('.') ? ('0' + val).toString() : val.toString()
     }
