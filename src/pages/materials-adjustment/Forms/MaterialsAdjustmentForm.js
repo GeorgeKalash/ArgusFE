@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -26,11 +26,15 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { useWindow } from 'src/windows'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
+import { SystemChecks } from 'src/resources/SystemChecks'
 
 export default function MaterialsAdjustmentForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData, systemChecks } = useContext(ControlContext)
   const { stack } = useWindow()
+
+  const filteredMeasurements = useRef([])
+  const [measurements, setMeasurements] = useState([])
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.MaterialAdjustment,
@@ -40,8 +44,10 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
   const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
 
   const initialValues = {
+    disableSKULookup: false,
     recordId: recordId,
     dtId: null,
     reference: '',
@@ -81,10 +87,9 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      siteId: yup.string().required(),
+      siteId: yup.number().required(),
       date: yup.date().required(),
       rows: yup
         .array()
@@ -156,14 +161,19 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
 
-  const totalQty = getFormattedNumber(
-    formik.values?.rows
-      ?.reduce((qtySum, row) => {
-        const qtyValue = parseFloat(row.qty) || 0
+  const { totalQty, totalCost, totalWeight } = formik?.values?.rows?.reduce(
+    (acc, row) => {
+      const qtyValue = parseFloat(row?.qty) || 0
+      const totalCostValue = parseFloat(row?.totalCost) || 0
+      const weightValue = parseFloat(row?.weight) || 0
 
-        return qtySum + qtyValue
-      }, 0)
-      .toFixed(2)
+      return {
+        totalQty: acc?.totalQty + qtyValue,
+        totalCost: (Math.round((parseFloat(acc?.totalCost) + totalCostValue) * 100) / 100).toFixed(2),
+        totalWeight: acc?.totalWeight + weightValue
+      }
+    },
+    { totalQty: 0, totalCost: 0, totalWeight: 0 }
   )
   async function onPost() {
     await postRequest({
@@ -191,14 +201,20 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   }
 
   async function getDTD(dtId) {
+    if (!dtId) {
+      formik.setFieldValue('disableSKULookup', false)
+
+      return
+    }
     if (dtId) {
       const res = await getRequest({
         extension: InventoryRepository.DocumentTypeDefaults.get,
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('siteId', res?.record?.siteId || siteId)
+      formik.setFieldValue('siteId', res?.record?.siteId || siteId || null)
       formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+      formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
 
       return res
     }
@@ -222,29 +238,137 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     }
   }
 
+  const getWeightAndMetalId = async itemId => {
+    const res = await getRequest({
+      extension: InventoryRepository.Physical.get,
+      parameters: `_itemId=${itemId}`
+    })
+
+    return {
+      weight: res?.record?.weight ?? 0,
+      metalId: res?.record?.metalId,
+      metalRef: res?.record?.metalRef
+    }
+  }
+
+  const getUnitCost = async itemId => {
+    const res = await getRequest({
+      extension: InventoryRepository.CurrentCost.get,
+      parameters: '_itemId=' + itemId
+    })
+
+    return res?.record?.currentCost
+  }
+
+  async function getFilteredMU(itemId) {
+    if (!itemId) return
+
+    const currentItemId = formik.values.rows?.find(transfer => parseInt(transfer.itemId) === itemId)?.msId
+
+    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    filteredMeasurements.current = arrayMU
+  }
+
+  const getMeasurementUnits = async () => {
+    return await getRequest({
+      extension: InventoryRepository.MeasurementUnit.qry,
+      parameters: `_msId=0`
+    })
+  }
+
+  function calcTotalCost(rec) {
+    if (rec.priceType === 1) return (Math.round(rec.qty * rec.unitCost * 100) / 100).toFixed(2)
+    else if (rec.priceType === 2) return (Math.round(rec.qty * rec.unitCost * rec.volume * 100) / 100).toFixed(2)
+    else if (rec.priceType === 3) return (Math.round(rec.qty * rec.unitCost * rec.weight * 100) / 100).toFixed(2)
+    else return 0
+  }
+
+  async function getItem(itemId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Item.get,
+      parameters: `_recordId=${itemId}`
+    })
+
+    return res?.record
+  }
+
+  useEffect(() => {
+    ;(async function () {
+      const muList = await getMeasurementUnits()
+      setMeasurements(muList?.list)
+    })()
+  }, [])
+
   const columns = [
     {
-      component: 'resourcelookup',
+      component: formik?.values?.disableSKULookup ? 'textfield' : 'resourcelookup',
       label: labels.sku,
       name: 'sku',
+      ...(formik.values.disableSKULookup && { updateOn: 'blur' }),
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
-        valueField: 'sku',
-        displayField: 'sku',
-        mapping: [
-          { from: 'recordId', to: 'itemId' },
-          { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' },
-          { from: 'trackBy', to: 'trackBy' }
-        ],
-        columnsInDropDown: [
-          { key: 'sku', value: 'SKU' },
-          { key: 'name', value: 'Name' }
-        ],
-        displayFieldWidth: 3
+        ...(!formik.values.disableSKULookup && {
+          endpointId: InventoryRepository.Item.snapshot,
+          valueField: 'sku',
+          displayField: 'sku',
+          mapping: [
+            { from: 'recordId', to: 'itemId' },
+            { from: 'msId', to: 'msId' },
+            { from: 'trackBy', to: 'trackBy' },
+            { from: 'lotCategoryId', to: 'lotCategoryId' },
+            { from: 'priceType', to: 'priceType' },
+            { from: 'sku', to: 'sku' },
+            { from: 'name', to: 'itemName' },
+            { from: 'isInactive', to: 'isInactive' }
+          ],
+          columnsInDropDown: [
+            { key: 'sku', value: 'SKU' },
+            { key: 'name', value: 'Name' }
+          ],
+          displayFieldWidth: 3
+        })
       },
       propsReducer({ row, props }) {
         return { ...props, imgSrc: onCondition(row) }
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow?.itemId) {
+          update({
+            details: false
+          })
+
+          return
+        }
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.rows[0],
+            id: newRow.id
+          })
+          stackError({
+            message: labels.inactiveItem
+          })
+
+          return
+        }
+
+        if (newRow?.itemId) {
+          const { weight, metalId, metalRef } = await getWeightAndMetalId(newRow?.itemId)
+          const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
+          const totalCost = calcTotalCost(newRow)
+          const itemInfo = await getItem(newRow.itemId)
+          getFilteredMU(newRow?.itemId)
+          const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+          update({
+            weight,
+            unitCost,
+            totalCost,
+            details: true,
+            msId: itemInfo?.msId,
+            muRef: filteredMeasurements?.[0]?.reference,
+            muId: filteredMeasurements?.[0]?.recordId,
+            metalId,
+            metalRef
+          })
+        }
       }
     },
     {
@@ -256,12 +380,90 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       }
     },
     {
+      component: 'textfield',
+      label: labels.metalRef,
+      name: 'metalRef',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.muId,
+      name: 'muRef',
+      props: {
+        store: filteredMeasurements?.current,
+        displayField: 'reference',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'reference', to: 'muRef' },
+          { from: 'qty', to: 'muQty' },
+          { from: 'recordId', to: 'muId' }
+        ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const qtyInBase = newRow?.qty * filteredItems?.muQty ?? 0
+
+        update({
+          qtyInBase,
+          muQty: newRow?.muQty
+        })
+      },
+      propsReducer({ row, props }) {
+        return { ...props, store: filteredMeasurements?.current }
+      }
+    },
+    {
       component: 'numberfield',
-      name: 'qty',
+      label: labels.pieces,
+      name: 'pcs',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.weight,
+      name: 'weight',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
       label: labels.qty,
+      name: 'qty',
       props: {
         maxLength: 11,
         decimalScale: 3
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (newRow) {
+          const totalCost = calcTotalCost(newRow)
+          const qtyInBase = newRow?.qty * newRow?.muQty ?? 0
+
+          update({
+            totalCost,
+            qtyInBase
+          })
+        }
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.unitCost,
+      name: 'unitCost',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.totalCost,
+      name: 'totalCost',
+      props: {
+        readOnly: true
       }
     },
     {
@@ -320,13 +522,14 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         return {
           ...item,
           id: item.seqNo,
+          pcs: item.pcs || 0,
           serials: serials?.list?.map((serialDetail, index) => {
             return {
               ...serialDetail,
               id: index
             }
           }),
-          totalCost: item.unitCost * item.qty
+          totalCost: (item.unitCost * item.qty).toFixed(2)
         }
       })
     )
@@ -527,6 +730,9 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             error={formik.errors.rows}
             name='rows'
             maxAccess={maxAccess}
+            onSelectionChange={(row, update, field) => {
+              if (field == 'muRef') getFilteredMU(row?.itemId)
+            }}
             columns={columns}
             allowAddNewLine={!isPosted}
             allowDelete={!isPosted}
@@ -534,16 +740,34 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
           />
         </Grow>
         <Fixed>
-          <Grid container xs={6}>
-            <CustomTextField
-              name='totalQty'
-              label={labels.totalQty}
-              maxAccess={maxAccess}
-              value={totalQty}
-              maxLength='30'
-              readOnly
-              error={formik.touched.totalQty && Boolean(formik.errors.totalQty)}
-            />
+          <Grid container xs={3} direction='column' wrap='nowrap' sx={{ pt: 5, justifyContent: 'flex-start' }}>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='totalQty'
+                maxAccess={maxAccess}
+                value={getFormattedNumber(Number(totalQty).toFixed(2))}
+                label={labels.totalQty}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={3} sx={{ mt: 2 }}>
+              <CustomTextField
+                name='totalCost'
+                maxAccess={maxAccess}
+                value={getFormattedNumber(Number(totalCost).toFixed(2))}
+                label={labels.totalCost}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={3} sx={{ mt: 2 }}>
+              <CustomTextField
+                name='totalWeight'
+                maxAccess={maxAccess}
+                value={getFormattedNumber(totalWeight)}
+                label={labels.totalWeight}
+                readOnly
+              />
+            </Grid>
           </Grid>
         </Fixed>
       </VertLayout>
