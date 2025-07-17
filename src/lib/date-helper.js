@@ -69,6 +69,11 @@ function formatDateForGetApI(dateString) {
   return dayjs(dateString).format('YYYY-MM-DD')
 }
 
+function formatDateTimeForGetAPI(dateString) {
+  return dayjs(dateString).format('YYYY-MM-DD HH:mm')
+}
+
+
 function formatDateDefault(date) {
   //used for report params
   return formatDateandTime(date)
@@ -156,5 +161,6 @@ export {
   getTimeInTimeZone,
   formatDate,
   formatDateTimeDefault,
-  formatDateToISO
+  formatDateToISO,
+  formatDateTimeForGetAPI
 }

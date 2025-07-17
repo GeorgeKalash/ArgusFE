@@ -11,7 +11,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 
 const AddressTab = ({
   address,
-  optional = false,
   addressValidation,
   readOnly = false,
   defaultReadOnly = {},
@@ -70,24 +69,18 @@ const AddressTab = ({
       addressValidation.values.countryId ||
       addressValidation.values.street1 ||
       requiredFields.some(field => !!addressValidation.values[field])) &&
-      optional) ||
-    !optional
+      !required) ||
+    required
 
-  console.log('addressValidation', addressValidation)
-
-  const validate = options &&
-    required && {
-      name: yup.string().required(),
-      street1: yup.string().required(),
-      phone: yup.string().required(),
-      countryId: yup.number().required(),
-      city: yup.string().required(),
-      email1: yup
-        .string()
-        .nullable()
-        .matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true }),
-      email2: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true })
-    }
+  const validate = options && {
+    name: yup.string().required(),
+    street1: yup.string().required(),
+    phone: yup.string().required(),
+    countryId: yup.number().required(),
+    city: yup.string().required(),
+    email1: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true }),
+    email2: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true })
+  }
   useEffect(() => {
     if (address?.recordId !== lastRecordIdRef.current) {
       lastRecordIdRef.current = address?.recordId

@@ -104,9 +104,10 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           tdPct: form.values.tdPct,
           taxDetails: form.values.isVattable ? taxDetailList : null
         })
+        const { muId, ...restItem } = item
 
         return {
-          ...item,
+          ...restItem,
           id: index + 1,
           basePrice: itemPriceRow.basePrice,
           unitPrice: itemPriceRow.unitPrice,
@@ -189,6 +190,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
       label: labels.returnNow,
       flex: 2,
       name: 'returnNow',
+      updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
         if (!newRow.returnNow) {
           update({ returnNow: 0 })

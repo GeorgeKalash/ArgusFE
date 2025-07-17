@@ -66,9 +66,9 @@ const AddressForm = ({
       editMode={editMode}
       setAddress={setAddress}
       address={address}
-      allowPost={true}
       onSubmit={onAddressSubmit}
       actions={actions}
+      window={window}
       {...props}
     />
   )

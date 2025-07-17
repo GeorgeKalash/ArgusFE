@@ -61,9 +61,6 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
         if (rule.required && (value === '' || value == null)) {
           maxAccessErrors[field] = `${field} is required.`
         } else {
-          console.log(value, field, rule.maxValue, rule.minValue)
-
-          // if (typeof value === 'string') {
           if (value != '' && value != null && rule.minLength != null && value.length < rule.minLength) {
             maxAccessErrors[field] = `${field} must be at least ${rule.minLength} characters`
           }
@@ -74,14 +71,6 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
           if (value != '' && value != null && rule.minValue != null && value < rule.minValue) {
             maxAccessErrors[field] = `${field} value must be more than  ${rule.minValue}`
           }
-
-          // }
-
-          // if (typeof value === 'number') {
-          //   if (rule.minLength != null && value < rule.minLength) {
-          //     maxAccessErrors[field] = `${field} must be at least ${rule.minLength}`
-          //   }
-          // }
         }
       })
       ;(maxAccess?.record?.controls ?? []).forEach(obj => {
@@ -144,14 +133,9 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
           }
       })
 
-      // const mergedValidation = Validation.current[formId.current] || {}
-      console.log(maxAccessErrors)
-
       return {
         ...maxAccessErrors,
         ...validate(values)
-
-        // ...mergedValidation
       }
     }
   })

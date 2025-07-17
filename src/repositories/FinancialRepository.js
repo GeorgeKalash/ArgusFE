@@ -178,11 +178,10 @@ export const FinancialRepository = {
   PaymentVoucherCostCenters: {
     qry: service + 'qryPVC'
   },
-  Apply2: {
-    qry: service + 'qryAPL2'
-  },
-  Apply3: {
-    qry: service + 'qryAPL3'
+  Apply: {
+    qry: service + 'qryAPL',
+    qry2: service + 'qryAPL2',
+    qry3: service + 'qryAPL3'
   },
   AgingLeg: {
     qry: service + 'qryAGL'
@@ -206,7 +205,8 @@ export const FinancialRepository = {
   },
   AgingDoc: {
     snapshot: service + 'snapshotAGD',
-    rebuild: service + 'rebuildAGD'
+    rebuild: service + 'rebuildAGD',
+    qry: service + 'qryAGD',
   },
   BalanceTransferMultiAccounts: {
     page: service + 'pageTMA',
@@ -269,5 +269,9 @@ export const FinancialRepository = {
   },
   PaymentOrdersCostCenters: {
     qry: service + 'qryPOC'
+  },
+  ApplyManual: {
+    set2: service + 'set2APLM',
+    qry: service + 'qryAPLM'
   }
 }

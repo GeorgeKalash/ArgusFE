@@ -419,7 +419,6 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
       props: {
         resourceId: ResourceIds.WCConsumptionImport,
         access: maxAccess,
-        platformLabels,
         onSuccess: async res => {
           if (formik?.values?.recordId) {
             const header = await getHeaderData(formik?.values.recordId)

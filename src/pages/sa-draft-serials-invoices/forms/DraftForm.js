@@ -110,7 +110,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
           unitPrice: 0,
           taxId: null,
           taxDetails: null,
-          taxDetailsButton: true,
           priceType: 0,
           volume: 0
         }
@@ -144,7 +143,8 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       )
     }),
     onSubmit: async obj => {
-      const { serials, date, ...rest } = obj
+      const { taxDetailsStore, itemGridData, metalGridData, search, autoSrlNo, disSkuLookup, serials, date, ...rest } =
+        obj
 
       const header = {
         ...rest,
@@ -322,16 +322,17 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
   }
 
   async function saveHeader(lastLine) {
+    const { taxDetailsStore, itemGridData, metalGridData, search, autoSrlNo, disSkuLookup, serials, date, ...rest } =
+      formik?.values
+
     const DraftInvoicePack = {
       header: {
-        ...formik?.values,
+        ...rest,
         pcs: 0,
-        date: formatDateToApi(formik.values.date)
+        date: formatDateToApi(date)
       },
       items: []
     }
-
-    delete DraftInvoicePack.header.serials
 
     const diRes = await postRequest({
       extension: SaleRepository.DraftInvoice.set2,
@@ -398,6 +399,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 metalRef: res?.record?.metalRef || '',
                 designId: res?.record?.designId || null,
                 designRef: res?.record?.designRef || null,
+                categoryName: res?.record?.categoryName,
                 volume: res?.record?.volume || 0,
                 baseLaborPrice: res?.record?.baseLaborPrice || 0,
                 unitPrice: parseFloat(res?.record?.unitPrice).toFixed(2) || 0,
@@ -409,8 +411,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                   taxDetails: await FilteredListByTaxId(
                     formik?.values?.taxDetailsStore,
                     formik.values?.taxId || res?.record?.taxId
-                  ),
-                  taxDetailsButton: true
+                  )
                 })
               }
             }
@@ -492,21 +493,31 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       name: 'taxDetailsButton',
       flex: 0.75,
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {
         row.qty = row.weight
         row.basePrice = 0
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
@@ -641,7 +652,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           amount: parseFloat(item.amount).toFixed(2),
-          taxDetailsButton: true,
           taxDetails: taxDetailsResponse
         }
       })
@@ -673,7 +683,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           amount: parseFloat(item.amount).toFixed(2),
-          taxDetailsButton: true,
           taxDetails: taxDetailsResponse
         }
       })
@@ -768,11 +777,11 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
       var seqNo = 0
 
-      const itemMap = serials.reduce((acc, { sku, itemId, itemName, weight }) => {
+      const itemMap = serials.reduce((acc, { sku, itemId, itemName, weight, categoryName }) => {
         if (itemId) {
           if (!acc[itemId]) {
             seqNo++
-            acc[itemId] = { sku: sku, pcs: 0, weight: 0, itemName: itemName, seqNo: seqNo }
+            acc[itemId] = { sku, pcs: 0, weight: 0, itemName, seqNo, categoryName }
           }
           acc[itemId].pcs += 1
           acc[itemId].weight = parseFloat((acc[itemId].weight + parseFloat(weight || 0)).toFixed(2))
@@ -1138,6 +1147,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 0.75 },
                 { field: 'sku', headerName: labels.sku, flex: 1 },
                 { field: 'itemName', headerName: labels.itemDesc, flex: 2 },
+                { field: 'categoryName', headerName: labels.category, flex: 2 },
                 { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
                 { field: 'weight', headerName: labels.weight, type: 'number', flex: 1 }
               ]}

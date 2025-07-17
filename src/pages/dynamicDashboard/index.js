@@ -237,6 +237,26 @@ const DashboardLayout = () => {
             </ChartCard>
           </TopRow>
         )}
+        {containsApplet(ResourceIds.SalesTeamOrdersSummary) && (
+          <TopRow>
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.salesTeamOrdersSummary}</Title>
+              </SummaryCard>
+              <MixedBarChart
+                id='salesTeamOrdersSummaries'
+                labels={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.spRef) || []}
+                data1={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.amount) || []}
+                data2={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.orderCount) || []}
+                ratio={5}
+                label1={labels.amount}
+                label2={labels.orderCount}
+                hasLegend={true}
+                rotation={-90}
+              />
+            </ChartCard>
+          </TopRow>
+        )}
         <MiddleRow>
           {containsApplet(ResourceIds.MyYearlyUnitsSoldList) && (
             <ChartCard>

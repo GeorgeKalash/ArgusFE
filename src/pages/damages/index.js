@@ -88,8 +88,7 @@ const Damages = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.Damage,
-    action: openForm,
-    hasDT: false
+    action: openForm
   })
 
   const add = async () => {

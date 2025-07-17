@@ -20,5 +20,6 @@ export const commonResourceIds = [
   ResourceIds.POSPayment,
   ResourceIds.Address,
   ResourceIds.OpenOutwardsReturn,
-  ResourceIds.Printing
+  ResourceIds.Printing,
+  ResourceIds.Worksheet
 ]

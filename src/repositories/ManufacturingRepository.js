@@ -138,6 +138,7 @@ export const ManufacturingRepository = {
     del: service + 'delJOB',
     snapshot: service + 'snapshotJOB',
     snapshot2: service + 'snapshotJOB2',
+    snapshot3: service + 'snapshotJOB3',
     cancel: service + 'cancelJOB',
     post: service + 'postJOB',
     start: service + 'startJOB',
@@ -204,7 +205,8 @@ export const ManufacturingRepository = {
     get: service + 'getJRO',
     set: service + 'setJRO',
     set2: service + 'set2JRO',
-    del: service + 'delJRO'
+    del: service + 'delJRO',
+    sync: service + 'syncJRO',
   },
   Worksheet: {
     snapshot: service + 'snapshotWST',
@@ -253,7 +255,8 @@ export const ManufacturingRepository = {
     page: service + 'pagePO',
     snapshot: service + 'snapshotPO',
     post: service + 'postPO',
-    gen: service + 'genPO'
+    gen: service + 'genPO',
+    close: service + 'closePO',
   },
   BillOfMaterials: {
     get: service + 'getBMA',
