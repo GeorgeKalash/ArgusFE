@@ -12,7 +12,8 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
-import ResourceComboBox from 'src/components/Inputs/ResourceComboBox'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function CustomForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -63,21 +64,33 @@ export default function CustomForm({ labels, maxAccess, recordId }) {
     <FormShell resourceId={ResourceIds.UserProperties} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                datasetId={DataSets.GENDER}
-                name='gender'
-                label={_labels.Mask}
+                datasetId={DataSets.MASK_PROPERTY}
+                name='mask'
+                label={labels.Mask}
                 valueField='key'
                 displayField='value'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('gender', newValue ? newValue.key : '')
+                  formik.setFieldValue('mask', newValue?.key || null)
                 }}
                 maxAccess={maxAccess}
-                error={formik.touched.gender && Boolean(formik.errors.gender)}
-                readOnly={editMode}
+                error={formik.touched.mask && Boolean(formik.errors.mask)}
               />
             </Grid>
           </Grid>
