@@ -4,8 +4,11 @@ import { useState } from 'react'
 import WorksheetForm from '../forms/WorksheetForm.js'
 import MaterialsTab from '../forms/MaterialsTab.js'
 import OperationsTab from '../forms/OperationsTab.js'
+import useSetWindow from 'src/hooks/useSetWindow.js'
+import { ResourceIds } from 'src/resources/ResourceIds.js'
+import useResourceParams from 'src/hooks/useResourceParams.js'
 
-const WorksheetWindow = ({ recordId, labels, maxAccess, window }) => {
+const WorksheetWindow = ({ recordId, window }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -13,6 +16,13 @@ const WorksheetWindow = ({ recordId, labels, maxAccess, window }) => {
     isPosted: false,
     values: null
   })
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.Worksheet,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.Worksheet, window })
 
   const tabs = [
     { label: labels.Worksheet },
@@ -24,16 +34,19 @@ const WorksheetWindow = ({ recordId, labels, maxAccess, window }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <WorksheetForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} window={window} />
+        <WorksheetForm labels={labels} setStore={setStore} store={store} maxAccess={access} window={window} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <MaterialsTab store={store} />
+        <MaterialsTab store={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <OperationsTab labels={labels} store={store} maxAccess={maxAccess} />
+        <OperationsTab store={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
     </>
   )
 }
+
+WorksheetWindow.width = 1200
+WorksheetWindow.height = 650
 
 export default WorksheetWindow
