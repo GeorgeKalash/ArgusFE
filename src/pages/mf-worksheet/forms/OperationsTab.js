@@ -46,7 +46,8 @@ export default function OperationsTab({ store, labels, access }) {
           maxAccess={access}
           columns={[
             { field: 'operationRef', headerName: labels.operationRef, flex: 1 },
-            { field: 'operationName', headerName: labels.operationName, flex: 1 },
+            { field: 'operationName', headerName: labels.operationName, flex: 2 },
+            { field: 'categoryName', headerName: labels.category, flex: 2 },
             { field: 'issued_qty', headerName: labels.issued, type: 'number', flex: 1 },
             { field: 'returned_qty', headerName: labels.returned, type: 'number', flex: 1 },
             { field: 'lost_qty', headerName: labels.loss, type: 'number', flex: 1 },
@@ -57,7 +58,7 @@ export default function OperationsTab({ store, labels, access }) {
         />
       </Grow>
       <Fixed>
-        <Grid container spacing={1} padding={2}>
+        <Grid container spacing={1} sx={{ pt: 2 }}>
           <Grid item xs={6.8}></Grid>
           <Grid item xs={5}>
             <Grid container spacing={4}>
