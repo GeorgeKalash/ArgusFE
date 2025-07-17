@@ -253,7 +253,10 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={InventoryRepository.Item.snapshot}
+                endpointId={InventoryRepository.Item.snapshot3}
+                parameters={{
+                  _productionLevel: 4
+                }}
                 name='wipItemId'
                 label={labels.wipItem}
                 valueField='sku'
@@ -261,7 +264,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 valueShow='wipItemSku'
                 secondValueShow='wipItemName'
                 form={formik}
-                readOnly={productionLevel != 4}
+                readOnly={productionLevel == 4}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('wipItemSku', newValue?.sku || null)
                   formik.setFieldValue('wipItemName', newValue?.name || '')

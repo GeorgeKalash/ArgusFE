@@ -83,7 +83,8 @@ const CashCountForm = ({ recordId, window }) => {
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CashCountTransaction
+    datasetId: ResourceIds.CashCountTransaction,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.cashCount, window })
@@ -123,7 +124,6 @@ const CashCountForm = ({ recordId, window }) => {
           system: '',
           variation: '',
           flag: '',
-          enabled: false,
           currencyNotes: []
         }
       ]
@@ -220,7 +220,6 @@ const CashCountForm = ({ recordId, window }) => {
         items: items.map(({ seqNo, variation, ...rest }, index) => ({
           id: seqNo,
           seqNo,
-          enabled: true,
           variation,
           flag: variation === 0 ? true : false,
           ...rest
@@ -531,7 +530,6 @@ const CashCountForm = ({ recordId, window }) => {
                   if (newRow?.currencyId) {
                     const balance = await getSystem(newRow?.currencyId)
                     update({
-                      enabled: true,
                       system: balance
                     })
                   }
@@ -571,6 +569,13 @@ const CashCountForm = ({ recordId, window }) => {
                 component: 'button',
                 name: 'enabled',
                 label: labels.currencyNotes,
+                props: {
+                  onCondition: row => {
+                    return {
+                      disabled: !row?.currencyId
+                    }
+                  }
+                },
                 onClick: (e, row, update, updateRow) => {
                   stack({
                     Component: CashCountNotes,

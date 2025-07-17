@@ -254,7 +254,18 @@ export const SystemRepository = {
   Attachment: {
     qry: service + 'qryAT',
     set: service + 'setAT',
+    set2: service + 'setAT2',
     get: service + 'getAT',
+    get2: service + 'getAT2',
     del: service + 'delAT'
+  },
+  Folders: {
+    page: service + 'pageFO',
+    get: service + 'getFO',
+    set: service + 'setFO',
+    del: service + 'delFO'
+  },
+  ResourcePerformance: {
+    page: service + 'pageTLP'
   }
 }

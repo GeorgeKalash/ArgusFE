@@ -37,22 +37,34 @@ const ReportViewer = ({ resourceId }) => {
   }
 
   const getReportLayout = () => {
-    const parameters = `_resourceId=${resourceId}`
     getRequest({
       extension: SystemRepository.ReportLayout,
-      parameters
-    }).then(res => {
-      res.list &&
-        setReportStore(prevReportStore => [
-          ...prevReportStore,
-          ...res?.list?.map(item => ({
-            api_url: item.api,
-            reportClass: item.instanceName,
-            parameters: item.parameters,
-            layoutName: item.layoutName,
-            assembly: 'ArgusRPT.dll'
-          }))
-        ])
+      parameters: `_resourceId=${resourceId}`
+    }).then(async res => {
+      const inactiveReports = await getRequest({
+        extension: SystemRepository.ReportLayoutObject.qry,
+        parameters: `_resourceId=${resourceId}`
+      })
+      let newList = res.list || []
+      if (inactiveReports?.list?.length > 0) {
+        const inactiveIds = new Set(inactiveReports.list.map(item => item.id))
+        newList = newList.filter(item => !inactiveIds.has(item.id))
+      }
+      setReportStore(prevReportStore => {
+        const existingIds = new Set(prevReportStore.map(report => report.id))
+        const filteredNewItems = newList.filter(item => !existingIds.has(item.id))
+
+        const newMappedItems = filteredNewItems.map(item => ({
+          id: item.id,
+          api_url: item.api,
+          reportClass: item.instanceName,
+          parameters: item.parameters,
+          layoutName: item.layoutName,
+          assembly: 'ArgusRPT.dll'
+        }))
+
+        return [...prevReportStore, ...newMappedItems]
+      })
     })
   }
 

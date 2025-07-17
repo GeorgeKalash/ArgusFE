@@ -442,6 +442,7 @@ export default function FormShell({
           previewReport={previewReport}
           visibleClear={visibleClear}
           functionId={functionId}
+          maxAccess={maxAccess}
         />
       )}
     </>

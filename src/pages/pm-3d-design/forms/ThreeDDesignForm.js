@@ -43,7 +43,8 @@ const ThreeDDesignForm = ({ recordId, window }) => {
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.ThreeDDesign
+    datasetId: ResourceIds.ThreeDDesign,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.ThreeDDesign, window })
@@ -657,7 +658,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
   )
 }
 
-ThreeDDesignForm.width = 800
-ThreeDDesignForm.height = 650
+ThreeDDesignForm.width = 1200
+ThreeDDesignForm.height = 700
 
 export default ThreeDDesignForm

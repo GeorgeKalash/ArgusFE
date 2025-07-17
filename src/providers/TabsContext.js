@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useState, useContext } from 'react'
 import { useRouter } from 'next/router'
 import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
+import RefreshIcon from '@mui/icons-material/Refresh'
 import PropTypes from 'prop-types'
 import { MenuContext } from 'src/providers/MenuContext'
 import { v4 as uuidv4 } from 'uuid'
@@ -186,6 +187,14 @@ const TabsProvider = ({ children }) => {
     }
   }
 
+  const refreshHomeTab = () => {
+    const homeTabIndex = openTabs.findIndex(tab => tab.route === '/default/')
+    if (homeTabIndex !== -1) {
+      setOpenTabs(prev => prev.map((tab, index) => (index === homeTabIndex ? { ...tab, id: uuidv4() } : tab)))
+      setReloadOpenedPage([])
+    }
+  }
+
   useEffect(() => {
     if (reloadOpenedPage) {
       setOpenTabs(openTabs => openTabs.map(tab => (tab.route === router.asPath ? { ...tab, id: uuidv4() } : tab)))
@@ -313,7 +322,23 @@ const TabsProvider = ({ children }) => {
               openTabs.map((activeTab, i) => (
                 <Tab
                   key={activeTab?.id}
-                  label={activeTab?.label}
+                  label={
+                    <Box display='flex' alignItems='center'>
+                      <span>{activeTab.label}</span>
+                      {activeTab.route === '/default/' && currentTabIndex === i && (
+                        <IconButton
+                          size='small'
+                          onClick={e => {
+                            e.stopPropagation()
+                            refreshHomeTab()
+                          }}
+                          sx={{ ml: 1, p: 0.5 }}
+                        >
+                          <RefreshIcon fontSize='small' />
+                        </IconButton>
+                      )}
+                    </Box>
+                  }
                   onContextMenu={event => OpenItems(event, i)}
                   icon={
                     activeTab.route === '/default/' ? null : (

@@ -63,7 +63,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.SalesOrder
+    datasetId: ResourceIds.SalesOrder,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.salesOrder, window })
@@ -151,7 +152,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         applyVat: false,
         taxId: '',
         taxDetails: null,
-        taxDetailsButton: true,
         notes: ''
       }
     ]
@@ -230,6 +230,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
       toast.success(actionMessage)
       await refetchForm(soRes.recordId)
+
       invalidate()
     }
   })
@@ -264,6 +265,26 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     return currentAmount
   }
 
+  const onCondition = row => {
+    if (row.itemId && row.taxId) {
+      return {
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
+  const saTrxCondition = row => {
+    return {
+      disabled: !row.itemId
+    }
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -288,9 +309,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) {
-          update({
-            saTrx: false
-          })
 
           return
         }
@@ -348,9 +366,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           taxDetails: formik.values.isVattable ? rowTaxDetails : null,
           mdType: 1,
           siteId: formik?.values?.siteId,
-          siteRef: await getSiteRef(formik?.values?.siteId),
-          saTrx: true,
-          taxDetailsButton: true
+          siteRef: await getSiteRef(formik?.values?.siteId)
         })
       }
     },
@@ -481,19 +497,17 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        onCondition
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
@@ -519,6 +533,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       component: 'button',
       name: 'saTrx',
       label: labels.salesTrx,
+      props: {
+        onCondition: saTrxCondition
+      },
       onClick: (e, row, update, newRow) => {
         stack({
           Component: SalesTrxForm,
@@ -705,7 +722,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 upo: parseFloat(item.upo).toFixed(2),
                 vatAmount: parseFloat(item.vatAmount).toFixed(2),
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-                saTrx: true,
                 taxDetails: taxDetailsResponse
               }
             })

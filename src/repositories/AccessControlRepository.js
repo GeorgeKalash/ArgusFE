@@ -56,6 +56,7 @@ export const AccessControlRepository = {
   },
   ModuleClass: {
     qry: service + 'qryRES',
+    get: service + 'getRES',
     qry0: service + 'qryRES0',
     qry2: service + 'qryRES2',
     set: service + 'setRES',
@@ -83,8 +84,7 @@ export const AccessControlRepository = {
   },
   DataAccessItem: {
     qry: service + 'qryROW',
-    set: service + 'setROW',
-    del: service + 'delROW'
+    set2: service + 'set2ROW'
   },
   Notification: {
     qry: service + 'qryNTX',
