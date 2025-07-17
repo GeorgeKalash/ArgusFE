@@ -66,6 +66,7 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res?.record)
+        recordId: String(employeeId * 100) + String(fiscalYear * 10) + String(lsId)
       }
     })()
   }, [])
@@ -124,9 +125,13 @@ export default function LmObaForm({ labels, maxAccess, recordId }) {
                 label={labels.leaveSchedule}
                 values={formik.values}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
                 readOnly={editMode}
                 required
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('lsId', newValue?.recordId || '')

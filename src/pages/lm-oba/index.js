@@ -81,7 +81,8 @@ const LmObaPage = () => {
       props: {
         labels,
         recordId,
-        maxAccess: access
+        maxAccess: access,
+        recordId: recordId ? String(employeeId * 100) + String(fiscalYear * 10) + String(lsId) : null
       },
       width: 500,
       height: 500,
