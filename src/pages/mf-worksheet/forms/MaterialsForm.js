@@ -43,8 +43,8 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
   const { formik } = useForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
+      recordId,
       header: {
-        recordId: '',
         jobId: values.jobId,
         notes: '',
         siteId: values.siteId,
@@ -104,7 +104,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
             ...item,
             imaId: recordId || 0,
             unitCost: item.unitCost || 0,
-            seqNo: index + 1,
+            seqNo: index + 1
           }
         })
       }
@@ -113,9 +113,6 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         extension: ManufacturingRepository.WorksheetMaterials.set2,
         record: JSON.stringify(data)
       })
-      if (!obj.recordId) {
-        formik.setFieldValue('recordId', res.recordId)
-      }
       const dimensionRecords = []
       for (const item of obj.items) {
         const { seqNo, dim1Id, dim1, dim2, dim2Id, dimension1, dimension2 } = item
@@ -213,6 +210,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
 
     if (values) {
       formik.setValues({
+        recordId,
         header: {
           ...formik.values.header,
           ...res?.record,
