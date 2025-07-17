@@ -14,7 +14,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
-import { mask } from 'primereact/utils'
 
 export default function CustomForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
