@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function useResourceParams({ datasetId, DatasetIdAccess }) {
+export default function useResourceParams({ datasetId, DatasetIdAccess, editMode, cacheOnlyMode }) {
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
 
@@ -10,10 +10,10 @@ export default function useResourceParams({ datasetId, DatasetIdAccess }) {
   useEffect(() => {
     const resourceId = DatasetIdAccess || datasetId
     if (resourceId) {
-      if (!access) getAccess(resourceId, setAccess)
+      if (!access) getAccess(resourceId, setAccess, cacheOnlyMode)
       else {
         if (access.record.maxAccess > 0) {
-          getLabels(datasetId, setLabels)
+          getLabels(datasetId, setLabels, cacheOnlyMode)
         }
       }
     }
@@ -23,6 +23,6 @@ export default function useResourceParams({ datasetId, DatasetIdAccess }) {
 
   return {
     labels: _labels,
-    access
+    access: editMode ? { ...access, editMode } : access
   }
 }

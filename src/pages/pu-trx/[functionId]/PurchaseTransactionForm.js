@@ -62,15 +62,7 @@ import { createConditionalSchema } from 'src/lib/validation'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function PurchaseTransactionForm({
-  labels,
-  access,
-  recordId,
-  functionId,
-  window,
-  getResourceId,
-  getGLResource
-}) {
+export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
@@ -89,7 +81,7 @@ export default function PurchaseTransactionForm({
     value: 2
   })
 
-  const { documentType, maxAccess } = useDocumentType({
+  const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
     enabled: !recordId,
@@ -198,6 +190,18 @@ export default function PurchaseTransactionForm({
   const invalidate = useInvalidate({
     endpointId: PurchaseRepository.PurchaseInvoiceHeader.qry
   })
+
+  const getGLResource = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.GLPurchaseInvoice
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.GLPurchaseReturn
+      default:
+        return null
+    }
+  }
 
   const onClick = () => {
     stack({
@@ -802,12 +806,14 @@ export default function PurchaseTransactionForm({
           vatAmount: item.vatAmount ? parseFloat(item.vatAmount).toFixed(2) : 0,
           extendedPrice: item.extendedPrice ? parseFloat(item.extendedPrice).toFixed(2) : 0,
           puTrx: true,
-          serials: puTrxSerials?.map((serialDetail, index) => {
-            return {
-              ...serialDetail,
-              id: index
-            }
-          }),
+          serials: puTrxSerials
+            ?.filter(row => row.seqNo == item.seqNo)
+            ?.map((serialDetail, index) => {
+              return {
+                ...serialDetail,
+                id: index
+              }
+            }),
           taxDetails: updatedpuTrxTaxes.filter(tax => tax.seqNo === item.seqNo)
         }
       })
@@ -1454,6 +1460,17 @@ export default function PurchaseTransactionForm({
     })
   }
 
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.PurchaseInvoice
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.PurchaseReturn
+      default:
+        return null
+    }
+  }
+
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
@@ -1494,6 +1511,7 @@ export default function PurchaseTransactionForm({
                     formik.setFieldValue('header.KGmetalPrice', 0)
                     setmetalPriceVisibility(false)
                   }
+                  changeDT(newValue)
                 }}
                 error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
               />
