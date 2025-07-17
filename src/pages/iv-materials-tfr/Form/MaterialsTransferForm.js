@@ -221,7 +221,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       }
 
       toast.success(!values.recordId ? platformLabels.Added : platformLabels.Edited)
-      refetchForm(values.recordId, true)
+      refetchForm(res.recordId, true)
       invalidate()
     }
   })
