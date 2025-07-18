@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useRef } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -34,7 +34,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { stack } = useWindow()
-  const imageUploadRef = useRef(null)
   const functionId = SystemFunction.Worksheet
   const resourceId = ResourceIds.Worksheet
   const editMode = !!recordId
@@ -106,11 +105,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
         extension: ManufacturingRepository.Worksheet.set,
         record: JSON.stringify({ ...data })
       }).then(async res => {
-        if (imageUploadRef.current) {
-          imageUploadRef.current.value = parseInt(res.recordId)
-
-          await imageUploadRef.current.submit()
-        }
         if (!obj.recordId) {
           setStore(prevStore => ({
             ...prevStore,
@@ -135,6 +129,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
         extension: ManufacturingRepository.WorkCenter.get,
         parameters: `_recordId=${res?.record?.workCenterId}`
       })
+
       formik.setValues({
         ...res?.record,
         date: formatDateFromApi(res?.record?.date),
@@ -199,20 +194,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
     })
   }
 
-  const onRefresh = () => {
-    window.close()
-    stack({
-      Component: WorksheetWindow,
-      props: {
-        labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 1200,
-      height: 780,
-      title: labels.Worksheet
-    })
-  }
 
   const actions = [
     {
@@ -599,12 +580,13 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ImageUpload
-                    ref={imageUploadRef}
-                    resourceId={resourceId}
+                    resourceId={ResourceIds.MFJobOrders}
                     seqNo={0}
-                    recordId={recordId}
+                    recordId={formik.values.jobId}
                     customWidth={320}
                     customHeight={190}
+                    isAbsolutePath={true}
+                    disabled={true}
                   />
                 </Grid>
 

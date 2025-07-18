@@ -8,9 +8,9 @@ import OverheadTab from '../form/OverheadTab'
 import MaterialsTab from '../form/MaterialsTab'
 import SizesTab from '../form/SizesTab'
 
-const JobOrderWindow = ({ recordId, access, labels, invalidate, lockRecord }) => {
+const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lockRecord }) => {
   const [activeTab, setActiveTab] = useState(0)
-  const [store, setStore] = useState({ recordId, isPosted: false, isCancelled: false })
+  const [store, setStore] = useState({ recordId, jobReference, isPosted: false, isCancelled: false })
   const [refetchRouting, setRefetchRouting] = useState(false)
 
   const tabs = [

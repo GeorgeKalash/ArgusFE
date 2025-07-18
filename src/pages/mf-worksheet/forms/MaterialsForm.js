@@ -28,7 +28,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const functionId = SystemFunction.IssueOfMaterial
-  const resourceId = ResourceIds.Worksheet
+  const resourceId = ResourceIds.IssueOfMaterials
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
@@ -43,8 +43,8 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
   const { formik } = useForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
+      recordId,
       header: {
-        recordId: '',
         jobId: values.jobId,
         notes: '',
         siteId: values.siteId,
@@ -102,8 +102,9 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         items: obj?.items?.map((item, index) => {
           return {
             ...item,
+            imaId: recordId || 0,
             unitCost: item.unitCost || 0,
-            seqNo: index + 1,
+            seqNo: index + 1
           }
         })
       }
@@ -112,9 +113,6 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
         extension: ManufacturingRepository.WorksheetMaterials.set2,
         record: JSON.stringify(data)
       })
-      if (!obj.recordId) {
-        formik.setFieldValue('recordId', res.recordId)
-      }
       const dimensionRecords = []
       for (const item of obj.items) {
         const { seqNo, dim1Id, dim1, dim2, dim2Id, dimension1, dimension2 } = item
@@ -148,7 +146,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
       invalidate()
 
-      getData(res.recordId)
+      await getData(res.recordId)
     }
   })
 
@@ -212,6 +210,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
 
     if (values) {
       formik.setValues({
+        recordId,
         header: {
           ...formik.values.header,
           ...res?.record,
@@ -243,23 +242,17 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
           id: index + 1,
           ...item,
           pcs: item.pcs || 0,
-          qty: item.qty || 0,
+          qty: item.qty || 0
         })) || formik.values.items
       )
     }
   }
 
   const editMode = !!formik?.values?.header?.recordId
-  const totalQty = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.qty, 0) : 0
-  const totalPcs = formik.values.items ? formik.values.items.reduce((acc, item) => acc + item.pcs, 0) : 0
-
-  const totalExpQty = formik.values.items
-    ? formik.values.items.reduce((acc, item) => acc + parseInt(item.designQty), 0)
-    : 0
-
-  const totalExpPcs = formik.values.items
-    ? formik.values.items.reduce((acc, item) => acc + parseInt(item.designPcs), 0)
-    : 0
+  const totalQty = formik.values.items?.reduce((acc, { qty = 0 }) => acc + qty, 0) ?? 0
+  const totalPcs = formik.values.items?.reduce((acc, { pcs = 0 }) => acc + pcs, 0) ?? 0
+  const totalExpQty = formik.values.items?.reduce((acc, { designQty = 0 }) => acc + designQty, 0) ?? 0
+  const totalExpPcs = formik.values.items?.reduce((acc, { designPcs = 0 }) => acc + designPcs, 0) ?? 0
 
   return (
     <FormShell resourceId={resourceId} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -415,6 +408,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
             name='items'
             value={formik.values.items}
             error={formik.errors.items}
+            maxAccess={access}
             columns={[
               {
                 component: 'resourcelookup',

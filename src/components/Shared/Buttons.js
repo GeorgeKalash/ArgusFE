@@ -11,6 +11,13 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
+    key: 'Rebuild',
+    color: '#231F20',
+    label: platformLabels.RebuildButton,
+    image: 'rebuild.png',
+    main: false
+  },
+  {
     key: 'Info',
     label: platformLabels.Info,
     condition: 'isInfo && infoVisible',
@@ -322,13 +329,6 @@ export const getButtons = platformLabels => [
     label: platformLabels.Apply,
     color: '#4eb558',
     image: 'apply.png',
-    main: false
-  },
-  {
-    key: 'Rebuild',
-    color: '#231F20',
-    label: platformLabels.RebuildButton,
-    image: 'rebuild.png',
     main: false
   },
   {
