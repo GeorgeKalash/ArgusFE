@@ -1126,6 +1126,28 @@ export default function RetailTransactionsForm({
 
     formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
   }
+
+  async function importInvoiceItems() {
+    const retailTrxItems = await getRetailTransactionPack(formik.values?.header?.oDocId)
+
+    const modifiedItemsList = await Promise.all(
+      retailTrxItems?.items?.map(async (item, index) => {
+        const taxDetails = await getTaxDetails(item?.taxId)
+
+        return {
+          ...item,
+          id: index + 1,
+          qty: parseFloat(item.qty).toFixed(2),
+          unitPrice: parseFloat(item.unitPrice).toFixed(2),
+          extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+          taxDetails
+        }
+      })
+    )
+    formik.setFieldValue('items', modifiedItemsList)
+    setReCal(true)
+  }
+
   useEffect(() => {
     formik.setFieldValue('header.name', address?.name || '')
     formik.setFieldValue('header.street1', address?.street1 || '')
@@ -1269,7 +1291,7 @@ export default function RetailTransactionsForm({
                     error={formik.touched?.header?.KGmetalPrice && Boolean(formik.errors?.header?.KGmetalPrice)}
                   />
                 </Grid>
-                <Grid item xs={8}>
+                <Grid item xs={9}>
                   <ResourceLookup
                     endpointId={PointofSaleRepository.RetailInvoice.snapshot}
                     parameters={{
@@ -1279,12 +1301,14 @@ export default function RetailTransactionsForm({
                     valueField='reference'
                     displayField='reference'
                     name='header.oDocRef'
-                    label={labels.invoice}
+                    label={labels.invoices}
                     readOnly={isPosted}
                     form={formik}
+                    displayFieldWidth={1.5}
                     formObject={formik.values.header}
                     secondDisplayField={false}
                     onChange={(event, newValue) => {
+                      formik.setFieldValue('header.isVatable', newValue?.isVatable || false)
                       formik.setFieldValue('header.oDocRef', newValue?.reference)
                       formik.setFieldValue('header.oDocId', newValue?.recordId || null)
                     }}
@@ -1293,9 +1317,9 @@ export default function RetailTransactionsForm({
                   />
                 </Grid>
 
-                <Grid item xs={3}>
+                <Grid item xs={2}>
                   <CustomButton
-                    onClick={() => {}}
+                    onClick={() => importInvoiceItems()}
                     tooltipText={platformLabels.import}
                     image={'import.png'}
                     disabled={!formik.values.header.oDocId}
