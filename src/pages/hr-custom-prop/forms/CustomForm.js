@@ -33,7 +33,7 @@ export default function CustomForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      mask: yup.string().required()
+      mask: yup.number().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
