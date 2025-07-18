@@ -33,6 +33,7 @@ import { getStorageData } from 'src/storage/storage'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import useSetWindow from 'src/hooks/useSetWindow'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 
 export default function PurchaseRquisitionForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -101,7 +102,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
 
       invalidate()
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-      refetchForm(res?.recordId)
+      await refetchForm(res?.recordId)
     }
   })
 
@@ -455,7 +456,6 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
                     valueShow='vendorRef'
                     secondValueShow='vendorName'
                     maxAccess={maxAccess}
-                    editMode={editMode}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }

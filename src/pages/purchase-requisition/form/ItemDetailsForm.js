@@ -109,7 +109,10 @@ export default function ItemDetailsForm({
       parameters: `_itemId=${itemId}&_vendorId=${formik?.values?.vendorId || 0}`
     })
     formik.setFieldValue('details.lastPurchaseUnitPrice', lastResp?.record?.invoiceItem?.unitPrice || 0)
-    formik.setFieldValue('details.lastPurchaseDate', formatDateFromApi(lastResp?.record?.invoice?.date))
+    formik.setFieldValue(
+      'details.lastPurchaseDate',
+      lastResp?.record?.invoice?.date ? formatDateFromApi(lastResp?.record?.invoice?.date) : null
+    )
     formik.setFieldValue('details.lastPurchaseCurrencyId', lastResp?.record?.invoice?.currencyId)
   }
 
@@ -178,7 +181,6 @@ export default function ItemDetailsForm({
                     secondValueShow='itemName'
                     maxAccess={maxAccess}
                     required
-                    editMode={editMode}
                     formObject={formik.values.details}
                     columnsInDropDown={[
                       { key: 'sku', value: 'SKU' },
@@ -263,7 +265,7 @@ export default function ItemDetailsForm({
                       formik.setFieldValue('details.totalCost', (qty || 0) * (formik.values.details.unitCost || 0))
                       formik.setFieldValue('details.qty', qty)
                     }}
-                    onClear={() => formik.setFieldValue('details.qty', '')}
+                    onClear={() => formik.setFieldValue('details.qty', null)}
                     readOnly={readOnlyField}
                     maxAccess={maxAccess}
                     required
@@ -320,15 +322,14 @@ export default function ItemDetailsForm({
                     secondValueShow='vendorName'
                     maxAccess={maxAccess}
                     formObject={formik.values.details}
-                    editMode={editMode}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('details.vendorId', newValue?.recordId || null)
                       formik.setFieldValue('details.vendorName', newValue?.name || '')
                       formik.setFieldValue('details.vendorRef', newValue?.reference || '')
+                      formik.setFieldValue('details.vendorId', newValue?.recordId || null)
                     }}
                     errorCheck={'details.vendorId'}
                   />
