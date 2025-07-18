@@ -65,10 +65,7 @@ export default function LmObaForm({ labels, maxAccess, obj }) {
 
         formik.setValues({
           ...record,
-          recordId:
-            record.employeeId && record.fiscalYear && record.lsId
-              ? String(record.employeeId * 100) + String(record.fiscalYear * 10) + String(record.lsId)
-              : null
+          recordId: String(record.employeeId * 100) + String(record.fiscalYear * 10) + String(record.lsId)
         })
       }
     })()
