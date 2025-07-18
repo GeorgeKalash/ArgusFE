@@ -27,9 +27,8 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import DamageForm from 'src/pages/damages/forms/DamageForm'
 import { useWindow } from 'src/windows'
 import WorkFlow from 'src/components/Shared/WorkFlow'
-import WorksheetWindow from '../window/WorksheetWindow'
 
-export default function WorksheetForm({ labels, maxAccess, setStore, store, window }) {
+export default function WorksheetForm({ labels, maxAccess, setStore, store, joInvalidate }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
@@ -115,7 +114,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
         }
         getData(res.recordId)
         toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-        invalidate()
+        joInvalidate ? joInvalidate() : invalidate()
       })
     }
   })
@@ -177,7 +176,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       record: JSON.stringify(data)
     }).then(async () => {
       await getData()
-      invalidate()
+      joInvalidate ? joInvalidate() : invalidate()
       toast.success(platformLabels.Posted)
     })
   }
@@ -193,7 +192,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       title: labels.Damage
     })
   }
-
 
   const actions = [
     {
