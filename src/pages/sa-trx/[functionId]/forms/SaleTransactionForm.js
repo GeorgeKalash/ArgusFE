@@ -1,7 +1,7 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from 'src/lib/date-helper'
 import { Button, Grid } from '@mui/material'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -33,7 +33,6 @@ import {
   DIRTYFIELD_TWPG,
   DIRTYFIELD_UNIT_PRICE,
   DIRTYFIELD_MDAMOUNT,
-  DIRTYFIELD_MDTYPE,
   DIRTYFIELD_UPO,
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_PCT,
@@ -113,6 +112,7 @@ export default function SaleTransactionForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
       recordId: recordId || null,
+      search: '',
       header: {
         dgId: functionId,
         recordId: null,
@@ -199,9 +199,7 @@ export default function SaleTransactionForm({
           applyVat: false,
           taxId: null,
           taxDetails: null,
-          notes: '',
-          saTrx: true,
-          taxDetailsButton: true
+          notes: ''
         }
       ],
       serials: [],
@@ -750,19 +748,29 @@ export default function SaleTransactionForm({
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
@@ -788,7 +796,12 @@ export default function SaleTransactionForm({
       component: 'button',
       name: 'saTrx',
       props: {
-        imgSrc: '/images/buttonsIcons/popup-black.png'
+        imgSrc: '/images/buttonsIcons/popup-black.png',
+        onCondition: row => {
+          return {
+            disabled: !row.itemId
+          }
+        }
       },
       label: labels.salesTrx,
       onClick: (e, row, update, newRow) => {
@@ -1073,7 +1086,6 @@ export default function SaleTransactionForm({
           upo: parseFloat(item.upo).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-          saTrx: true,
           serials: serials?.list?.map((serialDetail, index) => {
             return {
               ...serialDetail,
@@ -1592,20 +1604,26 @@ export default function SaleTransactionForm({
     return res
   }
 
+  const filteredData = useMemo(() => {
+    if (formik?.values?.search) {
+      const filtered = formik.values.items.filter(
+        item =>
+          item.barcode?.toString()?.includes(formik.values.search) ||
+          item.sku?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
+          item.itemName?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
+          item.qty?.toString()?.includes(formik.values.search)
+      )
+
+      return filtered.length > 0 ? filtered : []
+    }
+
+    return formik.values.items
+  }, [formik.values.search, formik.values.items])
+
   const handleSearchChange = event => {
     const { value } = event.target
-    formik.setFieldValue('header.search', value)
+    formik.setFieldValue('search', value)
   }
-
-  const filteredData = formik.values.header.search
-    ? formik.values.items.filter(
-        item =>
-          item.barcode?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.sku?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
-          item.itemName?.toString().toLowerCase()?.includes(formik.values.header?.search.toLowerCase())
-      )
-    : formik.values.items
-
   async function onChangeDtId(recordId) {
     const dtd = await getDTD(recordId)
     if (dtd?.record != null) {
@@ -2028,15 +2046,13 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <CustomTextField
-                name='header.search'
-                value={formik.values.header.search}
+                name='search'
+                value={formik.values.search}
                 label={platformLabels.Search}
                 onClear={() => {
-                  formik.setFieldValue('header.search', '')
+                  formik.setFieldValue('search', '')
                 }}
                 onChange={handleSearchChange}
-                onSearch={e => formik.setFieldValue('header.search', e)}
-                search={true}
               />
             </Grid>
             <Grid item xs={3}>
@@ -2054,12 +2070,31 @@ export default function SaleTransactionForm({
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={(value, action) => {
-              formik.setFieldValue('items', value)
-              itemsUpdate.current = value
-              action === 'delete' && setReCal(true)
+            onChange={(value, action, row) => {
+              let updatedValue = value
+
+              if (formik.values.search) {
+                const updatedItems = formik.values.items.map(item => {
+                  const updated = updatedValue.find(newItem => newItem.id === item.id)
+
+                  return updated ? { ...item, ...updated } : item
+                })
+
+                formik.setFieldValue('items', updatedItems)
+                itemsUpdate.current = updatedItems
+              } else {
+                formik.setFieldValue('items', updatedValue)
+                itemsUpdate.current = updatedValue
+              }
+              if (action === 'delete') {
+                const filteredItems = formik.values.items.filter(item => item.id !== row.id)
+                updatedValue = value.filter(item => item.id !== row.id)
+
+                formik.setFieldValue('items', filteredItems)
+                setReCal(true)
+              }
             }}
-            value={filteredData || formik?.initialValues?.items[0]}
+            value={filteredData}
             error={formik.errors.items}
             initialValues={formik?.initialValues?.items[0]}
             onSelectionChange={(row, update, field) => {
@@ -2069,6 +2104,7 @@ export default function SaleTransactionForm({
             columns={columns}
             maxAccess={maxAccess}
             allowDelete={!isPosted}
+            allowAddNewLine={!formik.values.search}
             disabled={isPosted || !formik.values.header.clientId || !formik.values.header.currencyId}
           />
         </Grow>

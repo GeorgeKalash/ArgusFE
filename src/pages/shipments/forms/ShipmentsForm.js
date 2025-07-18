@@ -553,6 +553,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       props: {
         readOnly: isPosted
       },
+      updateOn: 'blur',
       async onChange({ row: { update, oldRow, newRow } }) {
         checkMaximum(newRow?.shippedNowQty, newRow, update)
         if (newRow?.muQty)
