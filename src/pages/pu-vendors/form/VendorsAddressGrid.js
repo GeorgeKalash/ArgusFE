@@ -37,10 +37,6 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
     datasetId: ResourceIds.Address
   })
 
-  const refetchAddresses = () => {
-    if (recordId) refetch()
-  }
-
   const delAddress = async obj => {
     const vendorId = recordId
     obj.vendorId = vendorId
@@ -51,7 +47,7 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
     })
 
     toast.success(platformLabels.Deleted)
-    refetchAddresses()
+    refetch()
   }
 
   function addAddress() {
@@ -59,8 +55,6 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
   }
 
   function openForm(id) {
-    const vendorId = store.recordId
-
     stack({
       Component: AddressForm,
       props: {
@@ -69,7 +63,7 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
         onSubmit: async (obj, window) => {
           if (obj) {
             const data = {
-              vendorId,
+              vendorId: store.recordId,
               address: obj,
               addressId: obj.recordId
             }
@@ -80,7 +74,7 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
             })
 
             toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-            refetchAddresses()
+            refetch()
             window.close()
           }
         }
@@ -114,7 +108,7 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
       addAddress={addAddress}
       delAddress={delAddress}
       editAddress={editAddress}
-      refetch={refetchAddresses}
+      refetch={refetch}
       columns={columns}
       {...props}
     />

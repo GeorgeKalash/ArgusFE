@@ -17,11 +17,10 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
 
   const fetchGridData = async (options = {}) => {
     const { _startAt = 0, _pageSize = 50 } = options
-    const parameters = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=1|${recordId}`
 
     const response = await getRequest({
       extension: SaleRepository.Address.page,
-      parameters
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=1|${recordId}`
     })
 
     return { ...response, _startAt }
@@ -37,10 +36,6 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
     datasetId: ResourceIds.Address
   })
 
-  const refetchAddresses = () => {
-    if (recordId) refetch()
-  }
-
   const delAddress = async obj => {
     const clientId = recordId
 
@@ -55,7 +50,7 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
     })
 
     toast.success(platformLabels.Deleted)
-    refetchAddresses()
+    refetch()
   }
 
   const addAddress = () => {
@@ -118,7 +113,7 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
             })
 
             toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
-            refetchAddresses()
+            refetch()
             window.close()
           }
         },
@@ -175,7 +170,7 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
       editAddress={editAddress}
       paginationParameters={paginationParameters}
       columns={columns}
-      refetch={refetchAddresses}
+      refetch={refetch}
       {...props}
     />
   )

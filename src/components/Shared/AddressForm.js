@@ -2,7 +2,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
 
@@ -35,13 +34,7 @@ const AddressForm = ({
         record: JSON.stringify(data)
       }).then(res => {
         data.addressId = res.recordId
-
-        if (recordId) {
-          toast.success(platformLabels.Edited)
-          onSubmit(null, window)
-        } else {
-          onSubmit(data, window)
-        }
+        onSubmit(data, window)
       })
     } else {
       setAddress(post)

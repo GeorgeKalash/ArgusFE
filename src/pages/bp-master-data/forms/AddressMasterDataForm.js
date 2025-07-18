@@ -37,10 +37,6 @@ const AddressMasterDataForm = ({ store, editMode, ...props }) => {
     datasetId: ResourceIds.Address
   })
 
-  const refetchAddresses = () => {
-    if (recordId) refetch()
-  }
-
   const delAddress = obj => {
     const bpId = recordId
     obj.bpId = bpId
@@ -51,7 +47,7 @@ const AddressMasterDataForm = ({ store, editMode, ...props }) => {
     }).then(res => {
       toast.success(platformLabels.Deleted)
 
-      refetchAddresses()
+      refetch()
     })
   }
 
@@ -65,18 +61,17 @@ const AddressMasterDataForm = ({ store, editMode, ...props }) => {
       props: {
         recordId: addressId,
         editMode,
-        onSubmit: async obj => {
-          if ((obj, window)) {
-            obj.bpId = recordId
-            await postRequest({
-              extension: BusinessPartnerRepository.BPAddress.set,
-              record: JSON.stringify(obj)
-            })
+        onSubmit: async (obj, window) => {
+          console.log(obj, 'obj')
+          obj.bpId = recordId
+          await postRequest({
+            extension: BusinessPartnerRepository.BPAddress.set,
+            record: JSON.stringify(obj)
+          })
 
-            toast.success(!addressId ? platformLabels.Added : platformLabels.Edited)
-            refetchAddresses()
-            window.close()
-          }
+          toast.success(!addressId ? platformLabels.Added : platformLabels.Edited)
+          refetch()
+          window.close()
         }
       }
     })
@@ -95,7 +90,7 @@ const AddressMasterDataForm = ({ store, editMode, ...props }) => {
       addAddress={addAddress}
       delAddress={delAddress}
       editAddress={editAddress}
-      refetch={refetchAddresses}
+      refetch={refetch}
       {...props}
     />
   )
