@@ -383,6 +383,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PurchaseRequisition}`}
+                    filter={!editMode ? dt => dt.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.docType}
                     columnsInDropDown={[
