@@ -596,6 +596,7 @@ export default function RetailTransactionsForm({
       extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
+      totPricePerG: itemPriceRow?.totalWeightPerG,
       mdAmount: itemPriceRow?.mdAmount ? parseFloat(itemPriceRow.mdAmount).toFixed(2) : 0,
       vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0,
       taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
@@ -1134,18 +1135,51 @@ export default function RetailTransactionsForm({
       retailTrxItems?.items?.map(async (item, index) => {
         const taxDetails = await getTaxDetails(item?.taxId)
 
-        return {
-          ...item,
-          id: index + 1,
-          qty: parseFloat(item.qty).toFixed(2),
-          unitPrice: parseFloat(item.unitPrice).toFixed(2),
-          extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-          taxDetails
-        }
+        const getItems = getItemPriceRow(
+          {
+            ...item,
+            id: index + 1,
+            qty: parseFloat(item.qty).toFixed(2),
+            unitPrice: parseFloat(item.unitPrice).toFixed(2),
+            extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+            priceWithVAT: calculatePrice(item, taxDetails[0], DIRTYFIELD_BASE_PRICE),
+            taxDetails
+          },
+          DIRTYFIELD_BASE_PRICE
+        )
+
+        return getItems
       })
     )
     formik.setFieldValue('items', modifiedItemsList)
     setReCal(true)
+  }
+  function calculatePrice(item = {}, taxDetails = null, dirtyField) {
+    const vatPct = item?.vatPct ?? 0
+    const priceWithVAT = item?.priceWithVAT ?? 0
+
+    if (!taxDetails) {
+      return !priceWithVAT ? vatPct : Math.abs(priceWithVAT - vatPct)
+    }
+
+    const { amount = 0, taxBase } = taxDetails
+
+    switch (dirtyField) {
+      case DIRTYFIELD_BASE_PRICE:
+        return vatPct * (1 + amount / 100)
+
+      case DIRTYFIELD_UNIT_PRICE:
+        if (taxBase == 1) {
+          return priceWithVAT / (1 + amount / 100)
+        } else if (taxBase == 2) {
+          return priceWithVAT
+        } else {
+          return priceWithVAT - vatPct
+        }
+
+      default:
+        return
+    }
   }
 
   useEffect(() => {
