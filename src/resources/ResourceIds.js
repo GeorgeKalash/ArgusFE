@@ -301,7 +301,6 @@ export const ResourceIds = {
   BranchFilter: 70102,
   CompanyPosition: 70103,
   DepartmentFilter: 70104,
-  CertificateFilter: 71102,
   HRDocTypeFilter: 71104,
   SalaryChangeReasonFilter: 71105,
   EmploymentStatusFilter: 71107,
@@ -517,6 +516,7 @@ export const ResourceIds = {
   SyncJobOrderRouting: 42704,
   LMOpeningBalances: 73104,
   OvertimeProfiles: 72109,
+  PurchaseRequisition: 50301,
 
   // GL
   GLSalesInvoice: 51604,

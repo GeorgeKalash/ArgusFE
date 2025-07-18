@@ -32,6 +32,7 @@ import OutwardsForm from '../outwards-order/Tabs/OutwardsForm'
 import SketchForm from '../pm-sketch/Forms/SketchForm'
 import ThreeDDesignForm from '../pm-3d-design/forms/ThreeDDesignForm'
 import SalesOrderForm from '../sales-order/Tabs/SalesOrderForm'
+import PurchaseRquisitionForm from '../purchase-requisition/form/PurchaseRquisitionForm'
 
 const DocumentsOnHold = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -171,6 +172,9 @@ const DocumentsOnHold = () => {
 
       case SystemFunction.ThreeDDesign:
         relevantComponent = ThreeDDesignForm
+
+      case SystemFunction.PurchaseRequisition:
+        relevantComponent = PurchaseRquisitionForm
       default:
         // Handle default case if needed
         break
