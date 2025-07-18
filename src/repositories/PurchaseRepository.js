@@ -119,11 +119,21 @@ export const PurchaseRepository = {
     terminate: service + 'terminateORD',
     transfer: service + 'transfer1ORD'
   },
-  Request: {
-    snapshot: service + 'snapshotREQ'
+  PurchaseRequisition: {
+    snapshot: service + 'snapshotREQ',
+    page: service + 'pageREQ',
+    get: service + 'getREQ',
+    set: service + 'setREQ',
+    del: service + 'delREQ',
+    cancel: service + 'cancelREQ',
+    reopen: service + 'reopenREQ',
+    close: service + 'closeREQ'
   },
-  Requisition: {
-    qry: service + 'qryREI'
+  RequisitionDetail: {
+    qry: service + 'qryREI',
+    set: service + 'setREI',
+    get: service + 'getREI',
+    del: service + 'delREI'
   },
   QuotationItem: {
     preview: service + 'previewQTI'
@@ -135,5 +145,8 @@ export const PurchaseRepository = {
   FinancialGroup: {
     qry: service + 'qryFII',
     set2: service + 'set2FII'
+  },
+  ItemLastPurchaseInfo: {
+    last: service + 'lastIVI'
   }
 }

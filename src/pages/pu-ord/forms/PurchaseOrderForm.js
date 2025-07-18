@@ -1176,7 +1176,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     }
 
     const response = await getRequest({
-      extension: PurchaseRepository.Requisition.qry,
+      extension: PurchaseRepository.RequisitionDetail.qry,
       parameters: `_trxId=${formik.values.requestId}`
     })
 
@@ -1331,7 +1331,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
-                    endpointId={PurchaseRepository?.Request.snapshot}
+                    endpointId={PurchaseRepository.PurchaseRequisition.snapshot}
                     name='requestId'
                     label={labels.requisition}
                     filter={{ status: 4 }}
