@@ -42,7 +42,8 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
   const [mismatchedFields, setMismatchedFields] = useState([])
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.InwardSettlement
+    datasetId: ResourceIds.InwardSettlement,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.InwardSettlement, window })
@@ -89,6 +90,7 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.InwardSettlement,
     access,
+    enabled: !recordId,
     hasDT: false
   })
 
@@ -601,7 +603,7 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
                   name='reference'
                   label={labels.reference}
                   value={formik?.values?.reference}
-                  maxAccess={!editMode && maxAccess}
+                  maxAccess={maxAccess}
                   maxLength='30'
                   readOnly={isClosed}
                   onChange={formik.handleChange}
@@ -664,6 +666,7 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
                   required={formik.values.interfaceId}
                   readOnly={isClosed && !formik.values.interfaceId}
                   label={labels.inwardRef}
+                  maxAccess={maxAccess}
                   form={formik}
                   onChange={async (event, newValue) => {
                     formik.setFieldValue('inwardId', newValue ? newValue.recordId : '')
@@ -788,6 +791,7 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
                   valueField='key'
                   displayField='value'
                   values={formik.values}
+                  maxAccess={maxAccess}
                   readOnly={isClosed}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('type', '')
@@ -1221,6 +1225,7 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
                 displayField='name'
                 readOnly={isClosed}
                 values={formik.values}
+                maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('relationId', newValue?.recordId || '')
                 }}

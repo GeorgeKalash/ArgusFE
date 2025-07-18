@@ -40,10 +40,12 @@ export const IVReplenishementRepository = {
     get: service + 'getMPL',
     set2: service + 'set2MPL',
     reopen: service + 'reopenMPL',
-    close: service + 'closeMPL'
+    close: service + 'closeMPL',
+    qry: service + 'qryMPL'
   },
   MatPlanningItem: {
-    qry: service + 'qryMPI'
+    qry: service + 'qryMPI',
+    append: service + 'appendMPI'
   },
   PurchaseRequest: {
     generate: service + 'generatePR'
@@ -58,5 +60,8 @@ export const IVReplenishementRepository = {
     set: service + 'setDTD',
     del: service + 'delDTD',
     page: service + 'pageDTD'
+  },
+  materialPlaning: {
+    preview: service + 'previewMRP'
   }
 }

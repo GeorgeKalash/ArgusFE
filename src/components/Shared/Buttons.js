@@ -1,3 +1,5 @@
+import { accessMap, TrxType } from 'src/resources/AccessLevels'
+
 export const getButtons = platformLabels => [
   {
     key: 'Clear',
@@ -7,6 +9,13 @@ export const getButtons = platformLabels => [
     color: '#f44336',
     image: 'clear.png',
     main: true
+  },
+  {
+    key: 'Rebuild',
+    color: '#231F20',
+    label: platformLabels.RebuildButton,
+    image: 'rebuild.png',
+    main: false
   },
   {
     key: 'Info',
@@ -135,7 +144,8 @@ export const getButtons = platformLabels => [
     color: 'transparent',
     image: 'close.png',
     border: '1px solid #01a437',
-    main: false
+    main: false,
+    access: accessMap[TrxType.CLOSE]
   },
   {
     key: 'Reopen',
@@ -143,7 +153,8 @@ export const getButtons = platformLabels => [
     color: 'transparent',
     image: 'reopen.png',
     border: '1px solid #000000',
-    main: false
+    main: false,
+    access: accessMap[TrxType.REOPEN]
   },
   {
     key: 'Approval',
@@ -321,13 +332,6 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Rebuild',
-    color: '#231F20',
-    label: platformLabels.RebuildButton,
-    image: 'rebuild.png',
-    main: false
-  },
-  {
     key: 'Run',
     color: '#231F20',
     label: platformLabels.Run,
@@ -484,14 +488,16 @@ export const getButtons = platformLabels => [
     label: platformLabels.Locked,
     color: '#231f20',
     image: 'lock.png',
-    main: false
+    main: false,
+    access: accessMap[TrxType.UNPOST]
   },
   {
     key: 'Unlocked',
     label: platformLabels.Unlocked,
     color: '#231f20',
     image: 'unlock.png',
-    main: false
+    main: false,
+    access: accessMap[TrxType.POST]
   },
   {
     key: 'Ok',
@@ -573,6 +579,12 @@ export const getButtons = platformLabels => [
   {
     key: 'ORD',
     label: platformLabels.ord,
+    color: '#231f20',
+    main: false
+  },
+  {
+    key: 'add',
+    label: platformLabels.add,
     color: '#231f20',
     main: false
   },

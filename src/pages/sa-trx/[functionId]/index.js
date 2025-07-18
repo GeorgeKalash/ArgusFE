@@ -110,7 +110,7 @@ const SaTrx = () => {
       field: 'amount',
       headerName: labels.net,
       flex: 1,
-      type: 'number'
+      type: { field: 'number', decimal: 2 }
     },
     {
       field: 'spName',
@@ -179,8 +179,7 @@ const SaTrx = () => {
         : stackError({
             message: labels.noSelectedCurrency
           })
-    },
-    hasDT: false
+    }
   })
 
   const edit = obj => {

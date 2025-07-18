@@ -46,7 +46,8 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => 
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CashTransfer
+    datasetId: ResourceIds.CashTransfer,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.cashTransfer, window })
@@ -88,7 +89,8 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.CashTransfer,
     access: access,
-    enabled: !recordId
+    enabled: !recordId,
+    hasDT: false
   })
 
   const { formik } = useForm({
@@ -526,8 +528,8 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => 
                   if (newRow.currencyId) {
                     const result = await getCurrencyApi(newRow?.currencyId)
                     update({
-                      exRate: result.record.exRate,
-                      rateCalcMethod: result.record.rateCalcMethod
+                      exRate: result.record?.exRate,
+                      rateCalcMethod: result.record?.rateCalcMethod
                     })
                   }
                 }

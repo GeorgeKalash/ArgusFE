@@ -13,7 +13,7 @@ import LastPageIcon from '@mui/icons-material/LastPage'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import { ControlContext } from 'src/providers/ControlContext'
 import { AuthContext } from 'src/providers/AuthContext'
-import { TrxType } from 'src/resources/AccessLevels'
+import { TrxType, accessMap } from 'src/resources/AccessLevels'
 import deleteIcon from '../../../public/images/TableIcons/delete.png'
 import { useWindow } from 'src/windows'
 import DeleteDialog from './DeleteDialog'
@@ -55,8 +55,8 @@ const Table = ({
   const [startAt, setStartAt] = useState(0)
   const { languageId } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
-  const maxAccess = props?.maxAccess && props?.maxAccess.record.maxAccess
-  const columnsAccess = props?.maxAccess && props?.maxAccess.record.controls
+  const maxAccess = props?.maxAccess && props?.maxAccess?.record?.accessFlags
+  const columnsAccess = props?.maxAccess && props?.maxAccess?.record?.controls
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
   const [focus, setFocus] = useState(false)
@@ -426,7 +426,7 @@ const Table = ({
                 </IconButton>
                 {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
                 {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}
-                {platformLabels.Of} {totalRecords}
+                {' ' + platformLabels.Of} {totalRecords}
               </Box>
               <Box>
                 <IconButton onClick={onReset}>
@@ -620,6 +620,46 @@ const Table = ({
       ? (containerWidth - totalFixedColumnWidth) / filteredColumns?.length
       : 0
 
+  const IndentedCellRenderer = props => {
+    const { data, value } = props
+    const indent = data.level * 20
+    const isParent = data.level === 0
+
+    const arrow = isParent && data.hasChildren ? (data.isExpanded ? '▼' : '▶') : ''
+
+    return (
+      <div
+        style={{ paddingLeft: indent, cursor: isParent && data.hasChildren ? 'pointer' : 'default' }}
+        onClick={() => handleRowClick(data)}
+      >
+        {arrow} {value}
+      </div>
+    )
+  }
+
+  const handleRowClick = params => {
+    props.fullRowData.current = props?.fullRowData.current.map(row => {
+      if (row?.[props?.field] === params?.[props?.field] && row.level === 0) {
+        return { ...row, isExpanded: !row.isExpanded }
+      }
+
+      return row
+    })
+
+    const updatedVisibleRows = []
+    for (const row of props?.fullRowData.current) {
+      if (row.level === 0) {
+        updatedVisibleRows.push(row)
+        if (row.isExpanded) {
+          const children = props?.fullRowData.current.filter(child => child.parent === row?.[props?.field])
+          updatedVisibleRows.push(...children)
+        }
+      }
+    }
+
+    props?.setRowData(updatedVisibleRows)
+  }
+
   const columnDefs = [
     ...(showCheckboxColumn
       ? [
@@ -650,12 +690,16 @@ const Table = ({
       width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
       flex: column.flex,
       sort: column.sort || '',
-      cellRenderer: column.cellRenderer ? column.cellRenderer : FieldWrapper
+      cellRenderer: column.isTree ? IndentedCellRenderer : column.cellRenderer ? column.cellRenderer : FieldWrapper
     }))
   ]
 
   if (props?.onEdit || props?.onDelete) {
-    const deleteBtnVisible = maxAccess ? props?.onDelete && maxAccess > TrxType.EDIT : props?.onDelete ? true : false
+    const deleteBtnVisible = maxAccess
+      ? props?.onDelete && maxAccess[accessMap[TrxType.DEL]]
+      : props?.onDelete
+      ? true
+      : false
 
     if (!columnDefs?.some(column => column.field === 'actions'))
       columnDefs?.push({

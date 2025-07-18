@@ -96,7 +96,8 @@ const OutwardsModification = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.OutwardsModification,
-    action: openForm
+    action: openForm,
+    hasDT: false
   })
 
   const add = async () => {

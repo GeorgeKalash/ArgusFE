@@ -40,7 +40,6 @@ import { getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -49,6 +48,7 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { RateDivision } from 'src/resources/RateDivision'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
+import AddressForm from 'src/components/Shared/AddressForm'
 
 export default function RetailTransactionsForm({
   labels,
@@ -62,12 +62,13 @@ export default function RetailTransactionsForm({
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, systemChecks } = useContext(ControlContext)
   const [address, setAddress] = useState({})
   const [reCal, setReCal] = useState(false)
   const [cashGridData, setCashGridData] = useState({ cashAccounts: [], creditCards: [], creditCardFees: [] })
   const [addressModified, setAddressModified] = useState(false)
   const filteredCreditCard = useRef([])
+  const autoPostAfterSavePos = systemChecks.some(check => check.checkId === SystemChecks.AUTO_POST_POS_ACTIVITY_ON_SAVE)
 
   const getEndpoint = {
     [SystemFunction.RetailInvoice]: PointofSaleRepository.RetailInvoice.set2,
@@ -94,6 +95,7 @@ export default function RetailTransactionsForm({
     recordId: recordId || null,
     singleCashPos: false,
     defaultMCbaseCU: null,
+    disableSKULookup: false,
     header: {
       recordId: recordId || null,
       date: new Date(),
@@ -164,8 +166,7 @@ export default function RetailTransactionsForm({
         posFlags: null,
         taxId: null,
         taxId_base: null,
-        taxId_amount: null,
-        taxDetailsButton: true
+        taxId_amount: null
       }
     ],
     cash: [
@@ -267,8 +268,9 @@ export default function RetailTransactionsForm({
       const retailRes = await setRetail(getEndpoint[functionId], payload)
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
       toast.success(actionMessage)
-      await refetchForm(retailRes?.recordId)
+      const retailPack = await refetchForm(retailRes?.recordId)
       invalidate()
+      if (autoPostAfterSavePos) await onPost(retailPack?.header)
     }
   })
   async function setRetail(endPoint, payload) {
@@ -322,10 +324,14 @@ export default function RetailTransactionsForm({
       mdAmount: 0,
       mdValue: 0,
       taxId: row?.taxId || formik.values.header.taxId,
-      taxDetails: taxDetailsInfo || null,
-      taxDetailsButton: true
+      taxDetails: taxDetailsInfo || null
     }
     update(result)
+
+    if (result?.basePrice) {
+      const basePriceResult = getItemPriceRow(result, DIRTYFIELD_BASE_PRICE)
+      update(basePriceResult)
+    }
     if (result?.unitPrice) {
       const result2 = getItemPriceRow(result, DIRTYFIELD_UNIT_PRICE)
       update(result2)
@@ -404,10 +410,10 @@ export default function RetailTransactionsForm({
     updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
-  const onPost = async () => {
+  const onPost = async header => {
     await postRequest({
       extension: PointofSaleRepository.RetailInvoice.post,
-      record: JSON.stringify(formik.values.header)
+      record: JSON.stringify(header)
     })
 
     toast.success(platformLabels.Posted)
@@ -463,7 +469,9 @@ export default function RetailTransactionsForm({
     {
       key: 'Unlocked',
       condition: !isPosted,
-      onClick: onPost,
+      onClick: () => {
+        onPost(formik.values.header)
+      },
       disabled: !editMode
     }
   ]
@@ -663,32 +671,72 @@ export default function RetailTransactionsForm({
       }
     },
     {
-      component: 'resourcelookup',
+      component: formik?.values?.disableSKULookup ? 'textfield' : 'resourcelookup',
       label: labels.sku,
       name: 'sku',
       flex: 2,
+      ...(formik.values.disableSKULookup && { updateOn: 'blur' }),
       props: {
-        endpointId: PointofSaleRepository.PUItems.snapshot,
-        parameters: {
-          _siteId: totalQty > 0 || SystemFunction.RetailInvoice === functionId ? 0 : formik.values?.header?.siteId || 0
-        },
-        displayField: 'sku',
-        valueField: 'sku',
-        mapping: [
-          { from: 'itemId', to: 'itemId' },
-          { from: 'sku', to: 'sku' },
-          { from: 'itemName', to: 'itemName' },
-          { from: 'taxId', to: 'taxId' }
-        ],
-        columnsInDropDown: [
-          { key: 'sku', value: 'SKU' },
-          { key: 'itemName', value: 'Item Name' }
-        ],
-        displayFieldWidth: 3
+        ...(!formik.values.disableSKULookup && {
+          endpointId: PointofSaleRepository.PUItems.snapshot,
+          parameters: {
+            _siteId:
+              totalQty > 0 || SystemFunction.RetailInvoice === functionId ? 0 : formik.values?.header?.siteId || 0
+          },
+          displayField: 'sku',
+          valueField: 'sku',
+          mapping: [
+            { from: 'itemId', to: 'itemId' },
+            { from: 'sku', to: 'sku' },
+            { from: 'itemName', to: 'itemName' },
+            { from: 'taxId', to: 'taxId' }
+          ],
+          columnsInDropDown: [
+            { key: 'sku', value: 'SKU' },
+            { key: 'itemName', value: 'Item Name' }
+          ],
+          displayFieldWidth: 3
+        })
       },
       async onChange({ row: { update, newRow } }) {
-        if (!newRow.itemId) return
-        await barcodeSkuSelection(update, newRow)
+        if (!formik.values.disableSKULookup) {
+          if (!newRow.itemId) return
+          await barcodeSkuSelection(update, newRow)
+        } else {
+          if (!newRow?.sku) {
+            update({
+              ...formik.initialValues.items[0],
+              id: newRow.id
+            })
+
+            return
+          }
+
+          const skuInfo = await getRequest({
+            extension: InventoryRepository.Items.get2,
+            parameters: `_sku=${newRow.sku}`
+          })
+          if (!skuInfo.record) {
+            update({
+              ...formik.initialValues.items[0],
+              id: newRow.id
+            })
+            stackError({
+              message: labels.invalidSKU
+            })
+
+            return
+          }
+          await barcodeSkuSelection(update, {
+            id: newRow?.id,
+            itemId: skuInfo?.record?.recordId,
+            sku: skuInfo?.record?.sku,
+            itemName: skuInfo?.record?.name,
+            taxId: skuInfo?.record?.taxId,
+            priceType: skuInfo?.record?.priceType,
+            qty: newRow?.qty || 0
+          })
+        }
       }
     },
     {
@@ -775,19 +823,29 @@ export default function RetailTransactionsForm({
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
@@ -898,6 +956,8 @@ export default function RetailTransactionsForm({
   async function refetchForm(recordId) {
     const retailTrxPack = await getRetailTransactionPack(recordId)
     await fillForm(retailTrxPack)
+
+    return retailTrxPack
   }
 
   async function setMetalPriceOperations() {
@@ -931,16 +991,12 @@ export default function RetailTransactionsForm({
 
   function openAddressForm() {
     stack({
-      Component: AddressFormShell,
+      Component: AddressForm,
       props: {
         address: address,
         setAddress: setAddress,
-        isCleared: false,
-        isSavedClear: false
-      },
-      width: 850,
-      height: 620,
-      title: labels.address
+        isCleared: false
+      }
     })
   }
 
@@ -1054,6 +1110,20 @@ export default function RetailTransactionsForm({
     filteredCreditCard.current = arrayCC
   }
 
+  async function sKULookupInfo(dtId) {
+    if (!dtId) {
+      formik.setFieldValue('disableSKULookup', false)
+
+      return
+    }
+
+    const res = await getRequest({
+      extension: PointofSaleRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
+  }
   useEffect(() => {
     formik.setFieldValue('header.name', address?.name || '')
     formik.setFieldValue('header.street1', address?.street1 || '')
@@ -1062,6 +1132,10 @@ export default function RetailTransactionsForm({
     formik.setFieldValue('header.city', address?.city || '')
     formik.setFieldValue('header.phone', address?.phone || '')
   }, [address])
+
+  useEffect(() => {
+    sKULookupInfo(formik.values.header.dtId)
+  }, [formik.values.header.dtId])
 
   useEffect(() => {
     formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
@@ -1084,8 +1158,6 @@ export default function RetailTransactionsForm({
       await fillCashObjects()
     })()
   }, [])
-
-  console.log(formik)
 
   return (
     <FormShell

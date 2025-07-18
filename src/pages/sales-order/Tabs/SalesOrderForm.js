@@ -1,6 +1,6 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -34,13 +34,11 @@ import {
   DIRTYFIELD_MDAMOUNT,
   DIRTYFIELD_UPO,
   DIRTYFIELD_EXTENDED_PRICE,
-  DIRTYFIELD_MDTYPE,
   MDTYPE_PCT,
   MDTYPE_AMOUNT
 } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
 import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
@@ -50,6 +48,7 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import { createConditionalSchema } from 'src/lib/validation'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
+import AddressForm from 'src/components/Shared/AddressForm'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -64,7 +63,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.SalesOrder
+    datasetId: ResourceIds.SalesOrder,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.salesOrder, window })
@@ -152,7 +152,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         applyVat: false,
         taxId: '',
         taxDetails: null,
-        taxDetailsButton: true,
         notes: ''
       }
     ]
@@ -231,6 +230,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
       toast.success(actionMessage)
       await refetchForm(soRes.recordId)
+
       invalidate()
     }
   })
@@ -265,6 +265,26 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     return currentAmount
   }
 
+  const onCondition = row => {
+    if (row.itemId && row.taxId) {
+      return {
+        imgSrc: '/images/buttonsIcons/tax-icon.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
+  const saTrxCondition = row => {
+    return {
+      disabled: !row.itemId
+    }
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -289,9 +309,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) {
-          update({
-            saTrx: false
-          })
 
           return
         }
@@ -349,9 +366,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           taxDetails: formik.values.isVattable ? rowTaxDetails : null,
           mdType: 1,
           siteId: formik?.values?.siteId,
-          siteRef: await getSiteRef(formik?.values?.siteId),
-          saTrx: true,
-          taxDetailsButton: true
+          siteRef: await getSiteRef(formik?.values?.siteId)
         })
       }
     },
@@ -482,19 +497,17 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       component: 'button',
       name: 'taxDetailsButton',
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        onCondition
       },
       label: labels.tax,
       onClick: (e, row) => {
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     },
     {
@@ -520,6 +533,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       component: 'button',
       name: 'saTrx',
       label: labels.salesTrx,
+      props: {
+        onCondition: saTrxCondition
+      },
       onClick: (e, row, update, newRow) => {
         stack({
           Component: SalesTrxForm,
@@ -706,7 +722,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 upo: parseFloat(item.upo).toFixed(2),
                 vatAmount: parseFloat(item.vatAmount).toFixed(2),
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-                saTrx: true,
                 taxDetails: taxDetailsResponse
               }
             })
@@ -1059,16 +1074,12 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   }
   function openAddressForm() {
     stack({
-      Component: AddressFormShell,
+      Component: AddressForm,
       props: {
         address: address,
         setAddress: setAddress,
-        isCleared: false,
-        isSavedClear: false
-      },
-      width: 850,
-      height: 550,
-      title: labels.address
+        isCleared: false
+      }
     })
   }
 
