@@ -20,6 +20,7 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
     queryFn: fetchGridData,
     enabled: Boolean(recordId),
     endpointId: ManufacturingRepository.JobMaterial.qry,
+    params: { disabledReqParams: true, maxAccess },
     datasetId: ResourceIds.MFJobOrders
   })
 
@@ -46,6 +47,12 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
       type: 'number'
     },
     {
+      field: 'loss',
+      headerName: labels.loss,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'unitCost',
       headerName: labels.unitCost,
       flex: 1,
@@ -61,8 +68,9 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
 
   const totQty = data?.list?.reduce((qtySum, row) => {
     const qtyValue = parseFloat(row?.qty?.toString().replace(/,/g, '')) || 0
+    const loss = parseFloat(row?.loss?.toString().replace(/,/g, '')) || 0
 
-    return qtySum + qtyValue
+    return qtySum + qtyValue - loss
   }, 0)
 
   async function fetchGridData() {

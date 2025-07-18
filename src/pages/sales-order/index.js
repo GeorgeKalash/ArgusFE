@@ -145,8 +145,7 @@ const SalesOrder = () => {
         : stackError({
             message: labels.noSelectedCurrency
           })
-    },
-    hasDT: false
+    }
   })
 
   const add = async () => {

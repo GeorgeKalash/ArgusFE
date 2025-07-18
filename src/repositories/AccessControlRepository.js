@@ -84,8 +84,7 @@ export const AccessControlRepository = {
   },
   DataAccessItem: {
     qry: service + 'qryROW',
-    set: service + 'setROW',
-    del: service + 'delROW'
+    set2: service + 'set2ROW'
   },
   Notification: {
     qry: service + 'qryNTX',

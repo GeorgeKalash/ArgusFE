@@ -26,6 +26,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { useWindow } from 'src/windows'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import ImportForm from 'src/components/Shared/ImportForm'
 
 export default function ProductionOrderForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -119,6 +120,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
+  const isClosed = formik.values.wip === 2
 
   const totalQty = formik.values?.rows
     ?.reduce((qtySum, row) => {
@@ -189,7 +191,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       props: {
         valueField: 'recordId',
         displayField: 'reference',
-        readOnly: isPosted,
+        readOnly: isPosted || isClosed,
         displayFieldWidth: 2,
         endpointId: ManufacturingRepository.Design.snapshot,
         mapping: [
@@ -379,14 +381,15 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       parameters: `_recordId=${recordId}`
     })
 
-    const modifiedList = res?.record?.items?.map((item, index) => ({
-      ...item,
-      deliveryDate: formatDateFromApi(item.deliveryDate),
-      id: index + 1
-    })) || formik.initialValues.items
+    const modifiedList =
+      res?.record?.items?.map((item, index) => ({
+        ...item,
+        deliveryDate: formatDateFromApi(item.deliveryDate),
+        id: index + 1
+      })) || formik.initialValues.items
 
     formik.setValues({
-      ...res.record.header,
+      ...res?.record?.header,
       date: formatDateFromApi(res?.record?.header?.date),
       rows: modifiedList
     })
@@ -397,6 +400,30 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
   useEffect(() => {
     if (recordId) refetchForm(recordId)
   }, [])
+
+  async function onImportClick() {
+    stack({
+      Component: ImportForm,
+      props: {
+        resourceId: ResourceIds.ImportProductionOrder,
+        access: maxAccess,
+        onSuccess: async () => {
+          if (recordId) refetchForm(recordId)
+        }
+      }
+    })
+  }
+
+  const onClose = async () => {
+    await postRequest({
+      extension: ManufacturingRepository.ProductionOrder.close,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(platformLabels.Closed)
+    refetchForm(formik.values.recordId)
+    invalidate()
+  }
 
   const actions = [
     {
@@ -409,7 +436,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode
+      disabled: !editMode || !isClosed
     },
     {
       key: 'Locked',
@@ -418,22 +445,35 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       disabled: true
     },
     {
+      key: 'Close',
+      condition: true,
+      onClick: onClose,
+      disabled: isClosed || !editMode
+    },
+    {
       key: 'generate',
       condition: true,
       onClick: onGenerateAssembly,
       disabled: !editMode
+    },
+    {
+      key: 'Import',
+      condition: true,
+      onClick: onImportClick,
+      disabled: !editMode || isPosted || isClosed
     }
   ]
 
   return (
     <FormShell
       resourceId={ResourceIds.ProductionOrder}
+      functionId={SystemFunction.ProductionOrder}
       form={formik}
       maxAccess={maxAccess}
       actions={actions}
       editMode={editMode}
       previewReport={editMode}
-      disabledSubmit={isPosted}
+      disabledSubmit={isPosted || isClosed}
     >
       <VertLayout>
         <Fixed>
@@ -469,7 +509,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
                     value={formik?.values?.reference}
                     maxAccess={!editMode && maxAccess}
                     maxLength='30'
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -479,7 +519,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
                   <CustomDatePicker
                     name='date'
                     label={labels.date}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     value={formik?.values?.date}
                     onChange={formik.setFieldValue}
                     required
@@ -497,7 +537,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
                     endpointId={SystemRepository.Plant.qry}
                     name='plantId'
                     label={labels.plant}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -518,7 +558,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
                     label={labels.description}
                     value={formik?.values?.notes}
                     rows={2.5}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('notes', '')}
@@ -537,9 +577,9 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
             name='rows'
             maxAccess={maxAccess}
             columns={columns}
-            allowAddNewLine={!isPosted}
-            allowDelete={!isPosted}
-            disabled={isPosted}
+            allowAddNewLine={!isPosted && !isClosed}
+            allowDelete={!isPosted && !isClosed}
+            disabled={isPosted || isClosed}
           />
         </Grow>
         <Fixed>

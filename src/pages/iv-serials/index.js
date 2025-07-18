@@ -15,7 +15,7 @@ import { Grid } from '@mui/material'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import SerialsForm from './Forms/SerialsForm'
+import SerialsWindow from './Windows/SerialsWindow'
 import CustomButton from 'src/components/Inputs/CustomButton'
 
 const IvSerials = () => {
@@ -78,16 +78,6 @@ const IvSerials = () => {
       flex: 1
     },
     {
-      field: 'siteRef',
-      headerName: labels.siteReference,
-      flex: 1
-    },
-    {
-      field: 'siteName',
-      headerName: labels.siteName,
-      flex: 1
-    },
-    {
       field: 'statusName',
       headerName: labels.status,
       flex: 1
@@ -106,14 +96,14 @@ const IvSerials = () => {
 
   function openForm(recordId) {
     stack({
-      Component: SerialsForm,
+      Component: SerialsWindow,
       props: {
         labels,
         recordId,
         maxAccess: access
       },
-      width: 750,
-      height: 420,
+      width: 850,
+      height: 470,
       title: labels.Serials
     })
   }
