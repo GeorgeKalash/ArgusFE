@@ -55,5 +55,11 @@ export const EmployeeRepository = {
     set: service + 'setNP',
     del: service + 'delNP',
     page: service + 'pageNP'
+  },
+  TerminationReasons: {
+    get: service + 'getTR',
+    set: service + 'setTR',
+    del: service + 'delTR',
+    page: service + 'pageTR'
   }
 }
