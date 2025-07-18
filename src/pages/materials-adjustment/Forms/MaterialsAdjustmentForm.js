@@ -287,8 +287,10 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
 
   function calcUnitCost(rec) {
     if (rec.priceType === 1) return rec.qty != 0 ? (rec.totalCost / rec.qty).toFixed(2) : 0
-    else if (rec.priceType === 2) return rec.qty != 0 || rec.volume != 0 ? (rec.totalCost / (rec.qty * rec.volume)).toFixed(2) : 0
-    else if (rec.priceType === 3) return rec.qty != 0 || rec.weight != 0 ? (rec.totalCost / (rec.qty * rec.weight)).toFixed(2) : 0
+    else if (rec.priceType === 2)
+      return rec.qty != 0 || rec.volume != 0 ? (rec.totalCost / (rec.qty * rec.volume)).toFixed(2) : 0
+    else if (rec.priceType === 3)
+      return rec.qty != 0 || rec.weight != 0 ? (rec.totalCost / (rec.qty * rec.weight)).toFixed(2) : 0
     else return 0
   }
 
@@ -316,9 +318,11 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       const unitCost = (await getUnitCost(itemIdValue)) ?? 0
       const totalCost = calcTotalCost(newRow)
       const itemInfo = await getItem(itemIdValue)
+      console.log(itemInfo)
       getFilteredMU(itemIdValue)
       const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
       update({
+        itemId: itemIdValue,
         weight,
         unitCost,
         itemName: itemNameValue,
