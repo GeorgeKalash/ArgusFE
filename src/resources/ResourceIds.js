@@ -516,6 +516,7 @@ export const ResourceIds = {
   TransactionLogPerformance: 20137,
   SyncJobOrderRouting: 42704,
   LMOpeningBalances: 73104,
+  OvertimeProfiles: 72109,
 
   // GL
   GLSalesInvoice: 51604,
