@@ -1,5 +1,3 @@
-import { Folder } from '@mui/icons-material'
-
 export const ResourceIds = {
   //Dashboard
   WeeklySalesYTD: 60100,
@@ -502,13 +500,16 @@ export const ResourceIds = {
   RequisitionDocumentTypeDefaults: 50612,
   PUFinancialIntegrators: 50102,
   IRMaterialDocTypeDefaults: 46101,
+  DocumentsAging: 31409,
   PhysicalCountItemDetailsImport: 44305,
   GenerateMRPs: 46304,
   FITrialBalanceGridView: 31402,
-  BonusTypes: 71101,
   Folders: 70111,
-  CertificateLevels: 71102,
   BgCheck: 71103,
+  RelationshipTypes: 71109,
+  BonusTypes: 71101,
+  CertificateLevels: 71102,
+  ApplyManual: 31117,
   ImportProductionOrder: 42703,
   NoticePeriods: 71111,
   TransactionLogPerformance: 20137,
@@ -557,6 +558,7 @@ export const ResourceIds = {
   IomProperties: 42606,
   SyncPurchaseTrx: 50602,
   IRPlantSettings: 46100,
+  IssueOfMaterials: 42304,
 
   //MCR
   MCRSalesInvoice: 51607,

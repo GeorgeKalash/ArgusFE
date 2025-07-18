@@ -14,6 +14,8 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import MaterialsForm from './MaterialsForm'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { Grid } from '@mui/material'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const MaterialsTab = ({ store, labels, access }) => {
   const { platformLabels } = useContext(ControlContext)
@@ -27,7 +29,8 @@ const MaterialsTab = ({ store, labels, access }) => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.WorksheetMaterials.qry,
-    datasetId: ResourceIds.Worksheet,
+    datasetId: ResourceIds.IssueOfMaterials,
+    params: { disabledReqParams: true, maxAccess: access },
     enabled: Boolean(recordId)
   })
 
@@ -111,6 +114,12 @@ const MaterialsTab = ({ store, labels, access }) => {
     await proxyAction()
   }
 
+  const totQty = data?.list?.reduce((qtySum, row) => {
+    const qtyValue = parseFloat(row?.qty?.toString().replace(/,/g, '')) || 0
+
+    return qtySum + qtyValue
+  }, 0)
+
   return (
     <VertLayout>
       <Fixed>
@@ -129,6 +138,13 @@ const MaterialsTab = ({ store, labels, access }) => {
           pagination={false}
         />
       </Grow>
+      <Fixed>
+        <Grid container padding={4}>
+          <Grid item xs={2}>
+            <CustomNumberField name='totalQty' label={labels.totalQty} value={totQty} readOnly />
+          </Grid>
+        </Grid>
+      </Fixed>
     </VertLayout>
   )
 }

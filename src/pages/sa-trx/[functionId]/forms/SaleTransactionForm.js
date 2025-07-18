@@ -1055,14 +1055,6 @@ export default function SaleTransactionForm({
     }
   ]
 
-  async function getSerials(recordId, seqNo) {
-    if (recordId)
-      return await getRequest({
-        extension: SaleRepository.LastSerialInvoice.qry,
-        parameters: `_trxId=${recordId}&_seqNo=${seqNo}&_componentSeqNo=${0}`
-      })
-  }
-
   async function fillForm(saTrxPack, dtInfo) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
@@ -1076,7 +1068,6 @@ export default function SaleTransactionForm({
     const modifiedList = await Promise.all(
       saTrxItems?.map(async (item, index) => {
         const taxDetails = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
-        const serials = await getSerials(recordId, item.seqNo)
 
         return {
           ...item,
@@ -1086,12 +1077,14 @@ export default function SaleTransactionForm({
           upo: parseFloat(item.upo).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-          serials: serials?.list?.map((serialDetail, index) => {
-            return {
-              ...serialDetail,
-              id: index
-            }
-          }),
+          serials: saTrxPack?.serials
+            ?.filter(row => row.seqNo == item.seqNo)
+            .map((serialDetail, index) => {
+              return {
+                ...serialDetail,
+                id: index
+              }
+            }),
           taxDetails
         }
       })
