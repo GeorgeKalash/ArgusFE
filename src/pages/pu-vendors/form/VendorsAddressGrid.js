@@ -17,11 +17,10 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
 
   const fetchGridData = async (options = {}) => {
     const { _startAt = 0, _pageSize = 50 } = options
-    const parameters = `_startAt=${_startAt}&_pageSize=${_pageSize}&_vendorId=${recordId}`
 
     const response = await getRequest({
       extension: PurchaseRepository.Address.page,
-      parameters
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_vendorId=${recordId}`
     })
 
     return { ...response, _startAt }
@@ -54,11 +53,11 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
     openForm('')
   }
 
-  function openForm(id) {
+  function openForm(recordId) {
     stack({
       Component: AddressForm,
       props: {
-        recordId: id,
+        recordId,
         isCleared: false,
         onSubmit: async (obj, window) => {
           if (obj) {

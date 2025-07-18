@@ -17,11 +17,10 @@ const AddressMasterDataForm = ({ store, editMode, ...props }) => {
 
   const fetchGridData = async (options = {}) => {
     const { _startAt = 0, _pageSize = 50 } = options
-    const parameters = `_startAt=${_startAt}&_pageSize=${_pageSize}&_bpId=${recordId}`
 
     const response = await getRequest({
       extension: BusinessPartnerRepository.BPAddress.page,
-      parameters
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_bpId=${recordId}`
     })
 
     return { ...response, _startAt }
@@ -60,9 +59,9 @@ const AddressMasterDataForm = ({ store, editMode, ...props }) => {
       Component: AddressForm,
       props: {
         recordId: addressId,
+        isSavedClear: false,
         editMode,
         onSubmit: async (obj, window) => {
-          console.log(obj, 'obj')
           obj.bpId = recordId
           await postRequest({
             extension: BusinessPartnerRepository.BPAddress.set,
