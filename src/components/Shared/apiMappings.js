@@ -862,7 +862,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.CertificateFilter]: {
+  [ResourceIds.CertificateLevels]: {
     type: COMBOBOX,
     endpoint: EmployeeRepository.CertificateFilters.qry,
     valueField: 'recordId',
