@@ -20,7 +20,7 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 export default function InvoiceForm({ form, maxAccess, labels, setReCal, window }) {
   const { getRequest } = useContext(RequestsContext)
 
-  const { formik } = useForm({
+  const { formik, setFieldValidation } = useForm({
     maxAccess,
     initialValues: {
       items: [{ id: 1, sku: '', itemName: '', qty: 0, returnedQty: 0, balanceQty: 0, returnNow: 0 }]
@@ -190,14 +190,23 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
       label: labels.returnNow,
       flex: 2,
       name: 'returnNow',
+      props: {
+        onCondition: row => {
+          return {
+            maxValue: row?.qty
+          }
+        }
+      },
       updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
-        if (!newRow.returnNow) {
-          update({ returnNow: 0 })
+        update({ returnNow: newRow.returnNow || 0, isEditMode: false })
 
-          return
-        }
-        update({ returnNow: newRow.returnNow > newRow.balanceQty ? 0 : newRow.returnNow, isEditMode: false })
+        // if (!newRow.returnNow) {
+        //   update({ returnNow: 0 })
+
+        //   return
+        // }
+        // update({ returnNow: newRow.returnNow > newRow.balanceQty ? 0 : newRow.returnNow, isEditMode: false })
       }
     }
   ]
@@ -380,6 +389,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
             maxAccess={maxAccess}
             allowDelete={false}
             allowAddNewLine={false}
+            setFieldValidation={setFieldValidation}
           />
         </Grow>
       </VertLayout>

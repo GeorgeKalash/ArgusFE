@@ -30,8 +30,10 @@ export function DataGrid({
   initialValues,
   bg,
   searchValue,
-  onValidationRequired
+  onValidationRequired,
+  setFieldValidation
 }) {
+  console.log('dataGrid', setFieldValidation)
   const gridApiRef = useRef(null)
 
   let lastCellStopped = useRef()
@@ -538,6 +540,7 @@ export function DataGrid({
             ...column.colDef,
             props: column?.colDef?.propsReducer ? column?.colDef?.propsReducer({ row: data, props }) : props
           }}
+          setFieldValidation={setFieldValidation}
           updateRow={updateRow}
           update={update}
         />

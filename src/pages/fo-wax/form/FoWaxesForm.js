@@ -48,9 +48,10 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
-  const { formik } = useForm({
+  const { formik, setFieldValidation } = useForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
-    conditionSchema: ['items'],
+
+    // conditionSchema: ['items'],
     initialValues: {
       recordId: null,
       header: {
@@ -77,7 +78,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           id: 1,
           jobId: null,
           waxId: recordId || 0,
-          pieces: 0,
+          pieces: null,
           jobPcs: 0,
           classId: null,
           sku: '',
@@ -97,13 +98,15 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         lineId: yup.number().required(),
         metalId: yup.number().required(),
         metalColorId: yup.number().required(),
-        grossWgt: yup.number().required(),
+
+        // grossWgt: yup.number().required(),
         rmWgt: yup.number().required(),
         mouldWgt: yup.number().required(),
         netWgt: yup.number().min(0).required(),
         suggestedWgt: yup.number().required()
-      }),
-      items: yup.array().of(schema)
+      })
+
+      // items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const { items, header } = obj
@@ -281,6 +284,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       name: 'jobId',
       flex: 1,
       props: {
+        required: true,
         endpointId: ManufacturingRepository.MFJobOrder.snapshot2,
         parameters: {
           _workCenterId: formik.values?.header?.workCenterId
@@ -380,8 +384,10 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: 'pieces',
       label: labels.pieces,
-      defaultValue: 0,
+
+      // defaultValue: 0,
       props: {
+        required: true,
         allowNegative: false,
         readOnly: isClosed
       }
@@ -640,6 +646,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     readOnly={isClosed}
                     value={formik.values.header.grossWgt}
                     maxAccess={maxAccess}
+                    setFieldValidation={setFieldValidation}
                     onChange={e => formik.setFieldValue('header.grossWgt', e.target.value)}
                     onClear={() => formik.setFieldValue('header.grossWgt', 0)}
                     error={formik.touched?.header?.grossWgt && Boolean(formik.errors?.header?.grossWgt)}
@@ -703,6 +710,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
             name='items'
             columns={columns}
             maxAccess={maxAccess}
+            setFieldValidation={setFieldValidation}
           />
         </Grow>
       </VertLayout>

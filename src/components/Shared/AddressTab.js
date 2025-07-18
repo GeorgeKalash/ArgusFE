@@ -73,7 +73,7 @@ const AddressTab = ({
     required
 
   const validate = options && {
-    name: yup.string().required(),
+    // name: yup.string().required(),
     street1: yup.string().required(),
     phone: yup.string().required(),
     countryId: yup.number().required(),
@@ -145,6 +145,8 @@ const AddressTab = ({
     getCountry()
   }, [])
 
+  console.log(required)
+
   return (
     <FormGrid container hideonempty xs={12} spacing={2}>
       <FormGrid item hideonempty xs={12}>
@@ -155,6 +157,7 @@ const AddressTab = ({
           readOnly={readOnly}
           maxLength='50'
           required={required}
+          setFieldValidation={setFieldValidation}
           onChange={addressValidation.handleChange}
           onClear={() => addressValidation.setFieldValue('name', '')}
           error={addressValidation.touched?.name && Boolean(addressValidation.errors?.name)}

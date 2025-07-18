@@ -51,7 +51,7 @@ const CustomTextField = ({
         }
       }))
     }
-  }, [])
+  }, [_required])
 
   useEffect(() => {
     if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && value?.length < 1) {
