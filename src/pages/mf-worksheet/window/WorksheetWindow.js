@@ -8,7 +8,7 @@ import useSetWindow from 'src/hooks/useSetWindow.js'
 import { ResourceIds } from 'src/resources/ResourceIds.js'
 import useResourceParams from 'src/hooks/useResourceParams.js'
 
-const WorksheetWindow = ({ recordId, window }) => {
+const WorksheetWindow = ({ recordId, window, joInvalidate }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -34,7 +34,7 @@ const WorksheetWindow = ({ recordId, window }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <WorksheetForm labels={labels} setStore={setStore} store={store} maxAccess={access} window={window} />
+        <WorksheetForm labels={labels} setStore={setStore} store={store} maxAccess={access} window={window} joInvalidate={joInvalidate}/>
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
         <MaterialsTab store={store} />
