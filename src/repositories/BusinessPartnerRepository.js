@@ -66,6 +66,7 @@ export const BusinessPartnerRepository = {
   },
   BPAddress: {
     qry: service + 'qryADD',
+    page: service + 'pageADD',
     get: service + 'getADD',
     set: service + 'setADD',
     del: service + 'delADD'
