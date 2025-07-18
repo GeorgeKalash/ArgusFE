@@ -50,6 +50,11 @@ const FoCastings = () => {
       type: 'date'
     },
     {
+      field: 'waxRef',
+      headerName: labels.waxRef,
+      flex: 1
+    },
+    {
       field: 'mouldRef',
       headerName: labels.mould,
       flex: 1
