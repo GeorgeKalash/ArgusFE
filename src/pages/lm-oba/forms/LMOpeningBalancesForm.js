@@ -41,14 +41,14 @@ export default function LmObaForm({ labels, maxAccess, obj }) {
       days: yup.number().required().min(0).max(999)
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
+      await postRequest({
         extension: LoanManagementRepository.OpeningBalances.set,
         record: JSON.stringify(obj)
       })
 
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
       if (!obj.recordId) {
-        formik.setFieldValue('recordId', response.recordId)
+        formik.setFieldValue('recordId', String(obj.employeeId * 100) + String(obj.fiscalYear * 10) + String(obj.lsId))
       }
       invalidate()
     }

@@ -11,6 +11,7 @@ import LMOpeningBalancesForm from './forms/LMOpeningBalancesForm'
 import { LoanManagementRepository } from 'src/repositories/LoanManagementRepository'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { useContext } from 'react'
+import toast from 'react-hot-toast'
 
 const LmObaPage = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,6 +29,10 @@ const LmObaPage = () => {
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
   const {
     query: { data },
     labels,
@@ -39,7 +44,10 @@ const LmObaPage = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: LoanManagementRepository.OpeningBalances.page,
-    datasetId: ResourceIds.LMOpeningBalances
+    datasetId: ResourceIds.LMOpeningBalances,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [
@@ -54,7 +62,7 @@ const LmObaPage = () => {
       flex: 1
     },
     {
-      field: 'leaveScheduleRef',
+      field: 'lsName',
       headerName: labels.leaveSchedule,
       flex: 1
     },
