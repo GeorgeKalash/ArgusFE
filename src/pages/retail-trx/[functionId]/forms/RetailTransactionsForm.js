@@ -49,6 +49,7 @@ import { RateDivision } from 'src/resources/RateDivision'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import AddressForm from 'src/components/Shared/AddressForm'
+import CustomButton from 'src/components/Inputs/CustomButton'
 
 export default function RetailTransactionsForm({
   labels,
@@ -109,6 +110,7 @@ export default function RetailTransactionsForm({
       spId: parseInt(posUser?.spId),
       addressId: null,
       oDocId: null,
+      oDocRef: '',
       subtotal: 0,
       vatAmount: 0,
       amount: 0,
@@ -1265,6 +1267,38 @@ export default function RetailTransactionsForm({
                     hidden={(!editMode && !formik.values.baseMetalCuId) || (!editMode && formik.values.header.dtId)}
                     onClear={() => formik.setFieldValue('header.KGmetalPrice', '')}
                     error={formik.touched?.header?.KGmetalPrice && Boolean(formik.errors?.header?.KGmetalPrice)}
+                  />
+                </Grid>
+                <Grid item xs={8}>
+                  <ResourceLookup
+                    endpointId={PointofSaleRepository.RetailInvoice.snapshot}
+                    parameters={{
+                      _posId: parseInt(posUser?.posId),
+                      _functionId: SystemFunction.RetailInvoice
+                    }}
+                    valueField='reference'
+                    displayField='reference'
+                    name='header.oDocRef'
+                    label={labels.invoice}
+                    readOnly={isPosted}
+                    form={formik}
+                    formObject={formik.values.header}
+                    secondDisplayField={false}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('header.oDocRef', newValue?.reference)
+                      formik.setFieldValue('header.oDocId', newValue?.recordId || null)
+                    }}
+                    errorCheck={'oDocId'}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+
+                <Grid item xs={3}>
+                  <CustomButton
+                    onClick={() => {}}
+                    tooltipText={platformLabels.import}
+                    image={'import.png'}
+                    disabled={!formik.values.header.oDocId}
                   />
                 </Grid>
               </Grid>
