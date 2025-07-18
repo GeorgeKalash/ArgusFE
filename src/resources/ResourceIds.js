@@ -1,5 +1,3 @@
-import { Folder } from '@mui/icons-material'
-
 export const ResourceIds = {
   //Dashboard
   WeeklySalesYTD: 60100,
@@ -562,6 +560,7 @@ export const ResourceIds = {
   IomProperties: 42606,
   SyncPurchaseTrx: 50602,
   IRPlantSettings: 46100,
+  IssueOfMaterials: 42304,
 
   //MCR
   MCRSalesInvoice: 51607,

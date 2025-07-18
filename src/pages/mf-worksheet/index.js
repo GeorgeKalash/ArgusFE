@@ -132,13 +132,8 @@ const MfWorksheet = () => {
     stack({
       Component: WorksheetWindow,
       props: {
-        labels: _labels,
-        recordId: obj?.recordId,
-        maxAccess: access
-      },
-      width: 1200,
-      height: 650,
-      title: _labels.Worksheet
+        recordId: obj?.recordId
+      }
     })
   }
 

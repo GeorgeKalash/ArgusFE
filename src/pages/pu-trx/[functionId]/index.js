@@ -153,7 +153,9 @@ const PuTrx = () => {
           parseFloat(functionId) === SystemFunction.PurchaseInvoice
             ? PurchaseRepository.PurchaseInvoiceHeader.snapshot
             : PurchaseRepository.PurchaseReturnHeader.snapshot,
-        parameters: `_filter=${filters.qry}`
+        parameters:
+          `_filter=${filters.qry}` +
+          (parseFloat(functionId) === SystemFunction.PurchaseReturn ? `&_functionId=${parseFloat(functionId)}` : '')
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }

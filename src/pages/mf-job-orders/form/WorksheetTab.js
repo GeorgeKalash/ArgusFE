@@ -6,10 +6,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import WorksheetWindow from 'src/pages/mf-worksheet/window/WorksheetWindow'
+import { useWindow } from 'src/windows'
 
 export default function WorksheetTab({ store, maxAccess, labels }) {
   const { getRequest } = useContext(RequestsContext)
   const recordId = store?.recordId
+  const { stack } = useWindow()
 
   const {
     query: { data }
@@ -17,6 +20,7 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
     queryFn: fetchGridData,
     enabled: Boolean(recordId),
     endpointId: ManufacturingRepository.Worksheet.qry2,
+    params: { disabledReqParams: true, maxAccess },
     datasetId: ResourceIds.MFJobOrders
   })
 
@@ -63,6 +67,19 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
     })
   }
 
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: WorksheetWindow,
+      props: {
+        recordId
+      }
+    })
+  }
+
   return (
     <VertLayout>
       <Grow>
@@ -70,6 +87,7 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
           name='worksheetTable'
           columns={columns}
           gridData={data}
+          onEdit={edit}
           rowId={['worksheetId']}
           maxAccess={maxAccess}
           pagination={false}
