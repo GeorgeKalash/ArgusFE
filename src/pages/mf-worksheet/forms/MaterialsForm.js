@@ -24,7 +24,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function MaterialsForm({ labels, access, recordId, wsId, values }) {
+export default function MaterialsForm({ labels, access, recordId, wsId, values, isPosted }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const functionId = SystemFunction.IssueOfMaterial
@@ -255,7 +255,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
   const totalExpPcs = formik.values.items?.reduce((acc, { designPcs = 0 }) => acc + designPcs, 0) ?? 0
 
   return (
-    <FormShell resourceId={resourceId} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={resourceId} form={formik} maxAccess={maxAccess} editMode={editMode} disabledSubmit={isPosted}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -344,6 +344,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                 displayField={['reference', 'name']}
                 values={formik.values.header}
                 maxAccess={maxAccess}
+                readOnly={isPosted}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.operationId', newValue?.recordId || null)
                   newValue?.recordId &&
@@ -549,6 +550,9 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                 }
               }
             ]}
+            disabled={isPosted}
+            allowDelete={!isPosted}
+            allowAddNewLine={!isPosted}
           />
         </Grow>
         <Fixed>
@@ -561,6 +565,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values }
                 rows={2}
                 maxLength='100'
                 editMode={editMode}
+                readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.notes', e.target.value)}
                 onClear={() => formik.setFieldValue('header.notes', '')}
