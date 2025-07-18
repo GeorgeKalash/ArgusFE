@@ -130,7 +130,7 @@ export const PurchaseRepository = {
   },
   OrderItem: {
     qry: service + 'qryORI',
-    set2: service + 'set2ORI',
+    set2: service + 'set2ORI'
   },
   FinancialGroup: {
     qry: service + 'qryFII',
