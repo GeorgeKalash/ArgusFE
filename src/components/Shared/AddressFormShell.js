@@ -24,7 +24,7 @@ export const AddressFormShell = ({
   const [required, setRequired] = useState(!optional)
   const [formikSettings, setFormik] = useState({})
 
-  const { formik } = useForm({
+  const { formik, setFieldValidation } = useForm({
     maxAccess: formikSettings.maxAccess,
     initialValues: {
       recordId: null,
@@ -65,6 +65,8 @@ export const AddressFormShell = ({
       }
     }
   })
+
+  console.log('formik-formShell', formik)
 
   useEffect(() => {
     if (optional && (formik.values.name || formik.values.street1 || formik.values.countryId || formik.values.cityId)) {
@@ -110,6 +112,7 @@ export const AddressFormShell = ({
             required={required}
             setFormik={setFormik}
             address={address}
+            setFieldValidation={setFieldValidation}
             {...props}
           />
         </Fixed>

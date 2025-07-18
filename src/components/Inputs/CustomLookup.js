@@ -43,9 +43,24 @@ const CustomLookup = ({
   minChars,
   onBlur = () => {},
   onFocus = () => {},
+  setFieldValidation,
   ...props
 }) => {
   const { _readOnly, _required, _hidden } = checkAccess(fullName, props.maxAccess, required, readOnly, hidden)
+
+  useEffect(() => {
+    if (typeof setFieldValidation === 'function') {
+      console.log(name, _required)
+      setFieldValidation(prev => ({
+        ...prev,
+        [name]: {
+          required: _required && !_hidden,
+          minValue: null,
+          maxValue: null
+        }
+      }))
+    }
+  }, [_required])
 
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
