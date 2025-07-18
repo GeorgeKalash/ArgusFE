@@ -98,6 +98,7 @@ const MaterialsTab = ({ store }) => {
         labels,
         recordId: obj?.recordId,
         wsId: recordId,
+        isPosted,
         access,
         values
       },
@@ -134,7 +135,7 @@ const MaterialsTab = ({ store }) => {
           rowId={['recordId']}
           isLoading={false}
           onDelete={isPosted ? null : del}
-          onEdit={isPosted ? null : edit}
+          onEdit={edit}
           maxAccess={access}
           pagination={false}
         />
