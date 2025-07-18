@@ -74,7 +74,7 @@ const AddressMasterDataForm = ({ store, editMode, ...props }) => {
             })
 
             toast.success(!addressId ? platformLabels.Added : platformLabels.Edited)
-            getAddressGridData(recordId)
+            refetchAddresses()
             window.close()
           }
         }
@@ -95,6 +95,7 @@ const AddressMasterDataForm = ({ store, editMode, ...props }) => {
       addAddress={addAddress}
       delAddress={delAddress}
       editAddress={editAddress}
+      refetch={refetchAddresses}
       {...props}
     />
   )

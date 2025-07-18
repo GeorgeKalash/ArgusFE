@@ -175,6 +175,7 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
       editAddress={editAddress}
       paginationParameters={paginationParameters}
       columns={columns}
+      refetch={refetchAddresses}
       {...props}
     />
   )

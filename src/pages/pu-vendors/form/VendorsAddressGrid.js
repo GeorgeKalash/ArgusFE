@@ -80,7 +80,7 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
             })
 
             toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-            getAddressGridData(recordId)
+            refetchAddresses()
             window.close()
           }
         }
@@ -114,6 +114,7 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
       addAddress={addAddress}
       delAddress={delAddress}
       editAddress={editAddress}
+      refetch={refetchAddresses}
       columns={columns}
       {...props}
     />

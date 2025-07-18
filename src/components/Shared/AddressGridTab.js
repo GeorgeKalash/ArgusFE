@@ -8,12 +8,12 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 const AddressGridTab = ({
   addressGridData,
-  getAddressGridData,
   addAddress,
   delAddress,
   editAddress,
   columns,
-  paginationParameters
+  paginationParameters,
+  refetch
 }) => {
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.Address
@@ -73,6 +73,7 @@ const AddressGridTab = ({
           isLoading={false}
           maxAccess={maxAccess}
           pageSize={50}
+          refetch={refetch}
           paginationParameters={paginationParameters}
           paginationType='api'
         />
