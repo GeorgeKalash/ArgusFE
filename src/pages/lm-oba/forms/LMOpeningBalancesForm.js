@@ -63,11 +63,13 @@ export default function LmObaForm({ labels, maxAccess, obj }) {
           parameters: `_employeeId=${obj.employeeId}&_fiscalYear=${obj.fiscalYear}&_lsId=${obj.lsId}`
         })
 
-        const recordId =
-          record.employeeId && record.fiscalYear && record.lsId
-            ? String(record.employeeId * 100) + String(record.fiscalYear * 10) + String(record.lsId)
-            : null
-        formik.setValues({ ...record, recordId })
+        formik.setValues({
+          ...record,
+          recordId:
+            record.employeeId && record.fiscalYear && record.lsId
+              ? String(record.employeeId * 100) + String(record.fiscalYear * 10) + String(record.lsId)
+              : null
+        })
       }
     })()
   }, [])
@@ -150,7 +152,6 @@ export default function LmObaForm({ labels, maxAccess, obj }) {
                 required
                 maxLength={5}
                 allowNegative={false}
-                precision={2}
                 maxAccess={maxAccess}
                 error={formik.touched.days && Boolean(formik.errors.days)}
               />
