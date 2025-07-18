@@ -805,7 +805,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         </Grow>
         <Fixed>
           <Grid container xs={3} spacing={2}>
-            <Grid item>
+            <Grid item xs={12}>
               <CustomTextField
                 name='totalQty'
                 maxAccess={maxAccess}
@@ -814,7 +814,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                 readOnly
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={12}>
               <CustomTextField
                 name='totalCost'
                 maxAccess={maxAccess}
@@ -823,7 +823,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                 readOnly
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={12}>
               <CustomTextField
                 name='totalWeight'
                 maxAccess={maxAccess}
