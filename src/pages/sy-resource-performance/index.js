@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
@@ -17,27 +17,28 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { formatDateTimeForGetAPI } from 'src/lib/date-helper'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
-import { useWindow } from 'src/windows'
 import TransactionLogPerformance from './Forms/TransactionLogPerformance'
 
 const ResourcePerformance = () => {
   const { getRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const timeZoneObj = defaultsData?.list?.find(item => item.key === 'timeZone')
+  const timeZone = parseFloat(timeZoneObj?.value || '0')
 
-  const tomorrowEnd = new Date()
-  tomorrowEnd.setDate(tomorrowEnd.getDate() + 1)
-  tomorrowEnd.setHours(23, 59, 0, 0)
+  const shiftLaptopTime = (localDate, offsetHours) => new Date(localDate.getTime() + offsetHours * 60 * 60 * 1000)
+
+  const now = new Date()
+  const nowInTZ = shiftLaptopTime(now, timeZone)
+  const fromDT = new Date(nowInTZ.getTime() - 5 * 60 * 1000)
+  const toDT = new Date(nowInTZ)
 
   const { formik } = useForm({
     initialValues: {
       resourceId: null,
       moduleId: null,
       minimumDuration: null,
-      fromDT: todayStart,
-      toDT: tomorrowEnd
+      fromDT,
+      toDT
     },
     validateOnChange: true,
     validationSchema: yup.object({
@@ -46,6 +47,21 @@ const ResourcePerformance = () => {
       toDT: yup.date().required()
     })
   })
+
+  useEffect(() => {
+    if (!defaultsData?.list) return
+
+    const now = new Date()
+    const nowInTZ = shiftLaptopTime(now, timeZone)
+    const fromDT = new Date(nowInTZ.getTime() - 5 * 60 * 1000)
+    const toDT = new Date(nowInTZ)
+
+    formik.setValues(prev => ({
+      ...prev,
+      fromDT,
+      toDT
+    }))
+  }, [defaultsData])
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
