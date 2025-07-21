@@ -513,6 +513,7 @@ export const ResourceIds = {
   ImportProductionOrder: 42703,
   NoticePeriods: 71111,
   TransactionLogPerformance: 20137,
+  UserProperties: 71113,
   SyncJobOrderRouting: 42704,
   LMOpeningBalances: 73104,
   PurchaseRequisition: 50301,
