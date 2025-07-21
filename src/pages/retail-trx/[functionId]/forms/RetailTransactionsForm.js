@@ -494,6 +494,8 @@ export default function RetailTransactionsForm({
           qty: parseFloat(item.qty).toFixed(2),
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+          totPricePerG: getTotPricePerG(retailTrxHeader, item, DIRTYFIELD_BASE_PRICE),
           taxDetails
         }
       })
@@ -1180,6 +1182,28 @@ export default function RetailTransactionsForm({
       default:
         return
     }
+  }
+
+  function getTotPricePerG(header, item, dirtyField) {
+    const itemPriceRow = getIPR({
+      priceType: item?.priceType,
+      basePrice: parseFloat(item?.basePrice || 0),
+      volume: parseFloat(item?.volume) || 0,
+      weight: parseFloat(item?.weight),
+      unitPrice: parseFloat(item?.unitPrice || 0),
+      upo: 0,
+      qty: parseFloat(item?.qty) || 0,
+      extendedPrice: parseFloat(item?.extendedPrice),
+      mdAmount: header?.mdAmount || 0,
+      mdType: item?.mdType || 1,
+      baseLaborPrice: item?.baseLaborPrice || 0,
+      totalWeightPerG: item?.TotPricePerG,
+      mdValue: parseFloat(item?.mdValue),
+      tdPct: 0,
+      dirtyField
+    })
+
+    return itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0
   }
 
   useEffect(() => {
