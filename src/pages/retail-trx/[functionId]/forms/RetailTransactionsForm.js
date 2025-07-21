@@ -596,7 +596,7 @@ export default function RetailTransactionsForm({
       extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
-      totPricePerG: itemPriceRow?.totalWeightPerG,
+      totPricePerG: itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0,
       mdAmount: itemPriceRow?.mdAmount ? parseFloat(itemPriceRow.mdAmount).toFixed(2) : 0,
       vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0,
       taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
@@ -1142,7 +1142,7 @@ export default function RetailTransactionsForm({
             qty: parseFloat(item.qty).toFixed(2),
             unitPrice: parseFloat(item.unitPrice).toFixed(2),
             extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-            priceWithVAT: calculatePrice(item, taxDetails[0], DIRTYFIELD_BASE_PRICE),
+            priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
             taxDetails
           },
           DIRTYFIELD_BASE_PRICE
@@ -1155,27 +1155,27 @@ export default function RetailTransactionsForm({
     setReCal(true)
   }
   function calculatePrice(item = {}, taxDetails = null, dirtyField) {
-    const vatPct = item?.vatPct ?? 0
+    const unitPrice = item?.unitPrice ?? 0
     const priceWithVAT = item?.priceWithVAT ?? 0
 
     if (!taxDetails) {
-      return !priceWithVAT ? vatPct : Math.abs(priceWithVAT - vatPct)
+      const price = priceWithVAT ? Math.abs(priceWithVAT - unitPrice) : unitPrice
+
+      return price.toFixed(2)
     }
 
     const { amount = 0, taxBase } = taxDetails
 
     switch (dirtyField) {
       case DIRTYFIELD_BASE_PRICE:
-        return vatPct * (1 + amount / 100)
+        return (unitPrice * (1 + amount / 100)).toFixed(2)
 
       case DIRTYFIELD_UNIT_PRICE:
-        if (taxBase == 1) {
-          return priceWithVAT / (1 + amount / 100)
-        } else if (taxBase == 2) {
-          return priceWithVAT
-        } else {
-          return priceWithVAT - vatPct
-        }
+        if (taxBase == 1) return (priceWithVAT / (1 + amount / 100)).toFixed(2)
+
+        if (taxBase == 2) return priceWithVAT.toFixed(2)
+
+        return (priceWithVAT - unitPrice).toFixed(2)
 
       default:
         return
@@ -1356,7 +1356,7 @@ export default function RetailTransactionsForm({
                     onClick={() => importInvoiceItems()}
                     tooltipText={platformLabels.import}
                     image={'import.png'}
-                    disabled={!formik.values.header.oDocId}
+                    disabled={!formik.values.header.oDocId || formik.values.items?.some(item => !!item.itemId)}
                   />
                 </Grid>
               </Grid>
