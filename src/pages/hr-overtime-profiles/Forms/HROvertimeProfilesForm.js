@@ -69,7 +69,7 @@ export default function HROvertimeProfilesForm({ labels, maxAccess, recordId }) 
                 value={formik.values.name}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='50'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
