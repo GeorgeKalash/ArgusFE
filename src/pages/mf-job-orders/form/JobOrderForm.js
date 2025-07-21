@@ -201,7 +201,7 @@ export default function JobOrderForm({
       key: 'SerialsLots',
       condition: true,
       onClick: openSerials,
-      disabled: !editMode || !formik.values.itemId || (!isReleased && formik.values.trackBy == 1)
+      disabled: false
     },
     {
       key: 'Start',
