@@ -255,7 +255,13 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
   const totalExpPcs = formik.values.items?.reduce((acc, { designPcs = 0 }) => acc + designPcs, 0) ?? 0
 
   return (
-    <FormShell resourceId={resourceId} form={formik} maxAccess={maxAccess} editMode={editMode} disabledSubmit={isPosted}>
+    <FormShell
+      resourceId={resourceId}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      disabledSubmit={isPosted}
+    >
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -537,8 +543,8 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
                 label: labels.quantity,
                 name: 'qty',
                 props: {
-                  maxLength: 6,
-                  decimalScale: 5
+                  maxLength: 10,
+                  decimalScale: 3
                 }
               },
               {
