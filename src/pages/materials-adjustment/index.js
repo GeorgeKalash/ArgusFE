@@ -30,6 +30,11 @@ const MaterialsAdjustment = () => {
       }&_dgId=0&_sortBy=recordId&_trxType=1`
     })
 
+    response.list = response?.list?.map(item => ({
+      ...item,
+      isVerified: item?.isVerified === null ? false : item?.isVerified
+    }))
+
     return { ...response, _startAt: _startAt }
   }
 
@@ -90,6 +95,17 @@ const MaterialsAdjustment = () => {
       field: 'qty',
       headerName: labels.qty,
       flex: 1
+    },
+    {
+      field: 'pcs',
+      headerName: labels.pcs,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'isVerified',
+      headerName: labels.isVerified,
+      type: 'checkbox'
     }
   ]
 

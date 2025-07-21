@@ -62,6 +62,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     rsStatus: '',
     clientId: null,
     clientName: '',
+    isVerified: false,
     clientRef: '',
     rows: [
       {
@@ -162,6 +163,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
+  const rowsUpdate = useRef(formik?.values?.rows)
 
   const { totalQty, totalCost, totalWeight } = formik?.values?.rows?.reduce(
     (acc, row) => {
@@ -216,9 +218,8 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       return res
     }
   }
-
   useEffect(() => {
-    if (formik.values.dtId) getDTD(formik?.values?.dtId)
+    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
     if (!formik?.values?.dtId) {
       formik.setFieldValue('disableSKULookup', false)
 
@@ -262,12 +263,10 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     return res?.record?.currentCost
   }
 
-  async function getFilteredMU(itemId) {
+  async function getFilteredMU(itemId, msId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.rows?.find(transfer => parseInt(transfer.itemId) === itemId)?.msId
-
-    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    const arrayMU = measurements?.filter(item => item.msId === msId) || []
     filteredMeasurements.current = arrayMU
   }
 
@@ -318,10 +317,10 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       const unitCost = (await getUnitCost(itemIdValue)) ?? 0
       const totalCost = calcTotalCost(newRow)
       const itemInfo = await getItem(itemIdValue)
-      console.log(itemInfo)
-      getFilteredMU(itemIdValue)
+      await getFilteredMU(itemIdValue, newRow?.msId)
       const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
       update({
+        sku: newRow.sku,
         itemId: itemIdValue,
         weight,
         unitCost,
@@ -332,7 +331,8 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         muRef: filteredMeasurements?.[0]?.reference,
         muId: filteredMeasurements?.[0]?.recordId,
         metalId,
-        metalRef
+        metalRef,
+        priceType: newRow?.priceType
       })
     }
   }
@@ -391,7 +391,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
           }
 
           if (newRow?.itemId) {
-            fillSkuData(newRow, update)
+            await fillSkuData(newRow, update)
           }
         } else {
           if (!newRow?.sku) {
@@ -614,7 +614,47 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     if (recordId) refetchForm(recordId)
   }, [])
 
+  const handleMetalClick = async () => {
+    const metalItemsList = rowsUpdate?.current
+      ?.filter(item => item.metalId)
+      .map(item => ({
+        qty: item.qty,
+        metalRef: '',
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+
+    return metalItemsList || []
+  }
+
+  async function verifyRecord() {
+    const copy = { ...formik.values, isVerified: !formik.values.isVerified }
+    delete copy.items
+    await postRequest({
+      extension: InventoryRepository.MaterialsAdjustment.verify,
+      record: JSON.stringify(copy)
+    })
+
+    toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+    refetchForm(formik.values.recordId)
+    invalidate()
+  }
+
   const actions = [
+    {
+      key: 'Verify',
+      condition: !formik.values.isVerified,
+      onClick: verifyRecord,
+      disabled: formik.values.isVerified || !editMode || !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: formik.values.isVerified,
+      onClick: verifyRecord,
+      disabled: !formik.values.isVerified
+    },
     {
       key: 'RecordRemarks',
       condition: true,
@@ -633,12 +673,32 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode
+    },
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      datasetId: ResourceIds.GLMaterialAdjustment,
+      disabled: !editMode
+    },
+    {
+      key: 'IV',
+      condition: true,
+      onClick: 'onInventoryTransaction',
+      disabled: !editMode || !isPosted
+    },
+    {
+      key: 'Metals',
+      condition: true,
+      onClick: 'onClickMetal',
+      handleMetalClick
     }
   ]
 
   return (
     <FormShell
       resourceId={ResourceIds.MaterialsAdjustment}
+      functionId={SystemFunction.MaterialsAdjustment}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -799,7 +859,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             name='rows'
             maxAccess={maxAccess}
             onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId)
+              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             columns={columns}
             allowAddNewLine={!isPosted}

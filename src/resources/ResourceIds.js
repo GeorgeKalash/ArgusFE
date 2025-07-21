@@ -560,6 +560,7 @@ export const ResourceIds = {
   SyncPurchaseTrx: 50602,
   IRPlantSettings: 46100,
   IssueOfMaterials: 42304,
+  GLMaterialAdjustment: 41606,
 
   //MCR
   MCRSalesInvoice: 51607,
