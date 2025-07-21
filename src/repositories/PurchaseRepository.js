@@ -148,5 +148,12 @@ export const PurchaseRepository = {
   },
   ItemLastPurchaseInfo: {
     last: service + 'lastIVI'
+  },
+  PurchaseQuotation: {
+    page: service + 'pageQTN',
+    set2: service + 'set2QTN',
+    get: service + 'genQTN',
+    del: service + 'delQTN',
+    snapshot: service + 'snapshotQTN'
   }
 }
