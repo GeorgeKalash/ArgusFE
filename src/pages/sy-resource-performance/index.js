@@ -21,16 +21,10 @@ import TransactionLogPerformance from './Forms/TransactionLogPerformance'
 
 const ResourcePerformance = () => {
   const { getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
-  const timeZoneObj = defaultsData?.list?.find(item => item.key === 'timeZone')
-  const timeZone = parseFloat(timeZoneObj?.value || '0')
-
-  const shiftLaptopTime = (localDate, offsetHours) => new Date(localDate.getTime() + offsetHours * 60 * 60 * 1000)
-
+  const { platformLabels } = useContext(ControlContext)
   const now = new Date()
-  const nowInTZ = shiftLaptopTime(now, timeZone)
-  const fromDT = new Date(nowInTZ.getTime() - 5 * 60 * 1000)
-  const toDT = new Date(nowInTZ)
+  const fromDT = new Date(now.getTime() - 5 * 60 * 1000) 
+  const toDT = now
 
   const { formik } = useForm({
     initialValues: {
@@ -47,21 +41,21 @@ const ResourcePerformance = () => {
       toDT: yup.date().required()
     })
   })
-
   useEffect(() => {
-    if (!defaultsData?.list) return
-
+  const interval = setInterval(() => {
     const now = new Date()
-    const nowInTZ = shiftLaptopTime(now, timeZone)
-    const fromDT = new Date(nowInTZ.getTime() - 5 * 60 * 1000)
-    const toDT = new Date(nowInTZ)
+    const fromDT = new Date(now.getTime() - 5 * 60 * 1000)
+    const toDT = now
 
     formik.setValues(prev => ({
       ...prev,
       fromDT,
       toDT
     }))
-  }, [defaultsData])
+  }, 60 * 1000)
+
+  return () => clearInterval(interval)
+}, [])
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
