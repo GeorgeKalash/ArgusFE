@@ -42,14 +42,27 @@ const CustomTextField = ({
   const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
+    if (!name) return
+
     if (typeof setFieldValidation === 'function') {
-      setFieldValidation(prev => ({
-        ...prev,
-        [name]: {
-          required: _required,
-          minLength
+      setFieldValidation(prev => {
+        const shouldRemove = !_required && !minLength
+
+        if (shouldRemove) {
+          const newState = { ...prev }
+          delete newState[name]
+
+          return newState
         }
-      }))
+
+        return {
+          ...prev,
+          [name]: {
+            required: _required && !_hidden,
+            minLength
+          }
+        }
+      })
     }
   }, [_required])
 

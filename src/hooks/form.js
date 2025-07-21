@@ -3,7 +3,14 @@ import { useEffect, useState } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import * as yup from 'yup'
 
-export function useForm({ documentType = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
+export function useForm({
+  allowNoLines,
+  documentType = {},
+  conditionSchema = [],
+  maxAccess,
+  validate = () => {},
+  ...formikProps
+}) {
   const [validation, setFieldValidation] = useState({})
 
   function explode(str) {
@@ -13,6 +20,21 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
       gridName: parts[0] || '',
       fieldName: parts[1] || ''
     }
+  }
+
+  function getValueByPath(obj, path) {
+    return path.split('.').reduce((o, key) => (o ? o[key] : undefined), obj)
+  }
+
+  function filterRowsWithEmptyRequiredFields(rows) {
+    return rows.filter(row =>
+      Object.entries(validation).some(([fieldPath, rule]) => {
+        if (!rule?.required) return false
+        const value = getValueByPath(row, fieldPath)
+
+        return value === '' || value === null || value === undefined
+      })
+    )
   }
 
   const checkValidation = (field, value, rule) => {
@@ -88,6 +110,20 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
           if (Array.isArray(values?.[gridName])) {
             if (conditionSchema.indexOf(gridName) < 0) {
               ;(values?.[gridName] || [])?.forEach((row, index) => {
+                if (allowNoLines) {
+                  const requiredFieldsInRow = Object.entries(rules)
+                    .filter(([fieldKey, rule]) => fieldKey.startsWith(`${gridName}.`) && rule.required)
+                    .map(([fieldKey]) => explode(fieldKey).fieldName)
+
+                  const rowHasAnyValue = requiredFieldsInRow.some(field => {
+                    const val = row?.[field]
+
+                    return val !== '' && val != null
+                  })
+
+                  if (allowNoLines && !rowHasAnyValue) return
+                }
+
                 if (!maxAccessErrors[gridName]) {
                   maxAccessErrors[gridName] = []
                 }
@@ -98,7 +134,6 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
                 const error = checkValidation(field, row[fieldName], rule)
                 if (error) maxAccessErrors[gridName][index][fieldName] = error
 
-                console.log('maxAccessErrors', maxAccessErrors)
                 if (maxAccessErrors[gridName]?.every(obj => Object.keys(obj)?.length === 0)) {
                   delete maxAccessErrors[gridName]
                 }
@@ -200,5 +235,5 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
     }
   }, [reference?.isEmpty])
 
-  return { formik, setFieldValidation }
+  return { formik, setFieldValidation, filterRowsWithEmptyRequiredFields }
 }

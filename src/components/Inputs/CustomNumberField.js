@@ -47,21 +47,36 @@ const CustomNumberField = ({
   const name = props.name
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
 
-  console.log(maxValue, name)
-  console.log('setFieldValidation', _required, name)
-
   useEffect(() => {
+    if (!name) return
     if (typeof setFieldValidation === 'function') {
-      setFieldValidation(prev => ({
-        ...prev,
-        [name]: {
+      setFieldValidation(prev => {
+        const existing = prev?.[name]
+
+        const shouldRemove = existing && !_required && minValue == null && maxValue == null
+
+        if (shouldRemove) {
+          const newState = { ...prev }
+          delete newState[name]
+
+          return newState
+        }
+
+        const next = {
           required: _required && !_hidden,
           minValue,
           maxValue
         }
-      }))
+
+        const isEqual =
+          existing?.required === next.required &&
+          existing?.minValue === next.minValue &&
+          existing?.maxValue === next.maxValue
+
+        return isEqual ? prev : { ...prev, [name]: next }
+      })
     }
-  }, [maxValue, maxValue, _required])
+  }, [minValue, maxValue, _required])
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/

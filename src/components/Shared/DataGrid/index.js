@@ -33,7 +33,6 @@ export function DataGrid({
   onValidationRequired,
   setFieldValidation
 }) {
-  console.log('dataGrid', setFieldValidation)
   const gridApiRef = useRef(null)
 
   let lastCellStopped = useRef()
@@ -460,7 +459,14 @@ export function DataGrid({
             'center'
         }}
       >
-        <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
+        <Component
+          {...params}
+          gridName={name}
+          column={column.colDef}
+          updateRow={updateRow}
+          update={update}
+          setFieldValidation={setFieldValidation}
+        />
       </Box>
     )
   }

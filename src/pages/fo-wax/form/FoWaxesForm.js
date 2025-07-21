@@ -48,7 +48,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
-  const { formik, setFieldValidation } = useForm({
+  const { formik, setFieldValidation, filterRowsWithEmptyRequiredFields } = useForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
 
     // conditionSchema: ['items'],
@@ -90,6 +90,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       ]
     },
     maxAccess,
+    allowNoLines: true,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -111,11 +112,13 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     onSubmit: async obj => {
       const { items, header } = obj
 
+      // console.log('getRequiredFields', validation)
+
       const response = await postRequest({
         extension: FoundryRepository.Wax.set2,
         record: JSON.stringify({
           header,
-          items: items.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+          items: filterRowsWithEmptyRequiredFields(items)
         })
       })
       const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
@@ -372,21 +375,24 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: 'rmWgt',
       label: labels.rmWgt,
-      defaultValue: 0,
       onChange: () => {
         setReCal(true)
       },
       props: {
-        readOnly: isClosed
+        readOnly: isClosed,
+        required: true
       }
     },
     {
       component: 'numberfield',
       name: 'pieces',
       label: labels.pieces,
-
-      // defaultValue: 0,
       props: {
+        onCondition: row => {
+          return {
+            maxValue: row?.qty <= row?.jobPcs || null
+          }
+        },
         required: true,
         allowNegative: false,
         readOnly: isClosed
@@ -707,6 +713,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
             error={formik.errors.items}
             allowDelete={!isClosed}
             disabled={!formik.values.header.lineId}
+            initialValues={formik.values.items?.[0]}
             name='items'
             columns={columns}
             maxAccess={maxAccess}

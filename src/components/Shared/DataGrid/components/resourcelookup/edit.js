@@ -1,6 +1,13 @@
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function ResourceLookupEdit({ id, column: { props, field }, value, updateRow, update }) {
+export default function ResourceLookupEdit({
+  id,
+  column: { props, field },
+  value,
+  updateRow,
+  update,
+  setFieldValidation
+}) {
   let changes = props?.mapping
     ? props?.mapping
         ?.map(({ from, to }) => ({
@@ -41,6 +48,7 @@ export default function ResourceLookupEdit({ id, column: { props, field }, value
           })
         }
       }}
+      setFieldValidation={setFieldValidation}
       {...props}
     />
   )

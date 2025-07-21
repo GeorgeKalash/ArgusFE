@@ -50,15 +50,17 @@ const CustomLookup = ({
 
   useEffect(() => {
     if (typeof setFieldValidation === 'function') {
-      console.log(name, _required)
-      setFieldValidation(prev => ({
-        ...prev,
-        [name]: {
-          required: _required && !_hidden,
-          minValue: null,
-          maxValue: null
+      setFieldValidation(prev => {
+        const existing = prev?.[fullName]
+
+        const next = {
+          required: _required && !_hidden
         }
-      }))
+
+        const isEqual = existing?.required === next.required
+
+        return isEqual ? prev : { ...prev, [fullName]: next }
+      })
     }
   }, [_required])
 
