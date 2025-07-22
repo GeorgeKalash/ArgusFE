@@ -212,7 +212,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
   }, [formik2?.values])
 
   useEffect(() => {
-    if (data && data.list.length > 0 && Array.isArray(data.list)) {
+    if (data && data?.list?.length > 0 && Array.isArray(data?.list)) {
       const glTransactions = data.list.map((row, idx) => ({
         id: idx,
         accountRef: row.accountRef,
@@ -586,7 +586,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                     dirtyField: DIRTYFIELD_RATE
                   })
                   update({
-                    exRate: updatedRateRow.exRate,
                     amount: updatedRateRow.amount,
                     baseAmount: updatedRateRow.baseAmount
                   })
@@ -609,7 +608,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                   })
                   update({
                     exRate: updatedRateRow.exRate,
-                    amount: updatedRateRow.amount,
                     baseAmount: updatedRateRow.baseAmount
                   })
                 }
@@ -631,8 +629,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                   })
                   update({
                     exRate: updatedRateRow.exRate,
-                    amount: updatedRateRow.amount,
-                    baseAmount: updatedRateRow.baseAmount
+                    amount: updatedRateRow.amount
                   })
                 }
               }

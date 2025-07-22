@@ -11,7 +11,8 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   const editMode = !!rest.data.recordId
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds?.POSPayment
+    datasetId: ResourceIds?.POSPayment,
+    editMode
   })
   const { stack } = useWindow()
 
@@ -28,8 +29,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       paidAmount: '',
       returnedAmount: 0,
       bankFees: '',
-      receiptRef: '',
-      pos: true
+      receiptRef: ''
     }
   ]
 
@@ -95,6 +95,12 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     rest.onChange(val)
   }
 
+  const onCondition = row => {
+    return {
+      disabled: !editMode || row.type != 3
+    }
+  }
+
   const columns = [
     {
       component: 'resourcecombobox',
@@ -122,7 +128,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
 
         const currentAmount = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
 
-        update({ amount: currentAmount, pos: !editMode || newRow.type != 3 })
+        update({ amount: currentAmount })
       }
     },
     {
@@ -223,7 +229,8 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       component: 'button',
       name: 'pos',
       props: {
-        imgSrc: '/images/buttonsIcons/open-external.png'
+        imgSrc: '/images/buttonsIcons/open-external.png',
+        onCondition
       },
       label: labels.pos,
       onClick: (e, row, update, updateRow) => {

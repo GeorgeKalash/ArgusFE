@@ -155,7 +155,7 @@ export function WindowProvider({ children }) {
                         }
                       : window
                   )
-                  
+
                   return nextStack
                 })
               }

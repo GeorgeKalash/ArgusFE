@@ -197,17 +197,12 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
             {
               field: 'resourceName',
               headerName: labels.className,
-              flex: 1
-            },
-            {
-              field: 'accessLevelString',
-              headerName: labels.accessLevel,
-              flex: 1
+              flex: 2
             },
             {
               field: 'resourceGlobal',
               headerName: labels.resourceGlobal,
-              width: 200,
+              flex: 1,
               cellRenderer: row => (
                 <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
                   <IconButton size='small' onClick={() => openResourceGlobal(row)}>
@@ -219,7 +214,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
             {
               field: 'Control Access',
               headerName: labels.controlAccess,
-              width: 200,
+              flex: 1,
               cellRenderer: row => (
                 <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
                   <IconButton size='small' onClick={() => openFieldGlobal(row)}>

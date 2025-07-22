@@ -14,8 +14,10 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import MaterialsForm from './MaterialsForm'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { Grid } from '@mui/material'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-const MaterialsTab = ({ store, labels, access }) => {
+const MaterialsTab = ({ store }) => {
   const { platformLabels } = useContext(ControlContext)
   const { recordId, isPosted, values } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,11 +25,13 @@ const MaterialsTab = ({ store, labels, access }) => {
 
   const {
     query: { data },
-    invalidate
+    invalidate,
+    labels,
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.WorksheetMaterials.qry,
-    datasetId: ResourceIds.Worksheet,
+    datasetId: ResourceIds.IssueOfMaterials,
     enabled: Boolean(recordId)
   })
 
@@ -84,8 +88,7 @@ const MaterialsTab = ({ store, labels, access }) => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.IssueOfMaterial,
-    action: openForm,
-    hasDT: true
+    action: openForm
   })
 
   function openForm(obj) {
@@ -95,6 +98,7 @@ const MaterialsTab = ({ store, labels, access }) => {
         labels,
         recordId: obj?.recordId,
         wsId: recordId,
+        isPosted,
         access,
         values
       },
@@ -112,6 +116,12 @@ const MaterialsTab = ({ store, labels, access }) => {
     await proxyAction()
   }
 
+  const totQty = data?.list?.reduce((qtySum, row) => {
+    const qtyValue = parseFloat(row?.qty?.toString().replace(/,/g, '')) || 0
+
+    return qtySum + qtyValue
+  }, 0)
+
   return (
     <VertLayout>
       <Fixed>
@@ -125,11 +135,18 @@ const MaterialsTab = ({ store, labels, access }) => {
           rowId={['recordId']}
           isLoading={false}
           onDelete={isPosted ? null : del}
-          onEdit={isPosted ? null : edit}
+          onEdit={edit}
           maxAccess={access}
           pagination={false}
         />
       </Grow>
+      <Fixed>
+        <Grid container padding={4}>
+          <Grid item xs={2}>
+            <CustomNumberField name='totalQty' label={labels.totalQty} value={totQty} readOnly />
+          </Grid>
+        </Grid>
+      </Fixed>
     </VertLayout>
   )
 }

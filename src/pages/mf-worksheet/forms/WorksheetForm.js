@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useRef } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -27,14 +27,12 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import DamageForm from 'src/pages/damages/forms/DamageForm'
 import { useWindow } from 'src/windows'
 import WorkFlow from 'src/components/Shared/WorkFlow'
-import WorksheetWindow from '../window/WorksheetWindow'
 
-export default function WorksheetForm({ labels, maxAccess, setStore, store, window }) {
+export default function WorksheetForm({ labels, maxAccess, setStore, store, joInvalidate }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { stack } = useWindow()
-  const imageUploadRef = useRef(null)
   const functionId = SystemFunction.Worksheet
   const resourceId = ResourceIds.Worksheet
   const editMode = !!recordId
@@ -92,7 +90,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       wipQty: yup.number().required(),
       siteId: yup.number().required(),
       qty: yup.number().required(),
-      eopQty: yup.number().required(),
       jobQty: yup.number().required()
     }),
     onSubmit: async obj => {
@@ -107,11 +104,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
         extension: ManufacturingRepository.Worksheet.set,
         record: JSON.stringify({ ...data })
       }).then(async res => {
-        if (imageUploadRef.current) {
-          imageUploadRef.current.value = parseInt(res.recordId)
-
-          await imageUploadRef.current.submit()
-        }
         if (!obj.recordId) {
           setStore(prevStore => ({
             ...prevStore,
@@ -122,7 +114,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
         }
         getData(res.recordId)
         toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-        invalidate()
+        joInvalidate ? joInvalidate() : invalidate()
       })
     }
   })
@@ -136,6 +128,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
         extension: ManufacturingRepository.WorkCenter.get,
         parameters: `_recordId=${res?.record?.workCenterId}`
       })
+
       formik.setValues({
         ...res?.record,
         date: formatDateFromApi(res?.record?.date),
@@ -183,7 +176,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       record: JSON.stringify(data)
     }).then(async () => {
       await getData()
-      invalidate()
+      joInvalidate ? joInvalidate() : invalidate()
       toast.success(platformLabels.Posted)
     })
   }
@@ -197,21 +190,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       width: 1000,
       height: 700,
       title: labels.Damage
-    })
-  }
-
-  const onRefresh = () => {
-    window.close()
-    stack({
-      Component: WorksheetWindow,
-      props: {
-        labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 1200,
-      height: 780,
-      title: labels.Worksheet
     })
   }
 
@@ -251,12 +229,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
       condition: true,
       onClick: onDamage,
       disabled: !editMode
-    },
-    {
-      key: 'Refresh',
-      condition: true,
-      onClick: onRefresh,
-      disabled: !editMode || isPosted
     }
   ]
 
@@ -424,7 +396,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     maxAccess={access}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='wipQty'
                     required
@@ -438,7 +410,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     decimalScale={3}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='wipPcs'
                     readOnly={isPosted || editMode}
@@ -451,12 +423,39 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     decimalScale={3}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='rmQty'
+                    readOnly
+                    label={labels.rmQty}
+                    value={formik?.values?.rmQty}
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='damagedPcs'
                     readOnly
                     label={labels.damagedPcs}
                     value={formik?.values?.damagedPcs}
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='eopQty'
+                    readOnly
+                    label={labels.eopQty}
+                    value={formik?.values?.eopQty}
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='endPcs'
+                    readOnly
+                    label={labels.endPcs}
+                    value={(formik?.values?.wipPcs || 0) - (formik?.values?.damagedPcs || 0)}
                     maxAccess={access}
                   />
                 </Grid>
@@ -546,15 +545,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
                     maxAccess={access}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='rmQty'
-                    readOnly
-                    label={labels.rmQty}
-                    value={formik?.values?.rmQty}
-                    maxAccess={access}
-                  />
-                </Grid>
+
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='wgtBefore'
@@ -587,17 +578,16 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, wind
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ImageUpload
-                    ref={imageUploadRef}
-                    resourceId={resourceId}
+                    resourceId={ResourceIds.MFJobOrders}
                     seqNo={0}
-                    recordId={recordId}
+                    recordId={formik.values.jobId}
                     customWidth={320}
                     customHeight={190}
+                    isAbsolutePath={true}
+                    disabled={true}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField name='eopQty' readOnly label={labels.eopQty} maxAccess={access} />
-                </Grid>
+
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
