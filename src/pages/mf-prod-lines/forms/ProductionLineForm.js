@@ -29,8 +29,7 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
       recordId: null,
       reference: '',
       name: '',
-      ccId: null,
-      headWCId: null
+      ccId: null
     },
     maxAccess,
     enableReinitialize: true,
@@ -115,26 +114,6 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
                   formik.setFieldValue('ccId', newValue?.recordId)
                 }}
                 error={formik.touched.ccId && Boolean(formik.errors.ccId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={ManufacturingRepository.WorkCenter.qry}
-                name='headWCId'
-                label={labels.headWorkCenter}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                readOnly={editMode}
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('headWCId', newValue?.recordId)
-                }}
-                error={formik.touched.headWCId && Boolean(formik.errors.headWCId)}
-                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

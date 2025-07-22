@@ -21,8 +21,9 @@ const SystemDefaults = () => {
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   useEffect(() => {
+    if (!defaultsData?.list?.length) return
     getDataResult()
-  }, [])
+  }, [defaultsData])
 
   const getDataResult = () => {
     const myObject = {}
@@ -55,7 +56,6 @@ const SystemDefaults = () => {
   })
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       extentionsPath: '',
