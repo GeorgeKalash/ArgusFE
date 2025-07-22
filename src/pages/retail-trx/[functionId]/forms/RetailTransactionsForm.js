@@ -1360,14 +1360,14 @@ export default function RetailTransactionsForm({
                     displayField='reference'
                     name='header.oDocRef'
                     label={labels.invoices}
-                    readOnly={isPosted}
+                    readOnly={isPosted || formik.values.items?.some(item => !!item.itemId)}
                     form={formik}
                     displayFieldWidth={1.5}
                     formObject={formik.values.header}
                     secondDisplayField={false}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.isVatable', newValue?.isVatable || false)
-                      formik.setFieldValue('header.oDocRef', newValue?.reference)
+                      formik.setFieldValue('header.oDocRef', newValue?.reference || '')
                       formik.setFieldValue('header.oDocId', newValue?.recordId || null)
                     }}
                     errorCheck={'oDocId'}
@@ -1380,7 +1380,9 @@ export default function RetailTransactionsForm({
                     onClick={() => importInvoiceItems()}
                     tooltipText={platformLabels.import}
                     image={'import.png'}
-                    disabled={!formik.values.header.oDocId || formik.values.items?.some(item => !!item.itemId)}
+                    disabled={
+                      !formik.values.header.oDocId || formik.values.items?.some(item => !!item.itemId) || isPosted
+                    }
                   />
                 </Grid>
               </Grid>
