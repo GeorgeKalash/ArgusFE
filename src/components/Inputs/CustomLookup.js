@@ -223,7 +223,7 @@ const CustomLookup = ({
                   setFreeSolo(true)
                 } else {
                   setStore([])
-                  setFreeSolo(true)
+                  setFreeSolo(false)
                 }
               }}
               onKeyDown={onKeyDown}
